@@ -1621,7 +1621,18 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
 #if WCG_EXT
         pRdCost->saveUnadjustedLambda();
 #endif
-
+        for (uint32_t compIdx = 1; compIdx < MAX_NUM_COMPONENT; compIdx++)
+        {
+          const ComponentID compID = ComponentID(compIdx);
+          int chromaQPOffset = pcSlice->getPPS()->getQpOffset(compID) + pcSlice->getSliceChromaQpDelta(compID);
+          int qpc = pcSlice->getSPS()->getMappedChromaQpValue(compID, estQP) + chromaQPOffset;
+          double tmpWeight = pow(2.0, (estQP - qpc) / 3.0);  // takes into account of the chroma qp mapping and chroma qp Offset
+          if (m_pcCfg->getDepQuantEnabledFlag())
+          {
+            tmpWeight *= (m_pcCfg->getGOPSize() >= 8 ? pow(2.0, 0.1 / 3.0) : pow(2.0, 0.2 / 3.0));  // increase chroma weight for dependent quantization (in order to reduce bit rate shift from chroma to luma)
+          }
+          m_pcRdCost->setDistortionWeight(compID, tmpWeight);
+        }
 #if RDOQ_CHROMA_LAMBDA
         const double lambdaArray[MAX_NUM_COMPONENT] = {estLambda / m_pcRdCost->getDistortionWeight (COMPONENT_Y),
                                                        estLambda / m_pcRdCost->getDistortionWeight (COMPONENT_Cb),
@@ -1742,6 +1753,19 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
         actualQP = cu->qp;
       }
       pRdCost->setLambda(oldLambda, pcSlice->getSPS()->getBitDepths());
+      int estQP        = pcSlice->getSliceQp();
+      for (uint32_t compIdx = 1; compIdx < MAX_NUM_COMPONENT; compIdx++)
+      {
+        const ComponentID compID = ComponentID(compIdx);
+        int chromaQPOffset = pcSlice->getPPS()->getQpOffset(compID) + pcSlice->getSliceChromaQpDelta(compID);
+        int qpc = pcSlice->getSPS()->getMappedChromaQpValue(compID, estQP) + chromaQPOffset;
+        double tmpWeight = pow(2.0, (estQP - qpc) / 3.0);  // takes into account of the chroma qp mapping and chroma qp Offset
+        if (m_pcCfg->getDepQuantEnabledFlag())
+        {
+          tmpWeight *= (m_pcCfg->getGOPSize() >= 8 ? pow(2.0, 0.1 / 3.0) : pow(2.0, 0.2 / 3.0));  // increase chroma weight for dependent quantization (in order to reduce bit rate shift from chroma to luma)
+        }
+        m_pcRdCost->setDistortionWeight(compID, tmpWeight);
+      }
       pRateCtrl->getRCPic()->updateAfterCTU(pRateCtrl->getRCPic()->getLCUCoded(), actualBits, actualQP, actualLambda, skipRatio,
         pcSlice->isIRAP() ? 0 : pCfg->getLCULevelRC());
     }
