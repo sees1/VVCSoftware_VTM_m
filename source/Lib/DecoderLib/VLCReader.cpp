@@ -905,8 +905,11 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
   READ_FLAG( uiCode, "slice_header_extension_present_flag");
   pcPPS->setSliceHeaderExtensionPresentFlag(uiCode);
 
-
+#ifndef PPS_EXTENSION_BUGFIX
   READ_FLAG( uiCode, "pps_extension_present_flag");
+#else
+  READ_FLAG( uiCode, "pps_extension_flag");
+#endif
   if (uiCode)
   {
       while ( xMoreRbspData() )

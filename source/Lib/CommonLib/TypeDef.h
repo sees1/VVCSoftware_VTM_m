@@ -86,6 +86,8 @@
 
 #define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
 
+#define JVET_R0064                                        1 // JVET-R0064, aspect 2: Move the flag scaling_matrix_for_lfnst_disabled_flag from the scaling_list_data( ) syntax to the SPS.
+
 #define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
 
 #define JVET_S0258_SUBPIC_CONSTRAINTS                     1 // JVET-S0258: sub-picture constraints
@@ -878,6 +880,7 @@ enum SPSExtensionFlagIndex
   NUM_SPS_EXTENSION_FLAGS = 8
 };
 
+#ifndef PPS_EXTENSION_BUGFIX
 enum PPSExtensionFlagIndex
 {
   PPS_EXT__REXT           = 0,
@@ -885,6 +888,7 @@ enum PPSExtensionFlagIndex
 //PPS_EXT__SHVC           = 2, //for use in future versions
   NUM_PPS_EXTENSION_FLAGS = 8
 };
+#endif
 
 // TODO: Existing names used for the different NAL unit types can be altered to better reflect the names in the spec.
 //       However, the names in the spec are not yet stable at this point. Once the names are stable, a cleanup
