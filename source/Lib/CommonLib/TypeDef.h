@@ -53,6 +53,7 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
+#define JVET_R0042_SUBPIC_CHECK                           1 // JVET_R0042: SubPicture types related constraints
 
 
 //########### place macros to be be kept below this line ###############
