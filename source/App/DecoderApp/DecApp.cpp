@@ -337,12 +337,22 @@ void DecApp::writeLineToOutputLog(Picture * pcPic)
 {
   if (m_oplFileStream.is_open() && m_oplFileStream.good())
   {
-    const SPS* sps = pcPic->cs->sps;
-    PictureHash recon_digest;
-    auto numChar = calcMD5(((const Picture*)pcPic)->getRecoBuf(), recon_digest, sps->getBitDepths());
+    const SPS *   sps             = pcPic->cs->sps;
+    ChromaFormat  chromaFormatIDC = sps->getChromaFormatIdc();
+    const Window &conf            = pcPic->getConformanceWindow();
+    const int     leftOffset      = conf.getWindowLeftOffset() * SPS::getWinUnitX(chromaFormatIDC);
+    const int     rightOffset     = conf.getWindowRightOffset() * SPS::getWinUnitX(chromaFormatIDC);
+    const int     topOffset       = conf.getWindowTopOffset() * SPS::getWinUnitY(chromaFormatIDC);
+    const int     bottomOffset    = conf.getWindowBottomOffset() * SPS::getWinUnitY(chromaFormatIDC);
+    PictureHash   recon_digest;
+    auto numChar = calcMD5WithCropping(((const Picture *) pcPic)->getRecoBuf(), recon_digest, sps->getBitDepths(),
+                                       leftOffset, rightOffset, topOffset, bottomOffset);
 
+    const int croppedWidth  = pcPic->Y().width - leftOffset - rightOffset;
+    const int croppedHeight = pcPic->Y().height - topOffset - bottomOffset;
 
-    m_oplFileStream << std::setw(8) << pcPic->getPOC() << "," << std::setw(5) << pcPic->Y().width << "," << std::setw(5) << pcPic->Y().height << "," << hashToString(recon_digest, numChar) << "\n";
+    m_oplFileStream << std::setw(8) << pcPic->getPOC() << "," << std::setw(5) << croppedWidth << "," << std::setw(5)
+                    << croppedHeight << "," << hashToString(recon_digest, numChar) << "\n";
   }
 }
 
