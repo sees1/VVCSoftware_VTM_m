@@ -135,6 +135,9 @@ private:
   int                     m_sliceLmcsApsId;         //value of LmcsApsId, constraint is same id for all slices in one picture
   std::ostream           *m_pDecodedSEIOutputStream;
   uint32_t                m_audIrapOrGdrAuFlag;
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  std::string             m_decoded360SeiDumpFileName;
+#endif
 
   int                     m_decodedPictureHashSEIEnabled;  ///< Checksum(3)/CRC(2)/MD5(1)/disable(0) acting on decoded picture hash SEI message
   uint32_t                m_numberOfChecksumErrorsDetected;
@@ -222,6 +225,9 @@ public:
   bool  getFirstSliceInSequence(int layerId) const { return m_firstSliceInSequence[layerId]; }
   void  setFirstSliceInSequence(bool val, int layerId) { m_firstSliceInSequence[layerId] = val; }
   void  setDecodedSEIMessageOutputStream(std::ostream *pOpStream) { m_pDecodedSEIOutputStream = pOpStream; }
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  void  setDecoded360SEIMessageFileName(std::string &Dump360SeiFileName) { m_decoded360SeiDumpFileName = Dump360SeiFileName; }
+#endif
   uint32_t  getNumberOfChecksumErrorsDetected() const { return m_numberOfChecksumErrorsDetected; }
 
   int  getDebugCTU( )               const { return m_debugCTU; }
