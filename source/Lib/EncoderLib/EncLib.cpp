@@ -1718,7 +1718,11 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
   {
     chromaDbfOffsetNotSameAsLuma = false;
   }
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
   const uint32_t chromaArrayType = (int)sps.getSeparateColourPlaneFlag() ? 0 : sps.getChromaFormatIdc();
+#else
+  const uint32_t chromaArrayType = (int)sps.getChromaFormatIdc();
+#endif
   if( ( chromaArrayType != CHROMA_400 ) && ( chromaQPOffsetNotZero || chromaDbfOffsetNotSameAsLuma ) )
   {
     pps.setPPSChromaToolFlag(true);

@@ -1306,11 +1306,13 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   pcSPS->setGDREnabledFlag(uiCode);
   READ_CODE(2, uiCode, "chroma_format_idc");                     pcSPS->setChromaFormatIdc( ChromaFormat(uiCode) );
 
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
   if( pcSPS->getChromaFormatIdc() == CHROMA_444 )
   {
     READ_FLAG(     uiCode, "separate_colour_plane_flag");        CHECK(uiCode != 0, "separate_colour_plane_flag shall be equal to 0");
     pcSPS->setSeparateColourPlaneFlag( uiCode != 0 );
   }
+#endif
 
   READ_FLAG(uiCode, "ref_pic_resampling_enabled_flag");          pcSPS->setRprEnabledFlag(uiCode);
   if (uiCode)
@@ -1338,7 +1340,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     READ_UVLC(uiCode, "sps_conf_win_top_offset");                conf.setWindowTopOffset(uiCode);
     READ_UVLC(uiCode, "sps_conf_win_bottom_offset");             conf.setWindowBottomOffset(uiCode);
   }
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
   const uint32_t chromaArrayType = (int) pcSPS->getSeparateColourPlaneFlag() ? 0 : pcSPS->getChromaFormatIdc();
+#else
+  const uint32_t chromaArrayType = (int) pcSPS->getChromaFormatIdc();
+#endif
 
   READ_CODE(2, uiCode, "sps_log2_ctu_size_minus5");              pcSPS->setCTUSize(1 << (uiCode + 5));
   CHECK(uiCode > 2, "sps_log2_ctu_size_minus5 must be less than or equal to 2");
@@ -3247,7 +3253,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && pps->getWpInfoInPhFlag() == 1, "When sh_picture_header_in_slice_header_flag is equal to 1, wp_info_in_ph_flag shall be equal to 0");
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && pps->getQpDeltaInfoInPhFlag() == 1, "When sh_picture_header_in_slice_header_flag is equal to 1, qp_delta_info_in_ph_flag shall be equal to 0");
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSubPicInfoPresentFlag() == 1, "When sps_subpic_info_present_flag is equal to 1, the value of sh_picture_header_in_slice_header_flag shall be equal to 0");
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSeparateColourPlaneFlag() == 1, "when separate_colour_plane_flag is equal to 1, the value of picture_header_in_slice_header_flag shall be equal to 0");
+#endif
 
   const ChromaFormat chFmt = sps->getChromaFormatIdc();
   const uint32_t numValidComp=getNumberValidComponents(chFmt);
@@ -3510,6 +3518,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     pcSlice->setExplicitScalingListUsed(pcSlice->getPictureHeaderInSliceHeader() ? picHeader->getExplicitScalingListEnabledFlag() : false);
   }
 
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
     // 4:4:4 colour plane ID
     if( sps->getSeparateColourPlaneFlag() )
     {
@@ -3520,8 +3529,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     {
       pcSlice->setColourPlaneId( 0 );
     }
-
-
+#endif
     if( pps->getRplInfoInPhFlag() )
     {
       pcSlice->setRPL0(picHeader->getRPL0());

@@ -779,6 +779,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_CODE(int(pcSPS->getChromaFormatIdc ()), 2, "chroma_format_idc");
 
   const ChromaFormat format                = pcSPS->getChromaFormatIdc();
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
   const uint32_t  separate_colour_plane_flag = pcSPS->getSeparateColourPlaneFlag();
   if( format == CHROMA_444 )
   {
@@ -787,6 +788,9 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
 
   const uint32_t chromaArrayType = separate_colour_plane_flag ? 0 : format;
+#else
+  const uint32_t chromaArrayType = format;
+#endif
 
   WRITE_FLAG(pcSPS->getRprEnabledFlag(), "ref_pic_resampling_enabled_flag");
   if (pcSPS->getRprEnabledFlag())
@@ -2101,12 +2105,13 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
     WRITE_FLAG(pcSlice->getExplicitScalingListUsed(), "slice_explicit_scaling_list_used_flag");
   }
 
+#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
     // 4:4:4 colour plane ID
     if( pcSlice->getSPS()->getSeparateColourPlaneFlag() )
     {
       WRITE_CODE( pcSlice->getColourPlaneId(), 2, "colour_plane_id" );
     }
-
+#endif
   if( !pcSlice->getPPS()->getRplInfoInPhFlag() && (!pcSlice->getIdrPicFlag() || pcSlice->getSPS()->getIDRRefParamListPresent()))
     {
       //Write L0 related syntax elements
