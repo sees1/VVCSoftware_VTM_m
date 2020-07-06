@@ -1615,6 +1615,17 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     CHECK(m_resChangeInClvsEnabled, "resolution change in CLVS and subpictures cannot be enabled together");
   }
 
+#if JVET_S0221_NUM_VB_CHECK
+  if (m_virtualBoundariesPresentFlag)
+  {
+    if (m_iSourceWidth <= 8)
+      CHECK(m_numVerVirtualBoundaries != 0, "The number of vertical virtual boundaries shall be 0 when the picture width is less than or equal to 8");
+
+    if (m_iSourceHeight <= 8)
+      CHECK(m_numHorVirtualBoundaries != 0, "The number of horizontal virtual boundaries shall be 0 when the picture height is less than or equal to 8");
+  }
+#endif
+
   if (m_cfgSubpictureLevelInfoSEI.m_enabled)
   {
     CHECK (m_numSubPics != m_cfgSubpictureLevelInfoSEI.m_numSubpictures, "NumSubPics must be equal to SEISubpicLevelInfoNumSubpics" );

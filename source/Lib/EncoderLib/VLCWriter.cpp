@@ -1139,7 +1139,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 #if JVET_S0221_NUM_VB_CHECK
       if (pcSPS->getMaxPicWidthInLumaSamples() <= 8)
       {
-        CHECK(pcSPS->getNumVerVirtualBoundaries() == 0, "SPS: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        CHECK(pcSPS->getNumVerVirtualBoundaries() != 0, "SPS: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
       }
 #endif
       for( unsigned i = 0; i < pcSPS->getNumVerVirtualBoundaries(); i++ )
@@ -1150,7 +1150,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 #if JVET_S0221_NUM_VB_CHECK
       if (pcSPS->getMaxPicHeightInLumaSamples() <= 8)
       {
-        CHECK(pcSPS->getNumHorVirtualBoundaries() == 0, "SPS: When picture height is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
+        CHECK(pcSPS->getNumHorVirtualBoundaries() != 0, "SPS: When picture height is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
       }
 #endif
       for( unsigned i = 0; i < pcSPS->getNumHorVirtualBoundaries(); i++ )
@@ -1595,7 +1595,7 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
 #if JVET_S0221_NUM_VB_CHECK
       if (pps->getPicWidthInLumaSamples() <= 8)
       {
-        CHECK(picHeader->getNumVerVirtualBoundaries() == 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
       }
 #endif
       for( unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++ )
@@ -1606,7 +1606,7 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
 #if JVET_S0221_NUM_VB_CHECK
       if (pps->getPicHeightInLumaSamples() <= 8)
       {
-        CHECK(picHeader->getNumHorVirtualBoundaries() == 0, "PH: When picture width is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
+        CHECK(picHeader->getNumHorVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
       }
 #endif
       for( unsigned i = 0; i < picHeader->getNumHorVirtualBoundaries(); i++ )
