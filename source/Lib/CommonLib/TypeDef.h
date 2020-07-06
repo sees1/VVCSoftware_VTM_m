@@ -50,9 +50,34 @@
 #include <assert.h>
 #include <cassert>
 
-
 //########### place macros to be be kept below this line ###############
 #define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
+
+//########### place macros to be removed in next cycle below this line ###############
+#define JVET_Q0280_CONSTRAINT_ON_VPS_ID                   1 // JVET-Q0280: Same VPS ID value across layers
+
+#define JVET_R0042_SUBPIC_CHECK                           1 // JVET_R0042: SubPicture types related constraints
+
+#define JVET_R0066_DPB_NO_OUTPUT_PRIOR_PIC_FLAG           1 // JVET-R0066: Signal the maximum values of chroma_format_idc and bit_depth_minus8 for all pictures of all layers in the VPS
+                                                            //             The value of no_output_of_prior_pics_flag, when present, is required to be the same for all pictures in an AU
+
+#define JVET_R0068_ASPECT1_ASPECT6                        1 // JVET-R0068 aspect 1: On slice_type constraint; JVET-R0068 aspect 6: On signalling of conformance window parameters
+
+#define JVET_R0067_PICTURE_OUTPUT_FLAG                    1 // JVET-R0067: Update the derivation of PictureOutputFlag
+
+#define JVET_R0080                                        1 // JVET-R0080: Change the syntax condition for pps_tile_idx_delta_present_flag. When the value of pps_num_slices_in_pic_minus1 is greater than 1 instead of 0, the syntax element of pps_tile_idx_delta_present_flag is signalled.
+
+#define JVET_R0118_PH_IN_SH_CONSTRAINT_FLAG               1 // JVET0R0118: Add a general constraint flag pic_header_in_slice_header_constraint_flag
+
+#define JVET_R0122_PIC_OUTPUT_FLAG_CLEANUP                1 // JVET-R0122: pic_output_flag is not signalled in picture header and inferred to be equal to 1, when the value of non_reference_picture_flag is equal to 1.
+
+#define JVET_R0065                                        1 //JVET-R0065: Each picture in an AU in a CVS shall have nuh_layer_id equal to the nuh_layer_id of one of the pictures present in the first AU of the CVS
+                                                            //            Add a flag aud_irap_or_gdr_au_flag to the AUD, and mandate the presence of AUD in each IRAP or GDR AU when vps_max_layers_minus1 is greater than 0
+
+#define JVET_R0041                                        1 // JVET-R0041: Picture types related constraints
+
+#define JVET_R0064                                        1 // JVET-R0064, aspect 2: Move the flag scaling_matrix_for_lfnst_disabled_flag from the scaling_list_data( ) syntax to the SPS.
+>>>>>>> 7873c1d5b6e9e49143927835c26869d018b93d61
 
 #define JVET_Q0280_CONSTRAINT_ON_VPS_ID                   1 // JVET-Q0280: Same VPS ID value across layers
 
