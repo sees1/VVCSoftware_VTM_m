@@ -2323,6 +2323,16 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
           m_uiBlkSize[refLayer] = 0;
           m_uiNumBlk [refLayer] = 0;
+#if JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX
+          if (picHeader->getMinQTSize(pcSlice->getSliceType()) == pcSlice->getSPS()->getMinQTSize(pcSlice->getSliceType()) &&
+            picHeader->getMaxMTTHierarchyDepth(pcSlice->getSliceType()) == pcSlice->getSPS()->getMaxMTTHierarchyDepth() &&
+            picHeader->getMaxBTSize(pcSlice->getSliceType()) == pcSlice->getSPS()->getMaxBTSize() &&
+            picHeader->getMaxTTSize(pcSlice->getSliceType()) == pcSlice->getSPS()->getMaxTTSize()
+            )
+          {
+            picHeader->setSplitConsOverrideFlag(false);
+          }
+#endif
         }
       }
       else
