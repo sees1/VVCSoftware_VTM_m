@@ -54,6 +54,9 @@
 //########### place macros to be removed in next cycle below this line ###############
 
 
+#define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
+
+
 
 //########### place macros to be be kept below this line ###############
 #define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT                 1 // JVET-R0351: high bit depth coding support (syntax changes, no mathematical differences for CTCs)
