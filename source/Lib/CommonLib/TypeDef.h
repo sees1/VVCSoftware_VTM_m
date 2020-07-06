@@ -52,6 +52,8 @@
 
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_R0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET_R0052: Remove separate colour plane coding from VVC version 1
+
 #define JVET_Q0280_CONSTRAINT_ON_VPS_ID                   1 // JVET-Q0280: Same VPS ID value across layers
 
 #define JVET_R0042_SUBPIC_CHECK                           1 // JVET_R0042: SubPicture types related constraints
