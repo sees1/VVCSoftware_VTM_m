@@ -3256,7 +3256,6 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 #if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSeparateColourPlaneFlag() == 1, "when separate_colour_plane_flag is equal to 1, the value of picture_header_in_slice_header_flag shall be equal to 0");
 #endif
-#endif
 
   const ChromaFormat chFmt = sps->getChromaFormatIdc();
   const uint32_t numValidComp=getNumberValidComponents(chFmt);
