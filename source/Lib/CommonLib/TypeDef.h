@@ -77,7 +77,6 @@
 #define JVET_R0041                                        1 // JVET-R0041: Picture types related constraints
 
 #define JVET_R0064                                        1 // JVET-R0064, aspect 2: Move the flag scaling_matrix_for_lfnst_disabled_flag from the scaling_list_data( ) syntax to the SPS.
->>>>>>> 7873c1d5b6e9e49143927835c26869d018b93d61
 
 #define JVET_Q0280_CONSTRAINT_ON_VPS_ID                   1 // JVET-Q0280: Same VPS ID value across layers
 
