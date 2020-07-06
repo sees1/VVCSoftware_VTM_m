@@ -252,6 +252,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAvoidIntraInDepLayer                              ( m_avoidIntraInDepLayer );
 
   //====== SPS constraint flags =======
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  m_cEncLib.setGciPresentFlag                                    (true);
+#endif
   m_cEncLib.setOnePictureOnlyConstraintFlag                      ( m_onePictureOnlyConstraintFlag );
   m_cEncLib.setIntraOnlyConstraintFlag                           ( m_intraConstraintFlag );  // NOTE: This setting is not used, and is confused with setIntraConstraintFlag
   m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint - 8 );

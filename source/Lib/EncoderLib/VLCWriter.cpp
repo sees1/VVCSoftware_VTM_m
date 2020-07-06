@@ -2470,67 +2470,82 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
 
 void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 {
-  WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
-  WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
-  WRITE_FLAG(cinfo->getNonProjectedConstraintFlag(), "general_non_projected_constraint_flag");
-  WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "general_one_picture_only_constraint_flag" );
-  WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(),     "intra_only_constraint_flag"      );
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  WRITE_FLAG(cinfo->getGciPresentFlag(), "gci_present_flag");
+  if (cinfo->getGciPresentFlag()) {
+#endif
+    WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
+    WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
+    WRITE_FLAG(cinfo->getNonProjectedConstraintFlag(), "general_non_projected_constraint_flag");
+    WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "general_one_picture_only_constraint_flag" );
+    WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(),     "intra_only_constraint_flag"      );
 
-  WRITE_CODE(cinfo->getMaxBitDepthConstraintIdc(), 4, "max_bitdepth_constraint_idc" );
-  WRITE_CODE(cinfo->getMaxChromaFormatConstraintIdc(), 2, "max_chroma_format_constraint_idc" );
-  WRITE_FLAG(cinfo->getSingleLayerConstraintFlag(), "single_layer_constraint_flag");
-  WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag(), "all_layers_independent_constraint_flag");
-  WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "no_res_change_in_clvs_constraint_flag");
-  WRITE_FLAG(cinfo->getOneTilePerPicConstraintFlag(), "one_tile_per_pic_constraint_flag");
-  WRITE_FLAG(cinfo->getPicHeaderInSliceHeaderConstraintFlag(), "pic_header_in_slice_header_constraint_flag");
-  WRITE_FLAG(cinfo->getOneSlicePerPicConstraintFlag(), "one_slice_per_pic_constraint_flag");
-  WRITE_FLAG(cinfo->getOneSubpicPerPicConstraintFlag(), "one_subpic_per_pic_constraint_flag");
+    WRITE_CODE(cinfo->getMaxBitDepthConstraintIdc(), 4, "max_bitdepth_constraint_idc" );
+    WRITE_CODE(cinfo->getMaxChromaFormatConstraintIdc(), 2, "max_chroma_format_constraint_idc" );
+    WRITE_FLAG(cinfo->getSingleLayerConstraintFlag(), "single_layer_constraint_flag");
+    WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag(), "all_layers_independent_constraint_flag");
+    WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "no_res_change_in_clvs_constraint_flag");
+    WRITE_FLAG(cinfo->getOneTilePerPicConstraintFlag(), "one_tile_per_pic_constraint_flag");
+    WRITE_FLAG(cinfo->getPicHeaderInSliceHeaderConstraintFlag(), "pic_header_in_slice_header_constraint_flag");
+    WRITE_FLAG(cinfo->getOneSlicePerPicConstraintFlag(), "one_slice_per_pic_constraint_flag");
+    WRITE_FLAG(cinfo->getOneSubpicPerPicConstraintFlag(), "one_subpic_per_pic_constraint_flag");
 
-  WRITE_FLAG(cinfo->getNoQtbttDualTreeIntraConstraintFlag() ? 1 : 0, "no_qtbtt_dual_tree_intra_constraint_flag");
-  WRITE_FLAG(cinfo->getNoPartitionConstraintsOverrideConstraintFlag() ? 1 : 0, "no_partition_constraints_override_constraint_flag");
-  WRITE_FLAG(cinfo->getNoSaoConstraintFlag() ? 1 : 0, "no_sao_constraint_flag");
-  WRITE_FLAG(cinfo->getNoAlfConstraintFlag() ? 1 : 0, "no_alf_constraint_flag");
-  WRITE_FLAG(cinfo->getNoCCAlfConstraintFlag() ? 1 : 0, "no_ccalf_constraint_flag");
-  WRITE_FLAG(cinfo->getNoJointCbCrConstraintFlag() ? 1 : 0, "no_joint_cbcr_constraint_flag");
-  WRITE_FLAG(cinfo->getNoMrlConstraintFlag() ? 1 : 0, "no_mrl_constraint_flag");
-  WRITE_FLAG(cinfo->getNoIspConstraintFlag() ? 1 : 0, "no_isp_constraint_flag");
-  WRITE_FLAG(cinfo->getNoMipConstraintFlag() ? 1 : 0, "no_mip_constraint_flag");
-  WRITE_FLAG(cinfo->getNoRefWraparoundConstraintFlag() ? 1 : 0, "no_ref_wraparound_constraint_flag");
-  WRITE_FLAG(cinfo->getNoTemporalMvpConstraintFlag() ? 1 : 0, "no_temporal_mvp_constraint_flag");
-  WRITE_FLAG(cinfo->getNoSbtmvpConstraintFlag() ? 1 : 0, "no_sbtmvp_constraint_flag");
-  WRITE_FLAG(cinfo->getNoAmvrConstraintFlag() ? 1 : 0, "no_amvr_constraint_flag");
-  WRITE_FLAG(cinfo->getNoBdofConstraintFlag() ? 1 : 0, "no_bdof_constraint_flag");
-  WRITE_FLAG(cinfo->getNoDmvrConstraintFlag() ? 1 : 0, "no_dmvr_constraint_flag");
-  WRITE_FLAG(cinfo->getNoCclmConstraintFlag() ? 1 : 0, "no_cclm_constraint_flag");
-  WRITE_FLAG(cinfo->getNoMtsConstraintFlag() ? 1 : 0, "no_mts_constraint_flag");
-  WRITE_FLAG(cinfo->getNoSbtConstraintFlag() ? 1 : 0, "no_sbt_constraint_flag");
-  WRITE_FLAG(cinfo->getNoLfnstConstraintFlag() ? 1 : 0, "no_lfnst_constraint_flag");
-  WRITE_FLAG(cinfo->getNoAffineMotionConstraintFlag() ? 1 : 0, "no_affine_motion_constraint_flag");
-  WRITE_FLAG(cinfo->getNoMmvdConstraintFlag() ? 1 : 0, "no_mmvd_constraint_flag");
-  WRITE_FLAG(cinfo->getNoSmvdConstraintFlag() ? 1 : 0, "no_smvd_constraint_flag");
-  WRITE_FLAG(cinfo->getNoProfConstraintFlag() ? 1 : 0, "no_prof_constraint_flag");
-  WRITE_FLAG(cinfo->getNoBcwConstraintFlag() ? 1 : 0, "no_bcw_constraint_flag");
-  WRITE_FLAG(cinfo->getNoIbcConstraintFlag() ? 1 : 0, "no_ibc_constraint_flag");
-  WRITE_FLAG(cinfo->getNoCiipConstraintFlag() ? 1 : 0, "no_ciip_constraint_flag");
-  WRITE_FLAG(cinfo->getNoGeoConstraintFlag() ? 1 : 0, "no_gpm_constraint_flag");
-  WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "no_ladf_constraint_flag");
-  WRITE_FLAG(cinfo->getNoTransformSkipConstraintFlag() ? 1 : 0, "no_transform_skip_constraint_flag");
-  WRITE_FLAG(cinfo->getNoBDPCMConstraintFlag() ? 1 : 0, "no_bdpcm_constraint_flag");
-  WRITE_FLAG(cinfo->getNoPaletteConstraintFlag() ? 1 : 0, "no_palette_constraint_flag");
-  WRITE_FLAG(cinfo->getNoActConstraintFlag() ? 1 : 0, "no_act_constraint_flag");
-  WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "no_lmcs_constraint_flag");
-  WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "no_qp_delta_constraint_flag");
-  WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "no_dep_quant_constraint_flag");
-  WRITE_FLAG(cinfo->getNoSignDataHidingConstraintFlag() ? 1 : 0, "no_sign_data_hiding_constraint_flag");
-  WRITE_FLAG(cinfo->getNoMixedNaluTypesInPicConstraintFlag() ? 1 : 0, "no_mixed_nalu_types_in_pic_constraint_flag");
-  WRITE_FLAG(cinfo->getNoTrailConstraintFlag() ? 1 : 0, "no_trail_constraint_flag");
-  WRITE_FLAG(cinfo->getNoStsaConstraintFlag() ? 1 : 0, "no_stsa_constraint_flag");
-  WRITE_FLAG(cinfo->getNoRaslConstraintFlag() ? 1 : 0, "no_rasl_constraint_flag");
-  WRITE_FLAG(cinfo->getNoRadlConstraintFlag() ? 1 : 0, "no_radl_constraint_flag");
-  WRITE_FLAG(cinfo->getNoIdrConstraintFlag() ? 1 : 0, "no_idr_constraint_flag");
-  WRITE_FLAG(cinfo->getNoCraConstraintFlag() ? 1 : 0, "no_cra_constraint_flag");
-  WRITE_FLAG(cinfo->getNoGdrConstraintFlag() ? 1 : 0, "no_gdr_constraint_flag");
-  WRITE_FLAG(cinfo->getNoApsConstraintFlag() ? 1 : 0, "no_aps_constraint_flag");
+    WRITE_FLAG(cinfo->getNoQtbttDualTreeIntraConstraintFlag() ? 1 : 0, "no_qtbtt_dual_tree_intra_constraint_flag");
+    WRITE_FLAG(cinfo->getNoPartitionConstraintsOverrideConstraintFlag() ? 1 : 0, "no_partition_constraints_override_constraint_flag");
+    WRITE_FLAG(cinfo->getNoSaoConstraintFlag() ? 1 : 0, "no_sao_constraint_flag");
+    WRITE_FLAG(cinfo->getNoAlfConstraintFlag() ? 1 : 0, "no_alf_constraint_flag");
+    WRITE_FLAG(cinfo->getNoCCAlfConstraintFlag() ? 1 : 0, "no_ccalf_constraint_flag");
+    WRITE_FLAG(cinfo->getNoJointCbCrConstraintFlag() ? 1 : 0, "no_joint_cbcr_constraint_flag");
+    WRITE_FLAG(cinfo->getNoMrlConstraintFlag() ? 1 : 0, "no_mrl_constraint_flag");
+    WRITE_FLAG(cinfo->getNoIspConstraintFlag() ? 1 : 0, "no_isp_constraint_flag");
+    WRITE_FLAG(cinfo->getNoMipConstraintFlag() ? 1 : 0, "no_mip_constraint_flag");
+    WRITE_FLAG(cinfo->getNoRefWraparoundConstraintFlag() ? 1 : 0, "no_ref_wraparound_constraint_flag");
+    WRITE_FLAG(cinfo->getNoTemporalMvpConstraintFlag() ? 1 : 0, "no_temporal_mvp_constraint_flag");
+    WRITE_FLAG(cinfo->getNoSbtmvpConstraintFlag() ? 1 : 0, "no_sbtmvp_constraint_flag");
+    WRITE_FLAG(cinfo->getNoAmvrConstraintFlag() ? 1 : 0, "no_amvr_constraint_flag");
+    WRITE_FLAG(cinfo->getNoBdofConstraintFlag() ? 1 : 0, "no_bdof_constraint_flag");
+    WRITE_FLAG(cinfo->getNoDmvrConstraintFlag() ? 1 : 0, "no_dmvr_constraint_flag");
+    WRITE_FLAG(cinfo->getNoCclmConstraintFlag() ? 1 : 0, "no_cclm_constraint_flag");
+    WRITE_FLAG(cinfo->getNoMtsConstraintFlag() ? 1 : 0, "no_mts_constraint_flag");
+    WRITE_FLAG(cinfo->getNoSbtConstraintFlag() ? 1 : 0, "no_sbt_constraint_flag");
+    WRITE_FLAG(cinfo->getNoLfnstConstraintFlag() ? 1 : 0, "no_lfnst_constraint_flag");
+    WRITE_FLAG(cinfo->getNoAffineMotionConstraintFlag() ? 1 : 0, "no_affine_motion_constraint_flag");
+    WRITE_FLAG(cinfo->getNoMmvdConstraintFlag() ? 1 : 0, "no_mmvd_constraint_flag");
+    WRITE_FLAG(cinfo->getNoSmvdConstraintFlag() ? 1 : 0, "no_smvd_constraint_flag");
+    WRITE_FLAG(cinfo->getNoProfConstraintFlag() ? 1 : 0, "no_prof_constraint_flag");
+    WRITE_FLAG(cinfo->getNoBcwConstraintFlag() ? 1 : 0, "no_bcw_constraint_flag");
+    WRITE_FLAG(cinfo->getNoIbcConstraintFlag() ? 1 : 0, "no_ibc_constraint_flag");
+    WRITE_FLAG(cinfo->getNoCiipConstraintFlag() ? 1 : 0, "no_ciip_constraint_flag");
+    WRITE_FLAG(cinfo->getNoGeoConstraintFlag() ? 1 : 0, "no_gpm_constraint_flag");
+    WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "no_ladf_constraint_flag");
+    WRITE_FLAG(cinfo->getNoTransformSkipConstraintFlag() ? 1 : 0, "no_transform_skip_constraint_flag");
+    WRITE_FLAG(cinfo->getNoBDPCMConstraintFlag() ? 1 : 0, "no_bdpcm_constraint_flag");
+    WRITE_FLAG(cinfo->getNoPaletteConstraintFlag() ? 1 : 0, "no_palette_constraint_flag");
+    WRITE_FLAG(cinfo->getNoActConstraintFlag() ? 1 : 0, "no_act_constraint_flag");
+    WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "no_lmcs_constraint_flag");
+    WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "no_qp_delta_constraint_flag");
+    WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "no_dep_quant_constraint_flag");
+    WRITE_FLAG(cinfo->getNoSignDataHidingConstraintFlag() ? 1 : 0, "no_sign_data_hiding_constraint_flag");
+    WRITE_FLAG(cinfo->getNoMixedNaluTypesInPicConstraintFlag() ? 1 : 0, "no_mixed_nalu_types_in_pic_constraint_flag");
+    WRITE_FLAG(cinfo->getNoTrailConstraintFlag() ? 1 : 0, "no_trail_constraint_flag");
+    WRITE_FLAG(cinfo->getNoStsaConstraintFlag() ? 1 : 0, "no_stsa_constraint_flag");
+    WRITE_FLAG(cinfo->getNoRaslConstraintFlag() ? 1 : 0, "no_rasl_constraint_flag");
+    WRITE_FLAG(cinfo->getNoRadlConstraintFlag() ? 1 : 0, "no_radl_constraint_flag");
+    WRITE_FLAG(cinfo->getNoIdrConstraintFlag() ? 1 : 0, "no_idr_constraint_flag");
+    WRITE_FLAG(cinfo->getNoCraConstraintFlag() ? 1 : 0, "no_cra_constraint_flag");
+    WRITE_FLAG(cinfo->getNoGdrConstraintFlag() ? 1 : 0, "no_gdr_constraint_flag");
+    WRITE_FLAG(cinfo->getNoApsConstraintFlag() ? 1 : 0, "no_aps_constraint_flag");
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+    //The value of gci_num_reserved_bits shall be equal to 0 in bitstreams conforming to this version of this Specification.
+    //Other values of gci_num_reserved_bits are reserved for future use by ITU-T | ISO/IEC.
+    WRITE_CODE(0, 8, "gci_num_reserved_bits");
+  }
+
+  while (!isByteAligned())
+  {
+    WRITE_FLAG(0, "gci_alignment_zero_bit");
+  }
+#endif
 }
 
 void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 )
@@ -2539,13 +2554,18 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
   {
     WRITE_CODE( int(ptl->getProfileIdc()), 7 ,   "general_profile_idc"                     );
     WRITE_FLAG( ptl->getTierFlag()==Level::HIGH, "general_tier_flag"                       );
+#if !JVET_S0179_CONDITIONAL_SIGNAL_GCI
     codeConstraintInfo( ptl->getConstraintInfo() );
+#endif
   }
 
   WRITE_CODE( int( ptl->getLevelIdc() ), 8, "general_level_idc" );
 
   if(profileTierPresentFlag)
   {
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+    codeConstraintInfo(ptl->getConstraintInfo());
+#endif
     WRITE_CODE(ptl->getNumSubProfile(), 8, "num_sub_profiles");
     for (int i = 0; i < ptl->getNumSubProfile(); i++)
     {

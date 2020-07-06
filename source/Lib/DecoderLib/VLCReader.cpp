@@ -4279,143 +4279,159 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
 void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
 {
   uint32_t symbol;
-  READ_FLAG(symbol,  "general_non_packed_constraint_flag"       ); cinfo->setNonPackedConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "general_frame_only_constraint_flag"       ); cinfo->setFrameOnlyConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "general_non_projected_constraint_flag"    ); cinfo->setNonProjectedConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "general_one_picture_only_constraint_flag"    ); cinfo->setOnePictureOnlyConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "intra_only_constraint_flag"               ); cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  READ_FLAG(symbol, "gci_present_flag"); cinfo->setGciPresentFlag(symbol ? true : false);
+  if (cinfo->getGciPresentFlag()) {
+#endif
+    READ_FLAG(symbol,  "general_non_packed_constraint_flag"       ); cinfo->setNonPackedConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "general_frame_only_constraint_flag"       ); cinfo->setFrameOnlyConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "general_non_projected_constraint_flag"    ); cinfo->setNonProjectedConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "general_one_picture_only_constraint_flag"    ); cinfo->setOnePictureOnlyConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "intra_only_constraint_flag"               ); cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);
 
-  READ_CODE(4, symbol,  "max_bitdepth_constraint_idc"              ); cinfo->setMaxBitDepthConstraintIdc(symbol);
-  READ_CODE(2, symbol,  "max_chroma_format_constraint_idc"         ); cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)symbol);
-  READ_FLAG(symbol, "single_layer_constraint_flag");               cinfo->setSingleLayerConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol, "all_layers_independent_constraint_flag");     cinfo->setAllLayersIndependentConstraintFlag(symbol ? true : false);
-  if (cinfo->getSingleLayerConstraintFlag())
-  {
-    CHECK(symbol == 0, "When single_layer_constraint_flag is equal to 1, the value of all_layers_independent_ constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol,  "no_res_change_in_clvs_constraint_flag"    ); cinfo->setNoResChangeInClvsConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "one_tile_per_pic_constraint_flag"         ); cinfo->setOneTilePerPicConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "pic_header_in_slice_header_constraint_flag"); cinfo->setPicHeaderInSliceHeaderConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "one_slice_per_pic_constraint_flag"        ); cinfo->setOneSlicePerPicConstraintFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "one_subpic_per_pic_constraint_flag"       ); cinfo->setOneSubpicPerPicConstraintFlag(symbol ? true : false);
-  if (cinfo->getOneSlicePerPicConstraintFlag())
-  {
-    CHECK(symbol == 0, "When one_slice_per_pic_constraint_flag is equal to 1, the value of one_subpic_per_pic_constraint_flag shall be equal to 1");
-  }
+    READ_CODE(4, symbol,  "max_bitdepth_constraint_idc"              ); cinfo->setMaxBitDepthConstraintIdc(symbol);
+    READ_CODE(2, symbol,  "max_chroma_format_constraint_idc"         ); cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)symbol);
+    READ_FLAG(symbol, "single_layer_constraint_flag");               cinfo->setSingleLayerConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol, "all_layers_independent_constraint_flag");     cinfo->setAllLayersIndependentConstraintFlag(symbol ? true : false);
+    if (cinfo->getSingleLayerConstraintFlag())
+    {
+      CHECK(symbol == 0, "When single_layer_constraint_flag is equal to 1, the value of all_layers_independent_ constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol,  "no_res_change_in_clvs_constraint_flag"    ); cinfo->setNoResChangeInClvsConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "one_tile_per_pic_constraint_flag"         ); cinfo->setOneTilePerPicConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "pic_header_in_slice_header_constraint_flag"); cinfo->setPicHeaderInSliceHeaderConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "one_slice_per_pic_constraint_flag"        ); cinfo->setOneSlicePerPicConstraintFlag(symbol ? true : false);
+    READ_FLAG(symbol,  "one_subpic_per_pic_constraint_flag"       ); cinfo->setOneSubpicPerPicConstraintFlag(symbol ? true : false);
+    if (cinfo->getOneSlicePerPicConstraintFlag())
+    {
+      CHECK(symbol == 0, "When one_slice_per_pic_constraint_flag is equal to 1, the value of one_subpic_per_pic_constraint_flag shall be equal to 1");
+    }
 
-  READ_FLAG(symbol,  "no_qtbtt_dual_tree_intra_constraint_flag" ); cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
-  {
-    CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_qtbtt_dual_tree_intra_constraint_flag shall be equal to 1");
+    READ_FLAG(symbol,  "no_qtbtt_dual_tree_intra_constraint_flag" ); cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
+    {
+      CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_qtbtt_dual_tree_intra_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_partition_constraints_override_constraint_flag"); cinfo->setNoPartitionConstraintsOverrideConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol,  "no_sao_constraint_flag");                    cinfo->setNoSaoConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol,  "no_alf_constraint_flag");                    cinfo->setNoAlfConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol,  "no_ccalf_constraint_flag");                  cinfo->setNoCCAlfConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
+    {
+      CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_ccalf_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol,  "no_joint_cbcr_constraint_flag");             cinfo->setNoJointCbCrConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
+    {
+      CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_joint_cbcr_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_mrl_constraint_flag");                     cinfo->setNoMrlConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_isp_constraint_flag");                     cinfo->setNoIspConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_mip_constraint_flag");                     cinfo->setNoMipConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol,  "no_ref_wraparound_constraint_flag");         cinfo->setNoRefWraparoundConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_ref_wraparound_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol,  "no_temporal_mvp_constraint_flag");           cinfo->setNoTemporalMvpConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_temporal_mvp_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol,  "no_sbtmvp_constraint_flag");                 cinfo->setNoSbtmvpConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_sbtmvp_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol,  "no_amvr_constraint_flag");                   cinfo->setNoAmvrConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_amvr_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol,  "no_bdof_constraint_flag");                   cinfo->setNoBdofConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_bdof_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_dmvr_constraint_flag");                    cinfo->setNoDmvrConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_dmvr_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_cclm_constraint_flag");                    cinfo->setNoCclmConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
+    {
+      CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_cclm_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_mts_constraint_flag");                     cinfo->setNoMtsConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_sbt_constraint_flag");                     cinfo->setNoSbtConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_lfnst_constraint_flag");                   cinfo->setNoLfnstConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_affine_motion_constraint_flag");           cinfo->setNoAffineMotionConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_affine_motion_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_mmvd_constraint_flag");                    cinfo->setNoMmvdConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_mmvd_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_smvd_constraint_flag");                    cinfo->setNoSmvdConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_smvd_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_prof_constraint_flag");                    cinfo->setNoProfConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_prof_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_bcw_constraint_flag");                     cinfo->setNoBcwConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_bcw_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_ibc_constraint_flag");                     cinfo->setNoIbcConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_ciip_constraint_flag");                    cinfo->setNoCiipConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_ciip_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_gpm_constraint_flag");                     cinfo->setNoGeoConstraintFlag(symbol > 0 ? true : false);
+    if (cinfo->getIntraOnlyConstraintFlag() == 1)
+    {
+      CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_gpm_constraint_flag shall be equal to 1");
+    }
+    READ_FLAG(symbol, "no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_transform_skip_constraint_flag");          cinfo->setNoTransformSkipConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_bdpcm_constraint_flag");                   cinfo->setNoBDPCMConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_palette_constraint_flag");                 cinfo->setNoPaletteConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_act_constraint_flag");                     cinfo->setNoActConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_lmcs_constraint_flag");                    cinfo->setNoLmcsConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_qp_delta_constraint_flag");                cinfo->setNoQpDeltaConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_dep_quant_constraint_flag");               cinfo->setNoDepQuantConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_sign_data_hiding_constraint_flag");        cinfo->setNoSignDataHidingConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_mixed_nalu_types_in_pic_constraint_flag"); cinfo->setNoMixedNaluTypesInPicConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_trail_constraint_flag");                   cinfo->setNoTrailConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_stsa_constraint_flag");                    cinfo->setNoStsaConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_rasl_constraint_flag");                    cinfo->setNoRaslConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_radl_constraint_flag");                    cinfo->setNoRadlConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_idr_constraint_flag");                     cinfo->setNoIdrConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_cra_constraint_flag");                     cinfo->setNoCraConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_gdr_constraint_flag");                     cinfo->setNoGdrConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "no_aps_constraint_flag");                     cinfo->setNoApsConstraintFlag(symbol > 0 ? true : false);
+  #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+    READ_CODE(8, symbol, "gci_num_reserved_bits");
+    for (int i = 0; i < symbol; i++)
+    {
+      READ_FLAG(symbol, "gci_reserved_zero_bit");                    CHECK(symbol != 0, "gci_reserved_zero_bit not equal to zero");
+    }
   }
-  READ_FLAG(symbol, "no_partition_constraints_override_constraint_flag"); cinfo->setNoPartitionConstraintsOverrideConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol,  "no_sao_constraint_flag");                    cinfo->setNoSaoConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol,  "no_alf_constraint_flag");                    cinfo->setNoAlfConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol,  "no_ccalf_constraint_flag");                  cinfo->setNoCCAlfConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
+  while (!isByteAligned())
   {
-    CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_ccalf_constraint_flag shall be equal to 1");
+    READ_FLAG(symbol, "gci_alignment_zero_bit");                     CHECK(symbol != 0, "gci_alignment_zero_bit not equal to zero");
   }
-  READ_FLAG(symbol,  "no_joint_cbcr_constraint_flag");             cinfo->setNoJointCbCrConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
-  {
-    CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_joint_cbcr_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_mrl_constraint_flag");                     cinfo->setNoMrlConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_isp_constraint_flag");                     cinfo->setNoIspConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_mip_constraint_flag");                     cinfo->setNoMipConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol,  "no_ref_wraparound_constraint_flag");         cinfo->setNoRefWraparoundConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_ref_wraparound_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol,  "no_temporal_mvp_constraint_flag");           cinfo->setNoTemporalMvpConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_temporal_mvp_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol,  "no_sbtmvp_constraint_flag");                 cinfo->setNoSbtmvpConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_sbtmvp_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol,  "no_amvr_constraint_flag");                   cinfo->setNoAmvrConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_amvr_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol,  "no_bdof_constraint_flag");                   cinfo->setNoBdofConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_bdof_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_dmvr_constraint_flag");                    cinfo->setNoDmvrConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_dmvr_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_cclm_constraint_flag");                    cinfo->setNoCclmConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
-  {
-    CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_cclm_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_mts_constraint_flag");                     cinfo->setNoMtsConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_sbt_constraint_flag");                     cinfo->setNoSbtConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_lfnst_constraint_flag");                   cinfo->setNoLfnstConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_affine_motion_constraint_flag");           cinfo->setNoAffineMotionConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_affine_motion_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_mmvd_constraint_flag");                    cinfo->setNoMmvdConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_mmvd_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_smvd_constraint_flag");                    cinfo->setNoSmvdConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_smvd_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_prof_constraint_flag");                    cinfo->setNoProfConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_prof_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_bcw_constraint_flag");                     cinfo->setNoBcwConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_bcw_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_ibc_constraint_flag");                     cinfo->setNoIbcConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_ciip_constraint_flag");                    cinfo->setNoCiipConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_ciip_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_gpm_constraint_flag");                     cinfo->setNoGeoConstraintFlag(symbol > 0 ? true : false);
-  if (cinfo->getIntraOnlyConstraintFlag() == 1)
-  {
-    CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_gpm_constraint_flag shall be equal to 1");
-  }
-  READ_FLAG(symbol, "no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_transform_skip_constraint_flag");          cinfo->setNoTransformSkipConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_bdpcm_constraint_flag");                   cinfo->setNoBDPCMConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_palette_constraint_flag");                 cinfo->setNoPaletteConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_act_constraint_flag");                     cinfo->setNoActConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_lmcs_constraint_flag");                    cinfo->setNoLmcsConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_qp_delta_constraint_flag");                cinfo->setNoQpDeltaConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_dep_quant_constraint_flag");               cinfo->setNoDepQuantConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_sign_data_hiding_constraint_flag");        cinfo->setNoSignDataHidingConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_mixed_nalu_types_in_pic_constraint_flag"); cinfo->setNoMixedNaluTypesInPicConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_trail_constraint_flag");                   cinfo->setNoTrailConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_stsa_constraint_flag");                    cinfo->setNoStsaConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_rasl_constraint_flag");                    cinfo->setNoRaslConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_radl_constraint_flag");                    cinfo->setNoRadlConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_idr_constraint_flag");                     cinfo->setNoIdrConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_cra_constraint_flag");                     cinfo->setNoCraConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_gdr_constraint_flag");                     cinfo->setNoGdrConstraintFlag(symbol > 0 ? true : false);
-  READ_FLAG(symbol, "no_aps_constraint_flag");                     cinfo->setNoApsConstraintFlag(symbol > 0 ? true : false);
+#endif
 }
 
 
@@ -4426,13 +4442,18 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
   {
     READ_CODE(7 , symbol,   "general_profile_idc"              ); ptl->setProfileIdc  (Profile::Name(symbol));
     READ_FLAG(    symbol,   "general_tier_flag"                ); ptl->setTierFlag    (symbol ? Level::HIGH : Level::MAIN);
+#if !JVET_S0179_CONDITIONAL_SIGNAL_GCI
     parseConstraintInfo( ptl->getConstraintInfo() );
+#endif
   }
 
   READ_CODE( 8, symbol, "general_level_idc" ); ptl->setLevelIdc( Level::Name( symbol ) );
 
   if(profileTierPresentFlag)
   {
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+    parseConstraintInfo(ptl->getConstraintInfo());
+#endif
     READ_CODE(8, symbol, "num_sub_profiles");
     uint8_t numSubProfiles = symbol;
     ptl->setNumSubProfile( numSubProfiles );

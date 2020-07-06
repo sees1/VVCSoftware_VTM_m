@@ -1089,6 +1089,10 @@ void EncLib::xInitSPS( SPS& sps )
 {
   ProfileTierLevel* profileTierLevel = sps.getProfileTierLevel();
   ConstraintInfo* cinfo = profileTierLevel->getConstraintInfo();
+
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  cinfo->setGciPresentFlag(m_gciPresentFlag);
+#endif
   cinfo->setNonPackedConstraintFlag     (m_nonPackedConstraintFlag);
   cinfo->setNonProjectedConstraintFlag(m_nonProjectedConstraintFlag);
   cinfo->setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
