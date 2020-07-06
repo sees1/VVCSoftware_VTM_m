@@ -51,7 +51,7 @@
 #include <cassert>
 
 
-//########### place macros to be removed in next cycle below this line ###############
+//########### place macros to be be kept below this line ###############
 #define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
 
 #define JVET_Q0280_CONSTRAINT_ON_VPS_ID                   1 // JVET-Q0280: Same VPS ID value across layers
