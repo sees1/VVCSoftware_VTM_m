@@ -886,7 +886,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_CODE(int(pcSPS->getChromaFormatIdc ()), 2, "chroma_format_idc");
 
   const ChromaFormat format                = pcSPS->getChromaFormatIdc();
-#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   const uint32_t  separate_colour_plane_flag = pcSPS->getSeparateColourPlaneFlag();
   if( format == CHROMA_444 )
   {
@@ -2525,7 +2525,7 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
   }
 #endif
 
-#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
     // 4:4:4 colour plane ID
     if( pcSlice->getSPS()->getSeparateColourPlaneFlag() )
     {

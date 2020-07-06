@@ -1348,7 +1348,7 @@ private:
   bool              m_SBT;
   bool              m_ISP;
   ChromaFormat      m_chromaFormatIdc;
-#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   bool              m_separateColourPlaneFlag;     //!< separate colour plane flag
 #endif
 
@@ -1548,7 +1548,7 @@ public:
 #endif
   ChromaFormat            getChromaFormatIdc () const                                                     { return m_chromaFormatIdc;                                            }
   void                    setChromaFormatIdc (ChromaFormat i)                                             { m_chromaFormatIdc = i;                                               }
-#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   void                    setSeparateColourPlaneFlag ( bool b )                                           { m_separateColourPlaneFlag = b;                                       }
   bool                    getSeparateColourPlaneFlag () const                                             { return m_separateColourPlaneFlag;                                    }
 #endif
@@ -2699,7 +2699,7 @@ private:
   ReferencePictureList        m_localRPL1;            //< RPL for L1 when present in slice header
   int                         m_rpl0Idx;              //< index of used RPL in the SPS or -1 for local RPL in the slice header
   int                         m_rpl1Idx;              //< index of used RPL in the SPS or -1 for local RPL in the slice header
-#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   int                        m_colourPlaneId;                         //!< 4:4:4 colour plane ID
 #endif
   NalUnitType                m_eNalUnitType;         ///< Nal unit type for the slice
@@ -2960,7 +2960,7 @@ public:
   bool                        isPocRestrictedByDRAP( int poc, bool precedingDRAPinDecodingOrder );
   bool                        isPOCInRefPicList( const ReferencePictureList *rpl, int poc );
   void                        checkConformanceForDRAP( uint32_t temporalId );
-#if !JVET_R0052_RM_SEPARATE_COLOUR_PLANE
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   void                        setColourPlaneId( int id )                             { m_colourPlaneId = id;                                         }
   int                         getColourPlaneId() const                               { return m_colourPlaneId;                                       }
 #endif
