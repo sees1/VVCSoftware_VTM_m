@@ -304,7 +304,10 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setNoPaletteConstraintFlag                           ( m_PLTMode == 1 ? false : true );
   m_cEncLib.setNoActConstraintFlag                               ( !m_useColorTrans );
   m_cEncLib.setNoLmcsConstraintFlag                              ( !m_lmcsEnabled );
-
+#if JVET_S0050_GCI
+  m_cEncLib.setNoExplicitScaleListConstraintFlag                 ( m_useScalingListId == SCALING_LIST_OFF );
+  m_cEncLib.setNoVirtualBoundaryConstraintFlag                   ( !m_virtualBoundariesEnabledFlag );
+#endif
 
   //====== Coding Structure ========
   m_cEncLib.setIntraPeriod                                       ( m_iIntraPeriod );

@@ -100,6 +100,10 @@ EncAppCfg::EncAppCfg()
 , m_noPaletteConstraintFlag(false)
 , m_noActConstraintFlag(false)
 , m_noLmcsConstraintFlag(false)
+#if JVET_S0050_GCI
+, m_noExplicitScaleListConstraintFlag(false)
+, m_noVirtualBoundaryConstraintFlag(false)
+#endif
 , m_bNoQtbttDualTreeIntraConstraintFlag(false)
 , m_noPartitionConstraintsOverrideConstraintFlag(false)
 , m_bNoSaoConstraintFlag(false)

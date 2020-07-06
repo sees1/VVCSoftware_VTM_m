@@ -196,7 +196,10 @@ protected:
   bool      m_noPaletteConstraintFlag;
   bool      m_noActConstraintFlag;
   bool      m_noLmcsConstraintFlag;
-
+#if JVET_S0050_GCI
+  bool      m_noExplicitScaleListConstraintFlag;
+  bool      m_noVirtualBoundaryConstraintFlag;
+#endif
   bool      m_bNoQtbttDualTreeIntraConstraintFlag;
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
   bool      m_bNoSaoConstraintFlag;
@@ -803,7 +806,12 @@ public:
   void          setNoActConstraintFlag(bool bVal) { m_noActConstraintFlag = bVal; }
   bool          getNoLmcsConstraintFlag() const { return m_noLmcsConstraintFlag; }
   void          setNoLmcsConstraintFlag(bool bVal) { m_noLmcsConstraintFlag = bVal; }
-
+#if JVET_S0050_GCI
+  bool          getNoExplicitScaleListConstraintFlag() const { return m_noExplicitScaleListConstraintFlag; }
+  void          setNoExplicitScaleListConstraintFlag(bool bVal) { m_noExplicitScaleListConstraintFlag = bVal; }
+  bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
+  void          setNoVirtualBoundaryConstraintFlag(bool bVal) { m_noVirtualBoundaryConstraintFlag = bVal; }
+#endif
   bool      getNoQtbttDualTreeIntraConstraintFlag() const { return m_bNoQtbttDualTreeIntraConstraintFlag; }
   void      setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_bNoQtbttDualTreeIntraConstraintFlag = bVal; }
   bool      getNoPartitionConstraintsOverrideConstraintFlag() const { return m_noPartitionConstraintsOverrideConstraintFlag; }
