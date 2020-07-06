@@ -1242,13 +1242,7 @@ void AdaptiveLoopFilter::filterBlk(AlfClassifier **classifier, const PelUnitBuf 
         bool isNearVBbelow = yVb >= vbPos && (yVb <= vbPos);
         for( int jj = 0; jj < clsSizeX; jj++ )
         {
-
-
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
-          Pel sum = 0;
-#else
-          int sum = 0;
-#endif
+          int32_t   sum  = 0;
           const Pel curr = pImg0[+0];
           if( filtType == ALF_FILTER_7 )
           {
