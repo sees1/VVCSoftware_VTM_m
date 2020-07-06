@@ -1572,6 +1572,23 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setLog2MaxTbSize(5);
   }
 
+#if JVET_S0074_SPS_REORDER
+  READ_FLAG(uiCode, "sps_transform_skip_enabled_flag"); pcSPS->setTransformSkipEnabledFlag(uiCode ? true : false);
+  if (pcSPS->getTransformSkipEnabledFlag())
+  {
+    READ_UVLC(uiCode, "log2_transform_skip_max_size_minus2");
+    pcSPS->setLog2MaxTransformSkipBlockSize(uiCode + 2);
+    READ_FLAG(uiCode, "sps_bdpcm_enabled_flag"); pcSPS->setBDPCMEnabledFlag(uiCode ? true : false);
+  }
+  READ_FLAG(uiCode, "sps_mts_enabled_flag");                       pcSPS->setUseMTS(uiCode != 0);
+  if (pcSPS->getUseMTS())
+  {
+    READ_FLAG(uiCode, "sps_explicit_mts_intra_enabled_flag");               pcSPS->setUseIntraMTS(uiCode != 0);
+    READ_FLAG(uiCode, "sps_explicit_mts_inter_enabled_flag");               pcSPS->setUseInterMTS(uiCode != 0);
+  }
+  READ_FLAG(uiCode, "sps_lfnst_enabled_flag");                    pcSPS->setUseLFNST(uiCode != 0);
+#endif
+
   if (chromaArrayType != CHROMA_400)
   {
     READ_FLAG(uiCode, "sps_joint_cbcr_enabled_flag");                pcSPS->setJointCbCrEnabledFlag(uiCode ? true : false);
@@ -1611,6 +1628,9 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setCCALFEnabledFlag(false);
   }
 
+#if JVET_S0074_SPS_REORDER
+  READ_FLAG(uiCode, "sps_lmcs_enable_flag");                   pcSPS->setUseLmcs(uiCode == 1);
+#else
   READ_FLAG(uiCode, "sps_transform_skip_enabled_flag"); pcSPS->setTransformSkipEnabledFlag(uiCode ? true : false);
   if (pcSPS->getTransformSkipEnabledFlag())
   {
@@ -1618,6 +1638,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setLog2MaxTransformSkipBlockSize(uiCode + 2);
     READ_FLAG(uiCode, "sps_bdpcm_enabled_flag"); pcSPS->setBDPCMEnabledFlag(uiCode ? true : false);
   }
+#endif
 
   READ_FLAG( uiCode, "sps_weighted_pred_flag" );                    pcSPS->setUseWP( uiCode ? true : false );
   READ_FLAG( uiCode, "sps_weighted_bipred_flag" );                  pcSPS->setUseWPBiPred( uiCode ? true : false );
@@ -1795,13 +1816,14 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setHorCollocatedChromaFlag(true);
     pcSPS->setVerCollocatedChromaFlag(true);
   }
-
+#if !JVET_S0074_SPS_REORDER
   READ_FLAG( uiCode,    "sps_mts_enabled_flag" );                       pcSPS->setUseMTS                 ( uiCode != 0 );
   if ( pcSPS->getUseMTS() )
   {
     READ_FLAG( uiCode,    "sps_explicit_mts_intra_enabled_flag" );               pcSPS->setUseIntraMTS            ( uiCode != 0 );
     READ_FLAG( uiCode,    "sps_explicit_mts_inter_enabled_flag" );               pcSPS->setUseInterMTS            ( uiCode != 0 );
   }
+#endif
   READ_FLAG( uiCode,  "sps_palette_enabled_flag");                                pcSPS->setPLTMode                ( uiCode != 0 );
   if (chromaArrayType == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
   {
@@ -1827,8 +1849,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
   else
     pcSPS->setMaxNumIBCMergeCand(0);
+
+#if !JVET_S0074_SPS_REORDER
   READ_FLAG(uiCode, "sps_lmcs_enable_flag");                   pcSPS->setUseLmcs(uiCode == 1);
   READ_FLAG( uiCode, "sps_lfnst_enabled_flag" );                    pcSPS->setUseLFNST( uiCode != 0 );
+#endif
 
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
   READ_FLAG( uiCode, "sps_ladf_enabled_flag" );                     pcSPS->setLadfEnabled( uiCode != 0 );

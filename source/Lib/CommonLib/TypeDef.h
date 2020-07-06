@@ -52,7 +52,7 @@
 
 
 //########### place macros to be removed in next cycle below this line ###############
-
+#define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
 
 //########### place macros to be be kept below this line ###############
