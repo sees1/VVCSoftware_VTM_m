@@ -338,6 +338,9 @@ public:
 int calcAndPrintHashStatus(const CPelUnitBuf& pic, const class SEIDecodedPictureHash* pictureHashSEI, const BitDepths &bitDepths, const MsgLevel msgl);
 
 uint32_t calcMD5(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
+uint32_t calcMD5WithCropping(const CPelUnitBuf &pic, PictureHash &digest, const BitDepths &bitDepths,
+                             const int leftOffset, const int rightOffset, const int topOffset, const int bottomOffset);
+
 std::string hashToString(const PictureHash &digest, int numChar);
 
 typedef std::list<Picture*> PicList;
