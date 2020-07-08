@@ -303,9 +303,11 @@ class ConstraintInfo
 
 public:
   ConstraintInfo()
-    : m_nonPackedConstraintFlag (false)
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
-    , m_gciPresentFlag (true)
+    : m_gciPresentFlag(true)
+    , m_nonPackedConstraintFlag(false)
+#else
+    : m_nonPackedConstraintFlag (false)
 #endif
     , m_nonProjectedConstraintFlag(false)
     , m_noResChangeInClvsConstraintFlag(false)
