@@ -1420,8 +1420,8 @@ void SEIReader::xParseSEIGeneralizedCubemapProjection(SEIGeneralizedCubemapProje
 #if JVET_S0257_DUMP_360SEI_MESSAGE
         if (!m_360SEIMessageDumped)
         {
-          double a = sei.m_gcmpFunctionCoeffU[i] * 1.0 / 125;
-          double b = sei.m_gcmpFunctionCoeffV[i] * 1.0 / 125;
+          double a = ((int)sei.m_gcmpFunctionCoeffU[i] + 1) / 128.0;
+          double b = ((int)sei.m_gcmpFunctionCoeffV[i] + 1) / 128.0;
           oss.str("");
           oss<<a;
           std::string a_str = oss.str();
