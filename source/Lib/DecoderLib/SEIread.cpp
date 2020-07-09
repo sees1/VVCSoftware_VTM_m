@@ -760,8 +760,8 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   }
 #else
   sei_read_flag(pDecodedMessageOutputStream, code, "sublayer_initial_cpb_removal_delay_present_flag");
-#endif
   sei.m_sublayerInitialCpbRemovalDelayPresentFlag = code;
+#endif
   for (i = (sei.m_sublayerInitialCpbRemovalDelayPresentFlag ? 0 : sei.m_bpMaxSubLayers - 1); i < sei.m_bpMaxSubLayers; i++)
   {
     for( nalOrVcl = 0; nalOrVcl < 2; nalOrVcl ++ )
@@ -779,8 +779,20 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
       }
     }
   }
+#if JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP
+  if (sei.m_bpMaxSubLayers-1 > 0) 
+  {
+    sei_read_flag(pDecodedMessageOutputStream, code, "bp_sublayer_dpb_output_offsets_present_flag");
+    sei.m_sublayerDpbOutputOffsetsPresentFlag = code; 
+  }
+  else
+  {
+    sei.m_sublayerDpbOutputOffsetsPresentFlag = false;
+  }
+#else
   sei_read_flag( pDecodedMessageOutputStream, code, "sublayer_dpb_output_offsets_present_flag" );
   sei.m_sublayerDpbOutputOffsetsPresentFlag = code;
+#endif
   if(sei.m_sublayerDpbOutputOffsetsPresentFlag)
   {
     for(int i = 0; i < sei.m_bpMaxSubLayers - 1; i++)
