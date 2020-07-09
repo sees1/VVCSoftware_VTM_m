@@ -286,10 +286,12 @@ uint32_t DecApp::decode()
     {
       m_cDecLib.CheckNoOutputPriorPicFlagsInAccessUnit();
       m_cDecLib.resetAccessUnitNoOutputPriorPicFlags();
+      m_cDecLib.checkLayerIdIncludedInCvss();
+      m_cDecLib.resetAccessUnitEos();
+      m_cDecLib.resetAudIrapOrGdrAuFlag();
     }
     if(bNewAccessUnit)
     {
-      m_cDecLib.isCvsStart();
       m_cDecLib.checkTidLayerIdInAccessUnit();
       m_cDecLib.resetAccessUnitSeiTids();
       m_cDecLib.checkSEIInAccessUnit();

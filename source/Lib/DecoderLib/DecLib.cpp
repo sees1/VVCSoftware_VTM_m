@@ -427,6 +427,7 @@ DecLib::DecLib()
   , m_bFirstSliceInPicture(true)
   , m_firstSliceInSequence{ true }
   , m_firstSliceInBitstream(true)
+  , m_isFirstAuInCvs( true )
   , m_prevSliceSkipped(false)
   , m_skippedPOC(0)
   , m_lastPOCNoOutputPriorPics(-1)
@@ -434,6 +435,7 @@ DecLib::DecLib()
   , m_lastNoOutputBeforeRecoveryFlag{ false }
   , m_sliceLmcsApsId(-1)
   , m_pDecodedSEIOutputStream(NULL)
+  , m_audIrapOrGdrAuFlag( false )
   , m_decodedPictureHashSEIEnabled(false)
   , m_numberOfChecksumErrorsDetected(0)
   , m_warningMessageSkipPicture(false)
@@ -451,6 +453,7 @@ DecLib::DecLib()
 #if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
 #endif
+  memset(m_accessUnitEos, false, sizeof(m_accessUnitEos));
   for (int i = 0; i < MAX_VPS_LAYERS; i++)
   {
     m_associatedIRAPType[i] = NAL_UNIT_INVALID;
@@ -886,37 +889,47 @@ void DecLib::xCreateUnavailablePicture(int iUnavailablePoc, bool longTermFlag, c
   {
     m_pocRandomAccess = iUnavailablePoc;
   }
-
 }
 
-void DecLib::isCvsStart()
+void DecLib::checkLayerIdIncludedInCvss()
 {
-  for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
+  if (getVPS() == nullptr || getVPS()->getMaxLayers() == 1)
   {
-    if (pic->m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_N_LP && pic->m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_W_RADL)
+    return;
+  }
+
+  if (m_audIrapOrGdrAuFlag &&
+    (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL))
+  {
+    // store layerIDs in the first AU
+    m_firstAccessUnitPicInfo.assign(m_accessUnitPicInfo.begin(), m_accessUnitPicInfo.end());
+  }
+  else
+  {
+    // check whether the layerIDs in an AU are included in the layerIDs of the first AU
+    for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
     {
-      checkIncludedInFirstAu();
-      return;
+      bool layerIdFind;
+      for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
+      {
+        layerIdFind = pic->m_nuhLayerId == picFirst->m_nuhLayerId ? true : false;
+        if (layerIdFind)
+        {
+          break;
+        }
+      }
+      CHECK(!layerIdFind, "each picture in an AU in a CVS shall have nuh_layer_id equal to the nuh_layer_id of one of the pictures present in the first AU of the CVS");
     }
   }
-  //save the first AU info for a CVS start
-  m_firstAccessUnitPicInfo.assign(m_accessUnitPicInfo.begin(), m_accessUnitPicInfo.end());
-}
 
-void DecLib::checkIncludedInFirstAu()
-{
+  // update the value of m_isFirstAuInCvs for the next AU according to NAL_UNIT_EOS in each layer
   for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
   {
-    bool isFind = 0;
-    for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
+    m_isFirstAuInCvs = m_accessUnitEos[pic->m_nuhLayerId] ? true : false;
+    if(!m_isFirstAuInCvs)
     {
-      if (pic->m_nuhLayerId == picFirst->m_nuhLayerId)
-      {
-        isFind = 1;
-        break;
-      }
+      break;
     }
-    CHECK(!isFind, "each picture in an AU in a CVS shall have nuh_layer_id equal to the nuh_layer_id of one of the pictures present in the first AU of the CVS");
   }
 }
 
@@ -2712,14 +2725,14 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       m_prevPOC = MAX_INT;
       m_prevSliceSkipped = false;
       m_skippedPOC = 0;
+      m_accessUnitEos[nalu.m_nuhLayerId] = true;
       return false;
 
     case NAL_UNIT_ACCESS_UNIT_DELIMITER:
       {
         AUDReader audReader;
         uint32_t picType;
-        uint32_t audIrapOrGdrAuFlag;
-        audReader.parseAccessUnitDelimiter(&(nalu.getBitstream()), audIrapOrGdrAuFlag, picType);
+        audReader.parseAccessUnitDelimiter(&(nalu.getBitstream()), m_audIrapOrGdrAuFlag, picType);
         return !m_bFirstSliceInPicture;
       }
 

@@ -125,6 +125,8 @@ private:
   bool                    m_bFirstSliceInPicture;
   bool                    m_firstSliceInSequence[MAX_VPS_LAYERS];
   bool                    m_firstSliceInBitstream;
+  bool                    m_isFirstAuInCvs;
+  bool                    m_accessUnitEos[MAX_VPS_LAYERS];
   bool                    m_prevSliceSkipped;
   int                     m_skippedPOC;
   int                     m_lastPOCNoOutputPriorPics;
@@ -132,6 +134,7 @@ private:
   bool                    m_lastNoOutputBeforeRecoveryFlag[MAX_VPS_LAYERS];    //value of variable NoOutputBeforeRecoveryFlag of the assocated CRA/GDR pic
   int                     m_sliceLmcsApsId;         //value of LmcsApsId, constraint is same id for all slices in one picture
   std::ostream           *m_pDecodedSEIOutputStream;
+  uint32_t                m_audIrapOrGdrAuFlag;
 
   int                     m_decodedPictureHashSEIEnabled;  ///< Checksum(3)/CRC(2)/MD5(1)/disable(0) acting on decoded picture hash SEI message
   uint32_t                m_numberOfChecksumErrorsDetected;
@@ -229,11 +232,12 @@ public:
   void resetAccessUnitPicInfo()              { m_accessUnitPicInfo.clear();    }
   void resetAccessUnitApsNals()           { m_accessUnitApsNals.clear(); }
   void resetAccessUnitSeiTids()           { m_accessUnitSeiTids.clear(); }
+  void resetAudIrapOrGdrAuFlag()          { m_audIrapOrGdrAuFlag = false; }
+  void resetAccessUnitEos()               { memset(m_accessUnitEos, false, sizeof(m_accessUnitEos)); }
   void checkTidLayerIdInAccessUnit();
   void resetAccessUnitSeiPayLoadTypes()   { m_accessUnitSeiPayLoadTypes.clear(); }
   void checkSEIInAccessUnit();
-  void isCvsStart();
-  void checkIncludedInFirstAu();
+  void checkLayerIdIncludedInCvss();
   void CheckNoOutputPriorPicFlagsInAccessUnit();
   void resetAccessUnitNoOutputPriorPicFlags() { m_accessUnitNoOutputPriorPicFlags.clear(); }
   void checkSeiInPictureUnit();
@@ -254,6 +258,7 @@ public:
   void  setAPSMapEnc( ParameterSetMap<APS>* apsMap ) { m_apsMapEnc = apsMap;  }
   bool  isNewPicture( std::ifstream *bitstreamFile, class InputByteStream *bytestream );
   bool  isNewAccessUnit( bool newPicture, std::ifstream *bitstreamFile, class InputByteStream *bytestream );
+
 protected:
   void  xUpdateRasInit(Slice* slice);
 
