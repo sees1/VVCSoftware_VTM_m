@@ -105,6 +105,9 @@ private:
   HLSyntaxReader          m_HLSReader;
   CABACDecoder            m_CABACDecoder;
   SEIReader               m_seiReader;
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  SeiCfgFileDump          m_seiCfgDump;
+#endif
   LoopFilter              m_cLoopFilter;
   SampleAdaptiveOffset    m_cSAO;
   AdaptiveLoopFilter      m_cALF;

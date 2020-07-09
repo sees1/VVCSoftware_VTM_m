@@ -634,11 +634,7 @@ uint32_t BitstreamExtractorApp::decode()
           // decoding a SEI
           SEIMessages SEIs;
           HRD hrd;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-          m_seiReader.parseSEImessage(&(nalu.getBitstream()), SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, m_parameterSetManager.getActiveSPS(), hrd, &std::cout, std::string(""));
-#else
           m_seiReader.parseSEImessage(&(nalu.getBitstream()), SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, m_parameterSetManager.getActiveSPS(), hrd, &std::cout);
-#endif
           for (auto sei : SEIs)
           {
             // remove unqualiified scalable nesting SEI

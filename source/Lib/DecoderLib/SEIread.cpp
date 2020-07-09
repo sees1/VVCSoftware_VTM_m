@@ -115,22 +115,14 @@ static inline void output_sei_message_header(SEI &sei, std::ostream *pDecodedMes
  * unmarshal a single SEI message from bitstream bs
  */
  // note: for independent parsing no parameter set should not be required here
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-void SEIReader::parseSEImessage(InputBitstream* bs, SEIMessages& seis, const NalUnitType nalUnitType, const uint32_t nuh_layer_id, const uint32_t temporalId, const VPS *vps, const SPS *sps, HRD &hrd, std::ostream *pDecodedMessageOutputStream, std::string decoded360MessageFileName)
-#else
 void SEIReader::parseSEImessage(InputBitstream* bs, SEIMessages& seis, const NalUnitType nalUnitType, const uint32_t nuh_layer_id, const uint32_t temporalId, const VPS *vps, const SPS *sps, HRD &hrd, std::ostream *pDecodedMessageOutputStream)
-#endif
 {
   setBitstream(bs);
 
   CHECK(m_pcBitstream->getNumBitsUntilByteAligned(), "Bitstream not aligned");
   do
   {
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-    xReadSEImessage(seis, nalUnitType, nuh_layer_id, temporalId, vps, sps, hrd, pDecodedMessageOutputStream, decoded360MessageFileName);
-#else
     xReadSEImessage(seis, nalUnitType, nuh_layer_id, temporalId, vps, sps, hrd, pDecodedMessageOutputStream);
-#endif
 
     /* SEI messages are an integer number of bytes, something has failed
     * in the parsing if bitstream not byte-aligned */
@@ -141,11 +133,7 @@ void SEIReader::parseSEImessage(InputBitstream* bs, SEIMessages& seis, const Nal
   xReadRbspTrailingBits();
 }
 
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType, const uint32_t nuh_layer_id, const uint32_t temporalId, const VPS *vps, const SPS *sps, HRD &hrd, std::ostream *pDecodedMessageOutputStream, std::string decoded360MessageFileName)
-#else
 void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType, const uint32_t nuh_layer_id, const uint32_t temporalId, const VPS *vps, const SPS *sps, HRD &hrd, std::ostream *pDecodedMessageOutputStream)
-#endif
 {
 #if ENABLE_TRACING
   xTraceSEIHeader();
@@ -225,11 +213,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       break;
     case SEI::SCALABLE_NESTING:
       sei = new SEIScalableNesting;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-      xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, pDecodedMessageOutputStream, decoded360MessageFileName);
-#else
       xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, pDecodedMessageOutputStream);
-#endif
       break;
     case SEI::FRAME_FIELD_INFO:
       sei = new SEIFrameFieldInfo;
@@ -260,11 +244,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
 #endif
     case SEI::EQUIRECTANGULAR_PROJECTION:
       sei = new SEIEquirectangularProjection;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-      xParseSEIEquirectangularProjection((SEIEquirectangularProjection&) *sei, sps, payloadSize, pDecodedMessageOutputStream, decoded360MessageFileName);
-#else
       xParseSEIEquirectangularProjection((SEIEquirectangularProjection&) *sei, payloadSize, pDecodedMessageOutputStream);
-#endif
       break;
     case SEI::SPHERE_ROTATION:
       sei = new SEISphereRotation;
@@ -280,11 +260,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       break;
     case SEI::GENERALIZED_CUBEMAP_PROJECTION:
       sei = new SEIGeneralizedCubemapProjection;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-      xParseSEIGeneralizedCubemapProjection((SEIGeneralizedCubemapProjection&) *sei, sps, payloadSize, pDecodedMessageOutputStream, decoded360MessageFileName);
-#else
       xParseSEIGeneralizedCubemapProjection((SEIGeneralizedCubemapProjection&) *sei, payloadSize, pDecodedMessageOutputStream);
-#endif
       break;
     case SEI::SUBPICTURE_LEVEL_INFO:
       sei = new SEISubpicureLevelInfo;
@@ -485,11 +461,7 @@ void SEIReader::xParseSEIDecodedPictureHash(SEIDecodedPictureHash& sei, uint32_t
 }
 
 
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitType nalUnitType, const uint32_t nuhLayerId, uint32_t payloadSize, const VPS *vps, const SPS *sps, std::ostream *decodedMessageOutputStream, std::string decoded360MessageFileName)
-#else
 void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitType nalUnitType, const uint32_t nuhLayerId, uint32_t payloadSize, const VPS *vps, const SPS *sps, std::ostream *decodedMessageOutputStream)
-#endif
 {
   uint32_t symbol;
   SEIMessages seis;
@@ -568,11 +540,7 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
   for (int32_t i=0; i<sei.m_snNumSEIs; i++)
   {
     SEIMessages tmpSEIs;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-    xReadSEImessage(tmpSEIs, nalUnitType, nuhLayerId, 0, vps, sps, m_nestedHrd, decodedMessageOutputStream, decoded360MessageFileName);
-#else
     xReadSEImessage(tmpSEIs, nalUnitType, nuhLayerId, 0, vps, sps, m_nestedHrd, decodedMessageOutputStream);
-#endif
     if (tmpSEIs.front()->payloadType() == SEI::BUFFERING_PERIOD)
     {
       SEIBufferingPeriod *bp = (SEIBufferingPeriod*) tmpSEIs.front();
@@ -1192,11 +1160,7 @@ void SEIReader::xParseSEIContentColourVolume(SEIContentColourVolume& sei, uint32
     }
   }
 }
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-void SEIReader::xParseSEIEquirectangularProjection(SEIEquirectangularProjection& sei, const SPS *sps, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream, std::string decoded360MessageFileName)
-#else
 void SEIReader::xParseSEIEquirectangularProjection(SEIEquirectangularProjection& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
-#endif
 {
   uint32_t val;
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
@@ -1213,33 +1177,6 @@ void SEIReader::xParseSEIEquirectangularProjection(SEIEquirectangularProjection&
       sei_read_code( pDecodedMessageOutputStream, 8, val,     "erp_left_guard_band_width" );   sei.m_erpLeftGuardBandWidth = val;
       sei_read_code( pDecodedMessageOutputStream, 8, val,     "erp_right_guard_band_width");   sei.m_erpRightGuardBandWidth = val;
     }
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-    if (!m_360SEIMessageDumped && !decoded360MessageFileName.empty())
-    {
-      FILE *fp = fopen(decoded360MessageFileName.c_str(), "w");
-      if (fp)
-      {
-        int chromaFormatTable[4] = {400, 420, 422, 444};
-        fprintf(fp, "InputBitDepth                 : %d    # Input bitdepth\n", sps->getBitDepth(CHANNEL_TYPE_LUMA));
-        fprintf(fp, "InputChromaFormat             : %d    # Ratio of luminance to chrominance samples\n", chromaFormatTable[sps->getChromaFormatIdc()]);
-        fprintf(fp, "SourceWidth                   : %d    # Input  frame width\n", sps->getMaxPicWidthInLumaSamples());
-        fprintf(fp, "SourceHeight                  : %d    # Input  frame height\n\n", sps->getMaxPicHeightInLumaSamples());
-
-        fprintf(fp, "InputGeometryType             : 0     # 0: equirectangular; 1: cubemap; 2: equalarea; this should be in the cfg of per sequence.\n");
-        if (sei.m_erpGuardBandFlag == 1)
-        {
-          fprintf(fp, "InputPERP                     : 1     # 0: original ERP input; 1: padded ERP input\n");
-          fprintf(fp, "CodingPERP                    : 0     # 0: coding with original ERP size; 1: coding with padded ERP\n");
-        }
-        fclose(fp);
-        m_360SEIMessageDumped = true;
-      }
-      else
-      {
-        msg( ERROR, "File %s could not be opened.\n", decoded360MessageFileName.c_str() );
-      }
-    }
-#endif
   }
 }
 
@@ -1353,11 +1290,7 @@ void SEIReader::xParseSEIRegionWisePacking(SEIRegionWisePacking& sei, uint32_t p
   }
 }
 
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-void SEIReader::xParseSEIGeneralizedCubemapProjection(SEIGeneralizedCubemapProjection& sei, const SPS *sps, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream, std::string decoded360MessageFileName)
-#else
 void SEIReader::xParseSEIGeneralizedCubemapProjection(SEIGeneralizedCubemapProjection& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
-#endif
 {
   uint32_t val;
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
@@ -1380,57 +1313,16 @@ void SEIReader::xParseSEIGeneralizedCubemapProjection(SEIGeneralizedCubemapProje
       sei.m_gcmpFunctionVAffectedByUFlag.resize(numFace);
     }
 
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-    int packingTypeTable[6][2] = {{6, 1}, {3, 2}, {2, 3}, {1, 6}, {1, 5}, {5, 1}};
-    int rotationTable[4] = {0, 90, 180, 270};
-    std::string packingTypeStr = "";
-    std::string gcmpsettingsStr = "";
-    std::ostringstream oss;
-    if (!m_360SEIMessageDumped)
-    {
-      packingTypeStr += "SourceFPStructure                 : " + std::to_string(packingTypeTable[sei.m_gcmpPackingType][0]) + " " + std::to_string(packingTypeTable[sei.m_gcmpPackingType][1]);
-      gcmpsettingsStr += "InputGCMPSettings                 : ";
-    }
-#endif
     for (int i = 0; i < numFace; i++)
     {
       sei_read_code( pDecodedMessageOutputStream,   3, val,    "gcmp_face_index" );                       sei.m_gcmpFaceIndex[i] = val;
       sei_read_code( pDecodedMessageOutputStream,   2, val,    "gcmp_face_rotation" );                    sei.m_gcmpFaceRotation[i] = val;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-      if (!m_360SEIMessageDumped)
-      {
-        int rotation = rotationTable[sei.m_gcmpFaceRotation[i]];
-        if (sei.m_gcmpFaceIndex[i] == 1)
-          rotation = (rotation + 270) % 360 + 360;
-        else if (sei.m_gcmpFaceIndex[i] == 2)
-          rotation = (rotation + 180) % 360 + 360;
-        else
-          rotation += 360;
-        if (i % packingTypeTable[sei.m_gcmpPackingType][1] == 0)
-          packingTypeStr += "   ";
-        packingTypeStr += std::to_string(sei.m_gcmpFaceIndex[i]) + " " + std::to_string(rotation) + " ";
-      }
-#endif
       if (sei.m_gcmpMappingFunctionType == 2)
       {
         sei_read_code( pDecodedMessageOutputStream, 7, val,    "gcmp_function_coeff_u" );                 sei.m_gcmpFunctionCoeffU[i] = val;
         sei_read_flag( pDecodedMessageOutputStream,    val,    "gcmp_function_u_affected_by_v_flag"    ); sei.m_gcmpFunctionUAffectedByVFlag[i] = val;
         sei_read_code( pDecodedMessageOutputStream, 7, val,    "gcmp_function_coeff_v" );                 sei.m_gcmpFunctionCoeffV[i] = val;
         sei_read_flag( pDecodedMessageOutputStream,    val,    "gcmp_function_v_affected_by_u_flag"    ); sei.m_gcmpFunctionVAffectedByUFlag[i] = val;
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-        if (!m_360SEIMessageDumped)
-        {
-          double a = ((int)sei.m_gcmpFunctionCoeffU[i] + 1) / 128.0;
-          double b = ((int)sei.m_gcmpFunctionCoeffV[i] + 1) / 128.0;
-          oss.str("");
-          oss<<a;
-          std::string a_str = oss.str();
-          oss.str("");
-          oss<<b;
-          std::string b_str = oss.str();
-          gcmpsettingsStr += a_str + " " + std::to_string(sei.m_gcmpFunctionUAffectedByVFlag[i]) + " " + b_str + " " + std::to_string(sei.m_gcmpFunctionVAffectedByUFlag[i]) + "   ";
-        }
-#endif
       }
     }
     sei_read_flag( pDecodedMessageOutputStream,        val,    "gcmp_guard_band_flag" );                  sei.m_gcmpGuardBandFlag = val;
@@ -1440,42 +1332,6 @@ void SEIReader::xParseSEIGeneralizedCubemapProjection(SEIGeneralizedCubemapProje
       sei_read_flag( pDecodedMessageOutputStream,      val,    "gcmp_guard_band_boundary_exterior_flag" ); sei.m_gcmpGuardBandBoundaryExteriorFlag = val;
       sei_read_code( pDecodedMessageOutputStream,   4, val,    "gcmp_guard_band_samples_minus1" );         sei.m_gcmpGuardBandSamplesMinus1 = val;
     }
-#if JVET_S0257_DUMP_360SEI_MESSAGE
-    if (!m_360SEIMessageDumped && !decoded360MessageFileName.empty())
-    {
-      FILE *fp = fopen(decoded360MessageFileName.c_str(), "w");
-      if (fp)
-      {
-        int chromaFormatTable[4] = {400, 420, 422, 444};
-        fprintf(fp, "InputBitDepth                 : %d    # Input bitdepth\n", sps->getBitDepth(CHANNEL_TYPE_LUMA));
-        fprintf(fp, "InputChromaFormat             : %d    # Ratio of luminance to chrominance samples\n", chromaFormatTable[sps->getChromaFormatIdc()]);
-        fprintf(fp, "SourceWidth                   : %d    # Input  frame width\n", sps->getMaxPicWidthInLumaSamples());
-        fprintf(fp, "SourceHeight                  : %d    # Input  frame height\n\n", sps->getMaxPicHeightInLumaSamples());
-
-        fprintf(fp, "InputGeometryType             : 15    # 0: equirectangular; 1: cubemap; 2: equalarea; this should be in the cfg of per sequence.\n");
-
-        packingTypeStr += " # frame packing order: numRows numCols Row0Idx0 ROT Row0Idx1 ROT ... Row1...";
-        gcmpsettingsStr += " # mapping function parameters for each face: u coefficient, u affected by v flag, v coefficient, v affected by u flag";
-        fprintf(fp, "%s\n", packingTypeStr.c_str());
-        fprintf(fp, "InputGCMPMappingType              : %d                                   # 0: CMP; 1: EAC; 2: parameterized CMP\n", (int)sei.m_gcmpMappingFunctionType);
-        if ((int)sei.m_gcmpMappingFunctionType == 2)
-          fprintf(fp, "%s\n", gcmpsettingsStr.c_str());
-        fprintf(fp, "InputGCMPPaddingFlag              : %d                                  # 0: input without guard bands; 1: input with guard bands\n", sei.m_gcmpGuardBandFlag);
-        if (sei.m_gcmpGuardBandFlag)
-        {
-          fprintf(fp, "InputGCMPPaddingType              : %d                                   # 0: unspecified(repetitive padding is used); 1: repetitive padding; 2: copy from neighboring face; 3: geometry padding\n", (int)sei.m_gcmpGuardBandType);
-          fprintf(fp, "InputGCMPPaddingExteriorFlag      : %d                                  # 0: guard bands only on discontinuous edges; 1: guard bands on both discontinuous edges and frame boundaries\n", sei.m_gcmpGuardBandBoundaryExteriorFlag);
-          fprintf(fp, "InputGCMPPaddingSize              : %d                                   # guard band size for input GCMP\n", (int)sei.m_gcmpGuardBandSamplesMinus1 + 1);
-        }
-        fclose(fp);
-        m_360SEIMessageDumped = true;
-      }
-      else
-      {
-        msg( ERROR, "File %s could not be opened.\n", decoded360MessageFileName.c_str() );
-      }
-    }
-#endif
   }
 }
 
@@ -1534,6 +1390,146 @@ void SEIReader::xParseSEISampleAspectRatioInfo(SEISampleAspectRatioInfo& sei, ui
   }
 }
 
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps)
+{
+  if (m_360SEIMessageDumped)
+  {
+    return;
+  }
 
+  SEIMessages equirectangularProjectionSEIs = getSeisByType(seis, SEI::EQUIRECTANGULAR_PROJECTION);
+  if (!equirectangularProjectionSEIs.empty())
+  {
+    SEIEquirectangularProjection* sei = (SEIEquirectangularProjection*)equirectangularProjectionSEIs.front();
+    xDumpSEIEquirectangularProjection(*sei, sps, decoded360MessageFileName);
+    m_360SEIMessageDumped = true;
+  }
+  else
+  {
+    SEIMessages generalizedCubemapProjectionSEIs = getSeisByType(seis, SEI::GENERALIZED_CUBEMAP_PROJECTION);
+    if (!generalizedCubemapProjectionSEIs.empty())
+    {
+      SEIGeneralizedCubemapProjection* sei = (SEIGeneralizedCubemapProjection*)generalizedCubemapProjectionSEIs.front();
+      xDumpSEIGeneralizedCubemapProjection(*sei, sps, decoded360MessageFileName);
+      m_360SEIMessageDumped = true; 
+    }
+  }
+}
+
+void SeiCfgFileDump::xDumpSEIEquirectangularProjection     (SEIEquirectangularProjection &sei, const SPS* sps, std::string decoded360MessageFileName)
+{
+  if (!decoded360MessageFileName.empty())
+  {
+    FILE *fp = fopen(decoded360MessageFileName.c_str(), "w");
+    if (fp)
+    {
+      int chromaFormatTable[4] = {400, 420, 422, 444};
+      fprintf(fp, "InputBitDepth                 : %d    # Input bitdepth\n", sps->getBitDepth(CHANNEL_TYPE_LUMA));
+      fprintf(fp, "InputChromaFormat             : %d    # Ratio of luminance to chrominance samples\n", chromaFormatTable[sps->getChromaFormatIdc()]);
+      fprintf(fp, "SourceWidth                   : %d    # Input  frame width\n", sps->getMaxPicWidthInLumaSamples());
+      fprintf(fp, "SourceHeight                  : %d    # Input  frame height\n\n", sps->getMaxPicHeightInLumaSamples());
+
+      fprintf(fp, "InputGeometryType             : 0     # 0: equirectangular; 1: cubemap; 2: equalarea; this should be in the cfg of per sequence.\n");
+      if (sei.m_erpGuardBandFlag == 1)
+      {
+        fprintf(fp, "InputPERP                     : 1     # 0: original ERP input; 1: padded ERP input\n");
+        fprintf(fp, "CodingPERP                    : 0     # 0: coding with original ERP size; 1: coding with padded ERP\n");
+      }
+      fclose(fp);
+      m_360SEIMessageDumped = true;
+    }
+    else
+    {
+      msg( ERROR, "File %s could not be opened.\n", decoded360MessageFileName.c_str() );
+    }
+  }
+}
+void SeiCfgFileDump::xDumpSEIGeneralizedCubemapProjection  (SEIGeneralizedCubemapProjection &sei, const SPS* sps, std::string decoded360MessageFileName)
+{
+  if (!sei.m_gcmpCancelFlag)
+  {
+    int numFace = sei.m_gcmpPackingType == 4 || sei.m_gcmpPackingType == 5 ? 5 : 6;
+    int packingTypeTable[6][2] = {{6, 1}, {3, 2}, {2, 3}, {1, 6}, {1, 5}, {5, 1}};
+    int rotationTable[4] = {0, 90, 180, 270};
+    std::string packingTypeStr = "";
+    std::string gcmpsettingsStr = "";
+    std::ostringstream oss;
+
+    packingTypeStr += "SourceFPStructure                 : " + std::to_string(packingTypeTable[sei.m_gcmpPackingType][0]) + " " + std::to_string(packingTypeTable[sei.m_gcmpPackingType][1]);
+    gcmpsettingsStr += "InputGCMPSettings                 : ";
+
+    for (int i = 0; i < numFace; i++)
+    {
+      int rotation = rotationTable[sei.m_gcmpFaceRotation[i]];
+      if (sei.m_gcmpFaceIndex[i] == 1)
+      {
+        rotation = (rotation + 270) % 360 + 360;
+      }
+      else if (sei.m_gcmpFaceIndex[i] == 2)
+      {
+        rotation = (rotation + 180) % 360 + 360;
+      }
+      else
+      {
+        rotation += 360;
+      }
+      if (i % packingTypeTable[sei.m_gcmpPackingType][1] == 0)
+      {
+        packingTypeStr += "   ";
+      }
+      packingTypeStr += std::to_string(sei.m_gcmpFaceIndex[i]) + " " + std::to_string(rotation) + " ";
+
+      if (sei.m_gcmpMappingFunctionType == 2)
+      {
+        double a = ((int)sei.m_gcmpFunctionCoeffU[i] + 1) / 128.0;
+        double b = ((int)sei.m_gcmpFunctionCoeffV[i] + 1) / 128.0;
+        oss.str("");
+        oss<<a;
+        std::string a_str = oss.str();
+        oss.str("");
+        oss<<b;
+        std::string b_str = oss.str();
+        gcmpsettingsStr += a_str + " " + std::to_string(sei.m_gcmpFunctionUAffectedByVFlag[i]) + " " + b_str + " " + std::to_string(sei.m_gcmpFunctionVAffectedByUFlag[i]) + "   ";
+      }
+    }
+    if (!decoded360MessageFileName.empty())
+    {
+      FILE *fp = fopen(decoded360MessageFileName.c_str(), "w");
+      if (fp)
+      {
+        int chromaFormatTable[4] = {400, 420, 422, 444};
+        fprintf(fp, "InputBitDepth                 : %d    # Input bitdepth\n", sps->getBitDepth(CHANNEL_TYPE_LUMA));
+        fprintf(fp, "InputChromaFormat             : %d    # Ratio of luminance to chrominance samples\n", chromaFormatTable[sps->getChromaFormatIdc()]);
+        fprintf(fp, "SourceWidth                   : %d    # Input  frame width\n", sps->getMaxPicWidthInLumaSamples());
+        fprintf(fp, "SourceHeight                  : %d    # Input  frame height\n\n", sps->getMaxPicHeightInLumaSamples());
+
+        fprintf(fp, "InputGeometryType             : 15    # 0: equirectangular; 1: cubemap; 2: equalarea; this should be in the cfg of per sequence.\n");
+
+        packingTypeStr += " # frame packing order: numRows numCols Row0Idx0 ROT Row0Idx1 ROT ... Row1...";
+        gcmpsettingsStr += " # mapping function parameters for each face: u coefficient, u affected by v flag, v coefficient, v affected by u flag";
+        fprintf(fp, "%s\n", packingTypeStr.c_str());
+        fprintf(fp, "InputGCMPMappingType              : %d                                    # 0: CMP; 1: EAC; 2: parameterized CMP\n", (int)sei.m_gcmpMappingFunctionType);
+        if ((int)sei.m_gcmpMappingFunctionType == 2)
+          fprintf(fp, "%s\n", gcmpsettingsStr.c_str());
+        fprintf(fp, "InputGCMPPaddingFlag              : %d                                   # 0: input without guard bands; 1: input with guard bands\n", sei.m_gcmpGuardBandFlag);
+        if (sei.m_gcmpGuardBandFlag)
+        {
+          fprintf(fp, "InputGCMPPaddingType              : %d                                   # 0: unspecified(repetitive padding is used); 1: repetitive padding; 2: copy from neighboring face; 3: geometry padding\n", (int)sei.m_gcmpGuardBandType);
+          fprintf(fp, "InputGCMPPaddingExteriorFlag      : %d                                   # 0: guard bands only on discontinuous edges; 1: guard bands on both discontinuous edges and frame boundaries\n", sei.m_gcmpGuardBandBoundaryExteriorFlag);
+          fprintf(fp, "InputGCMPPaddingSize              : %d                                   # guard band size for input GCMP\n", (int)sei.m_gcmpGuardBandSamplesMinus1 + 1);
+        }
+        fclose(fp);
+        m_360SEIMessageDumped = true;
+      }
+      else
+      {
+        msg( ERROR, "File %s could not be opened.\n", decoded360MessageFileName.c_str() );
+      }
+    }
+  }
+}
+
+#endif
 
 //! \}
