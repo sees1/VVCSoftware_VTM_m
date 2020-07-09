@@ -66,6 +66,8 @@
 
 #define JVET_M0497_MATRIX_MULT                            0 // 0: Fast method; 1: Matrix multiplication
 
+#define JVET_R0107_BITSTREAM_EXTACTION                    1 // JVET-R0107 Proposal 3:Bitsteam extraction modifications
+
 #define APPLY_SBT_SL_ON_MTS                               1 // apply save & load fast algorithm on inter MTS when SBT is on
 
 typedef std::pair<int, bool> TrMode;
