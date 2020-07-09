@@ -66,7 +66,12 @@ protected:
   void xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, SubPic &subPic);
   void xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, SubPic &subPic);
 
+#if JVET_R0107_BITSTREAM_EXTACTION
+  Slice xParseSliceHeader(InputNALUnit &nalu);
+  bool  xCheckSliceSubpicture(Slice &slice, int subPicId);
+#else
   bool xCheckSliceSubpicture(InputNALUnit &nalu, int subPicId);
+#endif
   void xReadPicHeader(InputNALUnit &nalu);
 
   void xSetSPSUpdated(int spsId)   { return m_updatedSPSList.push_back(spsId); }
