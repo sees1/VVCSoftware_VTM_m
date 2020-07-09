@@ -61,6 +61,9 @@
 
 #define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
 
+#define JVET_S0063_VPS_SIGNALLING                         1 // Modifications to VPS signalling - conditionally signal vps_num_ptls_minus1
+
+
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
