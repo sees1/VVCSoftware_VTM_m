@@ -4281,7 +4281,8 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
   uint32_t symbol;
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   READ_FLAG(symbol, "gci_present_flag"); cinfo->setGciPresentFlag(symbol ? true : false);
-  if (cinfo->getGciPresentFlag()) {
+  if (cinfo->getGciPresentFlag())
+  {
 #endif
     READ_FLAG(symbol,  "general_non_packed_constraint_flag"       ); cinfo->setNonPackedConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "general_frame_only_constraint_flag"       ); cinfo->setFrameOnlyConstraintFlag(symbol ? true : false);
@@ -4420,7 +4421,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "no_cra_constraint_flag");                     cinfo->setNoCraConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_gdr_constraint_flag");                     cinfo->setNoGdrConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_aps_constraint_flag");                     cinfo->setNoApsConstraintFlag(symbol > 0 ? true : false);
-  #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     READ_CODE(8, symbol, "gci_num_reserved_bits");
     for (int i = 0; i < symbol; i++)
     {

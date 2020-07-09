@@ -2472,7 +2472,8 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 {
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   WRITE_FLAG(cinfo->getGciPresentFlag(), "gci_present_flag");
-  if (cinfo->getGciPresentFlag()) {
+  if (cinfo->getGciPresentFlag())
+  {
 #endif
     WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
     WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
