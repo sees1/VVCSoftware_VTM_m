@@ -436,6 +436,9 @@ DecLib::DecLib()
   , m_sliceLmcsApsId(-1)
   , m_pDecodedSEIOutputStream(NULL)
   , m_audIrapOrGdrAuFlag( false )
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  , m_decoded360SeiDumpFileName()
+#endif
   , m_decodedPictureHashSEIEnabled(false)
   , m_numberOfChecksumErrorsDetected(0)
   , m_warningMessageSkipPicture(false)
@@ -1780,6 +1783,9 @@ void DecLib::xParsePrefixSEImessages()
     const SPS *sps = m_parameterSetManager.getActiveSPS();
     const VPS *vps = m_parameterSetManager.getVPS(sps->getVPSId());
     m_seiReader.parseSEImessage( &(nalu.getBitstream()), m_SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, sps, m_HRD, m_pDecodedSEIOutputStream );
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+    m_seiCfgDump.write360SeiDump( m_decoded360SeiDumpFileName, m_SEIs, sps );
+#endif
     m_accessUnitSeiPayLoadTypes.push_back(std::tuple<NalUnitType, int, SEI::PayloadType>(nalu.m_nalUnitType, nalu.m_nuhLayerId, m_SEIs.back()->payloadType()));
     delete m_prefixSEINALUs.front();
     m_prefixSEINALUs.pop_front();
@@ -2693,6 +2699,9 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
         const SPS *sps = m_parameterSetManager.getActiveSPS();
         const VPS *vps = m_parameterSetManager.getVPS(sps->getVPSId());
         m_seiReader.parseSEImessage( &(nalu.getBitstream()), m_pcPic->SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, sps, m_HRD, m_pDecodedSEIOutputStream );
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+        m_seiCfgDump.write360SeiDump(m_decoded360SeiDumpFileName, m_pcPic->SEIs, sps);
+#endif
         m_accessUnitSeiPayLoadTypes.push_back(std::tuple<NalUnitType, int, SEI::PayloadType>(nalu.m_nalUnitType, nalu.m_nuhLayerId, m_pcPic->SEIs.back()->payloadType()));
       }
       else

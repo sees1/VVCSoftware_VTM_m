@@ -371,6 +371,12 @@ void DecApp::xCreateDecLib()
     std::ostream &os=m_seiMessageFileStream.is_open() ? m_seiMessageFileStream : std::cout;
     m_cDecLib.setDecodedSEIMessageOutputStream(&os);
   }
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  if (!m_outputDecoded360SEIMessagesFilename.empty())
+  {
+    m_cDecLib.setDecoded360SEIMessageFileName(m_outputDecoded360SEIMessagesFilename);
+  }
+#endif
   m_cDecLib.m_targetSubPicIdx = this->m_targetSubPicIdx;
   m_cDecLib.initScalingList();
 }
