@@ -1390,6 +1390,146 @@ void SEIReader::xParseSEISampleAspectRatioInfo(SEISampleAspectRatioInfo& sei, ui
   }
 }
 
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps)
+{
+  if (m_360SEIMessageDumped)
+  {
+    return;
+  }
 
+  SEIMessages equirectangularProjectionSEIs = getSeisByType(seis, SEI::EQUIRECTANGULAR_PROJECTION);
+  if (!equirectangularProjectionSEIs.empty())
+  {
+    SEIEquirectangularProjection* sei = (SEIEquirectangularProjection*)equirectangularProjectionSEIs.front();
+    xDumpSEIEquirectangularProjection(*sei, sps, decoded360MessageFileName);
+    m_360SEIMessageDumped = true;
+  }
+  else
+  {
+    SEIMessages generalizedCubemapProjectionSEIs = getSeisByType(seis, SEI::GENERALIZED_CUBEMAP_PROJECTION);
+    if (!generalizedCubemapProjectionSEIs.empty())
+    {
+      SEIGeneralizedCubemapProjection* sei = (SEIGeneralizedCubemapProjection*)generalizedCubemapProjectionSEIs.front();
+      xDumpSEIGeneralizedCubemapProjection(*sei, sps, decoded360MessageFileName);
+      m_360SEIMessageDumped = true; 
+    }
+  }
+}
+
+void SeiCfgFileDump::xDumpSEIEquirectangularProjection     (SEIEquirectangularProjection &sei, const SPS* sps, std::string decoded360MessageFileName)
+{
+  if (!decoded360MessageFileName.empty())
+  {
+    FILE *fp = fopen(decoded360MessageFileName.c_str(), "w");
+    if (fp)
+    {
+      int chromaFormatTable[4] = {400, 420, 422, 444};
+      fprintf(fp, "InputBitDepth                 : %d    # Input bitdepth\n", sps->getBitDepth(CHANNEL_TYPE_LUMA));
+      fprintf(fp, "InputChromaFormat             : %d    # Ratio of luminance to chrominance samples\n", chromaFormatTable[sps->getChromaFormatIdc()]);
+      fprintf(fp, "SourceWidth                   : %d    # Input  frame width\n", sps->getMaxPicWidthInLumaSamples());
+      fprintf(fp, "SourceHeight                  : %d    # Input  frame height\n\n", sps->getMaxPicHeightInLumaSamples());
+
+      fprintf(fp, "InputGeometryType             : 0     # 0: equirectangular; 1: cubemap; 2: equalarea; this should be in the cfg of per sequence.\n");
+      if (sei.m_erpGuardBandFlag == 1)
+      {
+        fprintf(fp, "InputPERP                     : 1     # 0: original ERP input; 1: padded ERP input\n");
+        fprintf(fp, "CodingPERP                    : 0     # 0: coding with original ERP size; 1: coding with padded ERP\n");
+      }
+      fclose(fp);
+      m_360SEIMessageDumped = true;
+    }
+    else
+    {
+      msg( ERROR, "File %s could not be opened.\n", decoded360MessageFileName.c_str() );
+    }
+  }
+}
+void SeiCfgFileDump::xDumpSEIGeneralizedCubemapProjection  (SEIGeneralizedCubemapProjection &sei, const SPS* sps, std::string decoded360MessageFileName)
+{
+  if (!sei.m_gcmpCancelFlag)
+  {
+    int numFace = sei.m_gcmpPackingType == 4 || sei.m_gcmpPackingType == 5 ? 5 : 6;
+    int packingTypeTable[6][2] = {{6, 1}, {3, 2}, {2, 3}, {1, 6}, {1, 5}, {5, 1}};
+    int rotationTable[4] = {0, 90, 180, 270};
+    std::string packingTypeStr = "";
+    std::string gcmpsettingsStr = "";
+    std::ostringstream oss;
+
+    packingTypeStr += "SourceFPStructure                 : " + std::to_string(packingTypeTable[sei.m_gcmpPackingType][0]) + " " + std::to_string(packingTypeTable[sei.m_gcmpPackingType][1]);
+    gcmpsettingsStr += "InputGCMPSettings                 : ";
+
+    for (int i = 0; i < numFace; i++)
+    {
+      int rotation = rotationTable[sei.m_gcmpFaceRotation[i]];
+      if (sei.m_gcmpFaceIndex[i] == 1)
+      {
+        rotation = (rotation + 270) % 360 + 360;
+      }
+      else if (sei.m_gcmpFaceIndex[i] == 2)
+      {
+        rotation = (rotation + 180) % 360 + 360;
+      }
+      else
+      {
+        rotation += 360;
+      }
+      if (i % packingTypeTable[sei.m_gcmpPackingType][1] == 0)
+      {
+        packingTypeStr += "   ";
+      }
+      packingTypeStr += std::to_string(sei.m_gcmpFaceIndex[i]) + " " + std::to_string(rotation) + " ";
+
+      if (sei.m_gcmpMappingFunctionType == 2)
+      {
+        double a = ((int)sei.m_gcmpFunctionCoeffU[i] + 1) / 128.0;
+        double b = ((int)sei.m_gcmpFunctionCoeffV[i] + 1) / 128.0;
+        oss.str("");
+        oss<<a;
+        std::string a_str = oss.str();
+        oss.str("");
+        oss<<b;
+        std::string b_str = oss.str();
+        gcmpsettingsStr += a_str + " " + std::to_string(sei.m_gcmpFunctionUAffectedByVFlag[i]) + " " + b_str + " " + std::to_string(sei.m_gcmpFunctionVAffectedByUFlag[i]) + "   ";
+      }
+    }
+    if (!decoded360MessageFileName.empty())
+    {
+      FILE *fp = fopen(decoded360MessageFileName.c_str(), "w");
+      if (fp)
+      {
+        int chromaFormatTable[4] = {400, 420, 422, 444};
+        fprintf(fp, "InputBitDepth                 : %d    # Input bitdepth\n", sps->getBitDepth(CHANNEL_TYPE_LUMA));
+        fprintf(fp, "InputChromaFormat             : %d    # Ratio of luminance to chrominance samples\n", chromaFormatTable[sps->getChromaFormatIdc()]);
+        fprintf(fp, "SourceWidth                   : %d    # Input  frame width\n", sps->getMaxPicWidthInLumaSamples());
+        fprintf(fp, "SourceHeight                  : %d    # Input  frame height\n\n", sps->getMaxPicHeightInLumaSamples());
+
+        fprintf(fp, "InputGeometryType             : 15    # 0: equirectangular; 1: cubemap; 2: equalarea; this should be in the cfg of per sequence.\n");
+
+        packingTypeStr += " # frame packing order: numRows numCols Row0Idx0 ROT Row0Idx1 ROT ... Row1...";
+        gcmpsettingsStr += " # mapping function parameters for each face: u coefficient, u affected by v flag, v coefficient, v affected by u flag";
+        fprintf(fp, "%s\n", packingTypeStr.c_str());
+        fprintf(fp, "InputGCMPMappingType              : %d                                    # 0: CMP; 1: EAC; 2: parameterized CMP\n", (int)sei.m_gcmpMappingFunctionType);
+        if ((int)sei.m_gcmpMappingFunctionType == 2)
+          fprintf(fp, "%s\n", gcmpsettingsStr.c_str());
+        fprintf(fp, "InputGCMPPaddingFlag              : %d                                   # 0: input without guard bands; 1: input with guard bands\n", sei.m_gcmpGuardBandFlag);
+        if (sei.m_gcmpGuardBandFlag)
+        {
+          fprintf(fp, "InputGCMPPaddingType              : %d                                   # 0: unspecified(repetitive padding is used); 1: repetitive padding; 2: copy from neighboring face; 3: geometry padding\n", (int)sei.m_gcmpGuardBandType);
+          fprintf(fp, "InputGCMPPaddingExteriorFlag      : %d                                   # 0: guard bands only on discontinuous edges; 1: guard bands on both discontinuous edges and frame boundaries\n", sei.m_gcmpGuardBandBoundaryExteriorFlag);
+          fprintf(fp, "InputGCMPPaddingSize              : %d                                   # guard band size for input GCMP\n", (int)sei.m_gcmpGuardBandSamplesMinus1 + 1);
+        }
+        fclose(fp);
+        m_360SEIMessageDumped = true;
+      }
+      else
+      {
+        msg( ERROR, "File %s could not be opened.\n", decoded360MessageFileName.c_str() );
+      }
+    }
+  }
+}
+
+#endif
 
 //! \}

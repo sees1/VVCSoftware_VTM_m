@@ -50,23 +50,28 @@
 #include <assert.h>
 #include <cassert>
 
-
 //########### place macros to be removed in next cycle below this line ###############
-#define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
+#define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
 
 #define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
 #define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
 
+#define JVET_S0221_NUM_VB_CHECK                           1 // JVET_S0221: Constraints on the number of virtual boundaries
 
+#define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
 
 //########### place macros to be be kept below this line ###############
+#define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
+
 #define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT                 1 // JVET-R0351: high bit depth coding support (syntax changes, no mathematical differences for CTCs)
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
 
 #define JVET_R0164_MEAN_SCALED_SATD                       1 // JVET-R0164: Use a mean scaled version of SATD in encoder decisions
 
 #define JVET_M0497_MATRIX_MULT                            0 // 0: Fast method; 1: Matrix multiplication
+
+#define JVET_R0107_BITSTREAM_EXTACTION                    1 // JVET-R0107 Proposal 3:Bitsteam extraction modifications
 
 #define APPLY_SBT_SL_ON_MTS                               1 // apply save & load fast algorithm on inter MTS when SBT is on
 
