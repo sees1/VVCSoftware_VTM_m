@@ -388,7 +388,7 @@ void IntraPrediction::initPredIntraParams(const PredictionUnit & pu, const CompA
     const int     signAng            = intraPredAngleMode < 0 ? -1 : 1;
                   absAng             = angTable  [absAngMode];
 
-    m_ipaParam.invAngle              = invAngTable[absAngMode];
+    m_ipaParam.absInvAngle           = invAngTable[absAngMode];
     m_ipaParam.intraPredAngle        = signAng * absAng;
     if (intraPredAngleMode < 0)
     {
@@ -399,7 +399,7 @@ void IntraPrediction::initPredIntraParams(const PredictionUnit & pu, const CompA
       const int sideSize = m_ipaParam.isModeVer ? puSize.height : puSize.width;
       const int maxScale = 2;
 
-      m_ipaParam.angularScale = std::min(maxScale, floorLog2(sideSize) - (floorLog2(3 * m_ipaParam.invAngle - 2) - 8));
+      m_ipaParam.angularScale = std::min(maxScale, floorLog2(sideSize) - (floorLog2(3 * m_ipaParam.absInvAngle - 2) - 8));
       m_ipaParam.applyPDPC &= m_ipaParam.angularScale >= 0;
     }
   }
@@ -464,7 +464,7 @@ void IntraPrediction::xPredIntraAng( const CPelBuf &pSrc, PelBuf &pDst, const Ch
   const bool bIsModeVer     = m_ipaParam.isModeVer;
   const int  multiRefIdx    = m_ipaParam.multiRefIndex;
   const int  intraPredAngle = m_ipaParam.intraPredAngle;
-  const int  invAngle       = m_ipaParam.invAngle;
+  const int  absInvAngle    = m_ipaParam.absInvAngle;
 
   Pel* refMain;
   Pel* refSide;
@@ -490,7 +490,7 @@ void IntraPrediction::xPredIntraAng( const CPelBuf &pSrc, PelBuf &pDst, const Ch
     int sizeSide = bIsModeVer ? height : width;
     for (int k = -sizeSide; k <= -1; k++)
     {
-      refMain[k] = refSide[std::min((-k * invAngle + 256) >> 9, sizeSide)];
+      refMain[k] = refSide[std::min((-k * absInvAngle + 256) >> 9, sizeSide)];
     }
   }
   else
@@ -618,7 +618,7 @@ void IntraPrediction::xPredIntraAng( const CPelBuf &pSrc, PelBuf &pDst, const Ch
 
         for (int x = 0; x < std::min(3 << scale, width); x++)
         {
-          invAngleSum += invAngle;
+          invAngleSum += absInvAngle;
 
           int wL   = 32 >> (2 * x >> scale);
           Pel left = refSide[y + (invAngleSum >> 9) + 1];

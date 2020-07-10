@@ -83,7 +83,7 @@ private:
     bool isModeVer;
     int  multiRefIndex;
     int  intraPredAngle;
-    int  invAngle;
+    int  absInvAngle;
     bool interpolationFlag;
     int  angularScale;
 
@@ -94,7 +94,7 @@ private:
       , isModeVer(false)
       , multiRefIndex(-1)
       , intraPredAngle(std::numeric_limits<int>::max())
-      , invAngle(std::numeric_limits<int>::max())
+      , absInvAngle(std::numeric_limits<int>::max())
       , interpolationFlag(false)
       , angularScale(-1)
     // clang-format on
