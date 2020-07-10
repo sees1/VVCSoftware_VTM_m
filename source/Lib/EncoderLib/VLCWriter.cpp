@@ -788,6 +788,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG(pcSPS->getGDREnabledFlag(), "gdr_enabled_flag");
   WRITE_CODE(int(pcSPS->getChromaFormatIdc ()), 2, "chroma_format_idc");
 
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   const ChromaFormat format                = pcSPS->getChromaFormatIdc();
   const uint32_t  separate_colour_plane_flag = pcSPS->getSeparateColourPlaneFlag();
   if( format == CHROMA_444 )
@@ -797,6 +798,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
 
   const uint32_t chromaArrayType = separate_colour_plane_flag ? 0 : format;
+#endif
 
   WRITE_FLAG(pcSPS->getRprEnabledFlag(), "ref_pic_resampling_enabled_flag");
   if (pcSPS->getRprEnabledFlag())
@@ -967,7 +969,11 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG(pcSPS->getUseLFNST() ? 1 : 0, "sps_lfnst_enabled_flag");
 #endif
 
+#if JVET_S0052_RM_SEPARATE_COLOUR_PLANE
+  if (pcSPS->getChromaFormatIdc() != CHROMA_400)
+#else
   if (chromaArrayType != CHROMA_400)
+#endif
   {
     WRITE_FLAG(pcSPS->getJointCbCrEnabledFlag(), "sps_joint_cbcr_enabled_flag");
     const ChromaQpMappingTable& chromaQpMappingTable = pcSPS->getChromaQpMappingTable();
@@ -2179,12 +2185,13 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
     WRITE_FLAG(pcSlice->getExplicitScalingListUsed(), "slice_explicit_scaling_list_used_flag");
   }
 
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
     // 4:4:4 colour plane ID
     if( pcSlice->getSPS()->getSeparateColourPlaneFlag() )
     {
       WRITE_CODE( pcSlice->getColourPlaneId(), 2, "colour_plane_id" );
     }
-
+#endif
   if( !pcSlice->getPPS()->getRplInfoInPhFlag() && (!pcSlice->getIdrPicFlag() || pcSlice->getSPS()->getIDRRefParamListPresent()))
     {
       //Write L0 related syntax elements

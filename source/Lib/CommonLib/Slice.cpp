@@ -57,7 +57,9 @@ Slice::Slice()
 , m_prevIRAPSubpicType            ( NAL_UNIT_INVALID )
 , m_rpl0Idx                       ( -1 )
 , m_rpl1Idx                       ( -1 )
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
 , m_colourPlaneId                 ( 0 )
+#endif
 , m_eNalUnitType                  ( NAL_UNIT_CODED_SLICE_IDR_W_RADL )
 , m_pictureHeaderInSliceHeader   ( false )
 , m_eSliceType                    ( I_SLICE )
@@ -161,7 +163,9 @@ void Slice::initSlice()
     m_aiNumRefIdx[i]      = 0;
   }
   m_colFromL0Flag = true;
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   m_colourPlaneId = 0;
+#endif
   m_colRefIdx = 0;
   m_lmcsEnabledFlag = 0;
   m_explicitScalingListUsed = 0;
@@ -2691,7 +2695,9 @@ SPS::SPS()
 , m_SBT                       ( false )
 , m_ISP                       ( false )
 , m_chromaFormatIdc           (CHROMA_420)
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
 , m_separateColourPlaneFlag   ( 0 )
+#endif
 , m_uiMaxTLayers              (  1)
 , m_ptlDpbHrdParamsPresentFlag (1)
 , m_SubLayerDpbParamsFlag      (0)
