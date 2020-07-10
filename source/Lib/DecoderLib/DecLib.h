@@ -85,6 +85,9 @@ private:
   int                     m_prevIRAPSubpicDecOrderNo[MAX_VPS_LAYERS][MAX_NUM_SUB_PICS];
   int                     m_pocRandomAccess;   ///< POC number of the random access point (the first IDR or CRA picture)
   int                     m_lastRasPoc;
+#if JVET_S0155_EOS_NALU_CHECK
+  bool                    m_prevEOS[MAX_VPS_LAYERS];
+#endif
 
   PicList                 m_cListPic;         //  Dynamic buffer
   ParameterSetManager     m_parameterSetManager;  // storage for parameter sets
@@ -217,6 +220,9 @@ public:
   void  finishPictureLight(int& poc, PicList*& rpcListPic );
   void  checkNoOutputPriorPics (PicList* rpcListPic);
   void  checkNalUnitConstraints( uint32_t naluType );
+#if JVET_S0155_EOS_NALU_CHECK
+  void  checkPicTypeAfterEos();
+#endif
   void  updateAssociatedIRAP();
   void  updatePrevGDRInSameLayer();
   void  updatePrevIRAPAndGDRSubpic();

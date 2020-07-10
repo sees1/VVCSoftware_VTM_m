@@ -67,6 +67,9 @@
 
 #define JVET_S0065_SPS_INFERENCE_RULE                     1 // JVET_S0065_PROPOSAL1: Inference rule for sps_virtual_boundaries_present_flag
 
+#define JVET_S0155_EOS_NALU_CHECK                         1 // JVET-S0155: Constraints on EOS NAL units
+
+
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 

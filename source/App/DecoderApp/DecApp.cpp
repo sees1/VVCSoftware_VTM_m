@@ -124,6 +124,10 @@ uint32_t DecApp::decode()
 
   bool bPicSkipped = false;
 
+#if JVET_S0155_EOS_NALU_CHECK
+  bool isEosPresentInPu = false;
+#endif
+
   while (!!bitstreamFile)
   {
     InputNALUnit nalu;
@@ -194,6 +198,18 @@ uint32_t DecApp::decode()
           bPicSkipped = true;
         }
       }
+#if JVET_S0155_EOS_NALU_CHECK
+      // once an EOS NAL unit appears in the current PU, mark the variable isEosPresentInPu as true
+      if (nalu.m_nalUnitType == NAL_UNIT_EOS)
+      {
+        isEosPresentInPu = true;
+      }
+      // within the current PU, only EOS and EOB are allowed to be sent after an EOS nal unit
+      if(isEosPresentInPu)
+      {
+        CHECK(nalu.m_nalUnitType != NAL_UNIT_EOS && nalu.m_nalUnitType != NAL_UNIT_EOB, "When an EOS NAL unit is present in a PU, it shall be the last NAL unit among all NAL units within the PU other than other EOS NAL units or an EOB NAL unit");
+      }
+#endif
     }
 
     if ((bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS) && !m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId) && !bPicSkipped)
@@ -276,6 +292,10 @@ uint32_t DecApp::decode()
     {
       m_cDecLib.checkSeiInPictureUnit();
       m_cDecLib.resetPictureSeiNalus();
+#if JVET_S0155_EOS_NALU_CHECK
+      // reset the EOS present status for the next PU check
+      isEosPresentInPu = false;
+#endif
     }
     if (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS)
     {
