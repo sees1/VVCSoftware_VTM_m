@@ -235,6 +235,9 @@ private:
 
 class ConstraintInfo
 {
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  bool              m_gciPresentFlag;
+#endif
   bool              m_nonPackedConstraintFlag;
   bool              m_nonProjectedConstraintFlag;
   bool              m_noResChangeInClvsConstraintFlag;
@@ -300,7 +303,12 @@ class ConstraintInfo
 
 public:
   ConstraintInfo()
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+    : m_gciPresentFlag(true)
+    , m_nonPackedConstraintFlag(false)
+#else
     : m_nonPackedConstraintFlag (false)
+#endif
     , m_nonProjectedConstraintFlag(false)
     , m_noResChangeInClvsConstraintFlag(false)
     , m_oneTilePerPicConstraintFlag(false)
@@ -364,6 +372,11 @@ public:
     , m_noApsConstraintFlag (false)
   {}
 
+
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  bool          getGciPresentFlag() const { return m_gciPresentFlag; }
+  void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
+#endif
 
   bool          getNonPackedConstraintFlag() const { return m_nonPackedConstraintFlag; }
   void          setNonPackedConstraintFlag(bool b) { m_nonPackedConstraintFlag = b; }

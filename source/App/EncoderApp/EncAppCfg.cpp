@@ -81,6 +81,9 @@ EncAppCfg::EncAppCfg()
 , m_snrInternalColourSpace(false)
 , m_outputInternalColourSpace(false)
 , m_packedYUVMode(false)
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+, m_gciPresentFlag(true)
+#endif
 , m_bIntraOnlyConstraintFlag(false)
 , m_maxBitDepthConstraintIdc(0)
 , m_maxChromaFormatConstraintIdc(CHROMA_420)
