@@ -1097,12 +1097,20 @@ void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
 #if ENABLE_TRACING
   DTRACE( g_trace_ctx, D_HEADER, "----------- vui_parameters -----------\n");
 #endif
-
+#if JVET_S0266_VUI_length
+  unsigned vuiPayloadSize = pcSPS->getVuiPayloadSize();
+  InputBitstream *bs = getBitstream();
+  setBitstream(bs->extractSubstream(vuiPayloadSize * 8));
+#endif
 
   uint32_t  symbol;
 
-  READ_FLAG(symbol,  "vui_general_progressive_source_flag"          ); pcVUI->setProgressiveSourceFlag(symbol ? true : false);
-  READ_FLAG(symbol,  "vui_general_interlaced_source_flag"           ); pcVUI->setInterlacedSourceFlag(symbol ? true : false);
+  READ_FLAG(symbol,  "vui_progressive_source_flag"          ); pcVUI->setProgressiveSourceFlag(symbol ? true : false);
+  READ_FLAG(symbol,  "vui_interlaced_source_flag"           ); pcVUI->setInterlacedSourceFlag(symbol ? true : false);
+#if JVET_S0266_VUI_length
+  READ_FLAG(symbol, "vui_non_packed_constraint_flag");         pcVUI->setNonPackedFlag(symbol ? true : false);
+  READ_FLAG(symbol, "vui_non_projected_constraint_flag");      pcVUI->setNonProjectedFlag(symbol ? true : false);
+#endif
   READ_FLAG( symbol, "vui_aspect_ratio_info_present_flag");           pcVUI->setAspectRatioInfoPresentFlag(symbol);
   if (pcVUI->getAspectRatioInfoPresentFlag())
   {
@@ -1127,7 +1135,7 @@ void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
     READ_CODE(8, symbol, "vui_colour_primaries");                       pcVUI->setColourPrimaries(symbol);
     READ_CODE(8, symbol, "vui_transfer_characteristics");               pcVUI->setTransferCharacteristics(symbol);
     READ_CODE(8, symbol, "vui_matrix_coeffs");                          pcVUI->setMatrixCoefficients(symbol);
-    READ_FLAG(   symbol, "vui_video_full_range_flag");                    pcVUI->setVideoFullRangeFlag(symbol);
+    READ_FLAG(   symbol, "vui_full_range_flag");                    pcVUI->setVideoFullRangeFlag(symbol);
   }
 
   READ_FLAG(     symbol, "vui_chroma_loc_info_present_flag");             pcVUI->setChromaLocInfoPresentFlag(symbol);
@@ -1144,6 +1152,40 @@ void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
     }
   }
 
+#if JVET_S0266_VUI_length
+  int payloadBitsRem = getBitstream()->getNumBitsLeft();
+  if(payloadBitsRem)      //Corresponds to more_data_in_payload()
+  {
+    while(payloadBitsRem > 9)    //payload_extension_present()
+    {
+      READ_CODE(1, symbol, "vui_reserved_payload_extension_data");
+      payloadBitsRem--;
+    }
+    int finalBits = getBitstream()->peekBits(payloadBitsRem);
+    int numFinalZeroBits = 0;
+    int mask = 0xff;
+    while(finalBits & (mask >> numFinalZeroBits))
+    {
+      numFinalZeroBits++;
+    }
+    while(payloadBitsRem > 9-numFinalZeroBits)     //payload_extension_present()
+    {
+      READ_CODE(1, symbol, "vui_reserved_payload_extension_data");
+      payloadBitsRem--;
+    }
+    READ_FLAG(symbol, "vui_payload_bit_equal_to_one");
+    CHECK(symbol != 1, "vui_payload_bit_equal_to_one not equal to 1");
+    payloadBitsRem--;
+    while(payloadBitsRem)
+    {
+      READ_FLAG(symbol, "vui_payload_bit_equal_to_zero");
+      CHECK(symbol != 0, "vui_payload_bit_equal_to_zero not equal to 0");
+      payloadBitsRem--;
+    }
+  }
+  delete getBitstream();
+  setBitstream(bs);
+#endif
 }
 
 void HLSyntaxReader::parseGeneralHrdParameters(GeneralHrdParams *hrd)
@@ -2015,6 +2057,15 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   if (pcSPS->getVuiParametersPresentFlag())
   {
+#if JVET_S0266_VUI_length
+    READ_UVLC(uiCode, "sps_vui_payload_size_minus1");
+    pcSPS->setVuiPayloadSize(uiCode+1);
+    while (!isByteAligned())
+    {
+      READ_FLAG(uiCode, "sps_vui_alignment_zero_bit");
+      CHECK(uiCode != 0, "sps_vui_alignment_zero_bit not equal to 0");
+    }
+#endif
     parseVUI(pcSPS->getVuiParameters(), pcSPS);
   }
 
@@ -4345,9 +4396,13 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
   if (cinfo->getGciPresentFlag())
   {
 #endif
+#if !JVET_S0266_VUI_length
     READ_FLAG(symbol,  "general_non_packed_constraint_flag"       ); cinfo->setNonPackedConstraintFlag(symbol ? true : false);
+#endif
     READ_FLAG(symbol,  "general_frame_only_constraint_flag"       ); cinfo->setFrameOnlyConstraintFlag(symbol ? true : false);
+#if !JVET_S0266_VUI_length
     READ_FLAG(symbol,  "general_non_projected_constraint_flag"    ); cinfo->setNonProjectedConstraintFlag(symbol ? true : false);
+#endif
     READ_FLAG(symbol,  "general_one_picture_only_constraint_flag"    ); cinfo->setOnePictureOnlyConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "intra_only_constraint_flag"               ); cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);
 

@@ -53,6 +53,8 @@
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
 
+#define JVET_S0266_VUI_length                             1 // JVET-S0266: VUI modifications including signalling of VUI length
+
 #define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
 
 #define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
@@ -73,7 +75,6 @@
 
 #define JVET_S0160_ASPECT1_ASPECT9                        1 // JVET-S0160: Aspect 1 Infer the value of pps_loop_filter_across_tiles_enabled_flag to be equal to 0 (instead of 1) when not present
                                                             //             Aspect 9 The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture
-
 
 
 //########### place macros to be be kept below this line ###############

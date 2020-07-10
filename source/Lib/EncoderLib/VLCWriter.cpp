@@ -646,12 +646,19 @@ void HLSWriter::codeScalingListAps( APS* pcAPS )
 void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
 {
 #if ENABLE_TRACING
-  DTRACE( g_trace_ctx, D_HEADER, "----------- vui_parameters -----------\n");
+  if( g_HLSTraceEnable )
+  {
+    DTRACE( g_trace_ctx, D_HEADER, "----------- vui_parameters -----------\n");
+  }
 #endif
 
 
-  WRITE_FLAG(pcVUI->getProgressiveSourceFlag(),   "vui_general_progressive_source_flag"         );
-  WRITE_FLAG(pcVUI->getInterlacedSourceFlag(),    "vui_general_interlaced_source_flag"          );
+  WRITE_FLAG(pcVUI->getProgressiveSourceFlag(),   "vui_progressive_source_flag"         );
+  WRITE_FLAG(pcVUI->getInterlacedSourceFlag(),    "vui_interlaced_source_flag"          );
+#if JVET_S0266_VUI_length
+  WRITE_FLAG(pcVUI->getNonPackedFlag(),           "vui_non_packed_constraint_flag");
+  WRITE_FLAG(pcVUI->getNonProjectedFlag(),        "vui_non_projected_constraint_flag");
+#endif
   WRITE_FLAG(pcVUI->getAspectRatioInfoPresentFlag(),            "vui_aspect_ratio_info_present_flag");
   if (pcVUI->getAspectRatioInfoPresentFlag())
   {
@@ -674,7 +681,7 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
     WRITE_CODE(pcVUI->getColourPrimaries(), 8,                "vui_colour_primaries");
     WRITE_CODE(pcVUI->getTransferCharacteristics(), 8,        "vui_transfer_characteristics");
     WRITE_CODE(pcVUI->getMatrixCoefficients(), 8,             "vui_matrix_coeffs");
-    WRITE_FLAG(pcVUI->getVideoFullRangeFlag(),                "vui_video_full_range_flag");
+    WRITE_FLAG(pcVUI->getVideoFullRangeFlag(),                "vui_full_range_flag");
   }
   WRITE_FLAG(pcVUI->getChromaLocInfoPresentFlag(),              "vui_chroma_loc_info_present_flag");
   if (pcVUI->getChromaLocInfoPresentFlag())
@@ -689,6 +696,16 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
       WRITE_UVLC(pcVUI->getChromaSampleLocTypeBottomField(),      "vui_chroma_sample_loc_type_bottom_field");
     }
   }
+#if JVET_S0266_VUI_length
+  if(!isByteAligned())
+  {
+    WRITE_FLAG(1, "vui_payload_bit_equal_to_one");
+    while(!isByteAligned())
+    {
+      WRITE_FLAG(0, "vui_payload_bit_equal_to_zero");
+    }
+  }
+#endif
 }
 
 void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
@@ -1238,6 +1255,27 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG( pcSPS->getVuiParametersPresentFlag(),            "vui_parameters_present_flag" );
   if (pcSPS->getVuiParametersPresentFlag())
   {
+#if JVET_S0266_VUI_length
+    OutputBitstream *bs = getBitstream();
+    OutputBitstream bs_count;
+    setBitstream(&bs_count);
+#if ENABLE_TRACING
+    bool traceEnable = g_HLSTraceEnable;
+    g_HLSTraceEnable = false;
+#endif
+    codeVUI(pcSPS->getVuiParameters(), pcSPS);
+#if ENABLE_TRACING
+    g_HLSTraceEnable = traceEnable;
+#endif
+    unsigned vui_payload_data_num_bits = bs_count.getNumberOfWrittenBits();
+    CHECK( vui_payload_data_num_bits % 8 != 0, "Invalid number of VUI payload data bits" );
+    setBitstream(bs);
+    WRITE_UVLC((vui_payload_data_num_bits >> 3) - 1, "sps_vui_payload_size_minus1");
+    while (!isByteAligned())
+    {
+      WRITE_FLAG(0, "sps_vui_alignment_zero_bit");
+    }
+#endif
     codeVUI(pcSPS->getVuiParameters(), pcSPS);
   }
 
@@ -2512,9 +2550,13 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
   if (cinfo->getGciPresentFlag())
   {
 #endif
+#if !JVET_S0266_VUI_length
     WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
+#endif
     WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
+#if !JVET_S0266_VUI_length
     WRITE_FLAG(cinfo->getNonProjectedConstraintFlag(), "general_non_projected_constraint_flag");
+#endif
     WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "general_one_picture_only_constraint_flag" );
     WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(),     "intra_only_constraint_flag"      );
 
