@@ -1358,8 +1358,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
 #if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   const uint32_t chromaArrayType = (int) pcSPS->getSeparateColourPlaneFlag() ? 0 : pcSPS->getChromaFormatIdc();
-#else
-  const uint32_t chromaArrayType = (int) pcSPS->getChromaFormatIdc();
 #endif
 
   READ_CODE(2, uiCode, "sps_log2_ctu_size_minus5");              pcSPS->setCTUSize(1 << (uiCode + 5));
@@ -1638,7 +1636,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_FLAG(uiCode, "sps_lfnst_enabled_flag");                    pcSPS->setUseLFNST(uiCode != 0);
 #endif
 
+#if JVET_S0052_RM_SEPARATE_COLOUR_PLANE
+  if (pcSPS->getChromaFormatIdc() != CHROMA_400)
+#else
   if (chromaArrayType != CHROMA_400)
+#endif
   {
     READ_FLAG(uiCode, "sps_joint_cbcr_enabled_flag");                pcSPS->setJointCbCrEnabledFlag(uiCode ? true : false);
     ChromaQpMappingTableParams chromaQpMappingTableParams;
@@ -1874,7 +1876,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
 #endif
   READ_FLAG( uiCode,  "sps_palette_enabled_flag");                                pcSPS->setPLTMode                ( uiCode != 0 );
+#if JVET_S0052_RM_SEPARATE_COLOUR_PLANE
+  if (pcSPS->getChromaFormatIdc() == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
+#else
   if (chromaArrayType == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
+#endif
   {
     READ_FLAG(uiCode, "sps_act_enabled_flag");                                pcSPS->setUseColorTrans(uiCode != 0);
   }
