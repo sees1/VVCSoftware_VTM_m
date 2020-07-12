@@ -2350,32 +2350,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         {
           identicalToSPS=false;
         }
-
-        if (identicalToSPS && picHeader->getPicIntraSliceAllowedFlag())
-        {
-          if (picHeader->getMinQTSize(I_SLICE) != sps->getMinQTSize(I_SLICE) ||
-              picHeader->getMaxMTTHierarchyDepth(I_SLICE) != sps->getMaxMTTHierarchyDepthI() ||
-              picHeader->getMaxBTSize(I_SLICE) != sps->getMaxBTSizeI() ||
-              picHeader->getMaxTTSize(I_SLICE) != sps->getMaxTTSizeI()
-           )
-          {
-            identicalToSPS=false;
-          }
-
-          if (identicalToSPS && sps->getUseDualITree())
-          {
-            if (picHeader->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA) ||
-                picHeader->getMaxMTTHierarchyDepth(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxMTTHierarchyDepthIChroma() ||
-                picHeader->getMaxBTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxBTSizeIChroma() ||
-                picHeader->getMaxTTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxTTSizeIChroma()
-             )
-            {
-              identicalToSPS=false;
-            }
-          }
-        }
       }
-      else
+
+      if (identicalToSPS && picHeader->getPicIntraSliceAllowedFlag())
       {
         if (picHeader->getMinQTSize(I_SLICE) != sps->getMinQTSize(I_SLICE) ||
             picHeader->getMaxMTTHierarchyDepth(I_SLICE) != sps->getMaxMTTHierarchyDepthI() ||
