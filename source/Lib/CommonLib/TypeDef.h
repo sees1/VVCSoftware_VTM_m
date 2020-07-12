@@ -53,6 +53,8 @@
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
 
+#define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
+
 #define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
 #define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
