@@ -1978,6 +1978,12 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setNumHorVirtualBoundaries( 0 );
   }
   }
+#if JVET_S0065_SPS_INFERENCE_RULE
+  else
+  {
+    pcSPS->setVirtualBoundariesPresentFlag(false);
+  }
+#endif
 
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {
