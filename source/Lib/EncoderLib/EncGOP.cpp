@@ -2323,16 +2323,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
           m_uiBlkSize[refLayer] = 0;
           m_uiNumBlk [refLayer] = 0;
-#if JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX
-          if (picHeader->getMinQTSize(pcSlice->getSliceType()) == pcSlice->getSPS()->getMinQTSize(pcSlice->getSliceType()) &&
-            picHeader->getMaxMTTHierarchyDepth(pcSlice->getSliceType()) == pcSlice->getSPS()->getMaxMTTHierarchyDepth() &&
-            picHeader->getMaxBTSize(pcSlice->getSliceType()) == pcSlice->getSPS()->getMaxBTSize() &&
-            picHeader->getMaxTTSize(pcSlice->getSliceType()) == pcSlice->getSPS()->getMaxTTSize()
-            )
-          {
-            picHeader->setSplitConsOverrideFlag(false);
-          }
-#endif
         }
       }
       else
@@ -2346,6 +2336,74 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         m_uiPrevISlicePOC = pcSlice->getPOC();
         m_bInitAMaxBT = true;
       }
+#if JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX
+      bool identicalToSPS=true;
+      const SPS* sps =pcSlice->getSPS();
+
+      if (picHeader->getPicInterSliceAllowedFlag())
+      {
+        if (picHeader->getMinQTSize(pcSlice->getSliceType()) != pcSlice->getSPS()->getMinQTSize(pcSlice->getSliceType()) &&
+            picHeader->getMaxMTTHierarchyDepth(pcSlice->getSliceType()) != pcSlice->getSPS()->getMaxMTTHierarchyDepth() &&
+            picHeader->getMaxBTSize(pcSlice->getSliceType()) != pcSlice->getSPS()->getMaxBTSize() &&
+            picHeader->getMaxTTSize(pcSlice->getSliceType()) != pcSlice->getSPS()->getMaxTTSize()
+          )
+        {
+          identicalToSPS=false;
+        }
+
+        if (identicalToSPS && picHeader->getPicIntraSliceAllowedFlag())
+        {
+          if (picHeader->getMinQTSize(I_SLICE) != sps->getMinQTSize(I_SLICE) ||
+              picHeader->getMaxMTTHierarchyDepth(I_SLICE) != sps->getMaxMTTHierarchyDepthI() ||
+              picHeader->getMaxBTSize(I_SLICE) != sps->getMaxBTSizeI() ||
+              picHeader->getMaxTTSize(I_SLICE) != sps->getMaxTTSizeI()
+           )
+          {
+            identicalToSPS=false;
+          }
+
+          if (identicalToSPS && sps->getUseDualITree())
+          {
+            if (picHeader->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA) ||
+                picHeader->getMaxMTTHierarchyDepth(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxMTTHierarchyDepthIChroma() ||
+                picHeader->getMaxBTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxBTSizeIChroma() ||
+                picHeader->getMaxTTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxTTSizeIChroma()
+             )
+            {
+              identicalToSPS=false;
+            }
+          }
+        }
+      }
+      else
+      {
+        if (picHeader->getMinQTSize(I_SLICE) != sps->getMinQTSize(I_SLICE) ||
+            picHeader->getMaxMTTHierarchyDepth(I_SLICE) != sps->getMaxMTTHierarchyDepthI() ||
+            picHeader->getMaxBTSize(I_SLICE) != sps->getMaxBTSizeI() ||
+            picHeader->getMaxTTSize(I_SLICE) != sps->getMaxTTSizeI()
+        )
+        {
+          identicalToSPS=false;
+        }
+
+        if (identicalToSPS && sps->getUseDualITree())
+        {
+          if (picHeader->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA) ||
+              picHeader->getMaxMTTHierarchyDepth(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxMTTHierarchyDepthIChroma() ||
+              picHeader->getMaxBTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxBTSizeIChroma() ||
+              picHeader->getMaxTTSize(I_SLICE, CHANNEL_TYPE_CHROMA) != sps->getMaxTTSizeIChroma()
+           )
+          {
+            identicalToSPS=false;
+          }
+        }
+      }
+
+      if (identicalToSPS)
+      {
+        picHeader->setSplitConsOverrideFlag(false);
+      }
+#endif
     }
 
     //  Slice info. refinement
