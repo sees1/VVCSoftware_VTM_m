@@ -456,6 +456,9 @@ DecLib::DecLib()
 #if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
 #endif
+#if JVET_S0155_EOS_NALU_CHECK
+  memset(m_prevEOS, false, sizeof(m_prevEOS));
+#endif
   memset(m_accessUnitEos, false, sizeof(m_accessUnitEos));
   for (int i = 0; i < MAX_VPS_LAYERS; i++)
   {
@@ -893,6 +896,19 @@ void DecLib::xCreateUnavailablePicture(int iUnavailablePoc, bool longTermFlag, c
     m_pocRandomAccess = iUnavailablePoc;
   }
 }
+#if JVET_S0155_EOS_NALU_CHECK
+void DecLib::checkPicTypeAfterEos()
+{
+  int layerId = m_pcPic->slices[0]->getNalUnitLayerId();
+  if (m_prevEOS[layerId])
+  {
+    bool isIrapOrGdrPu = !m_pcPic->cs->pps->getMixedNaluTypesInPicFlag() && ( m_pcPic->slices[0]->isIRAP() || m_pcPic->slices[0]->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR );
+    CHECK(!isIrapOrGdrPu, "when present, the next PU of a particular layer after an EOS NAL unit that belongs to the same layer shall be an IRAP or GDR PU");
+
+    m_prevEOS[layerId] = false;
+  }
+}
+#endif
 
 void DecLib::checkLayerIdIncludedInCvss()
 {
@@ -923,6 +939,28 @@ void DecLib::checkLayerIdIncludedInCvss()
       }
       CHECK(!layerIdFind, "each picture in an AU in a CVS shall have nuh_layer_id equal to the nuh_layer_id of one of the pictures present in the first AU of the CVS");
     }
+
+
+#if JVET_S0155_EOS_NALU_CHECK
+    // check whether the layerID of EOS_NUT is included in the layerIDs of the first AU
+    for (int i = 0; i < getVPS()->getMaxLayers(); i++)
+    {
+      int eosLayerId = getVPS()->getLayerId(i);
+      if (m_accessUnitEos[eosLayerId])
+      {
+        bool eosLayerIdFind;
+        for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
+        {
+          eosLayerIdFind = eosLayerId == picFirst->m_nuhLayerId ? true : false;
+          if (eosLayerIdFind)
+          {
+            break;
+          }
+        }
+        CHECK(!eosLayerIdFind, "When nal_unit_type is equal to EOS_NUT, nuh_layer_id shall be equal to one of the nuh_layer_id values of the layers present in the CVS");
+      }
+    }
+#endif
   }
 
   // update the value of m_isFirstAuInCvs for the next AU according to NAL_UNIT_EOS in each layer
@@ -2181,6 +2219,9 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_pcPic->setDecodingOrderNumber(m_decodingOrderCounter);
     m_decodingOrderCounter++;
     m_pcPic->setPictureType(nalu.m_nalUnitType);
+#if JVET_S0155_EOS_NALU_CHECK
+    checkPicTypeAfterEos();
+#endif
     // store sub-picture numbers, sizes, and locations with a picture
     pcSlice->getPic()->numSubpics = sps->getNumSubPics();
     pcSlice->getPic()->subpicWidthInCTUs.clear();
@@ -2735,6 +2776,9 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       m_prevSliceSkipped = false;
       m_skippedPOC = 0;
       m_accessUnitEos[nalu.m_nuhLayerId] = true;
+#if JVET_S0155_EOS_NALU_CHECK
+      m_prevEOS[nalu.m_nuhLayerId] = true;
+#endif
       return false;
 
     case NAL_UNIT_ACCESS_UNIT_DELIMITER:
