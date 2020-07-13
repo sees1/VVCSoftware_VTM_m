@@ -518,7 +518,11 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
     }
     else
     {
+#if JVET_S0160_ASPECT1_ASPECT9
+      pcPPS->setLoopFilterAcrossTilesEnabledFlag(false);
+#else
       pcPPS->setLoopFilterAcrossTilesEnabledFlag(true);
+#endif
       uiCode = 1;
     }
     pcPPS->setRectSliceFlag(uiCode == 1);
