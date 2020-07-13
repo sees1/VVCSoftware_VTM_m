@@ -1040,7 +1040,9 @@ void DecLib::checkSEIInAccessUnit()
   for (auto &sei : m_accessUnitSeiPayLoadTypes)
   {
     enum NalUnitType         naluType = std::get<0>(sei);
+#if !JVET_S0178_GENERAL_SEI_CHECK
     int                    nuhLayerId = std::get<1>(sei);
+#endif
     enum SEI::PayloadType payloadType = std::get<2>(sei);
 #if JVET_S0178_GENERAL_SEI_CHECK
     if (m_vps != nullptr && naluType == NAL_UNIT_PREFIX_SEI && ((payloadType == SEI::BUFFERING_PERIOD || payloadType == SEI::PICTURE_TIMING || payloadType == SEI::DECODING_UNIT_INFO || payloadType == SEI::SUBPICTURE_LEVEL_INFO)))
