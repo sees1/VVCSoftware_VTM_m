@@ -460,6 +460,9 @@ void SEIReader::xParseSEIDecodedPictureHash(SEIDecodedPictureHash& sei, uint32_t
   }
 }
 
+#if JVET_S0177_SCALABLE_NESTING_SEI
+#define VCL_ASSOCIATED_SEI_LIST_SIZE  17
+#endif
 
 void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitType nalUnitType, const uint32_t nuhLayerId, uint32_t payloadSize, const VPS *vps, const SPS *sps, std::ostream *decodedMessageOutputStream)
 {
@@ -550,6 +553,41 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
     tmpSEIs.clear();
   }
 
+#if JVET_S0177_SCALABLE_NESTING_SEI
+  int VclAssociatedSeiList[VCL_ASSOCIATED_SEI_LIST_SIZE] = { 3, 19, 45, 129, 137, 144, 145, 147, 148, 149, 150, 153, 154, 155, 156, 168, 204 };
+
+  bool containBPorPTorDUIorSLI = false;
+  bool containNoBPorPTorDUIorSLI = false;
+
+  for (auto nestedsei : sei.m_nestedSEIs)
+  {
+    CHECK(nestedsei->payloadType() == SEI::FILLER_PAYLOAD || nestedsei->payloadType() == SEI::SCALABLE_NESTING, "An SEI message that has payloadType equal to filler payload or scalable nesting shall not be contained in a scalable nesting SEI message");
+
+    CHECK(nestedsei->payloadType() != SEI::FILLER_PAYLOAD && nestedsei->payloadType() != SEI::DECODED_PICTURE_HASH && nalUnitType != NAL_UNIT_PREFIX_SEI, "When a scalable nesting SEI message contains an SEI message that has payloadType not equal to filler payload or decoded picture harsh, the SEI NAL unit containing the scalable nesting SEI message shall have nal_unit_type equal to PREFIX_SEI_NUT");
+
+    CHECK(nestedsei->payloadType() == SEI::DECODED_PICTURE_HASH && nalUnitType != NAL_UNIT_SUFFIX_SEI, "When a scalable nesting SEI message contains an SEI message that has payloadType equal to decoded picture harsh, the SEI NAL unit containing the scalable nesting SEI message shall have nal_unit_type equal to SUFFIX_SEI_NUT");
+
+    CHECK(nestedsei->payloadType() == SEI::DECODED_PICTURE_HASH && !sei.m_snSubpicFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to decoded picture hash, the value of sn_subpic_flag shall be equal to 1");
+
+    CHECK(nestedsei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO && sei.m_snSubpicFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to SLI, the value of sn_subpic_flag shall be equal to 0");
+
+    for (int i = 0; i < VCL_ASSOCIATED_SEI_LIST_SIZE; i++)
+    {
+      CHECK(nestedsei->payloadType() == VclAssociatedSeiList[i] && sei.m_snOlsFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to a value in VclAssociatedSeiList, the value of sn_ols_flag shall be equal to 0");
+    }
+
+    if (nestedsei->payloadType() == SEI::BUFFERING_PERIOD || nestedsei->payloadType() == SEI::PICTURE_TIMING || nestedsei->payloadType() == SEI::DECODING_UNIT_INFO || nestedsei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
+    {
+      containBPorPTorDUIorSLI = true;
+      CHECK(!sei.m_snOlsFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to BP, PT, or DUI, or SLI, the value of sn_ols_flag shall be equal to 1");
+    }
+    if (!(nestedsei->payloadType() == SEI::BUFFERING_PERIOD || nestedsei->payloadType() == SEI::PICTURE_TIMING || nestedsei->payloadType() == SEI::DECODING_UNIT_INFO || nestedsei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO))
+    {
+      containNoBPorPTorDUIorSLI = true;
+    }
+  }
+  CHECK(containBPorPTorDUIorSLI && containNoBPorPTorDUIorSLI, "When a scalable nesting SEI message contains a BP, PT, DUI, or SLI SEI message, the scalable nesting SEI message shall not contain any other SEI message with payloadType not equal to BP, PT, DUI, or SLI");
+#else
   bool containBPorPTorDUI   = false;
   bool containNoBPorPTorDUI = false;
   for (auto nestedsei : sei.m_nestedSEIs)
@@ -564,6 +602,7 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
     }
   }
   CHECK(containBPorPTorDUI && containNoBPorPTorDUI, "Scalable Nesting SEI cannot contain timing-related SEI and none-timing-related SEIs at the same time");
+#endif
 
   if (decodedMessageOutputStream)
   {
