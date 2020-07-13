@@ -1150,6 +1150,10 @@ void DecLib::checkSeiInPictureUnit()
   // extract SEI messages from NAL units
   for (auto &sei : m_pictureSeiNalus)
   {
+#if JVET_S0178_GENERAL_SEI_CHECK
+    bool isFillerPayloadInOneSeiNalUnit = false;
+    bool isNonFillerPayloadInOneSeiNalUnit = false;
+#endif
     InputBitstream bs = sei->getBitstream();
 
     do
@@ -1177,8 +1181,23 @@ void DecLib::checkSeiInPictureUnit()
         payload[i] = (uint8_t)val;
       }
       seiList.push_back(std::tuple<int, uint32_t, uint8_t*>(payloadType, payloadSize, payload));
+
+#if JVET_S0178_GENERAL_SEI_CHECK
+      if (payloadType == SEI::FILLER_PAYLOAD)
+      {
+        isFillerPayloadInOneSeiNalUnit = true;
+      }
+      else
+      {
+        isNonFillerPayloadInOneSeiNalUnit = true;
+      }
+
+#endif
     }
     while (bs.getNumBitsLeft() > 8);
+#if JVET_S0178_GENERAL_SEI_CHECK
+    CHECK(isFillerPayloadInOneSeiNalUnit && isNonFillerPayloadInOneSeiNalUnit, "When an SEI NAL unit contains an SEI message with payloadType equal to filler payload, the SEI NAL unit shall not contain any other SEI message with payloadType not equal to filler payload");
+#endif
   }
 
   // count repeated messages in list
