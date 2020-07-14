@@ -100,10 +100,6 @@ EncAppCfg::EncAppCfg()
 , m_noPaletteConstraintFlag(false)
 , m_noActConstraintFlag(false)
 , m_noLmcsConstraintFlag(false)
-#if JVET_S0050_GCI
-, m_noExplicitScaleListConstraintFlag(false)
-, m_noVirtualBoundaryConstraintFlag(false)
-#endif
 , m_bNoQtbttDualTreeIntraConstraintFlag(false)
 , m_noPartitionConstraintsOverrideConstraintFlag(false)
 , m_bNoSaoConstraintFlag(false)
@@ -835,6 +831,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("OneSlicePerPicConstraintFlag",                    m_oneSlicePerPicConstraintFlag,                   false, "Indicate that each picture shall contain only one slice")
   ("OneSubpicPerPicConstraintFlag",                   m_oneSubpicPerPicConstraintFlag,                  false, "Indicate that each picture shall contain only one subpicture")
   ("FrameOnly",                                       m_frameOnlyConstraintFlag,                        false, "Indicate that the bitstream contains only frames")
+#if JVET_S0050_GCI
+  ("ExplicitScaleListConstraintFlag",                 m_noExplicitScaleListConstraintFlag,              false, "Indicate that explicit scaling list is deactivated")
+  ("VirtualBoundaryConstraintFlag",                   m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
+#endif
   ("CTUSize",                                         m_uiCTUSize,                                       128u, "CTUSize (specifies the CTU size if QTBT is on) [default: 128]")
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")
   ("SubPicInfoPresentFlag",                           m_subPicInfoPresentFlag,                          false, "equal to 1 specifies that subpicture parameters are present in in the SPS RBSP syntax")

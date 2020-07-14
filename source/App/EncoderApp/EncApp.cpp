@@ -305,8 +305,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setNoActConstraintFlag                               ( !m_useColorTrans );
   m_cEncLib.setNoLmcsConstraintFlag                              ( !m_lmcsEnabled );
 #if JVET_S0050_GCI
-  m_cEncLib.setNoExplicitScaleListConstraintFlag                 ( m_useScalingListId == SCALING_LIST_OFF );
-  m_cEncLib.setNoVirtualBoundaryConstraintFlag                   ( !m_virtualBoundariesEnabledFlag );
+  m_cEncLib.setNoExplicitScaleListConstraintFlag                 ( m_noExplicitScaleListConstraintFlag );
+  m_cEncLib.setNoVirtualBoundaryConstraintFlag                   ( m_noVirtualBoundaryConstraintFlag );
 #endif
 
   //====== Coding Structure ========
