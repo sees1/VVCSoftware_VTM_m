@@ -1384,7 +1384,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       }
     }
 #if JVET_S0063_VPS_SIGNALLING
-    CHECK(pcVPS->getNumPtls() - 1 < pcVPS->getTotalNumOLSs(), "vps_num_ptls_minus1 shall be less than TotalNumOlss");
+    CHECK(pcVPS->getNumPtls() - 1 >= pcVPS->getTotalNumOLSs(), "vps_num_ptls_minus1 shall be less than TotalNumOlss");
     WRITE_CODE(pcVPS->getNumPtls() - 1, 8, "vps_num_ptls_minus1");
 #endif
   }
