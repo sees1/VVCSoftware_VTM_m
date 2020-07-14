@@ -832,6 +832,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")
   ("SubPicInfoPresentFlag",                           m_subPicInfoPresentFlag,                          false, "equal to 1 specifies that subpicture parameters are present in in the SPS RBSP syntax")
   ("NumSubPics",                                      m_numSubPics,                                        0u, "specifies the number of subpictures")
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  ("SubPicSameSizeFlag",                              m_subPicSameSizeFlag,                             false, "equal to 1 specifies that all subpictures in the CLVS have the same width specified by sps_subpic_width_minus1[ 0 ] and the same height specified by sps_subpic_height_minus1[ 0 ].")
+#endif
   ("SubPicCtuTopLeftX",                               cfg_subPicCtuTopLeftX,            cfg_subPicCtuTopLeftX, "specifies horizontal position of top left CTU of i-th subpicture in unit of CtbSizeY")
   ("SubPicCtuTopLeftY",                               cfg_subPicCtuTopLeftY,            cfg_subPicCtuTopLeftY, "specifies vertical position of top left CTU of i-th subpicture in unit of CtbSizeY")
   ("SubPicWidth",                                     cfg_subPicWidth,                        cfg_subPicWidth, "specifies the width of the i-th subpicture in units of CtbSizeY")
@@ -1566,11 +1569,28 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
   if ( m_subPicInfoPresentFlag )
   {
-    CHECK( m_numSubPics > MAX_NUM_SUB_PICS || m_numSubPics < 1, "Number of subpicture must be within 1 to 2^16" );
+    CHECK( m_numSubPics > MAX_NUM_SUB_PICS || m_numSubPics < 1, "Number of subpicture must be within 1 to 2^16" )
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+    if (!m_subPicSameSizeFlag)
+    {
+      CHECK(cfg_subPicCtuTopLeftX.values.size() != m_numSubPics, "Number of SubPicCtuTopLeftX values must be equal to NumSubPics");
+      CHECK(cfg_subPicCtuTopLeftY.values.size() != m_numSubPics, "Number of SubPicCtuTopLeftY values must be equal to NumSubPics");
+      CHECK(cfg_subPicWidth.values.size() != m_numSubPics, "Number of SubPicWidth values must be equal to NumSubPics");
+      CHECK(cfg_subPicHeight.values.size() != m_numSubPics, "Number of SubPicHeight values must be equal to NumSubPics");
+    }
+    else
+    {
+      CHECK(cfg_subPicCtuTopLeftX.values.size() != 0, "Number of SubPicCtuTopLeftX values must be equal to 0");
+      CHECK(cfg_subPicCtuTopLeftY.values.size() != 0, "Number of SubPicCtuTopLeftY values must be equal to 0");
+      CHECK(cfg_subPicWidth.values.size() != 1, "Number of SubPicWidth values must be equal to 1");
+      CHECK(cfg_subPicHeight.values.size() != 1, "Number of SubPicHeight values must be equal to 1");
+    }
+#else
     CHECK( cfg_subPicCtuTopLeftX.values.size() != m_numSubPics, "Number of SubPicCtuTopLeftX values must be equal to NumSubPics");
     CHECK( cfg_subPicCtuTopLeftY.values.size() != m_numSubPics, "Number of SubPicCtuTopLeftY values must be equal to NumSubPics");
     CHECK( cfg_subPicWidth.values.size() != m_numSubPics, "Number of SubPicWidth values must be equal to NumSubPics");
     CHECK( cfg_subPicHeight.values.size() != m_numSubPics, "Number of SubPicHeight values must be equal to NumSubPics");
+#endif
     CHECK( cfg_subPicTreatedAsPicFlag.values.size() != m_numSubPics, "Number of SubPicTreatedAsPicFlag values must be equal to NumSubPics");
     CHECK( cfg_loopFilterAcrossSubpicEnabledFlag.values.size() != m_numSubPics, "Number of LoopFilterAcrossSubpicEnabledFlag values must be equal to NumSubPics");
     if (m_subPicIdMappingExplicitlySignalledFlag)
@@ -1590,11 +1610,31 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
         m_subPicId[i]                   = cfg_subPicId.values[i];
       }
     }
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+    uint32_t tmpWidthVal = (m_iSourceWidth + m_uiCTUSize - 1) / m_uiCTUSize;
+    uint32_t tmpHeightVal = (m_iSourceHeight + m_uiCTUSize - 1) / m_uiCTUSize;
+    if (!m_subPicSameSizeFlag)
+    {
+      for (int i = 0; i < m_numSubPics; i++)
+      {
+        CHECK(m_subPicCtuTopLeftX[i] + m_subPicWidth[i] > tmpWidthVal, "Subpicture must not exceed picture boundary");
+        CHECK(m_subPicCtuTopLeftY[i] + m_subPicHeight[i] > tmpHeightVal, "Subpicture must not exceed picture boundary");
+      }
+    }
+    else
+    {
+      uint32_t numSubpicCols = tmpWidthVal / m_subPicWidth[0];
+      CHECK(tmpWidthVal % m_subPicWidth[0] != 0, "subpic_width_minus1[0] is invalid.");
+      CHECK(tmpHeightVal % m_subPicHeight[0] != 0, "subpic_height_minus1[0] is invalid.");
+      CHECK(numSubpicCols * (tmpHeightVal / m_subPicHeight[0]) != m_numSubPics, "when sps_subpic_same_size_flag is equal to, sps_num_subpics_minus1 is invalid");
+    }
+#else
     for(int i = 0; i < m_numSubPics; i++)
     {
       CHECK(m_subPicCtuTopLeftX[i] + m_subPicWidth[i] > (m_iSourceWidth + m_uiCTUSize - 1) / m_uiCTUSize, "Subpicture must not exceed picture boundary");
       CHECK(m_subPicCtuTopLeftY[i] + m_subPicHeight[i] > (m_iSourceHeight + m_uiCTUSize - 1) / m_uiCTUSize, "Subpicture must not exceed picture boundary");
     }
+#endif
     // automatically determine subpicture ID lenght in case it is not specified
     if (m_subPicIdLen == 0)
     {
@@ -3593,14 +3633,29 @@ void EncAppCfg::xPrintParameter()
   if (m_subPicInfoPresentFlag)
   {
     msg(DETAILS, "number of subpictures                            : %d\n", m_numSubPics);
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+    msg(DETAILS, "subpicture size same flag                        : %d\n", m_subPicSameSizeFlag);
+    if (m_subPicSameSizeFlag)
+      msg(DETAILS, "[0]th subpictures size                           :[%d %d]\n", m_subPicWidth[0], m_subPicHeight[0]);
+    for (int i = 0; i < m_numSubPics; i++)
+    {
+      if (!m_subPicSameSizeFlag)
+      {
+        msg(DETAILS, "[%d]th subpictures location                           :[%d %d]\n", i, m_subPicCtuTopLeftX[i], m_subPicCtuTopLeftY[i]);
+        msg(DETAILS, "[%d]th subpictures size                           :[%d %d]\n", i, m_subPicWidth[i], m_subPicHeight[i]);
+      }
+      msg(DETAILS, "[%d]th subpictures treated as picture flag                           :%d\n", i, m_subPicTreatedAsPicFlag[i]);
+      msg(DETAILS, "loop filter cross [%d]th subpictures enabled flag                           :%d\n", i, m_loopFilterAcrossSubpicEnabledFlag[i]);
+    }
+#else
     for (int i = 0; i < m_numSubPics; i++)
     {
       msg(DETAILS, "[%d]th subpictures location                           :[%d %d]\n", i, m_subPicCtuTopLeftX[i], m_subPicCtuTopLeftY[i]);
       msg(DETAILS, "[%d]th subpictures size                           :[%d %d]\n", i, m_subPicWidth[i], m_subPicHeight[i]);
       msg(DETAILS, "[%d]th subpictures treated as picture flag                           :%d\n", i, m_subPicTreatedAsPicFlag[i]);
       msg(DETAILS, "loop filter cross [%d]th subpictures enabled flag                           :%d\n", i, m_loopFilterAcrossSubpicEnabledFlag[i]);
-
     }
+#endif
   }
 
   msg(DETAILS, "subpicture ID present flag                            : %d\n", m_subPicIdMappingExplicitlySignalledFlag);

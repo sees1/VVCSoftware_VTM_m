@@ -1371,10 +1371,32 @@ void EncLib::xInitSPS( SPS& sps )
   if (m_subPicInfoPresentFlag)
   {
     sps.setNumSubPics(m_numSubPics);
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+    sps.setSubPicSameSizeFlag(m_subPicSameSizeFlag);
+    if (m_subPicSameSizeFlag)
+    {
+      uint32_t numSubpicCols = (m_iSourceWidth + m_CTUSize - 1) / m_CTUSize / m_subPicWidth[0];
+      for (unsigned int i = 0; i < m_numSubPics; i++)
+      {
+        sps.setSubPicCtuTopLeftX(i, (i % numSubpicCols) * m_subPicWidth[0]);
+        sps.setSubPicCtuTopLeftY(i, (i / numSubpicCols) * m_subPicHeight[0]);
+        sps.setSubPicWidth(i, m_subPicWidth[0]);
+        sps.setSubPicHeight(i, m_subPicHeight[0]);
+      }
+    }
+    else
+    {
+      sps.setSubPicCtuTopLeftX(m_subPicCtuTopLeftX);
+      sps.setSubPicCtuTopLeftY(m_subPicCtuTopLeftY);
+      sps.setSubPicWidth(m_subPicWidth);
+      sps.setSubPicHeight(m_subPicHeight);
+    }
+#else
     sps.setSubPicCtuTopLeftX(m_subPicCtuTopLeftX);
     sps.setSubPicCtuTopLeftY(m_subPicCtuTopLeftY);
     sps.setSubPicWidth(m_subPicWidth);
     sps.setSubPicHeight(m_subPicHeight);
+#endif
     sps.setSubPicTreatedAsPicFlag(m_subPicTreatedAsPicFlag);
     sps.setLoopFilterAcrossSubpicEnabledFlag(m_loopFilterAcrossSubpicEnabledFlag);
     sps.setSubPicIdLen(m_subPicIdLen);

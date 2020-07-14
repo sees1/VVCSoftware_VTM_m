@@ -1288,6 +1288,9 @@ private:
   bool                  m_subPicInfoPresentFlag;                // indicates the presence of sub-picture info
   uint32_t              m_numSubPics;                        //!< number of sub-pictures used
   bool                  m_independentSubPicsFlag;
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  bool                  m_subPicSameSizeFlag;
+#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;
@@ -1481,6 +1484,10 @@ public:
                                                                                             }
   void      setIndependentSubPicsFlag(bool b)                                                { m_independentSubPicsFlag = b;                    }
   bool      getIndependentSubPicsFlag() const                                                { return m_independentSubPicsFlag;                 }
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  void      setSubPicSameSizeFlag(bool b)                                                   { m_subPicSameSizeFlag = b;                       }
+  bool      getSubPicSameSizeFlag() const                                                   { return m_subPicSameSizeFlag;                    }
+#endif
   uint32_t  getNumSubPics( ) const                                                          { return  m_numSubPics;                           }
   void      setSubPicCtuTopLeftX( int i, uint32_t u )                                       { m_subPicCtuTopLeftX[i] = u;                     }
   uint32_t  getSubPicCtuTopLeftX( int i ) const                                             { return  m_subPicCtuTopLeftX[i];                 }

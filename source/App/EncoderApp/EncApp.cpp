@@ -420,6 +420,9 @@ void EncApp::xInitLibCfg()
   if(m_subPicInfoPresentFlag)
   {
     m_cEncLib.setNumSubPics                                      ( m_numSubPics );
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+    m_cEncLib.setSubPicSameSizeFlag                              ( m_subPicSameSizeFlag );
+#endif
     m_cEncLib.setSubPicCtuTopLeftX                               ( m_subPicCtuTopLeftX );
     m_cEncLib.setSubPicCtuTopLeftY                               ( m_subPicCtuTopLeftY );
     m_cEncLib.setSubPicWidth                                     ( m_subPicWidth );

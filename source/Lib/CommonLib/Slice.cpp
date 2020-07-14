@@ -2701,6 +2701,9 @@ SPS::SPS()
 , m_subPicInfoPresentFlag     (false)
 , m_numSubPics(1)
 , m_independentSubPicsFlag     (false)
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+, m_subPicSameSizeFlag        (false)
+#endif
 , m_subPicIdMappingExplicitlySignalledFlag ( false )
 , m_subPicIdMappingInSpsFlag ( false )
 , m_subPicIdLen(16)

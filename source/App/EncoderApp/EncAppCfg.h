@@ -278,6 +278,9 @@ protected:
   unsigned  m_uiCTUSize;
   bool m_subPicInfoPresentFlag;
   unsigned m_numSubPics;
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  bool m_subPicSameSizeFlag;
+#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;

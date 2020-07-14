@@ -278,6 +278,9 @@ protected:
   unsigned  m_CTUSize;
   bool                  m_subPicInfoPresentFlag;
   uint32_t              m_numSubPics;
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  bool                  m_subPicSameSizeFlag;
+#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;
@@ -967,17 +970,26 @@ public:
                                                                                       m_loopFilterAcrossSubpicEnabledFlag.resize(m_numSubPics);
                                                                                       m_subPicId.resize(m_numSubPics);
                                                                                     }
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  void      setSubPicSameSizeFlag                       (bool b)                    { m_subPicSameSizeFlag = b; }
+#endif
   void      setSubPicCtuTopLeftX                        (uint32_t u, int i)         { m_subPicCtuTopLeftX[i] = u; }
   void      setSubPicCtuTopLeftY                        (uint32_t u, int i)         { m_subPicCtuTopLeftY[i] = u; }
   void      setSubPicWidth                              (uint32_t u, int i)         { m_subPicWidth[i] = u; }
   void      setSubPicHeight                             (uint32_t u, int i)         { m_subPicHeight[i] = u; }
   void      setSubPicTreatedAsPicFlag                   (bool b, int i)             { m_subPicTreatedAsPicFlag[i] = b; }
   void      setLoopFilterAcrossSubpicEnabledFlag        (bool b, int i)             { m_loopFilterAcrossSubpicEnabledFlag[i] = b; }
-
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  void      setSubPicCtuTopLeftX                        (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 0 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 0(subPicSameSize=1)"); m_subPicCtuTopLeftX = v; }
+  void      setSubPicCtuTopLeftY                        (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 0 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 0(subPicSameSize=1)"); m_subPicCtuTopLeftY = v; }
+  void      setSubPicWidth                              (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 1 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 1(subPicSameSize=1)"); m_subPicWidth = v; }
+  void      setSubPicHeight                             (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 1 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 1(subPicSameSize=1)"); m_subPicHeight = v; }
+#else
   void      setSubPicCtuTopLeftX                        (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicCtuTopLeftX = v; }
   void      setSubPicCtuTopLeftY                        (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicCtuTopLeftY = v; }
   void      setSubPicWidth                              (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicWidth = v; }
   void      setSubPicHeight                             (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicHeight = v; }
+#endif
   void      setSubPicTreatedAsPicFlag                   (const std::vector<bool> &v)       { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicTreatedAsPicFlag = v; }
   void      setLoopFilterAcrossSubpicEnabledFlag        (const std::vector<bool> &v)       { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_loopFilterAcrossSubpicEnabledFlag = v; }
 
@@ -988,6 +1000,9 @@ public:
   void      setSubPicId                                 (const std::vector<uint16_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics"); m_subPicId = v; }
 
   bool      getSubPicInfoPresentFlag                    ()                          { return m_subPicInfoPresentFlag; }
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  bool      getSubPicSameSizeFlag                       ()                          { return m_subPicSameSizeFlag; }
+#endif
   uint32_t  getNumSubPics                               ()                          { return m_numSubPics; }
   uint32_t  getSubPicCtuTopLeftX                        (int i)                     { return m_subPicCtuTopLeftX[i]; }
   uint32_t  getSubPicCtuTopLeftY                        (int i)                     { return m_subPicCtuTopLeftY[i]; }

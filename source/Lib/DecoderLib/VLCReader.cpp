@@ -1365,12 +1365,85 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
       pcSPS->setSubPicHeight( 0, ( pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1 ) >> floorLog2( pcSPS->getCTUSize() ) );
 
       pcSPS->setIndependentSubPicsFlag(1);
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+      pcSPS->setSubPicSameSizeFlag(0);
+#endif
 
       pcSPS->setSubPicTreatedAsPicFlag(0, 1);
       pcSPS->setLoopFilterAcrossSubpicEnabledFlag(0, 0);
     }
     else
     {
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+      READ_FLAG(uiCode, "sps_independent_subpics_flag"); pcSPS->setIndependentSubPicsFlag(uiCode != 0);
+      READ_FLAG(uiCode, "sps_subpic_same_size_flag"); pcSPS->setSubPicSameSizeFlag(uiCode);
+      uint32_t tmpWidthVal = (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
+      uint32_t tmpHeightVal = (pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
+      uint32_t numSubpicCols = 1;
+      for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
+      {
+        if (!pcSPS->getSubPicSameSizeFlag() || picIdx == 0)
+        {
+          if ((picIdx > 0) && (pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize()))
+          {
+            READ_CODE(ceilLog2(tmpWidthVal), uiCode, "subpic_ctu_top_left_x[ i ]");
+            pcSPS->setSubPicCtuTopLeftX(picIdx, uiCode);
+          }
+          else
+          {
+            pcSPS->setSubPicCtuTopLeftX(picIdx, 0);
+          }
+          if ((picIdx > 0) && (pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize()))
+          {
+            READ_CODE(ceilLog2(tmpHeightVal), uiCode, "subpic_ctu_top_left_y[ i ]");
+            pcSPS->setSubPicCtuTopLeftY(picIdx, uiCode);
+          }
+          else
+          {
+            pcSPS->setSubPicCtuTopLeftY(picIdx, 0);
+          }
+          if (picIdx <pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize())
+          {
+            READ_CODE(ceilLog2(tmpWidthVal), uiCode, "subpic_width_minus1[ i ]");
+            pcSPS->setSubPicWidth(picIdx, uiCode + 1);
+          }
+          else
+          {
+            pcSPS->setSubPicWidth(picIdx, tmpWidthVal - pcSPS->getSubPicCtuTopLeftX(picIdx));
+          }
+          if (picIdx <pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize())
+          {
+            READ_CODE(ceilLog2(tmpHeightVal), uiCode, "subpic_height_minus1[ i ]");
+            pcSPS->setSubPicHeight(picIdx, uiCode + 1);
+          }
+          else
+          {
+            pcSPS->setSubPicHeight(picIdx, tmpHeightVal - pcSPS->getSubPicCtuTopLeftY(picIdx));
+          }
+          if (pcSPS->getSubPicSameSizeFlag())
+          {
+            numSubpicCols = tmpWidthVal / pcSPS->getSubPicWidth(0);
+            CHECK(!(tmpWidthVal % pcSPS->getSubPicWidth(0) == 0), "subpic_width_minus1[0] is invalid.");
+            CHECK(!(tmpHeightVal % pcSPS->getSubPicHeight(0) == 0), "subpic_height_minus1[0] is invalid.");
+            CHECK(!(numSubpicCols * (tmpHeightVal / pcSPS->getSubPicHeight(0)) == pcSPS->getNumSubPics()), "when sps_subpic_same_size_flag is equal to, sps_num_subpics_minus1 is invalid");
+          }
+        }
+        else
+        {
+          pcSPS->setSubPicCtuTopLeftX(picIdx, (picIdx % numSubpicCols) * pcSPS->getSubPicWidth(0));
+          pcSPS->setSubPicCtuTopLeftY(picIdx, (picIdx / numSubpicCols) * pcSPS->getSubPicHeight(0));
+          pcSPS->setSubPicWidth(picIdx, pcSPS->getSubPicWidth(0));
+          pcSPS->setSubPicHeight(picIdx, pcSPS->getSubPicHeight(0));
+        }
+        if (!pcSPS->getIndependentSubPicsFlag())
+        {
+          READ_FLAG(uiCode, "subpic_treated_as_pic_flag[ i ]");
+          pcSPS->setSubPicTreatedAsPicFlag(picIdx, uiCode);
+          READ_FLAG(uiCode, "loop_filter_across_subpic_enabled_flag[ i ]");
+          pcSPS->setLoopFilterAcrossSubpicEnabledFlag(picIdx, uiCode);
+        }
+      }
+#else
     READ_FLAG(uiCode, "sps_independent_subpics_flag"); pcSPS->setIndependentSubPicsFlag(uiCode != 0);
     for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
     {
@@ -1418,6 +1491,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
         pcSPS->setLoopFilterAcrossSubpicEnabledFlag(picIdx, uiCode);
       }
     }
+#endif
     }
 
     READ_UVLC( uiCode, "sps_subpic_id_len_minus1" );                       pcSPS->setSubPicIdLen( uiCode + 1 );

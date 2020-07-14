@@ -816,6 +816,37 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(pcSPS->getNumSubPics() - 1, "sps_num_subpics_minus1");
     if( pcSPS->getNumSubPics() > 1 )
     {
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+      WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
+      WRITE_FLAG(pcSPS->getSubPicSameSizeFlag(), "sps_subpic_same_size_flag");
+      for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
+      {
+        if (!pcSPS->getSubPicSameSizeFlag() || picIdx == 0)
+        {
+          if ((picIdx > 0) && (pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize()))
+          {
+            WRITE_CODE(pcSPS->getSubPicCtuTopLeftX(picIdx), ceilLog2((pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_ctu_top_left_x[ i ]");
+          }
+          if ((picIdx > 0) && (pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize()))
+          {
+            WRITE_CODE(pcSPS->getSubPicCtuTopLeftY(picIdx), ceilLog2((pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_ctu_top_left_y[ i ]");
+          }
+          if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize())
+          {
+            WRITE_CODE(pcSPS->getSubPicWidth(picIdx) - 1, ceilLog2((pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_width_minus1[ i ]");
+          }
+          if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize())
+          {
+            WRITE_CODE(pcSPS->getSubPicHeight(picIdx) - 1, ceilLog2((pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_height_minus1[ i ]");
+          }
+          if (!pcSPS->getIndependentSubPicsFlag())
+          {
+            WRITE_FLAG(pcSPS->getSubPicTreatedAsPicFlag(picIdx), "subpic_treated_as_pic_flag[ i ]");
+            WRITE_FLAG(pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx), "loop_filter_across_subpic_enabled_flag[ i ]");
+          }
+        }
+      }
+#else
     WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
     for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
     {
@@ -841,6 +872,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
         WRITE_FLAG( pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx),  "loop_filter_across_subpic_enabled_flag[ i ]" );
       }
     }
+#endif
     }
 
     CHECK(pcSPS->getSubPicIdLen() < 1, "SPS: SubPicIdLen cannot be less than 1");

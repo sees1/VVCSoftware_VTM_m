@@ -53,7 +53,7 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-
+#define JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT       1 // JVET-S0071 : shortcut when all subpictures have the same size
 
 //########### place macros to be be kept below this line ###############
 #define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT                 1 // JVET-R0351: high bit depth coding support (syntax changes, no mathematical differences for CTCs)
@@ -109,7 +109,7 @@ typedef std::pair<int, int>  TrCost;
 // ====================================================================================================================
 
 #ifndef ENABLE_TRACING
-#define ENABLE_TRACING                                    0 // DISABLE by default (enable only when debugging, requires 15% run-time in decoding) -- see documentation in 'doc/DTrace for NextSoftware.pdf'
+#define ENABLE_TRACING                                    1 // DISABLE by default (enable only when debugging, requires 15% run-time in decoding) -- see documentation in 'doc/DTrace for NextSoftware.pdf'
 #endif
 
 #if ENABLE_TRACING
