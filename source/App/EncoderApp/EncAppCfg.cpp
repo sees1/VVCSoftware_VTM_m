@@ -2563,6 +2563,7 @@ bool EncAppCfg::xCheckParameter()
 #endif
 #if SHARP_LUMA_DELTA_QP
   xConfirmPara( m_lumaLevelToDeltaQPMapping.mode && m_uiDeltaQpRD > 0,                      "Luma-level-based Delta QP cannot be used together with slice level multiple-QP optimization\n" );
+  xConfirmPara( m_lumaLevelToDeltaQPMapping.mode && m_RCEnableRateControl,                  "Luma-level-based Delta QP cannot be used together with rate control\n" );
 #endif
   if (m_lumaLevelToDeltaQPMapping.mode && m_lmcsEnabled)
   {
