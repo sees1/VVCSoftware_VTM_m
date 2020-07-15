@@ -657,9 +657,9 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
     sei->m_refLevelIdc[level].resize(sei->m_sliSublayerInfoPresentFlag ? sei->m_sliMaxSublayers : 1);
   }
 
-  for (int k = sei->m_sliSublayerInfoPresentFlag ? 0 : sei->m_sliMaxSublayers - 1; k < sei->m_sliMaxSublayers; k++)
+  for (int k = sei->m_sliSublayerInfoPresentFlag ? 0 : sei->m_sliMaxSublayers - 1, cnt = 0; k < sei->m_sliMaxSublayers; k++)
   {
-    for (int level = 0, cnt = 0; level < sei->m_numRefLevels; level++)
+    for (int level = 0; level < sei->m_numRefLevels; level++)
     {
       sei->m_refLevelIdc[level][k] = cfgSubPicLevel.m_refLevels[cnt++];
     }
@@ -674,7 +674,7 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
     sei->m_numSubpics = cfgSubPicLevel.m_numSubpictures;
     sei->m_refLevelFraction.resize(sei->m_numRefLevels);
 #if JVET_S0176_SLI_SEI
-    for (int level = 0, cnt = 0; level < sei->m_numRefLevels; level++)
+    for (int level = 0; level < sei->m_numRefLevels; level++)
     {
       sei->m_refLevelFraction[level].resize(sei->m_numSubpics);
       for (int subpic = 0; subpic < sei->m_numSubpics; subpic++)
