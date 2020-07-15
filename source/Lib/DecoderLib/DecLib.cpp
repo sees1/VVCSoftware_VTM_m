@@ -958,8 +958,7 @@ void DecLib::checkLayerIdIncludedInCvss()
     return;
   }
 
-  if (m_audIrapOrGdrAuFlag &&
-    (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL))
+  if (m_audIrapOrGdrAuFlag && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL))
   {
     // store layerIDs in the first AU
     m_firstAccessUnitPicInfo.assign(m_accessUnitPicInfo.begin(), m_accessUnitPicInfo.end());

@@ -648,6 +648,10 @@ public:
   , m_explicitFractionPresentFlag (false)
   , m_cbrConstraintFlag (false)
   , m_numSubpics(0)
+#if JVET_S0176_SLI_SEI
+  , m_sliMaxSublayers(1)
+  , m_sliSublayerInfoPresentFlag(false)
+#endif
   {}
   virtual ~SEISubpicureLevelInfo() {}
 
@@ -655,8 +659,15 @@ public:
   bool      m_explicitFractionPresentFlag;
   bool      m_cbrConstraintFlag;
   int       m_numSubpics;
+#if JVET_S0176_SLI_SEI
+  int       m_sliMaxSublayers;
+  bool      m_sliSublayerInfoPresentFlag;
+  std::vector<std::vector<Level::Name>>      m_refLevelIdc;
+  std::vector<std::vector<std::vector<int>>> m_refLevelFraction;
+#else
   std::vector<Level::Name>      m_refLevelIdc;
   std::vector<std::vector<int>> m_refLevelFraction;
+#endif
 };
 
 

@@ -1293,6 +1293,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEISubpicLevelInfoRefLevels",                     cfg_sliRefLevels,                                  cfg_sliRefLevels, "List of reference levels for Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoExplicitFraction",              m_cfgSubpictureLevelInfoSEI.m_explicitFraction,    false,            "Enable sending of explicit fractions in Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoNumSubpics",                    m_cfgSubpictureLevelInfoSEI.m_numSubpictures,      1,                "Number of subpictures for Subpicture Level Information SEI messages")
+#if JVET_S0176_SLI_SEI
+  ("SEISubpicLevelInfoMaxSublayers",                  m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers,               1,                    "Number of sublayers for Subpicture Level Information SEI messages")
+  ("SEISubpicLevelInfoSublayerInfoPresentFlag",       m_cfgSubpictureLevelInfoSEI.m_sliSublayerInfoPresentFlag,    false,                "Enable sending of level information for all sublayers in Subpicture Level Information SEI messages")
+#endif
   ("SEISubpicLevelInfoRefLevelFractions",             cfg_sliFractions,                                  cfg_sliFractions, "List of fractions for Subpicture Level Information SEI messages")
   ("SEISampleAspectRatioInfo",                        m_sampleAspectRatioInfoSEIEnabled,        false, "Control generation of Sample Aspect Ratio Information SEI messages")
   ("SEISARICancelFlag",                               m_sariCancelFlag,                         false, "Indicates that Sample Aspect Ratio Information SEI message cancels the persistence or follows")
@@ -1684,11 +1688,19 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   if (m_cfgSubpictureLevelInfoSEI.m_enabled)
   {
     CHECK (m_numSubPics != m_cfgSubpictureLevelInfoSEI.m_numSubpictures, "NumSubPics must be equal to SEISubpicLevelInfoNumSubpics" );
+#if JVET_S0176_SLI_SEI
+    CHECK (m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers > m_maxSublayers, "SEISubpicLevelInfoMaxSublayers must be no greater than vps_max_sublayers");
+#endif
     if (m_cfgSubpictureLevelInfoSEI.m_explicitFraction)
     {
       m_cfgSubpictureLevelInfoSEI.m_fractions = cfg_sliFractions.values;
       m_cfgSubpictureLevelInfoSEI.m_refLevels = cfg_sliRefLevels.values;
+#if JVET_S0176_SLI_SEI
+      CHECK (cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures * m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers != cfg_sliFractions.values.size(),
+        "Number of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels times the number of sublayers");
+#else
       CHECK (cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures != cfg_sliFractions.values.size(), "Number of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels.");
+#endif
     }
   }
 
