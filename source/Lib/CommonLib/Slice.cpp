@@ -3346,6 +3346,24 @@ void PPS::initSubPic(const SPS &sps)
 
   CHECK(getNumSubPics() > MAX_NUM_SUB_PICS, "Number of sub-pictures in picture exceeds valid range");
   m_subPics.resize(getNumSubPics());
+
+#if JVET_R0093_SUBPICS_AND_CONF_WINDOW
+  // Check that no subpicture is specified outside of the conformance cropping window
+  for(int i = 0; i < sps.getNumSubPics(); i++)
+  {
+    CHECK( (sps.getSubPicCtuTopLeftX(i) * sps.getCTUSize()) >=
+          (sps.getMaxPicWidthInLumaSamples() - sps.getConformanceWindow().getWindowRightOffset() * SPS::getWinUnitX(sps.getChromaFormatIdc())),
+          "No subpicture can be located completely outside of the conformance cropping window");
+    CHECK( ((sps.getSubPicCtuTopLeftX(i) + sps.getSubPicWidth(i)) * sps.getCTUSize()) <= (sps.getConformanceWindow().getWindowLeftOffset() * SPS::getWinUnitX(sps.getChromaFormatIdc())),
+          "No subpicture can be located completely outside of the conformance cropping window" );
+    CHECK( (sps.getSubPicCtuTopLeftY(i) * sps.getCTUSize()) >=
+          (sps.getMaxPicHeightInLumaSamples()  - sps.getConformanceWindow().getWindowBottomOffset() * SPS::getWinUnitY(sps.getChromaFormatIdc())),
+          "No subpicture can be located completely outside of the conformance cropping window");
+    CHECK( ((sps.getSubPicCtuTopLeftY(i) + sps.getSubPicHeight(i)) * sps.getCTUSize()) <= (sps.getConformanceWindow().getWindowTopOffset() * SPS::getWinUnitY(sps.getChromaFormatIdc())),
+          "No subpicture can be located completely outside of the conformance cropping window");
+  }
+#endif
+
   // m_ctuSize,  m_picWidthInCtu, and m_picHeightInCtu might not be initialized yet.
   if (m_ctuSize == 0 || m_picWidthInCtu == 0 || m_picHeightInCtu == 0)
   {

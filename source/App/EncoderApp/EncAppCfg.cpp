@@ -1866,6 +1866,22 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     }
   }
 
+#if JVET_R0093_SUBPICS_AND_CONF_WINDOW
+  if( m_conformanceWindowMode > 0 && m_subPicInfoPresentFlag )
+  {
+    for(int i = 0; i < m_numSubPics; i++)
+    {
+      CHECK( (m_subPicCtuTopLeftX[i] * m_uiCTUSize) >= (m_iSourceWidth - m_confWinRight * SPS::getWinUnitX(m_chromaFormatIDC)),
+          "No subpicture can be located completely outside of the conformance cropping window");
+      CHECK( ((m_subPicCtuTopLeftX[i] + m_subPicWidth[i]) * m_uiCTUSize) <= (m_confWinLeft * SPS::getWinUnitX(m_chromaFormatIDC)),
+	  "No subpicture can be located completely outside of the conformance cropping window" );
+      CHECK( (m_subPicCtuTopLeftY[i] * m_uiCTUSize) >= (m_iSourceHeight  - m_confWinBottom * SPS::getWinUnitY(m_chromaFormatIDC)),
+          "No subpicture can be located completely outside of the conformance cropping window");
+      CHECK( ((m_subPicCtuTopLeftY[i] + m_subPicHeight[i]) * m_uiCTUSize) <= (m_confWinTop * SPS::getWinUnitY(m_chromaFormatIDC)),
+          "No subpicture can be located completely outside of the conformance cropping window");
+    }
+  }
+#endif
 
   if (tmpDecodedPictureHashSEIMappedType<0 || tmpDecodedPictureHashSEIMappedType>=int(NUMBER_OF_HASHTYPES))
   {
