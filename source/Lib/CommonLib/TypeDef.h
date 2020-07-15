@@ -880,7 +880,7 @@ enum SPSExtensionFlagIndex
   NUM_SPS_EXTENSION_FLAGS = 8
 };
 
-#ifndef PPS_EXTENSION_BUGFIX
+/*
 enum PPSExtensionFlagIndex
 {
   PPS_EXT__REXT           = 0,
@@ -888,7 +888,7 @@ enum PPSExtensionFlagIndex
 //PPS_EXT__SHVC           = 2, //for use in future versions
   NUM_PPS_EXTENSION_FLAGS = 8
 };
-#endif
+*/
 
 // TODO: Existing names used for the different NAL unit types can be altered to better reflect the names in the spec.
 //       However, the names in the spec are not yet stable at this point. Once the names are stable, a cleanup
