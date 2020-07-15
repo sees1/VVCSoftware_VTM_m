@@ -4484,7 +4484,8 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "no_aps_constraint_flag");                     cinfo->setNoApsConstraintFlag(symbol > 0 ? true : false);
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     READ_CODE(8, symbol, "gci_num_reserved_bits");
-    for (int i = 0; i < symbol; i++)
+    uint32_t const numReservedBits = symbol;
+    for (int i = 0; i < numReservedBits; i++)
     {
       READ_FLAG(symbol, "gci_reserved_zero_bit");                    CHECK(symbol != 0, "gci_reserved_zero_bit not equal to zero");
     }
