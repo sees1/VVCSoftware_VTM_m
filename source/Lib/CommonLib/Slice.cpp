@@ -656,9 +656,9 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 
   for (int i = 0; i < numEntriesL0; i++)
   {
-    if (m_pRPL0->isInterLayerRefPic(i))
+    if (pRPL0->isInterLayerRefPic(i))
     {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, m_pRPL0->getInterLayerRefPicIdx(i)));
+      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL0->getInterLayerRefPicIdx(i)));
       pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
       refPicPOC = pcRefPic->getPOC();
     }
@@ -715,9 +715,9 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 
   for (int i = 0; i < numEntriesL1; i++)
   {
-    if (m_pRPL1->isInterLayerRefPic(i))
+    if (pRPL1->isInterLayerRefPic(i))
     {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, m_pRPL1->getInterLayerRefPicIdx(i)));
+      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL1->getInterLayerRefPicIdx(i)));
       pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
       refPicPOC = pcRefPic->getPOC();
     }
@@ -1248,119 +1248,118 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
           "for all the subpictures that are in the picture and contain at least one P or B slice");
   }
 
-  // below constraints are invoked only if the current slice is the first slice of a subpicture
-  if (getCtuAddrInSlice(0) != getPPS()->getSubPic(curSubpicIdx).getFirstCTUInSubPic())
-  {
-    return;
-  }
-
   int nalUnitType = getNalUnitType();
-  int prevGDRSubpicPOC = getPrevGDRSubpicPOC();
   int prevIRAPSubpicPOC = getPrevIRAPSubpicPOC();
-  int prevIRAPSubpicType = getPrevIRAPSubpicType();
 
-  if (prevIRAPSubpicPOC > getPOC() && (nalUnitType < NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalUnitType > NAL_UNIT_CODED_SLICE_CRA))
+  if (getCtuAddrInSlice(0) == getPPS()->getSubPic(curSubpicIdx).getFirstCTUInSubPic())
   {
-    CHECK(nalUnitType != NAL_UNIT_CODED_SLICE_RASL && nalUnitType != NAL_UNIT_CODED_SLICE_RADL,
-         "When a subpicture is a leading subpicture of an IRAP subpicture, it shall be a RADL or RASL subpicture");
-  }
+    // subpicture type related constraints invoked only if the current slice is the first slice of a subpicture
+    int prevGDRSubpicPOC = getPrevGDRSubpicPOC();
+    int prevIRAPSubpicType = getPrevIRAPSubpicType();
 
-  if (prevIRAPSubpicPOC <= getPOC())
-  {
-    CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL,
-         "When a subpicture is not a leading subpicture of an IRAP subpicture, it shall not be a RADL or RASL subpicture");
-  }
-
-  CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RASL && (prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_IDR_N_LP || prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_IDR_W_RADL),
-        "No RASL subpictures shall be present in the bitstream that are associated with an IDR subpicture");
-
-  CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RADL && prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_IDR_N_LP,
-        "No RADL subpictures shall be present in the bitstream that are associated with an IDR subpicture having nal_unit_type equal to IDR_N_LP");
-
-  //constraints related to current subpicture type and its preceding subpicture types
-  PicList::iterator iterPic = rcListPic.begin();
-  int numNonLeadingPic = 0;
-  while (iterPic != rcListPic.end())
-  {
-    Picture* bufPic = *(iterPic++);
-    if (!bufPic->reconstructed)
+    if (prevIRAPSubpicPOC > getPOC() && (nalUnitType < NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalUnitType > NAL_UNIT_CODED_SLICE_CRA))
     {
-      continue;
-    }
-    if (bufPic->poc == getPOC())
-    {
-      continue;
+      CHECK(nalUnitType != NAL_UNIT_CODED_SLICE_RASL && nalUnitType != NAL_UNIT_CODED_SLICE_RADL,
+        "When a subpicture is a leading subpicture of an IRAP subpicture, it shall be a RADL or RASL subpicture");
     }
 
-    //identify the subpicture in the reference picture buffer that with nuh_layer_id equal to current subpicture layerId and subpicture index equal to current subpicIdx
-    bool isBufPicOutput = false;
-    int bufSubpicType = NAL_UNIT_INVALID;
-    int bufSubpicPrevIRAPSubpicPOC = 0;
-    for (int i = 0; i < bufPic->numSlices; i++)
+    if (prevIRAPSubpicPOC <= getPOC())
     {
-      if (bufPic->sliceSubpicIdx[i] == curSubpicIdx)
+      CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL,
+        "When a subpicture is not a leading subpicture of an IRAP subpicture, it shall not be a RADL or RASL subpicture");
+    }
+
+    CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RASL && (prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_IDR_N_LP || prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_IDR_W_RADL),
+      "No RASL subpictures shall be present in the bitstream that are associated with an IDR subpicture");
+
+    CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RADL && prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_IDR_N_LP,
+      "No RADL subpictures shall be present in the bitstream that are associated with an IDR subpicture having nal_unit_type equal to IDR_N_LP");
+
+    //constraints related to current subpicture type and its preceding subpicture types
+    PicList::iterator iterPic = rcListPic.begin();
+    int numNonLeadingPic = 0;
+    while (iterPic != rcListPic.end())
+    {
+      Picture* bufPic = *(iterPic++);
+      if (!bufPic->reconstructed)
       {
-        isBufPicOutput = bufPic->slices[i]->getPicHeader()->getPicOutputFlag();
-        bufSubpicType = bufPic->slices[i]->getNalUnitType();
-        bufSubpicPrevIRAPSubpicPOC = bufPic->slices[i]->getPrevIRAPSubpicPOC();
-        break;
+        continue;
       }
-    }
-
-    if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) &&
-      !getPicHeader()->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 && bufPic->layerId == m_nuhLayerId )
-    {
-      CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
-            "precedes, in decoding order, an IRAP subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx shall precede, in output order, the "
-            "IRAP subpicture");
-    }
-
-    if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL && isBufPicOutput == 1 && bufPic->layerId == m_nuhLayerId &&
-      prevIRAPSubpicPOC > bufSubpicPrevIRAPSubpicPOC && prevIRAPSubpicPOC != bufPic->poc)
-    {
-      CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
-            "precedes, in decoding order, an IRAP subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx shall precede, in output order, all "
-            "its associated RADL subpictures");
-    }
-
-    if ( (getPOC() == getPicHeader()->getRecoveryPocCnt() + prevGDRSubpicPOC) && !getPicHeader()->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 &&
-      bufPic->layerId == m_nuhLayerId && nalUnitType != NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() != -1 )
-    {
-      CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
-            "precedes, in decoding order, a subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx in a recovery point picture shall precede "
-            "that subpicture in the recovery point picture in output order");
-    }
-
-    if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_CRA && bufSubpicType == NAL_UNIT_CODED_SLICE_RADL &&
-     prevIRAPSubpicPOC == bufSubpicPrevIRAPSubpicPOC )
-    {
-      CHECK(bufPic->poc <= getPOC(), "Any RASL subpicture associated with a CRA subpicture shall precede any RADL subpicture associated with the CRA subpicture in output order");
-    }
-
-    if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_CRA && bufPic->layerId == m_nuhLayerId && bufPic->poc < prevIRAPSubpicPOC)
-    {
-      if (bufSubpicType == NAL_UNIT_CODED_SLICE_IDR_N_LP || bufSubpicType == NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
-        bufSubpicType == NAL_UNIT_CODED_SLICE_CRA || bufSubpicType == NAL_UNIT_CODED_SLICE_GDR )
+      if (bufPic->poc == getPOC())
       {
-        CHECK(bufPic->poc >= getPOC(), "Any RASL subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, "
+        continue;
+      }
+
+      //identify the subpicture in the reference picture buffer that with nuh_layer_id equal to current subpicture layerId and subpicture index equal to current subpicIdx
+      bool isBufPicOutput = false;
+      int bufSubpicType = NAL_UNIT_INVALID;
+      int bufSubpicPrevIRAPSubpicPOC = 0;
+      for (int i = 0; i < bufPic->numSlices; i++)
+      {
+        if (bufPic->sliceSubpicIdx[i] == curSubpicIdx)
+        {
+          isBufPicOutput = bufPic->slices[i]->getPicHeader()->getPicOutputFlag();
+          bufSubpicType = bufPic->slices[i]->getNalUnitType();
+          bufSubpicPrevIRAPSubpicPOC = bufPic->slices[i]->getPrevIRAPSubpicPOC();
+          break;
+        }
+      }
+
+      if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) &&
+        !getPicHeader()->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 && bufPic->layerId == m_nuhLayerId)
+      {
+        CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
+          "precedes, in decoding order, an IRAP subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx shall precede, in output order, the "
+          "IRAP subpicture");
+      }
+
+      if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL && isBufPicOutput == 1 && bufPic->layerId == m_nuhLayerId &&
+        prevIRAPSubpicPOC > bufSubpicPrevIRAPSubpicPOC && prevIRAPSubpicPOC != bufPic->poc)
+      {
+        CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
+          "precedes, in decoding order, an IRAP subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx shall precede, in output order, all "
+          "its associated RADL subpictures");
+      }
+
+      if ((getPOC() == getPicHeader()->getRecoveryPocCnt() + prevGDRSubpicPOC) && !getPicHeader()->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 &&
+        bufPic->layerId == m_nuhLayerId && nalUnitType != NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() != -1)
+      {
+        CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
+          "precedes, in decoding order, a subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx in a recovery point picture shall precede "
+          "that subpicture in the recovery point picture in output order");
+      }
+
+      if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_CRA && bufSubpicType == NAL_UNIT_CODED_SLICE_RADL &&
+        prevIRAPSubpicPOC == bufSubpicPrevIRAPSubpicPOC)
+      {
+        CHECK(bufPic->poc <= getPOC(), "Any RASL subpicture associated with a CRA subpicture shall precede any RADL subpicture associated with the CRA subpicture in output order");
+      }
+
+      if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && prevIRAPSubpicType == NAL_UNIT_CODED_SLICE_CRA && bufPic->layerId == m_nuhLayerId && bufPic->poc < prevIRAPSubpicPOC)
+      {
+        if (bufSubpicType == NAL_UNIT_CODED_SLICE_IDR_N_LP || bufSubpicType == NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
+          bufSubpicType == NAL_UNIT_CODED_SLICE_CRA || bufSubpicType == NAL_UNIT_CODED_SLICE_GDR)
+        {
+          CHECK(bufPic->poc >= getPOC(), "Any RASL subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, "
             "associated with a CRA subpicture shall follow, in output order, any IRAP or GDR subpicture , with nuh_layer_id equal to layerId and subpicture index equal to "
             "subpicIdx, that precedes the CRA subpicture in decoding order");
+        }
+      }
+
+      if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) &&
+        bufSubpicType != NAL_UNIT_CODED_SLICE_RASL && bufSubpicType != NAL_UNIT_CODED_SLICE_RADL &&
+        bufSubpicPrevIRAPSubpicPOC == prevIRAPSubpicPOC && bufPic->layerId == m_nuhLayerId)
+      {
+        numNonLeadingPic++;
+        int th = bufPic->cs->sps->getFieldSeqFlag() ? 1 : 0;
+        CHECK(bufPic->poc > prevIRAPSubpicPOC && numNonLeadingPic > th, "If field_seq_flag is equal to 0 and the current subpicture, with nuh_layer_id equal to a particular value "
+          "layerId and subpicture index equal to a particular value subpicIdx, is a leading subpicture associated with an IRAP subpicture, it shall precede, in decoding order, "
+          "all non-leading subpictures that are associated with the same IRAP subpicture. Otherwise, let subpicA and subpicB be the first and the last leading subpictures, in "
+          "decoding order, associated with an IRAP subpicture, respectively, there shall be at most one non-leading subpicture with nuh_layer_id equal to layerId and subpicture "
+          "index equal to subpicIdx preceding subpicA in decoding order, and there shall be no non-leading picture with nuh_layer_id equal to layerId and subpicture index equal "
+          "to subpicIdx between picA and picB in decoding order");
       }
     }
-
-    if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) &&
-      bufSubpicType != NAL_UNIT_CODED_SLICE_RASL && bufSubpicType != NAL_UNIT_CODED_SLICE_RADL &&
-      bufSubpicPrevIRAPSubpicPOC == prevIRAPSubpicPOC && bufPic->layerId == m_nuhLayerId )
-    {
-      numNonLeadingPic++;
-      int th = bufPic->cs->sps->getFieldSeqFlag()? 1: 0;
-      CHECK(bufPic->poc > prevIRAPSubpicPOC && numNonLeadingPic > th, "If field_seq_flag is equal to 0 and the current subpicture, with nuh_layer_id equal to a particular value "
-            "layerId and subpicture index equal to a particular value subpicIdx, is a leading subpicture associated with an IRAP subpicture, it shall precede, in decoding order, "
-            "all non-leading subpictures that are associated with the same IRAP subpicture. Otherwise, let subpicA and subpicB be the first and the last leading subpictures, in "
-            "decoding order, associated with an IRAP subpicture, respectively, there shall be at most one non-leading subpicture with nuh_layer_id equal to layerId and subpicture "
-            "index equal to subpicIdx preceding subpicA in decoding order, and there shall be no non-leading picture with nuh_layer_id equal to layerId and subpicture index equal "
-            "to subpicIdx between picA and picB in decoding order");
-     }
   }
 
   //subpic RPL related constraints
@@ -1377,9 +1376,9 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
   int layerIdx = m_pcPic->cs->vps == nullptr ? 0 : m_pcPic->cs->vps->getGeneralLayerIdx(m_pcPic->layerId);
   for (int i = 0; i < numEntriesL0; i++)
   {
-    if (m_pRPL0->isInterLayerRefPic(i))
+    if (pRPL0->isInterLayerRefPic(i))
     {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, m_pRPL0->getInterLayerRefPicIdx(i)));
+      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL0->getInterLayerRefPicIdx(i)));
       pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
       refPicPOC = pcRefPic->getPOC();
     }
@@ -1451,9 +1450,9 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
 
   for (int i = 0; i < numEntriesL1; i++)
   {
-    if (m_pRPL1->isInterLayerRefPic(i))
+    if (pRPL1->isInterLayerRefPic(i))
     {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, m_pRPL1->getInterLayerRefPicIdx(i)));
+      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL1->getInterLayerRefPicIdx(i)));
       pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
       refPicPOC = pcRefPic->getPOC();
     }
