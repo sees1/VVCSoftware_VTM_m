@@ -308,7 +308,14 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
   }
   CHECK (sei.m_bpCpbCnt < 1, "sei.m_bpCpbCnt must be > 0");
   WRITE_UVLC( sei.m_bpCpbCnt - 1, "bp_cpb_cnt_minus1");
+#if JVET_S0181_PROPOSAL1
+  if (sei.m_bpMaxSubLayers - 1 > 0)
+  {
+    WRITE_FLAG(sei.m_sublayerInitialCpbRemovalDelayPresentFlag, "bp_sublayer_initial_cpb_removal_delay_present_flag");
+  }
+#else
   WRITE_FLAG(sei.m_sublayerInitialCpbRemovalDelayPresentFlag, "sublayer_initial_cpb_removal_delay_present_flag");
+#endif
   for (int i = (sei.m_sublayerInitialCpbRemovalDelayPresentFlag ? 0 : sei.m_bpMaxSubLayers - 1); i < sei.m_bpMaxSubLayers; i++)
   {
     for( int nalOrVcl = 0; nalOrVcl < 2; nalOrVcl ++ )

@@ -75,6 +75,8 @@
 #define JVET_S0160_ASPECT1_ASPECT9                        1 // JVET-S0160: Aspect 1 Infer the value of pps_loop_filter_across_tiles_enabled_flag to be equal to 0 (instead of 1) when not present
                                                             //             Aspect 9 The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture
 
+#define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
+
 #define JVET_S0177_SCALABLE_NESTING_SEI                   1 // JVET-S0177: Constraints on the scalable nesting SEI message
 
 #define JVET_R0068_ASPECT6_ENC_RESTRICTION                1 // encoder restriction for JVET-R0068 apsect 6
