@@ -2440,7 +2440,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 
   READ_FLAG(uiCode, "gdr_or_irap_pic_flag");               picHeader->setGdrOrIrapPicFlag(uiCode != 0);
 #if JVET_S0076_ASPECT1  
-  READ_FLAG(uiCode, "ph_non_ref_pic_flag");       picHeader->setNonReferencePictureFlag(uiCode != 0);
+  READ_FLAG(uiCode, "ph_non_ref_pic_flag");                picHeader->setNonReferencePictureFlag(uiCode != 0);
 #endif
   if (picHeader->getGdrOrIrapPicFlag())
   {
