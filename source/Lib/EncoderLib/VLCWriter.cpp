@@ -256,8 +256,13 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   WRITE_UVLC( pcPPS->getPicWidthInLumaSamples(), "pic_width_in_luma_samples" );
   WRITE_UVLC( pcPPS->getPicHeightInLumaSamples(), "pic_height_in_luma_samples" );
   Window conf = pcPPS->getConformanceWindow();
+#if JVET_R0068_ASPECT6_ENC_RESTRICTION
+  WRITE_FLAG(pcPPS->getConformanceWindowFlag(), "pps_conformance_window_flag");
+  if (pcPPS->getConformanceWindowFlag())
+#else
   WRITE_FLAG(conf.getWindowEnabledFlag(), "pps_conformance_window_flag");
   if (conf.getWindowEnabledFlag())
+#endif
   {
     WRITE_UVLC(conf.getWindowLeftOffset(), "pps_conf_win_left_offset");
     WRITE_UVLC(conf.getWindowRightOffset(), "pps_conf_win_right_offset");
