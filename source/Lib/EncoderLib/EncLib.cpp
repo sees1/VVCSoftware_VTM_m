@@ -1130,7 +1130,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
   cinfo->setFrameOnlyConstraintFlag     (m_frameOnlyConstraintFlag);
   cinfo->setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
-  cinfo->setIntraOnlyConstraintFlag         (m_intraConstraintFlag);
+  cinfo->setIntraOnlyConstraintFlag         (m_intraOnlyConstraintFlag);
   cinfo->setMaxBitDepthConstraintIdc    (m_maxBitDepthConstraintIdc);
   cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)m_maxChromaFormatConstraintIdc);
   cinfo->setSingleLayerConstraintFlag (m_singleLayerConstraintFlag);

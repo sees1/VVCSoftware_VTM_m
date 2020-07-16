@@ -219,17 +219,6 @@ void EncApp::xInitLibCfg()
   {
     m_cEncLib.setSubProfile(i, m_subProfile[i]);
   }
-  m_cEncLib.setNonPackedConstraintFlag                           ( m_nonPackedConstraintFlag);
-  m_cEncLib.setNonProjectedConstraintFlag                        ( m_nonProjectedConstraintFlag );
-  m_cEncLib.setSingleLayerConstraintFlag                         ( m_singleLayerConstraintFlag );
-  m_cEncLib.setAllLayersIndependentConstraintFlag                ( m_allLayersIndependentConstraintFlag );
-  m_cEncLib.setNoResChangeInClvsConstraintFlag                   ( m_noResChangeInClvsConstraintFlag );
-  m_cEncLib.setOneTilePerPicConstraintFlag                       ( m_oneTilePerPicConstraintFlag );
-  m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag              ( m_picHeaderInSliceHeaderConstraintFlag );
-  m_cEncLib.setOneSlicePerPicConstraintFlag                      ( m_oneSlicePerPicConstraintFlag );
-  m_cEncLib.setOneSubpicPerPicConstraintFlag                     ( m_oneSubpicPerPicConstraintFlag );
-  m_cEncLib.setFrameOnlyConstraintFlag                           ( m_frameOnlyConstraintFlag);
-  m_cEncLib.setIntraConstraintFlag                               ( m_intraConstraintFlag );
 
   m_cEncLib.setPrintMSEBasedSequencePSNR                         ( m_printMSEBasedSequencePSNR);
   m_cEncLib.setPrintFrameMSE                                     ( m_printFrameMSE);
@@ -255,65 +244,229 @@ void EncApp::xInitLibCfg()
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   m_cEncLib.setGciPresentFlag                                    (true);
 #endif
-  m_cEncLib.setOnePictureOnlyConstraintFlag                      ( m_onePictureOnlyConstraintFlag );
-  m_cEncLib.setIntraOnlyConstraintFlag                           ( m_intraConstraintFlag );  // NOTE: This setting is not used, and is confused with setIntraConstraintFlag
-#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
-  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint );
-#else
-  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint - 8 );
-#endif
-  //m_cEncLib.setMaxChromaFormatConstraintIdc                      ( m_chromaFormatConstraint );
-  //m_cEncLib.setFrameConstraintFlag                               ( m_bFrameConstraintFlag ); // NOTE: This setting is neither used nor setup, and is confused with setFrameOnlyConstraintFlag
-  m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag                ( !m_dualTree );
-  m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag      ( !m_SplitConsOverrideEnabledFlag );
-  m_cEncLib.setNoSaoConstraintFlag                               ( !m_bUseSAO );
-  m_cEncLib.setNoAlfConstraintFlag                               ( !m_alf );
-  m_cEncLib.setNoCCAlfConstraintFlag                             ( !m_ccalf );
-  m_cEncLib.setNoRefWraparoundConstraintFlag                     ( m_bNoRefWraparoundConstraintFlag );
-  m_cEncLib.setNoTemporalMvpConstraintFlag                       ( m_TMVPModeId ? false : true );
-  m_cEncLib.setNoSbtmvpConstraintFlag                            ( m_SubPuMvpMode ? false : true );
-  m_cEncLib.setNoAmvrConstraintFlag                              ( m_bNoAmvrConstraintFlag );
-  m_cEncLib.setNoBdofConstraintFlag                              ( !m_BIO );
-  m_cEncLib.setNoDmvrConstraintFlag                              ( !m_DMVR );
-  m_cEncLib.setNoCclmConstraintFlag                              ( m_LMChroma ? false : true );
-  m_cEncLib.setNoMtsConstraintFlag                               ( (m_MTS || m_MTSImplicit) ? false : true );
-  m_cEncLib.setNoSbtConstraintFlag                               ( !m_SBT );
-  m_cEncLib.setNoAffineMotionConstraintFlag                      ( !m_Affine );
-  m_cEncLib.setNoBcwConstraintFlag                               ( !m_bcw );
-  m_cEncLib.setNoIbcConstraintFlag                               ( m_IBCMode ? false : true );
-  m_cEncLib.setNoCiipConstraintFlag                           ( !m_ciip );
-  m_cEncLib.setNoGeoConstraintFlag                               ( !m_Geo );
-  m_cEncLib.setNoLadfConstraintFlag                              ( !m_LadfEnabed );
-  m_cEncLib.setNoTransformSkipConstraintFlag                     ( !m_useTransformSkip );
-  m_cEncLib.setNoBDPCMConstraintFlag                             ( !m_useBDPCM );
-  m_cEncLib.setNoJointCbCrConstraintFlag                         (!m_JointCbCrMode);
-  m_cEncLib.setNoQpDeltaConstraintFlag                           ( m_bNoQpDeltaConstraintFlag );
-  m_cEncLib.setNoDepQuantConstraintFlag                          ( !m_depQuantEnabledFlag);
-  m_cEncLib.setNoSignDataHidingConstraintFlag                    ( !m_signDataHidingEnabledFlag );
-  m_cEncLib.setNoTrailConstraintFlag                             ( m_iIntraPeriod == 1 );
-  m_cEncLib.setNoStsaConstraintFlag                              ( m_iIntraPeriod == 1 || !xHasNonZeroTemporalID() );
-  m_cEncLib.setNoRaslConstraintFlag                              ( m_iIntraPeriod == 1 || !xHasLeadingPicture() );
-  m_cEncLib.setNoRadlConstraintFlag                              ( m_iIntraPeriod == 1 || !xHasLeadingPicture() );
-  m_cEncLib.setNoIdrConstraintFlag                               ( false ); // Not yet possible to encode bitstream starting with a GDR picture
-  m_cEncLib.setNoCraConstraintFlag                               ( m_iDecodingRefreshType != 1 );
-  m_cEncLib.setNoGdrConstraintFlag                               ( false ); // Not yet possible to encode GDR using config parameters
-  m_cEncLib.setNoApsConstraintFlag                               ( !m_alf && !m_lmcsEnabled && m_useScalingListId == SCALING_LIST_OFF);
-  m_cEncLib.setNoMrlConstraintFlag                               ( !m_MRL );
-  m_cEncLib.setNoIspConstraintFlag                               ( !m_ISP );
-  m_cEncLib.setNoMipConstraintFlag                               ( !m_MIP );
-  m_cEncLib.setNoLfnstConstraintFlag                             ( !m_LFNST );
-  m_cEncLib.setNoMmvdConstraintFlag                              ( !m_MMVD );
-  m_cEncLib.setNoSmvdConstraintFlag                              ( !m_SMVD );
-  m_cEncLib.setNoProfConstraintFlag                              ( !m_PROF );
-  m_cEncLib.setNoPaletteConstraintFlag                           ( m_PLTMode == 1 ? false : true );
-  m_cEncLib.setNoActConstraintFlag                               ( !m_useColorTrans );
-  m_cEncLib.setNoLmcsConstraintFlag                              ( !m_lmcsEnabled );
+//#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+//  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint );
+//#else
+//  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint - 8 );
+//#endif
+  if (m_cEncLib.getGciPresentFlag())
+  {
+    m_cEncLib.setNonPackedConstraintFlag(m_nonPackedConstraintFlag);
+    m_cEncLib.setNonProjectedConstraintFlag(m_nonProjectedConstraintFlag);
+    m_cEncLib.setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
+    m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
+    m_cEncLib.setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
+    m_cEncLib.setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
+    m_cEncLib.setFrameOnlyConstraintFlag(m_frameOnlyConstraintFlag);
+    m_cEncLib.setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
+    m_cEncLib.setIntraOnlyConstraintFlag(m_intraOnlyConstraintFlag);
+    m_cEncLib.setNoIdrConstraintFlag(m_noIdrConstraintFlag); // Not yet possible to encode bitstream starting with a GDR picture
+    m_cEncLib.setNoGdrConstraintFlag(m_noGdrConstraintFlag); // Not yet possible to encode GDR using config parameters
+    m_cEncLib.setSingleLayerConstraintFlag(m_singleLayerConstraintFlag);
+    m_cEncLib.setAllLayersIndependentConstraintFlag(m_allLayersIndependentConstraintFlag);
+    m_cEncLib.setNoQpDeltaConstraintFlag(m_bNoQpDeltaConstraintFlag);
+
+    m_cEncLib.setNoTrailConstraintFlag(m_noTrailConstraintFlag);
+    CHECK(m_noTrailConstraintFlag && m_iIntraPeriod != 1, "TRAIL shall be deactivated when m_noTrailConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoStsaConstraintFlag(m_noStsaConstraintFlag);
+    CHECK(m_noStsaConstraintFlag && (m_iIntraPeriod != 1 || xHasNonZeroTemporalID()), "STSA shall be deactivated when m_noStsaConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoRaslConstraintFlag(m_noRaslConstraintFlag);
+    CHECK(m_noRaslConstraintFlag && (m_iIntraPeriod != 1 || xHasLeadingPicture()), "RASL shall be deactivated when m_noRaslConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoRadlConstraintFlag(m_noRadlConstraintFlag);
+    CHECK(m_noRadlConstraintFlag && (m_iIntraPeriod != 1 || xHasLeadingPicture()), "RADL shall be deactivated when m_noRadlConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoCraConstraintFlag(m_noCraConstraintFlag);
+    CHECK(m_noCraConstraintFlag && (m_iDecodingRefreshType == 1), "CRA shall be deactivated when m_noCraConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
+    CHECK(m_noResChangeInClvsConstraintFlag && m_resChangeInClvsEnabled, "Resolution change in CLVS shall be deactivated when m_noResChangeInClvsConstraintFlag is equal to 1");
+
+    m_cEncLib.setMaxBitDepthConstraintIdc(m_maxBitDepthConstraintIdc);
+    CHECK(m_maxBitDepthConstraintIdc < m_bitDepthConstraint - 8, "Bit depth minus 8 shall be less than m_maxBitDepthConstraintIdc");
+
+    m_cEncLib.setMaxChromaFormatConstraintIdc(m_maxChromaFormatConstraintIdc);
+    CHECK(m_maxChromaFormatConstraintIdc < m_chromaFormatConstraint, "Chroma format Idc shall be less than m_maxBitDepthConstraintIdc");
+
+    m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(m_bNoQtbttDualTreeIntraConstraintFlag);
+    CHECK(m_bNoQtbttDualTreeIntraConstraintFlag && m_dualTree, "Dual tree shall be deactivated when m_bNoQtbttDualTreeIntraConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(m_noPartitionConstraintsOverrideConstraintFlag);
+    CHECK(m_noPartitionConstraintsOverrideConstraintFlag && m_SplitConsOverrideEnabledFlag, "Partition override shall be deactivated when m_noPartitionConstraintsOverrideConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoSaoConstraintFlag(m_bNoSaoConstraintFlag);
+    CHECK(m_bNoSaoConstraintFlag && m_bUseSAO, "SAO shall be deactivated when m_bNoSaoConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoAlfConstraintFlag(m_bNoAlfConstraintFlag);
+    CHECK(m_bNoAlfConstraintFlag && m_alf, "ALF shall be deactivated when m_bNoAlfConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
+    CHECK(m_noCCAlfConstraintFlag && m_ccalf, "CCALF shall be deactivated when m_noCCAlfConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoRefWraparoundConstraintFlag(m_bNoRefWraparoundConstraintFlag);
+    CHECK(m_bNoRefWraparoundConstraintFlag && m_wrapAround, "Wrap around shall be deactivated when m_bNoRefWraparoundConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoTemporalMvpConstraintFlag(m_bNoTemporalMvpConstraintFlag);
+    CHECK(m_bNoTemporalMvpConstraintFlag && m_TMVPModeId, "Temporal MVP shall be deactivated when m_bNoTemporalMvpConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoSbtmvpConstraintFlag(m_bNoSbtmvpConstraintFlag);
+    CHECK(m_bNoSbtmvpConstraintFlag && m_SubPuMvpMode, "SbTMVP shall be deactivated when m_bNoSbtmvpConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoAmvrConstraintFlag(m_bNoAmvrConstraintFlag);
+    CHECK(m_bNoAmvrConstraintFlag && (m_ImvMode != IMV_OFF || m_AffineAmvr), "AMVR shall be deactivated when m_bNoAmvrConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoBdofConstraintFlag(m_bNoBdofConstraintFlag);
+    CHECK(m_bNoBdofConstraintFlag && m_BIO, "BIO shall be deactivated when m_bNoBdofConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoDmvrConstraintFlag(m_noDmvrConstraintFlag);
+    CHECK(m_noDmvrConstraintFlag && m_DMVR, "DMVR shall be deactivated when m_noDmvrConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoCclmConstraintFlag(m_bNoCclmConstraintFlag);
+    CHECK(m_bNoCclmConstraintFlag && m_LMChroma, "CCLM shall be deactivated when m_bNoCclmConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoMtsConstraintFlag(m_bNoMtsConstraintFlag);
+    CHECK(m_bNoMtsConstraintFlag && (m_MTS || m_MTSImplicit), "MTS shall be deactivated when m_bNoMtsConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoSbtConstraintFlag(m_noSbtConstraintFlag);
+    CHECK(m_noSbtConstraintFlag && m_SBT, "SBT shall be deactivated when mm_noSbtConstraintFlag_nonPackedConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoAffineMotionConstraintFlag(m_bNoAffineMotionConstraintFlag);
+    CHECK(m_bNoAffineMotionConstraintFlag && m_Affine, "Affine shall be deactivated when m_bNoAffineMotionConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoBcwConstraintFlag(m_bNoBcwConstraintFlag);
+    CHECK(m_bNoBcwConstraintFlag && m_bcw, "BCW shall be deactivated when m_bNoBcwConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoIbcConstraintFlag(m_noIbcConstraintFlag);
+    CHECK(m_noIbcConstraintFlag && m_IBCMode, "IBC shall be deactivated when m_noIbcConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoCiipConstraintFlag(m_bNoCiipConstraintFlag);
+    CHECK(m_bNoCiipConstraintFlag && m_ciip, "CIIP shall be deactivated when m_bNoCiipConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoGeoConstraintFlag(m_noGeoConstraintFlag);
+    CHECK(m_noGeoConstraintFlag && m_Geo, "GEO shall be deactivated when m_noGeoConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoLadfConstraintFlag(m_bNoLadfConstraintFlag);
+    CHECK(m_bNoLadfConstraintFlag && m_LadfEnabed, "LADF shall be deactivated when m_bNoLadfConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoTransformSkipConstraintFlag(m_noTransformSkipConstraintFlag);
+    CHECK(m_noTransformSkipConstraintFlag && m_useTransformSkip, "Transform skip shall be deactivated when m_noTransformSkipConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoBDPCMConstraintFlag(m_noBDPCMConstraintFlag);
+    CHECK(m_noBDPCMConstraintFlag && m_useBDPCM, "BDPCM shall be deactivated when m_noBDPCMConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoJointCbCrConstraintFlag(m_noJointCbCrConstraintFlag);
+    CHECK(m_noJointCbCrConstraintFlag && m_JointCbCrMode, "JCCR shall be deactivated when m_noJointCbCrConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoDepQuantConstraintFlag(m_bNoDepQuantConstraintFlag);
+    CHECK(m_bNoDepQuantConstraintFlag && m_depQuantEnabledFlag, "DQ shall be deactivated when m_bNoDepQuantConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoSignDataHidingConstraintFlag(m_bNoSignDataHidingConstraintFlag);
+    CHECK(m_bNoSignDataHidingConstraintFlag && m_signDataHidingEnabledFlag, "SDH shall be deactivated when m_bNoSignDataHidingConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoApsConstraintFlag(m_noApsConstraintFlag);
+    CHECK(m_noApsConstraintFlag && (m_lmcsEnabled || (m_useScalingListId != SCALING_LIST_OFF)), "LMCS and explict scaling list shall be deactivated when m_noApsConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoMrlConstraintFlag(m_noMrlConstraintFlag);
+    CHECK(m_noMrlConstraintFlag && m_MRL, "MRL shall be deactivated when m_noMrlConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoIspConstraintFlag(m_noIspConstraintFlag);
+    CHECK(m_noIspConstraintFlag && m_ISP, "ISP shall be deactivated when m_noIspConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoMipConstraintFlag(m_noMipConstraintFlag);
+    CHECK(m_noMipConstraintFlag && m_MIP, "MIP shall be deactivated when m_noMipConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoLfnstConstraintFlag(m_noLfnstConstraintFlag);
+    CHECK(m_noLfnstConstraintFlag && m_LFNST, "LFNST shall be deactivated when m_noLfnstConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoMmvdConstraintFlag(m_noMmvdConstraintFlag);
+    CHECK(m_noMmvdConstraintFlag && m_MMVD, "MMVD shall be deactivated when m_noMmvdConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoSmvdConstraintFlag(m_noSmvdConstraintFlag);
+    CHECK(m_noSmvdConstraintFlag && m_SMVD, "SMVD shall be deactivated when m_noSmvdConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoProfConstraintFlag(m_noProfConstraintFlag);
+    CHECK(m_noProfConstraintFlag && m_PROF, "PROF shall be deactivated when m_noProfConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoPaletteConstraintFlag(m_noPaletteConstraintFlag);
+    CHECK(m_noPaletteConstraintFlag && m_PLTMode, "Palette shall be deactivated when m_noPaletteConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoActConstraintFlag(m_noActConstraintFlag);
+    CHECK(m_noActConstraintFlag && m_useColorTrans, "ACT shall be deactivated when m_noActConstraintFlag is equal to 1");
+
+    m_cEncLib.setNoLmcsConstraintFlag(m_noLmcsConstraintFlag);
+    CHECK(m_noLmcsConstraintFlag && m_lmcsEnabled, "LMCS shall be deactivated when m_noLmcsConstraintFlag is equal to 1");
+
 #if JVET_S0050_GCI
-  m_cEncLib.setNoExplicitScaleListConstraintFlag                 ( m_noExplicitScaleListConstraintFlag );
-  CHECK( m_noExplicitScaleListConstraintFlag && m_useScalingListId != SCALING_LIST_OFF, "Explicit scaling list shall be deactivated when m_noExplicitScaleListConstraintFlag is equal to 1");
-  m_cEncLib.setNoVirtualBoundaryConstraintFlag                   ( m_noVirtualBoundaryConstraintFlag );
-  CHECK( m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
+    m_cEncLib.setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
+    CHECK(m_noExplicitScaleListConstraintFlag && m_useScalingListId != SCALING_LIST_OFF, "Explicit scaling list shall be deactivated when m_noExplicitScaleListConstraintFlag is equal to 1");
+   
+    m_cEncLib.setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
+    CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
 #endif
+  }
+  else
+  {
+    m_cEncLib.setNonPackedConstraintFlag(false);
+    m_cEncLib.setNonProjectedConstraintFlag(false);
+    m_cEncLib.setSingleLayerConstraintFlag(false);
+    m_cEncLib.setAllLayersIndependentConstraintFlag(false);
+    m_cEncLib.setNoResChangeInClvsConstraintFlag(false);
+    m_cEncLib.setOneTilePerPicConstraintFlag(false);
+    m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(false);
+    m_cEncLib.setOneSlicePerPicConstraintFlag(false);
+    m_cEncLib.setOneSubpicPerPicConstraintFlag(false);
+    m_cEncLib.setFrameOnlyConstraintFlag(false);
+    m_cEncLib.setOnePictureOnlyConstraintFlag(false);
+    m_cEncLib.setIntraOnlyConstraintFlag(false);
+    m_cEncLib.setMaxBitDepthConstraintIdc(8);
+    m_cEncLib.setMaxChromaFormatConstraintIdc(CHROMA_444);
+    m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(false);
+    m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(false);
+    m_cEncLib.setNoSaoConstraintFlag(false);
+    m_cEncLib.setNoAlfConstraintFlag(false);
+    m_cEncLib.setNoCCAlfConstraintFlag(false);
+    m_cEncLib.setNoRefWraparoundConstraintFlag(false);
+    m_cEncLib.setNoTemporalMvpConstraintFlag(false);
+    m_cEncLib.setNoSbtmvpConstraintFlag(false);
+    m_cEncLib.setNoAmvrConstraintFlag(false);
+    m_cEncLib.setNoBdofConstraintFlag(false);
+    m_cEncLib.setNoDmvrConstraintFlag(false);
+    m_cEncLib.setNoCclmConstraintFlag(false);
+    m_cEncLib.setNoMtsConstraintFlag(false);
+    m_cEncLib.setNoSbtConstraintFlag(false);
+    m_cEncLib.setNoAffineMotionConstraintFlag(false);
+    m_cEncLib.setNoBcwConstraintFlag(false);
+    m_cEncLib.setNoIbcConstraintFlag(false);
+    m_cEncLib.setNoCiipConstraintFlag(false);
+    m_cEncLib.setNoGeoConstraintFlag(false);
+    m_cEncLib.setNoLadfConstraintFlag(false);
+    m_cEncLib.setNoTransformSkipConstraintFlag(false);
+    m_cEncLib.setNoBDPCMConstraintFlag(false);
+    m_cEncLib.setNoJointCbCrConstraintFlag(false);
+    m_cEncLib.setNoQpDeltaConstraintFlag(false);
+    m_cEncLib.setNoDepQuantConstraintFlag(false);
+    m_cEncLib.setNoSignDataHidingConstraintFlag(false);
+    m_cEncLib.setNoTrailConstraintFlag(false);
+    m_cEncLib.setNoStsaConstraintFlag(false);
+    m_cEncLib.setNoRaslConstraintFlag(false);
+    m_cEncLib.setNoRadlConstraintFlag(false);
+    m_cEncLib.setNoIdrConstraintFlag(false);
+    m_cEncLib.setNoCraConstraintFlag(false);
+    m_cEncLib.setNoGdrConstraintFlag(false);
+    m_cEncLib.setNoApsConstraintFlag(false);
+    m_cEncLib.setNoMrlConstraintFlag(false);
+    m_cEncLib.setNoIspConstraintFlag(false);
+    m_cEncLib.setNoMipConstraintFlag(false);
+    m_cEncLib.setNoLfnstConstraintFlag(false);
+    m_cEncLib.setNoMmvdConstraintFlag(false);
+    m_cEncLib.setNoSmvdConstraintFlag(false);
+    m_cEncLib.setNoProfConstraintFlag(false);
+    m_cEncLib.setNoPaletteConstraintFlag(false);
+    m_cEncLib.setNoActConstraintFlag(false);
+    m_cEncLib.setNoLmcsConstraintFlag(false);
+  }
 
   //====== Coding Structure ========
   m_cEncLib.setIntraPeriod                                       ( m_iIntraPeriod );

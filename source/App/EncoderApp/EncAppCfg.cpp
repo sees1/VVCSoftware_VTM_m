@@ -820,13 +820,15 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("Tier",                                            m_levelTier,                                Level::MAIN, "Tier to use for interpretation of --Level (main or high only)")
   ("SubProfile",                                      cfg_SubProfile,                          cfg_SubProfile,  "Sub-profile idc")
   ("EnableDecodingCapabilityInformation",             m_DCIEnabled,                                     false, "Enables writing of Decoding Capability Information")
-  ("MaxBitDepthConstraint",                           m_bitDepthConstraint,                                0u, "Bit depth to use for profile-constraint for RExt profiles. 0=automatically choose based upon other parameters")
-  ("MaxChromaFormatConstraint",                       tmpConstraintChromaFormat,                            0, "Chroma-format to use for the profile-constraint for RExt profiles. 0=automatically choose based upon other parameters")
+  //("MaxBitDepthConstraint",                           m_bitDepthConstraint,                                0u, "Bit depth to use for profile-constraint for RExt profiles. 0=automatically choose based upon other parameters")
+  //("MaxChromaFormatConstraint",                       tmpConstraintChromaFormat,                            0, "Chroma-format to use for the profile-constraint for RExt profiles. 0=automatically choose based upon other parameters")
+  ("GciPresentFlag",                                  m_gciPresentFlag,                                  true, "GCI field present")
+  ("MaxBitDepthConstraintIdc",                        m_maxBitDepthConstraintIdc,                          8u, "Indicate that bit_depth_minus8 shall be in the range of 0 to max_bitdepth_constraint_idc")
+  ("MaxChromaFormatConstraintIdc",                    m_maxChromaFormatConstraintIdc,                      3u, "Indicate that chroma_format_idc shall be in the range of 0 to max_chroma_format_constraint_idc")
   ("OnePictureOnlyConstraintFlag",                    m_onePictureOnlyConstraintFlag,                   false, "Value of general_intra_constraint_flag. Can only be used for single frame encodings. Will be set to true for still picture profiles")
-  ("IntraConstraintFlag",                             m_intraConstraintFlag,                            false, "Value of intra_only_constraint_flag")
-
+  ("IntraOnlyConstraintFlag",                         m_intraOnlyConstraintFlag,                            false, "Value of intra_only_constraint_flag")
 #if !JVET_S0266_VUI_length
-  ("NonPackedSource",                                 m_nonPackedConstraintFlag,                        false, "Indicate that source does not contain frame packing")
+  ("NonPackedSourceConstraintFlag",                   m_nonPackedConstraintFlag,                        false, "Indicate that source does not contain frame packing")
   ("NonProjectedConstraintFlag",                      m_nonProjectedConstraintFlag,                     false, "Indicate that the bitstream contains projection SEI messages")
 #endif
   ("NoResChangeInClvsConstraintFlag",                 m_noResChangeInClvsConstraintFlag,                false, "Indicate that the picture spatial resolution does not change within any CLVS referring to the SPS")
@@ -2862,7 +2864,7 @@ bool EncAppCfg::xCheckParameter()
   }
   else
   {
-    xConfirmPara( m_intraConstraintFlag, "IntraConstraintFlag cannot be 1 for inter sequences");
+    xConfirmPara( m_intraOnlyConstraintFlag, "IntraOnlyConstraintFlag cannot be 1 for inter sequences");
   }
 
   int multipleFactor = m_compositeRefEnabled ? 2 : 1;

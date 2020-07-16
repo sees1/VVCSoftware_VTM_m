@@ -249,7 +249,7 @@ protected:
   bool m_oneSlicePerPicConstraintFlag;
   bool m_oneSubpicPerPicConstraintFlag;
   bool m_frameOnlyConstraintFlag;
-  bool m_intraConstraintFlag;
+  bool m_intraOnlyConstraintFlag;
 
   //====== Coding Structure ========
   int       m_intraPeriod;                        // needs to be signed to allow '-1' for no intra period
@@ -1863,12 +1863,6 @@ public:
 
   bool         getFrameOnlyConstraintFlag() const                    { return m_frameOnlyConstraintFlag; }
   void         setFrameOnlyConstraintFlag(bool b)                    { m_frameOnlyConstraintFlag = b; }
-
-
-  bool         getIntraConstraintFlag() const                        { return m_intraConstraintFlag; }
-  void         setIntraConstraintFlag(bool b)                        { m_intraConstraintFlag=b; }
-
-
 
   void         setSummaryOutFilename(const std::string &s)           { m_summaryOutFilename = s; }
   const std::string& getSummaryOutFilename() const                   { return m_summaryOutFilename; }

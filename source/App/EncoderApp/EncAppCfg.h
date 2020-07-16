@@ -199,7 +199,7 @@ protected:
   uint32_t          m_bitDepthConstraint;
   ChromaFormat  m_chromaFormatConstraint;
   bool          m_onePictureOnlyConstraintFlag;
-  bool          m_intraConstraintFlag;
+  bool          m_intraOnlyConstraintFlag;
   bool          m_nonPackedConstraintFlag;
   bool          m_nonProjectedConstraintFlag;
   bool          m_noResChangeInClvsConstraintFlag;
