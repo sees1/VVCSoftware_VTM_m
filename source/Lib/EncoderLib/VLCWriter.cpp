@@ -819,31 +819,33 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 #if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
       WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
       WRITE_FLAG(pcSPS->getSubPicSameSizeFlag(), "sps_subpic_same_size_flag");
+      uint32_t tmpWidthVal = (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
+      uint32_t tmpHeightVal = (pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
       for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
       {
         if (!pcSPS->getSubPicSameSizeFlag() || picIdx == 0)
         {
           if ((picIdx > 0) && (pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize()))
           {
-            WRITE_CODE(pcSPS->getSubPicCtuTopLeftX(picIdx), ceilLog2((pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_ctu_top_left_x[ i ]");
+            WRITE_CODE(pcSPS->getSubPicCtuTopLeftX(picIdx), ceilLog2(tmpWidthVal), "subpic_ctu_top_left_x[ i ]");
           }
           if ((picIdx > 0) && (pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize()))
           {
-            WRITE_CODE(pcSPS->getSubPicCtuTopLeftY(picIdx), ceilLog2((pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_ctu_top_left_y[ i ]");
+            WRITE_CODE(pcSPS->getSubPicCtuTopLeftY(picIdx), ceilLog2(tmpHeightVal), "subpic_ctu_top_left_y[ i ]");
           }
           if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize())
           {
-            WRITE_CODE(pcSPS->getSubPicWidth(picIdx) - 1, ceilLog2((pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_width_minus1[ i ]");
+            WRITE_CODE(pcSPS->getSubPicWidth(picIdx) - 1, ceilLog2(tmpWidthVal), "subpic_width_minus1[ i ]");
           }
           if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize())
           {
-            WRITE_CODE(pcSPS->getSubPicHeight(picIdx) - 1, ceilLog2((pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "subpic_height_minus1[ i ]");
+            WRITE_CODE(pcSPS->getSubPicHeight(picIdx) - 1, ceilLog2(tmpHeightVal), "subpic_height_minus1[ i ]");
           }
-          if (!pcSPS->getIndependentSubPicsFlag())
-          {
-            WRITE_FLAG(pcSPS->getSubPicTreatedAsPicFlag(picIdx), "subpic_treated_as_pic_flag[ i ]");
-            WRITE_FLAG(pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx), "loop_filter_across_subpic_enabled_flag[ i ]");
-          }
+        }
+        if (!pcSPS->getIndependentSubPicsFlag())
+        {
+          WRITE_FLAG(pcSPS->getSubPicTreatedAsPicFlag(picIdx), "subpic_treated_as_pic_flag[ i ]");
+          WRITE_FLAG(pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx), "loop_filter_across_subpic_enabled_flag[ i ]");
         }
       }
 #else
