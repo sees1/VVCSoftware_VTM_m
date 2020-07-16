@@ -2897,7 +2897,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
   {
     READ_FLAG( uiCode, "ph_virtual_boundaries_present_flag" );
     picHeader->setVirtualBoundariesPresentFlag( uiCode != 0 );
+#if !JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT
     CHECK( sps->getSubPicInfoPresentFlag() && picHeader->getVirtualBoundariesPresentFlag(), "When the subpicture info is present, the signalling of the virtual boundary position, if present, shall be in SPS" );
+#endif
     if( picHeader->getVirtualBoundariesPresentFlag() )
     {
       READ_CODE( 2, uiCode, "ph_num_ver_virtual_boundaries");        picHeader->setNumVerVirtualBoundaries( uiCode );
@@ -3586,6 +3588,10 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSubPicInfoPresentFlag() == 1, "When sps_subpic_info_present_flag is equal to 1, the value of sh_picture_header_in_slice_header_flag shall be equal to 0");
 #if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSeparateColourPlaneFlag() == 1, "when separate_colour_plane_flag is equal to 1, the value of picture_header_in_slice_header_flag shall be equal to 0");
+#endif
+#if JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT
+  CHECK(sps->getSubPicInfoPresentFlag() == 1 && sps->getVirtualBoundariesEnabledFlag() == 1 && sps->getVirtualBoundariesPresentFlag() == 0,
+        "when sps_subpic_info_present_flag is equal to 1 and sps_virtual_boundaries_enabled_flag is equal to 1, sps_virtual_boundaries_present_flag shall be equal 1");
 #endif
 
   const ChromaFormat chFmt = sps->getChromaFormatIdc();
