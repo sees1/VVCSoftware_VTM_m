@@ -1089,6 +1089,10 @@ void EncLib::xInitSPS( SPS& sps )
 {
   ProfileTierLevel* profileTierLevel = sps.getProfileTierLevel();
   ConstraintInfo* cinfo = profileTierLevel->getConstraintInfo();
+
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  cinfo->setGciPresentFlag(m_gciPresentFlag);
+#endif
   cinfo->setNonPackedConstraintFlag     (m_nonPackedConstraintFlag);
   cinfo->setNonProjectedConstraintFlag(m_nonProjectedConstraintFlag);
   cinfo->setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
@@ -1740,8 +1744,12 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
   {
     chromaDbfOffsetNotSameAsLuma = false;
   }
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   const uint32_t chromaArrayType = (int)sps.getSeparateColourPlaneFlag() ? 0 : sps.getChromaFormatIdc();
   if( ( chromaArrayType != CHROMA_400 ) && ( chromaQPOffsetNotZero || chromaDbfOffsetNotSameAsLuma ) )
+#else
+  if ((sps.getChromaFormatIdc() != CHROMA_400) && (chromaQPOffsetNotZero || chromaDbfOffsetNotSameAsLuma))
+#endif
   {
     pps.setPPSChromaToolFlag(true);
   }

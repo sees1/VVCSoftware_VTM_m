@@ -97,6 +97,9 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   ("TarDecLayerIdSetFile,l",    cfg_TargetDecLayerIdSetFile,           string(""), "targetDecLayerIdSet file name. The file should include white space separated LayerId values to be decoded. Omitting the option or a value of -1 in the file decodes all layers.")
   ("SEIColourRemappingInfoFilename",  m_colourRemapSEIFileName,        string(""), "Colour Remapping YUV output file name. If empty, no remapping is applied (ignore SEI message)\n")
   ("OutputDecodedSEIMessagesFilename",  m_outputDecodedSEIMessagesFilename,    string(""), "When non empty, output decoded SEI messages to the indicated file. If file is '-', then output to stdout\n")
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  ("360DumpFile",  m_outputDecoded360SEIMessagesFilename, string(""), "When non empty, output decoded 360 SEI messages to the indicated file.\n")
+#endif
   ("ClipOutputVideoToRec709Range",      m_bClipOutputVideoToRec709Range,  false,   "If true then clip output video to the Rec. 709 Range on saving")
   ("PYUV",                      m_packedYUVMode,                       false,      "If true then output 10-bit and 12-bit YUV data as 5-byte and 3-byte (respectively) packed YUV data. Ignored for interlaced output.")
 #if ENABLE_TRACING
@@ -235,6 +238,9 @@ DecAppCfg::DecAppCfg()
 , m_colourRemapSEIFileName()
 , m_targetDecLayerIdSet()
 , m_outputDecodedSEIMessagesFilename()
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+, m_outputDecoded360SEIMessagesFilename()
+#endif
 , m_bClipOutputVideoToRec709Range(false)
 , m_packedYUVMode(false)
 , m_statMode(0)

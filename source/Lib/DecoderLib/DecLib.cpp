@@ -427,6 +427,7 @@ DecLib::DecLib()
   , m_bFirstSliceInPicture(true)
   , m_firstSliceInSequence{ true }
   , m_firstSliceInBitstream(true)
+  , m_isFirstAuInCvs( true )
   , m_prevSliceSkipped(false)
   , m_skippedPOC(0)
   , m_lastPOCNoOutputPriorPics(-1)
@@ -434,6 +435,10 @@ DecLib::DecLib()
   , m_lastNoOutputBeforeRecoveryFlag{ false }
   , m_sliceLmcsApsId(-1)
   , m_pDecodedSEIOutputStream(NULL)
+  , m_audIrapOrGdrAuFlag( false )
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  , m_decoded360SeiDumpFileName()
+#endif
   , m_decodedPictureHashSEIEnabled(false)
   , m_numberOfChecksumErrorsDetected(0)
   , m_warningMessageSkipPicture(false)
@@ -451,6 +456,10 @@ DecLib::DecLib()
 #if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
 #endif
+#if JVET_S0155_EOS_NALU_CHECK
+  memset(m_prevEOS, false, sizeof(m_prevEOS));
+#endif
+  memset(m_accessUnitEos, false, sizeof(m_accessUnitEos));
   for (int i = 0; i < MAX_VPS_LAYERS; i++)
   {
     m_associatedIRAPType[i] = NAL_UNIT_INVALID;
@@ -886,37 +895,82 @@ void DecLib::xCreateUnavailablePicture(int iUnavailablePoc, bool longTermFlag, c
   {
     m_pocRandomAccess = iUnavailablePoc;
   }
-
 }
-
-void DecLib::isCvsStart()
+#if JVET_S0155_EOS_NALU_CHECK
+void DecLib::checkPicTypeAfterEos()
 {
-  for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
+  int layerId = m_pcPic->slices[0]->getNalUnitLayerId();
+  if (m_prevEOS[layerId])
   {
-    if (pic->m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_N_LP && pic->m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_W_RADL)
-    {
-      checkIncludedInFirstAu();
-      return;
-    }
+    bool isIrapOrGdrPu = !m_pcPic->cs->pps->getMixedNaluTypesInPicFlag() && ( m_pcPic->slices[0]->isIRAP() || m_pcPic->slices[0]->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR );
+    CHECK(!isIrapOrGdrPu, "when present, the next PU of a particular layer after an EOS NAL unit that belongs to the same layer shall be an IRAP or GDR PU");
+
+    m_prevEOS[layerId] = false;
   }
-  //save the first AU info for a CVS start
-  m_firstAccessUnitPicInfo.assign(m_accessUnitPicInfo.begin(), m_accessUnitPicInfo.end());
 }
+#endif
 
-void DecLib::checkIncludedInFirstAu()
+void DecLib::checkLayerIdIncludedInCvss()
 {
-  for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
+  if (getVPS() == nullptr || getVPS()->getMaxLayers() == 1)
   {
-    bool isFind = 0;
-    for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
+    return;
+  }
+
+  if (m_audIrapOrGdrAuFlag &&
+    (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL))
+  {
+    // store layerIDs in the first AU
+    m_firstAccessUnitPicInfo.assign(m_accessUnitPicInfo.begin(), m_accessUnitPicInfo.end());
+  }
+  else
+  {
+    // check whether the layerIDs in an AU are included in the layerIDs of the first AU
+    for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
     {
-      if (pic->m_nuhLayerId == picFirst->m_nuhLayerId)
+      bool layerIdFind;
+      for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
       {
-        isFind = 1;
-        break;
+        layerIdFind = pic->m_nuhLayerId == picFirst->m_nuhLayerId ? true : false;
+        if (layerIdFind)
+        {
+          break;
+        }
+      }
+      CHECK(!layerIdFind, "each picture in an AU in a CVS shall have nuh_layer_id equal to the nuh_layer_id of one of the pictures present in the first AU of the CVS");
+    }
+
+
+#if JVET_S0155_EOS_NALU_CHECK
+    // check whether the layerID of EOS_NUT is included in the layerIDs of the first AU
+    for (int i = 0; i < getVPS()->getMaxLayers(); i++)
+    {
+      int eosLayerId = getVPS()->getLayerId(i);
+      if (m_accessUnitEos[eosLayerId])
+      {
+        bool eosLayerIdFind;
+        for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
+        {
+          eosLayerIdFind = eosLayerId == picFirst->m_nuhLayerId ? true : false;
+          if (eosLayerIdFind)
+          {
+            break;
+          }
+        }
+        CHECK(!eosLayerIdFind, "When nal_unit_type is equal to EOS_NUT, nuh_layer_id shall be equal to one of the nuh_layer_id values of the layers present in the CVS");
       }
     }
-    CHECK(!isFind, "each picture in an AU in a CVS shall have nuh_layer_id equal to the nuh_layer_id of one of the pictures present in the first AU of the CVS");
+#endif
+  }
+
+  // update the value of m_isFirstAuInCvs for the next AU according to NAL_UNIT_EOS in each layer
+  for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
+  {
+    m_isFirstAuInCvs = m_accessUnitEos[pic->m_nuhLayerId] ? true : false;
+    if(!m_isFirstAuInCvs)
+    {
+      break;
+    }
   }
 }
 
@@ -1767,6 +1821,9 @@ void DecLib::xParsePrefixSEImessages()
     const SPS *sps = m_parameterSetManager.getActiveSPS();
     const VPS *vps = m_parameterSetManager.getVPS(sps->getVPSId());
     m_seiReader.parseSEImessage( &(nalu.getBitstream()), m_SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, sps, m_HRD, m_pDecodedSEIOutputStream );
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+    m_seiCfgDump.write360SeiDump( m_decoded360SeiDumpFileName, m_SEIs, sps );
+#endif
     m_accessUnitSeiPayLoadTypes.push_back(std::tuple<NalUnitType, int, SEI::PayloadType>(nalu.m_nalUnitType, nalu.m_nuhLayerId, m_SEIs.back()->payloadType()));
     delete m_prefixSEINALUs.front();
     m_prefixSEINALUs.pop_front();
@@ -2162,6 +2219,9 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_pcPic->setDecodingOrderNumber(m_decodingOrderCounter);
     m_decodingOrderCounter++;
     m_pcPic->setPictureType(nalu.m_nalUnitType);
+#if JVET_S0155_EOS_NALU_CHECK
+    checkPicTypeAfterEos();
+#endif
     // store sub-picture numbers, sizes, and locations with a picture
     pcSlice->getPic()->numSubpics = sps->getNumSubPics();
     pcSlice->getPic()->subpicWidthInCTUs.clear();
@@ -2680,6 +2740,9 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
         const SPS *sps = m_parameterSetManager.getActiveSPS();
         const VPS *vps = m_parameterSetManager.getVPS(sps->getVPSId());
         m_seiReader.parseSEImessage( &(nalu.getBitstream()), m_pcPic->SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, sps, m_HRD, m_pDecodedSEIOutputStream );
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+        m_seiCfgDump.write360SeiDump(m_decoded360SeiDumpFileName, m_pcPic->SEIs, sps);
+#endif
         m_accessUnitSeiPayLoadTypes.push_back(std::tuple<NalUnitType, int, SEI::PayloadType>(nalu.m_nalUnitType, nalu.m_nuhLayerId, m_pcPic->SEIs.back()->payloadType()));
       }
       else
@@ -2712,14 +2775,17 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       m_prevPOC = MAX_INT;
       m_prevSliceSkipped = false;
       m_skippedPOC = 0;
+      m_accessUnitEos[nalu.m_nuhLayerId] = true;
+#if JVET_S0155_EOS_NALU_CHECK
+      m_prevEOS[nalu.m_nuhLayerId] = true;
+#endif
       return false;
 
     case NAL_UNIT_ACCESS_UNIT_DELIMITER:
       {
         AUDReader audReader;
         uint32_t picType;
-        uint32_t audIrapOrGdrAuFlag;
-        audReader.parseAccessUnitDelimiter(&(nalu.getBitstream()), audIrapOrGdrAuFlag, picType);
+        audReader.parseAccessUnitDelimiter(&(nalu.getBitstream()), m_audIrapOrGdrAuFlag, picType);
         return !m_bFirstSliceInPicture;
       }
 

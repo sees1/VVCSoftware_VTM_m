@@ -72,6 +72,9 @@ protected:
   std::string   m_colourRemapSEIFileName;             ///< output Colour Remapping file name
   std::vector<int> m_targetDecLayerIdSet;             ///< set of LayerIds to be included in the sub-bitstream extraction process.
   std::string   m_outputDecodedSEIMessagesFilename;   ///< filename to output decoded SEI messages to. If '-', then use stdout. If empty, do not output details.
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  std::string   m_outputDecoded360SEIMessagesFilename;   ///< filename to output decoded 360 SEI messages to.
+#endif
 
 
   bool          m_bClipOutputVideoToRec709Range;      ///< If true, clip the output video to the Rec 709 range on saving.

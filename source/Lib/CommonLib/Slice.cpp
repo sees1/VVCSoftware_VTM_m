@@ -57,7 +57,9 @@ Slice::Slice()
 , m_prevIRAPSubpicType            ( NAL_UNIT_INVALID )
 , m_rpl0Idx                       ( -1 )
 , m_rpl1Idx                       ( -1 )
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
 , m_colourPlaneId                 ( 0 )
+#endif
 , m_eNalUnitType                  ( NAL_UNIT_CODED_SLICE_IDR_W_RADL )
 , m_pictureHeaderInSliceHeader   ( false )
 , m_eSliceType                    ( I_SLICE )
@@ -161,7 +163,9 @@ void Slice::initSlice()
     m_aiNumRefIdx[i]      = 0;
   }
   m_colFromL0Flag = true;
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   m_colourPlaneId = 0;
+#endif
   m_colRefIdx = 0;
   m_lmcsEnabledFlag = 0;
   m_explicitScalingListUsed = 0;
@@ -641,8 +645,14 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 
   bool fieldSeqFlag = getSPS()->getFieldSeqFlag();
 
-
   int layerIdx = m_pcPic->cs->vps == nullptr ? 0 : m_pcPic->cs->vps->getGeneralLayerIdx(m_pcPic->layerId);
+
+#if JVET_S0160_ASPECT1_ASPECT9
+  if ( m_pcPic->cs->vps && !m_pcPic->cs->vps->getIndependentLayerFlag(layerIdx) && (pRPL0->getNumberOfInterLayerPictures() || pRPL1->getNumberOfInterLayerPictures()))
+  {
+    CHECK( getPicHeader()->getPocMsbPresentFlag(), "The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture" );
+  }
+#endif
 
   for (int i = 0; i < numEntriesL0; i++)
   {
@@ -2691,7 +2701,9 @@ SPS::SPS()
 , m_SBT                       ( false )
 , m_ISP                       ( false )
 , m_chromaFormatIdc           (CHROMA_420)
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
 , m_separateColourPlaneFlag   ( 0 )
+#endif
 , m_uiMaxTLayers              (  1)
 , m_ptlDpbHrdParamsPresentFlag (1)
 , m_SubLayerDpbParamsFlag      (0)

@@ -96,6 +96,27 @@ protected:
   HRD m_nestedHrd;
 };
 
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+class SeiCfgFileDump
+{
+public:
+  SeiCfgFileDump()
+  : m_360SEIMessageDumped(false)
+  {};
+  virtual ~SeiCfgFileDump() {};
+
+  void write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps);
+
+protected:
+  void xDumpSEIEquirectangularProjection     (SEIEquirectangularProjection &sei, const SPS* sps, std::string decoded360MessageFileName);
+  void xDumpSEIGeneralizedCubemapProjection  (SEIGeneralizedCubemapProjection &sei, const SPS* sps, std::string decoded360MessageFileName);
+
+  bool m_360SEIMessageDumped;
+
+};
+
+
+#endif
 
 //! \}
 

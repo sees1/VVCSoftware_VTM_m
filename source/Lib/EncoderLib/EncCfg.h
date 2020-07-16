@@ -175,6 +175,9 @@ protected:
   bool      m_printSequenceMSE;
   bool      m_cabacZeroWordPaddingEnabled;
 
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  bool      m_gciPresentFlag;
+#endif
   bool      m_onePictureOnlyConstraintFlag;
   bool      m_bIntraOnlyConstraintFlag;
   uint32_t  m_maxBitDepthConstraintIdc;
@@ -774,6 +777,10 @@ public:
   void      setMaxChromaFormatConstraintIdc(uint32_t u) { m_maxChromaFormatConstraintIdc = u; }
   bool      getFrameConstraintFlag() const { return m_bFrameConstraintFlag; }
   void      setFrameConstraintFlag(bool bVal) { m_bFrameConstraintFlag = bVal; }
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  bool          getGciPresentFlag() const { return m_gciPresentFlag; }
+  void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
+#endif
 
   bool          getSingleLayerConstraintFlag() const { return m_singleLayerConstraintFlag; }
   void          setSingleLayerConstraintFlag(bool bVal) { m_singleLayerConstraintFlag = bVal; }

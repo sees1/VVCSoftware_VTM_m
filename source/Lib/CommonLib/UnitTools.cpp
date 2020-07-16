@@ -922,6 +922,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
   const CodingStructure &cs  = *pu.cs;
   const Slice &slice         = *pu.cs->slice;
   const uint32_t maxNumMergeCand = pu.cs->sps->getMaxNumMergeCand();
+  CHECK (maxNumMergeCand > MRG_MAX_NUM_CANDS, "selected maximum number of merge candidate exceeds global limit");
   for (uint32_t ui = 0; ui < maxNumMergeCand; ++ui)
   {
     mrgCtx.BcwIdx[ui] = BCW_DEFAULT;

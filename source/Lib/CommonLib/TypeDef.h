@@ -50,18 +50,43 @@
 #include <assert.h>
 #include <cassert>
 
-
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
+
+#define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
+
+#define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
+
+#define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
+
+#define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
+
+#define JVET_S0221_NUM_VB_CHECK                           1 // JVET_S0221: Constraints on the number of virtual boundaries
+
+#define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
+
+#define JVET_S0063_VPS_SIGNALLING                         1 // Modifications to VPS signalling - conditionally signal vps_num_ptls_minus1
+
+#define JVET_S0065_SPS_INFERENCE_RULE                     1 // JVET_S0065_PROPOSAL1: Inference rule for sps_virtual_boundaries_present_flag
+
+#define JVET_S0155_EOS_NALU_CHECK                         1 // JVET-S0155: Constraints on EOS NAL units
+
+#define JVET_S0160_ASPECT1_ASPECT9                        1 // JVET-S0160: Aspect 1 Infer the value of pps_loop_filter_across_tiles_enabled_flag to be equal to 0 (instead of 1) when not present
+                                                            //             Aspect 9 The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture
 
 #define JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT       1 // JVET-S0071 : shortcut when all subpictures have the same size
 
 //########### place macros to be be kept below this line ###############
+#define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
+
 #define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT                 1 // JVET-R0351: high bit depth coding support (syntax changes, no mathematical differences for CTCs)
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
 
 #define JVET_R0164_MEAN_SCALED_SATD                       1 // JVET-R0164: Use a mean scaled version of SATD in encoder decisions
 
 #define JVET_M0497_MATRIX_MULT                            0 // 0: Fast method; 1: Matrix multiplication
+
+#define JVET_R0107_BITSTREAM_EXTACTION                    1 // JVET-R0107 Proposal 3:Bitsteam extraction modifications
 
 #define APPLY_SBT_SL_ON_MTS                               1 // apply save & load fast algorithm on inter MTS when SBT is on
 

@@ -2664,6 +2664,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
           RefPicList eCurRefList = (curRefList ? REF_PIC_LIST_1 : REF_PIC_LIST_0);
           int refIdxCur = cs.slice->getSymRefIdx( curRefList );
           int refIdxTar = cs.slice->getSymRefIdx( tarRefList );
+          CHECK (refIdxCur==-1 || refIdxTar==-1, "Uninitialized reference index not allowed");
 
           if ( aacAMVPInfo[curRefList][refIdxCur].mvCand[0] == aacAMVPInfo[curRefList][refIdxCur].mvCand[1] )
             aacAMVPInfo[curRefList][refIdxCur].numCand = 1;

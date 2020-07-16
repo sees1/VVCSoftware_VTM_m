@@ -187,6 +187,12 @@ uint32_t calcChecksum(const CPelUnitBuf& pic, PictureHash &digest, const BitDept
  */
 uint32_t calcMD5(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths)
 {
+  return calcMD5WithCropping(pic, digest, bitDepths, 0, 0, 0, 0);
+}
+
+uint32_t calcMD5WithCropping(const CPelUnitBuf &pic, PictureHash &digest, const BitDepths &bitDepths,
+                             const int leftOffset, const int rightOffset, const int topOffset, const int bottomOffset)
+{
   /* choose an md5_plane packing function based on the system bitdepth */
   typedef void (*MD5PlaneFunc)(MD5&, const Pel*, uint32_t, uint32_t, uint32_t);
   MD5PlaneFunc md5_plane_func;
@@ -197,17 +203,26 @@ uint32_t calcMD5(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &b
 
   for (uint32_t chan = 0; chan< (uint32_t)pic.bufs.size(); chan++)
   {
-    const ComponentID compID=ComponentID(chan);
-    const CPelBuf area = pic.get(compID);
+    const ComponentID compID           = ComponentID(chan);
+    const CPelBuf     area             = pic.get(compID);
+    const int         chromaScaleX     = getComponentScaleX(compID, pic.chromaFormat);
+    const int         chromaScaleY     = getComponentScaleY(compID, pic.chromaFormat);
+    const int         compLeftOffset   = leftOffset >> chromaScaleX;
+    const int         compRightOffset  = rightOffset >> chromaScaleX;
+    const int         compTopOffset    = topOffset >> chromaScaleY;
+    const int         compBottomOffset = bottomOffset >> chromaScaleY;
     md5_plane_func = bitDepths.recon[toChannelType(compID)] <= 8 ? (MD5PlaneFunc)md5_plane<1> : (MD5PlaneFunc)md5_plane<2>;
     uint8_t tmp_digest[MD5_DIGEST_STRING_LENGTH];
-    md5_plane_func(md5[compID], area.bufAt(0, 0), area.width, area.height, area.stride );
+    md5_plane_func(md5[compID], area.bufAt(compLeftOffset, compTopOffset),
+                   area.width - compRightOffset - compLeftOffset, area.height - compTopOffset - compBottomOffset,
+                   area.stride);
     md5[compID].finalize(tmp_digest);
-    for(uint32_t i=0; i<MD5_DIGEST_STRING_LENGTH; i++)
+    for (uint32_t i = 0; i < MD5_DIGEST_STRING_LENGTH; i++)
     {
       digest.hash.push_back(tmp_digest[i]);
     }
   }
+
   return 16;
 }
 

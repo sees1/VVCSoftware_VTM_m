@@ -124,6 +124,10 @@ uint32_t DecApp::decode()
 
   bool bPicSkipped = false;
 
+#if JVET_S0155_EOS_NALU_CHECK
+  bool isEosPresentInPu = false;
+#endif
+
   while (!!bitstreamFile)
   {
     InputNALUnit nalu;
@@ -194,6 +198,18 @@ uint32_t DecApp::decode()
           bPicSkipped = true;
         }
       }
+#if JVET_S0155_EOS_NALU_CHECK
+      // once an EOS NAL unit appears in the current PU, mark the variable isEosPresentInPu as true
+      if (nalu.m_nalUnitType == NAL_UNIT_EOS)
+      {
+        isEosPresentInPu = true;
+      }
+      // within the current PU, only EOS and EOB are allowed to be sent after an EOS nal unit
+      if(isEosPresentInPu)
+      {
+        CHECK(nalu.m_nalUnitType != NAL_UNIT_EOS && nalu.m_nalUnitType != NAL_UNIT_EOB, "When an EOS NAL unit is present in a PU, it shall be the last NAL unit among all NAL units within the PU other than other EOS NAL units or an EOB NAL unit");
+      }
+#endif
     }
 
     if ((bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS) && !m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId) && !bPicSkipped)
@@ -276,6 +292,10 @@ uint32_t DecApp::decode()
     {
       m_cDecLib.checkSeiInPictureUnit();
       m_cDecLib.resetPictureSeiNalus();
+#if JVET_S0155_EOS_NALU_CHECK
+      // reset the EOS present status for the next PU check
+      isEosPresentInPu = false;
+#endif
     }
     if (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS)
     {
@@ -286,10 +306,12 @@ uint32_t DecApp::decode()
     {
       m_cDecLib.CheckNoOutputPriorPicFlagsInAccessUnit();
       m_cDecLib.resetAccessUnitNoOutputPriorPicFlags();
+      m_cDecLib.checkLayerIdIncludedInCvss();
+      m_cDecLib.resetAccessUnitEos();
+      m_cDecLib.resetAudIrapOrGdrAuFlag();
     }
     if(bNewAccessUnit)
     {
-      m_cDecLib.isCvsStart();
       m_cDecLib.checkTidLayerIdInAccessUnit();
       m_cDecLib.resetAccessUnitSeiTids();
       m_cDecLib.checkSEIInAccessUnit();
@@ -325,12 +347,22 @@ void DecApp::writeLineToOutputLog(Picture * pcPic)
 {
   if (m_oplFileStream.is_open() && m_oplFileStream.good())
   {
-    const SPS* sps = pcPic->cs->sps;
-    PictureHash recon_digest;
-    auto numChar = calcMD5(((const Picture*)pcPic)->getRecoBuf(), recon_digest, sps->getBitDepths());
+    const SPS *   sps             = pcPic->cs->sps;
+    ChromaFormat  chromaFormatIDC = sps->getChromaFormatIdc();
+    const Window &conf            = pcPic->getConformanceWindow();
+    const int     leftOffset      = conf.getWindowLeftOffset() * SPS::getWinUnitX(chromaFormatIDC);
+    const int     rightOffset     = conf.getWindowRightOffset() * SPS::getWinUnitX(chromaFormatIDC);
+    const int     topOffset       = conf.getWindowTopOffset() * SPS::getWinUnitY(chromaFormatIDC);
+    const int     bottomOffset    = conf.getWindowBottomOffset() * SPS::getWinUnitY(chromaFormatIDC);
+    PictureHash   recon_digest;
+    auto numChar = calcMD5WithCropping(((const Picture *) pcPic)->getRecoBuf(), recon_digest, sps->getBitDepths(),
+                                       leftOffset, rightOffset, topOffset, bottomOffset);
 
+    const int croppedWidth  = pcPic->Y().width - leftOffset - rightOffset;
+    const int croppedHeight = pcPic->Y().height - topOffset - bottomOffset;
 
-    m_oplFileStream << std::setw(8) << pcPic->getPOC() << "," << std::setw(5) << pcPic->Y().width << "," << std::setw(5) << pcPic->Y().height << "," << hashToString(recon_digest, numChar) << "\n";
+    m_oplFileStream << std::setw(8) << pcPic->getPOC() << "," << std::setw(5) << croppedWidth << "," << std::setw(5)
+                    << croppedHeight << "," << hashToString(recon_digest, numChar) << "\n";
   }
 }
 
@@ -359,6 +391,12 @@ void DecApp::xCreateDecLib()
     std::ostream &os=m_seiMessageFileStream.is_open() ? m_seiMessageFileStream : std::cout;
     m_cDecLib.setDecodedSEIMessageOutputStream(&os);
   }
+#if JVET_S0257_DUMP_360SEI_MESSAGE
+  if (!m_outputDecoded360SEIMessagesFilename.empty())
+  {
+    m_cDecLib.setDecoded360SEIMessageFileName(m_outputDecoded360SEIMessagesFilename);
+  }
+#endif
   m_cDecLib.m_targetSubPicIdx = this->m_targetSubPicIdx;
   m_cDecLib.initScalingList();
 }

@@ -235,6 +235,9 @@ private:
 
 class ConstraintInfo
 {
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  bool              m_gciPresentFlag;
+#endif
   bool              m_nonPackedConstraintFlag;
   bool              m_nonProjectedConstraintFlag;
   bool              m_noResChangeInClvsConstraintFlag;
@@ -300,7 +303,12 @@ class ConstraintInfo
 
 public:
   ConstraintInfo()
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+    : m_gciPresentFlag(true)
+    , m_nonPackedConstraintFlag(false)
+#else
     : m_nonPackedConstraintFlag (false)
+#endif
     , m_nonProjectedConstraintFlag(false)
     , m_noResChangeInClvsConstraintFlag(false)
     , m_oneTilePerPicConstraintFlag(false)
@@ -364,6 +372,11 @@ public:
     , m_noApsConstraintFlag (false)
   {}
 
+
+#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
+  bool          getGciPresentFlag() const { return m_gciPresentFlag; }
+  void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
+#endif
 
   bool          getNonPackedConstraintFlag() const { return m_nonPackedConstraintFlag; }
   void          setNonPackedConstraintFlag(bool b) { m_nonPackedConstraintFlag = b; }
@@ -1274,7 +1287,9 @@ private:
   bool              m_SBT;
   bool              m_ISP;
   ChromaFormat      m_chromaFormatIdc;
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   bool              m_separateColourPlaneFlag;     //!< separate colour plane flag
+#endif
 
   uint32_t              m_uiMaxTLayers;           // maximum number of temporal layers
 
@@ -1454,8 +1469,10 @@ public:
   int                     getLayerId() const                                                              { return m_layerId;                                                    }
   ChromaFormat            getChromaFormatIdc () const                                                     { return m_chromaFormatIdc;                                            }
   void                    setChromaFormatIdc (ChromaFormat i)                                             { m_chromaFormatIdc = i;                                               }
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   void                    setSeparateColourPlaneFlag ( bool b )                                           { m_separateColourPlaneFlag = b;                                       }
   bool                    getSeparateColourPlaneFlag () const                                             { return m_separateColourPlaneFlag;                                    }
+#endif
 
   static int              getWinUnitX (int chromaFormatIdc)                                               { CHECK(chromaFormatIdc < 0 || chromaFormatIdc >= NUM_CHROMA_FORMAT, "Invalid chroma format parameter"); return m_winUnitX[chromaFormatIdc]; }
   static int              getWinUnitY (int chromaFormatIdc)                                               { CHECK(chromaFormatIdc < 0 || chromaFormatIdc >= NUM_CHROMA_FORMAT, "Invalid chroma format parameter"); return m_winUnitY[chromaFormatIdc]; }
@@ -2535,7 +2552,9 @@ private:
   ReferencePictureList        m_localRPL1;            //< RPL for L1 when present in slice header
   int                         m_rpl0Idx;              //< index of used RPL in the SPS or -1 for local RPL in the slice header
   int                         m_rpl1Idx;              //< index of used RPL in the SPS or -1 for local RPL in the slice header
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   int                        m_colourPlaneId;                         //!< 4:4:4 colour plane ID
+#endif
   NalUnitType                m_eNalUnitType;         ///< Nal unit type for the slice
   bool                       m_pictureHeaderInSliceHeader;
   uint32_t                   m_nuhLayerId;           ///< Nal unit layer id
@@ -2784,8 +2803,10 @@ public:
   bool                        isPocRestrictedByDRAP( int poc, bool precedingDRAPinDecodingOrder );
   bool                        isPOCInRefPicList( const ReferencePictureList *rpl, int poc );
   void                        checkConformanceForDRAP( uint32_t temporalId );
+#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   void                        setColourPlaneId( int id )                             { m_colourPlaneId = id;                                         }
   int                         getColourPlaneId() const                               { return m_colourPlaneId;                                       }
+#endif
 
   void                        setLambdas( const double lambdas[MAX_NUM_COMPONENT] )  { for (int component = 0; component < MAX_NUM_COMPONENT; component++) m_lambdas[component] = lambdas[component]; }
   const double*               getLambdas() const                                     { return m_lambdas;                                             }
