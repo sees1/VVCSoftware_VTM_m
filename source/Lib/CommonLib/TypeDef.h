@@ -77,6 +77,8 @@
 
 #define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.
 
+#define JVET_S0156_LEVEL_DEFINITION                       1 // JVET-S0156: On level definitions
+
 #define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
 
 #define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag

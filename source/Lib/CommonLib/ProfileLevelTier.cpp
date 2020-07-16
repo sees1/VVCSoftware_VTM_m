@@ -56,6 +56,24 @@ static const uint64_t MAX_CNFUINT64 = std::numeric_limits<uint64_t>::max();
 
 static const LevelTierFeatures mainLevelTierInfo[] =
 {
+#if JVET_S0156_LEVEL_DEFINITION
+      //  level,       maxlumaps,      maxcpb[tier],,  maxSlicesPerAu,maxTilesPerAu,cols, maxLumaSr,       maxBr[tier],,    minCr[tier],,
+    { Level::LEVEL1  ,    36864, {      350,        0 },       16,        1,        1,     552960ULL, {     128,        0 }, { 2, 2} },
+    { Level::LEVEL2  ,   122880, {     1500,        0 },       16,        1,        1,    3686400ULL, {    1500,        0 }, { 2, 2} },
+    { Level::LEVEL2_1,   245760, {     3000,        0 },       20,        1,        1,    7372800ULL, {    3000,        0 }, { 2, 2} },
+    { Level::LEVEL3  ,   552960, {     6000,        0 },       30,        4,        2,   16588800ULL, {    6000,        0 }, { 2, 2} },
+    { Level::LEVEL3_1,   983040, {    10000,        0 },       40,        9,        3,   33177600ULL, {   10000,        0 }, { 2, 2} },
+    { Level::LEVEL4  ,  2228224, {    12000,    30000 },       75,        2,        5,   66846720ULL, {   12000,    30000 }, { 4, 4} },
+    { Level::LEVEL4_1,  2228224, {    20000,    50000 },       75,        2,        5,  133693440ULL, {   20000,    50000 }, { 4, 4} },
+    { Level::LEVEL5  ,  8912896, {    25000,   100000 },      200,      110,       10,  267386880ULL, {   25000,   100000 }, { 6, 4} },
+    { Level::LEVEL5_1,  8912896, {    40000,   160000 },      200,      110,       10,  534773760ULL, {   40000,   160000 }, { 8, 4} },
+    { Level::LEVEL5_2,  8912896, {    60000,   240000 },      200,      110,       10, 1069547520ULL, {   60000,   240000 }, { 8, 4} },
+    { Level::LEVEL6  , 35651584, {    80000,   240000 },      600,      440,       20, 1069547520ULL, {   60000,   240000 }, { 8, 4} },
+    { Level::LEVEL6_1, 35651584, {   120000,   480000 },      600,      440,       20, 2139095040ULL, {  120000,   480000 }, { 8, 4} },
+    { Level::LEVEL6_2, 35651584, {   180000,   800000 },      600,      440,       20, 4278190080ULL, {  240000,   800000 }, { 8, 4} },
+    { Level::LEVEL15_5, MAX_UINT,{ MAX_UINT, MAX_UINT }, MAX_UINT, MAX_UINT, MAX_UINT, MAX_CNFUINT64, {MAX_UINT, MAX_UINT }, { 0, 0} },
+    { Level::NONE    }
+#else
     //  level        , maxlumaps,      maxcpb[tier],,    maxSlice,    tile rows, cols,     maxLumaSr,       maxBr[tier],,  , minCr[tier],,
     { Level::LEVEL1  ,    36864, {      350,        0 },       16,        1,        1,     552960ULL, {     128,        0 }, { 2, 2} },
     { Level::LEVEL2  ,   122880, {     1500,        0 },       16,        1,        1,    3686400ULL, {    1500,        0 }, { 2, 2} },
@@ -72,6 +90,7 @@ static const LevelTierFeatures mainLevelTierInfo[] =
     { Level::LEVEL6_2, 35651584, {   180000,   800000 },      600,       22,       20, 4278190080ULL, {  240000,   800000 }, { 8, 4} },
     { Level::LEVEL15_5, MAX_UINT, { MAX_UINT, MAX_UINT }, MAX_UINT, MAX_UINT, MAX_UINT, MAX_CNFUINT64, {MAX_UINT, MAX_UINT }, { 0, 0} },
     { Level::NONE    }
+#endif
 };
 
 static const ProfileFeatures validProfiles[] =
