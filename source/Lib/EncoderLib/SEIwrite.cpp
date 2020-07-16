@@ -272,7 +272,9 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
   WRITE_CODE( sei.m_cpbRemovalDelayLength - 1,        5, "cpb_removal_delay_length_minus1" );
   CHECK (sei.m_dpbOutputDelayLength < 1, "sei.m_dpbOutputDelayLength must be > 0");
   WRITE_CODE( sei.m_dpbOutputDelayLength - 1,         5, "dpb_output_delay_length_minus1" );
+#if !JVET_S0185_PROPOSAL2_SEI_CLEANUP
   WRITE_FLAG(sei.m_altCpbParamsPresentFlag, "alt_cpb_params_present_flag");
+#endif
   WRITE_FLAG( sei.m_bpDecodingUnitHrdParamsPresentFlag, "bp_decoding_unit_hrd_params_present_flag"  );
   if( sei.m_bpDecodingUnitHrdParamsPresentFlag )
   {
@@ -339,6 +341,9 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
       WRITE_UVLC( sei.m_dpbOutputTidOffset[i], "dpb_output_tid_offset[i]" );
     }
   }
+#if JVET_S0185_PROPOSAL2_SEI_CLEANUP
+  WRITE_FLAG(sei.m_altCpbParamsPresentFlag, "bp_alt_cpb_params_present_flag");
+#endif
   if (sei.m_altCpbParamsPresentFlag)
   {
     WRITE_FLAG(sei.m_useAltCpbParamsFlag, "use_alt_cpb_params_flag");

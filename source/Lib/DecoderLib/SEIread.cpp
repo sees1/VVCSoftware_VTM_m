@@ -673,7 +673,9 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   sei_read_code( pDecodedMessageOutputStream, 5, code, "initial_cpb_removal_delay_length_minus1" );     sei.m_initialCpbRemovalDelayLength = code + 1;
   sei_read_code( pDecodedMessageOutputStream, 5, code, "cpb_removal_delay_length_minus1" );             sei.m_cpbRemovalDelayLength        = code + 1;
   sei_read_code( pDecodedMessageOutputStream, 5, code, "dpb_output_delay_length_minus1" );              sei.m_dpbOutputDelayLength         = code + 1;
+#if !JVET_S0185_PROPOSAL2_SEI_CLEANUP
   sei_read_flag( pDecodedMessageOutputStream, code, "alt_cpb_params_present_flag");                     sei.m_altCpbParamsPresentFlag      = code;
+#endif
   sei_read_flag( pDecodedMessageOutputStream, code, "bp_decoding_unit_hrd_params_present_flag" );       sei.m_bpDecodingUnitHrdParamsPresentFlag = code;
   if( sei.m_bpDecodingUnitHrdParamsPresentFlag )
   {
@@ -755,6 +757,10 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
     }
     sei.m_dpbOutputTidOffset[sei.m_bpMaxSubLayers-1] = 0;
   }
+#if JVET_S0185_PROPOSAL2_SEI_CLEANUP
+  sei_read_flag(pDecodedMessageOutputStream, code, "bp_alt_cpb_params_present_flag");
+  sei.m_altCpbParamsPresentFlag = code;
+#endif
   if (sei.m_altCpbParamsPresentFlag)
   {
     sei_read_flag(pDecodedMessageOutputStream, code, "use_alt_cpb_params_flag"); sei.m_useAltCpbParamsFlag = code;
