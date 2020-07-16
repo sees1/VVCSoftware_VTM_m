@@ -55,6 +55,7 @@
 
 #define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
+#define JVET_S0234_ACT_CRS_FIX                            1 // JVET-S0234: perform chroma residual scaling in RGB domain when ACT is on
 #define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
 
 #define JVET_S0221_NUM_VB_CHECK                           1 // JVET_S0221: Constraints on the number of virtual boundaries

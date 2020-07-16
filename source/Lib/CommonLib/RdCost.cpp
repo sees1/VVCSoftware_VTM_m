@@ -83,7 +83,11 @@ void RdCost::setLambda( double dLambda, const BitDepths &bitDepths )
   m_dLambdaMotionSAD    = sqrt(m_dLambda);
 }
 
+#if JVET_S0234_ACT_CRS_FIX
+void RdCost::lambdaAdjustColorTrans(bool forward, ComponentID componentID, bool applyChromaScale, int* resScaleInv)
+#else
 void RdCost::lambdaAdjustColorTrans(bool forward, ComponentID componentID)
+#endif
 {
   if (m_resetStore)
   {
@@ -115,6 +119,15 @@ void RdCost::lambdaAdjustColorTrans(bool forward, ComponentID componentID)
 
   m_dLambda = m_lambdaStore[m_pairCheck][componentID];
   m_DistScale = m_DistScaleStore[m_pairCheck][componentID];
+#if JVET_S0234_ACT_CRS_FIX
+  if (applyChromaScale)
+  {
+    CHECK(m_pairCheck == 0 || componentID == COMPONENT_Y, "wrong lambda adjustment for CS");
+    double cResScale = (double)(1 << CSCALE_FP_PREC) / (double)(*resScaleInv);
+    m_dLambda = m_dLambda / (cResScale*cResScale);
+    m_DistScale = double(1 << SCALE_BITS) / m_dLambda;
+  }
+#endif
   if (m_pairCheck == 0)
   {
     CHECK(m_DistScale != m_DistScaleUnadjusted, "lambda should be adjusted to the original value");

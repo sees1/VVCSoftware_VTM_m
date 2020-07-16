@@ -3458,6 +3458,7 @@ void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &c
     }
   }
 
+#if !JVET_S0234_ACT_CRS_FIX
   if (flag && uiAbsSum > 0 && isChroma(compID) && slice.getPicHeader()->getLmcsChromaResidualScaleFlag())
   {
     piResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(compID));
@@ -3466,6 +3467,7 @@ void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &c
       crResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(COMPONENT_Cr));
     }
   }
+#endif
   if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
   m_pcTrQuant->lambdaAdjustColorTrans(false);
 
@@ -4156,6 +4158,16 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
     PelUnitBuf predBuf = csFull->getPredBuf(tu);
     PelUnitBuf resiBuf = csFull->getResiBuf(tu);
     PelUnitBuf orgResiBuf = csFull->getOrgResiBuf(tu);
+#if JVET_S0234_ACT_CRS_FIX
+    bool doReshaping = (slice.getPicHeader()->getLmcsEnabledFlag() && slice.getPicHeader()->getLmcsChromaResidualScaleFlag() && (slice.isIntra() || m_pcReshape->getCTUFlag()) && (tu.blocks[COMPONENT_Cb].width * tu.blocks[COMPONENT_Cb].height > 4));
+    if (doReshaping)
+    {
+      const Area      area = tu.Y().valid() ? tu.Y() : Area(recalcPosition(tu.chromaFormat, tu.chType, CHANNEL_TYPE_LUMA, tu.blocks[tu.chType].pos()), recalcSize(tu.chromaFormat, tu.chType, CHANNEL_TYPE_LUMA, tu.blocks[tu.chType].size()));
+      const CompArea &areaY = CompArea(COMPONENT_Y, tu.chromaFormat, area);
+      int             adj = m_pcReshape->calculateChromaAdjVpduNei(tu, areaY);
+      tu.setChromaAdj(adj);
+    }
+#endif
 
     for (int i = 0; i < getNumberValidComponents(tu.chromaFormat); i++)
     {
@@ -4187,6 +4199,14 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
         piResi.rspSignal(m_pcReshape->getFwdLUT());
         piResi.subtract(tmpPred);
       }
+#if JVET_S0234_ACT_CRS_FIX
+      else if (doReshaping && (compID != COMPONENT_Y))
+      {
+        piResi.subtract(piPred);
+        int cResScaleInv = tu.getChromaAdj();
+        piResi.scaleSignal(cResScaleInv, 1, slice.clpRng(compID));
+      }
+#endif
       else
         piResi.subtract(piPred);
     }
@@ -4482,6 +4502,7 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
 
     tu.jointCbCr = 0;
 
+#if !JVET_S0234_ACT_CRS_FIX
     bool doReshaping = (slice.getLmcsEnabledFlag() && slice.getPicHeader()->getLmcsChromaResidualScaleFlag() && (slice.isIntra() || m_pcReshape->getCTUFlag()) && (cbArea.width * cbArea.height > 4));
     if (doReshaping)
     {
@@ -4490,18 +4511,21 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       int             adj = m_pcReshape->calculateChromaAdjVpduNei(tu, areaY);
       tu.setChromaAdj(adj);
     }
+#endif
 
     CompStorage  orgResiCb[5], orgResiCr[5]; // 0:std, 1-3:jointCbCr (placeholder at this stage), 4:crossComp
     orgResiCb[0].create(cbArea);
     orgResiCr[0].create(crArea);
     orgResiCb[0].copyFrom(csFull->getOrgResiBuf(cbArea));
     orgResiCr[0].copyFrom(csFull->getOrgResiBuf(crArea));
+#if !JVET_S0234_ACT_CRS_FIX
     if (doReshaping)
     {
       int cResScaleInv = tu.getChromaAdj();
       orgResiCb[0].scaleSignal(cResScaleInv, 1, slice.clpRng(COMPONENT_Cb));
       orgResiCr[0].scaleSignal(cResScaleInv, 1, slice.clpRng(COMPONENT_Cr));
     }
+#endif
 
     // 3.1 regular chroma residual coding
     csFull->getResiBuf(cbArea).copyFrom(orgResiCb[0]);
@@ -4539,7 +4563,21 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
         }
       }
       if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
+#if JVET_S0234_ACT_CRS_FIX
+      {
+        if (doReshaping)
+        {
+          int cResScaleInv = tu.getChromaAdj();
+          m_pcRdCost->lambdaAdjustColorTrans(true, compID, true, &cResScaleInv);
+        }
+        else
+        {
+          m_pcRdCost->lambdaAdjustColorTrans(true, compID);
+        }
+      }
+#else
         m_pcRdCost->lambdaAdjustColorTrans(true, compID);
+#endif
 
       TempCtx ctxBegin(m_CtxCache);
       ctxBegin = m_CABACEstimator->getCtx();
@@ -4616,6 +4654,12 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       PelBuf            piPred = csFull->getPredBuf(area);
       PelBuf            piResi = invColorTransResidual.bufs[compID];
 
+#if JVET_S0234_ACT_CRS_FIX
+      if (doReshaping && (compID != COMPONENT_Y))
+      {
+        piResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(compID));
+      }
+#endif
       piReco.reconstruct(piPred, piResi, cs.slice->clpRng(compID));
 
       if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcEncCfg->getLmcs()
@@ -4724,6 +4768,12 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
           PelBuf            piPred = csFull->getPredBuf(area);
           PelBuf            piResi = invColorTransResidual.bufs[compID];
 
+#if JVET_S0234_ACT_CRS_FIX
+          if (doReshaping && (compID != COMPONENT_Y))
+          {
+            piResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(compID));
+          }
+#endif
           piReco.reconstruct(piPred, piResi, cs.slice->clpRng(compID));
           if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcEncCfg->getLmcs()
             & slice.getLmcsEnabledFlag() && (m_pcReshape->getCTUFlag() || (isChroma(compID) && m_pcEncCfg->getReshapeIntraCMD()))))
