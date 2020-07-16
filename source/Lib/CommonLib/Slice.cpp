@@ -658,7 +658,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
   {
     if (pRPL0->isInterLayerRefPic(i))
     {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, m_pRPL0->getInterLayerRefPicIdx(i)));
+      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL0->getInterLayerRefPicIdx(i)));
       pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
       refPicPOC = pcRefPic->getPOC();
     }
@@ -717,7 +717,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
   {
     if (pRPL1->isInterLayerRefPic(i))
     {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, m_pRPL1->getInterLayerRefPicIdx(i)));
+      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL1->getInterLayerRefPicIdx(i)));
       pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
       refPicPOC = pcRefPic->getPOC();
     }
