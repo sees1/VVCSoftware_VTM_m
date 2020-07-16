@@ -166,6 +166,8 @@
 
 #define JVET_S0158_SUB_BITSTREAM_EXT                      1 // JVET-S0158: On the general sub-bitstream extraction process
 
+#define JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP     1 // JVET-S0181 Proposal2: Move signalling of bp_max_sublayers_minus1 and conditionally signal bp_cpb_removal_delay_deltas_present_flag, bp_num_cpb_removal_delay_deltas_minus1, and bp_cpb_removal_delay
+
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
