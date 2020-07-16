@@ -326,7 +326,11 @@ public:
   inline std::vector<double>& getLumaLevelWeightTable        ()                   { return m_lumaLevelToWeightPLUT; }
 #endif
 
+#if JVET_S0234_ACT_CRS_FIX
+  void           lambdaAdjustColorTrans(bool forward, ComponentID compID, bool applyChromaScale = false, int* resScaleInv = NULL);
+#else
   void           lambdaAdjustColorTrans(bool forward, ComponentID compID);
+#endif
   void           resetStore() { m_resetStore = true; }
 
 private:
