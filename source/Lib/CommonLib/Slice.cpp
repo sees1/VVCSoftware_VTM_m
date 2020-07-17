@@ -1123,7 +1123,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
 
   // No RASL pictures shall be present in the bitstream that are associated with
   // an IDR picture.
-  if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL)
+  if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && !pps.getMixedNaluTypesInPicFlag())
   {
     CHECK( this->getAssociatedIRAPType() == NAL_UNIT_CODED_SLICE_IDR_N_LP   ||
            this->getAssociatedIRAPType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL, "Invalid NAL unit type");
@@ -1132,7 +1132,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
   // No RADL pictures shall be present in the bitstream that are associated with
   // a BLA picture having nal_unit_type equal to BLA_N_LP or that are associated
   // with an IDR picture having nal_unit_type equal to IDR_N_LP.
-  if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL)
+  if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL && !pps.getMixedNaluTypesInPicFlag())
   {
     CHECK (this->getAssociatedIRAPType() == NAL_UNIT_CODED_SLICE_IDR_N_LP, "Invalid NAL unit type");
   }
@@ -1155,7 +1155,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
 
     if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getPicHeader()->getNoOutputOfPriorPicsFlag() && pcPic->layerId == this->m_nuhLayerId)
     {
-      if (nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL)
+      if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) && !pps.getMixedNaluTypesInPicFlag())
       {
         CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes an IRAP picture with nuh_layer_id "
               "equal to layerId in decoding order shall precede the IRAP picture in output order.");
@@ -1166,7 +1166,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
     {
       if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL)
       {
-        if (this->getAssociatedIRAPPOC() > pcSlice->getAssociatedIRAPPOC())
+        if (this->getAssociatedIRAPPOC() > pcSlice->getAssociatedIRAPPOC() && !pps.getMixedNaluTypesInPicFlag())
         {
           if (this->getAssociatedIRAPPOC() != pcPic->poc)
           {
@@ -1188,7 +1188,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
     }
 
     if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) && 
-      (pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL && pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL))
+      (pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL && pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL) && !pps.getMixedNaluTypesInPicFlag())
     {
       if (pcSlice->getAssociatedIRAPPOC() == this->getAssociatedIRAPPOC() && pcPic->layerId == this->m_nuhLayerId)
       {
@@ -1206,7 +1206,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
       }
     }
 
-    if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL)
+    if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && !pps.getMixedNaluTypesInPicFlag())
     {
       if ((this->getAssociatedIRAPType() == NAL_UNIT_CODED_SLICE_CRA) &&
           this->getAssociatedIRAPPOC() == pcSlice->getAssociatedIRAPPOC())
@@ -1218,7 +1218,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
       }
     }
 
-    if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL)
+    if (nalUnitType == NAL_UNIT_CODED_SLICE_RASL && !pps.getMixedNaluTypesInPicFlag())
     {
       if(this->getAssociatedIRAPType() == NAL_UNIT_CODED_SLICE_CRA)
       {

@@ -1851,7 +1851,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   }
   else
   {
-    CHECK(nalu.m_nalUnitType != m_pcPic->slices[m_uiSliceSegmentIdx - 1]->getNalUnitType(), "The value of NAL unit type shall be the same for all coded slice NAL units of a picture");
+    CHECK(nalu.m_nalUnitType != m_pcPic->slices[m_uiSliceSegmentIdx - 1]->getNalUnitType() && !m_pcPic->cs->pps->getMixedNaluTypesInPicFlag(), "If pps_mixed_nalu_types_in_pic_flag is equal to 0, the value of NAL unit type shall be the same for all coded slice NAL units of a picture");
     m_apcSlicePilot->copySliceInfo( m_pcPic->slices[m_uiSliceSegmentIdx-1] );
   }
 
@@ -2570,7 +2570,7 @@ void DecLib::updatePrevGDRInSameLayer()
 {
   const NalUnitType pictureType = m_pcPic->getPictureType();
 
-  if (pictureType == NAL_UNIT_CODED_SLICE_GDR)
+  if (pictureType == NAL_UNIT_CODED_SLICE_GDR && !m_pcPic->cs->pps->getMixedNaluTypesInPicFlag())
   {
     m_prevGDRInSameLayerPOC[m_pcPic->layerId] = m_pcPic->getPOC();
   }
@@ -2580,7 +2580,7 @@ void DecLib::updateAssociatedIRAP()
 {
   const NalUnitType pictureType = m_pcPic->getPictureType();
 
-  if (pictureType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || pictureType == NAL_UNIT_CODED_SLICE_IDR_N_LP || pictureType == NAL_UNIT_CODED_SLICE_CRA)
+  if ((pictureType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || pictureType == NAL_UNIT_CODED_SLICE_IDR_N_LP || pictureType == NAL_UNIT_CODED_SLICE_CRA) && !m_pcPic->cs->pps->getMixedNaluTypesInPicFlag())
   {
     m_associatedIRAPDecodingOrderNumber[m_pcPic->layerId] = m_pcPic->getDecodingOrderNumber();
     m_pocCRA[m_pcPic->layerId] = m_pcPic->getPOC();
