@@ -1306,8 +1306,20 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_CODE( 4,  uiCode, "sps_video_parameter_set_id" );      pcSPS->setVPSId( uiCode );
   READ_CODE(3, uiCode, "sps_max_sub_layers_minus1");          pcSPS->setMaxTLayers   (uiCode + 1);
   CHECK(uiCode > 6, "Invalid maximum number of T-layer signalled");
+#if JVET_S0186_SPS_CLEANUP
+  READ_CODE(2, uiCode, "chroma_format_idc");
+  pcSPS->setChromaFormatIdc(ChromaFormat(uiCode));
+
+  READ_CODE(2, uiCode, "sps_log2_ctu_size_minus5");
+  pcSPS->setCTUSize(1 << (uiCode + 5));
+  CHECK(uiCode > 2, "sps_log2_ctu_size_minus5 must be less than or equal to 2");
+  unsigned ctbLog2SizeY = uiCode + 5;
+  pcSPS->setMaxCUWidth(pcSPS->getCTUSize());
+  pcSPS->setMaxCUHeight(pcSPS->getCTUSize());
+#else
   READ_CODE(4, uiCode, "sps_reserved_zero_4bits");
   CHECK(uiCode != 0, "sps_reserved_zero_4bits not equal to zero");
+#endif
   READ_FLAG(uiCode, "sps_ptl_dpb_hrd_params_present_flag"); pcSPS->setPtlDpbHrdParamsPresentFlag(uiCode);
 
   if( !pcSPS->getVPSId() )
@@ -1324,7 +1336,9 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   READ_FLAG(uiCode, "gdr_enabled_flag");
   pcSPS->setGDREnabledFlag(uiCode);
+#if !JVET_S0186_SPS_CLEANUP
   READ_CODE(2, uiCode, "chroma_format_idc");                     pcSPS->setChromaFormatIdc( ChromaFormat(uiCode) );
+#endif
 
 #if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   if( pcSPS->getChromaFormatIdc() == CHROMA_444 )
@@ -1364,11 +1378,13 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   const uint32_t chromaArrayType = (int) pcSPS->getSeparateColourPlaneFlag() ? 0 : pcSPS->getChromaFormatIdc();
 #endif
 
+#if !JVET_S0186_SPS_CLEANUP
   READ_CODE(2, uiCode, "sps_log2_ctu_size_minus5");              pcSPS->setCTUSize(1 << (uiCode + 5));
   CHECK(uiCode > 2, "sps_log2_ctu_size_minus5 must be less than or equal to 2");
   unsigned ctbLog2SizeY = uiCode + 5;
   pcSPS->setMaxCUWidth(pcSPS->getCTUSize());
   pcSPS->setMaxCUHeight(pcSPS->getCTUSize());
+#endif
 
   READ_FLAG( uiCode, "subpic_info_present_flag" );               pcSPS->setSubPicInfoPresentFlag(uiCode);
 
@@ -3346,9 +3362,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   PPS* pps = NULL;
   SPS* sps = NULL;
   READ_FLAG(uiCode, "picture_header_in_slice_header_flag");
+  pcSlice->setPictureHeaderInSliceHeader(uiCode);
   if (uiCode)
   {
-    pcSlice->setPictureHeaderInSliceHeader(true);
     parsePictureHeader(picHeader, parameterSetManager, false);
     picHeader->setValid();
   }
@@ -4484,7 +4500,8 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "no_aps_constraint_flag");                     cinfo->setNoApsConstraintFlag(symbol > 0 ? true : false);
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     READ_CODE(8, symbol, "gci_num_reserved_bits");
-    for (int i = 0; i < symbol; i++)
+    uint32_t const numReservedBits = symbol;
+    for (int i = 0; i < numReservedBits; i++)
     {
       READ_FLAG(symbol, "gci_reserved_zero_bit");                    CHECK(symbol != 0, "gci_reserved_zero_bit not equal to zero");
     }
