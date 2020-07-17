@@ -307,6 +307,10 @@ static const int RExt__PREDICTION_WEIGHTING_ANALYSIS_DC_PRECISION = 0; ///< Addi
 
 static const int MAX_TIMECODE_SEI_SETS =                            3; ///< Maximum number of time sets
 
+#if JVET_S0177_SCALABLE_NESTING_SEI
+static const int VCL_ASSOCIATED_SEI_LIST_SIZE =                    17;
+#endif
+
 static const int MAX_CU_DEPTH =                                     7; ///< log2(CTUSize)
 static const int MAX_CU_SIZE =                        1<<MAX_CU_DEPTH;
 static const int MIN_CU_LOG2 =                                      2;

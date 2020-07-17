@@ -51,12 +51,15 @@
 #include <cassert>
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
+
 #define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
 
 #define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
 
 #define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
+#define JVET_S0234_ACT_CRS_FIX                            1 // JVET-S0234: perform chroma residual scaling in RGB domain when ACT is on
 #define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
 
 #define JVET_S0221_NUM_VB_CHECK                           1 // JVET_S0221: Constraints on the number of virtual boundaries
@@ -71,6 +74,18 @@
 
 #define JVET_S0160_ASPECT1_ASPECT9                        1 // JVET-S0160: Aspect 1 Infer the value of pps_loop_filter_across_tiles_enabled_flag to be equal to 0 (instead of 1) when not present
                                                             //             Aspect 9 The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture
+
+#define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.
+
+#define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
+
+#define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
+
+#define JVET_S0177_SCALABLE_NESTING_SEI                   1 // JVET-S0177: Constraints on the scalable nesting SEI message
+
+#define JVET_R0068_ASPECT6_ENC_RESTRICTION                1 // encoder restriction for JVET-R0068 apsect 6
+
+#define JVET_S0186_SPS_CLEANUP                            1 // JVET-S0186: Proposal 1, move sps_chroma_format_idc and sps_log2_ctu_size_minus5 to take place sps_reserved_zero_4bits
 
 #define JVET_S0050_GCI                                    1 // JVET-S0050: Signal new GCI flags no_virtual_boundaries_constraint_flag and no_explicit_scaling_list_constraint_flag
                                                             //             Constrain the value of one_subpic_per_pic_constraint_flag, one_slice_per_pic_constraint_flag and no_aps_constraint_flag
