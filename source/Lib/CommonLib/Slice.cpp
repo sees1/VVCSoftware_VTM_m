@@ -618,7 +618,7 @@ void Slice::checkCRA(const ReferencePictureList* pRPL0, const ReferencePictureLi
       {
         int pocBits = getSPS()->getBitsForPOC();
         int pocMask = (1 << pocBits) - 1;
-        int ltrpPoc = m_pRPL1->getRefPicIdentifier(i) & pocMask;
+        int ltrpPoc = pRPL1->getRefPicIdentifier(i) & pocMask;
         if(pRPL1->getDeltaPocMSBPresentFlag(i))
         {
           ltrpPoc += getPOC() - pRPL1->getDeltaPocMSBCycleLT(i) * (pocMask + 1) - (getPOC() & pocMask);
