@@ -216,12 +216,17 @@ public:
   int  poc;
   uint32_t temporalId;
   int      layerId;
+#if JVET_S0258_SUBPIC_CONSTRAINTS
+  std::vector<SubPic> subPictures;
+  int numSlices;
+#else
   int  numSubpics;
   std::vector<int> subpicWidthInCTUs;
   std::vector<int> subpicHeightInCTUs;
   std::vector<int> subpicCtuTopLeftX;
   std::vector<int> subpicCtuTopLeftY;
   int numSlices;
+#endif
   std::vector<int> sliceSubpicIdx;
 
   bool subLayerNonReferencePictureDueToSTSA;
@@ -232,7 +237,9 @@ public:
   std::vector<bool> m_lossylosslessSliceArray;
   bool interLayerRefPicFlag;
 
+#if !JVET_S0258_SUBPIC_CONSTRAINTS
   std::vector<int> subPicIDs;
+#endif
 
 #if ENABLE_SPLIT_PARALLELISM
   PelStorage m_bufs[PARL_SPLIT_MAX_NUM_JOBS][NUM_PIC_TYPES];

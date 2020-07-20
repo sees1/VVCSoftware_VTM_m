@@ -193,7 +193,9 @@ Picture::Picture()
   m_spliceIdx = NULL;
   m_ctuNums = 0;
   layerId = NOT_VALID;
+#if !JVET_S0258_SUBPIC_CONSTRAINTS
   numSubpics = 1;
+#endif
   numSlices = 1;
 }
 
