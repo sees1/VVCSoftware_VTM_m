@@ -183,6 +183,21 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
   targetSPS.setSubPicId(0, subPic.getSubPicID());
   targetSPS.setMaxPicWidthInLumaSamples(subPic.getSubPicWidthInLumaSample());
   targetSPS.setMaxPicHeightInLumaSamples(subPic.getSubPicHeightInLumaSample());
+
+#if JVET_R0093_SUBPICS_AND_CONF_WINDOW
+  // Set the new conformance window
+  Window& conf = targetSPS.getConformanceWindow();
+  int subpicConfWinLeftOffset = (subPic.getSubPicCtuTopLeftX() == 0) ? conf.getWindowLeftOffset() : 0;
+  int subpicConfWinRightOffset = ((subPic.getSubPicCtuTopLeftX() + subPic.getSubPicWidthInCTUs()) * sourceSPS.getCTUSize() >= sourceSPS.getMaxPicWidthInLumaSamples()) ?
+                                 conf.getWindowRightOffset() : 0;
+  int subpicConfWinTopOffset = (subPic.getSubPicCtuTopLeftY() == 0) ? conf.getWindowTopOffset() : 0;
+  int subpicConfWinBottomOffset = ((subPic.getSubPicCtuTopLeftY() + subPic.getSubPicHeightInCTUs()) * sourceSPS.getCTUSize() >= sourceSPS.getMaxPicHeightInLumaSamples()) ?
+                                  conf.getWindowBottomOffset() : 0;
+  conf.setWindowLeftOffset(subpicConfWinLeftOffset);
+  conf.setWindowRightOffset(subpicConfWinRightOffset);
+  conf.setWindowTopOffset(subpicConfWinTopOffset);
+  conf.setWindowBottomOffset(subpicConfWinBottomOffset);
+#endif
 }
 
 
