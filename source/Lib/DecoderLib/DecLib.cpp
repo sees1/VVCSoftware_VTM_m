@@ -1151,7 +1151,6 @@ void DecLib::checkSeiInPictureUnit()
       {
         isNonFillerPayloadInOneSeiNalUnit = true;
       }
-
 #endif
     }
     while (bs.getNumBitsLeft() > 8);
