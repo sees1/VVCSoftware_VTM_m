@@ -2223,6 +2223,14 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     checkPicTypeAfterEos();
 #endif
     // store sub-picture numbers, sizes, and locations with a picture
+#if JVET_S0258_SUBPIC_CONSTRAINTS
+    pcSlice->getPic()->subPictures.clear();
+
+    for( int subPicIdx = 0; subPicIdx < sps->getNumSubPics(); subPicIdx++ )
+    {
+      pcSlice->getPic()->subPictures.push_back( pps->getSubPic( subPicIdx ) );
+    }
+#else
     pcSlice->getPic()->numSubpics = sps->getNumSubPics();
     pcSlice->getPic()->subpicWidthInCTUs.clear();
     pcSlice->getPic()->subpicHeightInCTUs.clear();
@@ -2235,6 +2243,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       pcSlice->getPic()->subpicCtuTopLeftX.push_back(pps->getSubPic(subPicIdx).getSubPicCtuTopLeftX());
       pcSlice->getPic()->subpicCtuTopLeftY.push_back(pps->getSubPic(subPicIdx).getSubPicCtuTopLeftY());
     }
+#endif
     pcSlice->getPic()->numSlices = pps->getNumSlicesInPic();
     pcSlice->getPic()->sliceSubpicIdx.clear();
   }
@@ -2255,6 +2264,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   pcSlice->scaleRefPicList( scaledRefPic, m_pcPic->cs->picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true );
 
+#if !JVET_S0258_SUBPIC_CONSTRAINTS
   // For each value of i in the range of 0 to sps_num_subpics_minus1, inclusive, when the value of SubpicIdVal[ i ] of a current picture is not equal to the value of SubpicIdVal[ i ] of a reference picture,
   // the active entries of the RPLs of the coded slices in the i-th subpicture of the current picture shall not include that reference picture.
 
@@ -2301,6 +2311,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       }
     }
   }
+#endif
 
     if (!pcSlice->isIntra())
     {
