@@ -460,7 +460,6 @@ void SEIReader::xParseSEIDecodedPictureHash(SEIDecodedPictureHash& sei, uint32_t
   }
 }
 
-
 void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitType nalUnitType, const uint32_t nuhLayerId, uint32_t payloadSize, const VPS *vps, const SPS *sps, std::ostream *decodedMessageOutputStream)
 {
   uint32_t symbol;
@@ -550,6 +549,41 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
     tmpSEIs.clear();
   }
 
+#if JVET_S0177_SCALABLE_NESTING_SEI
+  int vclAssociatedSeiList[VCL_ASSOCIATED_SEI_LIST_SIZE] = { 3, 19, 45, 129, 137, 144, 145, 147, 148, 149, 150, 153, 154, 155, 156, 168, 204 };
+
+  bool containBPorPTorDUIorSLI = false;
+  bool containNoBPorPTorDUIorSLI = false;
+
+  for (auto nestedsei : sei.m_nestedSEIs)
+  {
+    CHECK(nestedsei->payloadType() == SEI::FILLER_PAYLOAD || nestedsei->payloadType() == SEI::SCALABLE_NESTING, "An SEI message that has payloadType equal to filler payload or scalable nesting shall not be contained in a scalable nesting SEI message");
+
+    CHECK(nestedsei->payloadType() != SEI::FILLER_PAYLOAD && nestedsei->payloadType() != SEI::DECODED_PICTURE_HASH && nalUnitType != NAL_UNIT_PREFIX_SEI, "When a scalable nesting SEI message contains an SEI message that has payloadType not equal to filler payload or decoded picture harsh, the SEI NAL unit containing the scalable nesting SEI message shall have nal_unit_type equal to PREFIX_SEI_NUT");
+
+    CHECK(nestedsei->payloadType() == SEI::DECODED_PICTURE_HASH && nalUnitType != NAL_UNIT_SUFFIX_SEI, "When a scalable nesting SEI message contains an SEI message that has payloadType equal to decoded picture harsh, the SEI NAL unit containing the scalable nesting SEI message shall have nal_unit_type equal to SUFFIX_SEI_NUT");
+
+    CHECK(nestedsei->payloadType() == SEI::DECODED_PICTURE_HASH && !sei.m_snSubpicFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to decoded picture hash, the value of sn_subpic_flag shall be equal to 1");
+
+    CHECK(nestedsei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO && sei.m_snSubpicFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to SLI, the value of sn_subpic_flag shall be equal to 0");
+
+    for (int i = 0; i < VCL_ASSOCIATED_SEI_LIST_SIZE; i++)
+    {
+      CHECK(nestedsei->payloadType() == vclAssociatedSeiList[i] && sei.m_snOlsFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to a value in vclAssociatedSeiList, the value of sn_ols_flag shall be equal to 0");
+    }
+
+    if (nestedsei->payloadType() == SEI::BUFFERING_PERIOD || nestedsei->payloadType() == SEI::PICTURE_TIMING || nestedsei->payloadType() == SEI::DECODING_UNIT_INFO || nestedsei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
+    {
+      containBPorPTorDUIorSLI = true;
+      CHECK(!sei.m_snOlsFlag, "When the scalable nesting SEI message contains an SEI message that has payloadType equal to BP, PT, or DUI, or SLI, the value of sn_ols_flag shall be equal to 1");
+    }
+    if (!(nestedsei->payloadType() == SEI::BUFFERING_PERIOD || nestedsei->payloadType() == SEI::PICTURE_TIMING || nestedsei->payloadType() == SEI::DECODING_UNIT_INFO || nestedsei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO))
+    {
+      containNoBPorPTorDUIorSLI = true;
+    }
+  }
+  CHECK(containBPorPTorDUIorSLI && containNoBPorPTorDUIorSLI, "When a scalable nesting SEI message contains a BP, PT, DUI, or SLI SEI message, the scalable nesting SEI message shall not contain any other SEI message with payloadType not equal to BP, PT, DUI, or SLI");
+#else
   bool containBPorPTorDUI   = false;
   bool containNoBPorPTorDUI = false;
   for (auto nestedsei : sei.m_nestedSEIs)
@@ -564,6 +598,7 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
     }
   }
   CHECK(containBPorPTorDUI && containNoBPorPTorDUI, "Scalable Nesting SEI cannot contain timing-related SEI and none-timing-related SEIs at the same time");
+#endif
 
   if (decodedMessageOutputStream)
   {
@@ -638,7 +673,9 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   sei_read_code( pDecodedMessageOutputStream, 5, code, "initial_cpb_removal_delay_length_minus1" );     sei.m_initialCpbRemovalDelayLength = code + 1;
   sei_read_code( pDecodedMessageOutputStream, 5, code, "cpb_removal_delay_length_minus1" );             sei.m_cpbRemovalDelayLength        = code + 1;
   sei_read_code( pDecodedMessageOutputStream, 5, code, "dpb_output_delay_length_minus1" );              sei.m_dpbOutputDelayLength         = code + 1;
+#if !JVET_S0185_PROPOSAL2_SEI_CLEANUP
   sei_read_flag( pDecodedMessageOutputStream, code, "alt_cpb_params_present_flag");                     sei.m_altCpbParamsPresentFlag      = code;
+#endif
   sei_read_flag( pDecodedMessageOutputStream, code, "bp_decoding_unit_hrd_params_present_flag" );       sei.m_bpDecodingUnitHrdParamsPresentFlag = code;
   if( sei.m_bpDecodingUnitHrdParamsPresentFlag )
   {
@@ -653,6 +690,10 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
     sei.m_dpbOutputDelayDuLength = 24;
     sei.m_decodingUnitDpbDuParamsInPicTimingSeiFlag = false;
   }
+
+#if JVET_S0248_HRD_CLEANUP
+  CHECK(sei.m_altCpbParamsPresentFlag && sei.m_bpDecodingUnitHrdParamsPresentFlag,"When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0");
+#endif
 
   sei_read_flag( pDecodedMessageOutputStream, code, "concatenation_flag");
   sei.m_concatenationFlag = code;
@@ -678,7 +719,19 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   }
   sei_read_code( pDecodedMessageOutputStream, 3, code, "bp_max_sub_layers_minus1" );     sei.m_bpMaxSubLayers = code + 1;
   sei_read_uvlc( pDecodedMessageOutputStream, code, "bp_cpb_cnt_minus1" ); sei.m_bpCpbCnt = code + 1;
+#if JVET_S0181_PROPOSAL1
+  if (sei.m_bpMaxSubLayers - 1 > 0)
+  {
+    sei_read_flag(pDecodedMessageOutputStream, code, "bp_sublayer_initial_cpb_removal_delay_present_flag");
+    sei.m_sublayerInitialCpbRemovalDelayPresentFlag = code;
+  }
+  else
+  {
+    sei.m_sublayerInitialCpbRemovalDelayPresentFlag = false;
+  }
+#else
   sei_read_flag(pDecodedMessageOutputStream, code, "sublayer_initial_cpb_removal_delay_present_flag");
+#endif
   sei.m_sublayerInitialCpbRemovalDelayPresentFlag = code;
   for (i = (sei.m_sublayerInitialCpbRemovalDelayPresentFlag ? 0 : sei.m_bpMaxSubLayers - 1); i < sei.m_bpMaxSubLayers; i++)
   {
@@ -708,6 +761,10 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
     }
     sei.m_dpbOutputTidOffset[sei.m_bpMaxSubLayers-1] = 0;
   }
+#if JVET_S0185_PROPOSAL2_SEI_CLEANUP
+  sei_read_flag(pDecodedMessageOutputStream, code, "bp_alt_cpb_params_present_flag");
+  sei.m_altCpbParamsPresentFlag = code;
+#endif
   if (sei.m_altCpbParamsPresentFlag)
   {
     sei_read_flag(pDecodedMessageOutputStream, code, "use_alt_cpb_params_flag"); sei.m_useAltCpbParamsFlag = code;

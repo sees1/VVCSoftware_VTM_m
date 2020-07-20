@@ -256,8 +256,13 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   WRITE_UVLC( pcPPS->getPicWidthInLumaSamples(), "pic_width_in_luma_samples" );
   WRITE_UVLC( pcPPS->getPicHeightInLumaSamples(), "pic_height_in_luma_samples" );
   Window conf = pcPPS->getConformanceWindow();
+#if JVET_R0068_ASPECT6_ENC_RESTRICTION
+  WRITE_FLAG(pcPPS->getConformanceWindowFlag(), "pps_conformance_window_flag");
+  if (pcPPS->getConformanceWindowFlag())
+#else
   WRITE_FLAG(conf.getWindowEnabledFlag(), "pps_conformance_window_flag");
   if (conf.getWindowEnabledFlag())
+#endif
   {
     WRITE_UVLC(conf.getWindowLeftOffset(), "pps_conf_win_left_offset");
     WRITE_UVLC(conf.getWindowRightOffset(), "pps_conf_win_right_offset");
@@ -772,7 +777,12 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   CHECK(pcSPS->getMaxTLayers() == 0, "Maximum number of temporal sub-layers is '0'");
 
   WRITE_CODE(pcSPS->getMaxTLayers() - 1, 3, "sps_max_sub_layers_minus1");
+#if JVET_S0186_SPS_CLEANUP
+  WRITE_CODE(int(pcSPS->getChromaFormatIdc()), 2, "chroma_format_idc");
+  WRITE_CODE(floorLog2(pcSPS->getCTUSize()) - 5, 2, "sps_log2_ctu_size_minus5");
+#else
   WRITE_CODE(0,                          4, "sps_reserved_zero_4bits");
+#endif
   WRITE_FLAG(pcSPS->getPtlDpbHrdParamsPresentFlag(), "sps_ptl_dpb_hrd_params_present_flag");
 
   if( !pcSPS->getVPSId() )
@@ -786,7 +796,9 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
 
   WRITE_FLAG(pcSPS->getGDREnabledFlag(), "gdr_enabled_flag");
+#if !JVET_S0186_SPS_CLEANUP
   WRITE_CODE(int(pcSPS->getChromaFormatIdc ()), 2, "chroma_format_idc");
+#endif
 
 #if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   const ChromaFormat format                = pcSPS->getChromaFormatIdc();
@@ -818,7 +830,9 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(conf.getWindowBottomOffset(), "sps_conf_win_bottom_offset");
   }
 
+#if !JVET_S0186_SPS_CLEANUP
   WRITE_CODE(floorLog2(pcSPS->getCTUSize()) - 5, 2, "sps_log2_ctu_size_minus5");
+#endif
 
   WRITE_FLAG(pcSPS->getSubPicInfoPresentFlag(), "subpic_info_present_flag");
 
@@ -1540,7 +1554,10 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
 #endif
 
   CodingStructure& cs = *picHeader->getPic()->cs;
-  WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
+WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
+#if JVET_S0076_ASPECT1
+  WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
+#endif
   if (picHeader->getGdrOrIrapPicFlag())
   {
     WRITE_FLAG(picHeader->getGdrPicFlag(), "gdr_pic_flag");
@@ -1551,7 +1568,9 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
   {
     WRITE_FLAG(picHeader->getPicIntraSliceAllowedFlag(), "ph_intra_slice_allowed_flag");
   }
+#if !JVET_S0076_ASPECT1
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "non_reference_picture_flag");
+#endif
   // parameter sets
   WRITE_UVLC(picHeader->getPPSId(), "ph_pic_parameter_set_id");
   pps = cs.slice->getPPS();
