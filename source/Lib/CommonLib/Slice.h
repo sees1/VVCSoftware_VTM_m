@@ -2300,6 +2300,9 @@ public:
   CcAlfFilterParam&      getCcAlfAPSParam()  { return m_ccAlfAPSParam; }
   void                   setHasPrefixNalUnitType( bool b )                                { m_hasPrefixNalUnitType = b;                   }
   bool                   getHasPrefixNalUnitType() const                                  { return m_hasPrefixNalUnitType;                }
+#if JVET_R0433
+  bool chromaPresentFlag;
+#endif
 };
 
 struct WPScalingParam
