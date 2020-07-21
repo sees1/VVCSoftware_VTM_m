@@ -193,7 +193,6 @@
 
 #define JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT                1 // JVET-S0071 : shortcut when all subpictures have the same size
 
-
 #define JVET_S0183_VPS_INFORMATION_SIGNALLING             1 // JVET-S0183: Proposal 1, signal vps_num_output_layer_sets_minus1 as vps_num_output_layer_sets_minus2
 
 //########### place macros to be be kept below this line ###############
