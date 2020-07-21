@@ -223,6 +223,8 @@ void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, S
   std::vector<uint32_t> tileRowHeight;
   std::vector<uint32_t> tileColBd;
   std::vector<uint32_t> tileRowBd;
+  int                   subpicTopLeftTileX = -1;
+  int                   subpicTopLeftTileY = -1;
 
   for (int i=0; i<= sourcePPS.getNumTileColumns(); i++)
   {
@@ -230,6 +232,10 @@ void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, S
     if ((currentColBd >= subPic.getSubPicCtuTopLeftX()) && (currentColBd <= (subPic.getSubPicCtuTopLeftX() + subPic.getSubPicWidthInCTUs())))
     {
       tileColBd.push_back(currentColBd - subPic.getSubPicCtuTopLeftX());
+      if (subpicTopLeftTileX == -1)
+      {
+        subpicTopLeftTileX = i;
+      }
     }
   }
   numTileCols=(int)tileColBd.size() - 1;
@@ -249,6 +255,10 @@ void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, S
     if ((currentRowBd >= subPic.getSubPicCtuTopLeftY()) && (currentRowBd <= (subPic.getSubPicCtuTopLeftY() + subPic.getSubPicHeightInCTUs())))
     {
       tileRowBd.push_back(currentRowBd - subPic.getSubPicCtuTopLeftY());
+      if(subpicTopLeftTileY == -1)
+      {
+        subpicTopLeftTileY = i;
+      }
     }
   }
   numTileRows=(int)tileRowBd.size() - 1;
@@ -295,6 +305,11 @@ void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, S
   {
     int targetNumSlices = subPic.getNumSlicesInSubPic();
     targetPPS.setNumSlicesInPic(targetNumSlices);
+    // To avoid the bitstream writer writing tile_idx_delta in the bitstream
+    if ( (targetPPS.getNumSlicesInPic() - 1) <= 1)
+    {
+      targetPPS.setTileIdxDeltaPresentFlag(0);
+    }
 
     for (int i=0, cnt=0; i<sourcePPS.getNumSlicesInPic(); i++)
     {
@@ -310,23 +325,14 @@ void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, S
         cnt++;
       }
     }
-    // renumber tiles to close gaps
+    // Find out new slices tile index after removal of some tiles
     for (int i=0; i<targetPPS.getNumSlicesInPic(); i++)
     {
-      int minVal = MAX_INT;
-      int minPos = -1;
-      for (int j=0; j<targetPPS.getNumSlicesInPic(); j++)
-      {
-        if ((targetPPS.getSliceTileIdx(j) < minVal) && (targetPPS.getSliceTileIdx(j) >= i))
-        {
-          minVal = targetPPS.getSliceTileIdx(j);
-          minPos = j;
-        }
-      }
-      if ( minPos != -1)
-      {
-        targetPPS.setSliceTileIdx(minPos, i);
-      }
+      int tileInPicX = targetPPS.getSliceTileIdx(i) % sourcePPS.getNumTileColumns();
+      int tileInPicY = targetPPS.getSliceTileIdx(i) / sourcePPS.getNumTileColumns();
+      int tileInSubpicX = tileInPicX - subpicTopLeftTileX;
+      int tileInSubpicY = tileInPicY - subpicTopLeftTileY;
+      targetPPS.setSliceTileIdx(i, tileInSubpicY * numTileCols + tileInSubpicX);
     }
 
   }
