@@ -178,7 +178,11 @@ public:
 
   void  parsePredWeightTable( Slice* pcSlice, const SPS *sps );
   void parsePredWeightTable ( PicHeader *picHeader, const SPS *sps );
-  void  parseScalingList    ( ScalingList* scalingList );
+#if JVET_R0433
+  void parseScalingList     ( ScalingList *scalingList, bool aps_chromaPresentFlag );
+#else
+  void  parseScalingList    ( ScalingList *scalingList );
+#endif
   void  decodeScalingList   ( ScalingList *scalingList, uint32_t scalingListId, bool isPredictor);
   void parseReshaper        ( SliceReshapeInfo& sliceReshaperInfo, const SPS* pcSPS, const bool isIntra );
   void alfFilter( AlfParam& alfParam, const bool isChroma, const int altIdx );

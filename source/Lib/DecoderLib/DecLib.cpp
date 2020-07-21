@@ -1254,6 +1254,10 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
         CHECK( aps->getTemporalId() > pSlice->getTLayer(), "TemporalId shall be less than or equal to the TemporalId of the coded slice NAL unit" );
         //ToDO: APS NAL unit containing the APS RBSP shall have nuh_layer_id either equal to the nuh_layer_id of a coded slice NAL unit that referrs it, or equal to the nuh_layer_id of a direct dependent layer of the layer containing a coded slice NAL unit that referrs it.
 
+#if JVET_R0433
+        CHECK( sps->getChromaFormatIdc() == CHROMA_400 && aps->chromaPresentFlag, "When ChromaArrayType is equal to 0, the value of aps_chroma_present_flag of an ALF_APS shall be equal to 0" );
+#endif
+
         CHECK(((sps->getCCALFEnabledFlag() == false) && (aps->getCcAlfAPSParam().newCcAlfFilter[0] || aps->getCcAlfAPSParam().newCcAlfFilter[1])), "When sps_ccalf_enabled_flag is 0, the values of alf_cc_cb_filter_signal_flag and alf_cc_cr_filter_signal_flag shall be equal to 0");
       }
     }
@@ -1356,6 +1360,12 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
         THROW("LMCS APS activation failed!");
       }
 
+#if JVET_R0433
+      CHECK( sps->getChromaFormatIdc() == CHROMA_400 && lmcsAPS->chromaPresentFlag, "When ChromaArrayType is equal to 0, the value of aps_chroma_present_flag of an LMCS_APS shall be equal to 0");
+
+      CHECK( lmcsAPS->getReshaperAPSInfo().maxNbitsNeededDeltaCW - 1 < 0 || lmcsAPS->getReshaperAPSInfo().maxNbitsNeededDeltaCW - 1 > sps->getBitDepth(CHANNEL_TYPE_LUMA) - 2, "The value of lmcs_delta_cw_prec_minus1 of an LMCS_APS shall be in the range of 0 to BitDepth – 2, inclusive" );
+#endif
+
       CHECK( lmcsAPS->getTemporalId() > pSlice->getTLayer(), "TemporalId shall be less than or equal to the TemporalId of the coded slice NAL unit" );
       //ToDO: APS NAL unit containing the APS RBSP shall have nuh_layer_id either equal to the nuh_layer_id of a coded slice NAL unit that referrs it, or equal to the nuh_layer_id of a direct dependent layer of the layer containing a coded slice NAL unit that referrs it.
     }
@@ -1373,6 +1383,11 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
       {
         THROW( "SCALING LIST APS activation failed!" );
       }
+
+#if JVET_R0433
+      CHECK( (sps->getChromaFormatIdc() == CHROMA_400 && scalingListAPS->chromaPresentFlag) || (sps->getChromaFormatIdc() != CHROMA_400 && !scalingListAPS->chromaPresentFlag),
+        "The value of aps_chroma_present_flag of the APS NAL unit having aps_params_type equal to SCALING_APS and adaptation_parameter_set_id equal to ph_scaling_list_aps_id shall be equal to ChromaArrayType  = =  0 ? 0 : 1" );
+#endif
 
       CHECK( scalingListAPS->getTemporalId() > pSlice->getTLayer(), "TemporalId shall be less than or equal to the TemporalId of the coded slice NAL unit" );
       //ToDO: APS NAL unit containing the APS RBSP shall have nuh_layer_id either equal to the nuh_layer_id of a coded slice NAL unit that referrs it, or equal to the nuh_layer_id of a direct dependent layer of the layer containing a coded slice NAL unit that referrs it.

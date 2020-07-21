@@ -51,6 +51,8 @@
 #include <cassert>
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
+
 #define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
 
 #define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
