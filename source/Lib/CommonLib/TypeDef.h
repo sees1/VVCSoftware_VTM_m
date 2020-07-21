@@ -72,6 +72,8 @@
 
 #define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
 
+#define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
+
 #define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
 
 #define JVET_S0045_SIGN                                   1 // JVET-S0045: semantics of strp_entry_sign_flag
