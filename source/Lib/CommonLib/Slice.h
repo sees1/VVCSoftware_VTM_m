@@ -314,8 +314,8 @@ public:
 #else
     : m_nonPackedConstraintFlag (false)
     , m_nonProjectedConstraintFlag(false)
-    , m_noResChangeInClvsConstraintFlag(false)
 #endif
+    , m_noResChangeInClvsConstraintFlag(false)
     , m_oneTilePerPicConstraintFlag(false)
     , m_picHeaderInSliceHeaderConstraintFlag(false)
     , m_oneSlicePerPicConstraintFlag(false)
