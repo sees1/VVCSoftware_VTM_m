@@ -164,6 +164,8 @@
 
 #define JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT            1 // JVET-S0184: Conformance constraints regarding virtual boundary signalling when subpictures are present
 
+#define JVET_S0158_SUB_BITSTREAM_EXT                      1 // JVET-S0158: On the general sub-bitstream extraction process
+
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 

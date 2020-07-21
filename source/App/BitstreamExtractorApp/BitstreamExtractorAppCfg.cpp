@@ -120,7 +120,10 @@ namespace po = df::program_options_lite;
       return false;
     }
   }
+
+#if !JVET_S0158_SUB_BITSTREAM_EXT
   CHECK(m_maxTemporalLayer < -1 || m_maxTemporalLayer > 6, "MaxTemporalLayer shall either be equal -1 (for diabled) or in the range of 0 to 6, inclusive");
+#endif
 
   if (m_bitstreamFileNameIn.empty())
   {
