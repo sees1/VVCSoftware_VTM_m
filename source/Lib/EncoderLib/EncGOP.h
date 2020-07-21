@@ -334,5 +334,19 @@ protected:
 
 //! \}
 
+#if JVET_Q0406_CABAC_ZERO
+class EncBitstreamParams
+{
+public:
+  EncBitstreamParams()
+  : numBinsWritten(0)
+  , numBytesInVclNalUnits(0)
+  {};
+
+  std::size_t numBinsWritten;
+  std::size_t numBytesInVclNalUnits;
+};
+#endif
+
 #endif // __ENCGOP__
 
