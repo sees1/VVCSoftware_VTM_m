@@ -117,18 +117,28 @@ static inline void output_sei_message_header(SEI &sei, std::ostream *pDecodedMes
  // note: for independent parsing no parameter set should not be required here
 void SEIReader::parseSEImessage(InputBitstream* bs, SEIMessages& seis, const NalUnitType nalUnitType, const uint32_t nuh_layer_id, const uint32_t temporalId, const VPS *vps, const SPS *sps, HRD &hrd, std::ostream *pDecodedMessageOutputStream)
 {
+#if JVET_S0178_GENERAL_SEI_CHECK
+  SEIMessages   seiListInCurNalu;
+#endif
   setBitstream(bs);
-
   CHECK(m_pcBitstream->getNumBitsUntilByteAligned(), "Bitstream not aligned");
+
   do
   {
     xReadSEImessage(seis, nalUnitType, nuh_layer_id, temporalId, vps, sps, hrd, pDecodedMessageOutputStream);
-
+#if JVET_S0178_GENERAL_SEI_CHECK
+    seiListInCurNalu.push_back(seis.back());
+#endif
     /* SEI messages are an integer number of bytes, something has failed
     * in the parsing if bitstream not byte-aligned */
     CHECK(m_pcBitstream->getNumBitsUntilByteAligned(), "Bitstream not aligned");
   }
   while (m_pcBitstream->getNumBitsLeft() > 8);
+
+#if JVET_S0178_GENERAL_SEI_CHECK
+  SEIMessages fillerData = getSeisByType(seiListInCurNalu, SEI::FILLER_PAYLOAD);
+  CHECK(fillerData.size() > 0 && fillerData.size() != seiListInCurNalu.size(), "When an SEI NAL unit contains an SEI message with payloadType equal to filler payload, the SEI NAL unit shall not contain any other SEI message with payloadType not equal to filler payload");
+#endif
 
   xReadRbspTrailingBits();
 }
@@ -588,6 +598,9 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
   bool containNoBPorPTorDUI = false;
   for (auto nestedsei : sei.m_nestedSEIs)
   {
+#if JVET_S0178_GENERAL_SEI_CHECK
+    CHECK(vps->getGeneralHrdParameters()->getGeneralSamePicTimingInAllOlsFlag() && nestedsei->payloadType() == SEI::PICTURE_TIMING, "When general_same_pic_timing_in_all_ols_flag is equal to 1, there shall be no SEI NAL unit that contain a scalable-nested SEI message with payloadType equal to PT");
+#endif
     if (nestedsei->payloadType() == SEI::BUFFERING_PERIOD || nestedsei->payloadType() == SEI::PICTURE_TIMING || nestedsei->payloadType() == SEI::DECODING_UNIT_INFO)
     {
       containBPorPTorDUI = true;

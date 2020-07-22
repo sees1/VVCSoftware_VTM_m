@@ -97,6 +97,8 @@
 
 #define JVET_R0068_ASPECT6_ENC_RESTRICTION                1 // encoder restriction for JVET-R0068 apsect 6
 
+#define JVET_S0178_GENERAL_SEI_CHECK                      1 // JVET-S0178: General SEI semantics and constraints
+
 #define JVET_S0186_SPS_CLEANUP                            1 // JVET-S0186: Proposal 1, move sps_chroma_format_idc and sps_log2_ctu_size_minus5 to take place sps_reserved_zero_4bits
 
 #define JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP     1 // JVET-S0181 Proposal2: Move signalling of bp_max_sublayers_minus1 and conditionally signal bp_cpb_removal_delay_deltas_present_flag, bp_num_cpb_removal_delay_deltas_minus1, and bp_cpb_removal_delay

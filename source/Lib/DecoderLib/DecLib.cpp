@@ -1040,8 +1040,40 @@ void DecLib::checkSEIInAccessUnit()
   for (auto &sei : m_accessUnitSeiPayLoadTypes)
   {
     enum NalUnitType         naluType = std::get<0>(sei);
+#if !JVET_S0178_GENERAL_SEI_CHECK
     int                    nuhLayerId = std::get<1>(sei);
+#endif
     enum SEI::PayloadType payloadType = std::get<2>(sei);
+#if JVET_S0178_GENERAL_SEI_CHECK
+    if (m_vps != nullptr && naluType == NAL_UNIT_PREFIX_SEI && ((payloadType == SEI::BUFFERING_PERIOD || payloadType == SEI::PICTURE_TIMING || payloadType == SEI::DECODING_UNIT_INFO || payloadType == SEI::SUBPICTURE_LEVEL_INFO)))
+    {
+      bool olsIncludeAllLayersFind = false;
+      for (int i = 0; i < m_vps->getNumOutputLayerSets(); i++)
+      {
+        for (auto pic = m_firstAccessUnitPicInfo.begin(); pic != m_firstAccessUnitPicInfo.end(); pic++)
+        {
+          int targetLayerId = pic->m_nuhLayerId;
+          for (int j = 0; j < m_vps->getNumLayersInOls(i); j++)
+          {
+            olsIncludeAllLayersFind = m_vps->getLayerIdInOls(i, j) == targetLayerId ? true : false;
+            if (olsIncludeAllLayersFind)
+            {
+              break;
+            }
+          }
+          if (!olsIncludeAllLayersFind)
+          {
+            break;
+          }
+        }
+        if (olsIncludeAllLayersFind)
+        {
+          break;
+        }
+      }
+      CHECK(!olsIncludeAllLayersFind, "When there is no OLS that includes all layers in the current CVS in the entire bitstream, there shall be no non-scalable-nested SEI message with payloadType equal to 0 (BP), 1 (PT), 130 (DUI), or 203 (SLI)");
+    }
+#else
     if (m_vps != nullptr && naluType == NAL_UNIT_PREFIX_SEI && ((payloadType == SEI::BUFFERING_PERIOD || payloadType == SEI::PICTURE_TIMING || payloadType == SEI::DECODING_UNIT_INFO)))
     {
       int numlayersInZeroOls = m_vps->getNumLayersInOls(0);
@@ -1059,6 +1091,7 @@ void DecLib::checkSEIInAccessUnit()
       int layerId = m_vps->getLayerId(0);
       CHECK(nuhLayerId != layerId, "the nuh_layer_id of non-scalable-nested timing related SEI shall be equal to vps_layer_id[0]");
     }
+#endif
   }
 }
 
@@ -1073,7 +1106,7 @@ void DecLib::checkSeiInPictureUnit()
 
   // payload types subject to constrained SEI repetition
   int picUnitRepConSeiList[SEI_REPETITION_CONSTRAINT_LIST_SIZE] = { 0, 1, 19, 45, 129, 132, 133, 137, 144, 145, 147, 148, 149, 150, 153, 154, 155, 156, 168, 203, 204};
-  
+
   // extract SEI messages from NAL units
   for (auto &sei : m_pictureSeiNalus)
   {
