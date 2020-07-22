@@ -536,7 +536,11 @@ void DecCu::xReconPLT(CodingUnit &cu, ComponentID compBegin, uint32_t numComp)
         PLTescapeBuf escapeValue = tu.getescapeValue((ComponentID)compID);
         if (curPLTIdx.at(x, y) == cu.curPLTSize[compBegin])
         {
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+          TCoeff value;
+#else
           Pel value;
+#endif
           QpParam cQP(tu, (ComponentID)compID);
           int qp = cQP.Qp(true);
           int qpRem = qp % 6;
@@ -546,8 +550,13 @@ void DecCu::xReconPLT(CodingUnit &cu, ComponentID compBegin, uint32_t numComp)
             int invquantiserRightShift = IQUANT_SHIFT;
             int add = 1 << (invquantiserRightShift - 1);
             value = ((((escapeValue.at(x, y)*g_invQuantScales[0][qpRem]) << qpPer) + add) >> invquantiserRightShift);
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+            value = ClipBD<TCoeff>(value, channelBitDepth);
+            picReco.at(x, y) = Pel(value);
+#else
             value = Pel(ClipBD<int>(value, channelBitDepth));
             picReco.at(x, y) = value;
+#endif
           }
           else if (compBegin == COMPONENT_Y && compID != COMPONENT_Y && y % (1 << scaleY) == 0 && x % (1 << scaleX) == 0)
           {
@@ -556,8 +565,13 @@ void DecCu::xReconPLT(CodingUnit &cu, ComponentID compBegin, uint32_t numComp)
             int invquantiserRightShift = IQUANT_SHIFT;
             int add = 1 << (invquantiserRightShift - 1);
             value = ((((escapeValue.at(posXC, posYC)*g_invQuantScales[0][qpRem]) << qpPer) + add) >> invquantiserRightShift);
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+            value = ClipBD<TCoeff>(value, channelBitDepth);
+            picReco.at(posXC, posYC) = Pel(value);
+#else
             value = Pel(ClipBD<int>(value, channelBitDepth));
             picReco.at(posXC, posYC) = value;
+#endif
 
           }
         }

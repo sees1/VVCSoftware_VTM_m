@@ -2323,14 +2323,25 @@ void IntraSearch::calcPixelPred(CodingStructure& cs, Partitioner& partitioner, u
       if (lossless)
       {
         escapeValue.at(xPos, yPos) = orgBuf[ch].at(xPos, yPos);
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+        recBuf.at(xPos, yPos)      = orgBuf[ch].at(xPos, yPos);
+#else
         recBuf.at(xPos, yPos)      = escapeValue.at(xPos, yPos);
+#endif
       }
       else
       {
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+      escapeValue.at(xPos, yPos) = std::max<TCoeff>(0, ((orgBuf[ch].at(xPos, yPos) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch]));
+      assert(escapeValue.at(xPos, yPos) < (TCoeff(1) << (channelBitDepth + 1)));
+      TCoeff value = (((escapeValue.at(xPos, yPos)*g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch]) >> invquantiserRightShift[ch];
+      recBuf.at(xPos, yPos) = Pel(ClipBD<TCoeff>(value, channelBitDepth));//to be checked
+#else
       escapeValue.at(xPos, yPos) = TCoeff(std::max<int>(0, ((orgBuf[ch].at(xPos, yPos) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch])));
       assert(escapeValue.at(xPos, yPos) < (1 << (channelBitDepth + 1)));
       recBuf.at(xPos, yPos) = (((escapeValue.at(xPos, yPos)*g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch]) >> invquantiserRightShift[ch];
       recBuf.at(xPos, yPos) = Pel(ClipBD<int>(recBuf.at(xPos, yPos), channelBitDepth));//to be checked
+#endif
       }
     }
     else if (compBegin == COMPONENT_Y && ch > 0 && yPos % (1 << scaleY) == 0 && xPos % (1 << scaleX) == 0)
@@ -2340,14 +2351,25 @@ void IntraSearch::calcPixelPred(CodingStructure& cs, Partitioner& partitioner, u
       if (lossless)
       {
         escapeValue.at(xPosC, yPosC) = orgBuf[ch].at(xPosC, yPosC);
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+        recBuf.at(xPosC, yPosC)      = orgBuf[ch].at(xPosC, yPosC);
+#else
         recBuf.at(xPosC, yPosC)      = escapeValue.at(xPosC, yPosC);
+#endif
       }
       else
       {
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+      escapeValue.at(xPosC, yPosC) = std::max<TCoeff>(0, ((orgBuf[ch].at(xPosC, yPosC) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch]));
+      assert(escapeValue.at(xPosC, yPosC) < (TCoeff(1) << (channelBitDepth + 1)));
+      TCoeff value = (((escapeValue.at(xPosC, yPosC)*g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch]) >> invquantiserRightShift[ch];
+      recBuf.at(xPosC, yPosC) = Pel(ClipBD<TCoeff>(value, channelBitDepth));//to be checked
+#else
       escapeValue.at(xPosC, yPosC) = TCoeff(std::max<int>(0, ((orgBuf[ch].at(xPosC, yPosC) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch])));
       assert(escapeValue.at(xPosC, yPosC) < (1 << (channelBitDepth + 1)));
       recBuf.at(xPosC, yPosC) = (((escapeValue.at(xPosC, yPosC)*g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch]) >> invquantiserRightShift[ch];
       recBuf.at(xPosC, yPosC) = Pel(ClipBD<int>(recBuf.at(xPosC, yPosC), channelBitDepth));//to be checked
+#endif
       }
     }
   }
