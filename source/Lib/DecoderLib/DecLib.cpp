@@ -1757,10 +1757,22 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   {
     CHECK(pps->getNumTiles() != 1, "When one_tile_per_pic_constraint_flag is equal to 1, each picture shall contain only one tile");
   }
+
   if (sps->getProfileTierLevel()->getConstraintInfo()->getOneSlicePerPicConstraintFlag())
   {
+#if JVET_S0050_GCI
+    CHECK( pps->getRectSliceFlag() && pps->getNumSlicesInPic() != 1, "When one_slice_per_pic_constraint_flag is equal to 1 and if pps_rect_slice_flag is equal to 1, the value of num_slices_in_pic_minus1 shall be equal to 0");
+#else
     CHECK( pps->getNumSlicesInPic() != 1, "When one_slice_per_pic_constraint_flag is equal to 1, each picture shall contain only one slice");
+#endif
   }
+
+#if JVET_S0050_GCI
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getOneSubpicPerPicConstraintFlag())
+  {
+    CHECK(sps->getNumSubPics() != 0, "When one_subpic_per_pic_constraint_flag is equal to 1, the value of sps_num_subpics_minus1 shall be equal to 0")
+  }
+#endif
 
   if (sps->getMaxPicWidthInLumaSamples() == pps->getPicWidthInLumaSamples() &&
       sps->getMaxPicHeightInLumaSamples() == pps->getPicHeightInLumaSamples())
@@ -2167,6 +2179,13 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   m_pcPic->layerId     = nalu.m_nuhLayerId;
   m_pcPic->subLayerNonReferencePictureDueToSTSA = false;
 
+#if JVET_S0050_GCI
+  if (pcSlice->getSPS()->getProfileTierLevel()->getConstraintInfo()->getNoApsConstraintFlag())
+  {
+    bool flag = pcSlice->getSPS()->getCCALFEnabledFlag() || pcSlice->getPicHeader()->getNumAlfAps() || pcSlice->getPicHeader()->getAlfEnabledFlag(COMPONENT_Cb) || pcSlice->getPicHeader()->getAlfEnabledFlag(COMPONENT_Cr);
+    CHECK(flag, "When no_aps_constraint_flag is equal to 1, the values of ph_num_alf_aps_ids_luma, sh_num_alf_aps_ids_luma, ph_alf_cb_flag, ph_alf_cr_flag, sh_alf_cb_flag, sh_alf_cr_flag, and sps_ccalf_enabled_flag shall all be equal to 0")
+  }
+#endif
   if( pcSlice->getNalUnitLayerId() != pcSlice->getSPS()->getLayerId() )
   {
     CHECK( pcSlice->getSPS()->getLayerId() > pcSlice->getNalUnitLayerId(), "Layer Id of SPS cannot be greater than layer Id of VCL NAL unit the refer to it" );

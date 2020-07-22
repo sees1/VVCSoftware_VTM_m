@@ -304,7 +304,12 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setNoPaletteConstraintFlag                           ( m_PLTMode == 1 ? false : true );
   m_cEncLib.setNoActConstraintFlag                               ( !m_useColorTrans );
   m_cEncLib.setNoLmcsConstraintFlag                              ( !m_lmcsEnabled );
-
+#if JVET_S0050_GCI
+  m_cEncLib.setNoExplicitScaleListConstraintFlag                 ( m_noExplicitScaleListConstraintFlag );
+  CHECK( m_noExplicitScaleListConstraintFlag && m_useScalingListId != SCALING_LIST_OFF, "Explicit scaling list shall be deactivated when m_noExplicitScaleListConstraintFlag is equal to 1");
+  m_cEncLib.setNoVirtualBoundaryConstraintFlag                   ( m_noVirtualBoundaryConstraintFlag );
+  CHECK( m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
+#endif
 
   //====== Coding Structure ========
   m_cEncLib.setIntraPeriod                                       ( m_iIntraPeriod );
