@@ -67,7 +67,7 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   SPS* sps = NULL;
   READ_FLAG(uiCode, "gdr_or_irap_pic_flag");
 #if JVET_S0076_ASPECT1 
-  READ_FLAG( uiCode, "ph_non_ref_pic_flag" );
+  READ_FLAG(uiCode, "ph_non_ref_pic_flag");
 #endif
   if (uiCode)
   {
