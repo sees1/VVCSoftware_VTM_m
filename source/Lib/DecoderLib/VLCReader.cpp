@@ -915,9 +915,9 @@ void HLSyntaxReader::parseAPS( APS* aps )
   aps->setAPSType( ApsType(code) );
 
 #if JVET_R0433
-  uint32_t code_aps_chromaPresentFlag;
-  READ_FLAG(code_aps_chromaPresentFlag, "aps_chroma_present_flag");
-  aps->chromaPresentFlag = code_aps_chromaPresentFlag;
+  uint32_t codeApsChromaPresentFlag;
+  READ_FLAG(codeApsChromaPresentFlag, "aps_chroma_present_flag");
+  aps->chromaPresentFlag = codeApsChromaPresentFlag;
 #endif
 
   if( code == ALF_APS )
@@ -962,7 +962,9 @@ void HLSyntaxReader::parseAlfAps( APS* aps )
 #if JVET_R0433
   }
   else
+  {
     param.newFilterFlag[CHANNEL_TYPE_CHROMA] = 0;
+  }
 #endif
 
   CcAlfFilterParam ccAlfParam = aps->getCcAlfAPSParam();
@@ -975,7 +977,9 @@ void HLSyntaxReader::parseAlfAps( APS* aps )
 #if JVET_R0433
   }
   else
+  {
     ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] = 0;
+  }
 #endif
 #if JVET_R0433
   if (aps->chromaPresentFlag)
@@ -986,7 +990,9 @@ void HLSyntaxReader::parseAlfAps( APS* aps )
 #if JVET_R0433
   }
   else
+  {
     ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] = 0;
+  }
 #endif
   CHECK(param.newFilterFlag[CHANNEL_TYPE_LUMA] == 0 && param.newFilterFlag[CHANNEL_TYPE_CHROMA] == 0
           && ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] == 0 && ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] == 0,
