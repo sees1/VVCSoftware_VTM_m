@@ -91,7 +91,11 @@ void fastInverseDCT2_B2(const TCoeff *src, TCoeff *dst, int shift, int line, int
   int j;
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   TCoeff E, O;
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  TCoeff add = TCoeff(1) << (shift - 1);
+#else
   TCoeff add = 1 << (shift - 1);
+#endif
 #else
   int E, O;
   int add = 1 << (shift - 1);
@@ -192,7 +196,11 @@ void fastInverseDCT2_B4( const TCoeff *src, TCoeff *dst, int shift, int line, in
   int j;
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   TCoeff E[2], O[2];
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  TCoeff add = TCoeff(1) << ( shift - 1 );
+#else
   TCoeff add = 1 << ( shift - 1 );
+#endif
 #else
   int E[2], O[2];
   int add = 1 << ( shift - 1 );
@@ -236,7 +244,11 @@ template< int uiTrSize >
 inline void _fastInverseMM( const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TCoeff outputMinimum, const TCoeff outputMaximum, const TMatrixCoeff* iT )
 {
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  const TCoeff rnd_factor = TCoeff(1) << (shift - 1);
+#else
   const TCoeff rnd_factor = 1 << (shift - 1);
+#endif
 #else
   const int  rnd_factor  = 1 << (shift - 1);
 #endif
@@ -275,7 +287,11 @@ template< int uiTrSize >
 inline void _fastForwardMM( const TCoeff *src, TCoeff *dst, int shift, int line, int iSkipLine, int iSkipLine2, const TMatrixCoeff* tc )
 {
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  const TCoeff rnd_factor = TCoeff(1) << (shift - 1);
+#else
   const TCoeff rnd_factor = 1 << (shift - 1);
+#endif
 #else
   const int  rnd_factor  = 1 << (shift - 1);
 #endif
@@ -393,7 +409,11 @@ void fastInverseDCT2_B8(const TCoeff *src, TCoeff *dst, int shift, int line, int
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   TCoeff E[4], O[4];
   TCoeff EE[2], EO[2];
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  TCoeff add = TCoeff(1) << (shift - 1);
+#else
   TCoeff add = 1 << (shift - 1);
+#endif
 #else
   int E[4], O[4];
   int EE[2], EO[2];
@@ -526,7 +546,11 @@ void fastInverseDCT2_B16( const TCoeff *src, TCoeff *dst, int shift, int line, i
   TCoeff E  [8], O  [8];
   TCoeff EE [4], EO [4];
   TCoeff EEE[2], EEO[2];
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  TCoeff add = TCoeff(1) << ( shift - 1 );
+#else
   TCoeff add = 1 << ( shift - 1 );
+#endif
 #else
   int E  [8], O  [8];
   int EE [4], EO [4];
@@ -682,7 +706,11 @@ void fastInverseDCT2_B32(const TCoeff *src, TCoeff *dst, int shift, int line, in
   TCoeff EE[8], EO[8];
   TCoeff EEE[4], EEO[4];
   TCoeff EEEE[2], EEEO[2];
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+  TCoeff add = TCoeff(1) << (shift - 1);
+#else
   TCoeff add = 1 << (shift - 1);
+#endif
 #else
   int j, k;
   int E[16], O[16];

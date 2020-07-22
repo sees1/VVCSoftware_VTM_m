@@ -439,7 +439,11 @@ void AreaBuf<T>::removeWeightHighFreq(const AreaBuf<T>& other, const bool bClip,
   else
   {
 #endif
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+    Intermediate_Int normalizer = ((1 << 16) + (bcwWeight > 0 ? (bcwWeight >> 1) : -(bcwWeight >> 1))) / bcwWeight;
+#else
     int normalizer = ((1 << 16) + (bcwWeight > 0 ? (bcwWeight >> 1) : -(bcwWeight >> 1))) / bcwWeight;
+#endif
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
     Intermediate_Int weight0 = normalizer << log2WeightBase;
     Intermediate_Int weight1 = bcwWeightOther * normalizer;
@@ -451,8 +455,13 @@ void AreaBuf<T>::removeWeightHighFreq(const AreaBuf<T>& other, const bool bClip,
   src += srcStride; \
   dst += dstStride; \
 
+#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
+#define REM_HF_OP_CLIP( ADDR ) dst[ADDR] = ClipPel<T>( T((dst[ADDR]*weight0 - src[ADDR]*weight1 + (1<<15))>>16), clpRng )
+#define REM_HF_OP( ADDR )      dst[ADDR] =             T((dst[ADDR]*weight0 - src[ADDR]*weight1 + (1<<15))>>16)
+#else
 #define REM_HF_OP_CLIP( ADDR ) dst[ADDR] = ClipPel<T>( (dst[ADDR]*weight0 - src[ADDR]*weight1 + (1<<15))>>16, clpRng )
 #define REM_HF_OP( ADDR )      dst[ADDR] =             (dst[ADDR]*weight0 - src[ADDR]*weight1 + (1<<15))>>16
+#endif
 
     if(bClip)
     {
