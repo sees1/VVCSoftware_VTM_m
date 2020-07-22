@@ -65,14 +65,22 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   uint32_t  uiCode;
   PPS* pps = NULL;
   SPS* sps = NULL;
-  READ_FLAG(uiCode, "gdr_or_irap_pic_flag");
-#if JVET_S0076_ASPECT1 
+  
+#if JVET_S0076_ASPECT1
+  uint32_t uiTmp;
+  READ_FLAG(uiTmp, "gdr_or_irap_pic_flag");
   READ_FLAG(uiCode, "ph_non_ref_pic_flag");
-#endif
+  if( uiTmp )
+  {
+    READ_FLAG( uiCode, "gdr_pic_flag" );
+  }
+#else
+  READ_FLAG( uiCode, "gdr_or_irap_pic_flag" );
   if (uiCode)
   {
     READ_FLAG(uiCode, "gdr_pic_flag");
   }
+#endif
   READ_FLAG(uiCode, "ph_inter_slice_allowed_flag");
   if (uiCode)
   {
