@@ -296,7 +296,17 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
   CHECK (sei.m_auCpbRemovalDelayDelta < 1, "sei.m_auCpbRemovalDelayDelta must be > 0");
   WRITE_CODE( sei.m_auCpbRemovalDelayDelta - 1, sei.m_cpbRemovalDelayLength, "au_cpb_removal_delay_delta_minus1" );
 
-  WRITE_FLAG( sei.m_cpbRemovalDelayDeltasPresentFlag, "cpb_removal_delay_deltas_present_flag");
+#if JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP
+  CHECK(sei.m_bpMaxSubLayers < 1, "bp_max_sub_layers_minus1 must be > 0");
+  WRITE_CODE(sei.m_bpMaxSubLayers - 1, 3, "bp_max_sub_layers_minus1");
+  if (sei.m_bpMaxSubLayers - 1 > 0)
+  {
+    WRITE_FLAG(sei.m_cpbRemovalDelayDeltasPresentFlag, "cpb_removal_delay_deltas_present_flag");
+  }
+#else
+  WRITE_FLAG(sei.m_cpbRemovalDelayDeltasPresentFlag, "cpb_removal_delay_deltas_present_flag");
+#endif
+
   if (sei.m_cpbRemovalDelayDeltasPresentFlag)
   {
     CHECK (sei.m_numCpbRemovalDelayDeltas < 1, "m_numCpbRemovalDelayDeltas must be > 0");
@@ -305,8 +315,10 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
     {
       WRITE_CODE( sei.m_cpbRemovalDelayDelta[i],        sei.m_cpbRemovalDelayLength, "cpb_removal_delay_delta[i]" );
     }
+#if !JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP
     CHECK (sei.m_bpMaxSubLayers < 1, "bp_max_sub_layers_minus1 must be > 0");
     WRITE_CODE( sei.m_bpMaxSubLayers - 1,        3, "bp_max_sub_layers_minus1" );
+#endif
   }
   CHECK (sei.m_bpCpbCnt < 1, "sei.m_bpCpbCnt must be > 0");
   WRITE_UVLC( sei.m_bpCpbCnt - 1, "bp_cpb_cnt_minus1");
