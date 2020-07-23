@@ -1818,7 +1818,7 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
 #if JVET_S0050_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getOneSubpicPerPicConstraintFlag())
   {
-    CHECK(sps->getNumSubPics() != 0, "When one_subpic_per_pic_constraint_flag is equal to 1, the value of sps_num_subpics_minus1 shall be equal to 0")
+    CHECK(sps->getNumSubPics() != 1, "When one_subpic_per_pic_constraint_flag is equal to 1, the value of sps_num_subpics_minus1 shall be equal to 0")
   }
 #endif
 
