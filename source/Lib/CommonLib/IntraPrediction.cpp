@@ -303,11 +303,13 @@ void IntraPrediction::xPredIntraPlanar( const CPelBuf &pSrc, PelBuf &pDst )
   const uint32_t offset = 1 << (log2W + log2H);
 
   // Get left and above reference column and row
+  CHECK(width > MAX_CU_SIZE, "width greater than limit");
   for( int k = 0; k < width + 1; k++ )
   {
     topRow[k] = pSrc.at( k + 1, 0 );
   }
 
+  CHECK(height > MAX_CU_SIZE, "height greater than limit");
   for( int k = 0; k < height + 1; k++ )
   {
     leftColumn[k] = pSrc.at(k + 1, 1);
