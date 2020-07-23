@@ -51,6 +51,9 @@
 #include <cassert>
 
 //########### place macros to be removed in next cycle below this line ###############
+
+#define JVET_S0193_NO_OUTPUT_PRIOR_PIC                    1 // JVET-S0193: Move ph_no_output_of_prior_pics_flag to SH                       
+
 #define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
 
 #define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
