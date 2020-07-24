@@ -41,7 +41,7 @@
 //! \ingroup EncoderLib
 //! \{
 
-void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, const SPS *sps, HRD &hrd, const uint32_t temporalId)
+void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &hrd, const uint32_t temporalId)
 {
   const SEIBufferingPeriod *bp = NULL;
   switch (sei.payloadType())
@@ -55,7 +55,7 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, const 
     xWriteSEIDecodingUnitInfo(*static_cast<const SEIDecodingUnitInfo*>(& sei), *bp, temporalId);
     break;
   case SEI::SCALABLE_NESTING:
-    xWriteSEIScalableNesting(bs, *static_cast<const SEIScalableNesting*>(&sei), sps);
+    xWriteSEIScalableNesting(bs, *static_cast<const SEIScalableNesting*>(&sei));
     break;
   case SEI::DECODED_PICTURE_HASH:
     xWriteSEIDecodedPictureHash(*static_cast<const SEIDecodedPictureHash*>(&sei));
@@ -137,7 +137,7 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, const 
 /**
  * marshal all SEI messages in provided list into one bitstream bs
  */
-void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList, const SPS *sps, HRD &hrd, bool isNested, const uint32_t temporalId)
+void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList, HRD &hrd, bool isNested, const uint32_t temporalId)
 {
 #if ENABLE_TRACING
   if (g_HLSTraceEnable)
@@ -157,7 +157,7 @@ void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList
     bool traceEnable = g_HLSTraceEnable;
     g_HLSTraceEnable = false;
 #endif
-    xWriteSEIpayloadData(bs_count, **sei, sps, hrd, temporalId);
+    xWriteSEIpayloadData(bs_count, **sei, hrd, temporalId);
 #if ENABLE_TRACING
     g_HLSTraceEnable = traceEnable;
 #endif
@@ -185,7 +185,7 @@ void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList
       xTraceSEIMessageType((*sei)->payloadType());
 #endif
 
-    xWriteSEIpayloadData(bs, **sei, sps, hrd, temporalId);
+    xWriteSEIpayloadData(bs, **sei, hrd, temporalId);
   }
   if (!isNested)
   {
@@ -495,7 +495,7 @@ void SEIWriter::xWriteSEIDependentRAPIndication(const SEIDependentRAPIndication&
   // intentionally empty
 }
 
-void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei, const SPS *sps)
+void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei)
 {
   CHECK (sei.m_nestedSEIs.size()<1, "There must be at lease one SEI message nested in the scalable nesting SEI.")
 
@@ -548,7 +548,7 @@ void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableN
   }
 
   // write nested SEI messages
-  writeSEImessages(bs, sei.m_nestedSEIs, sps, m_nestingHrd, true, 0);
+  writeSEImessages(bs, sei.m_nestedSEIs, m_nestingHrd, true, 0);
 }
 
 void SEIWriter::xWriteSEIFramePacking(const SEIFramePacking& sei)
