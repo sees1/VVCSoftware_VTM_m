@@ -61,11 +61,11 @@ Slice::Slice()
 , m_colourPlaneId                 ( 0 )
 #endif
 , m_eNalUnitType                  ( NAL_UNIT_CODED_SLICE_IDR_W_RADL )
+, m_pictureHeaderInSliceHeader   ( false )
+, m_eSliceType                    ( I_SLICE )
 #if JVET_S0193_NO_OUTPUT_PRIOR_PIC
 , m_noOutputOfPriorPicsFlag       ( 0 )
 #endif
-, m_pictureHeaderInSliceHeader   ( false )
-, m_eSliceType                    ( I_SLICE )
 , m_iSliceQp                      ( 0 )
 , m_ChromaQpAdjEnabled            ( false )
 , m_lmcsEnabledFlag               ( 0 )
