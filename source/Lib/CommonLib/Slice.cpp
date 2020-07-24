@@ -4357,7 +4357,10 @@ bool             operator == (const ConstraintInfo& op1, const ConstraintInfo& o
   if (op1.m_noPaletteConstraintFlag                      != op2.m_noPaletteConstraintFlag                        ) return false;
   if (op1.m_noActConstraintFlag                          != op2.m_noActConstraintFlag                            ) return false;
   if (op1.m_noLmcsConstraintFlag                         != op2.m_noLmcsConstraintFlag                           ) return false;
-
+#if JVET_S0050_GCI
+  if (op1.m_noExplicitScaleListConstraintFlag            != op2.m_noExplicitScaleListConstraintFlag              ) return false;
+  if (op1.m_noVirtualBoundaryConstraintFlag              != op2.m_noVirtualBoundaryConstraintFlag                ) return false;
+#endif
   if( op1.m_noQtbttDualTreeIntraConstraintFlag           != op2.m_noQtbttDualTreeIntraConstraintFlag             ) return false;
   if( op1.m_noPartitionConstraintsOverrideConstraintFlag != op2.m_noPartitionConstraintsOverrideConstraintFlag   ) return false;
   if( op1.m_noSaoConstraintFlag                          != op2.m_noSaoConstraintFlag                            ) return false;
@@ -4427,6 +4430,29 @@ bool             operator != (const ProfileTierLevel& op1, const ProfileTierLeve
 {
   return !(op1 == op2);
 }
+
+#if JVET_Q0406_CABAC_ZERO
+bool Slice::isLastSliceInSubpic()
+{
+  CHECK(m_pcPPS == NULL, "PPS pointer not initialized");
+
+  int lastCTUAddrInSlice = m_sliceMap.getCtuAddrList().back();
+
+  if (m_pcPPS->getNumSubPics() > 1)
+  {
+    const SubPic& subpic = m_pcPPS->getSubPic(m_pcPPS->getSubPicIdxFromSubPicId(getSliceSubPicId()));
+    return subpic.isLastCTUinSubPic(lastCTUAddrInSlice);
+  }
+  else
+  {
+    const CodingStructure *cs = m_pcPic->cs;
+    const PreCalcValues* pcv = cs->pcv;
+    const uint32_t picSizeInCtus   = pcv->heightInCtus * pcv->widthInCtus;
+    return lastCTUAddrInSlice == (picSizeInCtus-1);
+  }
+}
+#endif
+
 
 #if ENABLE_TRACING
 void xTraceVPSHeader()

@@ -513,6 +513,9 @@ void HLSWriter::codeAPS( APS* pcAPS )
 
   WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
   WRITE_CODE( (int)pcAPS->getAPSType(), 3, "aps_params_type" );
+#if JVET_R0433
+  WRITE_FLAG(pcAPS->chromaPresentFlag, "aps_chroma_present_flag");
+#endif
 
   if (pcAPS->getAPSType() == ALF_APS)
   {
@@ -535,11 +538,25 @@ void HLSWriter::codeAlfAps( APS* pcAPS )
   AlfParam param = pcAPS->getAlfAPSParam();
 
   WRITE_FLAG(param.newFilterFlag[CHANNEL_TYPE_LUMA], "alf_luma_new_filter");
+#if JVET_R0433
+  if (pcAPS->chromaPresentFlag)
+  {
+#endif
   WRITE_FLAG(param.newFilterFlag[CHANNEL_TYPE_CHROMA], "alf_chroma_new_filter");
+#if JVET_R0433
+  }
+#endif
 
   CcAlfFilterParam paramCcAlf = pcAPS->getCcAlfAPSParam();
-  WRITE_FLAG(paramCcAlf.newCcAlfFilter[COMPONENT_Cb - 1], "alf_cc_cb_filter_signal_flag");
-  WRITE_FLAG(paramCcAlf.newCcAlfFilter[COMPONENT_Cr - 1], "alf_cc_cr_filter_signal_flag");
+#if JVET_R0433
+  if (pcAPS->chromaPresentFlag)
+  {
+#endif
+    WRITE_FLAG(paramCcAlf.newCcAlfFilter[COMPONENT_Cb - 1], "alf_cc_cb_filter_signal_flag");
+    WRITE_FLAG(paramCcAlf.newCcAlfFilter[COMPONENT_Cr - 1], "alf_cc_cr_filter_signal_flag");
+#if JVET_R0433
+  }
+#endif
 
   if (param.newFilterFlag[CHANNEL_TYPE_LUMA])
   {
@@ -632,10 +649,21 @@ void HLSWriter::codeLmcsAps( APS* pcAPS )
       WRITE_FLAG(signCW, "lmcs_delta_sign_cw_flag[ i ]");
     }
   }
+#if JVET_R0433
+  int deltaCRS = pcAPS->chromaPresentFlag ? param.chrResScalingOffset : 0;
+#else
   int deltaCRS = param.chrResScalingOffset;
+#endif
   int signCRS = (deltaCRS < 0) ? 1 : 0;
   int absCRS = (deltaCRS < 0) ? (-deltaCRS) : deltaCRS;
-  WRITE_CODE(absCRS, 3, "lmcs_delta_abs_crs");
+#if JVET_R0433
+  if (pcAPS->chromaPresentFlag)
+  {
+#endif
+    WRITE_CODE(absCRS, 3, "lmcs_delta_abs_crs");
+#if JVET_R0433
+  }
+#endif
   if (absCRS > 0)
   {
     WRITE_FLAG(signCRS, "lmcs_delta_sign_crs_flag");
@@ -645,7 +673,11 @@ void HLSWriter::codeLmcsAps( APS* pcAPS )
 void HLSWriter::codeScalingListAps( APS* pcAPS )
 {
   ScalingList param = pcAPS->getScalingList();
+#if JVET_R0433
+  codeScalingList(param, pcAPS->chromaPresentFlag);
+#else
   codeScalingList( param );
+#endif
 }
 
 void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
@@ -2621,6 +2653,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoBDPCMConstraintFlag() ? 1 : 0, "no_bdpcm_constraint_flag");
     WRITE_FLAG(cinfo->getNoPaletteConstraintFlag() ? 1 : 0, "no_palette_constraint_flag");
     WRITE_FLAG(cinfo->getNoActConstraintFlag() ? 1 : 0, "no_act_constraint_flag");
+#if JVET_S0050_GCI
+    WRITE_FLAG(cinfo->getNoExplicitScaleListConstraintFlag() ? 1 : 0, "no_explicit_scaling_list_constraint_flag");
+#endif
     WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "no_lmcs_constraint_flag");
     WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "no_qp_delta_constraint_flag");
     WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "no_dep_quant_constraint_flag");
@@ -2634,6 +2669,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoCraConstraintFlag() ? 1 : 0, "no_cra_constraint_flag");
     WRITE_FLAG(cinfo->getNoGdrConstraintFlag() ? 1 : 0, "no_gdr_constraint_flag");
     WRITE_FLAG(cinfo->getNoApsConstraintFlag() ? 1 : 0, "no_aps_constraint_flag");
+#if JVET_S0050_GCI
+    WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "no_virtual_boundaries_constraint_flag");
+#endif
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     //The value of gci_num_reserved_bits shall be equal to 0 in bitstreams conforming to this version of this Specification.
     //Other values of gci_num_reserved_bits are reserved for future use by ITU-T | ISO/IEC.
@@ -2911,13 +2949,23 @@ void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const SPS *sps)
 /** code quantization matrix
 *  \param scalingList quantization matrix information
 */
+#if JVET_R0433
+void HLSWriter::codeScalingList( const ScalingList &scalingList, bool aps_chromaPresentFlag )
+#else
 void HLSWriter::codeScalingList( const ScalingList &scalingList )
+#endif
 {
   //for each size
+#if !JVET_R0433
   WRITE_FLAG(scalingList.getChromaScalingListPresentFlag(), "scaling_list_chroma_present_flag");
+#endif
   for (uint32_t scalingListId = 0; scalingListId < 28; scalingListId++)
   {
+#if JVET_R0433
+    if (aps_chromaPresentFlag || scalingList.isLumaScalingList(scalingListId))
+#else
     if(scalingList.getChromaScalingListPresentFlag()|| scalingList.isLumaScalingList(scalingListId))
+#endif
    {
     bool scalingListCopyModeFlag = scalingList.getScalingListCopyModeFlag(scalingListId);
     WRITE_FLAG(scalingListCopyModeFlag, "scaling_list_copy_mode_flag"); //copy mode

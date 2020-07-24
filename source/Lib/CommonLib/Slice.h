@@ -267,6 +267,10 @@ class ConstraintInfo
   bool              m_noActConstraintFlag;
   bool              m_noLmcsConstraintFlag;
 
+#if JVET_S0050_GCI
+  bool              m_noExplicitScaleListConstraintFlag;
+  bool              m_noVirtualBoundaryConstraintFlag;
+#endif
   bool              m_noQtbttDualTreeIntraConstraintFlag;
   bool              m_noPartitionConstraintsOverrideConstraintFlag;
   bool              m_noSaoConstraintFlag;
@@ -339,7 +343,10 @@ public:
     , m_noPaletteConstraintFlag(false)
     , m_noActConstraintFlag(false)
     , m_noLmcsConstraintFlag(false)
-
+#if JVET_S0050_GCI
+    , m_noExplicitScaleListConstraintFlag(false)
+    , m_noVirtualBoundaryConstraintFlag(false)
+#endif
     , m_noQtbttDualTreeIntraConstraintFlag(false)
     , m_noPartitionConstraintsOverrideConstraintFlag(false)
     , m_noSaoConstraintFlag      (false)
@@ -450,7 +457,12 @@ public:
   void          setNoActConstraintFlag(bool b) { m_noActConstraintFlag = b; }
   bool          getNoLmcsConstraintFlag() const { return m_noLmcsConstraintFlag; }
   void          setNoLmcsConstraintFlag(bool b) { m_noLmcsConstraintFlag = b; }
-
+#if JVET_S0050_GCI
+  bool          getNoExplicitScaleListConstraintFlag() const { return m_noExplicitScaleListConstraintFlag; }
+  void          setNoExplicitScaleListConstraintFlag(bool b) { m_noExplicitScaleListConstraintFlag = b; }
+  bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
+  void          setNoVirtualBoundaryConstraintFlag(bool b) { m_noVirtualBoundaryConstraintFlag = b; }
+#endif
   bool          getNoQtbttDualTreeIntraConstraintFlag() const { return m_noQtbttDualTreeIntraConstraintFlag; }
   void          setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_noQtbttDualTreeIntraConstraintFlag = bVal; }
   bool          getNoPartitionConstraintsOverrideConstraintFlag() const { return m_noPartitionConstraintsOverrideConstraintFlag; }
@@ -860,8 +872,8 @@ public:
   void             setloopFilterAcrossEnabledFlag(bool u)  {         m_loopFilterAcrossSubPicEnabledFlag = u; }
   bool             getloopFilterAcrossEnabledFlag()  const { return  m_loopFilterAcrossSubPicEnabledFlag;     }
 
-  bool             isFirstCTUinSubPic(uint32_t ctuAddr)    { return  ctuAddr == m_firstCtuInSubPic;  }
-  bool              isLastCTUinSubPic(uint32_t ctuAddr)    { return  ctuAddr == m_lastCtuInSubPic;   }
+  bool             isFirstCTUinSubPic(uint32_t ctuAddr) const { return  ctuAddr == m_firstCtuInSubPic;  }
+  bool              isLastCTUinSubPic(uint32_t ctuAddr) const { return  ctuAddr == m_lastCtuInSubPic;   }
   void             setNumSlicesInSubPic( uint32_t val )    { m_numSlicesInSubPic = val; }
   uint32_t         getNumSlicesInSubPic() const            { return m_numSlicesInSubPic; }
   bool             containsCtu(const Position& pos) const
@@ -2288,6 +2300,9 @@ public:
   CcAlfFilterParam&      getCcAlfAPSParam()  { return m_ccAlfAPSParam; }
   void                   setHasPrefixNalUnitType( bool b )                                { m_hasPrefixNalUnitType = b;                   }
   bool                   getHasPrefixNalUnitType() const                                  { return m_hasPrefixNalUnitType;                }
+#if JVET_R0433
+  bool chromaPresentFlag;
+#endif
 };
 
 struct WPScalingParam
@@ -3021,6 +3036,9 @@ public:
   void                        setNumSubstream( const SPS *sps, const PPS *pps );
   void                        setNumEntryPoints( const SPS *sps, const PPS *pps );
   uint32_t                    getNumEntryPoints( ) const { return m_numEntryPoints;  }
+#if JVET_Q0406_CABAC_ZERO
+  bool                        isLastSliceInSubpic();
+#endif
 
   CcAlfFilterParam            m_ccAlfFilterParam;
   uint8_t*                    m_ccAlfFilterControl[2];

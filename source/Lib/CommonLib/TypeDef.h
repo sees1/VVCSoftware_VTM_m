@@ -51,7 +51,10 @@
 #include <cassert>
 
 //########### place macros to be removed in next cycle below this line ###############
+
 #define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
+
+#define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
 
 #define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
 
@@ -95,16 +98,27 @@
 
 #define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
 
+#define JVET_Q0406_CABAC_ZERO                             1 // JVET-Q0406: signal cabac_zero_words per sub-picture
+
 #define JVET_S0177_SCALABLE_NESTING_SEI                   1 // JVET-S0177: Constraints on the scalable nesting SEI message
 
 #define JVET_R0068_ASPECT6_ENC_RESTRICTION                1 // encoder restriction for JVET-R0068 apsect 6
 
+#define JVET_S0178_GENERAL_SEI_CHECK                      1 // JVET-S0178: General SEI semantics and constraints
+
 #define JVET_S0186_SPS_CLEANUP                            1 // JVET-S0186: Proposal 1, move sps_chroma_format_idc and sps_log2_ctu_size_minus5 to take place sps_reserved_zero_4bits
+
+#define JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP     1 // JVET-S0181 Proposal2: Move signalling of bp_max_sublayers_minus1 and conditionally signal bp_cpb_removal_delay_deltas_present_flag, bp_num_cpb_removal_delay_deltas_minus1, and bp_cpb_removal_delay
+
+#define JVET_S0050_GCI                                    1 // JVET-S0050: Signal new GCI flags no_virtual_boundaries_constraint_flag and no_explicit_scaling_list_constraint_flag
+                                                            //             Constrain the value of one_subpic_per_pic_constraint_flag, one_slice_per_pic_constraint_flag and no_aps_constraint_flag
+                                                            //             Remove all constraints that require GCI fields to be equal to a value that imposes a constraint
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
 #define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT                 1 // JVET-R0351: high bit depth coding support (syntax changes, no mathematical differences for CTCs)
+#define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS              1 // JVET-R0351: high bit depth coding support (syntax changes for Visual Studio)
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
 
 #define JVET_R0164_MEAN_SCALED_SATD                       1 // JVET-R0164: Use a mean scaled version of SATD in encoder decisions

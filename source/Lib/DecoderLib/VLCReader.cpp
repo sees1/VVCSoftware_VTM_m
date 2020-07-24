@@ -913,6 +913,13 @@ void HLSyntaxReader::parseAPS( APS* aps )
 
   READ_CODE(3, code, "aps_params_type");
   aps->setAPSType( ApsType(code) );
+
+#if JVET_R0433
+  uint32_t codeApsChromaPresentFlag;
+  READ_FLAG(codeApsChromaPresentFlag, "aps_chroma_present_flag");
+  aps->chromaPresentFlag = codeApsChromaPresentFlag;
+#endif
+
   if( code == ALF_APS )
   {
     parseAlfAps( aps );
@@ -945,14 +952,48 @@ void HLSyntaxReader::parseAlfAps( APS* aps )
   param.enabledFlag[COMPONENT_Y] = param.enabledFlag[COMPONENT_Cb] = param.enabledFlag[COMPONENT_Cr] = true;
   READ_FLAG(code, "alf_luma_new_filter");
   param.newFilterFlag[CHANNEL_TYPE_LUMA] = code;
-  READ_FLAG(code, "alf_chroma_new_filter");
-  param.newFilterFlag[CHANNEL_TYPE_CHROMA] = code;
+
+  #if JVET_R0433
+  if (aps->chromaPresentFlag)
+  {
+#endif
+    READ_FLAG(code, "alf_chroma_new_filter");
+    param.newFilterFlag[CHANNEL_TYPE_CHROMA] = code;
+#if JVET_R0433
+  }
+  else
+  {
+    param.newFilterFlag[CHANNEL_TYPE_CHROMA] = 0;
+  }
+#endif
 
   CcAlfFilterParam ccAlfParam = aps->getCcAlfAPSParam();
+#if JVET_R0433
+  if (aps->chromaPresentFlag)
+  {
+#endif
   READ_FLAG(code, "alf_cc_cb_filter_signal_flag");
   ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] = code;
+#if JVET_R0433
+  }
+  else
+  {
+    ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] = 0;
+  }
+#endif
+#if JVET_R0433
+  if (aps->chromaPresentFlag)
+  {
+#endif
   READ_FLAG(code, "alf_cc_cr_filter_signal_flag");
   ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] = code;
+#if JVET_R0433
+  }
+  else
+  {
+    ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] = 0;
+  }
+#endif
   CHECK(param.newFilterFlag[CHANNEL_TYPE_LUMA] == 0 && param.newFilterFlag[CHANNEL_TYPE_CHROMA] == 0
           && ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] == 0 && ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] == 0,
         "bitstream conformance error: one of alf_luma_filter_signal_flag, alf_chroma_filter_signal_flag, "
@@ -1074,8 +1115,17 @@ void HLSyntaxReader::parseLmcsAps( APS* aps )
     int signCW = code;
     info.reshaperModelBinCWDelta[i] = (1 - 2 * signCW) * absCW;
   }
+#if JVET_R0433
+  if (aps->chromaPresentFlag)
+  {
+#endif
   READ_CODE(3, code, "lmcs_delta_abs_crs");
+#if JVET_R0433
+  }
+  int absCW = aps->chromaPresentFlag ? code : 0;
+#else
   int absCW = code;
+#endif
   if (absCW > 0)
   {
     READ_CODE(1, code, "lmcs_delta_sign_crs_flag");
@@ -1089,7 +1139,11 @@ void HLSyntaxReader::parseLmcsAps( APS* aps )
 void HLSyntaxReader::parseScalingListAps( APS* aps )
 {
   ScalingList& info = aps->getScalingList();
+#if JVET_R0433
+  parseScalingList(&info, aps->chromaPresentFlag);
+#else
   parseScalingList( &info );
+#endif
 }
 
 void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
@@ -4431,120 +4485,160 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_CODE(2, symbol,  "max_chroma_format_constraint_idc"         ); cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)symbol);
     READ_FLAG(symbol, "single_layer_constraint_flag");               cinfo->setSingleLayerConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol, "all_layers_independent_constraint_flag");     cinfo->setAllLayersIndependentConstraintFlag(symbol ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getSingleLayerConstraintFlag())
     {
       CHECK(symbol == 0, "When single_layer_constraint_flag is equal to 1, the value of all_layers_independent_ constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol,  "no_res_change_in_clvs_constraint_flag"    ); cinfo->setNoResChangeInClvsConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "one_tile_per_pic_constraint_flag"         ); cinfo->setOneTilePerPicConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "pic_header_in_slice_header_constraint_flag"); cinfo->setPicHeaderInSliceHeaderConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "one_slice_per_pic_constraint_flag"        ); cinfo->setOneSlicePerPicConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "one_subpic_per_pic_constraint_flag"       ); cinfo->setOneSubpicPerPicConstraintFlag(symbol ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getOneSlicePerPicConstraintFlag())
     {
       CHECK(symbol == 0, "When one_slice_per_pic_constraint_flag is equal to 1, the value of one_subpic_per_pic_constraint_flag shall be equal to 1");
     }
-
+#endif
     READ_FLAG(symbol,  "no_qtbtt_dual_tree_intra_constraint_flag" ); cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
     {
       CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_qtbtt_dual_tree_intra_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_partition_constraints_override_constraint_flag"); cinfo->setNoPartitionConstraintsOverrideConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_sao_constraint_flag");                    cinfo->setNoSaoConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_alf_constraint_flag");                    cinfo->setNoAlfConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_ccalf_constraint_flag");                  cinfo->setNoCCAlfConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
     {
       CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_ccalf_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol,  "no_joint_cbcr_constraint_flag");             cinfo->setNoJointCbCrConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
     {
       CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_joint_cbcr_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_mrl_constraint_flag");                     cinfo->setNoMrlConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_isp_constraint_flag");                     cinfo->setNoIspConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_mip_constraint_flag");                     cinfo->setNoMipConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_ref_wraparound_constraint_flag");         cinfo->setNoRefWraparoundConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_ref_wraparound_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol,  "no_temporal_mvp_constraint_flag");           cinfo->setNoTemporalMvpConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_temporal_mvp_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol,  "no_sbtmvp_constraint_flag");                 cinfo->setNoSbtmvpConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_sbtmvp_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol,  "no_amvr_constraint_flag");                   cinfo->setNoAmvrConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_amvr_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol,  "no_bdof_constraint_flag");                   cinfo->setNoBdofConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_bdof_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_dmvr_constraint_flag");                    cinfo->setNoDmvrConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_dmvr_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_cclm_constraint_flag");                    cinfo->setNoCclmConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
     {
       CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_cclm_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_mts_constraint_flag");                     cinfo->setNoMtsConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_sbt_constraint_flag");                     cinfo->setNoSbtConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_lfnst_constraint_flag");                   cinfo->setNoLfnstConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_affine_motion_constraint_flag");           cinfo->setNoAffineMotionConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_affine_motion_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_mmvd_constraint_flag");                    cinfo->setNoMmvdConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_mmvd_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_smvd_constraint_flag");                    cinfo->setNoSmvdConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_smvd_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_prof_constraint_flag");                    cinfo->setNoProfConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_prof_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_bcw_constraint_flag");                     cinfo->setNoBcwConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_bcw_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_ibc_constraint_flag");                     cinfo->setNoIbcConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_ciip_constraint_flag");                    cinfo->setNoCiipConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_ciip_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_gpm_constraint_flag");                     cinfo->setNoGeoConstraintFlag(symbol > 0 ? true : false);
+#if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)
     {
       CHECK(symbol == 0, "When intra_only_constraint_flag is equal to 1, the value of no_gpm_constraint_flag shall be equal to 1");
     }
+#endif
     READ_FLAG(symbol, "no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_transform_skip_constraint_flag");          cinfo->setNoTransformSkipConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_bdpcm_constraint_flag");                   cinfo->setNoBDPCMConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_palette_constraint_flag");                 cinfo->setNoPaletteConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_act_constraint_flag");                     cinfo->setNoActConstraintFlag(symbol > 0 ? true : false);
+#if JVET_S0050_GCI
+    READ_FLAG(symbol, "no_explicit_scaling_list_constraint_flag");   cinfo->setNoExplicitScaleListConstraintFlag(symbol > 0 ? true : false);
+#endif
     READ_FLAG(symbol, "no_lmcs_constraint_flag");                    cinfo->setNoLmcsConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_qp_delta_constraint_flag");                cinfo->setNoQpDeltaConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_dep_quant_constraint_flag");               cinfo->setNoDepQuantConstraintFlag(symbol > 0 ? true : false);
@@ -4558,6 +4652,9 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "no_cra_constraint_flag");                     cinfo->setNoCraConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_gdr_constraint_flag");                     cinfo->setNoGdrConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_aps_constraint_flag");                     cinfo->setNoApsConstraintFlag(symbol > 0 ? true : false);
+#if JVET_S0050_GCI
+    READ_FLAG(symbol, "no_virtual_boundaries_constraint_flag");      cinfo->setNoVirtualBoundaryConstraintFlag(symbol > 0 ? true : false);
+#endif
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     READ_CODE(8, symbol, "gci_num_reserved_bits");
     uint32_t const numReservedBits = symbol;
@@ -4950,16 +5047,29 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
 /** decode quantization matrix
 * \param scalingList quantization matrix information
 */
+#if JVET_R0433
+void HLSyntaxReader::parseScalingList(ScalingList *scalingList, bool aps_chromaPrsentFlag)
+#else
 void HLSyntaxReader::parseScalingList(ScalingList* scalingList)
+#endif
 {
   uint32_t  code;
   bool scalingListCopyModeFlag;
-
+#if !JVET_R0433
   READ_FLAG(code, "scaling_list_chroma_present_flag");
+#endif
+#if JVET_R0433
+  scalingList->setChromaScalingListPresentFlag(aps_chromaPrsentFlag);
+#else
   scalingList->setChromaScalingListPresentFlag(code ? true : false);
+#endif
   for (int scalingListId = 0; scalingListId < 28; scalingListId++)
   {
+#if JVET_R0433
+    if (aps_chromaPrsentFlag || scalingList->isLumaScalingList(scalingListId))
+#else
   if(scalingList->getChromaScalingListPresentFlag()|| scalingList->isLumaScalingList(scalingListId))
+#endif
   {
     READ_FLAG(code, "scaling_list_copy_mode_flag");
     scalingListCopyModeFlag = (code) ? true : false;
