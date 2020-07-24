@@ -872,8 +872,8 @@ public:
   void             setloopFilterAcrossEnabledFlag(bool u)  {         m_loopFilterAcrossSubPicEnabledFlag = u; }
   bool             getloopFilterAcrossEnabledFlag()  const { return  m_loopFilterAcrossSubPicEnabledFlag;     }
 
-  bool             isFirstCTUinSubPic(uint32_t ctuAddr)    { return  ctuAddr == m_firstCtuInSubPic;  }
-  bool              isLastCTUinSubPic(uint32_t ctuAddr)    { return  ctuAddr == m_lastCtuInSubPic;   }
+  bool             isFirstCTUinSubPic(uint32_t ctuAddr) const { return  ctuAddr == m_firstCtuInSubPic;  }
+  bool              isLastCTUinSubPic(uint32_t ctuAddr) const { return  ctuAddr == m_lastCtuInSubPic;   }
   void             setNumSlicesInSubPic( uint32_t val )    { m_numSlicesInSubPic = val; }
   uint32_t         getNumSlicesInSubPic() const            { return m_numSlicesInSubPic; }
   bool             containsCtu(const Position& pos) const
@@ -3036,6 +3036,9 @@ public:
   void                        setNumSubstream( const SPS *sps, const PPS *pps );
   void                        setNumEntryPoints( const SPS *sps, const PPS *pps );
   uint32_t                    getNumEntryPoints( ) const { return m_numEntryPoints;  }
+#if JVET_Q0406_CABAC_ZERO
+  bool                        isLastSliceInSubpic();
+#endif
 
   CcAlfFilterParam            m_ccAlfFilterParam;
   uint8_t*                    m_ccAlfFilterControl[2];

@@ -4431,6 +4431,29 @@ bool             operator != (const ProfileTierLevel& op1, const ProfileTierLeve
   return !(op1 == op2);
 }
 
+#if JVET_Q0406_CABAC_ZERO
+bool Slice::isLastSliceInSubpic()
+{
+  CHECK(m_pcPPS == NULL, "PPS pointer not initialized");
+
+  int lastCTUAddrInSlice = m_sliceMap.getCtuAddrList().back();
+
+  if (m_pcPPS->getNumSubPics() > 1)
+  {
+    const SubPic& subpic = m_pcPPS->getSubPic(m_pcPPS->getSubPicIdxFromSubPicId(getSliceSubPicId()));
+    return subpic.isLastCTUinSubPic(lastCTUAddrInSlice);
+  }
+  else
+  {
+    const CodingStructure *cs = m_pcPic->cs;
+    const PreCalcValues* pcv = cs->pcv;
+    const uint32_t picSizeInCtus   = pcv->heightInCtus * pcv->widthInCtus;
+    return lastCTUAddrInSlice == (picSizeInCtus-1);
+  }
+}
+#endif
+
+
 #if ENABLE_TRACING
 void xTraceVPSHeader()
 {

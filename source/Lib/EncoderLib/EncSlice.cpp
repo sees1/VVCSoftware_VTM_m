@@ -1794,7 +1794,7 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
 void EncSlice::encodeSlice   ( Picture* pcPic, OutputBitstream* pcSubstreams, uint32_t &numBinsCoded )
 {
 
-  Slice *const pcSlice               = pcPic->slices[getSliceSegmentIdx()];
+  Slice *const pcSlice                 = pcPic->slices[getSliceSegmentIdx()];
   const bool wavefrontsEnabled         = pcSlice->getSPS()->getEntropyCodingSyncEnabledFlag();
   const bool entryPointsPresentFlag    = pcSlice->getSPS()->getEntryPointsPresentFlag();
   uint32_t substreamSize               = 0;
@@ -1809,7 +1809,7 @@ void EncSlice::encodeSlice   ( Picture* pcPic, OutputBitstream* pcSubstreams, ui
 
   DTRACE( g_trace_ctx, D_HEADER, "=========== POC: %d ===========\n", pcSlice->getPOC() );
 
-    pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
+  pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
 
   const PreCalcValues& pcv = *cs.pcv;
   const uint32_t widthInCtus   = pcv.widthInCtus;

@@ -1200,12 +1200,18 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
     }
   }
 }
-
+#if JVET_Q0406_CABAC_ZERO
+static std::size_t
+#else
 static void
+#endif
 cabac_zero_word_padding(const Slice *const pcSlice,
                         const Picture *const pcPic,
                         const std::size_t binCountsInNalUnits,
                         const std::size_t numBytesInVclNalUnits,
+#if JVET_Q0406_CABAC_ZERO
+                        const std::size_t numZeroWordsAlreadyInserted,
+#endif
                               std::ostringstream &nalUnitData,
                         const bool cabacZeroWordPaddingEnabled,
                         const ProfileLevelTierFeatures &plt)
@@ -1231,7 +1237,11 @@ cabac_zero_word_padding(const Slice *const pcSlice,
 
     if (targetNumBytesInVclNalUnits>numBytesInVclNalUnits) // It should be!
     {
+#if JVET_Q0406_CABAC_ZERO
+      const std::size_t numberOfAdditionalBytesNeeded= std::max<std::size_t>(0, targetNumBytesInVclNalUnits - numBytesInVclNalUnits - numZeroWordsAlreadyInserted * 3);
+#else
       const std::size_t numberOfAdditionalBytesNeeded=targetNumBytesInVclNalUnits - numBytesInVclNalUnits;
+#endif
       const std::size_t numberOfAdditionalCabacZeroWords=(numberOfAdditionalBytesNeeded+2)/3;
       const std::size_t numberOfAdditionalCabacZeroBytes=numberOfAdditionalCabacZeroWords*3;
       if (cabacZeroWordPaddingEnabled)
@@ -1248,8 +1258,14 @@ cabac_zero_word_padding(const Slice *const pcSlice,
       {
         msg( NOTICE, "Standard would normally require adding %d bytes of padding\n", uint32_t( numberOfAdditionalCabacZeroWords * 3 ) );
       }
+#if JVET_Q0406_CABAC_ZERO
+      return numberOfAdditionalCabacZeroWords;
+#endif
     }
   }
+#if JVET_Q0406_CABAC_ZERO
+      return 0;
+#endif
 }
 
 class EfficientFieldIRAPMapping
@@ -3253,6 +3269,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       // pcSlice is currently slice 0.
       std::size_t binCountsInNalUnits   = 0; // For implementation of cabac_zero_word stuffing (section 7.4.3.10)
       std::size_t numBytesInVclNalUnits = 0; // For implementation of cabac_zero_word stuffing (section 7.4.3.10)
+#if JVET_Q0406_CABAC_ZERO
+      std::size_t sumZeroWords          = 0; // sum of cabac_zero_word inserted per sub-picture
+      std::vector<EncBitstreamParams> subPicStats (pcPic->cs->pps->getNumSubPics());
+#endif
 
       for(uint32_t sliceSegmentIdxCount = 0; sliceSegmentIdxCount < pcPic->cs->pps->getNumSlicesInPic(); sliceSegmentIdxCount++ )
       {
@@ -3365,7 +3385,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           }
         }
         pcSlice->setPicHeader( pcPic->cs->picHeader );
-	pcSlice->setNalUnitLayerId( m_pcEncLib->getLayerId() );
+        pcSlice->setNalUnitLayerId( m_pcEncLib->getLayerId() );
 
         for ( uint32_t ui = 0 ; ui < numSubstreams; ui++ )
         {
@@ -3386,10 +3406,16 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         pcSlice->resetNumberOfSubstream( );
         pcSlice->setNumSubstream( pcSlice->getSPS(), pcSlice->getPPS() );
         pcSlice->clearSubstreamSizes(  );
+#if JVET_Q0406_CABAC_ZERO
+        const int subpicIdx = pcPic->cs->pps->getSubPicIdxFromSubPicId(pcSlice->getSliceSubPicId());
+#endif
         {
           uint32_t numBinsCoded = 0;
           m_pcSliceEncoder->encodeSlice(pcPic, &(substreamsOut[0]), numBinsCoded);
           binCountsInNalUnits+=numBinsCoded;
+#if JVET_Q0406_CABAC_ZERO
+          subPicStats[subpicIdx].numBinsWritten += numBinsCoded;
+#endif
         }
         {
           // Construct the final bitstream by concatenating substreams.
@@ -3415,6 +3441,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         accessUnit.push_back(new NALUnitEBSP(nalu));
         actualTotalBits += uint32_t(accessUnit.back()->m_nalUnitData.str().size()) * 8;
         numBytesInVclNalUnits += (std::size_t)(accessUnit.back()->m_nalUnitData.str().size());
+#if JVET_Q0406_CABAC_ZERO
+        subPicStats[subpicIdx].numBytesInVclNalUnits += (std::size_t)(accessUnit.back()->m_nalUnitData.str().size());
+#endif
         bNALUAlignedWrittenToList = true;
 
         if (!bNALUAlignedWrittenToList)
@@ -3428,7 +3457,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           || (pcSlice->getSPS()->getGeneralHrdParameters()->getGeneralVclHrdParametersPresentFlag())) &&
           (pcSlice->getSPS()->getGeneralHrdParameters()->getGeneralDecodingUnitHrdParamsPresentFlag()))
         {
-            uint32_t numNalus = 0;
+          uint32_t numNalus = 0;
           uint32_t numRBSPBytes = 0;
           for (AccessUnit::const_iterator it = accessUnit.begin(); it != accessUnit.end(); it++)
           {
@@ -3439,6 +3468,16 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           duData.back().accumBitsDU = ( numRBSPBytes << 3 );
           duData.back().accumNalsDU = numNalus;
         }
+#if JVET_Q0406_CABAC_ZERO
+        if (pcSlice->isLastSliceInSubpic())
+        {
+          // Check picture level encoding constraints/requirements
+          ProfileLevelTierFeatures profileLevelTierFeatures;
+          profileLevelTierFeatures.extractPTLInformation(*(pcSlice->getSPS()));
+          sumZeroWords += cabac_zero_word_padding(pcSlice, pcPic, subPicStats[subpicIdx].numBinsWritten, subPicStats[subpicIdx].numBytesInVclNalUnits, 0,
+                                                  accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
+        }
+#endif
       } // end iteration over slices
 
       {
@@ -3447,7 +3486,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         profileLevelTierFeatures.extractPTLInformation(*(pcSlice->getSPS()));
         validateMinCrRequirements(profileLevelTierFeatures, numBytesInVclNalUnits, pcPic, m_pcCfg);
         // cabac_zero_words processing
+#if JVET_Q0406_CABAC_ZERO
+        cabac_zero_word_padding(pcSlice, pcPic, binCountsInNalUnits, numBytesInVclNalUnits, sumZeroWords, accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
+#else
         cabac_zero_word_padding(pcSlice, pcPic, binCountsInNalUnits, numBytesInVclNalUnits, accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
+#endif
       }
 
       //-- For time output for each slice
