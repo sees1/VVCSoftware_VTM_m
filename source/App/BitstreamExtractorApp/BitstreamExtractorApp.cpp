@@ -46,7 +46,11 @@
 #include "EncoderLib/AnnexBwrite.h"
 
 BitstreamExtractorApp::BitstreamExtractorApp()
+#if JVET_S0154_R0068_ASPECT5
+:m_vpsId(-1)
+#else
 :m_vpsId(0)
+#endif
 , m_removeTimingSEI (false)
 
 {
@@ -172,6 +176,79 @@ bool BitstreamExtractorApp::xCheckSliceSubpicture(InputNALUnit &nalu, int target
 }
 #endif
 
+#if JVET_S0154_R0068_ASPECT5
+bool BitstreamExtractorApp::xCheckSeiSubpicture(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten, bool isVclNalUnitRemoved)
+{
+  bool isWriteSeiNalUnitToStream = true;
+
+  for (auto sei : SEIs)
+  {
+    if (sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
+    {
+      SEISubpicureLevelInfo *seiSLI = (SEISubpicureLevelInfo *)sei;
+      if (!seiSLI->m_cbrConstraintFlag)
+      {
+        rmAllFillerInSubpicExt = true;
+      }
+    }
+  }
+  for (auto sei : SEIs)
+  {
+    if (sei->payloadType() == SEI::FILLER_PAYLOAD)
+    {
+      isWriteSeiNalUnitToStream = rmAllFillerInSubpicExt ? false : lastSliceWritten;
+      break;
+    }
+  }
+
+  if (isWriteSeiNalUnitToStream)
+  {
+    for (auto sei : SEIs)
+    {
+      if (sei->payloadType() == SEI::SCALABLE_NESTING)
+      {
+        SEIScalableNesting *seiNesting = (SEIScalableNesting *)sei;
+        if (seiNesting->m_snOlsFlag == 1)
+        {
+          bool targetSubpicFound = false;
+          for (uint32_t i = 0; i < seiNesting->m_snNumSubpics; i++)
+          {
+            if (seiNesting->m_snSubpicId[i] == targetSubPicId)
+            {
+              targetSubpicFound = true;
+              break;
+            }
+          }
+          isWriteSeiNalUnitToStream &= targetSubpicFound;
+        }
+      }
+      if (!isWriteSeiNalUnitToStream)
+      {
+        break;
+      }
+    }
+  }
+
+  if (isWriteSeiNalUnitToStream && isVclNalUnitRemoved)
+  {
+    for (auto sei : SEIs)
+    {
+      if (sei->payloadType() == SEI::SCALABLE_NESTING)
+      {
+        SEIScalableNesting *seiNesting = (SEIScalableNesting *)sei;
+        if (!seiNesting->m_snSubpicFlag)
+        {
+          isWriteSeiNalUnitToStream = false;
+          break;
+        }
+      }
+    }
+  }
+
+  return isWriteSeiNalUnitToStream;
+}
+#endif
+
 void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, SubPic &subPic)
 {
   targetSPS = sourceSPS;
@@ -200,21 +277,42 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
 #endif
 }
 
-
+#if JVET_S0154_R0068_ASPECT5
+void BitstreamExtractorApp::xRewritePPS(PPS &targetPPS, const PPS &sourcePPS, const SPS &sourceSPS, SubPic &subPic)
+#else
 void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, SubPic &subPic)
+#endif
 {
   targetPPS = sourcePPS;
 
   // set number of subpictures to 1
   targetPPS.setNumSubPics(1);
   // set taget subpicture ID as first ID
+#if JVET_S0154_R0068_ASPECT5
+  targetPPS.setSubPicId(0, subPic.getSubPicID());
+#else
   targetPPS.setSubPicId(0, m_subPicId);
+#endif
   // we send the ID in the SPS, so don't sent it in the PPS (hard coded decision)
   targetPPS.setSubPicIdMappingInPpsFlag(false);
   // picture size
   targetPPS.setPicWidthInLumaSamples(subPic.getSubPicWidthInLumaSample());
   targetPPS.setPicHeightInLumaSamples(subPic.getSubPicHeightInLumaSample());
   // todo: Conformance window
+
+#if JVET_S0154_R0068_ASPECT5
+  int subWidthC = SPS::getWinUnitX(sourceSPS.getChromaFormatIdc());
+  int subHeightC = SPS::getWinUnitY(sourceSPS.getChromaFormatIdc());
+  int subpicScalWinLeftOffset = sourcePPS.getScalingWindow().getWindowLeftOffset() - (int)subPic.getSubPicCtuTopLeftX() * sourceSPS.getCTUSize() / subWidthC;
+  int rightSubpicBd = (subPic.getSubPicCtuTopLeftX() + subPic.getSubPicWidthInCTUs()) * sourceSPS.getCTUSize();
+  int subpicScalWinRightOffset = rightSubpicBd >= sourceSPS.getMaxPicWidthInLumaSamples() ? sourcePPS.getScalingWindow().getWindowRightOffset() : sourcePPS.getScalingWindow().getWindowRightOffset() - (int)(sourceSPS.getMaxPicWidthInLumaSamples() - rightSubpicBd) / subWidthC;
+  int subpicScalWinTopOffset = sourcePPS.getScalingWindow().getWindowTopOffset() - (int)subPic.getSubPicCtuTopLeftY() * sourceSPS.getCTUSize() / subHeightC;
+  int botSubpicBd = (subPic.getSubPicCtuTopLeftY() + subPic.getSubPicHeightInCTUs()) * sourceSPS.getCTUSize();
+  int subpicScalWinBotOffset = botSubpicBd >= sourceSPS.getMaxPicHeightInLumaSamples() ? sourcePPS.getScalingWindow().getWindowBottomOffset() : sourcePPS.getScalingWindow().getWindowBottomOffset() - (int)(sourceSPS.getMaxPicHeightInLumaSamples() - botSubpicBd) / subHeightC;
+  Window scalingWindow;
+  scalingWindow.setWindow(subpicScalWinLeftOffset, subpicScalWinRightOffset, subpicScalWinTopOffset, subpicScalWinBotOffset);
+  targetPPS.setScalingWindow(scalingWindow);
+#endif
 
   // Tiles
   int                   numTileCols = 1;
@@ -441,7 +539,7 @@ bool BitstreamExtractorApp::xCheckNumSubLayers(InputNALUnit &nalu, VPS *vps)
 }
 
 #if JVET_R0294_SUBPIC_HASH
-bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out)
+bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId)
 {
   SEIMessages scalableNestingSEIs = getSeisByType(SEIs, SEI::SCALABLE_NESTING);
   if (scalableNestingSEIs.size())
@@ -456,7 +554,11 @@ bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit
       // does not apply to a subpicture -> remove
       return false;
     }
+#if JVET_S0154_R0068_ASPECT5
+    if (std::find(sei->m_snSubpicId.begin(), sei->m_snSubpicId.end(), subpicId) != sei->m_snSubpicId.end())
+#else
     if (std::find(sei->m_snSubpicId.begin(), sei->m_snSubpicId.end(), m_subPicId) != sei->m_snSubpicId.end())
+#endif
     {
       // applies to target subpicture -> extract
       OutputNALUnit outNalu( nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId );
@@ -541,6 +643,17 @@ uint32_t BitstreamExtractorApp::decode()
   std::vector<uint8_t> empty;
   m_parameterSetManager.storeVPS(vpsIdZero, empty);
 
+#if JVET_S0154_R0068_ASPECT5
+  int subpicIdTarget[MAX_VPS_LAYERS];
+  for (int i = 0; i < MAX_VPS_LAYERS; i++)
+  {
+    subpicIdTarget[i] = -1;
+  }
+  bool isVclNalUnitRemoved[MAX_VPS_LAYERS] = { false };
+  bool isMultiSubpicLayer[MAX_VPS_LAYERS] = { false };
+  bool rmAllFillerInSubpicExt[MAX_VPS_LAYERS] = { false };
+#endif
+
   while (!!bitstreamFileIn)
   {
     AnnexBStats stats = AnnexBStats();
@@ -590,7 +703,11 @@ uint32_t BitstreamExtractorApp::decode()
       }
 
       VPS *vps = nullptr;
+#if JVET_S0154_R0068_ASPECT5
+      if (m_targetOlsIdx >= 0 && m_vpsId >=0 )
+#else
       if (m_targetOlsIdx >= 0)
+#endif
       {
         // if there is no VPS nal unit, there shall be one OLS and one layer.
         if (m_vpsId == 0)
@@ -633,12 +750,26 @@ uint32_t BitstreamExtractorApp::decode()
         // *** add modifications here ***
         // only write, if not dropped earlier
         // rewrite the SPS
+#if JVET_S0154_R0068_ASPECT5
+        isMultiSubpicLayer[nalu.m_nuhLayerId] = sps->getNumSubPics() > 1 ? true : false;
+        if (isMultiSubpicLayer[nalu.m_nuhLayerId])
+        {
+          subpicIdTarget[nalu.m_nuhLayerId] = 0;
+        }
+        if (m_subPicIdx >= 0 && isMultiSubpicLayer[nalu.m_nuhLayerId])
+        {
+          CHECK(m_subPicIdx >= sps->getNumSubPics(), "Target subpicture not found");
+          CHECK(!sps->getSubPicTreatedAsPicFlag(m_subPicIdx), "sps_subpic_treated_as_pic_flag[subpicIdxTarget] should be equal to 1 for subpicture extraction");
+          xSetSPSUpdated(sps->getSPSId());
+          writeInpuNalUnitToStream = false;
+#else
         if (m_subPicId >= 0)
         {
           // we generally don't write SPS to the bitstream unless referred to by PPS
           // but remember that the SPS got updated
           xSetSPSUpdated(sps->getSPSId());
           writeInpuNalUnitToStream = false;
+#endif
         }
         if (writeInpuNalUnitToStream)
         {
@@ -684,6 +815,13 @@ uint32_t BitstreamExtractorApp::decode()
           pps->initRectSliceMap(sps);
           pps->initSubPic(*sps);
           xPrintSubPicInfo (pps);
+#if JVET_S0154_R0068_ASPECT5
+          if (m_subPicIdx >= 0 && isMultiSubpicLayer[nalu.m_nuhLayerId] && writeInpuNalUnitToStream)
+          {
+            SubPic subPic;
+            subPic = pps->getSubPic(m_subPicIdx);
+            subpicIdTarget[nalu.m_nuhLayerId] = subPic.getSubPicID();
+#else
           if (m_subPicId >= 0)
           {
             SubPic subPic;
@@ -698,7 +836,7 @@ uint32_t BitstreamExtractorApp::decode()
               }
             }
             CHECK (!found, "Target subpicture not found");
-
+#endif
             // if the referred SPS was updated, modify and write it
             if (xIsSPSUpdate(sps->getSPSId()))
             {
@@ -710,8 +848,11 @@ uint32_t BitstreamExtractorApp::decode()
 
             // rewrite the PPS
             PPS targetPPS;
+#if JVET_S0154_R0068_ASPECT5
+            xRewritePPS(targetPPS, *pps, *sps, subPic);
+#else
             xRewritePPS(targetPPS, *pps, subPic);
-
+#endif
             xWritePPS(&targetPPS, bitstreamFileOut, nalu.m_nuhLayerId, nalu.m_temporalId);
             writeInpuNalUnitToStream = false;
           }
@@ -751,7 +892,11 @@ uint32_t BitstreamExtractorApp::decode()
 #else
       if (m_targetOlsIdx>=0)
       {
+#if JVET_S0154_R0068_ASPECT5
+        if (nalu.m_nalUnitType == NAL_UNIT_SUFFIX_SEI || nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI)
+#else
         if (nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI)
+#endif
         {
 #endif
         // decode SEI
@@ -802,16 +947,29 @@ uint32_t BitstreamExtractorApp::decode()
 #if !JVET_R0294_SUBPIC_HASH
         }
 #endif
+#if JVET_S0154_R0068_ASPECT5
+          if (m_subPicIdx >= 0 && writeInpuNalUnitToStream)
+          {
+            writeInpuNalUnitToStream = xCheckSeiSubpicture(SEIs, subpicIdTarget[nalu.m_nuhLayerId], rmAllFillerInSubpicExt[nalu.m_nuhLayerId], lastSliceWritten, isVclNalUnitRemoved[nalu.m_nuhLayerId]);
+        }
+#endif
           if (m_vpsId == -1)
           {
             delete vps;
           }
         }
 #if JVET_R0294_SUBPIC_HASH
+#if JVET_S0154_R0068_ASPECT5
+        if (m_subPicIdx >= 0)
+        {
+          writeInpuNalUnitToStream &= xCheckSEIsSubPicture(SEIs, nalu, bitstreamFileOut, subpicIdTarget[nalu.m_nuhLayerId]);
+        }
+#else
         if (m_subPicId>=0)
         {
           writeInpuNalUnitToStream &= xCheckSEIsSubPicture(SEIs, nalu, bitstreamFileOut);
         }
+#endif
       }
 #endif
 
@@ -822,6 +980,27 @@ uint32_t BitstreamExtractorApp::decode()
          slice = xParseSliceHeader(nalu);
       }
 #endif
+#if JVET_S0154_R0068_ASPECT5
+      if (m_subPicIdx >= 0 && isMultiSubpicLayer[nalu.m_nuhLayerId] && writeInpuNalUnitToStream)
+      {
+        if (nalu.isSlice())
+        {
+          writeInpuNalUnitToStream = xCheckSliceSubpicture(slice, subpicIdTarget[nalu.m_nuhLayerId]);
+          if (!writeInpuNalUnitToStream)
+          {
+            isVclNalUnitRemoved[nalu.m_nuhLayerId] = true;
+          }
+        }
+        if (nalu.m_nalUnitType == NAL_UNIT_FD)
+        {
+          writeInpuNalUnitToStream = rmAllFillerInSubpicExt[nalu.m_nuhLayerId] ? false : lastSliceWritten;
+        }
+      }
+      if (nalu.isSlice() && writeInpuNalUnitToStream)
+      {
+        m_prevPicPOC = slice.getPOC();
+      }
+#else
       if (m_subPicId>=0)
       {
         if ( nalu.isSlice() )
@@ -838,6 +1017,7 @@ uint32_t BitstreamExtractorApp::decode()
           writeInpuNalUnitToStream = lastSliceWritten;
         }
       }
+#endif
       unitCnt++;
 
       if( writeInpuNalUnitToStream )
