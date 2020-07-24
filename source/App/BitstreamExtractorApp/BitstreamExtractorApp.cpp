@@ -894,7 +894,7 @@ uint32_t BitstreamExtractorApp::decode()
       if (m_targetOlsIdx>=0)
       {
 #if JVET_S0154_R0068_ASPECT5
-        if (nalu.m_nalUnitType == NAL_UNIT_SUFFIX_SEI || nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI)
+        if (nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI || nalu.m_nalUnitType == NAL_UNIT_SUFFIX_SEI)
 #else
         if (nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI)
 #endif
@@ -952,12 +952,12 @@ uint32_t BitstreamExtractorApp::decode()
           if (m_subPicIdx >= 0 && writeInpuNalUnitToStream)
           {
             writeInpuNalUnitToStream = xCheckSeiSubpicture(SEIs, subpicIdTarget[nalu.m_nuhLayerId], rmAllFillerInSubpicExt[nalu.m_nuhLayerId], lastSliceWritten, isVclNalUnitRemoved[nalu.m_nuhLayerId]);
-        }
-#endif
+          }
           if (m_vpsId == -1)
           {
             delete vps;
           }
+#endif
         }
 #if JVET_R0294_SUBPIC_HASH
 #if JVET_S0154_R0068_ASPECT5
