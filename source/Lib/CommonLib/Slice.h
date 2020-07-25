@@ -2151,7 +2151,11 @@ public:
   void                   setTileColumnWidths( std::vector<uint32_t> widths )              { m_tileColWidth = widths;                      }
   void                   setTileRowHeights( std::vector<uint32_t> heights )               { m_tileRowHeight = heights;                    }
   void                   addTileColumnWidth( uint32_t u )                                 { CHECK( m_tileColWidth.size()  >= MAX_TILE_COLS, "Number of tile columns exceeds valid range" ); m_tileColWidth.push_back(u);    }
+#if JVET_S0156_LEVEL_DEFINITION
+  void                   addTileRowHeight( uint32_t u )                                   { m_tileRowHeight.push_back(u);   }
+#else
   void                   addTileRowHeight( uint32_t u )                                   { CHECK( m_tileRowHeight.size() >= MAX_TILE_ROWS, "Number of tile rows exceeds valid range" );    m_tileRowHeight.push_back(u);   }
+#endif
   uint32_t               getTileColumnWidth( int idx ) const                              { CHECK( idx >= m_tileColWidth.size(), "Tile column index exceeds valid range" );                 return  m_tileColWidth[idx];    }
   uint32_t               getTileRowHeight( int idx ) const                                { CHECK( idx >= m_tileRowHeight.size(), "Tile row index exceeds valid range" );                   return  m_tileRowHeight[idx];   }
   uint32_t               getTileColumnBd( int idx ) const                                 { CHECK( idx >= m_tileColBd.size(), "Tile column index exceeds valid range" );                    return  m_tileColBd[idx];       }

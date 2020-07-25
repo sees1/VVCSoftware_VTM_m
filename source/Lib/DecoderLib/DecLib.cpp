@@ -42,6 +42,7 @@
 #include "CommonLib/dtrace_buffer.h"
 #include "CommonLib/Buffer.h"
 #include "CommonLib/UnitTools.h"
+#include "CommonLib/ProfileLevelTier.h"
 
 #include <fstream>
 #include <set>
@@ -1857,6 +1858,13 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   {    
     CHECK( !sps->getPtlDpbHrdParamsPresentFlag(), "When sps_video_parameter_set_id is greater than 0 and there is an OLS that contains only one layer with nuh_layer_id equal to the nuh_layer_id of the SPS, the value of sps_ptl_dpb_hrd_params_present_flag shall be equal to 1" );
   }
+
+#if JVET_S0156_LEVEL_DEFINITION
+  ProfileLevelTierFeatures ptlFeature;
+  ptlFeature.extractPTLInformation(*sps);
+  CHECK(pps->getNumTileColumns() > ptlFeature.getLevelTierFeatures()->maxTileCols, "Num tile columns signaled in PPS exceed level limits");
+  CHECK(pps->getNumTiles() > ptlFeature.getLevelTierFeatures()->maxTilesPerAu, "Num tiles signaled in PPS exceed level limits");
+#endif
 }
 
 

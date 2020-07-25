@@ -3097,7 +3097,9 @@ void PPS::initTiles()
   uint32_t  uniformTileRowHeight = m_tileRowHeight[rowIdx - 1];
   while( remainingHeightInCtu > 0 )
   {
+#if !JVET_S0156_LEVEL_DEFINITION
     CHECK(rowIdx >= MAX_TILE_ROWS, "Number of tile rows exceeds valid range");
+#endif
     uniformTileRowHeight = std::min(remainingHeightInCtu, uniformTileRowHeight);
     m_tileRowHeight.push_back( uniformTileRowHeight );
     remainingHeightInCtu -= uniformTileRowHeight;

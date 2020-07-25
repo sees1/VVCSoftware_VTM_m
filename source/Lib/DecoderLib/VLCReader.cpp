@@ -500,7 +500,9 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
     READ_UVLC( uiCode, "num_exp_tile_columns_minus1" );               pcPPS->setNumExpTileColumns( uiCode + 1 );
     READ_UVLC( uiCode, "num_exp_tile_rows_minus1" );                  pcPPS->setNumExpTileRows( uiCode + 1 );
     CHECK(pcPPS->getNumExpTileColumns() > MAX_TILE_COLS,              "Number of explicit tile columns exceeds valid range");
+#if !JVET_S0156_LEVEL_DEFINITION
     CHECK(pcPPS->getNumExpTileRows() > MAX_TILE_ROWS,                 "Number of explicit tile rows exceeds valid range");
+#endif
 
     // tile sizes
     for( colIdx = 0; colIdx < pcPPS->getNumExpTileColumns(); colIdx++ )
