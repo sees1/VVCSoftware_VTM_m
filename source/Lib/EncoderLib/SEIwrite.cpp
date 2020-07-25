@@ -345,7 +345,15 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
       }
     }
   }
+#if JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP
+  if (sei.m_bpMaxSubLayers-1 > 0) 
+  {
+    WRITE_FLAG(sei.m_sublayerDpbOutputOffsetsPresentFlag, "bp_sublayer_dpb_output_offsets_present_flag");
+  }
+#else
   WRITE_FLAG(sei.m_sublayerDpbOutputOffsetsPresentFlag, "sublayer_dpb_output_offsets_present_flag");
+#endif
+
   if(sei.m_sublayerDpbOutputOffsetsPresentFlag)
   {
     for(int i = 0; i < sei.m_bpMaxSubLayers - 1; i++)

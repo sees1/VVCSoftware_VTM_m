@@ -94,6 +94,8 @@
 
 #define JVET_S0156_LEVEL_DEFINITION                       1 // JVET-S0156: On level definitions
 
+#define JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP           1 // JVET-S0064: Conditionally signal bp_sublayer_dpb_output_offsets_present_flag
+
 #define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
 
 #define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
