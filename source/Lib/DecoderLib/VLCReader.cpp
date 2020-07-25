@@ -4481,8 +4481,15 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol,  "general_one_picture_only_constraint_flag"    ); cinfo->setOnePictureOnlyConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "intra_only_constraint_flag"               ); cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);
 
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+    READ_CODE(4, symbol,  "gci_sixteen_minus_max_bitdepth_constraint_idc"     ); cinfo->setMaxBitDepthConstraintIdc(symbol>8 ? 16 : (16-symbol));
+    CHECK(symbol>8, "gci_sixteen_minus_max_bitdepth_constraint_idc shall be in the range 0 to 8, inclusive");
+    READ_CODE(2, symbol,  "gci_three_minus_max_chroma_format_constraint_idc"  ); cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)(3-symbol));
+    printf("Decoded %d, %d\n", cinfo->getMaxBitDepthConstraintIdc(), cinfo->getMaxChromaFormatConstraintIdc());
+#else
     READ_CODE(4, symbol,  "max_bitdepth_constraint_idc"              ); cinfo->setMaxBitDepthConstraintIdc(symbol);
     READ_CODE(2, symbol,  "max_chroma_format_constraint_idc"         ); cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)symbol);
+#endif
     READ_FLAG(symbol, "single_layer_constraint_flag");               cinfo->setSingleLayerConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol, "all_layers_independent_constraint_flag");     cinfo->setAllLayersIndependentConstraintFlag(symbol ? true : false);
 #if !JVET_S0050_GCI

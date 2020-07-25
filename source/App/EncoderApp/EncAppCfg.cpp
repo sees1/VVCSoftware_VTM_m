@@ -1806,9 +1806,20 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       }
       else // m_profile == Profile::NONE
       {
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+        m_bitDepthConstraint = 16; // max value - unconstrained.
+#else
         m_bitDepthConstraint = 8+15; // max value - unconstrained.
+#endif
       }
     }
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+    CHECK(m_bitDepthConstraint < m_internalBitDepth[CHANNEL_TYPE_LUMA], "MaxBitDepthConstraint setting does not allow the specified luma bit depth to be coded.");
+    CHECK(m_bitDepthConstraint < m_internalBitDepth[CHANNEL_TYPE_CHROMA], "MaxBitDepthConstraint setting does not allow the specified chroma bit depth to be coded.");
+    CHECK(m_chromaFormatConstraint < m_chromaFormatIDC, "MaxChromaFormatConstraint setting does not allow the specified chroma format to be coded.");
+    CHECK(m_chromaFormatConstraint >= NUM_CHROMA_FORMAT, "Bad value given for MaxChromaFormatConstraint setting.")
+    CHECK(m_bitDepthConstraint < 8 || m_bitDepthConstraint>16, "MaxBitDepthConstraint setting must be in the range 8 to 16 (inclusive)");
+#endif
   }
 
 

@@ -257,7 +257,11 @@ void EncApp::xInitLibCfg()
 #endif
   m_cEncLib.setOnePictureOnlyConstraintFlag                      ( m_onePictureOnlyConstraintFlag );
   m_cEncLib.setIntraOnlyConstraintFlag                           ( m_intraConstraintFlag );  // NOTE: This setting is not used, and is confused with setIntraConstraintFlag
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint );
+#else
   m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint - 8 );
+#endif
   m_cEncLib.setMaxChromaFormatConstraintIdc                      ( m_chromaFormatConstraint );
   m_cEncLib.setFrameConstraintFlag                               ( m_bFrameConstraintFlag ); // NOTE: This setting is neither used nor setup, and is confused with setFrameOnlyConstraintFlag
   m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag                ( !m_dualTree );
