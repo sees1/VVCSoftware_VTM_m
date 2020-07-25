@@ -374,7 +374,34 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
 void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBufferingPeriod &bp, const uint32_t temporalId)
 {
 
+#if JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP
+  WRITE_CODE( sei.m_auCpbRemovalDelay[bp.m_bpMaxSubLayers - 1] - 1, bp.m_cpbRemovalDelayLength,               "pt_cpb_removal_delay_minus1[bp_max_sub_layers_minus1]" );
+  for (int i = temporalId; i < bp.m_bpMaxSubLayers - 1; i++)
+  {
+    WRITE_FLAG(sei.m_ptSubLayerDelaysPresentFlag[i], "pt_sub_layer_delays_present_flag[i]");
+    if (sei.m_ptSubLayerDelaysPresentFlag[i])
+    {
+      if (bp.m_cpbRemovalDelayDeltasPresentFlag)
+      {
+        WRITE_FLAG(sei.m_cpbRemovalDelayDeltaEnabledFlag[i], "pt_cpb_removal_delay_delta_enabled_flag[i]");
+      }
+      if (sei.m_cpbRemovalDelayDeltaEnabledFlag[i])
+      {
+        if ((bp.m_numCpbRemovalDelayDeltas - 1) > 0)
+        {
+          WRITE_CODE(sei.m_cpbRemovalDelayDeltaIdx[i], ceilLog2(bp.m_numCpbRemovalDelayDeltas), "pt_cpb_removal_delay_delta_idx[i]");
+        }
+      }
+      else
+      {
+        WRITE_CODE(sei.m_auCpbRemovalDelay[i] - 1, bp.m_cpbRemovalDelayLength, "pt_cpb_removal_delay_minus1[i]");
+      }
+    }
+  }
+  WRITE_CODE(sei.m_picDpbOutputDelay, bp.m_dpbOutputDelayLength, "pt_dpb_output_delay");
+#else
   WRITE_CODE( sei.m_auCpbRemovalDelay[bp.m_bpMaxSubLayers - 1] - 1, bp.m_cpbRemovalDelayLength,               "cpb_removal_delay_minus1[bp_max_sub_layers_minus1]" );
+#endif
   if( bp.m_altCpbParamsPresentFlag )
   {
     WRITE_FLAG( sei.m_cpbAltTimingInfoPresentFlag, "cpb_alt_timing_info_present_flag" );
@@ -414,6 +441,7 @@ void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBuf
       }
     }
   }
+#if !JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP
   for( int i = temporalId; i < bp.m_bpMaxSubLayers - 1; i ++ )
   {
     WRITE_FLAG( sei.m_ptSubLayerDelaysPresentFlag[i], "pt_sub_layer_delays_present_flag[i]" );
@@ -437,6 +465,7 @@ void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBuf
     }
   }
   WRITE_CODE( sei.m_picDpbOutputDelay,     bp.m_dpbOutputDelayLength,                                          "dpb_output_delay" );
+#endif
   if (bp.m_bpDecodingUnitHrdParamsPresentFlag && bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
 
   {
