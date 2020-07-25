@@ -326,8 +326,13 @@ public:
     , m_oneSubpicPerPicConstraintFlag(false)
     , m_frameOnlyConstraintFlag  (false)
     , m_intraOnlyConstraintFlag  (false)
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+    , m_maxBitDepthConstraintIdc  (  16)
+    , m_maxChromaFormatConstraintIdc(CHROMA_444)
+#else
     , m_maxBitDepthConstraintIdc  (  0)
     , m_maxChromaFormatConstraintIdc(CHROMA_420)
+#endif
     , m_onePictureOnlyConstraintFlag (false)
     , m_lowerBitRateConstraintFlag (false )
 
