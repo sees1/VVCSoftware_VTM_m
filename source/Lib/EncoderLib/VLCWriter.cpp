@@ -1461,7 +1461,11 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       }
       if (pcVPS->getOlsModeIdc() == 2)
       {
+#if JVET_S0183_VPS_INFORMATION_SIGNALLING
+        WRITE_CODE(pcVPS->getNumOutputLayerSets() - 2, 8, "num_output_layer_sets_minus2");
+#else
         WRITE_CODE(pcVPS->getNumOutputLayerSets() - 1, 8, "num_output_layer_sets_minus1");
+#endif
         for (uint32_t i = 1; i < pcVPS->getNumOutputLayerSets(); i++)
         {
           for (uint32_t j = 0; j < pcVPS->getMaxLayers(); j++)
