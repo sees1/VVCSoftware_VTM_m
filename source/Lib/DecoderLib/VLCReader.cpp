@@ -913,13 +913,19 @@ void HLSyntaxReader::parseAPS( APS* aps )
 #endif
 
   uint32_t  code;
+#if JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE
+  READ_CODE(3, code, "aps_params_type");
+  aps->setAPSType(ApsType(code));
 
+  READ_CODE(5, code, "adaptation_parameter_set_id");
+  aps->setAPSId(code);
+#else
   READ_CODE(5, code, "adaptation_parameter_set_id");
   aps->setAPSId(code);
 
   READ_CODE(3, code, "aps_params_type");
   aps->setAPSType( ApsType(code) );
-
+#endif
 #if JVET_R0433
   uint32_t codeApsChromaPresentFlag;
   READ_FLAG(codeApsChromaPresentFlag, "aps_chroma_present_flag");

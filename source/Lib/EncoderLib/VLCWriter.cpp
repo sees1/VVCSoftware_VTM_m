@@ -515,8 +515,13 @@ void HLSWriter::codeAPS( APS* pcAPS )
   xTraceAPSHeader();
 #endif
 
+#if JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE
+  WRITE_CODE((int)pcAPS->getAPSType(), 3, "aps_params_type");
+  WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
+#else
   WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
   WRITE_CODE( (int)pcAPS->getAPSType(), 3, "aps_params_type" );
+#endif
 #if JVET_R0433
   WRITE_FLAG(pcAPS->chromaPresentFlag, "aps_chroma_present_flag");
 #endif
