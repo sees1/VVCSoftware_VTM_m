@@ -128,6 +128,10 @@ uint32_t DecApp::decode()
   bool isEosPresentInPu = false;
 #endif
 
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+  bool outputPicturePresentInBitstream = false;
+#endif
+
   while (!!bitstreamFile)
   {
     InputNALUnit nalu;
@@ -274,6 +278,20 @@ uint32_t DecApp::decode()
       // write reconstruction to file
       if( bNewPicture )
       {
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+        if( !outputPicturePresentInBitstream ) 
+        {
+          PicList::iterator iterPic = pcListPic->begin();
+          while (!outputPicturePresentInBitstream && iterPic != pcListPic->end())
+          {
+            Picture *pcPic = *(iterPic);
+            if( pcPic->neededForOutput )
+            {
+              outputPicturePresentInBitstream = true;
+            }
+          }
+        }
+#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
@@ -321,6 +339,22 @@ uint32_t DecApp::decode()
       m_cDecLib.resetAccessUnitPicInfo();
     }
   }
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+  // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
+  if( !outputPicturePresentInBitstream ) 
+  {
+    PicList::iterator iterPic = pcListPic->begin();
+    while (!outputPicturePresentInBitstream && iterPic != pcListPic->end())
+    {
+      Picture *pcPic = *(iterPic);
+      if (pcPic->neededForOutput)
+      {
+        outputPicturePresentInBitstream = true;
+      }
+    }
+  }
+  CHECK(!outputPicturePresentInBitstream, "It is required that there shall be at least one picture with PictureOutputFlag equal to 1 in the bitstream")
+#endif
 
   xFlushOutput( pcListPic );
 
