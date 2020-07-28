@@ -3651,7 +3651,9 @@ void EncAppCfg::xPrintParameter()
 #if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
     msg(DETAILS, "subpicture size same flag                        : %d\n", m_subPicSameSizeFlag);
     if (m_subPicSameSizeFlag)
+    {
       msg(DETAILS, "[0]th subpictures size                           :[%d %d]\n", m_subPicWidth[0], m_subPicHeight[0]);
+    }
     for (int i = 0; i < m_numSubPics; i++)
     {
       if (!m_subPicSameSizeFlag)
