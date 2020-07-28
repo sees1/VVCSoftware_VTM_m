@@ -4190,6 +4190,8 @@ void Slice::scaleRefPicList( Picture *scaledRefPic[ ], PicHeader *picHeader, APS
       CU::getRprScaling( sps, pps, m_apcRefPicList[refList][rIdx], xScale, yScale );
       m_scalingRatio[refList][rIdx] = std::pair<int, int>( xScale, yScale );
 
+      CHECK( m_apcRefPicList[refList][rIdx]->unscaledPic == nullptr, "unscaledPic is not properly set" );
+
       if( m_apcRefPicList[refList][rIdx]->isRefScaled( pps ) == false )
       {
         refPicIsSameRes = true;
