@@ -279,7 +279,11 @@ protected:
 
   Picture * xGetNewPicBuffer( const SPS &sps, const PPS &pps, const uint32_t temporalLayer, const int layerId );
   void  xCreateLostPicture( int iLostPOC, const int layerId );
+#if JVET_S0124_UNAVAILABLE_REFERENCE
+  void  xCreateUnavailablePicture( const PPS *pps, const int iUnavailablePoc, const bool longTermFlag, const int temporalId, const int layerId, const bool interLayerRefPicFlag );
+#else
   void  xCreateUnavailablePicture(int iUnavailablePoc, bool longTermFlag, const int layerId, const bool interLayerRefPicFlag);
+#endif
   void  checkParameterSetsInclusionSEIconstraints(const InputNALUnit nalu);
   void  xActivateParameterSets( const InputNALUnit nalu );
   void  xCheckParameterSetConstraints( const int layerId );
