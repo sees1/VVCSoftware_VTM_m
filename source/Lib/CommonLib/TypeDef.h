@@ -72,6 +72,8 @@
 
 #define JVET_R0270                                        1 // JVET-S0270: Treating picture with mixed RASL and RADL slices as RASL picture
 
+#define JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE   1 // JVET-S0219 aspect2: change the order to put the aps_params_type before the aps_adaptation_parameter_set_id.
+
 #define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
 
 #define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
