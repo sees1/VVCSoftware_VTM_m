@@ -70,6 +70,10 @@
 
 #define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
 
+#define JVET_R0270                                        1 // JVET-S0270: Treating picture with mixed RASL and RADL slices as RASL picture
+
+#define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
+
 #define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
 
 #define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
