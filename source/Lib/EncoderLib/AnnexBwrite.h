@@ -60,8 +60,8 @@ static std::vector<uint32_t> writeAnnexB(std::ostream& out, const AccessUnit& au
 
     static const uint8_t start_code_prefix[] = {0,0,0,1};
 
-      if (it == au.begin() || nalu.m_nalUnitType == NAL_UNIT_DCI || nalu.m_nalUnitType == NAL_UNIT_SPS || nalu.m_nalUnitType == NAL_UNIT_VPS || nalu.m_nalUnitType == NAL_UNIT_PPS)
-
+    if (it == au.begin() || nalu.m_nalUnitType == NAL_UNIT_DCI || nalu.m_nalUnitType == NAL_UNIT_VPS || nalu.m_nalUnitType == NAL_UNIT_SPS
+        || nalu.m_nalUnitType == NAL_UNIT_PPS || nalu.m_nalUnitType == NAL_UNIT_PREFIX_APS || nalu.m_nalUnitType == NAL_UNIT_SUFFIX_APS)
     {
       /* From AVC, When any of the following conditions are fulfilled, the
        * zero_byte syntax element shall be present:
