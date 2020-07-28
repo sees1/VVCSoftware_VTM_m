@@ -2495,6 +2495,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
       for( int refIdx = 0; refIdx < pcSlice->getNumRefIdx( REF_PIC_LIST_0 ); refIdx++ )
       {
+        CHECK( pcSlice->getRefPic( REF_PIC_LIST_0, refIdx )->unscaledPic == nullptr, "unscaledPic is not set for L0 reference picture" );
+
         if( pcSlice->getRefPic( REF_PIC_LIST_0, refIdx )->isRefScaled( pcSlice->getPPS() ) == false )
         {
           colRefIdxL0 = refIdx;
@@ -2506,6 +2508,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         for( int refIdx = 0; refIdx < pcSlice->getNumRefIdx( REF_PIC_LIST_1 ); refIdx++ )
         {
+          CHECK( pcSlice->getRefPic( REF_PIC_LIST_1, refIdx )->unscaledPic == nullptr, "unscaledPic is not set for L1 reference picture" );
+
           if( pcSlice->getRefPic( REF_PIC_LIST_1, refIdx )->isRefScaled( pcSlice->getPPS() ) == false )
           {
             colRefIdxL1 = refIdx;
@@ -2527,6 +2531,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         {
           refPicL1 = refPicL1->unscaledPic;
         }
+
+        CHECK( !refPicL0->slices.size(), "Wrong L0 reference picture" );
+        CHECK( !refPicL1->slices.size(), "Wrong L1 reference picture" );
 
         const uint32_t uiColFromL0 = refPicL0->slices[0]->getSliceQp() > refPicL1->slices[0]->getSliceQp();
         picHeader->setPicColFromL0Flag( uiColFromL0 );
