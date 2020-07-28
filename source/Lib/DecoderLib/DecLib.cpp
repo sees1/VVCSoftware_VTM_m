@@ -691,7 +691,11 @@ void DecLib::finishPictureLight(int& poc, PicList*& rpcListPic )
   m_puCounter++;
 }
 
+#if JVET_R0270
+void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool associatedWithNewClvs)
+#else
 void DecLib::finishPicture(int& poc, PicList*& rpcListPic, MsgLevel msgl )
+#endif
 {
 #if RExt__DECODER_DEBUG_TOOL_STATISTICS
   CodingStatistics::StatTool& s = CodingStatistics::GetStatisticTool( STATS__TOOL_TOTAL_FRAME );
@@ -775,6 +779,30 @@ void DecLib::finishPicture(int& poc, PicList*& rpcListPic, MsgLevel msgl )
 #endif
 
   m_pcPic->neededForOutput = (pcSlice->getPicHeader()->getPicOutputFlag() ? true : false);
+#if JVET_R0270
+  if (associatedWithNewClvs && m_pcPic->neededForOutput)
+  {
+    if (!pcSlice->getPPS()->getMixedNaluTypesInPicFlag() && pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL)
+    {
+      m_pcPic->neededForOutput = false;
+    }
+    else if (pcSlice->getPPS()->getMixedNaluTypesInPicFlag())
+    {
+      bool isRaslPic = true;
+      for (int i = 0; isRaslPic && i < m_pcPic->numSlices; i++) 
+      {
+        if (!(pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RADL))
+        {
+          isRaslPic = false;
+        }
+      }
+      if (isRaslPic)
+      {
+        m_pcPic->neededForOutput = false;
+      }
+    }
+  }
+#endif
   m_pcPic->reconstructed = true;
 
 
@@ -2256,6 +2284,9 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   m_firstSliceInBitstream  = false;
 
   Slice* pcSlice = m_pcPic->slices[m_uiSliceSegmentIdx];
+#if JVET_R0270
+  m_pcPic->numSlices = m_uiSliceSegmentIdx + 1;
+#endif
   pcSlice->setPic( m_pcPic );
   m_pcPic->poc         = pcSlice->getPOC();
   m_pcPic->referenced  = true;
