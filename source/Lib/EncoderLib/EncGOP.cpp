@@ -3003,9 +3003,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           , pcPic, uiNumSliceSegments
         );
 
-        pcSlice->m_ccAlfFilterParam      = m_pcALF->getCcAlfFilterParam();
-        pcSlice->m_ccAlfFilterControl[0] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cb);
-        pcSlice->m_ccAlfFilterControl[1] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cr);
         //assign ALF slice header
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
@@ -3038,6 +3035,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           pcPic->slices[s]->setTileGroupApsIdChroma(cs.slice->getTileGroupApsIdChroma());
           pcPic->slices[s]->setTileGroupCcAlfCbApsId(cs.slice->getTileGroupCcAlfCbApsId());
           pcPic->slices[s]->setTileGroupCcAlfCrApsId(cs.slice->getTileGroupCcAlfCrApsId());
+          pcPic->slices[s]->m_ccAlfFilterParam      = m_pcALF->getCcAlfFilterParam();
+          pcPic->slices[s]->m_ccAlfFilterControl[0] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cb);
+          pcPic->slices[s]->m_ccAlfFilterControl[1] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cr);
         }
       }
       DTRACE_UPDATE( g_trace_ctx, ( std::make_pair( "final", 1 ) ) );
