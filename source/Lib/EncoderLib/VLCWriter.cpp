@@ -1565,7 +1565,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
 
       for( int j = ( pcVPS->m_sublayerDpbParamsPresentFlag ? 0 : pcVPS->m_dpbMaxTemporalId[i] ); j <= pcVPS->m_dpbMaxTemporalId[i]; j++ )
       {
-        WRITE_UVLC( pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j], "max_dec_pic_buffering_minus1[i]" );
+        WRITE_UVLC(pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] - 1, "max_dec_pic_buffering_minus1[i]");
         WRITE_UVLC( pcVPS->m_dpbParameters[i].m_numReorderPics[j], "max_num_reorder_pics[i]" );
         WRITE_UVLC( pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[j], "max_latency_increase_plus1[i]" );
       }
