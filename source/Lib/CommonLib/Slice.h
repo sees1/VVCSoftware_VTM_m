@@ -1748,8 +1748,8 @@ void                    setCCALFEnabledFlag( bool b )                           
   void                    setJointCbCrEnabledFlag(bool bVal)                                              { m_JointCbCrEnabledFlag = bVal; }
   bool                    getJointCbCrEnabledFlag() const                                                 { return m_JointCbCrEnabledFlag; }
 
-  bool                    getSBTMVPEnabledFlag() const                                                    { return m_sbtmvpEnabledFlag; }
-  void                    setSBTMVPEnabledFlag(bool b)                                                    { m_sbtmvpEnabledFlag = b; }
+  bool getSbTMVPEnabledFlag() const { return m_sbtmvpEnabledFlag; }
+  void setSbTMVPEnabledFlag(bool b) { m_sbtmvpEnabledFlag = b; }
 
   void                    setBDOFEnabledFlag(bool b)                                                      { m_bdofEnabledFlag = b; }
   bool                    getBDOFEnabledFlag() const                                                      { return m_bdofEnabledFlag; }

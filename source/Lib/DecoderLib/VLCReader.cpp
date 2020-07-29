@@ -1953,11 +1953,12 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   if ( pcSPS->getSPSTemporalMVPEnabledFlag() )
   {
-    READ_FLAG( uiCode,    "sps_sbtmvp_enabled_flag" );                   pcSPS->setSBTMVPEnabledFlag      ( uiCode != 0 );
+    READ_FLAG(uiCode, "sps_sbtmvp_enabled_flag");
+    pcSPS->setSbTMVPEnabledFlag(uiCode != 0);
   }
   else
   {
-    pcSPS->setSBTMVPEnabledFlag(false);
+    pcSPS->setSbTMVPEnabledFlag(false);
   }
 
   READ_FLAG( uiCode,  "sps_amvr_enabled_flag" );                     pcSPS->setAMVREnabledFlag ( uiCode != 0 );
@@ -1997,7 +1998,9 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   if ( pcSPS->getUseAffine() )
   {
     READ_UVLC(uiCode, "five_minus_max_num_subblock_merge_cand");
-    CHECK(uiCode > 5 - (pcSPS->getSBTMVPEnabledFlag() ? 1 : 0), "The value of five_minus_max_num_subblock_merge_cand shall be in the range of 0 to 5 - sps_sbtmvp_enabled_flag");
+    CHECK(
+      uiCode > 5 - (pcSPS->getSbTMVPEnabledFlag() ? 1 : 0),
+      "The value of five_minus_max_num_subblock_merge_cand shall be in the range of 0 to 5 - sps_sbtmvp_enabled_flag");
     CHECK(AFFINE_MRG_MAX_NUM_CANDS < uiCode, "The value of five_minus_max_num_subblock_merge_cand shall be in the range of 0 to 5 - sps_sbtmvp_enabled_flag");
     pcSPS->setMaxNumAffineMergeCand(AFFINE_MRG_MAX_NUM_CANDS - uiCode);
     READ_FLAG( uiCode,  "sps_affine_type_flag" );                       pcSPS->setUseAffineType          ( uiCode != 0 );
@@ -3240,7 +3243,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     }
     else
     {
-      picHeader->setMaxNumAffineMergeCand( sps->getSBTMVPEnabledFlag() && picHeader->getEnableTMVPFlag() );
+      picHeader->setMaxNumAffineMergeCand(sps->getSbTMVPEnabledFlag() && picHeader->getEnableTMVPFlag());
     }
 
   // full-pel MMVD flag

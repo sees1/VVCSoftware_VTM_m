@@ -307,7 +307,7 @@ protected:
   bool      m_dualTree;
   bool      m_LFNST;
   bool      m_useFastLFNST;
-  int       m_SubPuMvpMode;
+  bool      m_sbTmvpEnableFlag;
   bool      m_Affine;
   bool      m_AffineType;
   bool      m_PROF;

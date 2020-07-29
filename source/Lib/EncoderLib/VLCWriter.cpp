@@ -1156,7 +1156,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 
   if ( pcSPS->getSPSTemporalMVPEnabledFlag() )
   {
-    WRITE_FLAG( pcSPS->getSBTMVPEnabledFlag() ? 1 : 0,                               "sps_sbtmvp_enabled_flag");
+    WRITE_FLAG(pcSPS->getSbTMVPEnabledFlag() ? 1 : 0, "sps_sbtmvp_enabled_flag");
   }
 
   WRITE_FLAG( pcSPS->getAMVREnabledFlag() ? 1 : 0,                                   "sps_amvr_enabled_flag" );
@@ -2033,7 +2033,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
     }
     else
     {
-      picHeader->setMaxNumAffineMergeCand( sps->getSBTMVPEnabledFlag() && picHeader->getEnableTMVPFlag() );
+      picHeader->setMaxNumAffineMergeCand(sps->getSbTMVPEnabledFlag() && picHeader->getEnableTMVPFlag());
     }
 
   // full-pel MMVD flag
