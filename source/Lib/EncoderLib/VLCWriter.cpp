@@ -814,6 +814,7 @@ void HLSWriter::dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, co
 {
   for (uint32_t i = (subLayerInfoFlag ? 0 : maxSubLayersMinus1); i <= maxSubLayersMinus1; i++)
   {
+    CHECK(pcSPS->getMaxDecPicBuffering(i) < 1, "max_dec_pic_buffering must be greater than 0");
     WRITE_UVLC(pcSPS->getMaxDecPicBuffering(i) - 1, "max_dec_pic_buffering_minus1[i]");
     WRITE_UVLC(pcSPS->getNumReorderPics(i),                 "max_num_reorder_pics[i]");
     WRITE_UVLC(pcSPS->getMaxLatencyIncreasePlus1(i),  "max_latency_increase_plus1[i]");
@@ -1565,6 +1566,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
 
       for( int j = ( pcVPS->m_sublayerDpbParamsPresentFlag ? 0 : pcVPS->m_dpbMaxTemporalId[i] ); j <= pcVPS->m_dpbMaxTemporalId[i]; j++ )
       {
+        CHECK(pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] < 1, "max_dec_pic_buffering must be greater than 0");
         WRITE_UVLC(pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] - 1, "max_dec_pic_buffering_minus1[i]");
         WRITE_UVLC( pcVPS->m_dpbParameters[i].m_numReorderPics[j], "max_num_reorder_pics[i]" );
         WRITE_UVLC( pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[j], "max_latency_increase_plus1[i]" );
