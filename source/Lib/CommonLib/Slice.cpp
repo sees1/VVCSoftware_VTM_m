@@ -3672,6 +3672,9 @@ ReferencePictureList::ReferencePictureList( const bool interLayerPicPresentFlag 
   ::memset(m_POC, 0, sizeof(m_POC));
   ::memset( m_isInterLayerRefPic, 0, sizeof( m_isInterLayerRefPic ) );
   ::memset( m_interLayerRefPicIdx, 0, sizeof( m_interLayerRefPicIdx ) );
+
+  ::memset(m_deltaPOCMSBCycleLT, 0, sizeof(m_deltaPOCMSBCycleLT));
+  ::memset(m_deltaPocMSBPresentFlag, 0, sizeof(m_deltaPocMSBPresentFlag));
 }
 
 ReferencePictureList::~ReferencePictureList()
