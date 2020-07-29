@@ -517,12 +517,12 @@ void InterPrediction::xPredInterBi(PredictionUnit &pu, PelUnitBuf &pcYuvPred, co
   const PPS   &pps   = *pu.cs->pps;
   const Slice &slice = *pu.cs->slice;
   CHECK( !pu.cu->affine && pu.refIdx[0] >= 0 && pu.refIdx[1] >= 0 && ( pu.lwidth() + pu.lheight() == 12 ), "invalid 4x8/8x4 bi-predicted blocks" );
-  WPScalingParam *wp0;
-  WPScalingParam *wp1;
+
   int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
   int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
-  pu.cs->slice->getWpScaling(REF_PIC_LIST_0, refIdx0, wp0);
-  pu.cs->slice->getWpScaling(REF_PIC_LIST_1, refIdx1, wp1);
+
+  const WPScalingParam *wp0 = pu.cs->slice->getWpScaling(REF_PIC_LIST_0, refIdx0);
+  const WPScalingParam *wp1 = pu.cs->slice->getWpScaling(REF_PIC_LIST_1, refIdx1);
 
   bool bioApplied = false;
   if (pu.cs->sps->getBDOFEnabledFlag() && (!pu.cs->picHeader->getDisBdofFlag()))
@@ -533,7 +533,8 @@ void InterPrediction::xPredInterBi(PredictionUnit &pu, PelUnitBuf &pcYuvPred, co
     }
     else
     {
-      const bool biocheck0 = !((wp0[COMPONENT_Y].bPresentFlag || wp0[COMPONENT_Cb].bPresentFlag || wp0[COMPONENT_Cr].bPresentFlag || wp1[COMPONENT_Y].bPresentFlag || wp1[COMPONENT_Cb].bPresentFlag || wp1[COMPONENT_Cr].bPresentFlag) && slice.getSliceType() == B_SLICE);
+      const bool biocheck0 =
+        !((WPScalingParam::isWeighted(wp0) || WPScalingParam::isWeighted(wp1)) && slice.getSliceType() == B_SLICE);
       const bool biocheck1 = !(pps.getUseWP() && slice.getSliceType() == P_SLICE);
       if (biocheck0
         && biocheck1
@@ -1496,12 +1497,12 @@ void InterPrediction::motionCompensation( PredictionUnit &pu, PelUnitBuf &predBu
   {
 
     CHECK( !pu.cu->affine && pu.refIdx[0] >= 0 && pu.refIdx[1] >= 0 && ( pu.lwidth() + pu.lheight() == 12 ), "invalid 4x8/8x4 bi-predicted blocks" );
-    WPScalingParam *wp0;
-    WPScalingParam *wp1;
     int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
     int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
-    pu.cs->slice->getWpScaling(REF_PIC_LIST_0, refIdx0, wp0);
-    pu.cs->slice->getWpScaling(REF_PIC_LIST_1, refIdx1, wp1);
+
+    const WPScalingParam *wp0 = pu.cs->slice->getWpScaling(REF_PIC_LIST_0, refIdx0);
+    const WPScalingParam *wp1 = pu.cs->slice->getWpScaling(REF_PIC_LIST_1, refIdx1);
+
     bool bioApplied = false;
     const Slice &slice = *pu.cs->slice;
     if (pu.cs->sps->getBDOFEnabledFlag() && (!pu.cs->picHeader->getDisBdofFlag()))
@@ -1513,7 +1514,8 @@ void InterPrediction::motionCompensation( PredictionUnit &pu, PelUnitBuf &predBu
       }
       else
       {
-        const bool biocheck0 = !((wp0[COMPONENT_Y].bPresentFlag || wp0[COMPONENT_Cb].bPresentFlag || wp0[COMPONENT_Cr].bPresentFlag || wp1[COMPONENT_Y].bPresentFlag || wp1[COMPONENT_Cb].bPresentFlag || wp1[COMPONENT_Cr].bPresentFlag) && slice.getSliceType() == B_SLICE);
+        const bool biocheck0 =
+          !((WPScalingParam::isWeighted(wp0) || WPScalingParam::isWeighted(wp1)) && slice.getSliceType() == B_SLICE);
         const bool biocheck1 = !(pps.getUseWP() && slice.getSliceType() == P_SLICE);
         if (biocheck0
           && biocheck1

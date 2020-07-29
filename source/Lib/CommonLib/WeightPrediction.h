@@ -55,12 +55,8 @@ class WeightPrediction
 public:
   WeightPrediction();
 
-  void  getWpScaling(           const Slice                *slice,
-                                const int                  &iRefIdx0,
-                                const int                  &iRefIdx1,
-                                      WPScalingParam      *&wp0,
-                                      WPScalingParam      *&wp1,
-                                const ComponentID           maxNumComp = MAX_NUM_COMPONENT );
+  void getWpScaling(Slice *slice, const int &iRefIdx0, const int &iRefIdx1, WPScalingParam *&wp0, WPScalingParam *&wp1,
+                    const ComponentID maxNumComp = MAX_NUM_COMPONENT);
 
   void addWeightBi(             const CPelUnitBuf          &pcYuvSrc0,
                                 const CPelUnitBuf          &pcYuvSrc1,
