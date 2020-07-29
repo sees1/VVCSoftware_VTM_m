@@ -59,6 +59,12 @@
 DecApp::DecApp()
 : m_iPOCLastDisplay(-MAX_INT)
 {
+#if JVET_R0270
+  for (int i = 0; i < MAX_NUM_LAYER_IDS; i++)
+  {
+    m_newCLVS[i] = true;
+  }
+#endif
 }
 
 // ====================================================================================================================
@@ -161,8 +167,19 @@ uint32_t DecApp::decode()
             (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
              nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP))
         {
+#if JVET_R0270
+          m_newCLVS[nalu.m_nuhLayerId] = true;   // An IDR picture starts a new CLVS
+#endif
           xFlushOutput(pcListPic, nalu.m_nuhLayerId);
         }
+#if JVET_R0270
+        if (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL || nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA)
+        {
+          // Once the picture has TRAIL or or STSA slice, no more special treatment for new CLVS picture for the rest of
+          // pictures until new CLVS picture is received.
+          m_newCLVS[nalu.m_nuhLayerId] = false;
+        }
+#endif
 
         // parse NAL unit syntax if within target decoding layer
         if( ( m_iMaxTemporalLayer < 0 || nalu.m_temporalId <= m_iMaxTemporalLayer ) && xIsNaluWithinTargetDecLayerIdSet( &nalu ) )
@@ -203,6 +220,9 @@ uint32_t DecApp::decode()
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
         isEosPresentInPu = true;
+#if JVET_R0270
+        m_newCLVS[nalu.m_nuhLayerId] = true;  //The presence of EOS means that the next picture is the beginning of new CLVS
+#endif
       }
       // within the current PU, only EOS and EOB are allowed to be sent after an EOS nal unit
       if(isEosPresentInPu)
@@ -217,7 +237,11 @@ uint32_t DecApp::decode()
       if (!loopFiltered[nalu.m_nuhLayerId] || bitstreamFile)
       {
         m_cDecLib.executeLoopFilters();
+#if JVET_R0270
+        m_cDecLib.finishPicture(poc, pcListPic, INFO, m_newCLVS[nalu.m_nuhLayerId]);
+#else
         m_cDecLib.finishPicture( poc, pcListPic );
+#endif
       }
       loopFiltered[nalu.m_nuhLayerId] = (nalu.m_nalUnitType == NAL_UNIT_EOS);
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
