@@ -2325,10 +2325,10 @@ struct WPScalingParam
 {
   // Explicit weighted prediction parameters parsed in slice header,
   // or Implicit weighted prediction parameters (8 bits depth values).
-  bool bPresentFlag;
-  uint32_t uiLog2WeightDenom;
-  int  iWeight;
-  int  iOffset;
+  bool     presentFlag;
+  uint32_t log2WeightDenom;
+  int      codedWeight;
+  int      codedOffset;
 
   // Weighted prediction scaling values built from above parameters (bitdepth scaled):
   int  w;
@@ -2337,7 +2337,14 @@ struct WPScalingParam
   int  shift;
   int  round;
 
+  static bool isWeighted(const WPScalingParam *wp);
 };
+
+inline bool WPScalingParam::isWeighted(const WPScalingParam *wp)
+{
+  return wp != nullptr && (wp[COMPONENT_Y].presentFlag || wp[COMPONENT_Cb].presentFlag || wp[COMPONENT_Cr].presentFlag);
+}
+
 struct WPACDCParam
 {
   int64_t iAC;
@@ -2605,7 +2612,8 @@ public:
   {
     memcpy(m_weightPredTable, wp, sizeof(WPScalingParam) * NUM_REF_PIC_LIST_01 * MAX_NUM_REF * MAX_NUM_COMPONENT);
   }
-  void                        getWpScaling(RefPicList e, int iRefIdx, WPScalingParam *&wp) const;
+  const WPScalingParam *      getWpScaling(const RefPicList refPicList, const int refIdx) const;
+  WPScalingParam *            getWpScaling(const RefPicList refPicList, const int refIdx);
   WPScalingParam*             getWpScalingAll()                                        { return (WPScalingParam *) m_weightPredTable; }
   void                        resetWpScaling();
   void                        setNumL0Weights(int b)                                   { m_numL0Weights = b;                          }
@@ -2975,7 +2983,8 @@ public:
     memcpy(m_weightPredTable, wp, sizeof(WPScalingParam) * NUM_REF_PIC_LIST_01 * MAX_NUM_REF * MAX_NUM_COMPONENT);
   }
   WPScalingParam *            getWpScalingAll()                                      { return (WPScalingParam *) m_weightPredTable;                  }
-  void                        getWpScaling( RefPicList e, int iRefIdx, WPScalingParam *&wp) const;
+  WPScalingParam *            getWpScaling(const RefPicList refPicList, const int refIdx);
+  const WPScalingParam *      getWpScaling(const RefPicList refPicList, const int refIdx) const;
 
   void                        resetWpScaling();
   void                        initWpScaling(const SPS *sps);

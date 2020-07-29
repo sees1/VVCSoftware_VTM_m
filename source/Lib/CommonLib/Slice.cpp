@@ -2227,10 +2227,30 @@ void  Slice::initWpAcDcParam()
 }
 
 //! get tables for weighted prediction
-void  Slice::getWpScaling( RefPicList e, int iRefIdx, WPScalingParam *&wp ) const
+const WPScalingParam *Slice::getWpScaling(const RefPicList refPicList, const int refIdx) const
 {
-  CHECK(e>=NUM_REF_PIC_LIST_01, "Invalid picture reference list");
-  wp = (WPScalingParam*) m_weightPredTable[e][iRefIdx];
+  CHECK(refPicList >= NUM_REF_PIC_LIST_01, "Invalid picture reference list");
+  if (refIdx < 0)
+  {
+    return nullptr;
+  }
+  else
+  {
+    return m_weightPredTable[refPicList][refIdx];
+  }
+}
+
+WPScalingParam *Slice::getWpScaling(const RefPicList refPicList, const int refIdx)
+{
+  CHECK(refPicList >= NUM_REF_PIC_LIST_01, "Invalid picture reference list");
+  if (refIdx < 0)
+  {
+    return nullptr;
+  }
+  else
+  {
+    return m_weightPredTable[refPicList][refIdx];
+  }
 }
 
 //! reset Default WP tables settings : no weight.
@@ -2243,11 +2263,11 @@ void  Slice::resetWpScaling()
       for ( int yuv=0 ; yuv<MAX_NUM_COMPONENT ; yuv++ )
       {
         WPScalingParam  *pwp = &(m_weightPredTable[e][i][yuv]);
-        pwp->bPresentFlag      = false;
-        pwp->uiLog2WeightDenom = 0;
-        pwp->uiLog2WeightDenom = 0;
-        pwp->iWeight           = 1;
-        pwp->iOffset           = 0;
+        pwp->presentFlag     = false;
+        pwp->log2WeightDenom = 0;
+        pwp->log2WeightDenom = 0;
+        pwp->codedWeight     = 1;
+        pwp->codedOffset     = 0;
       }
     }
   }
@@ -2264,19 +2284,20 @@ void  Slice::initWpScaling(const SPS *sps)
       for ( int yuv=0 ; yuv<MAX_NUM_COMPONENT ; yuv++ )
       {
         WPScalingParam  *pwp = &(m_weightPredTable[e][i][yuv]);
-        if ( !pwp->bPresentFlag )
+        if (!pwp->presentFlag)
         {
           // Inferring values not present :
-          pwp->iWeight = (1 << pwp->uiLog2WeightDenom);
-          pwp->iOffset = 0;
+          pwp->codedWeight = (1 << pwp->log2WeightDenom);
+          pwp->codedOffset = 0;
         }
 
         const int offsetScalingFactor = bUseHighPrecisionPredictionWeighting ? 1 : (1 << (sps->getBitDepth(toChannelType(ComponentID(yuv)))-8));
 
-        pwp->w      = pwp->iWeight;
-        pwp->o      = pwp->iOffset * offsetScalingFactor; //NOTE: This value of the ".o" variable is never used - .o is set immediately before it gets used
-        pwp->shift  = pwp->uiLog2WeightDenom;
-        pwp->round  = (pwp->uiLog2WeightDenom>=1) ? (1 << (pwp->uiLog2WeightDenom-1)) : (0);
+        pwp->w = pwp->codedWeight;
+        pwp->o = pwp->codedOffset * offsetScalingFactor;   // NOTE: This value of the ".o" variable is never used - .o
+                                                           // is set immediately before it gets used
+        pwp->shift = pwp->log2WeightDenom;
+        pwp->round = (pwp->log2WeightDenom >= 1) ? (1 << (pwp->log2WeightDenom - 1)) : (0);
       }
     }
   }
@@ -2749,10 +2770,30 @@ void PicHeader::initPicHeader()
   m_alfApsId.resize(0);
 }
 
-void PicHeader::getWpScaling(RefPicList e, int iRefIdx, WPScalingParam *&wp) const
+const WPScalingParam *PicHeader::getWpScaling(const RefPicList refPicList, const int refIdx) const
 {
-  CHECK(e >= NUM_REF_PIC_LIST_01, "Invalid picture reference list");
-  wp = (WPScalingParam *) m_weightPredTable[e][iRefIdx];
+  CHECK(refPicList >= NUM_REF_PIC_LIST_01, "Invalid picture reference list");
+  if (refIdx < 0)
+  {
+    return nullptr;
+  }
+  else
+  {
+    return m_weightPredTable[refPicList][refIdx];
+  }
+}
+
+WPScalingParam *PicHeader::getWpScaling(const RefPicList refPicList, const int refIdx)
+{
+  CHECK(refPicList >= NUM_REF_PIC_LIST_01, "Invalid picture reference list");
+  if (refIdx < 0)
+  {
+    return nullptr;
+  }
+  else
+  {
+    return m_weightPredTable[refPicList][refIdx];
+  }
 }
 
 void PicHeader::resetWpScaling()
@@ -2764,10 +2805,10 @@ void PicHeader::resetWpScaling()
       for ( int yuv=0 ; yuv<MAX_NUM_COMPONENT ; yuv++ )
       {
         WPScalingParam  *pwp = &(m_weightPredTable[e][i][yuv]);
-        pwp->bPresentFlag      = false;
-        pwp->uiLog2WeightDenom = 0;
-        pwp->iWeight           = 1;
-        pwp->iOffset           = 0;
+        pwp->presentFlag     = false;
+        pwp->log2WeightDenom = 0;
+        pwp->codedWeight     = 1;
+        pwp->codedOffset     = 0;
       }
     }
   }

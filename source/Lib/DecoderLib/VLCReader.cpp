@@ -4206,16 +4206,16 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     }
     else
     {
-      WPScalingParam *wp;
       for ( int iNumRef=0 ; iNumRef<((pcSlice->getSliceType() == B_SLICE )?2:1); iNumRef++ )
       {
         RefPicList  eRefPicList = ( iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
         for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
         {
-          pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
-          wp[0].bPresentFlag = false;
-          wp[1].bPresentFlag = false;
-          wp[2].bPresentFlag = false;
+          WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+
+          wp[0].presentFlag = false;
+          wp[1].presentFlag = false;
+          wp[2].presentFlag = false;
         }
       }
     }
@@ -4872,7 +4872,6 @@ void HLSyntaxReader::parseRemainingBytes( bool noTrailingBytesExpected )
 //! parse explicit wp tables
 void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
 {
-  WPScalingParam *wp;
   const ChromaFormat    chFmt        = sps->getChromaFormatIdc();
   const int             numValidComp = int(getNumberValidComponents(chFmt));
   const bool            bChroma      = (chFmt!=CHROMA_400);
@@ -4898,65 +4897,66 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
     RefPicList  eRefPicList = ( iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
     for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
     {
-      pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
+      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
 
-      wp[COMPONENT_Y].uiLog2WeightDenom = uiLog2WeightDenomLuma;
+      wp[COMPONENT_Y].log2WeightDenom = uiLog2WeightDenomLuma;
       for(int j=1; j<numValidComp; j++)
       {
-        wp[j].uiLog2WeightDenom = uiLog2WeightDenomChroma;
+        wp[j].log2WeightDenom = uiLog2WeightDenomChroma;
       }
 
       uint32_t  uiCode;
       READ_FLAG( uiCode, iNumRef==0?"luma_weight_l0_flag[i]":"luma_weight_l1_flag[i]" );
-      wp[COMPONENT_Y].bPresentFlag = ( uiCode == 1 );
-      uiTotalSignalledWeightFlags += wp[COMPONENT_Y].bPresentFlag;
+      wp[COMPONENT_Y].presentFlag = (uiCode == 1);
+      uiTotalSignalledWeightFlags += wp[COMPONENT_Y].presentFlag;
     }
     if ( bChroma )
     {
       uint32_t  uiCode;
       for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
       {
-        pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
+        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
         READ_FLAG( uiCode, iNumRef==0?"chroma_weight_l0_flag[i]":"chroma_weight_l1_flag[i]" );
         for(int j=1; j<numValidComp; j++)
         {
-          wp[j].bPresentFlag = ( uiCode == 1 );
+          wp[j].presentFlag = (uiCode == 1);
         }
-        uiTotalSignalledWeightFlags += 2*wp[COMPONENT_Cb].bPresentFlag;
+        uiTotalSignalledWeightFlags += 2 * wp[COMPONENT_Cb].presentFlag;
       }
     }
     else
     {
       for ( int iRefIdx=0; iRefIdx<MAX_NUM_REF; iRefIdx++ )
       {
-        pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
-        wp[1].bPresentFlag = false;
-        wp[2].bPresentFlag = false;
+        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+
+        wp[COMPONENT_Cb].presentFlag = false;
+        wp[COMPONENT_Cr].presentFlag = false;
       }
     }
     for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
     {
-      pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
-      if ( wp[COMPONENT_Y].bPresentFlag )
+      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+      if (wp[COMPONENT_Y].presentFlag)
       {
         int iDeltaWeight;
         READ_SVLC( iDeltaWeight, iNumRef==0?"delta_luma_weight_l0[i]":"delta_luma_weight_l1[i]" );
         CHECK( iDeltaWeight < -128, "delta_luma_weight_lx shall be in the rage of -128 to 127" );
         CHECK( iDeltaWeight >  127, "delta_luma_weight_lx shall be in the rage of -128 to 127" );
-        wp[COMPONENT_Y].iWeight = (iDeltaWeight + (1<<wp[COMPONENT_Y].uiLog2WeightDenom));
-        READ_SVLC( wp[COMPONENT_Y].iOffset, iNumRef==0?"luma_offset_l0[i]":"luma_offset_l1[i]" );
+        wp[COMPONENT_Y].codedWeight = (iDeltaWeight + (1 << wp[COMPONENT_Y].log2WeightDenom));
+        READ_SVLC(wp[COMPONENT_Y].codedOffset, iNumRef == 0 ? "luma_offset_l0[i]" : "luma_offset_l1[i]");
         const int range=sps->getSpsRangeExtension().getHighPrecisionOffsetsEnabledFlag() ? (1<<sps->getBitDepth(CHANNEL_TYPE_LUMA))/2 : 128;
-        CHECK ( wp[0].iOffset < -range , "luma_offset_lx shall be in the rage of -128 to 127");
-        CHECK ( wp[0].iOffset >= range , "luma_offset_lx shall be in the rage of -128 to 127");
+        CHECK(wp[0].codedOffset < -range, "luma_offset_lx shall be in the rage of -128 to 127");
+        CHECK(wp[0].codedOffset >= range, "luma_offset_lx shall be in the rage of -128 to 127");
       }
       else
       {
-        wp[COMPONENT_Y].iWeight = (1 << wp[COMPONENT_Y].uiLog2WeightDenom);
-        wp[COMPONENT_Y].iOffset = 0;
+        wp[COMPONENT_Y].codedWeight = (1 << wp[COMPONENT_Y].log2WeightDenom);
+        wp[COMPONENT_Y].codedOffset = 0;
       }
       if ( bChroma )
       {
-        if ( wp[COMPONENT_Cb].bPresentFlag )
+        if (wp[COMPONENT_Cb].presentFlag)
         {
           int range=sps->getSpsRangeExtension().getHighPrecisionOffsetsEnabledFlag() ? (1<<sps->getBitDepth(CHANNEL_TYPE_CHROMA))/2 : 128;
           for ( int j=1 ; j<numValidComp ; j++ )
@@ -4965,22 +4965,22 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
             READ_SVLC( iDeltaWeight, iNumRef==0?"delta_chroma_weight_l0[i]":"delta_chroma_weight_l1[i]" );
             CHECK( iDeltaWeight < -128, "delta_chroma_weight_lx shall be in the rage of -128 to 127" );
             CHECK( iDeltaWeight >  127, "delta_chroma_weight_lx shall be in the rage of -128 to 127" );
-            wp[j].iWeight = (iDeltaWeight + (1<<wp[j].uiLog2WeightDenom));
+            wp[j].codedWeight = (iDeltaWeight + (1 << wp[j].log2WeightDenom));
 
             int iDeltaChroma;
             READ_SVLC( iDeltaChroma, iNumRef==0?"delta_chroma_offset_l0[i]":"delta_chroma_offset_l1[i]" );
             CHECK( iDeltaChroma <  -4*range, "delta_chroma_offset_lx shall be in the range of -4 * 128 to 4 * 127" );
             CHECK( iDeltaChroma >  4*(range-1), "delta_chroma_offset_lx shall be in the range of -4 * 128 to 4 * 127" );
-            int pred = ( range - ( ( range*wp[j].iWeight)>>(wp[j].uiLog2WeightDenom) ) );
-            wp[j].iOffset = Clip3(-range, range-1, (iDeltaChroma + pred) );
+            int pred          = (range - ((range * wp[j].codedWeight) >> (wp[j].log2WeightDenom)));
+            wp[j].codedOffset = Clip3(-range, range - 1, (iDeltaChroma + pred));
           }
         }
         else
         {
           for ( int j=1 ; j<numValidComp ; j++ )
           {
-            wp[j].iWeight = (1 << wp[j].uiLog2WeightDenom);
-            wp[j].iOffset = 0;
+            wp[j].codedWeight = (1 << wp[j].log2WeightDenom);
+            wp[j].codedOffset = 0;
           }
         }
       }
@@ -4988,11 +4988,11 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
 
     for ( int iRefIdx=pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx<MAX_NUM_REF ; iRefIdx++ )
     {
-      pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
+      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
 
-      wp[0].bPresentFlag = false;
-      wp[1].bPresentFlag = false;
-      wp[2].bPresentFlag = false;
+      wp[COMPONENT_Y].presentFlag  = false;
+      wp[COMPONENT_Cb].presentFlag = false;
+      wp[COMPONENT_Cr].presentFlag = false;
     }
   }
   CHECK(uiTotalSignalledWeightFlags>24, "Too many weight flag signalled");
@@ -5030,65 +5030,65 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
     RefPicList refPicList = (numRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0);
     for (int refIdx = 0; refIdx < numLxWeights; refIdx++)
     {
-      picHeader->getWpScaling(refPicList, refIdx, wp);
+      wp = picHeader->getWpScaling(refPicList, refIdx);
 
-      wp[COMPONENT_Y].uiLog2WeightDenom = log2WeightDenomLuma;
+      wp[COMPONENT_Y].log2WeightDenom = log2WeightDenomLuma;
       for (int j = 1; j < numValidComp; j++)
       {
-        wp[j].uiLog2WeightDenom = log2WeightDenomChroma;
+        wp[j].log2WeightDenom = log2WeightDenomChroma;
       }
 
       uint32_t uiCode;
       READ_FLAG(uiCode, numRef == 0 ? "luma_weight_l0_flag[i]" : "luma_weight_l1_flag[i]");
-      wp[COMPONENT_Y].bPresentFlag = (uiCode == 1);
-      totalSignalledWeightFlags += wp[COMPONENT_Y].bPresentFlag;
+      wp[COMPONENT_Y].presentFlag = (uiCode == 1);
+      totalSignalledWeightFlags += wp[COMPONENT_Y].presentFlag;
     }
     if (chroma)
     {
       uint32_t uiCode;
       for (int refIdx = 0; refIdx < numLxWeights; refIdx++)
       {
-        picHeader->getWpScaling(refPicList, refIdx, wp);
+        wp = picHeader->getWpScaling(refPicList, refIdx);
         READ_FLAG(uiCode, numRef == 0 ? "chroma_weight_l0_flag[i]" : "chroma_weight_l1_flag[i]");
         for (int j = 1; j < numValidComp; j++)
         {
-          wp[j].bPresentFlag = (uiCode == 1);
+          wp[j].presentFlag = (uiCode == 1);
         }
-        totalSignalledWeightFlags += 2 * wp[COMPONENT_Cb].bPresentFlag;
+        totalSignalledWeightFlags += 2 * wp[COMPONENT_Cb].presentFlag;
       }
     }
     else
     {
       for ( int refIdx=0; refIdx<MAX_NUM_REF; refIdx++ )
       {
-        picHeader->getWpScaling(refPicList, refIdx, wp);
-        wp[1].bPresentFlag = false;
-        wp[2].bPresentFlag = false;
+        wp                = picHeader->getWpScaling(refPicList, refIdx);
+        wp[1].presentFlag = false;
+        wp[2].presentFlag = false;
       }
     }
     for (int refIdx = 0; refIdx < numLxWeights; refIdx++)
     {
-      picHeader->getWpScaling(refPicList, refIdx, wp);
-      if (wp[COMPONENT_Y].bPresentFlag)
+      wp = picHeader->getWpScaling(refPicList, refIdx);
+      if (wp[COMPONENT_Y].presentFlag)
       {
         int deltaWeight;
         READ_SVLC(deltaWeight, numRef == 0 ? "delta_luma_weight_l0[i]" : "delta_luma_weight_l1[i]");
         CHECK(deltaWeight < -128, "delta_luma_weight_lx shall be in the rage of -128 to 127");
         CHECK(deltaWeight > 127, "delta_luma_weight_lx shall be in the rage of -128 to 127");
-        wp[COMPONENT_Y].iWeight = (deltaWeight + (1 << wp[COMPONENT_Y].uiLog2WeightDenom));
-        READ_SVLC(wp[COMPONENT_Y].iOffset, numRef == 0 ? "luma_offset_l0[i]" : "luma_offset_l1[i]");
+        wp[COMPONENT_Y].codedWeight = (deltaWeight + (1 << wp[COMPONENT_Y].log2WeightDenom));
+        READ_SVLC(wp[COMPONENT_Y].codedOffset, numRef == 0 ? "luma_offset_l0[i]" : "luma_offset_l1[i]");
         const int range = sps->getSpsRangeExtension().getHighPrecisionOffsetsEnabledFlag() ? (1 << sps->getBitDepth(CHANNEL_TYPE_LUMA)) / 2 : 128;
-        CHECK ( wp[0].iOffset < -range , "luma_offset_lx shall be in the rage of -128 to 127");
-        CHECK ( wp[0].iOffset >= range , "luma_offset_lx shall be in the rage of -128 to 127");
+        CHECK(wp[0].codedOffset < -range, "luma_offset_lx shall be in the rage of -128 to 127");
+        CHECK(wp[0].codedOffset >= range, "luma_offset_lx shall be in the rage of -128 to 127");
       }
       else
       {
-        wp[COMPONENT_Y].iWeight = (1 << wp[COMPONENT_Y].uiLog2WeightDenom);
-        wp[COMPONENT_Y].iOffset = 0;
+        wp[COMPONENT_Y].codedWeight = (1 << wp[COMPONENT_Y].log2WeightDenom);
+        wp[COMPONENT_Y].codedOffset = 0;
       }
       if (chroma)
       {
-        if (wp[COMPONENT_Cb].bPresentFlag)
+        if (wp[COMPONENT_Cb].presentFlag)
         {
           int range = sps->getSpsRangeExtension().getHighPrecisionOffsetsEnabledFlag() ? (1 << sps->getBitDepth(CHANNEL_TYPE_CHROMA)) / 2 : 128;
           for (int j = 1; j < numValidComp; j++)
@@ -5097,22 +5097,22 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
             READ_SVLC(deltaWeight, numRef == 0 ? "delta_chroma_weight_l0[i]" : "delta_chroma_weight_l1[i]");
             CHECK( deltaWeight < -128, "delta_chroma_weight_lx shall be in the rage of -128 to 127" );
             CHECK( deltaWeight >  127, "delta_chroma_weight_lx shall be in the rage of -128 to 127" );
-            wp[j].iWeight = (deltaWeight + (1 << wp[j].uiLog2WeightDenom));
+            wp[j].codedWeight = (deltaWeight + (1 << wp[j].log2WeightDenom));
 
             int deltaChroma;
             READ_SVLC(deltaChroma, numRef == 0 ? "delta_chroma_offset_l0[i]" : "delta_chroma_offset_l1[i]");
             CHECK( deltaChroma <  -4*range, "delta_chroma_offset_lx shall be in the range of -4 * 128 to 4 * 127" );
             CHECK( deltaChroma >=  4*range, "delta_chroma_offset_lx shall be in the range of -4 * 128 to 4 * 127" );
-            int pred      = (range - ((range * wp[j].iWeight) >> (wp[j].uiLog2WeightDenom)));
-            wp[j].iOffset = Clip3(-range, range - 1, (deltaChroma + pred));
+            int pred          = (range - ((range * wp[j].codedWeight) >> (wp[j].log2WeightDenom)));
+            wp[j].codedOffset = Clip3(-range, range - 1, (deltaChroma + pred));
           }
         }
         else
         {
           for (int j = 1; j < numValidComp; j++)
           {
-            wp[j].iWeight = (1 << wp[j].uiLog2WeightDenom);
-            wp[j].iOffset = 0;
+            wp[j].codedWeight = (1 << wp[j].log2WeightDenom);
+            wp[j].codedOffset = 0;
           }
         }
       }
@@ -5120,11 +5120,11 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
 
     for (int refIdx = numLxWeights; refIdx < MAX_NUM_REF; refIdx++)
     {
-      picHeader->getWpScaling(refPicList, refIdx, wp);
+      wp = picHeader->getWpScaling(refPicList, refIdx);
 
-      wp[0].bPresentFlag = false;
-      wp[1].bPresentFlag = false;
-      wp[2].bPresentFlag = false;
+      wp[0].presentFlag = false;
+      wp[1].presentFlag = false;
+      wp[2].presentFlag = false;
     }
 
     if (numRef == 0)
