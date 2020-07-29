@@ -173,10 +173,14 @@ uint32_t DecApp::decode()
           xFlushOutput(pcListPic, nalu.m_nuhLayerId);
         }
 #if JVET_R0270
-        if (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL || nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA)
+        if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInPu)
         {
-          // Once the picture has TRAIL or or STSA slice, no more special treatment for new CLVS picture for the rest of
-          // pictures until new CLVS picture is received.
+          // A CRA that is immediately preceded by an EOS is a CLVSS
+          m_newCLVS[nalu.m_nuhLayerId] = true;
+        }
+        else if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && !isEosPresentInPu)
+        {
+          // A CRA that is not immediately precede by an EOS is not a CLVSS
           m_newCLVS[nalu.m_nuhLayerId] = false;
         }
 #endif
