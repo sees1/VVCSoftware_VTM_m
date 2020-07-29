@@ -1201,10 +1201,17 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   if (pcSPS->getMaxNumMergeCand() >= 2)
   {
     WRITE_FLAG(pcSPS->getUseGeo() ? 1 : 0, "sps_gpm_enabled_flag");
-    if (pcSPS->getUseGeo() && pcSPS->getMaxNumMergeCand() >= 3)
+    if (pcSPS->getUseGeo())
     {
-      CHECK(pcSPS->getMaxNumMergeCand() < pcSPS->getMaxNumGeoCand(), "Incorrrect max number of GEO candidates!");
-      WRITE_UVLC(pcSPS->getMaxNumMergeCand() - pcSPS->getMaxNumGeoCand(), "max_num_merge_cand_minus_max_num_gpm_cand");
+      CHECK(pcSPS->getMaxNumMergeCand() < pcSPS->getMaxNumGeoCand(),
+            "The number of GPM candidates must not be greater than the number of merge candidates");
+      CHECK(2 > pcSPS->getMaxNumGeoCand(),
+            "The number of GPM candidates must not be smaller than 2");
+      if (pcSPS->getMaxNumMergeCand() >= 3)
+      {
+        WRITE_UVLC(pcSPS->getMaxNumMergeCand() - pcSPS->getMaxNumGeoCand(),
+                   "max_num_merge_cand_minus_max_num_gpm_cand");
+      }
     }
   }
 
