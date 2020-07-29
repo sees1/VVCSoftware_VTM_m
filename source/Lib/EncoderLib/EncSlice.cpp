@@ -117,7 +117,7 @@ EncSlice::setUpLambda( Slice* slice, const double dLambda, int iQP)
     int chromaQPOffset       = slice->getPPS()->getQpOffset( compID ) + slice->getSliceChromaQpDelta( compID );
     int qpc = slice->getSPS()->getMappedChromaQpValue(compID, iQP) + chromaQPOffset;
     double tmpWeight         = pow( 2.0, ( iQP - qpc ) / 3.0 );  // takes into account of the chroma qp mapping and chroma qp Offset
-    if( m_pcCfg->getDepQuantEnabledFlag()  )
+    if (slice->getDepQuantEnabledFlag())
     {
       tmpWeight *= ( m_pcCfg->getGOPSize() >= 8 ? pow( 2.0, 0.1/3.0 ) : pow( 2.0, 0.2/3.0 ) );  // increase chroma weight for dependent quantization (in order to reduce bit rate shift from chroma to luma)
     }
@@ -776,7 +776,7 @@ double EncSlice::calculateLambda( const Slice*     slice,
   double dLambda = initializeLambda (slice, GOPid, int (refQP + 0.5), dQP);
   iQP = Clip3 (-slice->getSPS()->getQpBDOffset (CHANNEL_TYPE_LUMA), MAX_QP, int (dQP + 0.5));
 
-  if( m_pcCfg->getDepQuantEnabledFlag() )
+  if (slice->getDepQuantEnabledFlag())
   {
     dLambda *= pow( 2.0, 0.25/3.0 ); // slight lambda adjustment for dependent quantization (due to different slope of quantizer)
   }
