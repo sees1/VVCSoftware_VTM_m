@@ -250,7 +250,7 @@ class ConstraintInfo
   bool              m_frameOnlyConstraintFlag;
   bool              m_intraOnlyConstraintFlag;
   uint32_t          m_maxBitDepthConstraintIdc;
-  ChromaFormat      m_maxChromaFormatConstraintIdc;
+  int               m_maxChromaFormatConstraintIdc;
   bool              m_onePictureOnlyConstraintFlag;
   bool              m_lowerBitRateConstraintFlag;
 
@@ -406,8 +406,8 @@ public:
   uint32_t      getMaxBitDepthConstraintIdc() const { return m_maxBitDepthConstraintIdc; }
   void          setMaxBitDepthConstraintIdc(uint32_t bitDepth) { m_maxBitDepthConstraintIdc = bitDepth; }
 
-  ChromaFormat  getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
-  void          setMaxChromaFormatConstraintIdc(ChromaFormat fmt) { m_maxChromaFormatConstraintIdc = fmt; }
+  int           getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
+  void          setMaxChromaFormatConstraintIdc(int fmt) { m_maxChromaFormatConstraintIdc = fmt; }
 
 #if !JVET_S0266_VUI_length
   bool          getNonProjectedConstraintFlag() const { return m_nonProjectedConstraintFlag; }

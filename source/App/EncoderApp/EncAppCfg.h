@@ -136,8 +136,7 @@ protected:
 #endif
   bool      m_bIntraOnlyConstraintFlag;
   uint32_t  m_maxBitDepthConstraintIdc;
-  uint32_t  m_maxChromaFormatConstraintIdc;
-  bool      m_bFrameConstraintFlag;
+  int       m_maxChromaFormatConstraintIdc;
   bool      m_singleLayerConstraintFlag;
   bool      m_allLayersIndependentConstraintFlag;
   bool      m_noMrlConstraintFlag;

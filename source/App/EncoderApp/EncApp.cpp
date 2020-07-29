@@ -242,13 +242,8 @@ void EncApp::xInitLibCfg()
 
   //====== SPS constraint flags =======
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
-  m_cEncLib.setGciPresentFlag                                    (true);
+  m_cEncLib.setGciPresentFlag                                    ( m_gciPresentFlag );
 #endif
-//#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
-//  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint );
-//#else
-//  m_cEncLib.setMaxBitDepthConstraintIdc                          ( m_bitDepthConstraint - 8 );
-//#endif
   if (m_cEncLib.getGciPresentFlag())
   {
     m_cEncLib.setNonPackedConstraintFlag(m_nonPackedConstraintFlag);
@@ -260,8 +255,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setFrameOnlyConstraintFlag(m_frameOnlyConstraintFlag);
     m_cEncLib.setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
     m_cEncLib.setIntraOnlyConstraintFlag(m_intraOnlyConstraintFlag);
-    m_cEncLib.setNoIdrConstraintFlag(m_noIdrConstraintFlag); // Not yet possible to encode bitstream starting with a GDR picture
-    m_cEncLib.setNoGdrConstraintFlag(m_noGdrConstraintFlag); // Not yet possible to encode GDR using config parameters
+    m_cEncLib.setNoIdrConstraintFlag(m_noIdrConstraintFlag);
+    m_cEncLib.setNoGdrConstraintFlag(m_noGdrConstraintFlag);
     m_cEncLib.setSingleLayerConstraintFlag(m_singleLayerConstraintFlag);
     m_cEncLib.setAllLayersIndependentConstraintFlag(m_allLayersIndependentConstraintFlag);
     m_cEncLib.setNoQpDeltaConstraintFlag(m_bNoQpDeltaConstraintFlag);
@@ -285,10 +280,10 @@ void EncApp::xInitLibCfg()
     CHECK(m_noResChangeInClvsConstraintFlag && m_resChangeInClvsEnabled, "Resolution change in CLVS shall be deactivated when m_noResChangeInClvsConstraintFlag is equal to 1");
 
     m_cEncLib.setMaxBitDepthConstraintIdc(m_maxBitDepthConstraintIdc);
-    CHECK(m_maxBitDepthConstraintIdc < m_bitDepthConstraint - 8, "Bit depth minus 8 shall be less than m_maxBitDepthConstraintIdc");
+    CHECK(m_internalBitDepth[CHANNEL_TYPE_LUMA] > m_maxBitDepthConstraintIdc, "Internal bit depth shall be less than or equal to m_maxBitDepthConstraintIdc");
 
     m_cEncLib.setMaxChromaFormatConstraintIdc(m_maxChromaFormatConstraintIdc);
-    CHECK(m_maxChromaFormatConstraintIdc < m_chromaFormatConstraint, "Chroma format Idc shall be less than m_maxBitDepthConstraintIdc");
+    CHECK(m_chromaFormatIDC > m_maxChromaFormatConstraintIdc, "Chroma format Idc shall be less than or equal to m_maxBitDepthConstraintIdc");
 
     m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(m_bNoQtbttDualTreeIntraConstraintFlag);
     CHECK(m_bNoQtbttDualTreeIntraConstraintFlag && m_dualTree, "Dual tree shall be deactivated when m_bNoQtbttDualTreeIntraConstraintFlag is equal to 1");
@@ -401,7 +396,7 @@ void EncApp::xInitLibCfg()
 #if JVET_S0050_GCI
     m_cEncLib.setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
     CHECK(m_noExplicitScaleListConstraintFlag && m_useScalingListId != SCALING_LIST_OFF, "Explicit scaling list shall be deactivated when m_noExplicitScaleListConstraintFlag is equal to 1");
-   
+
     m_cEncLib.setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
 #endif
@@ -420,8 +415,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setFrameOnlyConstraintFlag(false);
     m_cEncLib.setOnePictureOnlyConstraintFlag(false);
     m_cEncLib.setIntraOnlyConstraintFlag(false);
-    m_cEncLib.setMaxBitDepthConstraintIdc(8);
-    m_cEncLib.setMaxChromaFormatConstraintIdc(CHROMA_444);
+    m_cEncLib.setMaxBitDepthConstraintIdc(16);
+    m_cEncLib.setMaxChromaFormatConstraintIdc(3);
     m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(false);
     m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(false);
     m_cEncLib.setNoSaoConstraintFlag(false);
