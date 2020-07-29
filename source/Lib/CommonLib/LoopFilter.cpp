@@ -792,10 +792,6 @@ unsigned LoopFilter::xGetBoundaryStrengthSingle ( const CodingUnit& cu, const De
   {
     return tmpBs;
   }
-  if ((cuP.firstPU->ciipFlag || cuQ.firstPU->ciipFlag))
-  {
-    return 1;
-  }
 
   if ( !cu.Y().valid() )
   {
