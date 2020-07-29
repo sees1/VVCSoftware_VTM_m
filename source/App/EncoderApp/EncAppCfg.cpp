@@ -661,7 +661,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t>  cfg_subPicId(0, std::numeric_limits<uint16_t>::max(), 0, MAX_NUM_SUB_PICS);
 
   SMultiValueInput<int>          cfg_sliFractions(0, 100, 0, std::numeric_limits<int>::max());
+#if  JVET_S0176_SLI_SEI
+  SMultiValueInput<Level::Name>  cfg_sliRefLevels(Level::NONE, Level::LEVEL15_5, 0, 8 * MAX_VPS_SUBLAYERS);
+#else
   SMultiValueInput<Level::Name>  cfg_sliRefLevels(Level::NONE, Level::LEVEL15_5,  0, 8);
+#endif
 
   int warnUnknowParameter = 0;
 
@@ -1689,19 +1693,33 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     CHECK (m_numSubPics != m_cfgSubpictureLevelInfoSEI.m_numSubpictures, "NumSubPics must be equal to SEISubpicLevelInfoNumSubpics" );
 #if JVET_S0176_SLI_SEI
-    CHECK (m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers > m_maxSublayers, "SEISubpicLevelInfoMaxSublayers must be no greater than vps_max_sublayers");
-#endif
+    CHECK (m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers != m_maxSublayers, "SEISubpicLevelInfoMaxSublayers must be equal to vps_max_sublayers");
+    if (m_cfgSubpictureLevelInfoSEI.m_sliSublayerInfoPresentFlag)
+    {
+      CHECK(cfg_sliRefLevels.values.size() < m_maxSublayers, "when sliSublayerInfoPresentFlag = 1, the number of reference levels must be greater than or equal to sublayers");
+    }
     if (m_cfgSubpictureLevelInfoSEI.m_explicitFraction)
     {
       m_cfgSubpictureLevelInfoSEI.m_fractions = cfg_sliFractions.values;
       m_cfgSubpictureLevelInfoSEI.m_refLevels = cfg_sliRefLevels.values;
-#if JVET_S0176_SLI_SEI
-      CHECK (cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures * m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers != cfg_sliFractions.values.size(),
-        "Number of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels times the number of sublayers");
-#else
-      CHECK (cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures != cfg_sliFractions.values.size(), "Number of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels.");
-#endif
+      if (m_cfgSubpictureLevelInfoSEI.m_sliSublayerInfoPresentFlag)
+      {
+        CHECK((int)cfg_sliRefLevels.values.size() / m_maxSublayers * m_cfgSubpictureLevelInfoSEI.m_numSubpictures * m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers != cfg_sliFractions.values.size(),
+          "when sliSublayerInfoPresentFlag = 1, the number  of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels times the number of sublayers");
+      }
+      else
+      {
+        CHECK((int)cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures != cfg_sliFractions.values.size(), "when sliSublayerInfoPresentFlag = 0, the number  of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels");
+      }
     }
+#else
+    if (m_cfgSubpictureLevelInfoSEI.m_explicitFraction)
+    {
+        m_cfgSubpictureLevelInfoSEI.m_fractions = cfg_sliFractions.values;
+        m_cfgSubpictureLevelInfoSEI.m_refLevels = cfg_sliRefLevels.values;
+      CHECK (cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures != cfg_sliFractions.values.size(), "when sliSublayerInfoPresentFlag = 0, the number  of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels.");
+    }
+#endif
   }
 
   if (m_costMode != COST_LOSSLESS_CODING && m_mixedLossyLossless)

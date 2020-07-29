@@ -1507,9 +1507,14 @@ void SEIReader::xParseSEISubpictureLevelInfo(SEISubpicureLevelInfo& sei, uint32_
 
   sei.m_refLevelIdc.resize(sei.m_numRefLevels);
 #if JVET_S0176_SLI_SEI
+  // sei parameters initialization
   for (int i = 0; i < sei.m_numRefLevels; i++)
   {
-    sei.m_refLevelIdc[i].resize(sei.m_sliSublayerInfoPresentFlag ? sei.m_sliMaxSublayers : 1);
+    sei.m_refLevelIdc[i].resize(sei.m_sliMaxSublayers);
+    for (int k = 0; k < sei.m_sliMaxSublayers; k++)
+    {
+      sei.m_refLevelIdc[i][k] = Level::LEVEL15_5;
+    }
   }
   if (sei.m_explicitFractionPresentFlag)
   {
@@ -1519,11 +1524,16 @@ void SEIReader::xParseSEISubpictureLevelInfo(SEISubpicureLevelInfo& sei, uint32_
       sei.m_refLevelFraction[i].resize(sei.m_numSubpics);
       for (int j = 0; j < sei.m_numSubpics; j++)
       {
-        sei.m_refLevelFraction[i][j].resize(sei.m_sliSublayerInfoPresentFlag ? sei.m_sliMaxSublayers : 1);
+        sei.m_refLevelFraction[i][j].resize(sei.m_sliMaxSublayers);
+        for (int k = 0; k < sei.m_sliMaxSublayers; k++)
+        {
+          sei.m_refLevelFraction[i][j][k] = 0;
+        }
       }
     }
   }
 
+  // parsing
   for (int k = sei.m_sliSublayerInfoPresentFlag ? 0 : sei.m_sliMaxSublayers - 1; k < sei.m_sliMaxSublayers; k++)
   {
     for (int i = 0; i < sei.m_numRefLevels; i++)
@@ -1535,6 +1545,25 @@ void SEIReader::xParseSEISubpictureLevelInfo(SEISubpicureLevelInfo& sei, uint32_
         for (int j = 0; j < sei.m_numSubpics; j++)
         {
           sei_read_code(pDecodedMessageOutputStream, 8, val, "sli_ref_level_fraction_minus1[i][j][k]");  sei.m_refLevelFraction[i][j][k] = val;
+        }
+      }
+    }
+  }
+
+  // update the inference of m_refLevelIdc[][] and m_refLevelFraction[][][]
+  if (!sei.m_sliSublayerInfoPresentFlag)
+  {
+    for (int k = sei.m_sliMaxSublayers - 2; k >= 0; k--)
+    {
+      for (int i = 0; i < sei.m_numRefLevels; i++)
+      {
+        sei.m_refLevelIdc[i][k] = sei.m_refLevelIdc[i][sei.m_sliMaxSublayers - 1];
+        if (sei.m_explicitFractionPresentFlag)
+        {
+          for (int j = 0; j < sei.m_numSubpics; j++)
+          {
+            sei.m_refLevelFraction[i][j][k] = sei.m_refLevelFraction[i][j][sei.m_sliMaxSublayers - 1];
+          }
         }
       }
     }
