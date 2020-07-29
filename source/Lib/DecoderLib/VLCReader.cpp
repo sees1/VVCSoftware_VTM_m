@@ -2025,14 +2025,20 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   {
     READ_FLAG(uiCode, "sps_gpm_enabled_flag");
     pcSPS->setUseGeo(uiCode != 0);
-    if (pcSPS->getUseGeo() && pcSPS->getMaxNumMergeCand() >= 3)
+    if (pcSPS->getUseGeo())
     {
-      READ_UVLC(uiCode, "max_num_merge_cand_minus_max_num_gpm_cand");
-      CHECK(pcSPS->getMaxNumMergeCand() < uiCode, "Incorrrect max number of GEO candidates!");
-      pcSPS->setMaxNumGeoCand((uint32_t)(pcSPS->getMaxNumMergeCand() - uiCode));
+      if (pcSPS->getMaxNumMergeCand() >= 3)
+      {
+        READ_UVLC(uiCode, "max_num_merge_cand_minus_max_num_gpm_cand");
+        CHECK(pcSPS->getMaxNumMergeCand() - 2 < uiCode,
+              "max_num_merge_cand_minus_max_num_gpm_cand must not be greater than the number of merge candidates minus 2");
+        pcSPS->setMaxNumGeoCand((uint32_t)(pcSPS->getMaxNumMergeCand() - uiCode));
+      }
+      else
+      {
+        pcSPS->setMaxNumGeoCand(2);
+      }
     }
-    else if (pcSPS->getUseGeo())
-      pcSPS->setMaxNumGeoCand(2);
   }
   else
   {
