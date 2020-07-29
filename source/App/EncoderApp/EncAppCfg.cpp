@@ -676,6 +676,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   bool sdr = false;
 
+  // clang-format off
   po::Options opts;
   opts.addOptions()
   ("help",                                            do_help,                                          false, "this help text")
@@ -873,7 +874,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DualITree",                                       m_dualTree,                                       false, "Use separate QTBT trees for intra slice luma and chroma channel types")
   ( "LFNST",                                          m_LFNST,                                          false, "Enable LFNST (0:off, 1:on)  [default: off]" )
   ( "FastLFNST",                                      m_useFastLFNST,                                   false, "Fast methods for LFNST" )
-  ("SubPuMvp",                                        m_SubPuMvpMode,                                       0, "Enable Sub-PU temporal motion vector prediction (0:off, 1:ATMVP, 2:STMVP, 3:ATMVP+STMVP)  [default: off]")
+  ("SbTMVP",                                          m_sbTmvpEnableFlag,                               false, "Enable Subblock Temporal Motion Vector Prediction (0: off, 1: on) [default: off]")
   ("MMVD",                                            m_MMVD,                                            true, "Enable Merge mode with Motion Vector Difference (0:off, 1:on)  [default: 1]")
   ("Affine",                                          m_Affine,                                         false, "Enable affine prediction (0:off, 1:on)  [default: off]")
   ("AffineType",                                      m_AffineType,                                      true,  "Enable affine type prediction (0:off, 1:on)  [default: on]" )
@@ -1397,6 +1398,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     ("TemporalFilterFutureReference",                 m_gopBasedTemporalFilterFutureReference,   true,            "Enable referencing of future frames in the GOP based temporal filter. This is typically disabled for Low Delay configurations.")
     ("TemporalFilterStrengthFrame*",                  m_gopBasedTemporalFilterStrengths, std::map<int, double>(), "Strength for every * frame in GOP based temporal filter, where * is an integer."
                                                                                                                   " E.g. --TemporalFilterStrengthFrame8 0.95 will enable GOP based temporal filter at every 8th frame with strength 0.95");
+  // clang-format on
 
 #if EXTENSION_360_VIDEO
   TExt360AppEncCfg::TExt360AppEncCfgContext ext360CfgContext;
@@ -2605,20 +2607,6 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara ( m_level==Level::LEVEL15_5 && !m_onePictureOnlyConstraintFlag, "Currently the only profiles that support level 15.5 are still pictures, which require onePictureOnlyConstraintFlag to be 1" );
   }
 
-  if( m_SubPuMvpMode == 3 && m_maxNumMergeCand < 7 )
-  {
-    msg( WARNING, "****************************************************************************\n" );
-    msg( WARNING, "** WARNING: Allowing less than 7 merge candidates, although both          **\n" );
-    msg( WARNING, "**          advanced sup-pu temporal merging modes are enabled.           **\n" );
-    msg( WARNING, "****************************************************************************\n" );
-  }
-  else if( m_SubPuMvpMode != 0 && m_maxNumMergeCand < 6 )
-  {
-    msg( WARNING, "****************************************************************************\n" );
-    msg( WARNING, "** WARNING: Allowing less than 6 merge candidates, although               **\n" );
-    msg( WARNING, "**          an advanced sup-pu temporal merging mode is enabled.          **\n" );
-    msg( WARNING, "****************************************************************************\n" );
-  }
   xConfirmPara( m_iQP < -6 * (m_internalBitDepth[CHANNEL_TYPE_LUMA] - 8) || m_iQP > MAX_QP, "QP exceeds supported range (-QpBDOffsety to 63)" );
 #if W0038_DB_OPT
   xConfirmPara( m_deblockingFilterMetric!=0 && (m_bLoopFilterDisable || m_loopFilterOffsetInPPS), "If DeblockingFilterMetric is non-zero then both LoopFilterDisable and LoopFilterOffsetInPPS must be 0");
@@ -2779,11 +2767,12 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( 0 < m_maxNumGeoCand && m_maxNumGeoCand < 2, "MaxNumGeoCand must be no less than 2 unless MaxNumGeoCand is 0." );
   xConfirmPara( m_maxNumIBCMergeCand < 1, "MaxNumIBCMergeCand must be 1 or greater." );
   xConfirmPara( m_maxNumIBCMergeCand > IBC_MRG_MAX_NUM_CANDS, "MaxNumIBCMergeCand must be no more than IBC_MRG_MAX_NUM_CANDS." );
-  xConfirmPara( m_maxNumAffineMergeCand < (m_SubPuMvpMode ? 1 : 0), "MaxNumAffineMergeCand must be greater or equal to SubPuMvp." );
+  xConfirmPara(m_maxNumAffineMergeCand < (m_sbTmvpEnableFlag ? 1 : 0),
+               "MaxNumAffineMergeCand must be greater than 0 when SbTMVP is enabled");
   xConfirmPara( m_maxNumAffineMergeCand > AFFINE_MRG_MAX_NUM_CANDS, "MaxNumAffineMergeCand must be no more than AFFINE_MRG_MAX_NUM_CANDS." );
   if ( m_Affine == 0 )
   {
-    m_maxNumAffineMergeCand = m_SubPuMvpMode;
+    m_maxNumAffineMergeCand = m_sbTmvpEnableFlag ? 1 : 0;
     if (m_PROF) msg(WARNING, "PROF is forcefully disabled when Affine is off \n");
     m_PROF = false;
   }
@@ -3847,7 +3836,7 @@ void EncAppCfg::xPrintParameter()
       msg( VERBOSE, "AffineType:%d ", m_AffineType );
     }
     msg(VERBOSE, "PROF:%d ", m_PROF);
-    msg(VERBOSE, "SubPuMvp:%d+%d ", m_SubPuMvpMode & 1, (m_SubPuMvpMode & 2) == 2);
+    msg(VERBOSE, "SbTMVP:%d ", m_sbTmvpEnableFlag);
     msg( VERBOSE, "DualITree:%d ", m_dualTree );
     msg( VERBOSE, "IMV:%d ", m_ImvMode );
     msg( VERBOSE, "BIO:%d ", m_BIO );

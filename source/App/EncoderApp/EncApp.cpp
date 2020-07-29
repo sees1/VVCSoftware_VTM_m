@@ -307,7 +307,8 @@ void EncApp::xInitLibCfg()
     CHECK(m_bNoTemporalMvpConstraintFlag && m_TMVPModeId, "Temporal MVP shall be deactivated when m_bNoTemporalMvpConstraintFlag is equal to 1");
 
     m_cEncLib.setNoSbtmvpConstraintFlag(m_bNoSbtmvpConstraintFlag);
-    CHECK(m_bNoSbtmvpConstraintFlag && m_SubPuMvpMode, "SbTMVP shall be deactivated when m_bNoSbtmvpConstraintFlag is equal to 1");
+    CHECK(m_bNoSbtmvpConstraintFlag && m_sbTmvpEnableFlag,
+          "SbTMVP shall be deactivated when m_bNoSbtmvpConstraintFlag is equal to 1");
 
     m_cEncLib.setNoAmvrConstraintFlag(m_bNoAmvrConstraintFlag);
     CHECK(m_bNoAmvrConstraintFlag && (m_ImvMode != IMV_OFF || m_AffineAmvr), "AMVR shall be deactivated when m_bNoAmvrConstraintFlag is equal to 1");
@@ -611,7 +612,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDualITree                                         ( m_dualTree );
   m_cEncLib.setLFNST                                             ( m_LFNST );
   m_cEncLib.setUseFastLFNST                                      ( m_useFastLFNST );
-  m_cEncLib.setSubPuMvpMode                                      ( m_SubPuMvpMode );
+  m_cEncLib.setSbTmvpEnabledFlag(m_sbTmvpEnableFlag);
   m_cEncLib.setAffine                                            ( m_Affine );
   m_cEncLib.setAffineType                                        ( m_AffineType );
   m_cEncLib.setPROF                                              ( m_PROF );

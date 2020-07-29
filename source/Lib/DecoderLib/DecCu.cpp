@@ -907,7 +907,7 @@ void DecCu::xDeriveCUMV( CodingUnit &cu )
       if (pu.mmvdMergeFlag || pu.cu->mmvdSkip)
       {
         CHECK(pu.ciipFlag == true, "invalid Ciip");
-        if (pu.cs->sps->getSBTMVPEnabledFlag())
+        if (pu.cs->sps->getSbTMVPEnabledFlag())
         {
           Size bufSize = g_miScaling.scale(pu.lumaSize());
           mrgCtx.subPuMvpMiBuf = MotionBuf(m_SubPuMiBuf, bufSize);
@@ -934,7 +934,7 @@ void DecCu::xDeriveCUMV( CodingUnit &cu )
         if( pu.cu->affine )
         {
           AffineMergeCtx affineMergeCtx;
-          if ( pu.cs->sps->getSBTMVPEnabledFlag() )
+          if (pu.cs->sps->getSbTMVPEnabledFlag())
           {
             Size bufSize = g_miScaling.scale( pu.lumaSize() );
             mrgCtx.subPuMvpMiBuf = MotionBuf( m_SubPuMiBuf, bufSize );

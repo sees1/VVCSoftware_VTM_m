@@ -321,7 +321,7 @@ protected:
 
   bool      m_LFNST;
   bool      m_useFastLFNST;
-  int       m_SubPuMvpMode;
+  bool      m_sbTmvpEnableFlag;
   bool      m_Affine;
   bool      m_AffineType;
   bool      m_PROF;
@@ -1037,8 +1037,7 @@ public:
   void      setVerCollocatedChromaFlag( bool b )             { m_verCollocatedChromaFlag = b; }
   bool      getVerCollocatedChromaFlag()               const { return m_verCollocatedChromaFlag; }
 
-  void      setSubPuMvpMode(int n)          { m_SubPuMvpMode = n; }
-  bool      getSubPuMvpMode()         const { return m_SubPuMvpMode; }
+  void setSbTmvpEnabledFlag(bool val) { m_sbTmvpEnableFlag = val; }
 
   void      setAffine                       ( bool b )       { m_Affine = b; }
   bool      getAffine                       ()         const { return m_Affine; }

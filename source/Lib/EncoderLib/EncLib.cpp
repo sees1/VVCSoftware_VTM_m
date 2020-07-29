@@ -1232,7 +1232,7 @@ void EncLib::xInitSPS( SPS& sps )
   sps.setIDRRefParamListPresent              ( m_idrRefParamList );
   sps.setUseDualITree                        ( m_dualITree );
   sps.setUseLFNST                            ( m_LFNST );
-  sps.setSBTMVPEnabledFlag                  ( m_SubPuMvpMode );
+  sps.setSbTMVPEnabledFlag(m_sbTmvpEnableFlag);
   sps.setAMVREnabledFlag                ( m_ImvMode != IMV_OFF );
   sps.setBDOFEnabledFlag                    ( m_BIO );
   sps.setMaxNumMergeCand(getMaxNumMergeCand());
