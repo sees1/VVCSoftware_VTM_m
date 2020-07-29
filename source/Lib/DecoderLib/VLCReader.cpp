@@ -3710,7 +3710,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     {
       int bitsSliceAddress = ceilLog2(currSubPic.getNumSlicesInSubPic());
       READ_CODE(bitsSliceAddress, uiCode, "slice_address");  sliceAddr = uiCode;
-      CHECK(sliceAddr >= pps->getNumSlicesInPic(), "Invalid slice address");
+      CHECK(sliceAddr >= currSubPic.getNumSlicesInSubPic(), "Invalid slice address");
     }
     else
     {
