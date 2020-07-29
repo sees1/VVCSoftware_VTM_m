@@ -1000,40 +1000,88 @@ For --profile=main-RExt, specifies the value to use to derive the general_max_bi
 For --profile=main-RExt, specifies the chroma-format to use for the general profile constraints for RExt profiles; when 0, use the value of ChromaFormatIDC.
 \\
 
-\Option{IntraConstraintFlag} &
+\Option{GciPresentFlag} &
 %\ShortOption{\None} &
-\Default{false} &
-For --profile=main-RExt, specifies the value of general_intra_constraint_flag to use for RExt profiles.
+\Default{1} &
+Specifies the value of gci_present_flag
 \\
 
-\Option{OnePictureOnlyConstraintFlag} &
+\Option{IntraOnlyConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
-Specifies the value of general_one_picture_only_constraint_flag.
-\\
-
-\Option{LowerBitRateConstraintFlag} &
-%\ShortOption{\None} &
-\Default{true} &
-Specifies the value of general_lower_bit_constraint_flag to use for RExt profiles.
-\\
-
-\Option{NoResChangeInClvsConstraintFlag} &
-%\ShortOption{\None} &
-\Default{false} &
-Specifies the value of no_res_change_in_clvs_constraint_flag
-\\
-
-\Option{SingleLayerConstraintFlag} &
-%\ShortOption{\None} &
-\Default{false} &
-Specifies the value of single_layer_constraint_flag
+Specifies the value of gci_intra_only_constraint_flag
 \\
 
 \Option{AllLayersIndependentConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
 Specifies the value of all_layers_independent_constraint_flag
+\\
+
+\Option{OnePictureOnlyConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of general_one_picture_only_constraint_flag
+\\
+
+\Option{MaxBitDepthConstraintIdc} &
+%\ShortOption{\None} &
+\Default{16} &
+Specifies the value of 16 minus gci_sixteen_minus_max_bitdepth_constraint_idc
+\\
+
+\Option{MaxChromaFormatConstraintIdc} &
+%\ShortOption{\None} &
+\Default{3} &
+Specifies the value of 3 minus gci_three_minus_max_chroma_format_constraint_idc
+\\
+
+\Option{TrailConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_trail_constraint_flag
+\\
+
+\Option{StsaConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_stsa_constraint_flag
+\\
+
+\Option{RaslConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_rasl_constraint_flag
+\\
+
+\Option{RadlConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_radl_constraint_flag
+\\
+
+\Option{IdrConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_idr_constraint_flag
+\\
+
+\Option{CraConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_cra_constraint_flag
+\\
+
+\Option{GdrConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_gdr_constraint_flag
+\\
+
+\Option{ApsConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_aps_constraint_flag
 \\
 
 \Option{OneTilePerPicConstraintFlag} &
@@ -1060,10 +1108,232 @@ Specifies the value of one_slice_per_pic_constraint_flag
 Specifies the value of one_subpic_per_pic_constraint_flag
 \\
 
+\Option{PartitionConstraintsOverrideConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_partition_constraints_override_constraint_flag
+\\
+
+\Option{QtbttDualTreeIntraConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_qtbtt_dual_tree_intra_constraint_flag
+\\
+
+\Option{PaletteConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_palette_constraint_flag
+\\
+
+\Option{IbcConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_ibc_constraint_flag
+\\
+
+\Option{IspConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_isp_constraint_flag
+\\
+
+\Option{MrlConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_mrl_constraint_flag
+\\
+
+\Option{MipConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_mip_constraint_flag
+\\
+
+\Option{CclmConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_cclm_constraint_flag
+\\
+
+\Option{NoResChangeInClvsConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_res_change_in_clvs_constraint_flag
+\\
+
+\Option{RefWraparoundConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_ref_wraparound_constraint_flag
+\\
+
+\Option{TemporalMvpConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_temporal_mvp_constraint_flag
+\\
+
+\Option{SbtmvpConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_sbtmvp_constraint_flag
+\\
+
+\Option{AmvrConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_amvr_constraint_flag
+\\
+
+\Option{SmvdConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_smvd_constraint_flag
+\\
+
+\Option{BdofConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_bdof_constraint_flag
+\\
+
+\Option{DmvrConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_dmvr_constraint_flag
+\\
+
+\Option{MmvdConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_mmvd_constraint_flag
+\\
+
+\Option{AffineMotionConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_affine_motion_constraint_flag
+\\
+
+\Option{ProfConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_prof_constraint_flag
+\\
+
+\Option{BcwConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_bcw_constraint_flag
+\\
+
+\Option{CiipConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_ciip_constraint_flag
+\\
+
+\Option{GpmConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_gpm_constraint_flag
+\\
+
+\Option{TransformSkipConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_transform_skip_constraint_flag
+\\
+
+\Option{BDPCMConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_bdpcm_constraint_flag
+\\
+
+\Option{MtsConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_mts_constraint_flag
+\\
+
+\Option{LfnstConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_lfnst_constraint_flag
+\\
+
+\Option{JointCbCrConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_joint_cbcr_constraint_flag
+\\
+
+\Option{SbtConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_sbt_constraint_flag
+\\
+
+\Option{ActConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_act_constraint_flag
+\\
+
 \Option{ExplicitScaleListConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
 Specifies the value of gci_no_explicit_scaling_list_constraint_flag
+\\
+
+\Option{DepQuantConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_dep_quant_constraint_flag
+\\
+
+\Option{SignDataHidingConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_sign_data_hiding_constraint_flag
+\\
+
+\Option{QpDeltaConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_cu_qp_delta_constraint_flag
+\\
+
+\Option{SaoConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_sao_constraint_flag
+\\
+
+\Option{AlfConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_alf_constraint_flag
+\\
+
+\Option{CCAlfConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_ccalf_constraint_flag
+\\
+
+\Option{LmcsConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_lmcs_constraint_flag
+\\
+
+\Option{LadfConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_ladf_constraint_flag
 \\
 
 \Option{VirtualBoundaryConstraintFlag} &
@@ -1072,12 +1342,18 @@ Specifies the value of gci_no_explicit_scaling_list_constraint_flag
 Specifies the value of gci_no_virtual_boundaries_constraint_flag
 \\
 
-\Option{FrameOnly} &
+
+\Option{SingleLayerConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of single_layer_constraint_flag
+\\
+
+\Option{FrameOnlyConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
 Specifies the value of general_frame_only_constraint_flag
 \\
-
 \end{OptionTableNoShorthand}
 
 
@@ -2924,7 +3200,7 @@ Specifies the value of general_progressive_source_flag
 \Default{false} &
 Specifies the value of general_interlaced_source_flag 
 \\
-\Option{NonPackedSource} &
+\Option{NonPackedSourceConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
 Specifies the value of general_non_packed_constraint_flag

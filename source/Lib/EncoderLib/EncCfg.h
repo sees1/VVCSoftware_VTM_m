@@ -181,8 +181,7 @@ protected:
   bool      m_onePictureOnlyConstraintFlag;
   bool      m_bIntraOnlyConstraintFlag;
   uint32_t  m_maxBitDepthConstraintIdc;
-  uint32_t  m_maxChromaFormatConstraintIdc;
-  bool      m_bFrameConstraintFlag;
+  int  m_maxChromaFormatConstraintIdc;
 
   bool      m_singleLayerConstraintFlag;
   bool      m_allLayersIndependentConstraintFlag;
@@ -249,7 +248,7 @@ protected:
   bool m_oneSlicePerPicConstraintFlag;
   bool m_oneSubpicPerPicConstraintFlag;
   bool m_frameOnlyConstraintFlag;
-  bool m_intraConstraintFlag;
+  bool m_intraOnlyConstraintFlag;
 
   //====== Coding Structure ========
   int       m_intraPeriod;                        // needs to be signed to allow '-1' for no intra period
@@ -776,15 +775,12 @@ public:
   void      setIntraOnlyConstraintFlag(bool bVal) { m_bIntraOnlyConstraintFlag = bVal; }
   uint32_t  getMaxBitDepthConstraintIdc() const { return m_maxBitDepthConstraintIdc; }
   void      setMaxBitDepthConstraintIdc(uint32_t u) { m_maxBitDepthConstraintIdc = u; }
-  uint32_t  getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
-  void      setMaxChromaFormatConstraintIdc(uint32_t u) { m_maxChromaFormatConstraintIdc = u; }
-  bool      getFrameConstraintFlag() const { return m_bFrameConstraintFlag; }
-  void      setFrameConstraintFlag(bool bVal) { m_bFrameConstraintFlag = bVal; }
+  int       getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
+  void      setMaxChromaFormatConstraintIdc(int u) { m_maxChromaFormatConstraintIdc = u; }
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   bool          getGciPresentFlag() const { return m_gciPresentFlag; }
   void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
 #endif
-
   bool          getSingleLayerConstraintFlag() const { return m_singleLayerConstraintFlag; }
   void          setSingleLayerConstraintFlag(bool bVal) { m_singleLayerConstraintFlag = bVal; }
   bool          getAllLayersIndependentConstraintFlag() const { return m_allLayersIndependentConstraintFlag; }
@@ -1863,12 +1859,6 @@ public:
 
   bool         getFrameOnlyConstraintFlag() const                    { return m_frameOnlyConstraintFlag; }
   void         setFrameOnlyConstraintFlag(bool b)                    { m_frameOnlyConstraintFlag = b; }
-
-
-  bool         getIntraConstraintFlag() const                        { return m_intraConstraintFlag; }
-  void         setIntraConstraintFlag(bool b)                        { m_intraConstraintFlag=b; }
-
-
 
   void         setSummaryOutFilename(const std::string &s)           { m_summaryOutFilename = s; }
   const std::string& getSummaryOutFilename() const                   { return m_summaryOutFilename; }
