@@ -4820,7 +4820,11 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
     }
   }
 
+#if JVET_S0203
+  for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
+#else
   for (int i = 0; i < maxNumSubLayersMinus1; i++)
+#endif
   {
     READ_FLAG( symbol, "sub_layer_level_present_flag[i]"   ); ptl->setSubLayerLevelPresentFlag  (i, symbol);
   }
@@ -4830,7 +4834,11 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
     READ_FLAG(    symbol,   "ptl_alignment_zero_bit"        ); CHECK (symbol != 0, "ptl_alignment_zero_bit not equal to zero");
   }
 
+#if JVET_S0203
+  for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
+#else
   for (int i = 0; i < maxNumSubLayersMinus1; i++)
+#endif
   {
     if (ptl->getSubLayerLevelPresentFlag(i))
     {
