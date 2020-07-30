@@ -932,15 +932,17 @@ void HLSyntaxReader::parseAPS( APS* aps )
   aps->chromaPresentFlag = codeApsChromaPresentFlag;
 #endif
 
-  if( code == ALF_APS )
+  const ApsType apsType = aps->getAPSType();
+
+  if (apsType == ALF_APS)
   {
     parseAlfAps( aps );
   }
-  else if( code == LMCS_APS )
+  else if (apsType == LMCS_APS)
   {
     parseLmcsAps( aps );
   }
-  else if( code == SCALING_LIST_APS )
+  else if (apsType == SCALING_LIST_APS)
   {
     parseScalingListAps( aps );
   }
