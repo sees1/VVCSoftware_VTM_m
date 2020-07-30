@@ -182,6 +182,8 @@
 
 #define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
 
+#define JVET_S0138_GCI_PTL                                1 // JVET-S_Notes_d9: move frame_only_constraint_flag and single_layer_constraint_flag into PTL for easy access
+
 #define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
 
 #define JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT                1 // JVET-S0071 : shortcut when all subpictures have the same size
