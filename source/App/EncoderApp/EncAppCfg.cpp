@@ -559,6 +559,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   int tmpFastInterSearchMode;
   int tmpMotionEstimationSearchMethod;
   int tmpDecodedPictureHashSEIMappedType;
+#if JVET_R0294_SUBPIC_HASH
+  int tmpSubpicDecodedPictureHashMappedType;
+#endif
   string inputColourSpaceConvert;
   string inputPathPrefix;
   ExtendedProfileName extendedProfile;
@@ -1147,6 +1150,13 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
                                                                                                                "\t2: CRC\n"
                                                                                                                "\t1: use MD5\n"
                                                                                                                "\t0: disable")
+#if JVET_R0294_SUBPIC_HASH
+  ("SubpicDecodedPictureHash",                        tmpSubpicDecodedPictureHashMappedType,                0, "Control generation of decode picture hash SEI messages for each subpicture\n"
+                                                                                                               "\t3: checksum\n"
+                                                                                                               "\t2: CRC\n"
+                                                                                                               "\t1: use MD5\n"
+                                                                                                               "\t0: disable")
+#endif
   ("TMVPMode",                                        m_TMVPModeId,                                         1, "TMVP mode 0: TMVP disable for all slices. 1: TMVP enable for all slices (default) 2: TMVP enable for certain slices only")
   ("SliceLevelRpl",                                   m_sliceLevelRpl,                                   true, "Code reference picture lists in slice headers rather than picture header.")
   ("SliceLevelDblk",                                  m_sliceLevelDblk,                                  true, "Code deblocking filter parameters in slice headers rather than picture header.")
@@ -1959,7 +1969,17 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     m_decodedPictureHashSEIType=HashType(tmpDecodedPictureHashSEIMappedType-1);
   }
-
+#if JVET_R0294_SUBPIC_HASH
+  // Need to map values to match those of the SEI message:
+  if (tmpSubpicDecodedPictureHashMappedType==0)
+  {
+    m_subpicDecodedPictureHashType=HASHTYPE_NONE;
+  }
+  else
+  {
+    m_subpicDecodedPictureHashType=HashType(tmpSubpicDecodedPictureHashMappedType-1);
+  }
+#endif
   // allocate slice-based dQP values
   m_aidQP = new int[ m_framesToBeEncoded + m_iGOPSize + 1 ];
   ::memset( m_aidQP, 0, sizeof(int)*( m_framesToBeEncoded + m_iGOPSize + 1 ) );

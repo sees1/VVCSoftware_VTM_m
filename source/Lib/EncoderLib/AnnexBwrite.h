@@ -42,6 +42,30 @@
 //! \ingroup EncoderLib
 //! \{
 
+#if JVET_R0294_SUBPIC_HASH
+uint32_t writeAnnexBNalUnit(std::ostream& out, const NALUnitEBSP& nalu, bool useLongStartcode)
+{
+  uint32_t size = 0; /* size of annexB unit in bytes */
+
+  static const uint8_t startCodePrefix[] = {0,0,0,1};
+
+  if (useLongStartcode)
+  {
+    out.write(reinterpret_cast<const char*>(startCodePrefix), 4);
+    size += 4;
+  }
+  else
+  {
+    out.write(reinterpret_cast<const char*>(startCodePrefix+1), 3);
+    size += 3;
+  }
+  out << nalu.m_nalUnitData.str();
+  size += uint32_t(nalu.m_nalUnitData.str().size());
+
+  return size;
+}
+#endif
+
 /**
  * write all NALunits in au to bytestream out in a manner satisfying
  * AnnexB of AVC.  NALunits are written in the order they are found in au.
@@ -49,13 +73,18 @@
  *  - the initial startcode in the access unit,
  *  - any SPS/PPS nal units
  */
+#if JVET_R0294_SUBPIC_HASH
+std::vector<uint32_t> writeAnnexBAccessUnit(std::ostream& out, const AccessUnit& au)
+#else
 static std::vector<uint32_t> writeAnnexB(std::ostream& out, const AccessUnit& au)
+#endif
 {
   std::vector<uint32_t> annexBsizes;
 
   for (AccessUnit::const_iterator it = au.begin(); it != au.end(); it++)
   {
     const NALUnitEBSP& nalu = **it;
+#if !JVET_R0294_SUBPIC_HASH
     uint32_t size = 0; /* size of annexB unit in bytes */
 
     static const uint8_t start_code_prefix[] = {0,0,0,1};
@@ -81,7 +110,12 @@ static std::vector<uint32_t> writeAnnexB(std::ostream& out, const AccessUnit& au
     }
     out << nalu.m_nalUnitData.str();
     size += uint32_t(nalu.m_nalUnitData.str().size());
+#else
+    const bool useLongStartCode = (it == au.begin() || nalu.m_nalUnitType == NAL_UNIT_DCI || nalu.m_nalUnitType == NAL_UNIT_VPS || nalu.m_nalUnitType == NAL_UNIT_SPS
+                                   || nalu.m_nalUnitType == NAL_UNIT_PPS || nalu.m_nalUnitType == NAL_UNIT_PREFIX_APS || nalu.m_nalUnitType == NAL_UNIT_SUFFIX_APS);
+    const uint32_t size = writeAnnexBNalUnit(out, nalu, useLongStartCode);
 
+#endif
     annexBsizes.push_back(size);
   }
 
@@ -92,6 +126,7 @@ static std::vector<uint32_t> writeAnnexB(std::ostream& out, const AccessUnit& au
 
   return annexBsizes;
 }
+
 //! \}
 
 #endif

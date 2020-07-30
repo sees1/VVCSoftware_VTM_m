@@ -326,6 +326,12 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
         sei = new SEIDecodedPictureHash;
         xParseSEIDecodedPictureHash((SEIDecodedPictureHash&) *sei, payloadSize, pDecodedMessageOutputStream);
         break;
+#if JVET_R0294_SUBPIC_HASH
+      case SEI::SCALABLE_NESTING:
+        sei = new SEIScalableNesting;
+        xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, pDecodedMessageOutputStream);
+        break;
+#endif
       default:
         for (uint32_t i = 0; i < payloadSize; i++)
         {

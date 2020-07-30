@@ -512,6 +512,9 @@ protected:
   bool      m_entryPointPresentFlag;                           ///< flag for the presence of entry points
 
   HashType  m_decodedPictureHashSEIType;
+#if JVET_R0294_SUBPIC_HASH
+  HashType  m_subpicDecodedPictureHashType;
+#endif
   bool      m_bufferingPeriodSEIEnabled;
   bool      m_pictureTimingSEIEnabled;
   bool      m_frameFieldInfoSEIEnabled;
@@ -1470,6 +1473,11 @@ public:
   void  setEntryPointPresentFlag(bool b)                             { m_entryPointPresentFlag = b; }
   void  setDecodedPictureHashSEIType(HashType m)                     { m_decodedPictureHashSEIType = m; }
   HashType getDecodedPictureHashSEIType() const                      { return m_decodedPictureHashSEIType; }
+#if JVET_R0294_SUBPIC_HASH
+  void  setSubpicDecodedPictureHashType(HashType m)                  { m_subpicDecodedPictureHashType = m; }
+  HashType getSubpicDecodedPictureHashType() const                   { return m_subpicDecodedPictureHashType; }
+#endif
+
   void  setBufferingPeriodSEIEnabled(bool b)                         { m_bufferingPeriodSEIEnabled = b; }
   bool  getBufferingPeriodSEIEnabled() const                         { return m_bufferingPeriodSEIEnabled; }
   void  setPictureTimingSEIEnabled(bool b)                           { m_pictureTimingSEIEnabled = b; }

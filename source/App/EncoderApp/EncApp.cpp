@@ -785,6 +785,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setSaoGreedyMergeEnc                                 ( m_saoGreedyMergeEnc);
   m_cEncLib.setIntraSmoothingDisabledFlag                        (!m_enableIntraReferenceSmoothing );
   m_cEncLib.setDecodedPictureHashSEIType                         ( m_decodedPictureHashSEIType );
+#if JVET_R0294_SUBPIC_HASH
+  m_cEncLib.setSubpicDecodedPictureHashType                      ( m_subpicDecodedPictureHashType );
+#endif
   m_cEncLib.setDependentRAPIndicationSEIEnabled                  ( m_drapPeriod > 0 );
   m_cEncLib.setBufferingPeriodSEIEnabled                         ( m_bufferingPeriodSEIEnabled );
   m_cEncLib.setPictureTimingSEIEnabled                           ( m_pictureTimingSEIEnabled );
@@ -1328,7 +1331,11 @@ void EncApp::xWriteOutput( int iNumEncoded, std::list<PelUnitBuf*>& recBufList )
 
 void EncApp::outputAU( const AccessUnit& au )
 {
+#if JVET_R0294_SUBPIC_HASH
+  const vector<uint32_t>& stats = writeAnnexBAccessUnit(m_bitstream, au);
+#else
   const vector<uint32_t>& stats = writeAnnexB(m_bitstream, au);
+#endif
   rateStatsAccum(au, stats);
   m_bitstream.flush();
 }

@@ -113,6 +113,8 @@
 
 #define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
 
+#define JVET_R0294_SUBPIC_HASH                            1 // JVET-R0294: Allow decoded picture hash SEI messages to be nested in subpicture context
+
 #define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
 
 #define JVET_Q0406_CABAC_ZERO                             1 // JVET-Q0406: signal cabac_zero_words per sub-picture
