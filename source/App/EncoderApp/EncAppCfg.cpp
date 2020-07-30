@@ -795,6 +795,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("PicHeaderInSliceHeaderConstraintFlag",            m_picHeaderInSliceHeaderConstraintFlag,           false, "Indicate that picture header is present in slice header")
   ("OneSlicePerPicConstraintFlag",                    m_oneSlicePerPicConstraintFlag,                   false, "Indicate that each picture shall contain only one slice")
   ("OneSubpicPerPicConstraintFlag",                   m_oneSubpicPerPicConstraintFlag,                  false, "Indicate that each picture shall contain only one subpicture")
+#if JVET_S0066_GCI
+  ("MaxLog2CtuSizeConstraintIdc",                     m_maxLog2CtuSizeConstraintIdc,                        8, "Indicate that Log2CtuSize shall be in the range of 0 to m_maxLog2CtuSizeConstraintIdc")
+#endif
   ("PartitionConstraintsOverrideConstraintFlag",      m_noPartitionConstraintsOverrideConstraintFlag,   false, "Indicate that Partition Override is deactivated")
   ("QtbttDualTreeIntraConstraintFlag",                m_bNoQtbttDualTreeIntraConstraintFlag,            false, "Indicate that Qtbtt DualTree Intra is deactivated")
   ("PaletteConstraintFlag",                           m_noPaletteConstraintFlag,                        false, "Indicate that PLT is deactivated")
@@ -818,6 +821,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("CiipConstraintFlag",                              m_bNoCiipConstraintFlag,                          false, "Indicate that CIIP is deactivated")
   ("GpmConstraintFlag",                               m_noGeoConstraintFlag,                            false, "Indicate that GPM is deactivated")
   ("TransformSkipConstraintFlag",                     m_noTransformSkipConstraintFlag,                  false, "Indicate that Transform Skip is deactivated")
+#if JVET_S0066_GCI
+  ("LumaTransformSize64ConstraintFlag",               m_noLumaTransformSize64ConstraintFlag,            false, "Indicate that Luma Transform Size 64 is deactivated")
+#endif
   ("BDPCMConstraintFlag",                             m_noBDPCMConstraintFlag,                          false, "Indicate that BDPCM is deactivated")
   ("MtsConstraintFlag",                               m_bNoMtsConstraintFlag,                           false, "Indicate that MTS is deactivated")
   ("LfnstConstraintFlag",                             m_noLfnstConstraintFlag,                          false, "Indicate that LFNST is deactivated")

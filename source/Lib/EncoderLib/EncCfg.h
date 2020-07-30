@@ -200,6 +200,9 @@ protected:
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
   bool      m_bNoQtbttDualTreeIntraConstraintFlag;
+#if JVET_S0066_GCI
+  int       m_maxLog2CtuSizeConstraintIdc;
+#endif
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
   bool      m_bNoSaoConstraintFlag;
   bool      m_bNoAlfConstraintFlag;
@@ -220,6 +223,9 @@ protected:
   bool      m_noGeoConstraintFlag;
   bool      m_bNoLadfConstraintFlag;
   bool      m_noTransformSkipConstraintFlag;
+#if JVET_S0066_GCI
+  bool      m_noLumaTransformSize64ConstraintFlag;
+#endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
   bool      m_bNoQpDeltaConstraintFlag;
@@ -816,6 +822,10 @@ public:
 #endif
   bool      getNoQtbttDualTreeIntraConstraintFlag() const { return m_bNoQtbttDualTreeIntraConstraintFlag; }
   void      setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_bNoQtbttDualTreeIntraConstraintFlag = bVal; }
+#if JVET_S0066_GCI
+  int       getMaxLog2CtuSizeConstraintIdc() const { return m_maxLog2CtuSizeConstraintIdc; }
+  void      setMaxLog2CtuSizeConstraintIdc(int u) { m_maxLog2CtuSizeConstraintIdc = u; }
+#endif
   bool      getNoPartitionConstraintsOverrideConstraintFlag() const { return m_noPartitionConstraintsOverrideConstraintFlag; }
   void      setNoPartitionConstraintsOverrideConstraintFlag(bool bVal) { m_noPartitionConstraintsOverrideConstraintFlag = bVal; }
   bool      getNoSaoConstraintFlag() const { return m_bNoSaoConstraintFlag; }
@@ -856,6 +866,10 @@ public:
   void      setNoLadfConstraintFlag(bool bVal) { m_bNoLadfConstraintFlag = bVal; }
   bool      getNoTransformSkipConstraintFlag() const { return m_noTransformSkipConstraintFlag; }
   void      setNoTransformSkipConstraintFlag(bool bVal) { m_noTransformSkipConstraintFlag = bVal; }
+#if JVET_S0066_GCI
+  bool      getNoLumaTransformSize64ConstraintFlag() const { return m_noLumaTransformSize64ConstraintFlag; }
+  void      setNoLumaTransformSize64ConstraintFlag(bool bVal) { m_noLumaTransformSize64ConstraintFlag = bVal; }
+#endif
   bool      getNoBDPCMConstraintFlag() const { return m_noBDPCMConstraintFlag; }
   void      setNoBDPCMConstraintFlag(bool bVal) { m_noBDPCMConstraintFlag = bVal; }
   bool      getNoJointCbCrConstraintFlag() const { return m_noJointCbCrConstraintFlag; }
