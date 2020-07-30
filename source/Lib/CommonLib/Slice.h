@@ -1324,7 +1324,6 @@ class SPSRExt // Names aligned to text specification
 private:
   bool             m_transformSkipRotationEnabledFlag;
   bool             m_transformSkipContextEnabledFlag;
-  bool             m_rdpcmEnabledFlag[NUMBER_OF_RDPCM_SIGNALLING_MODES];
   bool             m_extendedPrecisionProcessingFlag;
   bool             m_intraSmoothingDisabledFlag;
   bool             m_highPrecisionOffsetsEnabledFlag;
@@ -1338,8 +1337,6 @@ public:
   {
     return getTransformSkipRotationEnabledFlag()
         || getTransformSkipContextEnabledFlag()
-        || getRdpcmEnabledFlag(RDPCM_SIGNAL_IMPLICIT)
-        || getRdpcmEnabledFlag(RDPCM_SIGNAL_EXPLICIT)
         || getExtendedPrecisionProcessingFlag()
         || getIntraSmoothingDisabledFlag()
         || getHighPrecisionOffsetsEnabledFlag()
@@ -1353,9 +1350,6 @@ public:
 
   bool getTransformSkipContextEnabledFlag() const                                      { return m_transformSkipContextEnabledFlag;      }
   void setTransformSkipContextEnabledFlag(const bool value)                            { m_transformSkipContextEnabledFlag = value;     }
-
-  bool getRdpcmEnabledFlag(const RDPCMSignallingMode signallingMode) const             { return m_rdpcmEnabledFlag[signallingMode];     }
-  void setRdpcmEnabledFlag(const RDPCMSignallingMode signallingMode, const bool value) { m_rdpcmEnabledFlag[signallingMode] = value;    }
 
   bool getExtendedPrecisionProcessingFlag() const                                      { return m_extendedPrecisionProcessingFlag;      }
   void setExtendedPrecisionProcessingFlag(bool value)                                  { m_extendedPrecisionProcessingFlag = value;     }

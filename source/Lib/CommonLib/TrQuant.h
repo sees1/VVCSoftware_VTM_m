@@ -100,8 +100,6 @@ public:
   void invTransformNxN  (TransformUnit &tu, const ComponentID &compID, PelBuf &pResi, const QpParam &cQPs);
   void transformNxN     ( TransformUnit& tu, const ComponentID& compID, const QpParam& cQP, std::vector<TrMode>* trModes, const int maxCand );
   void transformNxN     ( TransformUnit& tu, const ComponentID& compID, const QpParam& cQP, TCoeff& uiAbsSum, const Ctx& ctx, const bool loadTr = false );
-  void rdpcmNxN         (TransformUnit &tu, const ComponentID &compID, const QpParam &cQP, TCoeff &uiAbsSum,       RDPCMMode &rdpcmMode);
-  void applyForwardRDPCM(TransformUnit &tu, const ComponentID &compID, const QpParam &cQP, TCoeff &uiAbsSum, const RDPCMMode &rdpcmMode);
 
   void transformSkipQuantOneSample(TransformUnit &tu, const ComponentID &compID, const TCoeff &resiDiff, TCoeff &coeff,    const uint32_t &uiPos, const QpParam &cQP, const bool bUseHalfRoundingPoint);
   void invTrSkipDeQuantOneSample  (TransformUnit &tu, const ComponentID &compID, const TCoeff &pcCoeff,  Pel &reconSample, const uint32_t &uiPos, const QpParam &cQP);
@@ -110,7 +108,6 @@ public:
   std::pair<int64_t,int64_t>  fwdTransformICT     ( const TransformUnit &tu, const PelBuf &resCb, const PelBuf &resCr, PelBuf& resC1, PelBuf& resC2, int jointCbCr = -1 );
   std::vector<int>            selectICTCandidates ( const TransformUnit &tu, CompStorage* resCb, CompStorage* resCr );
 
-  void invRdpcmNxN(TransformUnit& tu, const ComponentID &compID, PelBuf &pcResidual);
 #if RDOQ_CHROMA_LAMBDA
   void   setLambdas  ( const double lambdas[MAX_NUM_COMPONENT] )   { m_quant->setLambdas( lambdas ); }
   void   selectLambda( const ComponentID compIdx )                 { m_quant->selectLambda( compIdx ); }

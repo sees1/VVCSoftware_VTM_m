@@ -283,12 +283,6 @@ bool CU::isPLT(const CodingUnit &cu)
   return cu.predMode == MODE_PLT;
 }
 
-bool CU::isRDPCMEnabled(const CodingUnit& cu)
-{
-  return cu.cs->sps->getSpsRangeExtension().getRdpcmEnabledFlag(cu.predMode == MODE_INTRA ? RDPCM_SIGNAL_IMPLICIT : RDPCM_SIGNAL_EXPLICIT);
-}
-
-
 bool CU::isSameSlice(const CodingUnit& cu, const CodingUnit& cu2)
 {
   return cu.slice->getIndependentSliceIdx() == cu2.slice->getIndependentSliceIdx();

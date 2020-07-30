@@ -696,22 +696,6 @@ const CtxSet ContextSetCfg::CopyRunModel = ContextSetCfg::addCtxSet
   {   0,   9,   5, },
 });
 
-const CtxSet ContextSetCfg::RdpcmFlag = ContextSetCfg::addCtxSet
-({
-  { CNU, CNU, },
-  { CNU, CNU, },
-  { CNU, CNU, },
-  { DWS, DWS, },
-});
-
-const CtxSet ContextSetCfg::RdpcmDir = ContextSetCfg::addCtxSet
-({
-  { CNU, CNU, },
-  { CNU, CNU, },
-  { CNU, CNU, },
-  { DWS, DWS, },
-});
-
 const CtxSet ContextSetCfg::TransformSkipFlag = ContextSetCfg::addCtxSet
 ({
   {  25,  17, },

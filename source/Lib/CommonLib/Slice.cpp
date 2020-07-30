@@ -2845,17 +2845,12 @@ void PicHeader::resetWpScaling()
 SPSRExt::SPSRExt()
  : m_transformSkipRotationEnabledFlag   (false)
  , m_transformSkipContextEnabledFlag    (false)
-// m_rdpcmEnabledFlag initialized below
  , m_extendedPrecisionProcessingFlag    (false)
  , m_intraSmoothingDisabledFlag         (false)
  , m_highPrecisionOffsetsEnabledFlag    (false)
  , m_persistentRiceAdaptationEnabledFlag(false)
  , m_cabacBypassAlignmentEnabledFlag    (false)
 {
-  for (uint32_t signallingModeIndex = 0; signallingModeIndex < NUMBER_OF_RDPCM_SIGNALLING_MODES; signallingModeIndex++)
-  {
-    m_rdpcmEnabledFlag[signallingModeIndex] = false;
-  }
 }
 
 

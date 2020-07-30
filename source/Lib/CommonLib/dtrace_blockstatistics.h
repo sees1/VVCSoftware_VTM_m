@@ -72,9 +72,6 @@ enum class BlockStatistic {
   IndependentSliceIdx,
   LFNSTIdx,
   JointCbCr,
-  RDPCM_Y,
-  RDPCM_Cb,
-  RDPCM_Cr,
 
   // intra
   Luma_IntraMode,
@@ -167,9 +164,6 @@ static const std::map<BlockStatistic, std::tuple<std::string, BlockStatisticType
   { BlockStatistic::IndependentSliceIdx,    std::tuple<std::string, BlockStatisticType, std::string>{"IndependentSliceIdx",         BlockStatisticType::Integer,                ""}},
   { BlockStatistic::LFNSTIdx,               std::tuple<std::string, BlockStatisticType, std::string>{"LFNSTIdx",                    BlockStatisticType::Integer,                "[0, 3]"}},
   { BlockStatistic::JointCbCr,              std::tuple<std::string, BlockStatisticType, std::string>{"JointCbCr",                   BlockStatisticType::Flag,                   ""}},
-  { BlockStatistic::RDPCM_Y,                std::tuple<std::string, BlockStatisticType, std::string>{"RDPCM_Y",                     BlockStatisticType::Integer,                "[0, " + std::to_string(NUMBER_OF_RDPCM_MODES) + "]"}},
-  { BlockStatistic::RDPCM_Cb,               std::tuple<std::string, BlockStatisticType, std::string>{"RDPCM_Cb",                    BlockStatisticType::Integer,                "[0, " + std::to_string(NUMBER_OF_RDPCM_MODES) + "]"}},
-  { BlockStatistic::RDPCM_Cr,               std::tuple<std::string, BlockStatisticType, std::string>{"RDPCM_Cr",                    BlockStatisticType::Integer,                "[0, " + std::to_string(NUMBER_OF_RDPCM_MODES) + "]"}},
 
   { BlockStatistic::MIPFlag,                std::tuple<std::string, BlockStatisticType, std::string>{"MIPFlag",                     BlockStatisticType::Flag,                   ""}},
   { BlockStatistic::ISPMode,                std::tuple<std::string, BlockStatisticType, std::string>{"ISPMode",                     BlockStatisticType::Integer,                "[0, " + std::to_string(NUM_INTRA_SUBPARTITIONS_MODES) + "]"}},

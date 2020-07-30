@@ -447,21 +447,6 @@ enum SbtMode
   NUMBER_SBT_MODE
 };
 
-enum RDPCMMode
-{
-  RDPCM_OFF             = 0,
-  RDPCM_HOR             = 1,
-  RDPCM_VER             = 2,
-  NUMBER_OF_RDPCM_MODES = 3
-};
-
-enum RDPCMSignallingMode
-{
-  RDPCM_SIGNAL_IMPLICIT            = 0,
-  RDPCM_SIGNAL_EXPLICIT            = 1,
-  NUMBER_OF_RDPCM_SIGNALLING_MODES = 2
-};
-
 /// supported slice type
 enum SliceType
 {
