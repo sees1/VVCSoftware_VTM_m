@@ -150,8 +150,6 @@ EncAppCfg::EncAppCfg()
 , m_noCraConstraintFlag(false)
 , m_noGdrConstraintFlag(false)
 , m_noApsConstraintFlag(false)
-
->>>>>>> JVET-S0050: GCI related cleanups
 #if EXTENSION_360_VIDEO
 , m_ext360(*this)
 #endif
