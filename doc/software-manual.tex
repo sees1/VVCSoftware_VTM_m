@@ -4396,6 +4396,15 @@ Enable signalling of level information for each sublayer
 0 & All sublayers use the same level information \\
 \end{tabular}
 \\
+\Option{SEISubpicLevelInfoNonSubpicLayersFractions} &
+\Default{""} &
+List of fraction of levels to be signalled for non-subpicture layers.
+\par
+\begin{tabular}{p{0.49\columnwidth}}
+When sli_sublayer_info_present_flag = 0, the number of input elements shall be equal to numReflevels. List is ordered by level.\\
+When sli_sublayer_info_present_flag = 1, the number of input elements shall be equal to numReflevels * maxSublayers. List is ordered by level then sublayer. For example, let Amn denotes the reference level indices for the m-th sublayer and and n-th reference level, the first N elements (A00...A0n-1) denotes the RefLevelFractions for N levels in the 0-th sublayer, and the following N elements (A10...A1n-1) denotes the RefLevelFractions for N levels in the 1st sublayer, and so on, untill all MxN elements specified.\\
+\end{tabular}
+\\
 \Option{SEISubpicLevelInfoRefLevels} &
 \Default{""} &
 List of reference levels to be signalled.

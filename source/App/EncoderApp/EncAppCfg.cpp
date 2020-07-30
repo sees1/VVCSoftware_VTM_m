@@ -663,7 +663,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<bool>      cfg_loopFilterAcrossSubpicEnabledFlag(0, 1, 0, MAX_NUM_SUB_PICS);
   SMultiValueInput<uint32_t>  cfg_subPicId(0, std::numeric_limits<uint16_t>::max(), 0, MAX_NUM_SUB_PICS);
 
-  SMultiValueInput<int>          cfg_sliFractions(0, 100, 0, std::numeric_limits<int>::max());
+  SMultiValueInput<int>       cfg_sliFractions(0, 100, 0, std::numeric_limits<int>::max());
+#if JVET_S0098_SLI_FRACTION
+  SMultiValueInput<int>       cfg_sliNonSubpicLayersFractions(0, 100, 0, std::numeric_limits<int>::max());
+#endif
+
 #if  JVET_S0176_SLI_SEI
   SMultiValueInput<Level::Name>  cfg_sliRefLevels(Level::NONE, Level::LEVEL15_5, 0, 8 * MAX_VPS_SUBLAYERS);
 #else
@@ -1311,7 +1315,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEISubpicLevelInfoMaxSublayers",                  m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers,               1,                    "Number of sublayers for Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoSublayerInfoPresentFlag",       m_cfgSubpictureLevelInfoSEI.m_sliSublayerInfoPresentFlag,    false,                "Enable sending of level information for all sublayers in Subpicture Level Information SEI messages")
 #endif
-  ("SEISubpicLevelInfoRefLevelFractions",             cfg_sliFractions,                                  cfg_sliFractions, "List of fractions for Subpicture Level Information SEI messages")
+  ("SEISubpicLevelInfoRefLevelFractions",             cfg_sliFractions,                                  cfg_sliFractions, "List of subpicture level fractions for Subpicture Level Information SEI messages")
+#if JVET_S0098_SLI_FRACTION
+  ("SEISubpicLevelInfoNonSubpicLayersFractions",      cfg_sliNonSubpicLayersFractions,                   cfg_sliNonSubpicLayersFractions, "List of level fractions for non-subpicture layers in Subpicture Level Information SEI messages")
+#endif
   ("SEISampleAspectRatioInfo",                        m_sampleAspectRatioInfoSEIEnabled,        false, "Control generation of Sample Aspect Ratio Information SEI messages")
   ("SEISARICancelFlag",                               m_sariCancelFlag,                         false, "Indicates that Sample Aspect Ratio Information SEI message cancels the persistence or follows")
   ("SEISARIPersistenceFlag",                          m_sariPersistenceFlag,                    true, "Specifies the persistence of the Sample Aspect Ratio Information SEI message")
@@ -1722,6 +1729,19 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
         CHECK((int)cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures != cfg_sliFractions.values.size(), "when sliSublayerInfoPresentFlag = 0, the number  of subpicture level fractions must be equal to the numer of subpictures times the number of reference levels");
       }
     }
+#if JVET_S0098_SLI_FRACTION
+    m_cfgSubpictureLevelInfoSEI.m_nonSubpicLayersFraction = cfg_sliNonSubpicLayersFractions.values;
+    if (m_cfgSubpictureLevelInfoSEI.m_sliSublayerInfoPresentFlag)
+    {
+      CHECK((int)cfg_sliNonSubpicLayersFractions.values.size() != ( cfg_sliRefLevels.values.size() * m_cfgSubpictureLevelInfoSEI.m_numSubpictures ),
+        "when sliSublayerInfoPresentFlag = 1, the number  of non-subpicture level fractions must be equal to the numer of reference levels times the number of sublayers");
+    }
+    else
+    {
+      CHECK((int)cfg_sliNonSubpicLayersFractions.values.size() != ( cfg_sliRefLevels.values.size() ),
+        "when sliSublayerInfoPresentFlag = 0, the number  of non-subpicture level fractions must be equal to the numer of reference levels");
+    }
+#endif
 #else
     if (m_cfgSubpictureLevelInfoSEI.m_explicitFraction)
     {
