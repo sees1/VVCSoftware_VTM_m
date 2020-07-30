@@ -1854,14 +1854,21 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     for (int i = 0; i < numQpTables; i++)
     {
       int32_t qpTableStart = 0;
-      READ_SVLC(qpTableStart, "qp_table_starts_minus26"); chromaQpMappingTableParams.setQpTableStartMinus26(i, qpTableStart);
-      READ_UVLC(uiCode, "num_points_in_qp_table_minus1"); chromaQpMappingTableParams.setNumPtsInCQPTableMinus1(i,uiCode);
+      READ_SVLC(qpTableStart, "sps_qp_table_starts_minus26");
+      chromaQpMappingTableParams.setQpTableStartMinus26(i, qpTableStart);
+      CHECK(qpTableStart < -26 - pcSPS->getQpBDOffset(CHANNEL_TYPE_LUMA) || qpTableStart > 36,
+            "The value of sps_qp_table_start_minus26[ i ] shall be in the range of −26 − QpBdOffset to 36 inclusive");
+      READ_UVLC(uiCode, "sps_num_points_in_qp_table_minus1");
+      chromaQpMappingTableParams.setNumPtsInCQPTableMinus1(i, uiCode);
+      CHECK(uiCode > 36 - qpTableStart, "The value of sps_num_points_in_qp_table_minus1[ i ] shall be in the range of "
+                                        "0 to 36 - sps_qp_table_start_minus26[ i ], inclusive");
       std::vector<int> deltaQpInValMinus1(chromaQpMappingTableParams.getNumPtsInCQPTableMinus1(i) + 1);
       std::vector<int> deltaQpOutVal(chromaQpMappingTableParams.getNumPtsInCQPTableMinus1(i) + 1);
       for (int j = 0; j <= chromaQpMappingTableParams.getNumPtsInCQPTableMinus1(i); j++)
       {
-        READ_UVLC(uiCode, "delta_qp_in_val_minus1");  deltaQpInValMinus1[j] = uiCode;
-        READ_UVLC(uiCode, "delta_qp_diff_val");
+        READ_UVLC(uiCode, "sps_delta_qp_in_val_minus1");
+        deltaQpInValMinus1[j] = uiCode;
+        READ_UVLC(uiCode, "sps_delta_qp_diff_val");
         deltaQpOutVal[j] = uiCode ^ deltaQpInValMinus1[j];
       }
       chromaQpMappingTableParams.setDeltaQpInValMinus1(i, deltaQpInValMinus1);
