@@ -690,14 +690,83 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
 {
   const EncCfgParam::CfgSEISubpictureLevel &cfgSubPicLevel = m_pcCfg->getSubpicureLevelInfoSEICfg();
 
-  sei->m_numRefLevels = (int) cfgSubPicLevel.m_refLevels.size();
-  sei->m_refLevelIdc  = cfgSubPicLevel.m_refLevels;
+#if JVET_S0176_SLI_SEI
+  sei->m_sliSublayerInfoPresentFlag = cfgSubPicLevel.m_sliSublayerInfoPresentFlag;
+  sei->m_sliMaxSublayers = cfgSubPicLevel.m_sliMaxSublayers;
+  sei->m_numRefLevels = cfgSubPicLevel.m_sliSublayerInfoPresentFlag ? (int)cfgSubPicLevel.m_refLevels.size() / cfgSubPicLevel.m_sliMaxSublayers : (int)cfgSubPicLevel.m_refLevels.size();
+  sei->m_numSubpics = cfgSubPicLevel.m_numSubpictures;
   sei->m_explicitFractionPresentFlag = cfgSubPicLevel.m_explicitFraction;
-  if (cfgSubPicLevel.m_explicitFraction)
+
+  // sei parameters initialization
+  sei->m_refLevelIdc.resize(sei->m_numRefLevels);
+  for (int level = 0; level < sei->m_numRefLevels; level++)
   {
-    CHECK (sps->getNumSubPics() != cfgSubPicLevel.m_numSubpictures, "Number of subpictures must be equal in SPS and subpicture level information SEI" );
-    sei->m_numSubpics = cfgSubPicLevel.m_numSubpictures;
+    sei->m_refLevelIdc[level].resize(sei->m_sliMaxSublayers);
+    for (int sublayer = 0; sublayer < sei->m_sliMaxSublayers; sublayer++)
+    {
+      sei->m_refLevelIdc[level][sublayer] = Level::LEVEL15_5;
+    }
+  }
+  if (sei->m_explicitFractionPresentFlag)
+  {
     sei->m_refLevelFraction.resize(sei->m_numRefLevels);
+    for (int level = 0; level < sei->m_numRefLevels; level++)
+    {
+      sei->m_refLevelFraction[level].resize(sei->m_numSubpics);
+      for (int subpic = 0; subpic < sei->m_numSubpics; subpic++)
+      {
+        sei->m_refLevelFraction[level][subpic].resize(sei->m_sliMaxSublayers);
+        for (int sublayer = 0; sublayer < sei->m_sliMaxSublayers; sublayer++)
+        {
+          sei->m_refLevelFraction[level][subpic][sublayer] = 0;
+        }
+      }
+    }
+  }
+
+  // set sei parameters according to the configured values
+  for (int sublayer = sei->m_sliSublayerInfoPresentFlag ? 0 : sei->m_sliMaxSublayers - 1, cnta = 0, cntb = 0; sublayer < sei->m_sliMaxSublayers; sublayer++)
+  {
+    for (int level = 0; level < sei->m_numRefLevels; level++)
+    {
+      sei->m_refLevelIdc[level][sublayer] = cfgSubPicLevel.m_refLevels[cnta++];
+      if (sei->m_explicitFractionPresentFlag)
+      {
+        for (int subpic = 0; subpic < sei->m_numSubpics; subpic++)
+        {
+          sei->m_refLevelFraction[level][subpic][sublayer] = cfgSubPicLevel.m_fractions[cntb++];
+        }
+      }
+    }
+  }
+
+  // update the inference of m_refLevelIdc[][] and m_refLevelFraction[][][]
+  if (!sei->m_sliSublayerInfoPresentFlag)
+  {
+    for (int sublayer = sei->m_sliMaxSublayers - 2; sublayer >= 0; sublayer--)
+    {
+      for (int level = 0; level < sei->m_numRefLevels; level++)
+      {
+        sei->m_refLevelIdc[level][sublayer] = sei->m_refLevelIdc[level][sei->m_sliMaxSublayers - 1];
+        if (sei->m_explicitFractionPresentFlag)
+        {
+          for (int subpic = 0; subpic < sei->m_numSubpics; subpic++)
+          {
+            sei->m_refLevelFraction[level][subpic][sublayer] = sei->m_refLevelFraction[level][subpic][sei->m_sliMaxSublayers - 1];
+          }
+        }
+      }
+    }
+  }
+#else
+    sei->m_numRefLevels = (int)cfgSubPicLevel.m_refLevels.size();
+    sei->m_refLevelIdc = cfgSubPicLevel.m_refLevels;
+    sei->m_explicitFractionPresentFlag = cfgSubPicLevel.m_explicitFraction;
+    if (cfgSubPicLevel.m_explicitFraction)
+    {
+      CHECK(sps->getNumSubPics() != cfgSubPicLevel.m_numSubpictures, "Number of subpictures must be equal in SPS and subpicture level information SEI");
+      sei->m_numSubpics = cfgSubPicLevel.m_numSubpictures;
+      sei->m_refLevelFraction.resize(sei->m_numRefLevels);
     for (int level=0, cnt=0; level < sei->m_numRefLevels; level++)
     {
       sei->m_refLevelFraction[level].resize(sei->m_numSubpics);
@@ -707,6 +776,7 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
       }
     }
   }
+#endif
 }
 
 
