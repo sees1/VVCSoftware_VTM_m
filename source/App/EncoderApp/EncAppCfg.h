@@ -136,8 +136,7 @@ protected:
 #endif
   bool      m_bIntraOnlyConstraintFlag;
   uint32_t  m_maxBitDepthConstraintIdc;
-  uint32_t  m_maxChromaFormatConstraintIdc;
-  bool      m_bFrameConstraintFlag;
+  int       m_maxChromaFormatConstraintIdc;
   bool      m_singleLayerConstraintFlag;
   bool      m_allLayersIndependentConstraintFlag;
   bool      m_noMrlConstraintFlag;
@@ -199,7 +198,7 @@ protected:
   uint32_t          m_bitDepthConstraint;
   ChromaFormat  m_chromaFormatConstraint;
   bool          m_onePictureOnlyConstraintFlag;
-  bool          m_intraConstraintFlag;
+  bool          m_intraOnlyConstraintFlag;
   bool          m_nonPackedConstraintFlag;
   bool          m_nonProjectedConstraintFlag;
   bool          m_noResChangeInClvsConstraintFlag;
@@ -285,6 +284,9 @@ protected:
   unsigned  m_uiCTUSize;
   bool m_subPicInfoPresentFlag;
   unsigned m_numSubPics;
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  bool m_subPicSameSizeFlag;
+#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;
@@ -305,7 +307,7 @@ protected:
   bool      m_dualTree;
   bool      m_LFNST;
   bool      m_useFastLFNST;
-  int       m_SubPuMvpMode;
+  bool      m_sbTmvpEnableFlag;
   bool      m_Affine;
   bool      m_AffineType;
   bool      m_PROF;

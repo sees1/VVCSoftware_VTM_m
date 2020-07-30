@@ -2321,7 +2321,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
     CHECK(pu.cu != &cu, "PU is contained in another CU");
 
-    if (cu.cs->sps->getSBTMVPEnabledFlag())
+    if (cu.cs->sps->getSbTMVPEnabledFlag())
     {
       Size bufSize = g_miScaling.scale(pu.lumaSize());
       mergeCtx.subPuMvpMiBuf = MotionBuf(m_SubPuMiBuf, bufSize);
@@ -2832,10 +2832,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
     {
       CHECK(iRefIdxBi[0]<0, "Invalid picture reference index");
       CHECK(iRefIdxBi[1]<0, "Invalid picture reference index");
-      cu.cs->slice->getWpScaling(REF_PIC_LIST_0, iRefIdxBi[0], wp0);
-      cu.cs->slice->getWpScaling(REF_PIC_LIST_1, iRefIdxBi[1], wp1);
-      if ((wp0[COMPONENT_Y].bPresentFlag || wp0[COMPONENT_Cb].bPresentFlag || wp0[COMPONENT_Cr].bPresentFlag
-        || wp1[COMPONENT_Y].bPresentFlag || wp1[COMPONENT_Cb].bPresentFlag || wp1[COMPONENT_Cr].bPresentFlag))
+      wp0 = cu.cs->slice->getWpScaling(REF_PIC_LIST_0, iRefIdxBi[0]);
+      wp1 = cu.cs->slice->getWpScaling(REF_PIC_LIST_1, iRefIdxBi[1]);
+      if (WPScalingParam::isWeighted(wp0) || WPScalingParam::isWeighted(wp1))
       {
         uiCostBi = MAX_UINT;
         enforceBcwPred = false;
@@ -5125,10 +5124,10 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
   {
     CHECK(iRefIdxBi[0]<0, "Invalid picture reference index");
     CHECK(iRefIdxBi[1]<0, "Invalid picture reference index");
-    pu.cs->slice->getWpScaling(REF_PIC_LIST_0, iRefIdxBi[0], wp0);
-    pu.cs->slice->getWpScaling(REF_PIC_LIST_1, iRefIdxBi[1], wp1);
-    if ((wp0[COMPONENT_Y].bPresentFlag || wp0[COMPONENT_Cb].bPresentFlag || wp0[COMPONENT_Cr].bPresentFlag
-      || wp1[COMPONENT_Y].bPresentFlag || wp1[COMPONENT_Cb].bPresentFlag || wp1[COMPONENT_Cr].bPresentFlag))
+    wp0 = pu.cs->slice->getWpScaling(REF_PIC_LIST_0, iRefIdxBi[0]);
+    wp1 = pu.cs->slice->getWpScaling(REF_PIC_LIST_1, iRefIdxBi[1]);
+
+    if (WPScalingParam::isWeighted(wp0) || WPScalingParam::isWeighted(wp1))
     {
       uiCostBi = MAX_UINT;
       enforceBcwPred = false;

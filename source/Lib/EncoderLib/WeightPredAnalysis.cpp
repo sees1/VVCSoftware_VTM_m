@@ -235,10 +235,10 @@ WeightPredAnalysis::WeightPredAnalysis()
       for ( int comp=0 ; comp<MAX_NUM_COMPONENT ;comp++ )
       {
         WPScalingParam  *pwp   = &(m_wp[lst][refIdx][comp]);
-        pwp->bPresentFlag      = false;
-        pwp->uiLog2WeightDenom = 0;
-        pwp->iWeight           = 1;
-        pwp->iOffset           = 0;
+        pwp->presentFlag       = false;
+        pwp->log2WeightDenom   = 0;
+        pwp->codedWeight       = 1;
+        pwp->codedOffset       = 0;
       }
     }
   }
@@ -318,7 +318,7 @@ void  WeightPredAnalysis::xCheckWPEnable(Slice *const slice)
       for(int componentIndex = 0; componentIndex < ::getNumberValidComponents( slice->getSPS()->getChromaFormatIdc() ); componentIndex++)
       {
         WPScalingParam  *pwp = &(m_wp[lst][refIdx][componentIndex]);
-        presentCnt += (int)pwp->bPresentFlag;
+        presentCnt += (int) pwp->presentFlag;
       }
     }
   }
@@ -336,10 +336,10 @@ void  WeightPredAnalysis::xCheckWPEnable(Slice *const slice)
         {
           WPScalingParam  *pwp = &(m_wp[lst][refIdx][componentIndex]);
 
-          pwp->bPresentFlag      = false;
-          pwp->uiLog2WeightDenom = 0;
-          pwp->iWeight           = 1;
-          pwp->iOffset           = 0;
+          pwp->presentFlag     = false;
+          pwp->log2WeightDenom = 0;
+          pwp->codedWeight     = 1;
+          pwp->codedOffset     = 0;
         }
       }
     }
@@ -435,7 +435,7 @@ bool WeightPredAnalysis::xUpdatingWPParameters(Slice *const slice, const int log
         const int64_t refDC  = refWeightACDCParam[comp].iDC;
         const int64_t refAC  = refWeightACDCParam[comp].iAC;
 
-        // calculating iWeight and iOffset params
+        // calculating codedWeight and codedOffset params
         const double dWeight = (refAC==0) ? (double)1.0 : Clip3( -16.0, 15.0, ((double)currAC / (double)refAC) );
         const int weight     = (int)( 0.5 + dWeight * (double)(1<<log2Denom) );
         const int offset     = (int)( ((currDC<<log2Denom) - ((int64_t)weight * refDC) + (int64_t)realOffset) >> realLog2Denom );
@@ -462,10 +462,10 @@ bool WeightPredAnalysis::xUpdatingWPParameters(Slice *const slice, const int log
           return false;
         }
 
-        m_wp[refList][refIdxTemp][comp].bPresentFlag      = true;
-        m_wp[refList][refIdxTemp][comp].iWeight           = weight;
-        m_wp[refList][refIdxTemp][comp].iOffset           = clippedOffset;
-        m_wp[refList][refIdxTemp][comp].uiLog2WeightDenom = log2Denom;
+        m_wp[refList][refIdxTemp][comp].presentFlag     = true;
+        m_wp[refList][refIdxTemp][comp].codedWeight     = weight;
+        m_wp[refList][refIdxTemp][comp].codedOffset     = clippedOffset;
+        m_wp[refList][refIdxTemp][comp].log2WeightDenom = log2Denom;
       }
     }
   }
@@ -507,41 +507,45 @@ bool WeightPredAnalysis::xSelectWPHistExtClip(Slice *const slice, const int log2
         const int          width      = compBuf.width;
         const int          height     = compBuf.height;
         const int          bitDepth   = slice->getSPS()->getBitDepth(toChannelType(compID));
-              WPScalingParam &wp      = m_wp[refList][refIdxTemp][compID];
-              int          weight     = wp.iWeight;
-              int          offset     = wp.iOffset;
-              int          weightDef  = defaultWeight;
-              int          offsetDef  = 0;
+
+        WPScalingParam &wp = m_wp[refList][refIdxTemp][compID];
+
+        int weight    = wp.codedWeight;
+        int offset    = wp.codedOffset;
+        int weightDef = defaultWeight;
+        int offsetDef = 0;
 
         // calculate SAD costs with/without wp for luma
-              std::vector<int> histogramOrg;
-              std::vector<int> histogramRef;
-              uint64_t SADnoWP = std::numeric_limits<uint64_t>::max();
-              if (bUseHistogram && compID == COMPONENT_Y)
-              {
-                xCalcHistogram(pOrg, histogramOrg, width, height, orgStride, 1 << bitDepth);
-                xCalcHistogram(pRef, histogramRef, width, height, refStride, 1 << bitDepth);
+        std::vector<int> histogramOrg;
+        std::vector<int> histogramRef;
+        Distortion       SADnoWP = std::numeric_limits<Distortion>::max();
+        if (bUseHistogram && compID == COMPONENT_Y)
+        {
+          xCalcHistogram(pOrg, histogramOrg, width, height, orgStride, 1 << bitDepth);
+          xCalcHistogram(pRef, histogramRef, width, height, refStride, 1 << bitDepth);
 
-                std::vector<int> histogramRef_noWP;
-                xScaleHistogram(histogramRef, histogramRef_noWP, bitDepth, log2Denom, defaultWeight, 0, useHighPrecision);
-                SADnoWP = (uint64_t)xCalcHistCumulDistortion(histogramOrg, histogramRef_noWP);
-              }
-              else
-              {
-                SADnoWP = (uint64_t)xCalcSADvalueWPOptionalClip(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom, defaultWeight, 0, useHighPrecision, bClipInitialSADWP);
-              }
+          std::vector<int> histogramRef_noWP;
+          xScaleHistogram(histogramRef, histogramRef_noWP, bitDepth, log2Denom, defaultWeight, 0, useHighPrecision);
+          SADnoWP = xCalcHistCumulDistortion(histogramOrg, histogramRef_noWP);
+        }
+        else
+        {
+          SADnoWP = xCalcSADvalueWPOptionalClip(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom,
+                                                defaultWeight, 0, useHighPrecision, bClipInitialSADWP);
+        }
         if (SADnoWP > 0)
         {
-          uint64_t SADWP = std::numeric_limits<uint64_t>::max();
+          Distortion SADWP = std::numeric_limits<Distortion>::max();
           if (bUseHistogram && compID == COMPONENT_Y)
           {
             std::vector<int> histogramRef_WP;
             xScaleHistogram(histogramRef, histogramRef_WP, bitDepth, log2Denom, weight, offset, useHighPrecision);
-            SADWP = (uint64_t)xCalcHistCumulDistortion(histogramOrg, histogramRef_WP);
+            SADWP = xCalcHistCumulDistortion(histogramOrg, histogramRef_WP);
           }
           else
           {
-            SADWP = (uint64_t)xCalcSADvalueWPOptionalClip(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom, weight, offset, useHighPrecision, bClipInitialSADWP);
+            SADWP = xCalcSADvalueWPOptionalClip(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom,
+                                                weight, offset, useHighPrecision, bClipInitialSADWP);
           }
           const double dRatioSAD = (double)SADWP / (double)SADnoWP;
           double dRatioSr0SAD = std::numeric_limits<double>::max();
@@ -590,10 +594,10 @@ bool WeightPredAnalysis::xSelectWPHistExtClip(Slice *const slice, const int log2
 
           if(std::min(dRatioSr0SAD, std::min(dRatioSAD, dRatioSrSAD)) >= WEIGHT_PRED_SAD_RELATIVE_TO_NON_WEIGHT_PRED_SAD)
           {
-            wp.bPresentFlag      = false;
-            wp.iOffset           = 0;
-            wp.iWeight           = defaultWeight;
-            wp.uiLog2WeightDenom = log2Denom;
+            wp.presentFlag     = false;
+            wp.codedOffset     = 0;
+            wp.codedWeight     = defaultWeight;
+            wp.log2WeightDenom = log2Denom;
           }
           else
           {
@@ -604,32 +608,32 @@ bool WeightPredAnalysis::xSelectWPHistExtClip(Slice *const slice, const int log2
 
             if (dRatioSr0SAD < dRatioSrSAD && dRatioSr0SAD < dRatioSAD)
             {
-              wp.bPresentFlag      = true;
-              wp.iOffset           = offsetDef;
-              wp.iWeight           = weightDef;
-              wp.uiLog2WeightDenom = log2Denom;
+              wp.presentFlag     = true;
+              wp.codedOffset     = offsetDef;
+              wp.codedWeight     = weightDef;
+              wp.log2WeightDenom = log2Denom;
             }
             else if (dRatioSrSAD < dRatioSAD)
             {
-              wp.bPresentFlag      = true;
-              wp.iOffset           = offset;
-              wp.iWeight           = weight;
-              wp.uiLog2WeightDenom = log2Denom;
+              wp.presentFlag     = true;
+              wp.codedOffset     = offset;
+              wp.codedWeight     = weight;
+              wp.log2WeightDenom = log2Denom;
             }
           }
         }
         else // (SADnoWP <= 0)
         {
-          wp.bPresentFlag      = false;
-          wp.iOffset           = 0;
-          wp.iWeight           = defaultWeight;
-          wp.uiLog2WeightDenom = log2Denom;
+          wp.presentFlag     = false;
+          wp.codedOffset     = 0;
+          wp.codedWeight     = defaultWeight;
+          wp.log2WeightDenom = log2Denom;
         }
       }
 
       for (int comp = 1; comp < ::getNumberValidComponents(pPic.chromaFormat); comp++)
       {
-        m_wp[refList][refIdxTemp][comp].bPresentFlag = useChromaWeight;
+        m_wp[refList][refIdxTemp][comp].presentFlag = useChromaWeight;
       }
     }
   }
@@ -668,7 +672,9 @@ bool WeightPredAnalysis::xSelectWP(Slice *const slice, const int log2Denom)
         const int          bitDepth   = slice->getSPS()->getBitDepth(toChannelType(compID));
 
         // calculate SAD costs with/without wp for luma
-        SADWP   += xCalcSADvalueWP(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom, m_wp[refList][refIdxTemp][compID].iWeight, m_wp[refList][refIdxTemp][compID].iOffset, useHighPrecisionPredictionWeighting);
+        SADWP += xCalcSADvalueWP(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom,
+                                 m_wp[refList][refIdxTemp][compID].codedWeight,
+                                 m_wp[refList][refIdxTemp][compID].codedOffset, useHighPrecisionPredictionWeighting);
         SADnoWP += xCalcSADvalueWP(bitDepth, pOrg, pRef, width, height, orgStride, refStride, log2Denom, defaultWeight, 0, useHighPrecisionPredictionWeighting);
       }
 
@@ -679,10 +685,10 @@ bool WeightPredAnalysis::xSelectWP(Slice *const slice, const int log2Denom)
         for(int comp=0; comp < ::getNumberValidComponents(pPic.chromaFormat); comp++)
         {
           WPScalingParam &wp=m_wp[refList][refIdxTemp][comp];
-          wp.bPresentFlag      = false;
-          wp.iOffset           = 0;
-          wp.iWeight           = defaultWeight;
-          wp.uiLog2WeightDenom = log2Denom;
+          wp.presentFlag     = false;
+          wp.codedOffset     = 0;
+          wp.codedWeight     = defaultWeight;
+          wp.log2WeightDenom = log2Denom;
         }
       }
     }

@@ -1369,7 +1369,7 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
           m_ComprCUCtxList.back().testModes.push_back( { ETM_MERGE_GEO, ETO_STANDARD, qp } );
         }
         m_ComprCUCtxList.back().testModes.push_back( { ETM_MERGE_SKIP,  ETO_STANDARD, qp } );
-        if ( cs.sps->getUseAffine() || cs.sps->getSBTMVPEnabledFlag() )
+        if (cs.sps->getUseAffine() || cs.sps->getSbTMVPEnabledFlag())
         {
           m_ComprCUCtxList.back().testModes.push_back( { ETM_AFFINE,    ETO_STANDARD, qp } );
         }
@@ -1383,7 +1383,7 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
           m_ComprCUCtxList.back().testModes.push_back( { ETM_MERGE_GEO, ETO_STANDARD, qp } );
         }
         m_ComprCUCtxList.back().testModes.push_back( { ETM_MERGE_SKIP,  ETO_STANDARD, qp } );
-        if ( cs.sps->getUseAffine() || cs.sps->getSBTMVPEnabledFlag() )
+        if (cs.sps->getUseAffine() || cs.sps->getSbTMVPEnabledFlag())
         {
           m_ComprCUCtxList.back().testModes.push_back( { ETM_AFFINE,    ETO_STANDARD, qp } );
         }

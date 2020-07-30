@@ -63,8 +63,8 @@ static const LevelTierFeatures mainLevelTierInfo[] =
     { Level::LEVEL2_1,   245760, {     3000,        0 },       20,        1,        1,    7372800ULL, {    3000,        0 }, { 2, 2} },
     { Level::LEVEL3  ,   552960, {     6000,        0 },       30,        4,        2,   16588800ULL, {    6000,        0 }, { 2, 2} },
     { Level::LEVEL3_1,   983040, {    10000,        0 },       40,        9,        3,   33177600ULL, {   10000,        0 }, { 2, 2} },
-    { Level::LEVEL4  ,  2228224, {    12000,    30000 },       75,        2,        5,   66846720ULL, {   12000,    30000 }, { 4, 4} },
-    { Level::LEVEL4_1,  2228224, {    20000,    50000 },       75,        2,        5,  133693440ULL, {   20000,    50000 }, { 4, 4} },
+    { Level::LEVEL4  ,  2228224, {    12000,    30000 },       75,       25,        5,   66846720ULL, {   12000,    30000 }, { 4, 4} },
+    { Level::LEVEL4_1,  2228224, {    20000,    50000 },       75,       25,        5,  133693440ULL, {   20000,    50000 }, { 4, 4} },
     { Level::LEVEL5  ,  8912896, {    25000,   100000 },      200,      110,       10,  267386880ULL, {   25000,   100000 }, { 6, 4} },
     { Level::LEVEL5_1,  8912896, {    40000,   160000 },      200,      110,       10,  534773760ULL, {   40000,   160000 }, { 8, 4} },
     { Level::LEVEL5_2,  8912896, {    60000,   240000 },      200,      110,       10, 1069547520ULL, {   60000,   240000 }, { 8, 4} },
@@ -152,19 +152,24 @@ uint64_t ProfileLevelTierFeatures::getCpbSizeInBits() const
 uint32_t ProfileLevelTierFeatures::getMaxDpbSize( uint32_t picSizeMaxInSamplesY ) const
 {
   const uint32_t maxDpbPicBuf = 8;
-  uint32_t maxDpbSize = maxDpbPicBuf;
+  uint32_t       maxDpbSize;
 
-  if( picSizeMaxInSamplesY <= ( m_pLevelTier->maxLumaPs >> 2 ) )
+  if (m_pLevelTier->level == Level::LEVEL15_5)
   {
-    maxDpbSize = std::min<uint32_t>( 4 * maxDpbPicBuf, 16 );
+    // maxDpbSize is unconstrained in this case
+    maxDpbSize = std::numeric_limits<uint32_t>::max();
   }
-  else if( picSizeMaxInSamplesY <= ( m_pLevelTier->maxLumaPs >> 1 ) )
+  else if (2 * picSizeMaxInSamplesY <= m_pLevelTier->maxLumaPs)
   {
-    maxDpbSize = std::min<uint32_t>( 2 * maxDpbPicBuf, 16 );
+    maxDpbSize = 2 * maxDpbPicBuf;
   }
-  else if( picSizeMaxInSamplesY <= ( ( 3 * m_pLevelTier->maxLumaPs ) >> 2 ) )
+  else if (3 * picSizeMaxInSamplesY <= 2 * m_pLevelTier->maxLumaPs)
   {
-    maxDpbSize = std::min<uint32_t>( ( 4 * maxDpbPicBuf ) / 3, 16 );
+    maxDpbSize = 3 * maxDpbPicBuf / 2;
+  }
+  else
+  {
+    maxDpbSize = maxDpbPicBuf;
   }
 
   return maxDpbSize;

@@ -185,7 +185,11 @@ void HLSWriter::xCodeRefPicList( const ReferencePictureList* rpl, bool isLongTer
   uint32_t numRefPic = rpl->getNumberOfShorttermPictures() + rpl->getNumberOfLongtermPictures() + rpl->getNumberOfInterLayerPictures();
   WRITE_UVLC( numRefPic, "num_ref_entries[ listIdx ][ rplsIdx ]" );
 
+#if JVET_S0182_RPL_SIGNALLING
+  if (isLongTermPresent && numRefPic > 0 && rplIdx != -1)
+#else
   if (isLongTermPresent && rplIdx != -1)
+#endif
   {
     WRITE_FLAG(rpl->getLtrpInSliceHeaderFlag(), "ltrp_in_slice_header_flag[ listIdx ][ rplsIdx ]");
   }
@@ -511,8 +515,13 @@ void HLSWriter::codeAPS( APS* pcAPS )
   xTraceAPSHeader();
 #endif
 
+#if JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE
+  WRITE_CODE((int)pcAPS->getAPSType(), 3, "aps_params_type");
+  WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
+#else
   WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
   WRITE_CODE( (int)pcAPS->getAPSType(), 3, "aps_params_type" );
+#endif
 #if JVET_R0433
   WRITE_FLAG(pcAPS->chromaPresentFlag, "aps_chroma_present_flag");
 #endif
@@ -810,6 +819,7 @@ void HLSWriter::dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, co
 {
   for (uint32_t i = (subLayerInfoFlag ? 0 : maxSubLayersMinus1); i <= maxSubLayersMinus1; i++)
   {
+    CHECK(pcSPS->getMaxDecPicBuffering(i) < 1, "max_dec_pic_buffering must be greater than 0");
     WRITE_UVLC(pcSPS->getMaxDecPicBuffering(i) - 1, "max_dec_pic_buffering_minus1[i]");
     WRITE_UVLC(pcSPS->getNumReorderPics(i),                 "max_num_reorder_pics[i]");
     WRITE_UVLC(pcSPS->getMaxLatencyIncreasePlus1(i),  "max_latency_increase_plus1[i]");
@@ -891,6 +901,39 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(pcSPS->getNumSubPics() - 1, "sps_num_subpics_minus1");
     if( pcSPS->getNumSubPics() > 1 )
     {
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+      WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
+      WRITE_FLAG(pcSPS->getSubPicSameSizeFlag(), "sps_subpic_same_size_flag");
+      uint32_t tmpWidthVal = (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
+      uint32_t tmpHeightVal = (pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
+      for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
+      {
+        if (!pcSPS->getSubPicSameSizeFlag() || picIdx == 0)
+        {
+          if ((picIdx > 0) && (pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize()))
+          {
+            WRITE_CODE(pcSPS->getSubPicCtuTopLeftX(picIdx), ceilLog2(tmpWidthVal), "subpic_ctu_top_left_x[ i ]");
+          }
+          if ((picIdx > 0) && (pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize()))
+          {
+            WRITE_CODE(pcSPS->getSubPicCtuTopLeftY(picIdx), ceilLog2(tmpHeightVal), "subpic_ctu_top_left_y[ i ]");
+          }
+          if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize())
+          {
+            WRITE_CODE(pcSPS->getSubPicWidth(picIdx) - 1, ceilLog2(tmpWidthVal), "subpic_width_minus1[ i ]");
+          }
+          if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize())
+          {
+            WRITE_CODE(pcSPS->getSubPicHeight(picIdx) - 1, ceilLog2(tmpHeightVal), "subpic_height_minus1[ i ]");
+          }
+        }
+        if (!pcSPS->getIndependentSubPicsFlag())
+        {
+          WRITE_FLAG(pcSPS->getSubPicTreatedAsPicFlag(picIdx), "subpic_treated_as_pic_flag[ i ]");
+          WRITE_FLAG(pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx), "loop_filter_across_subpic_enabled_flag[ i ]");
+        }
+      }
+#else
     WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
     for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
     {
@@ -916,6 +959,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
         WRITE_FLAG( pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx),  "loop_filter_across_subpic_enabled_flag[ i ]" );
       }
     }
+#endif
     }
 
     CHECK(pcSPS->getSubPicIdLen() < 1, "SPS: SubPicIdLen cannot be less than 1");
@@ -1118,7 +1162,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 
   if ( pcSPS->getSPSTemporalMVPEnabledFlag() )
   {
-    WRITE_FLAG( pcSPS->getSBTMVPEnabledFlag() ? 1 : 0,                               "sps_sbtmvp_enabled_flag");
+    WRITE_FLAG(pcSPS->getSbTMVPEnabledFlag() ? 1 : 0, "sps_sbtmvp_enabled_flag");
   }
 
   WRITE_FLAG( pcSPS->getAMVREnabledFlag() ? 1 : 0,                                   "sps_amvr_enabled_flag" );
@@ -1163,10 +1207,17 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   if (pcSPS->getMaxNumMergeCand() >= 2)
   {
     WRITE_FLAG(pcSPS->getUseGeo() ? 1 : 0, "sps_gpm_enabled_flag");
-    if (pcSPS->getUseGeo() && pcSPS->getMaxNumMergeCand() >= 3)
+    if (pcSPS->getUseGeo())
     {
-      CHECK(pcSPS->getMaxNumMergeCand() < pcSPS->getMaxNumGeoCand(), "Incorrrect max number of GEO candidates!");
-      WRITE_UVLC(pcSPS->getMaxNumMergeCand() - pcSPS->getMaxNumGeoCand(), "max_num_merge_cand_minus_max_num_gpm_cand");
+      CHECK(pcSPS->getMaxNumMergeCand() < pcSPS->getMaxNumGeoCand(),
+            "The number of GPM candidates must not be greater than the number of merge candidates");
+      CHECK(2 > pcSPS->getMaxNumGeoCand(),
+            "The number of GPM candidates must not be smaller than 2");
+      if (pcSPS->getMaxNumMergeCand() >= 3)
+      {
+        WRITE_UVLC(pcSPS->getMaxNumMergeCand() - pcSPS->getMaxNumGeoCand(),
+                   "max_num_merge_cand_minus_max_num_gpm_cand");
+      }
     }
   }
 
@@ -1457,7 +1508,11 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       }
       if (pcVPS->getOlsModeIdc() == 2)
       {
+#if JVET_S0183_VPS_INFORMATION_SIGNALLING
+        WRITE_CODE(pcVPS->getNumOutputLayerSets() - 2, 8, "num_output_layer_sets_minus2");
+#else
         WRITE_CODE(pcVPS->getNumOutputLayerSets() - 1, 8, "num_output_layer_sets_minus1");
+#endif
         for (uint32_t i = 1; i < pcVPS->getNumOutputLayerSets(); i++)
         {
           for (uint32_t j = 0; j < pcVPS->getMaxLayers(); j++)
@@ -1523,7 +1578,8 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
 
       for( int j = ( pcVPS->m_sublayerDpbParamsPresentFlag ? 0 : pcVPS->m_dpbMaxTemporalId[i] ); j <= pcVPS->m_dpbMaxTemporalId[i]; j++ )
       {
-        WRITE_UVLC( pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j], "max_dec_pic_buffering_minus1[i]" );
+        CHECK(pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] < 1, "max_dec_pic_buffering must be greater than 0");
+        WRITE_UVLC(pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] - 1, "max_dec_pic_buffering_minus1[i]");
         WRITE_UVLC( pcVPS->m_dpbParameters[i].m_numReorderPics[j], "max_num_reorder_pics[i]" );
         WRITE_UVLC( pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[j], "max_latency_increase_plus1[i]" );
       }
@@ -1993,7 +2049,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
     }
     else
     {
-      picHeader->setMaxNumAffineMergeCand( sps->getSBTMVPEnabledFlag() && picHeader->getEnableTMVPFlag() );
+      picHeader->setMaxNumAffineMergeCand(sps->getSbTMVPEnabledFlag() && picHeader->getEnableTMVPFlag());
     }
 
   // full-pel MMVD flag
@@ -2619,8 +2675,13 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "general_one_picture_only_constraint_flag" );
     WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(),     "intra_only_constraint_flag"      );
 
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+    WRITE_CODE(16-cinfo->getMaxBitDepthConstraintIdc(), 4, "gci_sixteen_minus_max_bitdepth_constraint_idc" );
+    WRITE_CODE(3-cinfo->getMaxChromaFormatConstraintIdc(), 2, "gci_three_minus_max_chroma_format_constraint_idc" );
+#else
     WRITE_CODE(cinfo->getMaxBitDepthConstraintIdc(), 4, "max_bitdepth_constraint_idc" );
     WRITE_CODE(cinfo->getMaxChromaFormatConstraintIdc(), 2, "max_chroma_format_constraint_idc" );
+#endif
     WRITE_FLAG(cinfo->getSingleLayerConstraintFlag(), "single_layer_constraint_flag");
     WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag(), "all_layers_independent_constraint_flag");
     WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "no_res_change_in_clvs_constraint_flag");
@@ -2802,61 +2863,65 @@ void HLSWriter::xCodePredWeightTable( Slice* pcSlice )
     {
       RefPicList  eRefPicList = ( iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
 
-      // NOTE: wp[].uiLog2WeightDenom and wp[].bPresentFlag are actually per-channel-type settings.
+      // NOTE: wp[].log2WeightDenom and wp[].presentFlag are actually per-channel-type settings.
 
       for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
       {
-        pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
+        wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
         if ( !bDenomCoded )
         {
           int iDeltaDenom;
-          WRITE_UVLC( wp[COMPONENT_Y].uiLog2WeightDenom, "luma_log2_weight_denom" );
+          WRITE_UVLC(wp[COMPONENT_Y].log2WeightDenom, "luma_log2_weight_denom");
 
           if( bChroma )
           {
-            CHECK( wp[COMPONENT_Cb].uiLog2WeightDenom != wp[COMPONENT_Cr].uiLog2WeightDenom, "Chroma blocks of different size not supported" );
-            iDeltaDenom = (wp[COMPONENT_Cb].uiLog2WeightDenom - wp[COMPONENT_Y].uiLog2WeightDenom);
+            CHECK(wp[COMPONENT_Cb].log2WeightDenom != wp[COMPONENT_Cr].log2WeightDenom,
+                  "Chroma blocks of different size not supported");
+            iDeltaDenom = (wp[COMPONENT_Cb].log2WeightDenom - wp[COMPONENT_Y].log2WeightDenom);
             WRITE_SVLC( iDeltaDenom, "delta_chroma_log2_weight_denom" );
           }
           bDenomCoded = true;
         }
-        WRITE_FLAG( wp[COMPONENT_Y].bPresentFlag, iNumRef==0?"luma_weight_l0_flag[i]":"luma_weight_l1_flag[i]" );
-        uiTotalSignalledWeightFlags += wp[COMPONENT_Y].bPresentFlag;
+        WRITE_FLAG(wp[COMPONENT_Y].presentFlag, iNumRef == 0 ? "luma_weight_l0_flag[i]" : "luma_weight_l1_flag[i]");
+        uiTotalSignalledWeightFlags += wp[COMPONENT_Y].presentFlag;
       }
       if (bChroma)
       {
         for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
         {
-          pcSlice->getWpScaling( eRefPicList, iRefIdx, wp );
-          CHECK( wp[COMPONENT_Cb].bPresentFlag != wp[COMPONENT_Cr].bPresentFlag, "Inconsistent settings for chroma channels" );
-          WRITE_FLAG( wp[COMPONENT_Cb].bPresentFlag, iNumRef==0?"chroma_weight_l0_flag[i]":"chroma_weight_l1_flag[i]" );
-          uiTotalSignalledWeightFlags += 2*wp[COMPONENT_Cb].bPresentFlag;
+          wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+          CHECK(wp[COMPONENT_Cb].presentFlag != wp[COMPONENT_Cr].presentFlag,
+                "Inconsistent settings for chroma channels");
+          WRITE_FLAG(wp[COMPONENT_Cb].presentFlag,
+                     iNumRef == 0 ? "chroma_weight_l0_flag[i]" : "chroma_weight_l1_flag[i]");
+          uiTotalSignalledWeightFlags += 2 * wp[COMPONENT_Cb].presentFlag;
         }
       }
 
       for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
       {
-        pcSlice->getWpScaling(eRefPicList, iRefIdx, wp);
-        if ( wp[COMPONENT_Y].bPresentFlag )
+        wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+        if (wp[COMPONENT_Y].presentFlag)
         {
-          int iDeltaWeight = (wp[COMPONENT_Y].iWeight - (1<<wp[COMPONENT_Y].uiLog2WeightDenom));
+          int iDeltaWeight = (wp[COMPONENT_Y].codedWeight - (1 << wp[COMPONENT_Y].log2WeightDenom));
           WRITE_SVLC( iDeltaWeight, iNumRef==0?"delta_luma_weight_l0[i]":"delta_luma_weight_l1[i]" );
-          WRITE_SVLC( wp[COMPONENT_Y].iOffset, iNumRef==0?"luma_offset_l0[i]":"luma_offset_l1[i]" );
+          WRITE_SVLC(wp[COMPONENT_Y].codedOffset, iNumRef == 0 ? "luma_offset_l0[i]" : "luma_offset_l1[i]");
         }
 
         if ( bChroma )
         {
-          if ( wp[COMPONENT_Cb].bPresentFlag )
+          if (wp[COMPONENT_Cb].presentFlag)
           {
             for ( int j = COMPONENT_Cb ; j < numberValidComponents ; j++ )
             {
-              CHECK(wp[COMPONENT_Cb].uiLog2WeightDenom != wp[COMPONENT_Cr].uiLog2WeightDenom, "Chroma blocks of different size not supported");
-              int iDeltaWeight = (wp[j].iWeight - (1<<wp[COMPONENT_Cb].uiLog2WeightDenom));
+              CHECK(wp[COMPONENT_Cb].log2WeightDenom != wp[COMPONENT_Cr].log2WeightDenom,
+                    "Chroma blocks of different size not supported");
+              int iDeltaWeight = (wp[j].codedWeight - (1 << wp[COMPONENT_Cb].log2WeightDenom));
               WRITE_SVLC( iDeltaWeight, iNumRef==0?"delta_chroma_weight_l0[i]":"delta_chroma_weight_l1[i]" );
 
               int range=pcSlice->getSPS()->getSpsRangeExtension().getHighPrecisionOffsetsEnabledFlag() ? (1<<pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_CHROMA))/2 : 128;
-              int pred = ( range - ( ( range*wp[j].iWeight)>>(wp[j].uiLog2WeightDenom) ) );
-              int iDeltaChroma = (wp[j].iOffset - pred);
+              int pred         = (range - ((range * wp[j].codedWeight) >> (wp[j].log2WeightDenom)));
+              int iDeltaChroma = (wp[j].codedOffset - pred);
               WRITE_SVLC( iDeltaChroma, iNumRef==0?"delta_chroma_offset_l0[i]":"delta_chroma_offset_l1[i]" );
             }
           }
@@ -2881,61 +2946,64 @@ void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const SPS *sps)
   for (int numRef = 0; numRef < NUM_REF_PIC_LIST_01 && moreSyntaxToBeParsed; numRef++)   // loop over l0 and l1 syntax elements
   {
     RefPicList refPicList = (numRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0);
-    // NOTE: wp[].uiLog2WeightDenom and wp[].bPresentFlag are actually per-channel-type settings.
+    // NOTE: wp[].log2WeightDenom and wp[].presentFlag are actually per-channel-type settings.
 
     for (int refIdx = 0; refIdx < numLxWeights; refIdx++)
     {
-      picHeader->getWpScaling(refPicList, refIdx, wp);
+      wp = picHeader->getWpScaling(refPicList, refIdx);
       if (!denomCoded)
       {
         int deltaDenom;
-        WRITE_UVLC(wp[COMPONENT_Y].uiLog2WeightDenom, "luma_log2_weight_denom");
+        WRITE_UVLC(wp[COMPONENT_Y].log2WeightDenom, "luma_log2_weight_denom");
 
         if (chroma)
         {
-          CHECK(wp[COMPONENT_Cb].uiLog2WeightDenom != wp[COMPONENT_Cr].uiLog2WeightDenom, "Chroma blocks of different size not supported");
-          deltaDenom = (wp[COMPONENT_Cb].uiLog2WeightDenom - wp[COMPONENT_Y].uiLog2WeightDenom);
+          CHECK(wp[COMPONENT_Cb].log2WeightDenom != wp[COMPONENT_Cr].log2WeightDenom,
+                "Chroma blocks of different size not supported");
+          deltaDenom = (wp[COMPONENT_Cb].log2WeightDenom - wp[COMPONENT_Y].log2WeightDenom);
           WRITE_SVLC(deltaDenom, "delta_chroma_log2_weight_denom");
         }
         denomCoded = true;
       }
-      WRITE_FLAG(wp[COMPONENT_Y].bPresentFlag, numRef == 0 ? "luma_weight_l0_flag[i]" : "luma_weight_l1_flag[i]");
-      totalSignalledWeightFlags += wp[COMPONENT_Y].bPresentFlag;
+      WRITE_FLAG(wp[COMPONENT_Y].presentFlag, numRef == 0 ? "luma_weight_l0_flag[i]" : "luma_weight_l1_flag[i]");
+      totalSignalledWeightFlags += wp[COMPONENT_Y].presentFlag;
     }
     if (chroma)
     {
       for (int refIdx = 0; refIdx < numLxWeights; refIdx++)
       {
-        picHeader->getWpScaling(refPicList, refIdx, wp);
-        CHECK(wp[COMPONENT_Cb].bPresentFlag != wp[COMPONENT_Cr].bPresentFlag, "Inconsistent settings for chroma channels");
-        WRITE_FLAG(wp[COMPONENT_Cb].bPresentFlag, numRef == 0 ? "chroma_weight_l0_flag[i]" : "chroma_weight_l1_flag[i]");
-        totalSignalledWeightFlags += 2 * wp[COMPONENT_Cb].bPresentFlag;
+        wp = picHeader->getWpScaling(refPicList, refIdx);
+        CHECK(wp[COMPONENT_Cb].presentFlag != wp[COMPONENT_Cr].presentFlag,
+              "Inconsistent settings for chroma channels");
+        WRITE_FLAG(wp[COMPONENT_Cb].presentFlag, numRef == 0 ? "chroma_weight_l0_flag[i]" : "chroma_weight_l1_flag[i]");
+        totalSignalledWeightFlags += 2 * wp[COMPONENT_Cb].presentFlag;
       }
     }
 
     for (int refIdx = 0; refIdx < numLxWeights; refIdx++)
     {
-      picHeader->getWpScaling(refPicList, refIdx, wp);
-      if (wp[COMPONENT_Y].bPresentFlag)
+      wp = picHeader->getWpScaling(refPicList, refIdx);
+      if (wp[COMPONENT_Y].presentFlag)
       {
-        int deltaWeight = (wp[COMPONENT_Y].iWeight - (1 << wp[COMPONENT_Y].uiLog2WeightDenom));
+        int deltaWeight = (wp[COMPONENT_Y].codedWeight - (1 << wp[COMPONENT_Y].log2WeightDenom));
         WRITE_SVLC(deltaWeight, numRef == 0 ? "delta_luma_weight_l0[i]" : "delta_luma_weight_l1[i]");
-        WRITE_SVLC(wp[COMPONENT_Y].iOffset, numRef == 0 ? "luma_offset_l0[i]" : "luma_offset_l1[i]");
+        WRITE_SVLC(wp[COMPONENT_Y].codedOffset, numRef == 0 ? "luma_offset_l0[i]" : "luma_offset_l1[i]");
       }
 
       if (chroma)
       {
-        if (wp[COMPONENT_Cb].bPresentFlag)
+        if (wp[COMPONENT_Cb].presentFlag)
         {
           for (int j = COMPONENT_Cb; j < numberValidComponents; j++)
           {
-            CHECK(wp[COMPONENT_Cb].uiLog2WeightDenom != wp[COMPONENT_Cr].uiLog2WeightDenom, "Chroma blocks of different size not supported");
-            int deltaWeight = (wp[j].iWeight - (1 << wp[COMPONENT_Cb].uiLog2WeightDenom));
+            CHECK(wp[COMPONENT_Cb].log2WeightDenom != wp[COMPONENT_Cr].log2WeightDenom,
+                  "Chroma blocks of different size not supported");
+            int deltaWeight = (wp[j].codedWeight - (1 << wp[COMPONENT_Cb].log2WeightDenom));
             WRITE_SVLC(deltaWeight, numRef == 0 ? "delta_chroma_weight_l0[i]" : "delta_chroma_weight_l1[i]");
 
             int range = sps->getSpsRangeExtension().getHighPrecisionOffsetsEnabledFlag() ? (1 << sps->getBitDepth(CHANNEL_TYPE_CHROMA)) / 2 : 128;
-            int pred         = (range - ((range * wp[j].iWeight) >> (wp[j].uiLog2WeightDenom)));
-            int deltaChroma = (wp[j].iOffset - pred);
+            int pred        = (range - ((range * wp[j].codedWeight) >> (wp[j].log2WeightDenom)));
+            int deltaChroma = (wp[j].codedOffset - pred);
             WRITE_SVLC(deltaChroma, numRef == 0 ? "delta_chroma_offset_l0[i]" : "delta_chroma_offset_l1[i]");
           }
         }

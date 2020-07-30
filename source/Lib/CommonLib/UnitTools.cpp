@@ -1403,29 +1403,25 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
 
 bool PU::checkDMVRCondition(const PredictionUnit& pu)
 {
-  WPScalingParam *wp0;
-  WPScalingParam *wp1;
-  int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
-  int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
-  pu.cu->slice->getWpScaling(REF_PIC_LIST_0, refIdx0, wp0);
-  pu.cu->slice->getWpScaling(REF_PIC_LIST_1, refIdx1, wp1);
-  if (pu.cs->sps->getUseDMVR() && (!pu.cs->picHeader->getDisDmvrFlag()))
+  if (pu.cs->sps->getUseDMVR() && !pu.cs->picHeader->getDisDmvrFlag())
   {
-    return pu.mergeFlag
-      && pu.mergeType == MRG_TYPE_DEFAULT_N
-      && !pu.ciipFlag
-      && !pu.cu->affine
-      && !pu.mmvdMergeFlag
-      && !pu.cu->mmvdSkip
-      && PU::isBiPredFromDifferentDirEqDistPoc(pu)
-      && (pu.lheight() >= 8)
-      && (pu.lwidth() >= 8)
-      && ((pu.lheight() * pu.lwidth()) >= 128)
-      && (pu.cu->BcwIdx == BCW_DEFAULT)
-      && ((!wp0[COMPONENT_Y].bPresentFlag) && (!wp0[COMPONENT_Cb].bPresentFlag) && (!wp0[COMPONENT_Cr].bPresentFlag) && (!wp1[COMPONENT_Y].bPresentFlag) && (!wp1[COMPONENT_Cb].bPresentFlag) && (!wp1[COMPONENT_Cr].bPresentFlag))
-      && ( refIdx0 < 0 ? true : (pu.cu->slice->getRefPic( REF_PIC_LIST_0, refIdx0 )->isRefScaled( pu.cs->pps ) == false) )
-      && ( refIdx1 < 0 ? true : (pu.cu->slice->getRefPic( REF_PIC_LIST_1, refIdx1 )->isRefScaled( pu.cs->pps ) == false) )
-      ;
+    const int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
+    const int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
+
+    const WPScalingParam *wp0 = pu.cu->slice->getWpScaling(REF_PIC_LIST_0, refIdx0);
+    const WPScalingParam *wp1 = pu.cu->slice->getWpScaling(REF_PIC_LIST_1, refIdx1);
+
+    const bool ref0IsScaled = refIdx0 < 0 || refIdx0 >= MAX_NUM_REF
+                                ? false
+                                : pu.cu->slice->getRefPic(REF_PIC_LIST_0, refIdx0)->isRefScaled(pu.cs->pps);
+    const bool ref1IsScaled = refIdx1 < 0 || refIdx1 >= MAX_NUM_REF
+                                ? false
+                                : pu.cu->slice->getRefPic(REF_PIC_LIST_1, refIdx1)->isRefScaled(pu.cs->pps);
+
+    return pu.mergeFlag && pu.mergeType == MRG_TYPE_DEFAULT_N && !pu.ciipFlag && !pu.cu->affine && !pu.mmvdMergeFlag
+           && !pu.cu->mmvdSkip && PU::isBiPredFromDifferentDirEqDistPoc(pu) && (pu.lheight() >= 8) && (pu.lwidth() >= 8)
+           && ((pu.lheight() * pu.lwidth()) >= 128) && (pu.cu->BcwIdx == BCW_DEFAULT)
+           && !WPScalingParam::isWeighted(wp0) && !WPScalingParam::isWeighted(wp1) && !ref0IsScaled && !ref1IsScaled;
   }
   else
   {
@@ -2623,9 +2619,10 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
   affMrgCtx.numValidMergeCand = 0;
   affMrgCtx.maxNumMergeCand = maxNumAffineMergeCand;
 
-  bool enableSubPuMvp = slice.getSPS()->getSBTMVPEnabledFlag() && !(slice.getPOC() == slice.getRefPic(REF_PIC_LIST_0, 0)->getPOC() && slice.isIRAP());
+  bool sbTmvpEnableFlag = slice.getSPS()->getSbTMVPEnabledFlag()
+                          && !(slice.getPOC() == slice.getRefPic(REF_PIC_LIST_0, 0)->getPOC() && slice.isIRAP());
   bool isAvailableSubPu = false;
-  if ( enableSubPuMvp && slice.getPicHeader()->getEnableTMVPFlag() )
+  if (sbTmvpEnableFlag && slice.getPicHeader()->getEnableTMVPFlag())
   {
     MergeCtx mrgCtx = *affMrgCtx.mrgCtx;
     bool tmpLICFlag = false;
@@ -3732,19 +3729,13 @@ bool CU::isBcwIdxCoded( const CodingUnit &cu )
   {
     if( cu.firstPU->interDir == 3 )
     {
-      WPScalingParam *wp0;
-      WPScalingParam *wp1;
-      int refIdx0 = cu.firstPU->refIdx[REF_PIC_LIST_0];
-      int refIdx1 = cu.firstPU->refIdx[REF_PIC_LIST_1];
+      const int refIdx0 = cu.firstPU->refIdx[REF_PIC_LIST_0];
+      const int refIdx1 = cu.firstPU->refIdx[REF_PIC_LIST_1];
 
-      cu.cs->slice->getWpScaling(REF_PIC_LIST_0, refIdx0, wp0);
-      cu.cs->slice->getWpScaling(REF_PIC_LIST_1, refIdx1, wp1);
-      if ((wp0[COMPONENT_Y].bPresentFlag || wp0[COMPONENT_Cb].bPresentFlag || wp0[COMPONENT_Cr].bPresentFlag
-        || wp1[COMPONENT_Y].bPresentFlag || wp1[COMPONENT_Cb].bPresentFlag || wp1[COMPONENT_Cr].bPresentFlag))
-      {
-        return false;
-      }
-      return true;
+      const WPScalingParam *wp0 = cu.cs->slice->getWpScaling(REF_PIC_LIST_0, refIdx0);
+      const WPScalingParam *wp1 = cu.cs->slice->getWpScaling(REF_PIC_LIST_1, refIdx1);
+
+      return !(WPScalingParam::isWeighted(wp0) || WPScalingParam::isWeighted(wp1));
     }
   }
 

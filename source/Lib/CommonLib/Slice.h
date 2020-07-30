@@ -250,7 +250,7 @@ class ConstraintInfo
   bool              m_frameOnlyConstraintFlag;
   bool              m_intraOnlyConstraintFlag;
   uint32_t          m_maxBitDepthConstraintIdc;
-  ChromaFormat      m_maxChromaFormatConstraintIdc;
+  int               m_maxChromaFormatConstraintIdc;
   bool              m_onePictureOnlyConstraintFlag;
   bool              m_lowerBitRateConstraintFlag;
 
@@ -326,8 +326,13 @@ public:
     , m_oneSubpicPerPicConstraintFlag(false)
     , m_frameOnlyConstraintFlag  (false)
     , m_intraOnlyConstraintFlag  (false)
+#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
+    , m_maxBitDepthConstraintIdc  (  16)
+    , m_maxChromaFormatConstraintIdc(CHROMA_444)
+#else
     , m_maxBitDepthConstraintIdc  (  0)
     , m_maxChromaFormatConstraintIdc(CHROMA_420)
+#endif
     , m_onePictureOnlyConstraintFlag (false)
     , m_lowerBitRateConstraintFlag (false )
 
@@ -401,8 +406,8 @@ public:
   uint32_t      getMaxBitDepthConstraintIdc() const { return m_maxBitDepthConstraintIdc; }
   void          setMaxBitDepthConstraintIdc(uint32_t bitDepth) { m_maxBitDepthConstraintIdc = bitDepth; }
 
-  ChromaFormat  getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
-  void          setMaxChromaFormatConstraintIdc(ChromaFormat fmt) { m_maxChromaFormatConstraintIdc = fmt; }
+  int           getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
+  void          setMaxChromaFormatConstraintIdc(int fmt) { m_maxChromaFormatConstraintIdc = fmt; }
 
 #if !JVET_S0266_VUI_length
   bool          getNonProjectedConstraintFlag() const { return m_nonProjectedConstraintFlag; }
@@ -872,8 +877,8 @@ public:
   void             setloopFilterAcrossEnabledFlag(bool u)  {         m_loopFilterAcrossSubPicEnabledFlag = u; }
   bool             getloopFilterAcrossEnabledFlag()  const { return  m_loopFilterAcrossSubPicEnabledFlag;     }
 
-  bool             isFirstCTUinSubPic(uint32_t ctuAddr)    { return  ctuAddr == m_firstCtuInSubPic;  }
-  bool              isLastCTUinSubPic(uint32_t ctuAddr)    { return  ctuAddr == m_lastCtuInSubPic;   }
+  bool             isFirstCTUinSubPic(uint32_t ctuAddr) const { return  ctuAddr == m_firstCtuInSubPic;  }
+  bool              isLastCTUinSubPic(uint32_t ctuAddr) const { return  ctuAddr == m_lastCtuInSubPic;   }
   void             setNumSlicesInSubPic( uint32_t val )    { m_numSlicesInSubPic = val; }
   uint32_t         getNumSlicesInSubPic() const            { return m_numSlicesInSubPic; }
   bool             containsCtu(const Position& pos) const
@@ -1378,6 +1383,9 @@ private:
   bool                  m_subPicInfoPresentFlag;                // indicates the presence of sub-picture info
   uint32_t              m_numSubPics;                        //!< number of sub-pictures used
   bool                  m_independentSubPicsFlag;
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  bool                  m_subPicSameSizeFlag;
+#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;
@@ -1576,6 +1584,10 @@ public:
                                                                                             }
   void      setIndependentSubPicsFlag(bool b)                                                { m_independentSubPicsFlag = b;                    }
   bool      getIndependentSubPicsFlag() const                                                { return m_independentSubPicsFlag;                 }
+#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
+  void      setSubPicSameSizeFlag(bool b)                                                   { m_subPicSameSizeFlag = b;                       }
+  bool      getSubPicSameSizeFlag() const                                                   { return m_subPicSameSizeFlag;                    }
+#endif
   uint32_t  getNumSubPics( ) const                                                          { return  m_numSubPics;                           }
   void      setSubPicCtuTopLeftX( int i, uint32_t u )                                       { m_subPicCtuTopLeftX[i] = u;                     }
   uint32_t  getSubPicCtuTopLeftX( int i ) const                                             { return  m_subPicCtuTopLeftX[i];                 }
@@ -1736,8 +1748,8 @@ void                    setCCALFEnabledFlag( bool b )                           
   void                    setJointCbCrEnabledFlag(bool bVal)                                              { m_JointCbCrEnabledFlag = bVal; }
   bool                    getJointCbCrEnabledFlag() const                                                 { return m_JointCbCrEnabledFlag; }
 
-  bool                    getSBTMVPEnabledFlag() const                                                    { return m_sbtmvpEnabledFlag; }
-  void                    setSBTMVPEnabledFlag(bool b)                                                    { m_sbtmvpEnabledFlag = b; }
+  bool getSbTMVPEnabledFlag() const { return m_sbtmvpEnabledFlag; }
+  void setSbTMVPEnabledFlag(bool b) { m_sbtmvpEnabledFlag = b; }
 
   void                    setBDOFEnabledFlag(bool b)                                                      { m_bdofEnabledFlag = b; }
   bool                    getBDOFEnabledFlag() const                                                      { return m_bdofEnabledFlag; }
@@ -2146,7 +2158,11 @@ public:
   void                   setTileColumnWidths( std::vector<uint32_t> widths )              { m_tileColWidth = widths;                      }
   void                   setTileRowHeights( std::vector<uint32_t> heights )               { m_tileRowHeight = heights;                    }
   void                   addTileColumnWidth( uint32_t u )                                 { CHECK( m_tileColWidth.size()  >= MAX_TILE_COLS, "Number of tile columns exceeds valid range" ); m_tileColWidth.push_back(u);    }
+#if JVET_S0156_LEVEL_DEFINITION
+  void                   addTileRowHeight( uint32_t u )                                   { m_tileRowHeight.push_back(u);   }
+#else
   void                   addTileRowHeight( uint32_t u )                                   { CHECK( m_tileRowHeight.size() >= MAX_TILE_ROWS, "Number of tile rows exceeds valid range" );    m_tileRowHeight.push_back(u);   }
+#endif
   uint32_t               getTileColumnWidth( int idx ) const                              { CHECK( idx >= m_tileColWidth.size(), "Tile column index exceeds valid range" );                 return  m_tileColWidth[idx];    }
   uint32_t               getTileRowHeight( int idx ) const                                { CHECK( idx >= m_tileRowHeight.size(), "Tile row index exceeds valid range" );                   return  m_tileRowHeight[idx];   }
   uint32_t               getTileColumnBd( int idx ) const                                 { CHECK( idx >= m_tileColBd.size(), "Tile column index exceeds valid range" );                    return  m_tileColBd[idx];       }
@@ -2309,10 +2325,10 @@ struct WPScalingParam
 {
   // Explicit weighted prediction parameters parsed in slice header,
   // or Implicit weighted prediction parameters (8 bits depth values).
-  bool bPresentFlag;
-  uint32_t uiLog2WeightDenom;
-  int  iWeight;
-  int  iOffset;
+  bool     presentFlag;
+  uint32_t log2WeightDenom;
+  int      codedWeight;
+  int      codedOffset;
 
   // Weighted prediction scaling values built from above parameters (bitdepth scaled):
   int  w;
@@ -2321,7 +2337,14 @@ struct WPScalingParam
   int  shift;
   int  round;
 
+  static bool isWeighted(const WPScalingParam *wp);
 };
+
+inline bool WPScalingParam::isWeighted(const WPScalingParam *wp)
+{
+  return wp != nullptr && (wp[COMPONENT_Y].presentFlag || wp[COMPONENT_Cb].presentFlag || wp[COMPONENT_Cr].presentFlag);
+}
+
 struct WPACDCParam
 {
   int64_t iAC;
@@ -2593,7 +2616,8 @@ public:
   {
     memcpy(m_weightPredTable, wp, sizeof(WPScalingParam) * NUM_REF_PIC_LIST_01 * MAX_NUM_REF * MAX_NUM_COMPONENT);
   }
-  void                        getWpScaling(RefPicList e, int iRefIdx, WPScalingParam *&wp) const;
+  const WPScalingParam *      getWpScaling(const RefPicList refPicList, const int refIdx) const;
+  WPScalingParam *            getWpScaling(const RefPicList refPicList, const int refIdx);
   WPScalingParam*             getWpScalingAll()                                        { return (WPScalingParam *) m_weightPredTable; }
   void                        resetWpScaling();
   void                        setNumL0Weights(int b)                                   { m_numL0Weights = b;                          }
@@ -2970,7 +2994,8 @@ public:
     memcpy(m_weightPredTable, wp, sizeof(WPScalingParam) * NUM_REF_PIC_LIST_01 * MAX_NUM_REF * MAX_NUM_COMPONENT);
   }
   WPScalingParam *            getWpScalingAll()                                      { return (WPScalingParam *) m_weightPredTable;                  }
-  void                        getWpScaling( RefPicList e, int iRefIdx, WPScalingParam *&wp) const;
+  WPScalingParam *            getWpScaling(const RefPicList refPicList, const int refIdx);
+  const WPScalingParam *      getWpScaling(const RefPicList refPicList, const int refIdx) const;
 
   void                        resetWpScaling();
   void                        initWpScaling(const SPS *sps);
@@ -3047,6 +3072,9 @@ public:
   void                        setNumSubstream( const SPS *sps, const PPS *pps );
   void                        setNumEntryPoints( const SPS *sps, const PPS *pps );
   uint32_t                    getNumEntryPoints( ) const { return m_numEntryPoints;  }
+#if JVET_Q0406_CABAC_ZERO
+  bool                        isLastSliceInSubpic();
+#endif
 
   CcAlfFilterParam            m_ccAlfFilterParam;
   uint8_t*                    m_ccAlfFilterControl[2];

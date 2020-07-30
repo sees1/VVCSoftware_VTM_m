@@ -72,14 +72,8 @@ WeightPrediction::WeightPrediction()
 {
 }
 
-
-
-void  WeightPrediction::getWpScaling(const Slice                *pcSlice,
-                                     const int                  &iRefIdx0,
-                                     const int                  &iRefIdx1,
-                                           WPScalingParam      *&wp0,
-                                           WPScalingParam      *&wp1,
-                                     const ComponentID           maxNumComp)
+void WeightPrediction::getWpScaling(Slice *pcSlice, const int &iRefIdx0, const int &iRefIdx1, WPScalingParam *&wp0,
+                                    WPScalingParam *&wp1, const ComponentID maxNumComp)
 {
   CHECK(iRefIdx0 < 0 && iRefIdx1 < 0, "Both picture reference list indizes smaller than '0'");
 
@@ -90,14 +84,8 @@ void  WeightPrediction::getWpScaling(const Slice                *pcSlice,
   if (bUniPred || wpBiPred)
   {
     // explicit --------------------
-    if (iRefIdx0 >= 0)
-    {
-      pcSlice->getWpScaling(REF_PIC_LIST_0, iRefIdx0, wp0);
-    }
-    if (iRefIdx1 >= 0)
-    {
-      pcSlice->getWpScaling(REF_PIC_LIST_1, iRefIdx1, wp1);
-    }
+    wp0 = pcSlice->getWpScaling(REF_PIC_LIST_0, iRefIdx0);
+    wp1 = pcSlice->getWpScaling(REF_PIC_LIST_1, iRefIdx1);
   }
   else
   {
@@ -106,11 +94,11 @@ void  WeightPrediction::getWpScaling(const Slice                *pcSlice,
 
   if (iRefIdx0 < 0)
   {
-    wp0 = NULL;
+    wp0 = nullptr;
   }
   if (iRefIdx1 < 0)
   {
-    wp1 = NULL;
+    wp1 = nullptr;
   }
 
   const uint32_t numValidComponent = getNumberValidComponents(pcSlice->getSPS()->getChromaFormatIdc());
@@ -124,13 +112,13 @@ void  WeightPrediction::getWpScaling(const Slice                *pcSlice,
       const int bitDepth = pcSlice->getSPS()->getBitDepth(toChannelType(ComponentID(yuv)));
       const int offsetScalingFactor = bUseHighPrecisionPredictionWeighting ? 1 : (1 << (bitDepth - 8));
 
-      wp0[yuv].w = wp0[yuv].iWeight;
-      wp1[yuv].w = wp1[yuv].iWeight;
-      wp0[yuv].o = wp0[yuv].iOffset * offsetScalingFactor;
-      wp1[yuv].o = wp1[yuv].iOffset * offsetScalingFactor;
+      wp0[yuv].w      = wp0[yuv].codedWeight;
+      wp1[yuv].w      = wp1[yuv].codedWeight;
+      wp0[yuv].o      = wp0[yuv].codedOffset * offsetScalingFactor;
+      wp1[yuv].o      = wp1[yuv].codedOffset * offsetScalingFactor;
       wp0[yuv].offset = wp0[yuv].o + wp1[yuv].o;
-      wp0[yuv].shift = wp0[yuv].uiLog2WeightDenom + 1;
-      wp0[yuv].round = (1 << wp0[yuv].uiLog2WeightDenom);
+      wp0[yuv].shift  = wp0[yuv].log2WeightDenom + 1;
+      wp0[yuv].round  = (1 << wp0[yuv].log2WeightDenom);
       wp1[yuv].offset = wp0[yuv].offset;
       wp1[yuv].shift = wp0[yuv].shift;
       wp1[yuv].round = wp0[yuv].round;
@@ -146,10 +134,10 @@ void  WeightPrediction::getWpScaling(const Slice                *pcSlice,
       const int bitDepth            = pcSlice->getSPS()->getBitDepth(toChannelType(ComponentID(yuv)));
       const int offsetScalingFactor = bUseHighPrecisionPredictionWeighting ? 1 : (1 << (bitDepth - 8));
 
-      pwp[yuv].w      = pwp[yuv].iWeight;
-      pwp[yuv].offset = pwp[yuv].iOffset * offsetScalingFactor;
-      pwp[yuv].shift  = pwp[yuv].uiLog2WeightDenom;
-      pwp[yuv].round  = (pwp[yuv].uiLog2WeightDenom >= 1) ? (1 << (pwp[yuv].uiLog2WeightDenom - 1)) : (0);
+      pwp[yuv].w      = pwp[yuv].codedWeight;
+      pwp[yuv].offset = pwp[yuv].codedOffset * offsetScalingFactor;
+      pwp[yuv].shift  = pwp[yuv].log2WeightDenom;
+      pwp[yuv].round  = (pwp[yuv].log2WeightDenom >= 1) ? (1 << (pwp[yuv].log2WeightDenom - 1)) : (0);
     }
   }
 }

@@ -186,6 +186,10 @@ Picture::Picture()
   fieldPic             = false;
   topField             = false;
   precedingDRAP        = false;
+#if JVET_S0124_UNAVAILABLE_REFERENCE
+  nonReferencePictureFlag = false;
+#endif
+
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
   {
     m_prevQP[i] = -1;
@@ -197,6 +201,7 @@ Picture::Picture()
   numSubpics = 1;
 #endif
   numSlices = 1;
+  unscaledPic = nullptr;
 }
 
 void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId )
@@ -214,7 +219,6 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
     M_BUFS( 0, PIC_TRUE_ORIGINAL ). create( _chromaFormat, a );
   }
 #if !KEEP_PRED_AND_RESI_SIGNALS
-
   m_ctuArea = UnitArea( _chromaFormat, Area( Position{ 0, 0 }, Size( _maxCUSize, _maxCUSize ) ) );
 #endif
   m_hashMap.clearAll();

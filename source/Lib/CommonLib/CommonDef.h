@@ -221,8 +221,12 @@ static const int NUM_APS_TYPE_LEN =                                 3;  //Curren
 static const int MAX_NUM_APS_TYPE =                                 8;  //Currently APS Type has 3 bits so the max type is 8
 
 static const int MAX_TILE_COLS =                                   20;  ///< Maximum number of tile columns
+#if JVET_S0156_LEVEL_DEFINITION
+static const int MAX_TILES =                                      440;  ///< Maximum number of tiles
+#else
 static const int MAX_TILE_ROWS =                                   22;  ///< Maximum number of tile rows
 static const int MAX_TILES =            MAX_TILE_COLS * MAX_TILE_ROWS;  ///< Maximum number of tiles
+#endif
 static const int MAX_SLICES =                                     600;  ///< Maximum number of slices per picture
 static const int MLS_GRP_NUM =                                   1024; ///< Max number of coefficient groups, max(16, 256)
 
@@ -306,10 +310,6 @@ static const int RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS =     4;
 static const int RExt__PREDICTION_WEIGHTING_ANALYSIS_DC_PRECISION = 0; ///< Additional fixed bit precision used during encoder-side weighting prediction analysis. Currently only used when high_precision_prediction_weighting_flag is set, for backwards compatibility reasons.
 
 static const int MAX_TIMECODE_SEI_SETS =                            3; ///< Maximum number of time sets
-
-#if JVET_S0177_SCALABLE_NESTING_SEI
-static const int VCL_ASSOCIATED_SEI_LIST_SIZE =                    17;
-#endif
 
 static const int MAX_CU_DEPTH =                                     7; ///< log2(CTUSize)
 static const int MAX_CU_SIZE =                        1<<MAX_CU_DEPTH;

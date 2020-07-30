@@ -41,7 +41,7 @@
 //! \ingroup EncoderLib
 //! \{
 
-void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, const SPS *sps, HRD &hrd, const uint32_t temporalId)
+void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &hrd, const uint32_t temporalId)
 {
   const SEIBufferingPeriod *bp = NULL;
   switch (sei.payloadType())
@@ -55,7 +55,7 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, const 
     xWriteSEIDecodingUnitInfo(*static_cast<const SEIDecodingUnitInfo*>(& sei), *bp, temporalId);
     break;
   case SEI::SCALABLE_NESTING:
-    xWriteSEIScalableNesting(bs, *static_cast<const SEIScalableNesting*>(&sei), sps);
+    xWriteSEIScalableNesting(bs, *static_cast<const SEIScalableNesting*>(&sei));
     break;
   case SEI::DECODED_PICTURE_HASH:
     xWriteSEIDecodedPictureHash(*static_cast<const SEIDecodedPictureHash*>(&sei));
@@ -137,7 +137,7 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, const 
 /**
  * marshal all SEI messages in provided list into one bitstream bs
  */
-void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList, const SPS *sps, HRD &hrd, bool isNested, const uint32_t temporalId)
+void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList, HRD &hrd, bool isNested, const uint32_t temporalId)
 {
 #if ENABLE_TRACING
   if (g_HLSTraceEnable)
@@ -157,7 +157,7 @@ void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList
     bool traceEnable = g_HLSTraceEnable;
     g_HLSTraceEnable = false;
 #endif
-    xWriteSEIpayloadData(bs_count, **sei, sps, hrd, temporalId);
+    xWriteSEIpayloadData(bs_count, **sei, hrd, temporalId);
 #if ENABLE_TRACING
     g_HLSTraceEnable = traceEnable;
 #endif
@@ -185,7 +185,7 @@ void SEIWriter::writeSEImessages(OutputBitstream& bs, const SEIMessages &seiList
       xTraceSEIMessageType((*sei)->payloadType());
 #endif
 
-    xWriteSEIpayloadData(bs, **sei, sps, hrd, temporalId);
+    xWriteSEIpayloadData(bs, **sei, hrd, temporalId);
   }
   if (!isNested)
   {
@@ -345,7 +345,15 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
       }
     }
   }
+#if JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP
+  if (sei.m_bpMaxSubLayers-1 > 0) 
+  {
+    WRITE_FLAG(sei.m_sublayerDpbOutputOffsetsPresentFlag, "bp_sublayer_dpb_output_offsets_present_flag");
+  }
+#else
   WRITE_FLAG(sei.m_sublayerDpbOutputOffsetsPresentFlag, "sublayer_dpb_output_offsets_present_flag");
+#endif
+
   if(sei.m_sublayerDpbOutputOffsetsPresentFlag)
   {
     for(int i = 0; i < sei.m_bpMaxSubLayers - 1; i++)
@@ -366,7 +374,34 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
 void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBufferingPeriod &bp, const uint32_t temporalId)
 {
 
+#if JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP
+  WRITE_CODE( sei.m_auCpbRemovalDelay[bp.m_bpMaxSubLayers - 1] - 1, bp.m_cpbRemovalDelayLength,               "pt_cpb_removal_delay_minus1[bp_max_sub_layers_minus1]" );
+  for (int i = temporalId; i < bp.m_bpMaxSubLayers - 1; i++)
+  {
+    WRITE_FLAG(sei.m_ptSubLayerDelaysPresentFlag[i], "pt_sub_layer_delays_present_flag[i]");
+    if (sei.m_ptSubLayerDelaysPresentFlag[i])
+    {
+      if (bp.m_cpbRemovalDelayDeltasPresentFlag)
+      {
+        WRITE_FLAG(sei.m_cpbRemovalDelayDeltaEnabledFlag[i], "pt_cpb_removal_delay_delta_enabled_flag[i]");
+      }
+      if (sei.m_cpbRemovalDelayDeltaEnabledFlag[i])
+      {
+        if ((bp.m_numCpbRemovalDelayDeltas - 1) > 0)
+        {
+          WRITE_CODE(sei.m_cpbRemovalDelayDeltaIdx[i], ceilLog2(bp.m_numCpbRemovalDelayDeltas), "pt_cpb_removal_delay_delta_idx[i]");
+        }
+      }
+      else
+      {
+        WRITE_CODE(sei.m_auCpbRemovalDelay[i] - 1, bp.m_cpbRemovalDelayLength, "pt_cpb_removal_delay_minus1[i]");
+      }
+    }
+  }
+  WRITE_CODE(sei.m_picDpbOutputDelay, bp.m_dpbOutputDelayLength, "pt_dpb_output_delay");
+#else
   WRITE_CODE( sei.m_auCpbRemovalDelay[bp.m_bpMaxSubLayers - 1] - 1, bp.m_cpbRemovalDelayLength,               "cpb_removal_delay_minus1[bp_max_sub_layers_minus1]" );
+#endif
   if( bp.m_altCpbParamsPresentFlag )
   {
     WRITE_FLAG( sei.m_cpbAltTimingInfoPresentFlag, "cpb_alt_timing_info_present_flag" );
@@ -406,6 +441,7 @@ void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBuf
       }
     }
   }
+#if !JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP
   for( int i = temporalId; i < bp.m_bpMaxSubLayers - 1; i ++ )
   {
     WRITE_FLAG( sei.m_ptSubLayerDelaysPresentFlag[i], "pt_sub_layer_delays_present_flag[i]" );
@@ -429,6 +465,7 @@ void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBuf
     }
   }
   WRITE_CODE( sei.m_picDpbOutputDelay,     bp.m_dpbOutputDelayLength,                                          "dpb_output_delay" );
+#endif
   if (bp.m_bpDecodingUnitHrdParamsPresentFlag && bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
 
   {
@@ -495,7 +532,7 @@ void SEIWriter::xWriteSEIDependentRAPIndication(const SEIDependentRAPIndication&
   // intentionally empty
 }
 
-void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei, const SPS *sps)
+void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei)
 {
   CHECK (sei.m_nestedSEIs.size()<1, "There must be at lease one SEI message nested in the scalable nesting SEI.")
 
@@ -548,7 +585,7 @@ void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableN
   }
 
   // write nested SEI messages
-  writeSEImessages(bs, sei.m_nestedSEIs, sps, m_nestingHrd, true, 0);
+  writeSEImessages(bs, sei.m_nestedSEIs, m_nestingHrd, true, 0);
 }
 
 void SEIWriter::xWriteSEIFramePacking(const SEIFramePacking& sei)

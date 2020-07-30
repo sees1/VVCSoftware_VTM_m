@@ -212,6 +212,9 @@ public:
   bool fieldPic;
   int  m_prevQP[MAX_NUM_CHANNEL_TYPE];
   bool precedingDRAP; // preceding a DRAP picture in decoding order
+#if JVET_S0124_UNAVAILABLE_REFERENCE
+  bool nonReferencePictureFlag;
+#endif
 
   int  poc;
   uint32_t temporalId;

@@ -216,7 +216,11 @@ public:
   void  deletePicBuffer();
 
   void  executeLoopFilters();
-  void  finishPicture(int& poc, PicList*& rpcListPic, MsgLevel msgl = INFO);
+#if JVET_R0270
+  void finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl = INFO, bool associatedWithNewClvs = false);
+#else
+  void  finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl = INFO);
+#endif
   void  finishPictureLight(int& poc, PicList*& rpcListPic );
   void  checkNoOutputPriorPics (PicList* rpcListPic);
   void  checkNalUnitConstraints( uint32_t naluType );
@@ -279,7 +283,11 @@ protected:
 
   Picture * xGetNewPicBuffer( const SPS &sps, const PPS &pps, const uint32_t temporalLayer, const int layerId );
   void  xCreateLostPicture( int iLostPOC, const int layerId );
+#if JVET_S0124_UNAVAILABLE_REFERENCE
+  void  xCreateUnavailablePicture( const PPS *pps, const int iUnavailablePoc, const bool longTermFlag, const int temporalId, const int layerId, const bool interLayerRefPicFlag );
+#else
   void  xCreateUnavailablePicture(int iUnavailablePoc, bool longTermFlag, const int layerId, const bool interLayerRefPicFlag);
+#endif
   void  checkParameterSetsInclusionSEIconstraints(const InputNALUnit nalu);
   void  xActivateParameterSets( const InputNALUnit nalu );
   void  xCheckParameterSetConstraints( const int layerId );
@@ -290,7 +298,17 @@ protected:
   void      xDecodeSPS( InputNALUnit& nalu );
   void      xDecodePPS( InputNALUnit& nalu );
   void      xDecodeAPS(InputNALUnit& nalu);
+#if JVET_S0081_NON_REFERENCED_PIC
+  void      xUpdatePreviousTid0POC(Slice *pSlice)
+  {
+    if( (pSlice->getTLayer() == 0) && (pSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL) && (pSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL) && !pSlice->getPicHeader()->getNonReferencePictureFlag() )
+    { 
+      m_prevTid0POC = pSlice->getPOC(); 
+    }  
+  }
+#else
   void      xUpdatePreviousTid0POC(Slice *pSlice) { if ((pSlice->getTLayer() == 0) && (pSlice->getNalUnitType()!=NAL_UNIT_CODED_SLICE_RASL) && (pSlice->getNalUnitType()!=NAL_UNIT_CODED_SLICE_RADL))  { m_prevTid0POC = pSlice->getPOC(); }  }
+#endif
   void      xParsePrefixSEImessages();
   void      xParsePrefixSEIsForUnknownVCLNal();
 
