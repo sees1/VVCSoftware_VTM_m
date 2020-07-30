@@ -4364,34 +4364,44 @@ Enables (true) or disables (false) the insertion of Subpicture Level Information
 Note, currently no other configuration options are available, because this depends on the number of subpictures,
 which are still not supported in the software. An example SEI with dummy values is generated, when the option is enabled.
 \\
-\Option{SEISubpicLevelInfoRefLevels} &
-\Default{none} &
-List of reference levels to be signalled.
-\\
 \Option{SEISubpicLevelInfoExplicitFraction} &
 \Default{false} &
 Enable signalling of explicit fraction for each level and subpicture
 \\
 \Option{SEISubpicLevelInfoNumSubpics} &
 \Default{1} &
-Number of subpictures in context of the SEI. Has to be equal to NumSubpics.
+Number of subpictures in context of the SEI. Has to be equal to NumSubpics
 \\
 \Option{SEISubpicLevelInfoMaxSublayers} &
 \Default{1} &
-Number of sublayers in context of the SEI. Has to be no greater than vps_max_sublayers_minus1 + 1.
+Number of sublayers in context of the SEI. Has to be equal to vps_max_sublayers_minus1 + 1
 \\
 \Option{SEISubpicLevelInfoSublayerInfoPresentFlag} &
-\Default{0} &
-The level information for subpicture sequences is present for sublayer representation(s).
+\Default{false} &
+Enable signalling of level information for each sublayer
 \par
 \begin{tabular}{cp{0.45\textwidth}}
-1 & The level information for subpicture sequences is present for sublayer representation(s) in the range of 0 to sli_max_sublayers_minus1, inclusive. \\
-0 & The level information for subpicture sequences is present for the sli_max_sublayers_minus1-th sublayer representation. \\
+1 & Each sublayer specifies its own level information \\
+0 & All sublayers use the same level information \\
+\end{tabular}
+\\
+\Option{SEISubpicLevelInfoRefLevels} &
+\Default{""} &
+List of reference levels to be signalled.
+\par
+\begin{tabular}{p{0.49\columnwidth}}
+When sli_sublayer_info_present_flag = 0, the number of input elements shall be equal to numReflevels. List is ordered by level.\\
+When sli_sublayer_info_present_flag = 1, the number of input elements shall be equal to numReflevels * maxSublayers. List is ordered by level then sublayer. For example, let Amn denotes the reference level indices for the m-th sublayer and and n-th reference level, the first N elements (A00...A0n-1) denotes the RefLevelFractions for N levels in the 0-th sublayer, and the following N elements (A10...A1n-1) denotes the RefLevelFractions for N levels in the 1st sublayer, and so on, untill all MxN elements specified.\\
 \end{tabular}
 \\
 \Option{SEISubpicLevelInfoRefLevelFractions} &
-\Default{none} &
-List of fractions of levels to be signalled. List is ordered by subpicture then level.
+\Default{""} &
+List of fractions of levels to be signalled.
+\par
+\begin{tabular}{p{0.49\columnwidth}}
+When sli_sublayer_info_present_flag = 0, the number of input elements shall be equal to numSubpics * numReflevels. List is ordered by subpicture then level.\\
+When sli_sublayer_info_present_flag = 1, the number of elements shall be equal to numSubpics * numReflevels * maxSublayers. List is ordered by subpicture then level then sublayer. For example, let Bmnk  denotes the reference level fractions for the m-th sublayer and n-th reference level and k-th subpicture, the first K elements (B000...B00k-1) denotes the RefLevelFractions for K subpictures in the 0-th levels and 0-th sublayer, and followed by K elements (B010...B0n-1k-1) denotes the RefLevelFractions for K subpictures in the 1st level and 0-th sublayer, and so on, untill all M*N*K elements specified. In another word, among all the specified M*N*K elements, the first N*K elements specify RefLevelFractions for N*K subpictures of N levels in the 0-th sublayer, and the following N*K elements specify RefLevelFractions for N*K subpictures of N levels in the 1st sublayer, and etc.\\
+\end{tabular}
 \\
 \end{OptionTableNoShorthand}
 
