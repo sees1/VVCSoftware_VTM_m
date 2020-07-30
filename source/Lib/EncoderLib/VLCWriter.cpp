@@ -1542,7 +1542,11 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   int cnt = 0;
   while (m_pcBitIf->getNumBitsUntilByteAligned())
   {
+#if JVET_S0138_GCI_PTL
+    WRITE_FLAG( 0, "vps_ptl_reserved_zero_bit");
+#else
     WRITE_FLAG( 0, "vps_ptl_alignment_zero_bit");
+#endif
     cnt++;
   }
   CHECK(cnt>=8, "More than '8' alignment bytes written");
@@ -2660,7 +2664,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 #if !JVET_S0266_VUI_length
     WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
 #endif
+#if !JVET_S0138_GCI_PTL
     WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
+#endif
 #if !JVET_S0266_VUI_length
     WRITE_FLAG(cinfo->getNonProjectedConstraintFlag(), "general_non_projected_constraint_flag");
 #endif
@@ -2674,7 +2680,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_CODE(cinfo->getMaxBitDepthConstraintIdc(), 4, "max_bitdepth_constraint_idc" );
     WRITE_CODE(cinfo->getMaxChromaFormatConstraintIdc(), 2, "max_chroma_format_constraint_idc" );
 #endif
+#if !JVET_S0138_GCI_PTL
     WRITE_FLAG(cinfo->getSingleLayerConstraintFlag(), "single_layer_constraint_flag");
+#endif
     WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag(), "all_layers_independent_constraint_flag");
     WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "no_res_change_in_clvs_constraint_flag");
     WRITE_FLAG(cinfo->getOneTilePerPicConstraintFlag(), "one_tile_per_pic_constraint_flag");
@@ -2759,6 +2767,11 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 
   WRITE_CODE( int( ptl->getLevelIdc() ), 8, "general_level_idc" );
 
+#if JVET_S0138_GCI_PTL
+  WRITE_FLAG( ptl->getFrameOnlyConstraintFlag(), "ptl_frame_only_constraint_flag" );
+  WRITE_FLAG( ptl->getMultiLayerEnabledFlag(),   "ptl_multilayer_enabled_flag"    );
+#endif
+
   if(profileTierPresentFlag)
   {
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
@@ -2778,7 +2791,11 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 
   while (!isByteAligned())
   {
+#if JVET_S0138_GCI_PTL
+    WRITE_FLAG(0, "ptl_reserved_zero_bit");
+#else
     WRITE_FLAG(0, "ptl_alignment_zero_bit");
+#endif
   }
 
   for(int i = 0; i < maxNumSubLayersMinus1; i++)

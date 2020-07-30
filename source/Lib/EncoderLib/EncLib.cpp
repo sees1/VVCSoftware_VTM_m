@@ -1128,12 +1128,16 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
   cinfo->setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
   cinfo->setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
+#if !JVET_S0138_GCI_PTL
   cinfo->setFrameOnlyConstraintFlag     (m_frameOnlyConstraintFlag);
+#endif
   cinfo->setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
   cinfo->setIntraOnlyConstraintFlag         (m_intraOnlyConstraintFlag);
   cinfo->setMaxBitDepthConstraintIdc    (m_maxBitDepthConstraintIdc);
   cinfo->setMaxChromaFormatConstraintIdc((int)m_maxChromaFormatConstraintIdc);
+#if !JVET_S0138_GCI_PTL
   cinfo->setSingleLayerConstraintFlag (m_singleLayerConstraintFlag);
+#endif
   cinfo->setAllLayersIndependentConstraintFlag (m_allLayersIndependentConstraintFlag);
   cinfo->setNoMrlConstraintFlag (m_noMrlConstraintFlag);
   cinfo->setNoIspConstraintFlag (m_noIspConstraintFlag);
@@ -1187,6 +1191,10 @@ void EncLib::xInitSPS( SPS& sps )
   profileTierLevel->setLevelIdc                    (m_level);
   profileTierLevel->setTierFlag                    (m_levelTier);
   profileTierLevel->setProfileIdc                  (m_profile);
+#if JVET_S0138_GCI_PTL
+  profileTierLevel->setFrameOnlyConstraintFlag     (m_frameOnlyConstraintFlag);
+  profileTierLevel->setMultiLayerEnabledFlag       (m_multiLayerEnabledFlag);
+#endif
   profileTierLevel->setNumSubProfile(m_numSubProfile);
   for (int k = 0; k < m_numSubProfile; k++)
   {

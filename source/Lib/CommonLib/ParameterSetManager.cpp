@@ -151,6 +151,10 @@ ProfileTierLevel::ProfileTierLevel()
   , m_numSubProfile(0)
   , m_subProfileIdc(0)
   , m_levelIdc        (Level::NONE)
+#if JVET_S0138_GCI_PTL
+  , m_frameOnlyConstraintFlag(1)
+  , m_multiLayerEnabledFlag(0)
+#endif
 {
   ::memset(m_subLayerLevelPresentFlag,   0, sizeof(m_subLayerLevelPresentFlag  ));
   ::memset(m_subLayerLevelIdc, Level::NONE, sizeof(m_subLayerLevelIdc          ));
