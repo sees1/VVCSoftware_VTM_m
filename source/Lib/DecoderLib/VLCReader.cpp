@@ -1678,7 +1678,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     }
   }
 
-  READ_UVLC(     uiCode, "bit_depth_minus8" );
+  READ_UVLC(uiCode, "sps_bitdepth_minus8");
   CHECK(uiCode > 8, "Invalid bit depth signalled");
   pcSPS->setBitDepth(CHANNEL_TYPE_LUMA, 8 + uiCode);
   pcSPS->setBitDepth(CHANNEL_TYPE_CHROMA, 8 + uiCode);
@@ -4826,7 +4826,15 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
 #if JVET_S0138_GCI_PTL
   READ_FLAG(      symbol,   "ptl_frame_only_constraint_flag"   ); ptl->setFrameOnlyConstraintFlag(symbol);
   READ_FLAG(      symbol,   "ptl_multilayer_enabled_flag"      ); ptl->setMultiLayerEnabledFlag(symbol);
+#if JVET_S_PROFILES
+  CHECK((ptl->getProfileIdc() == Profile::MAIN_10 || ptl->getProfileIdc() == Profile::MAIN_10_444
+         || ptl->getProfileIdc() == Profile::MAIN_10_STILL_PICTURE
+         || ptl->getProfileIdc() == Profile::MAIN_10_444_STILL_PICTURE)
+          && symbol,
+        "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
+#else
   CHECK( (ptl->getProfileIdc() == Profile::MAIN_10 || ptl->getProfileIdc() == Profile::MAIN_444_10) && symbol, "ptl_multilayer_enabled_flag shall be equal to 0 for Main 10 and Main 10 4:4:4 profiles");
+#endif
 #endif
 
   if(profileTierPresentFlag)

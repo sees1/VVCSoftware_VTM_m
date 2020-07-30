@@ -50,12 +50,15 @@
 #include <assert.h>
 #include <cassert>
 
+// clang-format off
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_S0203                                        1 // JVET-S0203 (aspects 1 & 2): change the signalling of sublayer_level_idc[ i ] and ptl_sublayer_level_present_flag[ i ] to be in descending order
 
 #define JVET_S0066_GCI                                    1 // JVET-S0066: Signal new GCI flags gci_three_minus_max_log2_ctu_size_constraint_idc and gci_no_luma_transform_size_64_constraint_flag (no_explicit_scaling_list_constraint_flag already included as part of JVET-S0050)
 
-#define JVET_S0193_NO_OUTPUT_PRIOR_PIC                    1 // JVET-S0193: Move ph_no_output_of_prior_pics_flag to SH                       
+#define JVET_S0193_NO_OUTPUT_PRIOR_PIC                    1 // JVET-S0193: Move ph_no_output_of_prior_pics_flag to SH
+
+#define JVET_S_PROFILES                                   1 // Profile definitions
 
 #define JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE   1 // JVET-S0219 aspect2: change the order to put the aps_params_type before the aps_adaptation_parameter_set_id.
 
@@ -168,12 +171,10 @@
 typedef std::pair<int, bool> TrMode;
 typedef std::pair<int, int>  TrCost;
 
-// clang-format off
 #define REUSE_CU_RESULTS                                  1
 #if REUSE_CU_RESULTS
 #define REUSE_CU_RESULTS_WITH_MULTIPLE_TUS                1
 #endif
-// clang-format on
 
 #ifndef JVET_J0090_MEMORY_BANDWITH_MEASURE
 #define JVET_J0090_MEMORY_BANDWITH_MEASURE                0
@@ -203,6 +204,7 @@ typedef std::pair<int, int>  TrCost;
 
 #endif
 
+// clang-format on
 
 // ====================================================================================================================
 // General settings
@@ -787,9 +789,22 @@ namespace Profile
 {
   enum Name
   {
+#if JVET_S_PROFILES
+    NONE                                 = 0,
+    STILL_PICTURE                        = 64,
+    MAIN_10                              = 1,
+    MAIN_10_STILL_PICTURE                = MAIN_10 | STILL_PICTURE,
+    MULTILAYER_MAIN_10                   = 17,
+    MULTILAYER_MAIN_10_STILL_PICTURE     = MULTILAYER_MAIN_10 | STILL_PICTURE,
+    MAIN_10_444                          = 33,
+    MAIN_10_444_STILL_PICTURE            = MAIN_10_444 | STILL_PICTURE,
+    MULTILAYER_MAIN_10_444               = 49,
+    MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
+#else
     NONE        = 0,
     MAIN_10     = 1,
     MAIN_444_10 = 2
+#endif
   };
 }
 

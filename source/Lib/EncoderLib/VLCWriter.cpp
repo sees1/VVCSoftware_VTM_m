@@ -978,7 +978,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     }
   }
 
-  WRITE_UVLC( pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) - 8,                      "bit_depth_minus8" );
+  WRITE_UVLC(pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) - 8, "sps_bitdepth_minus8");
   WRITE_FLAG( pcSPS->getEntropyCodingSyncEnabledFlag() ? 1 : 0, "sps_entropy_coding_sync_enabled_flag" );
   WRITE_FLAG( pcSPS->getEntryPointsPresentFlag() ? 1 : 0, "sps_entry_point_offsets_present_flag" );
   WRITE_CODE(pcSPS->getBitsForPOC()-4, 4, "log2_max_pic_order_cnt_lsb_minus4");

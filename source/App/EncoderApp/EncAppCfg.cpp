@@ -49,6 +49,9 @@
 #include "EncoderLib/RateCtrl.h"
 
 #include "CommonLib/dtrace_next.h"
+#if JVET_S_PROFILES
+#include "CommonLib/ProfileLevelTier.h"
+#endif
 
 #define MACRO_TO_STRING_HELPER(val) #val
 #define MACRO_TO_STRING(val) MACRO_TO_STRING_HELPER(val)
@@ -56,18 +59,27 @@
 using namespace std;
 namespace po = df::program_options_lite;
 
-
-
-enum ExtendedProfileName // this is used for determining profile strings, where multiple profiles map to a single profile idc with various constraint flag combinations
+enum ExtendedProfileName   // this is used for determining profile strings, where multiple profiles map to a single
+                           // profile idc with various constraint flag combinations
 {
   NONE,
+#if JVET_S_PROFILES
+  MAIN_10,
+  MAIN_10_STILL_PICTURE,
+  MAIN_10_444,
+  MAIN_10_444_STILL_PICTURE,
+  MULTILAYER_MAIN_10,
+  MULTILAYER_MAIN_10_STILL_PICTURE,
+  MULTILAYER_MAIN_10_444,
+  MULTILAYER_MAIN_10_444_STILL_PICTURE,
+#else
   MAIN_10,
   MAIN_10_STILL_PICTURE,
   MAIN_444_10,
   MAIN_444_10_STILL_PICTURE,
+#endif
   AUTO = -1
 };
-
 
 //! \ingroup EncoderApp
 //! \{
@@ -165,29 +177,46 @@ static const struct MapStrToProfile
 {
   const char* str;
   Profile::Name value;
-}
-strToProfile[] =
-{
-  {"none",                 Profile::NONE               },
-  {"main_10",              Profile::MAIN_10            },
-  {"main_444_10",          Profile::MAIN_444_10        }
+} strToProfile[] = {
+  { "none", Profile::NONE },
+#if JVET_S_PROFILES
+  { "main_10", Profile::MAIN_10 },
+  { "main_10_444", Profile::MAIN_10_444 },
+  { "main_10_still_picture", Profile::MAIN_10_STILL_PICTURE },
+  { "main_10_444_still_picture", Profile::MAIN_10_444_STILL_PICTURE },
+  { "multilayer_main_10", Profile::MULTILAYER_MAIN_10 },
+  { "multilayer_main_10_444", Profile::MULTILAYER_MAIN_10_444 },
+  { "multilayer_main_10_still_picture", Profile::MULTILAYER_MAIN_10_STILL_PICTURE },
+  { "multilayer_main_10_444_still_picture", Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE },
+#else
+  { "main_10", Profile::MAIN_10 },
+  { "main_444_10", Profile::MAIN_444_10 },
+#endif
 };
 
 static const struct MapStrToExtendedProfile
 {
   const char* str;
   ExtendedProfileName value;
-}
-strToExtendedProfile[] =
-{
-    {"none",                      NONE             },
-    {"main_10",                   MAIN_10          },
-    {"main_444_10",               MAIN_444_10      },
-    {"main_10_still_picture",     MAIN_10_STILL_PICTURE },
-    {"main_444_10_still_picture", MAIN_444_10_STILL_PICTURE },
-    {"auto",                      AUTO             }
+} strToExtendedProfile[] = {
+  { "none", NONE },
+#if JVET_S_PROFILES
+  { "main_10", MAIN_10 },
+  { "main_10_444", MAIN_10_444 },
+  { "main_10_still_picture", MAIN_10_STILL_PICTURE },
+  { "main_10_444_still_picture", MAIN_10_444_STILL_PICTURE },
+  { "multilayer_main_10", MULTILAYER_MAIN_10 },
+  { "multilayer_main_10_444", MULTILAYER_MAIN_10_444 },
+  { "multilayer_main_10_still_picture", MULTILAYER_MAIN_10_STILL_PICTURE },
+  { "multilayer_main_10_444_still_picture", MULTILAYER_MAIN_10_444_STILL_PICTURE },
+#else
+  { "main_10", MAIN_10 },
+  { "main_444_10", MAIN_444_10 },
+  { "main_10_still_picture", MAIN_10_STILL_PICTURE },
+  { "main_444_10_still_picture", MAIN_444_10_STILL_PICTURE },
+#endif
+  { "auto", AUTO },
 };
-
 
 static const struct MapStrToTier
 {
@@ -773,7 +802,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("HarmonizeGopFirstFieldCoupleEnabled",             m_bHarmonizeGopFirstFieldCoupleEnabled,            true, "Enables harmonization of Gop first field couple")
 
   // Profile and level
+#if JVET_S_PROFILES
+  ("Profile",                                         extendedProfile,              ExtendedProfileName::NONE, "Profile name to use for encoding. Use [multilayer_]main_10[_444][_still_picture], auto, or none")
+#else
   ("Profile",                                         extendedProfile,              ExtendedProfileName::NONE, "Profile name to use for encoding. Use main_10, main_10_still_picture, main_444_10, main_444_10_still_picture, auto, or none")
+#endif
   ("Level",                                           m_level,                                    Level::NONE, "Level limit to be used, eg 5.1, or none")
   ("Tier",                                            m_levelTier,                                Level::MAIN, "Tier to use for interpretation of --Level (main or high only)")
 #if JVET_S0138_GCI_PTL
@@ -789,7 +822,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("IntraOnlyConstraintFlag",                         m_intraOnlyConstraintFlag,                        false, "Value of intra_only_constraint_flag")
   ("AllLayersIndependentConstraintFlag",              m_allLayersIndependentConstraintFlag,             false, "Indicate that all layers are independent")
   ("OnePictureOnlyConstraintFlag",                    m_onePictureOnlyConstraintFlag,                   false, "Value of general_intra_constraint_flag. Can only be used for single frame encodings. Will be set to true for still picture profiles")
-  ("MaxBitDepthConstraintIdc",                        m_maxBitDepthConstraintIdc,                          16u, "Indicate that bit_depth_minus8 plus 8 shall be in the range of 0 to m_maxBitDepthConstraintIdc")
+  ("MaxBitDepthConstraintIdc",                        m_maxBitDepthConstraintIdc,                          16u, "Indicate that sps_bitdepth_minus8 plus 8 shall be in the range of 0 to m_maxBitDepthConstraintIdc")
   ("MaxChromaFormatConstraintIdc",                    m_maxChromaFormatConstraintIdc,                        3, "Indicate that chroma_format_idc shall be in the range of 0 to m_maxChromaFormatConstraintIdc")
   ("TrailConstraintFlag",                             m_noTrailConstraintFlag,                          false, "Indicate that TRAIL is deactivated")
   ("StsaConstraintFlag",                              m_noStsaConstraintFlag,                           false, "Indicate that STSA is deactivated")
@@ -1895,14 +1928,34 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     switch (extendedProfile)
     {
-      case ExtendedProfileName::NONE:                      m_profile = Profile::NONE; break;
-      case ExtendedProfileName::MAIN_10:                   m_profile = Profile::MAIN_10; break;
-      case ExtendedProfileName::MAIN_444_10:               m_profile = Profile::MAIN_444_10; break;
-      case ExtendedProfileName::MAIN_10_STILL_PICTURE:     m_profile = Profile::MAIN_10;     m_onePictureOnlyConstraintFlag = true; break;
-      case ExtendedProfileName::MAIN_444_10_STILL_PICTURE: m_profile = Profile::MAIN_444_10; m_onePictureOnlyConstraintFlag = true; break;
-      default:
-        EXIT( "Unable to determine profile from configured settings");
-        break;
+#if JVET_S_PROFILES
+    case ExtendedProfileName::NONE: m_profile = Profile::NONE; break;
+    case ExtendedProfileName::MAIN_10: m_profile = Profile::MAIN_10; break;
+    case ExtendedProfileName::MAIN_10_444: m_profile = Profile::MAIN_10_444; break;
+    case ExtendedProfileName::MAIN_10_STILL_PICTURE: m_profile = Profile::MAIN_10_STILL_PICTURE; break;
+    case ExtendedProfileName::MAIN_10_444_STILL_PICTURE: m_profile = Profile::MAIN_10_444_STILL_PICTURE; break;
+    case ExtendedProfileName::MULTILAYER_MAIN_10: m_profile = Profile::MULTILAYER_MAIN_10; break;
+    case ExtendedProfileName::MULTILAYER_MAIN_10_444: m_profile = Profile::MULTILAYER_MAIN_10_444; break;
+    case ExtendedProfileName::MULTILAYER_MAIN_10_STILL_PICTURE:
+      m_profile = Profile::MULTILAYER_MAIN_10_STILL_PICTURE;
+      break;
+    case ExtendedProfileName::MULTILAYER_MAIN_10_444_STILL_PICTURE:
+      m_profile = Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE;
+      break;
+#else
+    case ExtendedProfileName::NONE: m_profile = Profile::NONE; break;
+    case ExtendedProfileName::MAIN_10: m_profile = Profile::MAIN_10; break;
+    case ExtendedProfileName::MAIN_444_10: m_profile = Profile::MAIN_444_10; break;
+    case ExtendedProfileName::MAIN_10_STILL_PICTURE:
+      m_profile = Profile::MAIN_10;
+      m_onePictureOnlyConstraintFlag = true;
+      break;
+    case ExtendedProfileName::MAIN_444_10_STILL_PICTURE:
+      m_profile = Profile::MAIN_444_10;
+      m_onePictureOnlyConstraintFlag = true;
+      break;
+#endif
+    default: EXIT("Unable to determine profile from configured settings"); break;
     }
   }
 
@@ -1910,10 +1963,19 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_chromaFormatConstraint       = (tmpConstraintChromaFormat == 0) ? m_chromaFormatIDC : numberToChromaFormat(tmpConstraintChromaFormat);
     if (m_bitDepthConstraint == 0)
     {
+#if JVET_S_PROFILES
+      if (m_profile != Profile::NONE)
+      {
+        const ProfileFeatures *features = ProfileFeatures::getProfileFeatures(m_profile);
+        CHECK(features->profile != m_profile, "Profile not found");
+        m_bitDepthConstraint = features->maxBitDepth;
+      }
+#else
       if (m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_444_10)
       {
         m_bitDepthConstraint = 10;
       }
+#endif
       else // m_profile == Profile::NONE
       {
 #if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
@@ -2508,6 +2570,29 @@ int EncAppCfg::xAutoDetermineProfile()
   const int maxBitDepth= std::max(m_internalBitDepth[CHANNEL_TYPE_LUMA], m_internalBitDepth[m_chromaFormatIDC==ChromaFormat::CHROMA_400 ? CHANNEL_TYPE_LUMA : CHANNEL_TYPE_CHROMA]);
   m_profile=Profile::NONE;
 
+#if JVET_S_PROFILES
+  switch (m_chromaFormatIDC)
+  {
+  case ChromaFormat::CHROMA_400:
+  case ChromaFormat::CHROMA_420:
+    if (maxBitDepth <= 10)
+    {
+      m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10 : Profile::MAIN_10;
+    }
+    break;
+
+  case ChromaFormat::CHROMA_422:
+  case ChromaFormat::CHROMA_444:
+    if (maxBitDepth <= 10)
+    {
+      m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_444 : Profile::MAIN_10_444;
+    }
+    break;
+
+  default: return 1;
+  }
+
+#else
   if (m_chromaFormatIDC==ChromaFormat::CHROMA_400 || m_chromaFormatIDC==ChromaFormat::CHROMA_420)
   {
     if (maxBitDepth<=10)
@@ -2526,6 +2611,7 @@ int EncAppCfg::xAutoDetermineProfile()
   {
     return 1; // unknown chroma format
   }
+#endif
   return 0;
 }
 
@@ -2600,7 +2686,11 @@ bool EncAppCfg::xCheckParameter()
 
   xConfirmPara(m_bitstreamFileName.empty(), "A bitstream file name must be specified (BitstreamFile)");
   xConfirmPara(m_internalBitDepth[CHANNEL_TYPE_CHROMA] != m_internalBitDepth[CHANNEL_TYPE_LUMA], "The internalBitDepth must be the same for luma and chroma");
+#if JVET_S_PROFILES
+  if (m_profile != Profile::NONE)
+#else
   if (m_profile==Profile::MAIN_10 || m_profile==Profile::MAIN_444_10)
+#endif
   {
     xConfirmPara(m_log2MaxTransformSkipBlockSize>=6, "Transform Skip Log2 Max Size must be less or equal to 5 for given profile.");
     xConfirmPara(m_transformSkipRotationEnabledFlag==true, "UseResidualRotation must not be enabled for given profile.");
@@ -2684,10 +2774,19 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara (m_log2MaxTransformSkipBlockSize < 2, "Transform Skip Log2 Max Size must be at least 2 (4x4)");
 
   xConfirmPara ( m_onePictureOnlyConstraintFlag && m_framesToBeEncoded!=1, "When onePictureOnlyConstraintFlag is true, the number of frames to be encoded must be 1" );
+#if JVET_S_PROFILES
+  if (m_profile != Profile::NONE)
+  {
+    const ProfileFeatures *features = ProfileFeatures::getProfileFeatures(m_profile);
+    CHECK(features->profile != m_profile, "Profile not found");
+    xConfirmPara(m_level == Level::LEVEL15_5 && !features->canUseLevel15p5, "Profile does not support level 15.5");
+  }
+#else
   if (m_profile == Profile::MAIN_10 || m_profile==Profile::MAIN_444_10)
   {
     xConfirmPara ( m_level==Level::LEVEL15_5 && !m_onePictureOnlyConstraintFlag, "Currently the only profiles that support level 15.5 are still pictures, which require onePictureOnlyConstraintFlag to be 1" );
   }
+#endif
 
   xConfirmPara( m_iQP < -6 * (m_internalBitDepth[CHANNEL_TYPE_LUMA] - 8) || m_iQP > MAX_QP, "QP exceeds supported range (-QpBDOffsety to 63)" );
 #if W0038_DB_OPT
