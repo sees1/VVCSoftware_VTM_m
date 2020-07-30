@@ -2361,7 +2361,9 @@ private:
   bool                        m_nonReferencePictureFlag;                                //!< non-reference picture flag
   bool                        m_gdrOrIrapPicFlag;                                       //!< gdr or irap picture flag
   bool                        m_gdrPicFlag;                                             //!< gradual decoding refresh picture flag
+#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
   bool                        m_noOutputOfPriorPicsFlag;                                //!< no output of prior pictures flag
+#endif
   uint32_t                    m_recoveryPocCnt;                                         //!< recovery POC count
   bool                        m_noOutputBeforeRecoveryFlag;                             //!< NoOutputBeforeRecoveryFlag
   bool                        m_handleCraAsCvsStartFlag;                                //!< HandleCraAsCvsStartFlag
@@ -2451,8 +2453,10 @@ public:
   bool                        getGdrOrIrapPicFlag() const                               { return m_gdrOrIrapPicFlag;                                                                   }
   void                        setGdrPicFlag( bool b )                                   { m_gdrPicFlag = b;                                                                            }
   bool                        getGdrPicFlag() const                                     { return m_gdrPicFlag;                                                                         }
+#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
   void                        setNoOutputOfPriorPicsFlag( bool b )                      { m_noOutputOfPriorPicsFlag = b;                                                               }
   bool                        getNoOutputOfPriorPicsFlag() const                        { return m_noOutputOfPriorPicsFlag;                                                            }
+#endif
   void                        setRecoveryPocCnt( uint32_t u )                           { m_recoveryPocCnt = u;                                                                        }
   uint32_t                    getRecoveryPocCnt() const                                 { return m_recoveryPocCnt;                                                                     }
   void                        setSPSId( uint32_t u )                                    { m_spsId = u;                                                                                 }
@@ -2661,6 +2665,9 @@ private:
   bool                       m_pictureHeaderInSliceHeader;
   uint32_t                   m_nuhLayerId;           ///< Nal unit layer id
   SliceType                  m_eSliceType;
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+  bool                       m_noOutputOfPriorPicsFlag;           //!< no output of prior pictures flag
+#endif
   int                        m_iSliceQp;
   int                        m_iSliceQpBase;
   bool                       m_ChromaQpAdjEnabled;
@@ -2800,6 +2807,10 @@ public:
   NalUnitType                 getPrevIRAPSubpicType() const                          { return m_prevIRAPSubpicType;                                  }
   void                        checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictureList* pRPL0, const ReferencePictureList* pRPL1, const int prevIRAPSubpicDecOrderNo);
   SliceType                   getSliceType() const                                   { return m_eSliceType;                                          }
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+  void                        setNoOutputOfPriorPicsFlag(bool b)                     { m_noOutputOfPriorPicsFlag = b;                                }
+  bool                        getNoOutputOfPriorPicsFlag() const                     { return m_noOutputOfPriorPicsFlag;                             }
+#endif
   int                         getPOC() const                                         { return m_iPOC;                                                }
   int                         getSliceQp() const                                     { return m_iSliceQp;                                            }
   bool                        getUseWeightedPrediction() const                       { return( (m_eSliceType==P_SLICE && testWeightPred()) || (m_eSliceType==B_SLICE && testWeightBiPred()) ); }

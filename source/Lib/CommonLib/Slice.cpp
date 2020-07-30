@@ -63,6 +63,9 @@ Slice::Slice()
 , m_eNalUnitType                  ( NAL_UNIT_CODED_SLICE_IDR_W_RADL )
 , m_pictureHeaderInSliceHeader   ( false )
 , m_eSliceType                    ( I_SLICE )
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+, m_noOutputOfPriorPicsFlag       ( 0 )
+#endif
 , m_iSliceQp                      ( 0 )
 , m_ChromaQpAdjEnabled            ( false )
 , m_lmcsEnabledFlag               ( 0 )
@@ -170,6 +173,10 @@ void Slice::initSlice()
   m_lmcsEnabledFlag = 0;
   m_explicitScalingListUsed = 0;
   initEqualRef();
+
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+  m_noOutputOfPriorPicsFlag = 0;
+#endif
 
   m_bCheckLDC = false;
 
@@ -1256,7 +1263,11 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
     }
     const Slice* pcSlice = pcPic->slices[0];
 
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+    if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getNoOutputOfPriorPicsFlag() && pcPic->layerId == this->m_nuhLayerId)
+#else
     if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getPicHeader()->getNoOutputOfPriorPicsFlag() && pcPic->layerId == this->m_nuhLayerId)
+#endif
     {
       if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) && !pps.getMixedNaluTypesInPicFlag())
       {
@@ -1408,8 +1419,13 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
         }
       }
 
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+      if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) &&
+        !this->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 && bufPic->layerId == m_nuhLayerId)
+#else
       if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) &&
         !getPicHeader()->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 && bufPic->layerId == m_nuhLayerId)
+#endif
       {
         CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
           "precedes, in decoding order, an IRAP subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx shall precede, in output order, the "
@@ -1424,8 +1440,13 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
           "its associated RADL subpictures");
       }
 
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+      if ((getPOC() == getPicHeader()->getRecoveryPocCnt() + prevGDRSubpicPOC) && !this->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 &&
+        bufPic->layerId == m_nuhLayerId && nalUnitType != NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() != -1)
+#else
       if ((getPOC() == getPicHeader()->getRecoveryPocCnt() + prevGDRSubpicPOC) && !getPicHeader()->getNoOutputOfPriorPicsFlag() && isBufPicOutput == 1 &&
         bufPic->layerId == m_nuhLayerId && nalUnitType != NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() != -1)
+#endif
       {
         CHECK(bufPic->poc >= getPOC(), "Any subpicture, with nuh_layer_id equal to a particular value layerId and subpicture index equal to a particular value subpicIdx, that "
           "precedes, in decoding order, a subpicture with nuh_layer_id equal to layerId and subpicture index equal to subpicIdx in a recovery point picture shall precede "
@@ -2606,7 +2627,9 @@ PicHeader::PicHeader()
 : m_valid                                         ( 0 )
 , m_nonReferencePictureFlag                       ( 0 )
 , m_gdrPicFlag                                    ( 0 )
+#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
 , m_noOutputOfPriorPicsFlag                       ( 0 )
+#endif
 , m_recoveryPocCnt                                ( -1 )
 , m_noOutputBeforeRecoveryFlag                    ( false )
 , m_handleCraAsCvsStartFlag                       ( false )
@@ -2699,7 +2722,9 @@ void PicHeader::initPicHeader()
   m_valid                                         = 0;
   m_nonReferencePictureFlag                       = 0;
   m_gdrPicFlag                                    = 0;
+#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
   m_noOutputOfPriorPicsFlag                       = 0;
+#endif
   m_recoveryPocCnt                                = -1;
   m_spsId                                         = -1;
   m_ppsId                                         = -1;

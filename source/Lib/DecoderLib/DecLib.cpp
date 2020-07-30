@@ -1992,7 +1992,11 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   if (m_picHeader.getGdrOrIrapPicFlag() && m_bFirstSliceInPicture)
   {
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+    m_accessUnitNoOutputPriorPicFlags.push_back(m_apcSlicePilot->getNoOutputOfPriorPicsFlag());
+#else
     m_accessUnitNoOutputPriorPicFlags.push_back(m_picHeader.getNoOutputOfPriorPicsFlag());
+#endif
   }
 
   PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId());
@@ -2111,11 +2115,19 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     //the inference for NoOutputOfPriorPicsFlag
     if( !m_firstSliceInBitstream && m_picHeader.getNoOutputBeforeRecoveryFlag() )
     {
-      m_picHeader.setNoOutputOfPriorPicsFlag( true );
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+      m_apcSlicePilot->setNoOutputOfPriorPicsFlag(true);
+#else
+      m_picHeader.setNoOutputOfPriorPicsFlag(true);
+#endif
     }
     else
     {
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+      m_apcSlicePilot->setNoOutputOfPriorPicsFlag(false);
+#else
       m_picHeader.setNoOutputOfPriorPicsFlag(false);
+#endif
     }
 
     if (m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR)
@@ -2123,7 +2135,11 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       m_lastNoOutputBeforeRecoveryFlag[nalu.m_nuhLayerId] = m_picHeader.getNoOutputBeforeRecoveryFlag();
     }
 
-    if( m_picHeader.getNoOutputOfPriorPicsFlag() )
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+    if (m_apcSlicePilot->getNoOutputOfPriorPicsFlag())
+#else
+    if (m_picHeader.getNoOutputOfPriorPicsFlag())
+#endif
     {
       m_lastPOCNoOutputPriorPics = m_apcSlicePilot->getPOC();
       m_isNoOutputPriorPics = true;

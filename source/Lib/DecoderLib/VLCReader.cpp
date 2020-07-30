@@ -2696,10 +2696,12 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
   CHECK(sps == 0, "Invalid SPS");
   READ_CODE(sps->getBitsForPOC(), uiCode, "ph_pic_order_cnt_lsb");
   picHeader->setPocLsb(uiCode);
+#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
   if (picHeader->getGdrOrIrapPicFlag())
   {
     READ_FLAG(uiCode, "no_output_of_prior_pics_flag");   picHeader->setNoOutputOfPriorPicsFlag(uiCode != 0);
   }
+#endif
   if( picHeader->getGdrPicFlag() )
   {
     READ_UVLC(uiCode, "recovery_poc_cnt");               picHeader->setRecoveryPocCnt( uiCode );
@@ -3766,7 +3768,12 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   {
     CHECK(pcSlice->getSliceType() == I_SLICE, "when ph_intra_slice_allowed_flag = 0, no I_Slice is allowed");
   }
-
+#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
+  if (pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR)
+  {
+    READ_FLAG(uiCode, "no_output_of_prior_pics_flag");   pcSlice->setNoOutputOfPriorPicsFlag(uiCode != 0);
+  }
+#endif
   // inherit values from picture header
   //   set default values in case slice overrides are disabled
   pcSlice->inheritFromPicHeader(picHeader, pps, sps);
