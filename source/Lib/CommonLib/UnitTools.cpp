@@ -1411,10 +1411,12 @@ bool PU::checkDMVRCondition(const PredictionUnit& pu)
     const WPScalingParam *wp0 = pu.cu->slice->getWpScaling(REF_PIC_LIST_0, refIdx0);
     const WPScalingParam *wp1 = pu.cu->slice->getWpScaling(REF_PIC_LIST_1, refIdx1);
 
-    const bool ref0IsScaled =
-      refIdx0 < 0 ? false : pu.cu->slice->getRefPic(REF_PIC_LIST_0, refIdx0)->isRefScaled(pu.cs->pps);
-    const bool ref1IsScaled =
-      refIdx1 < 0 ? false : pu.cu->slice->getRefPic(REF_PIC_LIST_1, refIdx1)->isRefScaled(pu.cs->pps);
+    const bool ref0IsScaled = refIdx0 < 0 || refIdx0 >= MAX_NUM_REF
+                                ? false
+                                : pu.cu->slice->getRefPic(REF_PIC_LIST_0, refIdx0)->isRefScaled(pu.cs->pps);
+    const bool ref1IsScaled = refIdx1 < 0 || refIdx1 >= MAX_NUM_REF
+                                ? false
+                                : pu.cu->slice->getRefPic(REF_PIC_LIST_1, refIdx1)->isRefScaled(pu.cs->pps);
 
     return pu.mergeFlag && pu.mergeType == MRG_TYPE_DEFAULT_N && !pu.ciipFlag && !pu.cu->affine && !pu.mmvdMergeFlag
            && !pu.cu->mmvdSkip && PU::isBiPredFromDifferentDirEqDistPoc(pu) && (pu.lheight() >= 8) && (pu.lwidth() >= 8)
