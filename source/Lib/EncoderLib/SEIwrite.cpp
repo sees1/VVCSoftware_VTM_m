@@ -819,6 +819,9 @@ void SEIWriter::xWriteSEISubpictureLevelInfo(const SEISubpicureLevelInfo &sei)
   {
     for (int i = 0; i < sei.m_numRefLevels; i++)
     {
+#if JVET_S0098_SLI_FRACTION
+      WRITE_CODE((uint32_t)sei.m_nonSubpicLayersFraction[i][k], 8, "sli_non_subpic_layers_fraction[i][k]");
+#endif
       WRITE_CODE((uint32_t)sei.m_refLevelIdc[i][k], 8, "sli_ref_level_idc[i][k]");
       if (sei.m_explicitFractionPresentFlag)
       {

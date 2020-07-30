@@ -662,6 +662,9 @@ public:
 #if JVET_S0176_SLI_SEI
   int       m_sliMaxSublayers;
   bool      m_sliSublayerInfoPresentFlag;
+#if JVET_S0098_SLI_FRACTION
+  std::vector<std::vector<int>>              m_nonSubpicLayersFraction;
+#endif
   std::vector<std::vector<Level::Name>>      m_refLevelIdc;
   std::vector<std::vector<std::vector<int>>> m_refLevelFraction;
 #else

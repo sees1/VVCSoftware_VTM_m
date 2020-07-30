@@ -106,6 +106,8 @@
 
 #define JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT                1 // JVET-S0071 : shortcut when all subpictures have the same size
 
+#define JVET_S0098_SLI_FRACTION                           1 // JVET-S0098 Item 3: Add non_subpic_layers_fraction syntax element
+
 #define JVET_S0048_SCALING_OFFSET                         1 // JVET-S0048 Aspect2: change the constraint on the value ranges of scaling window offsets to be more flexible
 
 #define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.

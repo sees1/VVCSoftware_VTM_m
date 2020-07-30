@@ -698,9 +698,15 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
   sei->m_explicitFractionPresentFlag = cfgSubPicLevel.m_explicitFraction;
 
   // sei parameters initialization
+#if JVET_S0098_SLI_FRACTION
+  sei->m_nonSubpicLayersFraction.resize(sei->m_numRefLevels);
+#endif
   sei->m_refLevelIdc.resize(sei->m_numRefLevels);
   for (int level = 0; level < sei->m_numRefLevels; level++)
   {
+#if JVET_S0098_SLI_FRACTION
+    sei->m_nonSubpicLayersFraction[level].resize(sei->m_sliMaxSublayers);
+#endif
     sei->m_refLevelIdc[level].resize(sei->m_sliMaxSublayers);
     for (int sublayer = 0; sublayer < sei->m_sliMaxSublayers; sublayer++)
     {
@@ -729,6 +735,9 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
   {
     for (int level = 0; level < sei->m_numRefLevels; level++)
     {
+#if JVET_S0098_SLI_FRACTION
+      sei->m_nonSubpicLayersFraction[level][sublayer] = cfgSubPicLevel.m_nonSubpicLayersFraction[cnta];
+#endif
       sei->m_refLevelIdc[level][sublayer] = cfgSubPicLevel.m_refLevels[cnta++];
       if (sei->m_explicitFractionPresentFlag)
       {
@@ -747,6 +756,9 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
     {
       for (int level = 0; level < sei->m_numRefLevels; level++)
       {
+#if JVET_S0098_SLI_FRACTION
+        sei->m_nonSubpicLayersFraction[level][sublayer] = sei->m_nonSubpicLayersFraction[level][sei->m_sliMaxSublayers - 1];
+#endif
         sei->m_refLevelIdc[level][sublayer] = sei->m_refLevelIdc[level][sei->m_sliMaxSublayers - 1];
         if (sei->m_explicitFractionPresentFlag)
         {
