@@ -50,7 +50,9 @@
 #include "VLCWriter.h"
 
 #include "SEIread.h"
-
+#if JVET_R0294_SUBPIC_HASH
+#include "SEIwrite.h"
+#endif
 class BitstreamExtractorApp : public BitstreamExtractorAppCfg
 {
 
@@ -73,6 +75,9 @@ protected:
   bool xCheckSliceSubpicture(InputNALUnit &nalu, int subPicId);
 #endif
   void xReadPicHeader(InputNALUnit &nalu);
+#if JVET_R0294_SUBPIC_HASH
+  bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out);
+#endif
 
   void xSetSPSUpdated(int spsId)   { return m_updatedSPSList.push_back(spsId); }
   bool xIsSPSUpdate(int spsId)     { return (std::find(m_updatedSPSList.begin(),m_updatedSPSList.end(), spsId) != m_updatedSPSList.end()); }
@@ -88,6 +93,11 @@ protected:
   HLSyntaxReader        m_hlSynaxReader;
   HLSWriter             m_hlSyntaxWriter;
   SEIReader             m_seiReader;
+#if JVET_R0294_SUBPIC_HASH
+  SEIWriter             m_seiWriter;
+  HRD                   m_hrd;
+#endif
+
   int                   m_vpsId;
   bool                  m_removeTimingSEI;
 

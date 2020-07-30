@@ -3767,7 +3767,18 @@ SEI messages.
 \begin{OptionTableNoShorthand}{Scalable nesting SEI message encoder parameters}{tab:sei-scalable-nesting}
 \Option{SEIScalableNesting} &
 \Default{0} &
-Enables or disables the use of the scalable nesting SEI messages.
+Enables creation of scalable nesting SEI messages for buffering period and picture timing SEI messages.
+\\
+\Option{SubpicDecodedPictureHash} &
+\Default{0} &
+Enables creation of decoded picture hash SEI messages for each subpicture and writes these in scalable nesting SEI messages.
+\par
+\begin{tabular}{cp{0.35\textwidth}}
+  0 & Disabled \\
+  1 & MD5 \\
+  2 & CRCs \\
+  3 & checksum \\
+\end{tabular}
 \\
 \end{OptionTableNoShorthand}
 
