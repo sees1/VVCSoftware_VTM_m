@@ -2472,7 +2472,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
   while (m_pcBitstream->getNumBitsUntilByteAligned())
   {
 #if JVET_S0138_GCI_PTL
-  READ_FLAG( uiCode, "vps_ptl_reserved_zero_bit");
+    READ_FLAG( uiCode, "vps_ptl_reserved_zero_bit");
 #else
     READ_FLAG( uiCode, "vps_ptl_alignment_zero_bit");
 #endif
