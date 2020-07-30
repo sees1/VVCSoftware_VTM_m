@@ -272,6 +272,9 @@ class ConstraintInfo
   bool              m_noVirtualBoundaryConstraintFlag;
 #endif
   bool              m_noQtbttDualTreeIntraConstraintFlag;
+#if JVET_S0066_GCI
+  int               m_maxLog2CtuSizeConstraintIdc;
+#endif
   bool              m_noPartitionConstraintsOverrideConstraintFlag;
   bool              m_noSaoConstraintFlag;
   bool              m_noAlfConstraintFlag;
@@ -292,6 +295,9 @@ class ConstraintInfo
   bool              m_noGeoConstraintFlag;
   bool              m_noLadfConstraintFlag;
   bool              m_noTransformSkipConstraintFlag;
+#if JVET_S0066_GCI
+  bool              m_noLumaTransformSize64ConstraintFlag;
+#endif
   bool              m_noBDPCMConstraintFlag;
   bool              m_noJointCbCrConstraintFlag;
   bool              m_noQpDeltaConstraintFlag;
@@ -353,6 +359,9 @@ public:
     , m_noVirtualBoundaryConstraintFlag(false)
 #endif
     , m_noQtbttDualTreeIntraConstraintFlag(false)
+#if JVET_S0066_GCI
+    , m_maxLog2CtuSizeConstraintIdc(8)
+#endif
     , m_noPartitionConstraintsOverrideConstraintFlag(false)
     , m_noSaoConstraintFlag      (false)
     , m_noAlfConstraintFlag      (false)
@@ -373,6 +382,9 @@ public:
     , m_noGeoConstraintFlag      (false)
     , m_noLadfConstraintFlag     (false)
     , m_noTransformSkipConstraintFlag(false)
+#if JVET_S0066_GCI
+    , m_noLumaTransformSize64ConstraintFlag(false)
+#endif
     , m_noBDPCMConstraintFlag    (false)
     , m_noJointCbCrConstraintFlag (false)
     , m_noQpDeltaConstraintFlag  (false)
@@ -470,6 +482,10 @@ public:
 #endif
   bool          getNoQtbttDualTreeIntraConstraintFlag() const { return m_noQtbttDualTreeIntraConstraintFlag; }
   void          setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_noQtbttDualTreeIntraConstraintFlag = bVal; }
+#if JVET_S0066_GCI
+  int           getMaxLog2CtuSizeConstraintIdc() const { return m_maxLog2CtuSizeConstraintIdc; }
+  void          setMaxLog2CtuSizeConstraintIdc(int idc) { m_maxLog2CtuSizeConstraintIdc = idc; }
+#endif
   bool          getNoPartitionConstraintsOverrideConstraintFlag() const { return m_noPartitionConstraintsOverrideConstraintFlag; }
   void          setNoPartitionConstraintsOverrideConstraintFlag(bool bVal) { m_noPartitionConstraintsOverrideConstraintFlag = bVal; }
   bool          getNoSaoConstraintFlag() const { return m_noSaoConstraintFlag; }
@@ -512,6 +528,10 @@ public:
   void          setNoLadfConstraintFlag(bool bVal) { m_noLadfConstraintFlag = bVal; }
   bool          getNoTransformSkipConstraintFlag() const { return m_noTransformSkipConstraintFlag; }
   void          setNoTransformSkipConstraintFlag(bool bVal) { m_noTransformSkipConstraintFlag = bVal; }
+#if JVET_S0066_GCI
+  bool          getNoLumaTransformSize64ConstraintFlag() const { return m_noLumaTransformSize64ConstraintFlag; }
+  void          setNoLumaTransformSize64ConstraintFlag(bool bVal) { m_noLumaTransformSize64ConstraintFlag = bVal; }
+#endif
   bool          getNoBDPCMConstraintFlag() const { return m_noBDPCMConstraintFlag; }
   void          setNoBDPCMConstraintFlag(bool bVal) { m_noBDPCMConstraintFlag = bVal; }
   bool          getNoQpDeltaConstraintFlag() const { return m_noQpDeltaConstraintFlag; }
