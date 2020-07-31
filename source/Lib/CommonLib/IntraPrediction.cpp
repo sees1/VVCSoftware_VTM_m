@@ -112,7 +112,6 @@ void IntraPrediction::destroy()
 
 void IntraPrediction::init(ChromaFormat chromaFormatIDC, const unsigned bitDepthY)
 {
-
   if (m_yuvExt2[COMPONENT_Y][0] != nullptr && m_currChromaFormat != chromaFormatIDC)
   {
     destroy();
@@ -211,7 +210,6 @@ void IntraPrediction::setReferenceArrayLengths( const CompArea &area )
 
   m_leftRefLength     = (height << 1);
   m_topRefLength      = (width << 1);
-
 }
 
 void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf &piPred, const PredictionUnit &pu)
@@ -348,6 +346,7 @@ void IntraPrediction::xPredIntraPlanar( const CPelBuf &pSrc, PelBuf &pDst )
     }
   }
 }
+
 void IntraPrediction::xPredIntraDc( const CPelBuf &pSrc, PelBuf &pDst, const ChannelType channelType, const bool enableBoundaryFilter )
 {
   const Pel dcval = xGetPredValDc( pSrc, pDst );
@@ -722,6 +721,7 @@ void IntraPrediction::geneWeightedPred(const ComponentID compId, PelBuf &pred, c
     }
   }
 }
+
 void IntraPrediction::switchBuffer(const PredictionUnit &pu, ComponentID compID, PelBuf srcBuff, Pel *dst)
 {
   Pel  *src = srcBuff.bufAt(0, 0);
@@ -750,14 +750,14 @@ void IntraPrediction::geneIntrainterPred(const CodingUnit &cu)
   if (isChromaEnabled(pu->chromaFormat))
   {
     maxCompID = MAX_NUM_COMPONENT;
-  if (pu->chromaSize().width > 2)
-  {
-    initIntraPatternChType(cu, pu->Cb());
-    predIntraAng(COMPONENT_Cb, cu.cs->getPredBuf(*pu).Cb(), *pu);
+    if (pu->chromaSize().width > 2)
+    {
+      initIntraPatternChType(cu, pu->Cb());
+      predIntraAng(COMPONENT_Cb, cu.cs->getPredBuf(*pu).Cb(), *pu);
 
-    initIntraPatternChType(cu, pu->Cr());
-    predIntraAng(COMPONENT_Cr, cu.cs->getPredBuf(*pu).Cr(), *pu);
-  }
+      initIntraPatternChType(cu, pu->Cr());
+      predIntraAng(COMPONENT_Cr, cu.cs->getPredBuf(*pu).Cr(), *pu);
+    }
   }
   for (int currCompID = 0; currCompID < maxCompID; currCompID++)
   {
@@ -838,7 +838,6 @@ void IntraPrediction::initIntraPatternChTypeISP(const CodingUnit& cu, const Comp
   }
   else
   {
-
     m_topRefLength = cu.blocks[area.compID].width + area.width;
     m_leftRefLength = cu.blocks[area.compID].height + area.height;
 
@@ -907,7 +906,6 @@ void IntraPrediction::initIntraPatternChTypeISP(const CodingUnit& cu, const Comp
         *dst = sample;
         dst++;
       }
-
     }
   }
   // ----- Step 2: filtered reference samples -----
@@ -975,11 +973,13 @@ void IntraPrediction::xFillReferenceSamples( const CPelBuf &recoBuf, Pel* refBuf
   const Pel*  ptrSrc;
   const Pel   valueDC   = 1 << (sps.getBitDepth( chType ) - 1);
 
-
   if( numIntraNeighbor == 0 )
   {
     // Fill border with DC value
-    for (int j = 0; j <= predSize + multiRefIdx; j++) { ptrDst[j] = valueDC; }
+    for (int j = 0; j <= predSize + multiRefIdx; j++)
+    {
+      ptrDst[j] = valueDC;
+    }
     for (int i = 0; i <= predHSize + multiRefIdx; i++)
     {
       ptrDst[i + predStride] = valueDC;
@@ -989,7 +989,10 @@ void IntraPrediction::xFillReferenceSamples( const CPelBuf &recoBuf, Pel* refBuf
   {
     // Fill top-left border and top and top right with rec. samples
     ptrSrc = srcBuf - (1 + multiRefIdx) * srcStride - (1 + multiRefIdx);
-    for (int j = 0; j <= predSize + multiRefIdx; j++) { ptrDst[j] = ptrSrc[j]; }
+    for (int j = 0; j <= predSize + multiRefIdx; j++)
+    {
+      ptrDst[j] = ptrSrc[j];
+    }
     for (int i = 0; i <= predHSize + multiRefIdx; i++)
     {
       ptrDst[i + predStride] = ptrSrc[i * srcStride];
@@ -1166,8 +1169,7 @@ void IntraPrediction::xFillReferenceSamples( const CPelBuf &recoBuf, Pel* refBuf
 }
 
 void IntraPrediction::xFilterReferenceSamples(const Pel *refBufUnfiltered, Pel *refBufFiltered, const CompArea &area,
-                                              const SPS &sps, int multiRefIdx
-)
+                                              const SPS &sps, int multiRefIdx)
 {
   if (area.compID != COMPONENT_Y)
   {
@@ -1390,13 +1392,13 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
   memset(bNeighborFlags, 0, totalUnits);
   bool aboveIsAvailable, leftIsAvailable;
 
-  int availlableUnit = isLeftAvailable( isChroma( pu.chType ) ? cu : lumaCU, toChannelType( area.compID ), area.pos(), iLeftUnits, iUnitHeight,
-  ( bNeighborFlags + iLeftUnits + leftBelowUnits - 1 ) );
+  int availlableUnit = isLeftAvailable(isChroma(pu.chType) ? cu : lumaCU, toChannelType(area.compID), area.pos(),
+                                       iLeftUnits, iUnitHeight, (bNeighborFlags + iLeftUnits + leftBelowUnits - 1));
 
   leftIsAvailable = availlableUnit == iTUHeightInUnits;
 
-  availlableUnit = isAboveAvailable( isChroma( pu.chType ) ? cu : lumaCU, toChannelType( area.compID ), area.pos(), iAboveUnits, iUnitWidth,
-  ( bNeighborFlags + iLeftUnits + leftBelowUnits + 1 ) );
+  availlableUnit = isAboveAvailable(isChroma(pu.chType) ? cu : lumaCU, toChannelType(area.compID), area.pos(),
+                                    iAboveUnits, iUnitWidth, (bNeighborFlags + iLeftUnits + leftBelowUnits + 1));
 
   aboveIsAvailable = availlableUnit == iTUWidthInUnits;
 
@@ -1662,7 +1664,6 @@ void IntraPrediction::xGetLMParameters(const PredictionUnit &pu, const Component
   srcColor0 = temp.bufAt(0, 0);
   curChroma0 = getPredictorPtr(compID);
 
-
   unsigned internalBitDepth = sps.getBitDepth(CHANNEL_TYPE_CHROMA);
 
   int minLuma[2] = {  MAX_INT, 0 };
@@ -1743,10 +1744,22 @@ void IntraPrediction::xGetLMParameters(const PredictionUnit &pu, const Component
   int maxGrpIdx[2] = { 1, 3 };
   int *tmpMinGrp = minGrpIdx;
   int *tmpMaxGrp = maxGrpIdx;
-  if (selectLumaPix[tmpMinGrp[0]] > selectLumaPix[tmpMinGrp[1]]) std::swap(tmpMinGrp[0], tmpMinGrp[1]);
-  if (selectLumaPix[tmpMaxGrp[0]] > selectLumaPix[tmpMaxGrp[1]]) std::swap(tmpMaxGrp[0], tmpMaxGrp[1]);
-  if (selectLumaPix[tmpMinGrp[0]] > selectLumaPix[tmpMaxGrp[1]]) std::swap(tmpMinGrp, tmpMaxGrp);
-  if (selectLumaPix[tmpMinGrp[1]] > selectLumaPix[tmpMaxGrp[0]]) std::swap(tmpMinGrp[1], tmpMaxGrp[0]);
+  if (selectLumaPix[tmpMinGrp[0]] > selectLumaPix[tmpMinGrp[1]])
+  {
+    std::swap(tmpMinGrp[0], tmpMinGrp[1]);
+  }
+  if (selectLumaPix[tmpMaxGrp[0]] > selectLumaPix[tmpMaxGrp[1]])
+  {
+    std::swap(tmpMaxGrp[0], tmpMaxGrp[1]);
+  }
+  if (selectLumaPix[tmpMinGrp[0]] > selectLumaPix[tmpMaxGrp[1]])
+  {
+    std::swap(tmpMinGrp, tmpMaxGrp);
+  }
+  if (selectLumaPix[tmpMinGrp[1]] > selectLumaPix[tmpMaxGrp[0]])
+  {
+    std::swap(tmpMinGrp[1], tmpMaxGrp[0]);
+  }
 
   minLuma[0] = (selectLumaPix[tmpMinGrp[0]] + selectLumaPix[tmpMinGrp[1]] + 1 )>>1;
   minLuma[1] = (selectChromaPix[tmpMinGrp[0]] + selectChromaPix[tmpMinGrp[1]] + 1) >> 1;
@@ -1848,6 +1861,7 @@ void IntraPrediction::predIntraMip( const ComponentID compId, PelBuf &piPred, co
     }
   }
 }
+
 void IntraPrediction::reorderPLT(CodingStructure& cs, Partitioner& partitioner, ComponentID compBegin, uint32_t numComp)
 {
   CodingUnit &cu = *cs.getCU(partitioner.chType);
@@ -1875,7 +1889,9 @@ void IntraPrediction::reorderPLT(CodingStructure& cs, Partitioner& partitioner, 
     for (curidx = 0; curidx < cu.curPLTSize[compBegin]; curidx++)
     {
       if( curPLTpred[curidx] )
+      {
         continue;
+      }
       bool matchTmp = true;
       for (int comp = compBegin; comp < (compBegin + numComp); comp++)
       {
@@ -1902,10 +1918,10 @@ void IntraPrediction::reorderPLT(CodingStructure& cs, Partitioner& partitioner, 
       }
       else
       {
-      for (int comp = compBegin; comp < (compBegin + numComp); comp++)
-      {
-        curPLTtmp[comp][reusePLTSizetmp] = cs.prevPLT.curPLT[comp][predidx];
-      }
+        for (int comp = compBegin; comp < (compBegin + numComp); comp++)
+        {
+          curPLTtmp[comp][reusePLTSizetmp] = cs.prevPLT.curPLT[comp][predidx];
+        }
       }
       reusePLTSizetmp++;
       pltSizetmp++;
@@ -1934,10 +1950,10 @@ void IntraPrediction::reorderPLT(CodingStructure& cs, Partitioner& partitioner, 
       }
       else
       {
-      for (int comp = compBegin; comp < (compBegin + numComp); comp++)
-      {
-        curPLTtmp[comp][pltSizetmp] = cu.curPLT[comp][curidx];
-      }
+        for (int comp = compBegin; comp < (compBegin + numComp); comp++)
+        {
+          curPLTtmp[comp][pltSizetmp] = cu.curPLT[comp][curidx];
+        }
       }
       pltSizetmp++;
     }
@@ -1954,10 +1970,10 @@ void IntraPrediction::reorderPLT(CodingStructure& cs, Partitioner& partitioner, 
     }
     else
     {
-    for (int comp = compBegin; comp < (compBegin + numComp); comp++)
-    {
-      cu.curPLT[comp][curidx] = curPLTtmp[comp][curidx];
-    }
+      for (int comp = compBegin; comp < (compBegin + numComp); comp++)
+      {
+        cu.curPLT[comp][curidx] = curPLTtmp[comp][curidx];
+      }
     }
   }
 }
