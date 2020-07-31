@@ -506,19 +506,21 @@ void InterpolationFilter::filterCopy( const ClpRng& clpRng, const Pel *src, int 
       }
     }
     else
-    for (row = 0; row < height; row++)
     {
-      for (col = 0; col < width; col++)
+      for (row = 0; row < height; row++)
       {
-        Pel val = src[ col ];
-        val = rightShift_round((val + IF_INTERNAL_OFFS), shift);
+        for (col = 0; col < width; col++)
+        {
+          Pel val = src[col];
+          val     = rightShift_round((val + IF_INTERNAL_OFFS), shift);
 
-        dst[col] = ClipPel( val, clpRng );
-        JVET_J0090_CACHE_ACCESS( &src[col], __FILE__, __LINE__ );
+          dst[col] = ClipPel(val, clpRng);
+          JVET_J0090_CACHE_ACCESS(&src[col], __FILE__, __LINE__);
+        }
+
+        src += srcStride;
+        dst += dstStride;
       }
-
-      src += srcStride;
-      dst += dstStride;
     }
   }
 }
@@ -790,7 +792,6 @@ void InterpolationFilter::filterHor(const ComponentID compID, Pel const *src, in
     else
     {
       filterHor<NTAPS_LUMA>( clpRng, src, srcStride, dst, dstStride, width, height, isLast, m_lumaFilter[frac], biMCForDMVR );
-
     }
   }
   else
