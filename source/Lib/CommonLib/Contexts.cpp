@@ -752,14 +752,6 @@ const CtxSet ContextSetCfg::SbtPosFlag = ContextSetCfg::addCtxSet
   {  13, },
 });
 
-const CtxSet ContextSetCfg::CrossCompPred = ContextSetCfg::addCtxSet
-({
-  { CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, },
-  { CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, },
-  { CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, CNU, },
-  { DWS, DWS, DWS, DWS, DWS, DWS, DWS, DWS, DWS, DWS, },
-});
-
 const CtxSet ContextSetCfg::ChromaQpAdjFlag = ContextSetCfg::addCtxSet
 ({
   { CNU, },

@@ -253,7 +253,6 @@ public:
   static const CtxSet   SbtQuadFlag;
   static const CtxSet   SbtHorFlag;
   static const CtxSet   SbtPosFlag;
-  static const CtxSet   CrossCompPred;
   static const CtxSet   ChromaQpAdjFlag;
   static const CtxSet   ChromaQpAdjIdc;
   static const CtxSet   ImvFlag;

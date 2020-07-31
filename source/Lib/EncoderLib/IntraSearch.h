@@ -44,7 +44,6 @@
 #include "EncCfg.h"
 
 #include "CommonLib/IntraPrediction.h"
-#include "CommonLib/CrossCompPrediction.h"
 #include "CommonLib/TrQuant.h"
 #include "CommonLib/Unit.h"
 #include "CommonLib/RdCost.h"
