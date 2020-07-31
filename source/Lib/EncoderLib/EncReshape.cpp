@@ -69,23 +69,41 @@ void  EncReshape::createEnc(int picWidth, int picHeight, uint32_t maxCUWidth, ui
   m_initCW = m_reshapeLUTSize / PIC_CODE_CW_BINS;
 
   if (m_fwdLUT.empty())
+  {
     m_fwdLUT.resize(m_reshapeLUTSize, 0);
+  }
   if (m_invLUT.empty())
+  {
     m_invLUT.resize(m_reshapeLUTSize,0);
+  }
   if (m_binCW.empty())
+  {
     m_binCW.resize(PIC_ANALYZE_CW_BINS);
+  }
   if (m_binImportance.empty())
+  {
     m_binImportance.resize(PIC_ANALYZE_CW_BINS);
+  }
   if (m_reshapePivot.empty())
+  {
     m_reshapePivot.resize(PIC_CODE_CW_BINS + 1, 0);
+  }
   if (m_inputPivot.empty())
+  {
     m_inputPivot.resize(PIC_CODE_CW_BINS + 1, 0);
+  }
   if (m_fwdScaleCoef.empty())
+  {
     m_fwdScaleCoef.resize(PIC_CODE_CW_BINS, 1 << FP_PREC);
+  }
   if (m_invScaleCoef.empty())
+  {
     m_invScaleCoef.resize(PIC_CODE_CW_BINS, 1 << FP_PREC);
+  }
   if (m_chromaAdjHelpLUT.empty())
+  {
     m_chromaAdjHelpLUT.resize(PIC_CODE_CW_BINS, 1<<CSCALE_FP_PREC);
+  }
 
   m_sliceReshapeInfo.setUseSliceReshaper(true);
   m_sliceReshapeInfo.setSliceReshapeChromaAdj(true);
@@ -121,8 +139,14 @@ void EncReshape::preAnalyzerHDR(Picture *pcPic, const SliceType sliceType, const
   if (m_lumaBD >= 10)
   {
     m_sliceReshapeInfo.sliceReshaperEnableFlag = true;
-      if (sliceType == I_SLICE )                                              { m_sliceReshapeInfo.sliceReshaperModelPresentFlag = true;  }
-      else                                                                    { m_sliceReshapeInfo.sliceReshaperModelPresentFlag = false; }
+    if (sliceType == I_SLICE)
+    {
+      m_sliceReshapeInfo.sliceReshaperModelPresentFlag = true;
+    }
+    else
+    {
+      m_sliceReshapeInfo.sliceReshaperModelPresentFlag = false;
+    }
     { m_sliceReshapeInfo.enableChromaAdj = 1;                   }
   }
   else
@@ -360,7 +384,9 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
   for (int b = 0; b < m_binNum; b++)
   {
     if (stats.meanBinVar > 0.0)
+    {
       stats.normVar[b] = stats.binVar[b] / stats.meanBinVar;
+    }
     stats.weightVar += stats.binHist[b] * stats.binVar[b];
     stats.weightNorm += stats.binHist[b] * stats.normVar[b];
   }
@@ -389,29 +415,30 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
     const int strideC = picU.stride;
     double avgU = 0.0, avgV = 0.0;
     double varU = 0.0, varV = 0.0;
-  for (int y = 0; y < heightC; y++)
-  {
-    for (int x = 0; x < widthC; x++)
+    for (int y = 0; y < heightC; y++)
     {
-      avgU += picU.buf[x];
-      avgV += picV.buf[x];
-      varU += picU.buf[x] * picU.buf[x];
-      varV += picV.buf[x] * picV.buf[x];
+      for (int x = 0; x < widthC; x++)
+      {
+        avgU += picU.buf[x];
+        avgV += picV.buf[x];
+        varU += picU.buf[x] * picU.buf[x];
+        varV += picV.buf[x] * picV.buf[x];
+      }
+      picU.buf += strideC;
+      picV.buf += strideC;
     }
-    picU.buf += strideC;
-    picV.buf += strideC;
-  }
-  avgU = avgU / (widthC * heightC);
-  avgV = avgV / (widthC * heightC);
-  varU = varU / (widthC * heightC) - avgU * avgU;
-  varV = varV / (widthC * heightC) - avgV * avgV;
-  if (varY > 0)
-  {
-    stats.ratioStdU = sqrt(varU) / sqrt(varY);
-    stats.ratioStdV = sqrt(varV) / sqrt(varY);
-  }
+    avgU = avgU / (widthC * heightC);
+    avgV = avgV / (widthC * heightC);
+    varU = varU / (widthC * heightC) - avgU * avgU;
+    varV = varV / (widthC * heightC) - avgV * avgV;
+    if (varY > 0)
+    {
+      stats.ratioStdU = sqrt(varU) / sqrt(varY);
+      stats.ratioStdV = sqrt(varV) / sqrt(varY);
+    }
   }
 }
+
 void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, const SliceType sliceType, const ReshapeCW& reshapeCW)
 {
   m_sliceReshapeInfo.sliceReshaperModelPresentFlag = true;
@@ -431,7 +458,10 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
       m_sliceReshapeInfo.reshaperModelMinBinIdx = startBinIdx;
       m_sliceReshapeInfo.reshaperModelMaxBinIdx = endBinIdx;
       m_initCWAnalyze = m_lumaBD > 10 ? (binLen >> (m_lumaBD - 10)) : m_lumaBD < 10 ? (binLen << (10 - m_lumaBD)) : binLen;
-      for (int b = 0; b < m_binNum; b++) { m_binCW[b] = m_initCWAnalyze; }
+      for (int b = 0; b < m_binNum; b++)
+      {
+        m_binCW[b] = m_initCWAnalyze;
+      }
 
       m_reshape = true;
       m_useAdpCW = false;
@@ -446,37 +476,81 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
       bool isFlat = true;
       for (int b = 0; b < m_binNum; b++)
       {
-        if (m_srcSeqStats.binVar[b] > 0) { isFlat = false; }
+        if (m_srcSeqStats.binVar[b] > 0)
+        {
+          isFlat = false;
+        }
       }
-      if (isFlat) { intraAdp = false;  interAdp = false; }
+      if (isFlat)
+      {
+        intraAdp = false;
+        interAdp = false;
+      }
       if (m_binNum == PIC_CODE_CW_BINS)
       {
-        if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[m_binNum - 1]) > 0.005) { m_exceedSTD = true; }
-        if (m_srcSeqStats.binHist[m_binNum - 1] > 0.0003) { intraAdp = false;  interAdp = false; }
-        if (m_srcSeqStats.binHist[0] > 0.03) { intraAdp = false;  interAdp = false; }
+        if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[m_binNum - 1]) > 0.005)
+        {
+          m_exceedSTD = true;
+        }
+        if (m_srcSeqStats.binHist[m_binNum - 1] > 0.0003)
+        {
+          intraAdp = false;
+          interAdp = false;
+        }
+        if (m_srcSeqStats.binHist[0] > 0.03)
+        {
+          intraAdp = false;
+          interAdp = false;
+        }
       }
       else if (m_binNum == PIC_ANALYZE_CW_BINS)
       {
-        if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[1] + m_srcSeqStats.binHist[m_binNum - 2] + m_srcSeqStats.binHist[m_binNum - 1]) > 0.01) { m_exceedSTD = true; }
-        if ((m_srcSeqStats.binHist[m_binNum - 2] + m_srcSeqStats.binHist[m_binNum - 1]) > 0.0003) { intraAdp = false;  interAdp = false; }
-        if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[1]) > 0.03) { intraAdp = false;  interAdp = false; }
+        if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[1] + m_srcSeqStats.binHist[m_binNum - 2]
+             + m_srcSeqStats.binHist[m_binNum - 1])
+            > 0.01)
+        {
+          m_exceedSTD = true;
+        }
+        if ((m_srcSeqStats.binHist[m_binNum - 2] + m_srcSeqStats.binHist[m_binNum - 1]) > 0.0003)
+        {
+          intraAdp = false;
+          interAdp = false;
+        }
+        if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[1]) > 0.03)
+        {
+          intraAdp = false;
+          interAdp = false;
+        }
       }
       if (m_exceedSTD)
       {
         for (int i = 0; i < m_binNum; i++)
         {
-          if (m_srcSeqStats.binHist[i] > 0 && i < startBinIdx) { startBinIdx = i; }
-          if (m_srcSeqStats.binHist[i] > 0 && i > endBinIdx) { endBinIdx = i; }
+          if (m_srcSeqStats.binHist[i] > 0 && i < startBinIdx)
+          {
+            startBinIdx = i;
+          }
+          if (m_srcSeqStats.binHist[i] > 0 && i > endBinIdx)
+          {
+            endBinIdx = i;
+          }
         }
         m_sliceReshapeInfo.reshaperModelMinBinIdx = startBinIdx;
         m_sliceReshapeInfo.reshaperModelMaxBinIdx = endBinIdx;
       }
 
-      if ((m_srcSeqStats.ratioStdU + m_srcSeqStats.ratioStdV) > 1.5 && m_srcSeqStats.binHist[1] > 0.5) { intraAdp = false;  interAdp = false; }
+      if ((m_srcSeqStats.ratioStdU + m_srcSeqStats.ratioStdV) > 1.5 && m_srcSeqStats.binHist[1] > 0.5)
+      {
+        intraAdp = false;
+        interAdp = false;
+      }
       if (m_srcSeqStats.ratioStdU > 0.36 && m_srcSeqStats.ratioStdV > 0.2 && m_reshapeCW.rspPicSize > 5184000)
       {
         m_sliceReshapeInfo.enableChromaAdj = 0; m_chromaWeight = 1.05;
-        if ((m_srcSeqStats.ratioStdU + m_srcSeqStats.ratioStdV) < 0.69) { m_chromaWeight = 0.95; }
+        if ((m_srcSeqStats.ratioStdU + m_srcSeqStats.ratioStdV) < 0.69)
+        {
+          m_chromaWeight = 0.95;
+        }
       }
 
       if (interAdp)
@@ -485,8 +559,14 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
         {
           m_reshapeCW.binCW[0] = 0; m_reshapeCW.binCW[1] = m_reshapeCW.initialCW;
           m_rateAdpMode = m_reshapeCW.adpOption - 2 * (m_reshapeCW.adpOption / 2);
-          if (m_reshapeCW.adpOption == 2) { m_tcase = 9; }
-          else if (m_reshapeCW.adpOption > 2) { intraAdp = false; }
+          if (m_reshapeCW.adpOption == 2)
+          {
+            m_tcase = 9;
+          }
+          else if (m_reshapeCW.adpOption > 2)
+          {
+            intraAdp = false;
+          }
         }
         else if (signalType == RESHAPE_SIGNAL_SDR)
         {
@@ -499,20 +579,39 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
           {
             m_rateAdpMode = 0;  m_tcase = 9;
             m_reshapeCW.binCW[1] = 952;
-            if (m_srcSeqStats.meanBinVar < 2.5) { m_reshapeCW.binCW[1] = 840; }
+            if (m_srcSeqStats.meanBinVar < 2.5)
+            {
+              m_reshapeCW.binCW[1] = 840;
+            }
           }
           else
           {
             m_useAdpCW = true;
             m_rateAdpMode = 2;
-            if (m_binNum == PIC_CODE_CW_BINS) { m_reshapeCW.binCW[0] = 72;  m_reshapeCW.binCW[1] = 58; }
-            else if (m_binNum == PIC_ANALYZE_CW_BINS) { m_reshapeCW.binCW[0] = 36;  m_reshapeCW.binCW[1] = 30; }
-            if (m_srcSeqStats.meanBinVar < 2.5) { intraAdp = false; interAdp = false; }
+            if (m_binNum == PIC_CODE_CW_BINS)
+            {
+              m_reshapeCW.binCW[0] = 72;
+              m_reshapeCW.binCW[1] = 58;
+            }
+            else if (m_binNum == PIC_ANALYZE_CW_BINS)
+            {
+              m_reshapeCW.binCW[0] = 36;
+              m_reshapeCW.binCW[1] = 30;
+            }
+            if (m_srcSeqStats.meanBinVar < 2.5)
+            {
+              intraAdp = false;
+              interAdp = false;
+            }
           }
         }
       }
 
-      if (m_rateAdpMode == 2 && reshapeCW.rspBaseQP <= 22) { intraAdp = false; interAdp = false; }
+      if (m_rateAdpMode == 2 && reshapeCW.rspBaseQP <= 22)
+      {
+        intraAdp = false;
+        interAdp = false;
+      }
       m_sliceReshapeInfo.sliceReshaperEnableFlag = intraAdp;
       if (!intraAdp && !interAdp)
       {
@@ -525,8 +624,14 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
       {
         for (int i = 0; i < m_binNum; i++)
         {
-          if (i >= startBinIdx && i <= endBinIdx) { m_binCW[i] = m_initCWAnalyze + 2; }
-          else { m_binCW[i] = 0; }
+          if (i >= startBinIdx && i <= endBinIdx)
+          {
+            m_binCW[i] = m_initCWAnalyze + 2;
+          }
+          else
+          {
+            m_binCW[i] = 0;
+          }
         }
       }
       else if (m_useAdpCW)
@@ -542,8 +647,14 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
         deriveReshapeParameters(m_srcSeqStats.binVar, startBinIdx, endBinIdx, m_reshapeCW, alpha, beta);
         for (int i = 0; i < m_binNum; i++)
         {
-          if (i >= startBinIdx && i <= endBinIdx) { m_binCW[i] = (uint32_t)round(alpha*m_srcSeqStats.binVar[i] + beta); }
-          else { m_binCW[i] = 0; }
+          if (i >= startBinIdx && i <= endBinIdx)
+          {
+            m_binCW[i] = (uint32_t) round(alpha * m_srcSeqStats.binVar[i] + beta);
+          }
+          else
+          {
+            m_binCW[i] = 0;
+          }
         }
       }
       else
@@ -558,7 +669,10 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
   {
     m_sliceReshapeInfo.sliceReshaperModelPresentFlag = false;
     m_sliceReshapeInfo.enableChromaAdj = m_chromaAdj;
-    if (!m_reshape) { m_sliceReshapeInfo.sliceReshaperEnableFlag = false; }
+    if (!m_reshape)
+    {
+      m_sliceReshapeInfo.sliceReshaperEnableFlag = false;
+    }
     else
     {
       const int cTid = m_reshapeCW.rspTid;
@@ -586,7 +700,9 @@ void EncReshape::bubbleSortDsd(double* array, int * idx, int n)
       }
     }
     if (swapped == false)
+    {
       break;
+    }
   }
 }
 
@@ -594,8 +710,14 @@ void EncReshape::cwPerturbation(int startBinIdx, int endBinIdx, uint16_t maxCW)
 {
   for (int i = 0; i < m_binNum; i++)
   {
-    if (i >= startBinIdx && i <= endBinIdx) { m_binCW[i] = (uint32_t)round((double)maxCW / (endBinIdx - startBinIdx + 1)); }
-    else { m_binCW[i] = 0; }
+    if (i >= startBinIdx && i <= endBinIdx)
+    {
+      m_binCW[i] = (uint32_t) round((double) maxCW / (endBinIdx - startBinIdx + 1));
+    }
+    else
+    {
+      m_binCW[i] = 0;
+    }
   }
 
   double hist = 0.0;
@@ -607,10 +729,22 @@ void EncReshape::cwPerturbation(int startBinIdx, int endBinIdx, uint16_t maxCW)
       hist = m_srcSeqStats.binHist[i] > 0.4 ? 0.4 : m_srcSeqStats.binHist[i];
       delta1 = (uint16_t)(10.0 * hist + 0.5);
       delta2 = (uint16_t)(20.0 * hist + 0.5);
-      if (m_srcSeqStats.normVar[i] < 0.8) { m_binCW[i] = m_binCW[i] + delta2; }
-      else if (m_srcSeqStats.normVar[i] < 0.9) { m_binCW[i] = m_binCW[i] + delta1; }
-      if (m_srcSeqStats.normVar[i] > 1.2) { m_binCW[i] = m_binCW[i] - delta2; }
-      else if (m_srcSeqStats.normVar[i] > 1.1) { m_binCW[i] = m_binCW[i] - delta1; }
+      if (m_srcSeqStats.normVar[i] < 0.8)
+      {
+        m_binCW[i] = m_binCW[i] + delta2;
+      }
+      else if (m_srcSeqStats.normVar[i] < 0.9)
+      {
+        m_binCW[i] = m_binCW[i] + delta1;
+      }
+      if (m_srcSeqStats.normVar[i] > 1.2)
+      {
+        m_binCW[i] = m_binCW[i] - delta2;
+      }
+      else if (m_srcSeqStats.normVar[i] > 1.1)
+      {
+        m_binCW[i] = m_binCW[i] - delta1;
+      }
     }
   }
 }
@@ -619,7 +753,10 @@ void EncReshape::cwReduction(int startBinIdx, int endBinIdx)
   int bdShift = m_lumaBD - 10;
   int totCW = bdShift != 0 ? (bdShift > 0 ? m_reshapeLUTSize / (1 << bdShift) : m_reshapeLUTSize * (1 << (-bdShift))) : m_reshapeLUTSize;
   int maxAllowedCW = totCW - 1, usedCW = 0;
-  for (int i = 0; i < m_binNum; i++) { usedCW += m_binCW[i]; }
+  for (int i = 0; i < m_binNum; i++)
+  {
+    usedCW += m_binCW[i];
+  }
   if (usedCW > maxAllowedCW)
   {
     int deltaCW = usedCW - maxAllowedCW;
@@ -627,12 +764,22 @@ void EncReshape::cwReduction(int startBinIdx, int endBinIdx)
     int modCW = deltaCW - divCW * (endBinIdx - startBinIdx + 1);
     if (divCW > 0)
     {
-      for (int i = startBinIdx; i <= endBinIdx; i++) { m_binCW[i] -= divCW; }
+      for (int i = startBinIdx; i <= endBinIdx; i++)
+      {
+        m_binCW[i] -= divCW;
+      }
     }
     for (int i = startBinIdx; i <= endBinIdx; i++)
     {
-      if (modCW == 0)  break;
-      if (m_binCW[i] > 0) { m_binCW[i]--; modCW--; }
+      if (modCW == 0)
+      {
+        break;
+      }
+      if (m_binCW[i] > 0)
+      {
+        m_binCW[i]--;
+        modCW--;
+      }
     }
   }
 }
@@ -660,12 +807,24 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
   }
   bubbleSortDsd(binVarSortDsd, binIdxSortDsd, m_binNum);
   binVarSortDsdCDF[0] = m_srcSeqStats.binHist[binIdxSortDsd[0]];
-  for (int b = 1; b < m_binNum; b++) { binVarSortDsdCDF[b] = binVarSortDsdCDF[b - 1] + m_srcSeqStats.binHist[binIdxSortDsd[b]]; }
+  for (int b = 1; b < m_binNum; b++)
+  {
+    binVarSortDsdCDF[b] = binVarSortDsdCDF[b - 1] + m_srcSeqStats.binHist[binIdxSortDsd[b]];
+  }
   for (int b = 0; b < m_binNum - 1; b++)
   {
-    if (binVarSortDsd[b] > 3.4) { firstBinVarLessThanVal1 = b + 1; }
-    if (binVarSortDsd[b] > 2.8) { firstBinVarLessThanVal2 = b + 1; }
-    if (binVarSortDsd[b] > 2.5) { firstBinVarLessThanVal3 = b + 1; }
+    if (binVarSortDsd[b] > 3.4)
+    {
+      firstBinVarLessThanVal1 = b + 1;
+    }
+    if (binVarSortDsd[b] > 2.8)
+    {
+      firstBinVarLessThanVal2 = b + 1;
+    }
+    if (binVarSortDsd[b] > 2.5)
+    {
+      firstBinVarLessThanVal3 = b + 1;
+    }
   }
   percBinVarLessThenVal1 = binVarSortDsdCDF[firstBinVarLessThanVal1];
   percBinVarLessThenVal2 = binVarSortDsdCDF[firstBinVarLessThanVal2];
@@ -693,15 +852,23 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
     {
       m_rspSeqStats.nonZeroCnt++;
       m_rspSeqStats.meanBinVar += m_rspSeqStats.binVar[b];
-      if (m_rspSeqStats.binVar[b] > m_rspSeqStats.maxBinVar) { m_rspSeqStats.maxBinVar = m_rspSeqStats.binVar[b]; }
-      if (m_rspSeqStats.binVar[b] < m_rspSeqStats.minBinVar) { m_rspSeqStats.minBinVar = m_rspSeqStats.binVar[b]; }
+      if (m_rspSeqStats.binVar[b] > m_rspSeqStats.maxBinVar)
+      {
+        m_rspSeqStats.maxBinVar = m_rspSeqStats.binVar[b];
+      }
+      if (m_rspSeqStats.binVar[b] < m_rspSeqStats.minBinVar)
+      {
+        m_rspSeqStats.minBinVar = m_rspSeqStats.binVar[b];
+      }
     }
   }
   m_rspSeqStats.meanBinVar /= (double)m_rspSeqStats.nonZeroCnt;
   for (int b = 0; b < m_binNum; b++)
   {
     if (m_rspSeqStats.meanBinVar > 0.0)
+    {
       m_rspSeqStats.normVar[b] = m_rspSeqStats.binVar[b] / m_rspSeqStats.meanBinVar;
+    }
     m_rspSeqStats.weightVar += m_rspSeqStats.binHist[b] * m_rspSeqStats.binVar[b];
     m_rspSeqStats.weightNorm += m_rspSeqStats.binHist[b] * m_rspSeqStats.normVar[b];
   }
@@ -710,16 +877,42 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
 
   if ((m_srcSeqStats.binHist[0] + m_srcSeqStats.binHist[m_binNum - 1]) > 0.0001 && m_srcSeqStats.binHist[m_binNum - 2] < 0.001)
   {
-    if (percBinVarLessThenVal3 > 0.8 && percBinVarLessThenVal2 > 0.4 && m_srcSeqStats.binVar[m_binNum - 2] > 4.8) { isSkipCase = true; }
-    else if (percBinVarLessThenVal3 < 0.1 && percBinVarLessThenVal1 < 0.05 && m_srcSeqStats.binVar[m_binNum - 2] < 4.0) { isSkipCase = true; }
+    if (percBinVarLessThenVal3 > 0.8 && percBinVarLessThenVal2 > 0.4 && m_srcSeqStats.binVar[m_binNum - 2] > 4.8)
+    {
+      isSkipCase = true;
+    }
+    else if (percBinVarLessThenVal3 < 0.1 && percBinVarLessThenVal1 < 0.05 && m_srcSeqStats.binVar[m_binNum - 2] < 4.0)
+    {
+      isSkipCase = true;
+    }
   }
-  if (isSkipCase) { *intraAdp = false;  *interAdp = false;  return; }
+  if (isSkipCase)
+  {
+    *intraAdp = false;
+    *interAdp = false;
+    return;
+  }
 
-  if (m_reshapeCW.rspPicSize > 5184000) { isLowCase = true; }
-  else if (m_srcSeqStats.binVar[1] > 4.0) { isLowCase = true; }
-  else if (m_rspSeqStats.meanBinVar > 3.4 && ratioWeiVarNorm > 1.005 && ratioWeiVar > 1.02) { isLowCase = true; }
-  else if (m_rspSeqStats.meanBinVar > 3.1 && ratioWeiVarNorm > 1.005 && ratioWeiVar > 1.04) { isLowCase = true; }
-  else if (m_rspSeqStats.meanBinVar > 2.8 && ratioWeiVarNorm > 1.01 && ratioWeiVar > 1.04) { isLowCase = true; }
+  if (m_reshapeCW.rspPicSize > 5184000)
+  {
+    isLowCase = true;
+  }
+  else if (m_srcSeqStats.binVar[1] > 4.0)
+  {
+    isLowCase = true;
+  }
+  else if (m_rspSeqStats.meanBinVar > 3.4 && ratioWeiVarNorm > 1.005 && ratioWeiVar > 1.02)
+  {
+    isLowCase = true;
+  }
+  else if (m_rspSeqStats.meanBinVar > 3.1 && ratioWeiVarNorm > 1.005 && ratioWeiVar > 1.04)
+  {
+    isLowCase = true;
+  }
+  else if (m_rspSeqStats.meanBinVar > 2.8 && ratioWeiVarNorm > 1.01 && ratioWeiVar > 1.04)
+  {
+    isLowCase = true;
+  }
 
   if (m_reshapeCW.updateCtrl == 0)
   {
@@ -732,7 +925,10 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
       if (m_srcSeqStats.binHist[m_binNum - 2] > 0.05)
       {
         m_reshapeCW.binCW[1] = 896;
-        if (m_srcSeqStats.binVar[m_binNum - 2] < 1.2) { m_reshapeCW.binCW[1] = 938; }
+        if (m_srcSeqStats.binVar[m_binNum - 2] < 1.2)
+        {
+          m_reshapeCW.binCW[1] = 938;
+        }
       }
       else if (percBinVarLessThenVal2 < 0.8 && percBinVarLessThenVal3 == 1.0)
       {
@@ -767,7 +963,10 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
       m_rateAdpMode = 0;
       m_reshapeCW.binCW[1] = 1022;
     }
-    if (*intraAdp == true && m_rateAdpMode == 0) { m_tcase = 9; }
+    if (*intraAdp == true && m_rateAdpMode == 0)
+    {
+      m_tcase = 9;
+    }
   }
   else if (m_reshapeCW.updateCtrl == 1)
   {
@@ -808,7 +1007,10 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
     if (m_srcSeqStats.binHist[1] > 0.1 && (m_srcSeqStats.binVar[1] > 1.8 && m_srcSeqStats.binVar[1] < 3.0))
     {
       m_rateAdpMode = 1;
-      if (m_srcSeqStats.binVar[m_binNum - 2] > 1.2 && m_srcSeqStats.binVar[m_binNum - 2] < 4.0) { m_reshapeCW.binCW[1] = 784; }
+      if (m_srcSeqStats.binVar[m_binNum - 2] > 1.2 && m_srcSeqStats.binVar[m_binNum - 2] < 4.0)
+      {
+        m_reshapeCW.binCW[1] = 784;
+      }
     }
     else if (m_srcSeqStats.binHist[m_binNum - 2] < 0.001)
     {
@@ -845,9 +1047,15 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
         m_useAdpCW = false;
         m_rateAdpMode = 1;
         m_reshapeCW.binCW[1] = 896;
-        if (m_srcSeqStats.binHist[1] > 0.005) { m_rateAdpMode = 0; }
+        if (m_srcSeqStats.binHist[1] > 0.005)
+        {
+          m_rateAdpMode = 0;
+        }
       }
-      else if (percBinVarLessThenVal2 < 0.8 && percBinVarLessThenVal3 == 1.0) { m_reshapeCW.binCW[1] = 28; }
+      else if (percBinVarLessThenVal2 < 0.8 && percBinVarLessThenVal3 == 1.0)
+      {
+        m_reshapeCW.binCW[1] = 28;
+      }
     }
     if (m_srcSeqStats.binHist[1] > 0.1 && m_srcSeqStats.binVar[1] > 1.8 && m_srcSeqStats.binVar[1] < 3.0)
     {
@@ -886,7 +1094,10 @@ void EncReshape::deriveReshapeParametersSDR(bool *intraAdp, bool *interAdp)
       m_rateAdpMode = 0;
       m_reshapeCW.binCW[0] = 34;
     }
-    if (m_useAdpCW && !isLowCase) { m_reshapeCW.binCW[1] = 66 - m_reshapeCW.binCW[0]; }
+    if (m_useAdpCW && !isLowCase)
+    {
+      m_reshapeCW.binCW[1] = 66 - m_reshapeCW.binCW[0];
+    }
   }
 }
 
@@ -895,8 +1106,14 @@ void EncReshape::deriveReshapeParameters(double *array, int start, int end, Resh
   double minVar = 10.0, maxVar = 0.0;
   for (int b = start; b <= end; b++)
   {
-    if (array[b] < minVar)       minVar = array[b];
-    if (array[b] > maxVar)       maxVar = array[b];
+    if (array[b] < minVar)
+    {
+      minVar = array[b];
+    }
+    if (array[b] > maxVar)
+    {
+      maxVar = array[b];
+    }
   }
   double maxCW = (double)respCW.binCW[0];
   double minCW = (double)respCW.binCW[1];
@@ -921,11 +1138,23 @@ void EncReshape::initLUTfromdQPModel()
     lumaDQP = lumaDQP<-3 ? -3 : (lumaDQP>6 ? 6 : lumaDQP);
     slopeLUT[i] = pow(2.0, lumaDQP / 6.0);
   }
-  for (int i = 0; i < (16 << (m_lumaBD - 8)); i++) { slopeLUT[i] = 0.0; }
-  for (int i = (235 << (m_lumaBD - 8)); i < m_reshapeLUTSize; i++) { slopeLUT[i] = 0.0; }
+  for (int i = 0; i < (16 << (m_lumaBD - 8)); i++)
+  {
+    slopeLUT[i] = 0.0;
+  }
+  for (int i = (235 << (m_lumaBD - 8)); i < m_reshapeLUTSize; i++)
+  {
+    slopeLUT[i] = 0.0;
+  }
   for (int i = 0; i < m_reshapeLUTSize - 1; i++)
+  {
     fwdLUTHighPrec[i + 1] = fwdLUTHighPrec[i] + slopeLUT[i];
-  if (slopeLUT != nullptr) { delete[] slopeLUT;    slopeLUT = nullptr; }
+  }
+  if (slopeLUT != nullptr)
+  {
+    delete[] slopeLUT;
+    slopeLUT = nullptr;
+  }
 
   double maxY = fwdLUTHighPrec[m_reshapeLUTSize - 1];
   for (int i = 0; i < m_reshapeLUTSize; i++)
@@ -933,7 +1162,11 @@ void EncReshape::initLUTfromdQPModel()
     m_fwdLUT[i] = (int16_t)((fwdLUTHighPrec[i] / maxY * (double)(m_reshapeLUTSize - 1)) + 0.5);
   }
 
-  if (fwdLUTHighPrec != nullptr)   {    delete[] fwdLUTHighPrec;    fwdLUTHighPrec = nullptr;  }
+  if (fwdLUTHighPrec != nullptr)
+  {
+    delete[] fwdLUTHighPrec;
+    fwdLUTHighPrec = nullptr;
+  }
   m_sliceReshapeInfo.reshaperModelMinBinIdx = 1;
   m_sliceReshapeInfo.reshaperModelMaxBinIdx = PIC_CODE_CW_BINS-2;
 
@@ -961,7 +1194,10 @@ void EncReshape::initLUTfromdQPModel()
     deltaCW = (int)m_binCW[i] - (int)m_initCW;
     m_sliceReshapeInfo.reshaperModelBinCWDelta[i] = deltaCW;
     absDeltaCW = (deltaCW < 0) ? (-deltaCW) : deltaCW;
-    if (absDeltaCW > maxAbsDeltaCW)     {      maxAbsDeltaCW = absDeltaCW;    }
+    if (absDeltaCW > maxAbsDeltaCW)
+    {
+      maxAbsDeltaCW = absDeltaCW;
+    }
   }
   m_sliceReshapeInfo.maxNbitsNeededDeltaCW = std::max(1, 1 + floorLog2(maxAbsDeltaCW));
 
@@ -1046,7 +1282,10 @@ void EncReshape::constructReshaperLMCS()
     deltaCW = (int)m_binCW[i] - (int)m_initCW;
     m_sliceReshapeInfo.reshaperModelBinCWDelta[i] = deltaCW;
     absDeltaCW = (deltaCW < 0) ? (-deltaCW) : deltaCW;
-    if (absDeltaCW > maxAbsDeltaCW) { maxAbsDeltaCW = absDeltaCW; }
+    if (absDeltaCW > maxAbsDeltaCW)
+    {
+      maxAbsDeltaCW = absDeltaCW;
+    }
   }
   m_sliceReshapeInfo.maxNbitsNeededDeltaCW = std::max(1, 1 + floorLog2(maxAbsDeltaCW));
 
@@ -1140,7 +1379,9 @@ void EncReshape::adjustLmcsPivot()
             adjustVal = 0;
           }
           if (adjustVal == 0)
+          {
             break;
+          }
         }
       }
     }
