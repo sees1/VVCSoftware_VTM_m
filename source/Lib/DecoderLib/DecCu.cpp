@@ -37,7 +37,6 @@
 
 #include "DecCu.h"
 
-#include "CommonLib/CrossCompPrediction.h"
 #include "CommonLib/InterPrediction.h"
 #include "CommonLib/IntraPrediction.h"
 #include "CommonLib/Picture.h"

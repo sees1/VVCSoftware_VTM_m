@@ -40,7 +40,6 @@
 #include "UnitTools.h"
 #include "ContextModelling.h"
 #include "CodingStructure.h"
-#include "CrossCompPrediction.h"
 
 #include "dtrace_buffer.h"
 

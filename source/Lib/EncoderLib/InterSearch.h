@@ -44,7 +44,6 @@
 
 #include "CommonLib/MotionInfo.h"
 #include "CommonLib/InterPrediction.h"
-#include "CommonLib/CrossCompPrediction.h"
 #include "CommonLib/TrQuant.h"
 #include "CommonLib/Unit.h"
 #include "CommonLib/UnitPartitioner.h"
