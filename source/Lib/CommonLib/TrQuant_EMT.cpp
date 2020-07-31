@@ -126,18 +126,6 @@ void fastInverseDCT2_B2(const TCoeff *src, TCoeff *dst, int shift, int line, int
   {
     memset(dst, 0, (iSkipLine << 1) * sizeof(TCoeff));
   }
-
-  /*TCoeff add = (shift > 0) ? (1 << (shift - 1)) : 0;
-
-  #define T(a,b)    ( (TCoeff)( g_aiT2[ TRANSFORM_INVERSE ][ a ][ b ] ) * src[ a * line ] )
-
-  for (int j = 0; j < line; j++, src++, dst += 2)
-  {
-  dst[0] = Clip3(outputMinimum, outputMaximum, (T(0, 0) + T(1, 0) + add) >> shift);
-  dst[1] = Clip3(outputMinimum, outputMaximum, (T(0, 1) + T(1, 1) + add) >> shift);
-  }
-
-  #undef  T*/
 }
 
 /** 4x4 forward transform implemented using partial butterfly structure (1D)
@@ -608,8 +596,6 @@ void fastInverseDCT2_B16( const TCoeff *src, TCoeff *dst, int shift, int line, i
     memset( dst, 0, ( iSkipLine << 4 ) * sizeof( TCoeff ) );
   }
 }
-
-
 
 /** 32x32 forward transform implemented using partial butterfly structure (1D)
 *  \param src   input data (residual)

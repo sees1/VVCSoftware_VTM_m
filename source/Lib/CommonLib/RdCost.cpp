@@ -1918,7 +1918,6 @@ Distortion RdCost::xGetSSE16( const DistParam &rcDtParam )
 
   for( ; iRows != 0; iRows-- )
   {
-
     iTemp = piOrg[ 0] - piCur[ 0]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
     iTemp = piOrg[ 1] - piCur[ 1]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
     iTemp = piOrg[ 2] - piCur[ 2]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
@@ -1965,7 +1964,6 @@ Distortion RdCost::xGetSSE16N( const DistParam &rcDtParam )
   {
     for (int n = 0; n < iCols; n+=16 )
     {
-
       iTemp = piOrg[n+ 0] - piCur[n+ 0]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
       iTemp = piOrg[n+ 1] - piCur[n+ 1]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
       iTemp = piOrg[n+ 2] - piCur[n+ 2]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
@@ -1982,7 +1980,6 @@ Distortion RdCost::xGetSSE16N( const DistParam &rcDtParam )
       iTemp = piOrg[n+13] - piCur[n+13]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
       iTemp = piOrg[n+14] - piCur[n+14]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
       iTemp = piOrg[n+15] - piCur[n+15]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
-
     }
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -2012,7 +2009,6 @@ Distortion RdCost::xGetSSE32( const DistParam &rcDtParam )
 
   for( ; iRows != 0; iRows-- )
   {
-
     iTemp = piOrg[ 0] - piCur[ 0]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
     iTemp = piOrg[ 1] - piCur[ 1]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
     iTemp = piOrg[ 2] - piCur[ 2]; uiSum += Distortion(( iTemp * iTemp ) >> uiShift);
@@ -2962,24 +2958,14 @@ void RdCost::saveUnadjustedLambda()
 
 void RdCost::initLumaLevelToWeightTable()
 {
-  for (int i = 0; i < LUMA_LEVEL_TO_DQP_LUT_MAXSIZE; i++) {
+  for (int i = 0; i < LUMA_LEVEL_TO_DQP_LUT_MAXSIZE; i++)
+  {
     double x = i;
     double y;
 
-/*
-    //always false
-    if (isSDR)  // set SDR weight table
-    {
-      y = 0.03*x - 3.0;        // this is the Equation used to derive the luma qp LUT for SDR in ST-2084
-      y = y<0 ? 0 : (y>12 ? 12 : y);
-
-    }
-    else
-*/
-    { // set SDR weight table
-      y = 0.015*x - 1.5 - 6;   // this is the Equation used to derive the luma qp LUT for HDR in MPEG HDR anchor3.2 (JCTCX-X1020)
-      y = y<-3 ? -3 : (y>6 ? 6 : y);
-    }
+    y = 0.015 * x - 1.5
+        - 6;   // this is the Equation used to derive the luma qp LUT for HDR in MPEG HDR anchor3.2 (JCTCX-X1020)
+    y = y < -3 ? -3 : (y > 6 ? 6 : y);
 
     m_lumaLevelToWeightPLUT[i] = pow(2.0, y / 3.0);      // or power(10, dQp/10)      they are almost equal
   }
@@ -2989,9 +2975,13 @@ void RdCost::initLumaLevelToWeightTableReshape()
 {
   int lutSize = 1 << m_lumaBD;
   if (m_reshapeLumaLevelToWeightPLUT.empty())
+  {
     m_reshapeLumaLevelToWeightPLUT.resize(lutSize, 1.0);
+  }
   if (m_lumaLevelToWeightPLUT.empty())
+  {
     m_lumaLevelToWeightPLUT.resize(lutSize, 1.0);
+  }
   if (m_signalType == RESHAPE_SIGNAL_PQ)
   {
     for (int i = 0; i < (1 << m_lumaBD); i++)
@@ -3035,11 +3025,15 @@ void RdCost::updateReshapeLumaLevelToWeightTable(SliceReshapeInfo &sliceReshape,
       for (int i = 0; i < PIC_CODE_CW_BINS; i++)
       {
         if ((i < sliceReshape.reshaperModelMinBinIdx) || (i > sliceReshape.reshaperModelMaxBinIdx))
+        {
           weight = 1.0;
+        }
         else
         {
           if (sliceReshape.reshaperModelBinCWDelta[i] == 1 || (sliceReshape.reshaperModelBinCWDelta[i] == -1 * histLens))
+          {
             weight = wBin;
+          }
           else
           {
             weight = (double)wtTable[i] / (double)histLens;
@@ -3073,7 +3067,7 @@ Distortion RdCost::getWeightedMSE(int compIdx, const Pel org, const Pel cur, con
 
   if (compIdx == COMPONENT_Y)
   {
-     CHECK(org!=orgLuma, "");
+    CHECK(org != orgLuma, "");
   }
   // use luma to get weight
   double weight = 1.0;

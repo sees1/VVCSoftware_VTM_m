@@ -141,7 +141,10 @@ public:
             m_line++;
             m_column = m_blockWidth - 1;
           }
-          else m_column++;
+          else
+          {
+            m_column++;
+          }
         }
         else
         {
@@ -150,7 +153,10 @@ public:
             m_line++;
             m_column = 0;
           }
-          else m_column--;
+          else
+          {
+            m_column--;
+          }
         }
         break;
 
@@ -162,7 +168,10 @@ public:
             m_column++;
             m_line = m_blockHeight - 1;
           }
-          else m_line++;
+          else
+          {
+            m_line++;
+          }
         }
         else
         {
@@ -171,7 +180,10 @@ public:
             m_column++;
             m_line = 0;
           }
-          else m_line--;
+          else
+          {
+            m_line--;
+          }
         }
         break;
       //------------------------------------------------
@@ -709,7 +721,9 @@ void initGeoTemplate()
       if( (distanceIdx == 0 && angleIdx >= 16)
         || ((distanceIdx == 2 || distanceIdx == 0) && (g_angle2mask[angleIdx] == 0 || g_angle2mask[angleIdx] == 5))
         || g_angle2mask[angleIdx] == -1 )
+      {
         continue;
+      }
       g_GeoParams[modeIdx]    = new int16_t[2];
       g_GeoParams[modeIdx][0] = (int16_t)angleIdx;
       g_GeoParams[modeIdx][1] = (int16_t)distanceIdx;
@@ -719,7 +733,9 @@ void initGeoTemplate()
   for (int angleIdx = 0; angleIdx < (GEO_NUM_ANGLES >> 2) + 1; angleIdx++)
   {
     if (g_angle2mask[angleIdx] == -1)
+    {
       continue;
+    }
     g_globalGeoWeights[g_angle2mask[angleIdx]] = new int16_t[GEO_WEIGHT_MASK_SIZE * GEO_WEIGHT_MASK_SIZE];
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
     g_globalGeoEncSADmask[g_angle2mask[angleIdx]] = new Pel[GEO_WEIGHT_MASK_SIZE * GEO_WEIGHT_MASK_SIZE];
@@ -775,6 +791,7 @@ void initGeoTemplate()
     }
   }
 }
+
 int16_t** g_GeoParams;
 int16_t*  g_globalGeoWeights   [GEO_NUM_PRESTORED_MASK];
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
