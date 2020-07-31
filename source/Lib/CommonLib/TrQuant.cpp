@@ -144,12 +144,31 @@ template<int signedMode> void invTransformCbCr( PelBuf &resCb, PelBuf &resCr )
   {
     for( SizeType x = 0; x < resCb.width; x++ )
     {
-      if      ( signedMode ==  1 )  { cr[x] =  cb[x] >> 1;  }
-      else if ( signedMode == -1 )  { cr[x] = -cb[x] >> 1;  }
-      else if ( signedMode ==  2 )  { cr[x] =  cb[x]; }
-      else if ( signedMode == -2 )  { cr[x] = (cb[x] == -32768 && sizeof(Pel) == 2) ? 32767 : -cb[x]; }   // non-normative clipping to prevent 16-bit overflow
-      else if ( signedMode ==  3 )  { cb[x] =  cr[x] >> 1; }
-      else if ( signedMode == -3 )  { cb[x] = -cr[x] >> 1; }
+      if (signedMode == 1)
+      {
+        cr[x] = cb[x] >> 1;
+      }
+      else if (signedMode == -1)
+      {
+        cr[x] = -cb[x] >> 1;
+      }
+      else if (signedMode == 2)
+      {
+        cr[x] = cb[x];
+      }
+      else if (signedMode == -2)
+      {
+        // non-normative clipping to prevent 16-bit overflow
+        cr[x] = (cb[x] == -32768 && sizeof(Pel) == 2) ? 32767 : -cb[x];
+      }
+      else if (signedMode == 3)
+      {
+        cb[x] = cr[x] >> 1;
+      }
+      else if (signedMode == -3)
+      {
+        cb[x] = -cr[x] >> 1;
+      }
     }
   }
 }
@@ -217,9 +236,7 @@ void TrQuant::init( const Quant* otherQuant,
   delete m_quant;
   m_quant = nullptr;
 
-  {
-    m_quant = new DepQuant( otherQuant, bEnc );
-  }
+  m_quant = new DepQuant(otherQuant, bEnc);
 
   if( m_quant )
   {
@@ -371,62 +388,71 @@ void TrQuant::xInvLfnst( const TransformUnit &tu, const ComponentID compID )
       bool          tu8x8Flag       = ( width == 8 && height == 8 );
       TCoeff*       lfnstTemp;
       TCoeff*       coeffTemp;
-          int y;
-          lfnstTemp = m_tempInMatrix; // inverse spectral rearrangement
-          coeffTemp = m_tempCoeff;
-          TCoeff * dst = lfnstTemp;
-          const ScanElement * scanPtr = scan;
-          for( y = 0; y < 16; y++ )
-          {
-            *dst++ = coeffTemp[ scanPtr->idx ];
-            scanPtr++;
-          }
+      int           y;
+      lfnstTemp   = m_tempInMatrix;   // inverse spectral rearrangement
+      coeffTemp   = m_tempCoeff;
+      TCoeff *dst = lfnstTemp;
+
+      const ScanElement *scanPtr = scan;
+      for (y = 0; y < 16; y++)
+      {
+        *dst++ = coeffTemp[scanPtr->idx];
+        scanPtr++;
+      }
 
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
-          invLfnstNxN( m_tempInMatrix, m_tempOutMatrix, g_lfnstLut[ intraMode ], lfnstIdx - 1, sbSize, ( tu4x4Flag || tu8x8Flag ) ? 8 : 16, maxLog2TrDynamicRange );
+      invLfnstNxN(m_tempInMatrix, m_tempOutMatrix, g_lfnstLut[intraMode], lfnstIdx - 1, sbSize,
+                  (tu4x4Flag || tu8x8Flag) ? 8 : 16, maxLog2TrDynamicRange);
 #else
-          invLfnstNxN( m_tempInMatrix, m_tempOutMatrix, g_lfnstLut[ intraMode ], lfnstIdx - 1, sbSize, ( tu4x4Flag || tu8x8Flag ) ? 8 : 16 );
+      invLfnstNxN(m_tempInMatrix, m_tempOutMatrix, g_lfnstLut[intraMode], lfnstIdx - 1, sbSize,
+                  (tu4x4Flag || tu8x8Flag) ? 8 : 16);
 #endif
-          lfnstTemp = m_tempOutMatrix; // inverse spectral rearrangement
+      lfnstTemp = m_tempOutMatrix;   // inverse spectral rearrangement
 
-          if( transposeFlag )
+      if (transposeFlag)
+      {
+        if (sbSize == 4)
+        {
+          for (y = 0; y < 4; y++)
           {
-            if( sbSize == 4 )
-            {
-              for( y = 0; y < 4; y++ )
-              {
-                coeffTemp[ 0 ] = lfnstTemp[ 0 ];  coeffTemp[ 1 ] = lfnstTemp[  4 ];
-                coeffTemp[ 2 ] = lfnstTemp[ 8 ];  coeffTemp[ 3 ] = lfnstTemp[ 12 ];
-                lfnstTemp++;
-                coeffTemp += width;
-              }
-            }
-            else // ( sbSize == 8 )
-            {
-              for( y = 0; y < 8; y++ )
-              {
-                coeffTemp[ 0 ] = lfnstTemp[  0 ];  coeffTemp[ 1 ] = lfnstTemp[  8 ];
-                coeffTemp[ 2 ] = lfnstTemp[ 16 ];  coeffTemp[ 3 ] = lfnstTemp[ 24 ];
-                if( y < 4 )
-                {
-                  coeffTemp[ 4 ] = lfnstTemp[ 32 ];  coeffTemp[ 5 ] = lfnstTemp[ 36 ];
-                  coeffTemp[ 6 ] = lfnstTemp[ 40 ];  coeffTemp[ 7 ] = lfnstTemp[ 44 ];
-                }
-                lfnstTemp++;
-                coeffTemp += width;
-              }
-            }
+            coeffTemp[0] = lfnstTemp[0];
+            coeffTemp[1] = lfnstTemp[4];
+            coeffTemp[2] = lfnstTemp[8];
+            coeffTemp[3] = lfnstTemp[12];
+            lfnstTemp++;
+            coeffTemp += width;
           }
-          else
+        }
+        else   // ( sbSize == 8 )
+        {
+          for (y = 0; y < 8; y++)
           {
-            for( y = 0; y < sbSize; y++ )
+            coeffTemp[0] = lfnstTemp[0];
+            coeffTemp[1] = lfnstTemp[8];
+            coeffTemp[2] = lfnstTemp[16];
+            coeffTemp[3] = lfnstTemp[24];
+            if (y < 4)
             {
-              uint32_t uiStride = ( y < 4 ) ? sbSize : 4;
-              ::memcpy( coeffTemp, lfnstTemp, uiStride * sizeof( TCoeff ) );
-              lfnstTemp += uiStride;
-              coeffTemp += width;
+              coeffTemp[4] = lfnstTemp[32];
+              coeffTemp[5] = lfnstTemp[36];
+              coeffTemp[6] = lfnstTemp[40];
+              coeffTemp[7] = lfnstTemp[44];
             }
+            lfnstTemp++;
+            coeffTemp += width;
           }
+        }
+      }
+      else
+      {
+        for (y = 0; y < sbSize; y++)
+        {
+          uint32_t uiStride = (y < 4) ? sbSize : 4;
+          ::memcpy(coeffTemp, lfnstTemp, uiStride * sizeof(TCoeff));
+          lfnstTemp += uiStride;
+          coeffTemp += width;
+        }
+      }
     }
   }
 }
@@ -465,60 +491,69 @@ void TrQuant::xFwdLfnst( const TransformUnit &tu, const ComponentID compID, cons
       TCoeff*         coeffTemp;
       TCoeff *        tempCoeff = loadTr ? m_mtsCoeffs[tu.mtsIdx[compID]] : m_tempCoeff;
 
-          int y;
-          lfnstTemp = m_tempInMatrix; // forward low frequency non-separable transform
-          coeffTemp = tempCoeff;
+      int y;
+      lfnstTemp = m_tempInMatrix;   // forward low frequency non-separable transform
+      coeffTemp = tempCoeff;
 
-          if( transposeFlag )
+      if (transposeFlag)
+      {
+        if (sbSize == 4)
+        {
+          for (y = 0; y < 4; y++)
           {
-            if( sbSize == 4 )
-            {
-              for( y = 0; y < 4; y++ )
-              {
-                lfnstTemp[ 0 ] = coeffTemp[ 0 ];  lfnstTemp[  4 ] = coeffTemp[ 1 ];
-                lfnstTemp[ 8 ] = coeffTemp[ 2 ];  lfnstTemp[ 12 ] = coeffTemp[ 3 ];
-                lfnstTemp++;
-                coeffTemp += width;
-              }
-            }
-            else // ( sbSize == 8 )
-            {
-              for( y = 0; y < 8; y++ )
-              {
-                lfnstTemp[  0 ] = coeffTemp[ 0 ];  lfnstTemp[  8 ] = coeffTemp[ 1 ];
-                lfnstTemp[ 16 ] = coeffTemp[ 2 ];  lfnstTemp[ 24 ] = coeffTemp[ 3 ];
-                if( y < 4 )
-                {
-                  lfnstTemp[ 32 ] = coeffTemp[ 4 ];  lfnstTemp[ 36 ] = coeffTemp[ 5 ];
-                  lfnstTemp[ 40 ] = coeffTemp[ 6 ];  lfnstTemp[ 44 ] = coeffTemp[ 7 ];
-                }
-                lfnstTemp++;
-                coeffTemp += width;
-              }
-            }
+            lfnstTemp[0]  = coeffTemp[0];
+            lfnstTemp[4]  = coeffTemp[1];
+            lfnstTemp[8]  = coeffTemp[2];
+            lfnstTemp[12] = coeffTemp[3];
+            lfnstTemp++;
+            coeffTemp += width;
           }
-          else
+        }
+        else   // ( sbSize == 8 )
+        {
+          for (y = 0; y < 8; y++)
           {
-            for( y = 0; y < sbSize; y++ )
+            lfnstTemp[0]  = coeffTemp[0];
+            lfnstTemp[8]  = coeffTemp[1];
+            lfnstTemp[16] = coeffTemp[2];
+            lfnstTemp[24] = coeffTemp[3];
+            if (y < 4)
             {
-              uint32_t uiStride = ( y < 4 ) ? sbSize : 4;
-              ::memcpy( lfnstTemp, coeffTemp, uiStride * sizeof( TCoeff ) );
-              lfnstTemp += uiStride;
-              coeffTemp += width;
+              lfnstTemp[32] = coeffTemp[4];
+              lfnstTemp[36] = coeffTemp[5];
+              lfnstTemp[40] = coeffTemp[6];
+              lfnstTemp[44] = coeffTemp[7];
             }
+            lfnstTemp++;
+            coeffTemp += width;
           }
+        }
+      }
+      else
+      {
+        for (y = 0; y < sbSize; y++)
+        {
+          uint32_t uiStride = (y < 4) ? sbSize : 4;
+          ::memcpy(lfnstTemp, coeffTemp, uiStride * sizeof(TCoeff));
+          lfnstTemp += uiStride;
+          coeffTemp += width;
+        }
+      }
 
-          fwdLfnstNxN( m_tempInMatrix, m_tempOutMatrix, g_lfnstLut[ intraMode ], lfnstIdx - 1, sbSize, ( tu4x4Flag || tu8x8Flag ) ? 8 : 16 );
+      fwdLfnstNxN(m_tempInMatrix, m_tempOutMatrix, g_lfnstLut[intraMode], lfnstIdx - 1, sbSize,
+                  (tu4x4Flag || tu8x8Flag) ? 8 : 16);
 
-          lfnstTemp = m_tempOutMatrix; // forward spectral rearrangement
-          coeffTemp = tempCoeff;
-          const ScanElement * scanPtr = scan;
-          int lfnstCoeffNum = ( sbSize == 4 ) ? sbSize * sbSize : 48;
-          for( y = 0; y < lfnstCoeffNum; y++ )
-          {
-            coeffTemp[ scanPtr->idx ] = *lfnstTemp++;
-            scanPtr++;
-          }
+      lfnstTemp         = m_tempOutMatrix;   // forward spectral rearrangement
+      coeffTemp         = tempCoeff;
+      int lfnstCoeffNum = (sbSize == 4) ? sbSize * sbSize : 48;
+
+      const ScanElement *scanPtr = scan;
+
+      for (y = 0; y < lfnstCoeffNum; y++)
+      {
+        coeffTemp[scanPtr->idx] = *lfnstTemp++;
+        scanPtr++;
+      }
     }
   }
 }
@@ -531,24 +566,24 @@ void TrQuant::invTransformNxN( TransformUnit &tu, const ComponentID &compID, Pel
   const uint32_t uiHeight     = area.height;
 
   CHECK( uiWidth > tu.cs->sps->getMaxTbSize() || uiHeight > tu.cs->sps->getMaxTbSize(), "Maximal allowed transformation size exceeded!" );
-    CoeffBuf tempCoeff = CoeffBuf(m_tempCoeff, area);
-    xDeQuant( tu, tempCoeff, compID, cQP );
+  CoeffBuf tempCoeff = CoeffBuf(m_tempCoeff, area);
+  xDeQuant(tu, tempCoeff, compID, cQP);
 
-    DTRACE_COEFF_BUF( D_TCOEFF, tempCoeff, tu, tu.cu->predMode, compID );
+  DTRACE_COEFF_BUF(D_TCOEFF, tempCoeff, tu, tu.cu->predMode, compID);
 
-    if( tu.cs->sps->getUseLFNST() )
-    {
-      xInvLfnst( tu, compID );
-    }
+  if (tu.cs->sps->getUseLFNST())
+  {
+    xInvLfnst(tu, compID);
+  }
 
-    if( tu.mtsIdx[compID] == MTS_SKIP )
-    {
-      xITransformSkip( tempCoeff, pResi, tu, compID );
-    }
-    else
-    {
-      xIT( tu, compID, tempCoeff, pResi );
-    }
+  if (tu.mtsIdx[compID] == MTS_SKIP)
+  {
+    xITransformSkip(tempCoeff, pResi, tu, compID);
+  }
+  else
+  {
+    xIT(tu, compID, tempCoeff, pResi);
+  }
 
   //DTRACE_BLOCK_COEFF(tu.getCoeffs(compID), tu, tu.cu->predMode, compID);
   DTRACE_PEL_BUF( D_RESIDUALS, pResi, tu, tu.cu->predMode, compID);
@@ -646,7 +681,9 @@ void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &
   }
 
   if (!tu.cs->sps->getUseMTS())
+  {
     return;
+  }
 
   if (isImplicitMTS || isISP)
   {
@@ -656,9 +693,13 @@ void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &
     bool heightDstOk = height >= 4 && height <= 16;
 
     if (widthDstOk)
+    {
       trTypeHor = DST7;
+    }
     if (heightDstOk)
+    {
       trTypeVer = DST7;
+    }
     return;
   }
 
@@ -677,8 +718,16 @@ void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &
       }
       else
       {
-        if( sbtPos == SBT_POS0 )  { trTypeHor = DCT8;  trTypeVer = DST7; }
-        else                      { trTypeHor = DST7;  trTypeVer = DST7; }
+        if (sbtPos == SBT_POS0)
+        {
+          trTypeHor = DCT8;
+          trTypeVer = DST7;
+        }
+        else
+        {
+          trTypeHor = DST7;
+          trTypeVer = DST7;
+        }
       }
     }
     else
@@ -690,8 +739,16 @@ void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &
       }
       else
       {
-        if( sbtPos == SBT_POS0 )  { trTypeHor = DST7;  trTypeVer = DCT8; }
-        else                      { trTypeHor = DST7;  trTypeVer = DST7; }
+        if (sbtPos == SBT_POS0)
+        {
+          trTypeHor = DST7;
+          trTypeVer = DCT8;
+        }
+        else
+        {
+          trTypeHor = DST7;
+          trTypeVer = DST7;
+        }
       }
     }
     return;
@@ -709,8 +766,6 @@ void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &
   }
 }
 
-
-
 void TrQuant::xT( const TransformUnit &tu, const ComponentID &compID, const CPelBuf &resi, CoeffBuf &dstCoeff, const int width, const int height )
 {
   const unsigned maxLog2TrDynamicRange  = tu.cs->sps->getMaxLog2TrDynamicRange( toChannelType( compID ) );
@@ -718,7 +773,6 @@ void TrQuant::xT( const TransformUnit &tu, const ComponentID &compID, const CPel
   const int      TRANSFORM_MATRIX_SHIFT = g_transformMatrixShift[TRANSFORM_FORWARD];
   const uint32_t transformWidthIndex    = floorLog2(width ) - 1;  // nLog2WidthMinus1, since transform start from 2-point
   const uint32_t transformHeightIndex   = floorLog2(height) - 1;  // nLog2HeightMinus1, since transform start from 2-point
-
 
   int trTypeHor = DCT2;
   int trTypeVer = DCT2;
@@ -767,10 +821,10 @@ void TrQuant::xT( const TransformUnit &tu, const ComponentID &compID, const CPel
     const int      shift_2nd              =  (floorLog2(height))            + TRANSFORM_MATRIX_SHIFT                          + COM16_C806_TRANS_PREC;
     CHECK( shift_1st < 0, "Negative shift" );
     CHECK( shift_2nd < 0, "Negative shift" );
-  TCoeff *tmp = ( TCoeff * ) alloca( width * height * sizeof( TCoeff ) );
+    TCoeff *tmp = (TCoeff *) alloca(width * height * sizeof(TCoeff));
 
-  fastFwdTrans[trTypeHor][transformWidthIndex ](block,        tmp, shift_1st, height,        0, skipWidth);
-  fastFwdTrans[trTypeVer][transformHeightIndex](tmp, dstCoeff.buf, shift_2nd, width, skipWidth, skipHeight);
+    fastFwdTrans[trTypeHor][transformWidthIndex](block, tmp, shift_1st, height, 0, skipWidth);
+    fastFwdTrans[trTypeVer][transformHeightIndex](tmp, dstCoeff.buf, shift_2nd, width, skipWidth, skipHeight);
   }
   else if( height == 1 ) //1-D horizontal transform
   {
@@ -799,7 +853,6 @@ void TrQuant::xIT( const TransformUnit &tu, const ComponentID &compID, const CCo
   const TCoeff   clipMaximum            =  ( 1 << maxLog2TrDynamicRange ) - 1;
   const uint32_t transformWidthIndex    = floorLog2(width ) - 1;                                // nLog2WidthMinus1, since transform start from 2-point
   const uint32_t transformHeightIndex   = floorLog2(height) - 1;                                // nLog2HeightMinus1, since transform start from 2-point
-
 
   int trTypeHor = DCT2;
   int trTypeVer = DCT2;
@@ -873,10 +926,10 @@ void TrQuant::xITransformSkip(const CCoeffBuf     &pCoeff,
 
   for (uint32_t y = 0; y < height; y++)
   {
-      for (uint32_t x = 0; x < width; x++)
-      {
-          pResidual.at(x, y) = Pel(pCoeff.at(x, y));
-      }
+    for (uint32_t x = 0; x < width; x++)
+    {
+      pResidual.at(x, y) = Pel(pCoeff.at(x, y));
+    }
   }
 }
 
@@ -938,8 +991,9 @@ void TrQuant::transformNxN( TransformUnit& tu, const ComponentID& compID, const 
     }
     if (tu.mtsIdx[compID] == MTS_SKIP)
     {
-        int trShift = getTransformShift(tu.cu->slice->getSPS()->getBitDepth(toChannelType(compID)), rect.size(), tu.cu->slice->getSPS()->getMaxLog2TrDynamicRange(toChannelType(compID)));
-        scaleSAD *= pow(2, trShift);
+      int trShift = getTransformShift(tu.cu->slice->getSPS()->getBitDepth(toChannelType(compID)), rect.size(),
+                                      tu.cu->slice->getSPS()->getMaxLog2TrDynamicRange(toChannelType(compID)));
+      scaleSAD *= pow(2, trShift);
     }
 
 #if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
@@ -986,41 +1040,37 @@ void TrQuant::transformNxN( TransformUnit& tu, const ComponentID& compID, const 
     tu.mtsIdx[compID] = MTS_SKIP;
   }
 
+  uiAbsSum = 0;
+
+  // transform and quantize
+  CHECK(cs.sps->getMaxTbSize() < uiWidth, "Unsupported transformation size");
+
+  CoeffBuf tempCoeff(loadTr ? m_mtsCoeffs[tu.mtsIdx[compID]] : m_tempCoeff, rect);
+
+  DTRACE_PEL_BUF(D_RESIDUALS, resiBuf, tu, tu.cu->predMode, compID);
+
+  if (!loadTr)
   {
-    uiAbsSum = 0;
-
-    // transform and quantize
-      CHECK( cs.sps->getMaxTbSize() < uiWidth, "Unsupported transformation size" );
-
-
-      CoeffBuf tempCoeff(loadTr ? m_mtsCoeffs[tu.mtsIdx[compID]] : m_tempCoeff, rect);
-
-      DTRACE_PEL_BUF( D_RESIDUALS, resiBuf, tu, tu.cu->predMode, compID );
-
-      if( !loadTr )
-      {
-        if ( tu.mtsIdx[compID] == MTS_SKIP )
-      {
-        xTransformSkip( tu, compID, resiBuf, tempCoeff.buf );
-      }
-      else
-      {
-        xT( tu, compID, resiBuf, tempCoeff, uiWidth, uiHeight );
-      }
-      }
-
-
-      if( sps.getUseLFNST() )
-      {
-        xFwdLfnst( tu, compID, loadTr );
-      }
-
-      DTRACE_COEFF_BUF( D_TCOEFF, tempCoeff, tu, tu.cu->predMode, compID );
-
-      xQuant( tu, compID, tempCoeff, uiAbsSum, cQP, ctx );
-
-      DTRACE_COEFF_BUF( D_TCOEFF, tu.getCoeffs( compID ), tu, tu.cu->predMode, compID );
+    if (tu.mtsIdx[compID] == MTS_SKIP)
+    {
+      xTransformSkip(tu, compID, resiBuf, tempCoeff.buf);
+    }
+    else
+    {
+      xT(tu, compID, resiBuf, tempCoeff, uiWidth, uiHeight);
+    }
   }
+
+  if (sps.getUseLFNST())
+  {
+    xFwdLfnst(tu, compID, loadTr);
+  }
+
+  DTRACE_COEFF_BUF(D_TCOEFF, tempCoeff, tu, tu.cu->predMode, compID);
+
+  xQuant(tu, compID, tempCoeff, uiAbsSum, cQP, ctx);
+
+  DTRACE_COEFF_BUF(D_TCOEFF, tu.getCoeffs(compID), tu, tu.cu->predMode, compID);
 
   // set coded block flag (CBF)
   TU::setCbfAtDepth (tu, compID, tu.depth, uiAbsSum > 0);
@@ -1035,10 +1085,10 @@ void TrQuant::xTransformSkip(const TransformUnit &tu, const ComponentID &compID,
 
   for (uint32_t y = 0, coefficientIndex = 0; y < height; y++)
   {
-      for (uint32_t x = 0; x < width; x++, coefficientIndex++)
-      {
-          psCoeff[ coefficientIndex ] = TCoeff(resi.at(x, y));
-      }
+    for (uint32_t x = 0; x < width; x++, coefficientIndex++)
+    {
+      psCoeff[coefficientIndex] = TCoeff(resi.at(x, y));
+    }
   }
 }
 
