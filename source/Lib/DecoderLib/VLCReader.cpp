@@ -4847,6 +4847,7 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     parseConstraintInfo(ptl->getConstraintInfo());
 #endif
+#if !JVET_S_SUB_PROFILE
     READ_CODE(8, symbol, "num_sub_profiles");
     uint8_t numSubProfiles = symbol;
     ptl->setNumSubProfile( numSubProfiles );
@@ -4854,6 +4855,7 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
     {
       READ_CODE(32, symbol, "general_sub_profile_idc[i]"); ptl->setSubProfileIdc(i, symbol);
     }
+#endif
   }
 
 #if JVET_S0203
@@ -4893,6 +4895,20 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
       ptl->setSubLayerLevelIdc( i, ptl->getSubLayerLevelIdc( i + 1 ) );
     }
   }
+
+#if JVET_S_SUB_PROFILE
+  if (profileTierPresentFlag)
+  {
+    READ_CODE(8, symbol, "ptl_num_sub_profiles");
+    uint8_t numSubProfiles = symbol;
+    ptl->setNumSubProfile(numSubProfiles);
+    for (int i = 0; i < numSubProfiles; i++)
+    {
+      READ_CODE(32, symbol, "general_sub_profile_idc[i]");
+      ptl->setSubProfileIdc(i, symbol);
+    }
+  }
+#endif
 }
 
 
