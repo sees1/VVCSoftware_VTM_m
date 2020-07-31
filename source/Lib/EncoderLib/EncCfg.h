@@ -491,7 +491,6 @@ protected:
   bool      m_transformSkipContextEnabledFlag;
   bool      m_persistentRiceAdaptationEnabledFlag;
   bool      m_cabacBypassAlignmentEnabledFlag;
-  bool      m_rdpcmEnabledFlag[NUMBER_OF_RDPCM_SIGNALLING_MODES];
 #if SHARP_LUMA_DELTA_QP
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping; ///< mapping from luma level to delta QP.
 #endif
@@ -1439,8 +1438,6 @@ public:
   void setPersistentRiceAdaptationEnabledFlag          (const bool value)       { m_persistentRiceAdaptationEnabledFlag = value; }
   bool getCabacBypassAlignmentEnabledFlag              ()       const      { return m_cabacBypassAlignmentEnabledFlag;  }
   void setCabacBypassAlignmentEnabledFlag              (const bool value)  { m_cabacBypassAlignmentEnabledFlag = value; }
-  bool getRdpcmEnabledFlag                             (const RDPCMSignallingMode signallingMode)        const      { return m_rdpcmEnabledFlag[signallingMode];  }
-  void setRdpcmEnabledFlag                             (const RDPCMSignallingMode signallingMode, const bool value) { m_rdpcmEnabledFlag[signallingMode] = value; }
   bool getUseTransformSkipFast                         ()      { return m_useTransformSkipFast;    }
   void setUseTransformSkipFast                         ( bool b ) { m_useTransformSkipFast  = b;   }
   uint32_t getLog2MaxTransformSkipBlockSize                () const      { return m_log2MaxTransformSkipBlockSize;     }

@@ -736,7 +736,6 @@ void TransformUnit::initData()
   for( unsigned i = 0; i < MAX_NUM_TBLOCKS; i++ )
   {
     cbf[i]           = 0;
-    rdpcm[i]         = NUMBER_OF_RDPCM_MODES;
     mtsIdx[i]        = MTS_DCT2_DCT2;
   }
   depth              = 0;
@@ -779,7 +778,6 @@ TransformUnit& TransformUnit::operator=(const TransformUnit& other)
       if (m_runType[i]   && other.m_runType[i]   && m_runType[i]   != other.m_runType[i]  ) memcpy(m_runType[i],   other.m_runType[i],   sizeof(bool) * area);
     }
     cbf[i]           = other.cbf[i];
-    rdpcm[i]         = other.rdpcm[i];
     mtsIdx[i] = other.mtsIdx[i];
   }
   depth              = other.depth;
@@ -804,7 +802,6 @@ void TransformUnit::copyComponentFrom(const TransformUnit& other, const Componen
   }
 
   cbf[i]           = other.cbf[i];
-  rdpcm[i]         = other.rdpcm[i];
   depth            = other.depth;
   mtsIdx[i]        = other.mtsIdx[i];
   noResidual       = other.noResidual;

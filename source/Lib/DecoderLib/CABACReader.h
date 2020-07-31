@@ -135,7 +135,6 @@ public:
   void        mts_idx                   ( CodingUnit&                   cu,     CUCtx&          cuCtx  );
   void        residual_lfnst_mode       ( CodingUnit&                   cu,     CUCtx&          cuCtx  );
   void        isp_mode                  ( CodingUnit&                   cu );
-  void        explicit_rdpcm_mode       ( TransformUnit&                tu,     ComponentID     compID );
   int         last_sig_coeff            ( CoeffCodingContext&           cctx,   TransformUnit& tu, ComponentID   compID );
   void        residual_coding_subblock  ( CoeffCodingContext&           cctx,   TCoeff*         coeff, const int stateTransTable, int& state );
   void        residual_codingTS         ( TransformUnit&                tu,     ComponentID     compID );

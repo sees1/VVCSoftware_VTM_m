@@ -2603,7 +2603,6 @@ void CABACWriter::cu_chroma_qp_offset( const CodingUnit& cu )
 //--------------------------------------------------------------------------------
 //    void        residual_coding         ( tu, compID )
 //    void        transform_skip_flag     ( tu, compID )
-//    void        explicit_rdpcm_mode     ( tu, compID )
 //    void        last_sig_coeff          ( coeffCtx )
 //    void        residual_coding_subblock( coeffCtx )
 //================================================================================
@@ -2630,9 +2629,7 @@ void CABACWriter::residual_coding( const TransformUnit& tu, ComponentID compID, 
   if( compID == COMPONENT_Cr && tu.jointCbCr == 3 )
     return;
 
-  // code transform skip and explicit rdpcm mode
   ts_flag            ( tu, compID );
-  explicit_rdpcm_mode( tu, compID );
 
   if( tu.mtsIdx[compID] == MTS_SKIP && !tu.cs->slice->getTSResidualCodingDisabledFlag() )
   {
@@ -2641,16 +2638,7 @@ void CABACWriter::residual_coding( const TransformUnit& tu, ComponentID compID, 
   }
 
   // determine sign hiding
-  bool signHiding  = ( cu.cs->slice->getSignDataHidingEnabledFlag() && tu.rdpcm[compID] == RDPCM_OFF );
-  if(  signHiding && CU::isIntra(cu) && CU::isRDPCMEnabled(cu) && tu.mtsIdx[compID] == MTS_SKIP)
-  {
-    const ChannelType chType    = toChannelType( compID );
-    const unsigned    intraMode = PU::getFinalIntraMode( *cu.cs->getPU( tu.blocks[compID].pos(), chType ), chType );
-    if( intraMode == HOR_IDX || intraMode == VER_IDX )
-    {
-      signHiding = false;
-    }
-  }
+  bool signHiding = cu.cs->slice->getSignDataHidingEnabledFlag();
 
   // init coeff coding context
   CoeffCodingContext  cctx    ( tu, compID, signHiding );
@@ -2778,28 +2766,6 @@ void CABACWriter::isp_mode( const CodingUnit& cu )
     m_BinEncoder.encodeBin( cu.ispMode - 1, Ctx::ISPMode( 1 ) );
   }
   DTRACE( g_trace_ctx, D_SYNTAX, "intra_subPartitions() etype=%d pos=(%d,%d) ispIdx=%d\n", cu.chType, cu.blocks[cu.chType].x, cu.blocks[cu.chType].y, (int)cu.ispMode );
-}
-
-void CABACWriter::explicit_rdpcm_mode( const TransformUnit& tu, ComponentID compID )
-{
-  const CodingUnit& cu = *tu.cu;
-  if (!CU::isIntra(cu) && CU::isRDPCMEnabled(cu) && (tu.mtsIdx[compID] == MTS_SKIP))
-  {
-    ChannelType chType = toChannelType( compID );
-    switch( tu.rdpcm[compID] )
-    {
-    case RDPCM_VER:
-      m_BinEncoder.encodeBin( 1, Ctx::RdpcmFlag(chType) );
-      m_BinEncoder.encodeBin( 1, Ctx::RdpcmDir (chType) );
-      break;
-    case RDPCM_HOR:
-      m_BinEncoder.encodeBin( 1, Ctx::RdpcmFlag(chType) );
-      m_BinEncoder.encodeBin( 0, Ctx::RdpcmDir (chType) );
-      break;
-    default: // RDPCM_OFF
-      m_BinEncoder.encodeBin( 0, Ctx::RdpcmFlag(chType) );
-    }
-  }
 }
 
 void CABACWriter::residual_lfnst_mode( const CodingUnit& cu, CUCtx& cuCtx )

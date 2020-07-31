@@ -249,8 +249,6 @@ public:
   static const CtxSet   RunTypeFlag;
   static const CtxSet   IdxRunModel;
   static const CtxSet   CopyRunModel;
-  static const CtxSet   RdpcmFlag;
-  static const CtxSet   RdpcmDir;
   static const CtxSet   SbtFlag;
   static const CtxSet   SbtQuadFlag;
   static const CtxSet   SbtHorFlag;

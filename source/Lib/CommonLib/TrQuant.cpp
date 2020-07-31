@@ -554,67 +554,7 @@ void TrQuant::invTransformNxN( TransformUnit &tu, const ComponentID &compID, Pel
 
   //DTRACE_BLOCK_COEFF(tu.getCoeffs(compID), tu, tu.cu->predMode, compID);
   DTRACE_PEL_BUF( D_RESIDUALS, pResi, tu, tu.cu->predMode, compID);
-  invRdpcmNxN(tu, compID, pResi);
 }
-
-void TrQuant::invRdpcmNxN(TransformUnit& tu, const ComponentID &compID, PelBuf &pcResidual)
-{
-  const CompArea &area    = tu.blocks[compID];
-
-  if (CU::isRDPCMEnabled(*tu.cu) && (tu.mtsIdx[compID] == MTS_SKIP))
-  {
-    const uint32_t uiWidth  = area.width;
-    const uint32_t uiHeight = area.height;
-
-    RDPCMMode rdpcmMode = RDPCM_OFF;
-
-    if (tu.cu->predMode == MODE_INTRA)
-    {
-      const ChannelType chType = toChannelType(compID);
-      const uint32_t uiChFinalMode = PU::getFinalIntraMode(*tu.cs->getPU(area.pos(), chType), chType);
-
-      if (uiChFinalMode == VER_IDX || uiChFinalMode == HOR_IDX)
-      {
-        rdpcmMode = (uiChFinalMode == VER_IDX) ? RDPCM_VER : RDPCM_HOR;
-      }
-    }
-    else  // not intra case
-    {
-      rdpcmMode = RDPCMMode(tu.rdpcm[compID]);
-    }
-
-    const TCoeff pelMin = (TCoeff) std::numeric_limits<Pel>::min();
-    const TCoeff pelMax = (TCoeff) std::numeric_limits<Pel>::max();
-
-    if (rdpcmMode == RDPCM_VER)
-    {
-      for (uint32_t uiX = 0; uiX < uiWidth; uiX++)
-      {
-        TCoeff accumulator = pcResidual.at(uiX, 0); // 32-bit accumulator
-
-        for (uint32_t uiY = 1; uiY < uiHeight; uiY++)
-        {
-          accumulator            += pcResidual.at(uiX, uiY);
-          pcResidual.at(uiX, uiY) = (Pel) Clip3<TCoeff>(pelMin, pelMax, accumulator);
-        }
-      }
-    }
-    else if (rdpcmMode == RDPCM_HOR)
-    {
-      for (uint32_t uiY = 0; uiY < uiHeight; uiY++)
-      {
-        TCoeff accumulator = pcResidual.at(0, uiY);
-
-        for (uint32_t uiX = 1; uiX < uiWidth; uiX++)
-        {
-          accumulator            += pcResidual.at(uiX, uiY);
-          pcResidual.at(uiX, uiY) = (Pel) Clip3<TCoeff>(pelMin, pelMax, accumulator);
-        }
-      }
-    }
-  }
-}
-
 
 std::pair<int64_t,int64_t> TrQuant::fwdTransformICT( const TransformUnit &tu, const PelBuf &resCb, const PelBuf &resCr, PelBuf &resC1, PelBuf &resC2, int jointCbCr )
 {
@@ -1043,15 +983,11 @@ void TrQuant::transformNxN( TransformUnit& tu, const ComponentID& compID, const 
     return;
   }
 
-  RDPCMMode rdpcmMode = RDPCM_OFF;
-  rdpcmNxN(tu, compID, cQP, uiAbsSum, rdpcmMode);
-
   if ((tu.cu->bdpcmMode && isLuma(compID)) || (!isLuma(compID) && tu.cu->bdpcmModeChroma))
   {
     tu.mtsIdx[compID] = MTS_SKIP;
   }
 
-  if (rdpcmMode == RDPCM_OFF)
   {
     uiAbsSum = 0;
 
@@ -1092,118 +1028,6 @@ void TrQuant::transformNxN( TransformUnit& tu, const ComponentID& compID, const 
   TU::setCbfAtDepth (tu, compID, tu.depth, uiAbsSum > 0);
 }
 
-
-void TrQuant::applyForwardRDPCM(TransformUnit &tu, const ComponentID &compID, const QpParam &cQP, TCoeff &uiAbsSum, const RDPCMMode &mode)
-{
-  const uint32_t uiWidth        = tu.blocks[compID].width;
-  const uint32_t uiHeight       = tu.blocks[compID].height;
-  const bool rotateResidual = TU::isNonTransformedResidualRotated(tu, compID);
-  const uint32_t uiSizeMinus1   = (uiWidth * uiHeight) - 1;
-
-  const CPelBuf pcResidual  = tu.cs->getResiBuf(tu.blocks[compID]);
-  const CoeffBuf pcCoeff    = tu.getCoeffs(compID);
-
-  uint32_t uiX = 0;
-  uint32_t uiY = 0;
-
-  uint32_t &majorAxis            = (mode == RDPCM_VER) ? uiX      : uiY;
-  uint32_t &minorAxis            = (mode == RDPCM_VER) ? uiY      : uiX;
-  const uint32_t  majorAxisLimit = (mode == RDPCM_VER) ? uiWidth  : uiHeight;
-  const uint32_t  minorAxisLimit = (mode == RDPCM_VER) ? uiHeight : uiWidth;
-
-  const bool bUseHalfRoundingPoint = (mode != RDPCM_OFF);
-
-  uiAbsSum = 0;
-
-  for (majorAxis = 0; majorAxis < majorAxisLimit; majorAxis++)
-  {
-    TCoeff accumulatorValue = 0; // 32-bit accumulator
-
-    for (minorAxis = 0; minorAxis < minorAxisLimit; minorAxis++)
-    {
-      const uint32_t sampleIndex        = (uiY * uiWidth) + uiX;
-      const uint32_t coefficientIndex   = (rotateResidual ? (uiSizeMinus1-sampleIndex) : sampleIndex);
-      const Pel  currentSample      = pcResidual.at(uiX, uiY);
-      const TCoeff encoderSideDelta = TCoeff(currentSample) - accumulatorValue;
-
-      Pel reconstructedDelta;
-
-        m_quant->transformSkipQuantOneSample(tu, compID, encoderSideDelta, pcCoeff.buf[coefficientIndex],   coefficientIndex, cQP, bUseHalfRoundingPoint);
-        m_quant->invTrSkipDeQuantOneSample  (tu, compID, pcCoeff.buf[coefficientIndex], reconstructedDelta, coefficientIndex, cQP);
-
-      uiAbsSum += abs(pcCoeff.buf[coefficientIndex]);
-
-      if (mode != RDPCM_OFF)
-      {
-        accumulatorValue += reconstructedDelta;
-      }
-    }
-  }
-}
-
-void TrQuant::rdpcmNxN(TransformUnit &tu, const ComponentID &compID, const QpParam &cQP, TCoeff &uiAbsSum, RDPCMMode &rdpcmMode)
-{
-  if (!CU::isRDPCMEnabled(*tu.cu) || (tu.mtsIdx[compID] != MTS_SKIP))
-  {
-    rdpcmMode = RDPCM_OFF;
-  }
-  else if (CU::isIntra(*tu.cu))
-  {
-    const ChannelType chType = toChannelType(compID);
-    const uint32_t uiChFinalMode = PU::getFinalIntraMode(*tu.cs->getPU(tu.blocks[compID].pos(), chType), chType);
-
-    if (uiChFinalMode == VER_IDX || uiChFinalMode == HOR_IDX)
-    {
-      rdpcmMode = (uiChFinalMode == VER_IDX) ? RDPCM_VER : RDPCM_HOR;
-
-      applyForwardRDPCM(tu, compID, cQP, uiAbsSum, rdpcmMode);
-    }
-    else
-    {
-      rdpcmMode = RDPCM_OFF;
-    }
-  }
-  else // not intra, need to select the best mode
-  {
-    const CompArea &area = tu.blocks[compID];
-    const uint32_t uiWidth   = area.width;
-    const uint32_t uiHeight  = area.height;
-
-    RDPCMMode bestMode = NUMBER_OF_RDPCM_MODES;
-    TCoeff    bestAbsSum = std::numeric_limits<TCoeff>::max();
-    TCoeff    bestCoefficients[MAX_TB_SIZEY * MAX_TB_SIZEY];
-
-    for (uint32_t modeIndex = 0; modeIndex < NUMBER_OF_RDPCM_MODES; modeIndex++)
-    {
-      const RDPCMMode mode = RDPCMMode(modeIndex);
-
-      TCoeff currAbsSum = 0;
-
-      applyForwardRDPCM(tu, compID, cQP, uiAbsSum, rdpcmMode);
-
-      if (currAbsSum < bestAbsSum)
-      {
-        bestMode = mode;
-        bestAbsSum = currAbsSum;
-
-        if (mode != RDPCM_OFF)
-        {
-          CoeffBuf(bestCoefficients, uiWidth, uiHeight).copyFrom(tu.getCoeffs(compID));
-        }
-      }
-    }
-
-    rdpcmMode = bestMode;
-    uiAbsSum = bestAbsSum;
-
-    if (rdpcmMode != RDPCM_OFF) //the TU is re-transformed and quantized if DPCM_OFF is returned, so there is no need to preserve it here
-    {
-      tu.getCoeffs(compID).copyFrom(CoeffBuf(bestCoefficients, uiWidth, uiHeight));
-    }
-  }
-
-  tu.rdpcm[compID] = rdpcmMode;
-}
 
 void TrQuant::xTransformSkip(const TransformUnit &tu, const ComponentID &compID, const CPelBuf &resi, TCoeff* psCoeff)
 {

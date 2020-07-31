@@ -458,7 +458,6 @@ struct TransformUnit : public UnitArea
   bool           noResidual;
   uint8_t        jointCbCr;
   uint8_t        cbf        [ MAX_NUM_TBLOCKS ];
-  RDPCMMode    rdpcm        [ MAX_NUM_TBLOCKS ];
 
   TransformUnit() : chType( CH_L ) { }
   TransformUnit(const UnitArea& unit);

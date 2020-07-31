@@ -65,7 +65,8 @@ public:
   void setScalingList       ( ScalingList *scalingList, const int maxLog2TrDynamicRange[MAX_NUM_CHANNEL_TYPE], const BitDepths &bitDepths);
   // quantization
   void quant                ( TransformUnit &tu, const ComponentID &compID, const CCoeffBuf &pSrc, TCoeff &uiAbsSum, const QpParam &cQP, const Ctx& ctx );
-  void forwardRDPCM         ( TransformUnit &tu, const ComponentID &compID, const CCoeffBuf &pSrc, TCoeff &uiAbsSum, const QpParam &cQP, const Ctx &ctx );
+  void forwardBDPCM(TransformUnit &tu, const ComponentID &compID, const CCoeffBuf &pSrc, TCoeff &uiAbsSum,
+                    const QpParam &cQP, const Ctx &ctx);
 
 private:
   double* xGetErrScaleCoeffSL            ( uint32_t list, uint32_t sizeX, uint32_t sizeY, int qp ) { return m_errScale[sizeX][sizeY][list][qp]; };  //!< get Error Scale Coefficent

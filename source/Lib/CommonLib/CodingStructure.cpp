@@ -683,7 +683,6 @@ void CodingStructure::addEmptyTUs( Partitioner &partitioner )
       {
         tu.getCoeffs( ComponentID( compID ) ).fill( 0 );
         tu.getPcmbuf( ComponentID( compID ) ).fill( 0 );
-        tu.rdpcm[compID] = RDPCM_OFF;
       }
     }
     tu.depth = trDepth;
