@@ -82,6 +82,10 @@ struct ProfileFeatures
   uint32_t                 minCrScaleFactorx100;
   const LevelTierFeatures *pLevelTiersListInfo;
   bool                     onePictureOnlyFlagMustBe1;
+
+#if JVET_S_PROFILES
+  static const ProfileFeatures *getProfileFeatures(const Profile::Name p);
+#endif
 };
 
 

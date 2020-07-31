@@ -93,15 +93,49 @@ static const LevelTierFeatures mainLevelTierInfo[] =
 #endif
 };
 
-static const ProfileFeatures validProfiles[] =
-{   //  profile,                   pNameString,             maxBitDepth, maxChrFmt, lvl15.5, cpbvcl, cpbnal, fcf*1000, mincr*100, levelInfo
-    // most constrained profiles must appear first.
-    { Profile::MAIN_10,            "Main_10_Still_Picture",          10, CHROMA_420,  true,   1000,   1100,     1875,    100    , mainLevelTierInfo,  true },
-    { Profile::MAIN_444_10,        "Main_444_10_Still_Picture",      10, CHROMA_444,  true,   2500,   2750,     3750,     75    , mainLevelTierInfo,  true },
-    { Profile::MAIN_10,            "Main_10",                        10, CHROMA_420, false,   1000,   1100,     1875,    100    , mainLevelTierInfo, false },
-    { Profile::MAIN_444_10,        "Main_444_10",                    10, CHROMA_444, false,   2500,   2750,     3750,     75    , mainLevelTierInfo, false },
-    { Profile::NONE, 0 }
+static const ProfileFeatures validProfiles[] = {
+// profile, pNameString, maxBitDepth, maxChrFmt, lvl15.5, cpbvcl, cpbnal, fcf*1000, mincr*100, levelInfo
+// most constrained profiles must appear first.
+#if JVET_S_PROFILES
+  { Profile::MAIN_10_STILL_PICTURE, "Main_10_Still_Picture", 10, CHROMA_420, true, 1000, 1100, 1875, 100,
+    mainLevelTierInfo, true },
+  { Profile::MULTILAYER_MAIN_10_STILL_PICTURE, "Multilayer_Main_10_Still_Picture", 10, CHROMA_420, true, 1000, 1100,
+    1875, 100, mainLevelTierInfo, true },
+  { Profile::MAIN_10_444_STILL_PICTURE, "Main_444_10_Still_Picture", 10, CHROMA_444, true, 2500, 2750, 3750, 75,
+    mainLevelTierInfo, true },
+  { Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE, "Multilayer_Main_444_10_Still_Picture", 10, CHROMA_444, true, 2500,
+    2750, 3750, 75, mainLevelTierInfo, true },
+  { Profile::MAIN_10, "Main_10", 10, CHROMA_420, false, 1000, 1100, 1875, 100, mainLevelTierInfo, false },
+  { Profile::MULTILAYER_MAIN_10, "Multilayer_Main_10", 10, CHROMA_420, false, 1000, 1100, 1875, 100, mainLevelTierInfo,
+    false },
+  { Profile::MAIN_10_444, "Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75, mainLevelTierInfo, false },
+  { Profile::MULTILAYER_MAIN_10_444, "Multilayer_Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75,
+    mainLevelTierInfo, false },
+#else
+  { Profile::MAIN_10, "Main_10_Still_Picture", 10, CHROMA_420, true, 1000, 1100, 1875, 100, mainLevelTierInfo, true },
+  { Profile::MAIN_444_10, "Main_444_10_Still_Picture", 10, CHROMA_444, true, 2500, 2750, 3750, 75, mainLevelTierInfo,
+    true },
+  { Profile::MAIN_10, "Main_10", 10, CHROMA_420, false, 1000, 1100, 1875, 100, mainLevelTierInfo, false },
+  { Profile::MAIN_444_10, "Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75, mainLevelTierInfo, false },
+#endif
+  { Profile::NONE, 0 },
 };
+
+#if JVET_S_PROFILES
+const ProfileFeatures *ProfileFeatures::getProfileFeatures(const Profile::Name p)
+{
+  int i;
+  for (i = 0; validProfiles[i].profile != Profile::NONE; i++)
+  {
+    if (validProfiles[i].profile == p)
+    {
+      return &validProfiles[i];
+    }
+  }
+
+  return &validProfiles[i];
+}
+#endif
 
 void
 ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)

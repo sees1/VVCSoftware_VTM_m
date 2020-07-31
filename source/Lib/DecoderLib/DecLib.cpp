@@ -1806,7 +1806,8 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK( sps->getMaxPicWidthInLumaSamples() > vps->getOlsDpbPicSize( vps->m_targetOlsIdx ).width, "pic_width_max_in_luma_samples shall be less than or equal to the value of ols_dpb_pic_width[ i ]" );
     CHECK( sps->getMaxPicHeightInLumaSamples() > vps->getOlsDpbPicSize( vps->m_targetOlsIdx ).height, "pic_height_max_in_luma_samples shall be less than or equal to the value of ols_dpb_pic_height[ i ]" );
     CHECK( sps->getChromaFormatIdc() > vps->getOlsDpbChromaFormatIdc( vps->m_targetOlsIdx ), "sps_chroma_format_idc shall be less than or equal to the value of ols_dpb_chroma_format[ i ]");
-    CHECK((sps->getBitDepth(CHANNEL_TYPE_LUMA) - 8) > vps->getOlsDpbBitDepthMinus8( vps->m_targetOlsIdx ), "sps_bit_depth_minus8 shall be less than or equal to the value of ols_dpb_bitdepth_minus8[ i ]");
+    CHECK((sps->getBitDepth(CHANNEL_TYPE_LUMA) - 8) > vps->getOlsDpbBitDepthMinus8(vps->m_targetOlsIdx),
+          "sps_bitdepth_minus8 shall be less than or equal to the value of ols_dpb_bitdepth_minus8[ i ]");
   }
 
   static std::unordered_map<int, int> m_layerChromaFormat;
@@ -1911,6 +1912,12 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   ptlFeature.extractPTLInformation(*sps);
   CHECK(pps->getNumTileColumns() > ptlFeature.getLevelTierFeatures()->maxTileCols, "Num tile columns signaled in PPS exceed level limits");
   CHECK(pps->getNumTiles() > ptlFeature.getLevelTierFeatures()->maxTilesPerAu, "Num tiles signaled in PPS exceed level limits");
+#if JVET_S_PROFILES
+  CHECK(sps->getBitDepth(CHANNEL_TYPE_LUMA) > ptlFeature.getProfileFeatures()->maxBitDepth,
+        "Bit depth exceed profile limit");
+  CHECK(sps->getChromaFormatIdc() > ptlFeature.getProfileFeatures()->maxChromaFormat,
+        "Chroma format exceed profile limit");
+#endif
 #endif
 }
 
