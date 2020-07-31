@@ -229,34 +229,36 @@ void Picture::destroy()
 #if ENABLE_SPLIT_PARALLELISM
   for( int jId = 0; jId < PARL_SPLIT_MAX_NUM_THREADS; jId++ )
 #endif
-  for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
   {
-    M_BUFS( jId, t ).destroy();
-  }
-  m_hashMap.clearAll();
-  if( cs )
-  {
-    cs->destroy();
-    delete cs;
-    cs = nullptr;
-  }
+    for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
+    {
+      M_BUFS(jId, t).destroy();
+    }
+    m_hashMap.clearAll();
+    if (cs)
+    {
+      cs->destroy();
+      delete cs;
+      cs = nullptr;
+    }
 
-  for( auto &ps : slices )
-  {
-    delete ps;
-  }
-  slices.clear();
+    for (auto &ps: slices)
+    {
+      delete ps;
+    }
+    slices.clear();
 
-  for( auto &psei : SEIs )
-  {
-    delete psei;
-  }
-  SEIs.clear();
+    for (auto &psei: SEIs)
+    {
+      delete psei;
+    }
+    SEIs.clear();
 
-  if (m_spliceIdx)
-  {
-    delete[] m_spliceIdx;
-    m_spliceIdx = NULL;
+    if (m_spliceIdx)
+    {
+      delete[] m_spliceIdx;
+      m_spliceIdx = NULL;
+    }
   }
 }
 
@@ -277,11 +279,17 @@ void Picture::createTempBuffers( const unsigned _maxCUSize )
     M_BUFS( jId, PIC_PREDICTION                   ).create( chromaFormat, a,   _maxCUSize );
     M_BUFS( jId, PIC_RESIDUAL                     ).create( chromaFormat, a,   _maxCUSize );
 #if ENABLE_SPLIT_PARALLELISM
-    if( jId > 0 ) M_BUFS( jId, PIC_RECONSTRUCTION ).create( chromaFormat, Y(), _maxCUSize, margin, MEMORY_ALIGN_DEF_SIZE );
+    if (jId > 0)
+    {
+      M_BUFS(jId, PIC_RECONSTRUCTION).create(chromaFormat, Y(), _maxCUSize, margin, MEMORY_ALIGN_DEF_SIZE);
+    }
 #endif
   }
 
-  if( cs ) cs->rebindPicBufs();
+  if (cs)
+  {
+    cs->rebindPicBufs();
+  }
 }
 
 void Picture::destroyTempBuffers()
@@ -291,15 +299,26 @@ void Picture::destroyTempBuffers()
 
   for( int jId = 0; jId < scheduler.getNumPicInstances(); jId++ )
 #endif
-  for( uint32_t t = 0; t < NUM_PIC_TYPES; t++ )
   {
-    if( t == PIC_RESIDUAL || t == PIC_PREDICTION ) M_BUFS( jId, t ).destroy();
+    for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
+    {
+      if (t == PIC_RESIDUAL || t == PIC_PREDICTION)
+      {
+        M_BUFS(jId, t).destroy();
+      }
 #if ENABLE_SPLIT_PARALLELISM
-    if( t == PIC_RECONSTRUCTION &&       jId > 0 ) M_BUFS( jId, t ).destroy();
+      if (t == PIC_RECONSTRUCTION && jId > 0)
+      {
+        M_BUFS(jId, t).destroy();
+      }
 #endif
+    }
   }
 
-  if( cs ) cs->rebindPicBufs();
+  if (cs)
+  {
+    cs->rebindPicBufs();
+  }
 }
 
        PelBuf     Picture::getOrigBuf(const CompArea &blk)        { return getBuf(blk,  PIC_ORIGINAL); }
@@ -342,7 +361,6 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   }
   SEIs.clear();
   clearSliceBuffer();
-
 
   const ChromaFormat chromaFormatIDC = sps.getChromaFormatIdc();
   const int          iWidth = pps.getPicWidthInLumaSamples();
@@ -387,7 +405,6 @@ void Picture::allocateNewSlice()
   Slice& slice = *slices.back();
   memcpy(slice.getAlfAPSs(), cs->alfApss, sizeof(cs->alfApss));
 
-
   slice.setPPS( cs->pps);
   slice.setSPS( cs->sps);
   slice.setVPS( cs->vps);
@@ -397,6 +414,7 @@ void Picture::allocateNewSlice()
     slice.initSlice();
   }
 }
+
 void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessIndexArray, bool mixedLossyLossless)
 {
   uint16_t numElementsinsliceLosslessIndexArray = (uint16_t)sliceLosslessIndexArray.size();
@@ -415,7 +433,6 @@ void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessInd
     }
   } 
   CHECK(m_lossylosslessSliceArray.size() < numSlices, "sliceLosslessArray size is less than number of slices");
-
 }
 
 Slice *Picture::swapSliceObject(Slice * p, uint32_t i)
@@ -446,7 +463,6 @@ void Picture::clearSliceBuffer()
 }
 
 #if ENABLE_SPLIT_PARALLELISM
-
 void Picture::finishParallelPart( const UnitArea& area )
 {
   const UnitArea clipdArea = clipArea( area, *this );
@@ -461,8 +477,6 @@ void Picture::finishParallelPart( const UnitArea& area )
     M_BUFS( destID, PIC_RECONSTRUCTION ).subBuf( clipdArea ).copyFrom( M_BUFS( sourceID, PIC_RECONSTRUCTION ).subBuf( clipdArea ) );
   }
 }
-
-
 #endif
 
 const TFilterCoeff DownsamplingFilterSRC[8][16][12] =
@@ -657,21 +671,63 @@ void Picture::sampleRateConv( const std::pair<int, int> scalingRatio, const std:
     int verFilter = 0;
     int horFilter = 0;
 
-    if( scalingRatio.first > ( 15 << SCALE_RATIO_BITS ) / 4 )   horFilter = 7;
-    else if( scalingRatio.first > ( 20 << SCALE_RATIO_BITS ) / 7 )   horFilter = 6;
-    else if( scalingRatio.first > ( 5 << SCALE_RATIO_BITS ) / 2 )   horFilter = 5;
-    else if( scalingRatio.first > ( 2 << SCALE_RATIO_BITS ) )   horFilter = 4;
-    else if( scalingRatio.first > ( 5 << SCALE_RATIO_BITS ) / 3 )   horFilter = 3;
-    else if( scalingRatio.first > ( 5 << SCALE_RATIO_BITS ) / 4 )   horFilter = 2;
-    else if( scalingRatio.first > ( 20 << SCALE_RATIO_BITS ) / 19 )   horFilter = 1;
+    if (scalingRatio.first > (15 << SCALE_RATIO_BITS) / 4)
+    {
+      horFilter = 7;
+    }
+    else if (scalingRatio.first > (20 << SCALE_RATIO_BITS) / 7)
+    {
+      horFilter = 6;
+    }
+    else if (scalingRatio.first > (5 << SCALE_RATIO_BITS) / 2)
+    {
+      horFilter = 5;
+    }
+    else if (scalingRatio.first > (2 << SCALE_RATIO_BITS))
+    {
+      horFilter = 4;
+    }
+    else if (scalingRatio.first > (5 << SCALE_RATIO_BITS) / 3)
+    {
+      horFilter = 3;
+    }
+    else if (scalingRatio.first > (5 << SCALE_RATIO_BITS) / 4)
+    {
+      horFilter = 2;
+    }
+    else if (scalingRatio.first > (20 << SCALE_RATIO_BITS) / 19)
+    {
+      horFilter = 1;
+    }
 
-    if( scalingRatio.second > ( 15 << SCALE_RATIO_BITS ) / 4 )   verFilter = 7;
-    else if( scalingRatio.second > ( 20 << SCALE_RATIO_BITS ) / 7 )   verFilter = 6;
-    else if( scalingRatio.second > ( 5 << SCALE_RATIO_BITS ) / 2 )   verFilter = 5;
-    else if( scalingRatio.second > ( 2 << SCALE_RATIO_BITS ) )   verFilter = 4;
-    else if( scalingRatio.second > ( 5 << SCALE_RATIO_BITS ) / 3 )   verFilter = 3;
-    else if( scalingRatio.second > ( 5 << SCALE_RATIO_BITS ) / 4 )   verFilter = 2;
-    else if( scalingRatio.second > ( 20 << SCALE_RATIO_BITS ) / 19 )   verFilter = 1;
+    if (scalingRatio.second > (15 << SCALE_RATIO_BITS) / 4)
+    {
+      verFilter = 7;
+    }
+    else if (scalingRatio.second > (20 << SCALE_RATIO_BITS) / 7)
+    {
+      verFilter = 6;
+    }
+    else if (scalingRatio.second > (5 << SCALE_RATIO_BITS) / 2)
+    {
+      verFilter = 5;
+    }
+    else if (scalingRatio.second > (2 << SCALE_RATIO_BITS))
+    {
+      verFilter = 4;
+    }
+    else if (scalingRatio.second > (5 << SCALE_RATIO_BITS) / 3)
+    {
+      verFilter = 3;
+    }
+    else if (scalingRatio.second > (5 << SCALE_RATIO_BITS) / 4)
+    {
+      verFilter = 2;
+    }
+    else if (scalingRatio.second > (20 << SCALE_RATIO_BITS) / 19)
+    {
+      verFilter = 1;
+    }
 
     filterHor = &DownsamplingFilterSRC[horFilter][0][0];
     filterVer = &DownsamplingFilterSRC[verFilter][0][0];
@@ -1074,15 +1130,15 @@ void Picture::extendPicBorder( const PPS *pps )
 
     Pel*  pi = piTxt;
     // do left and right margins
-      for (int y = 0; y < p.height; y++)
+    for (int y = 0; y < p.height; y++)
+    {
+      for (int x = 0; x < xmargin; x++)
       {
-        for (int x = 0; x < xmargin; x++ )
-        {
-          pi[ -xmargin + x ] = pi[0];
-          pi[  p.width + x ] = pi[p.width-1];
-        }
-        pi += p.stride;
+        pi[-xmargin + x] = pi[0];
+        pi[p.width + x]  = pi[p.width - 1];
       }
+      pi += p.stride;
+    }
 
     // pi is now the (0,height) (bottom left of image within bigger picture
     pi -= (p.stride + xmargin);
@@ -1248,7 +1304,6 @@ Pel* Picture::getOrigin( const PictureType &type, const ComponentID compID ) con
   const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL ) ? 0 : scheduler.getSplitPicId();
 #endif
   return M_BUFS( jId, type ).getOrigin( compID );
-
 }
 
 void Picture::createSpliceIdx(int nums)
@@ -1264,10 +1319,14 @@ bool Picture::getSpliceFull()
   for (int i = 0; i < m_ctuNums; i++)
   {
     if (m_spliceIdx[i] != 0)
+    {
       count++;
+    }
   }
   if (count < m_ctuNums * 0.25)
+  {
     return false;
+  }
   return true;
 }
 
