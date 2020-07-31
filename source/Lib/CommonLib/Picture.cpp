@@ -303,10 +303,14 @@ void Picture::destroyTempBuffers()
     for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
     {
       if (t == PIC_RESIDUAL || t == PIC_PREDICTION)
+      {
         M_BUFS(jId, t).destroy();
+      }
 #if ENABLE_SPLIT_PARALLELISM
       if (t == PIC_RECONSTRUCTION && jId > 0)
+      {
         M_BUFS(jId, t).destroy();
+      }
 #endif
     }
   }
