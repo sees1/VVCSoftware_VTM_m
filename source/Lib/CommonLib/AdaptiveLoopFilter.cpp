@@ -276,6 +276,7 @@ const int AdaptiveLoopFilter::m_fixedFilterSetCoeff[ALF_FIXED_FILTER_NUM][MAX_NU
   { 0,   1,   2,  -8,   2,  -6,   5,  15,   0,   2,  -7,   9,  0 },
   { 1,  -1,  12, -15,  -7,  -2,   3,   6,   6,  -1,   7,  30,  0 },
 };
+
 const int AdaptiveLoopFilter::m_classToFilterMapping[NUM_FIXED_FILTER_SETS][MAX_NUM_ALF_CLASSES] =
 {
   { 8,   2,   2,   2,   3,   4,  53,   9,   9,  52,   4,   4,   5,   9,   2,   8,  10,   9,   1,   3,  39,  39,  10,   9,  52 },
@@ -319,7 +320,9 @@ void AdaptiveLoopFilter::applyCcAlfFilter(CodingStructure &cs, ComponentID compI
       if (!skipFiltering)
       {
         if (filterControl != nullptr)
+        {
           filterIdx--;
+        }
 
         const int16_t *filterCoeff = filterSet[filterIdx];
 
@@ -584,10 +587,8 @@ void AdaptiveLoopFilter::ALFProcess(CodingStructure& cs)
             coeff = m_fixedFilterSetCoeffDec[filterSetIndex];
             clip = m_clipDefault;
           }
-          m_filter7x7Blk(m_classifier, recYuv, tmpYuv, blk, blk, COMPONENT_Y, coeff, clip, m_clpRngs.comp[COMPONENT_Y], cs
-            , m_alfVBLumaCTUHeight
-            , m_alfVBLumaPos
-          );
+          m_filter7x7Blk(m_classifier, recYuv, tmpYuv, blk, blk, COMPONENT_Y, coeff, clip, m_clpRngs.comp[COMPONENT_Y],
+                         cs, m_alfVBLumaCTUHeight, m_alfVBLumaPos);
         }
 
         for( int compIdx = 1; compIdx < MAX_NUM_COMPONENT; compIdx++ )
@@ -1115,7 +1116,6 @@ void AdaptiveLoopFilter::filterBlk(AlfClassifier **classifier, const PelUnitBuf 
   int transposeIdx = 0;
   const int clsSizeY = 4;
   const int clsSizeX = 4;
-
 
   CHECK( startHeight % clsSizeY, "Wrong startHeight in filtering" );
   CHECK( startWidth % clsSizeX, "Wrong startWidth in filtering" );
