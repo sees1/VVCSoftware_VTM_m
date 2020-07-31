@@ -2789,11 +2789,13 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     codeConstraintInfo(ptl->getConstraintInfo());
 #endif
+#if !JVET_S_SUB_PROFILE
     WRITE_CODE(ptl->getNumSubProfile(), 8, "num_sub_profiles");
     for (int i = 0; i < ptl->getNumSubProfile(); i++)
     {
       WRITE_CODE(ptl->getSubProfileIdc(i) , 32, "general_sub_profile_idc[i]");
     }
+#endif
   }
 
 #if JVET_S0203
@@ -2826,6 +2828,16 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
     }
   }
 
+#if JVET_S_SUB_PROFILE
+  if (profileTierPresentFlag)
+  {
+    WRITE_CODE(ptl->getNumSubProfile(), 8, "ptl_num_sub_profiles");
+    for (int i = 0; i < ptl->getNumSubProfile(); i++)
+    {
+      WRITE_CODE(ptl->getSubProfileIdc(i), 32, "general_sub_profile_idc[i]");
+    }
+  }
+#endif
 }
 
 
