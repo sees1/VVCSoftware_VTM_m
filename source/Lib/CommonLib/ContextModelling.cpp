@@ -194,13 +194,31 @@ void DeriveCtx::CtxSplit( const CodingStructure& cs, Partitioner& partitioner, u
   }
 
   unsigned numSplit = 0;
-  if( canSplit[1] ) numSplit += 2;
-  if( canSplit[2] ) numSplit += 1;
-  if( canSplit[3] ) numSplit += 1;
-  if( canSplit[4] ) numSplit += 1;
-  if( canSplit[5] ) numSplit += 1;
+  if (canSplit[1])
+  {
+    numSplit += 2;
+  }
+  if (canSplit[2])
+  {
+    numSplit += 1;
+  }
+  if (canSplit[3])
+  {
+    numSplit += 1;
+  }
+  if (canSplit[4])
+  {
+    numSplit += 1;
+  }
+  if (canSplit[5])
+  {
+    numSplit += 1;
+  }
 
-  if( numSplit > 0 ) numSplit--;
+  if (numSplit > 0)
+  {
+    numSplit--;
+  }
 
   ctxSpl += 3 * ( numSplit >> 1 );
 
@@ -229,9 +247,18 @@ void DeriveCtx::CtxSplit( const CodingStructure& cs, Partitioner& partitioner, u
     const unsigned depAbove     = area.width / wAbove;
     const unsigned depLeft      = area.height / hLeft;
 
-    if( depAbove == depLeft || !cuLeft || !cuAbove ) ctxHv = 0;
-    else if( depAbove < depLeft ) ctxHv = 1;
-    else ctxHv = 2;
+    if (depAbove == depLeft || !cuLeft || !cuAbove)
+    {
+      ctxHv = 0;
+    }
+    else if (depAbove < depLeft)
+    {
+      ctxHv = 1;
+    }
+    else
+    {
+      ctxHv = 2;
+    }
   }
   else if( numVer < numHor )
   {
