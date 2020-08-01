@@ -2575,7 +2575,14 @@ int EncAppCfg::xAutoDetermineProfile()
   case ChromaFormat::CHROMA_420:
     if (maxBitDepth <= 10)
     {
-      m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10 : Profile::MAIN_10;
+      if (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1)
+      {
+        m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_STILL_PICTURE : Profile::MAIN_10_STILL_PICTURE;
+      }
+      else
+      {
+        m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10 : Profile::MAIN_10;
+      }
     }
     break;
 
@@ -2583,7 +2590,15 @@ int EncAppCfg::xAutoDetermineProfile()
   case ChromaFormat::CHROMA_444:
     if (maxBitDepth <= 10)
     {
-      m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_444 : Profile::MAIN_10_444;
+      if (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1)
+      {
+        m_profile =
+          m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE : Profile::MAIN_10_444_STILL_PICTURE;
+      }
+      else
+      {
+        m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_444 : Profile::MAIN_10_444;
+      }
     }
     break;
 

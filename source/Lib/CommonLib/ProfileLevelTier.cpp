@@ -145,10 +145,16 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
   m_tier = spsPtl.getTierFlag();
 
   // Identify the profile from the profile Idc, and possibly other constraints.
+#if !JVET_S_PROFILES
   bool onePictureOnlyConstraintFlag=spsPtl.getConstraintInfo()->getOnePictureOnlyConstraintFlag();
+#endif
   for(int32_t i=0; validProfiles[i].profile != Profile::NONE; i++)
   {
+#if JVET_S_PROFILES
+    if (spsPtl.getProfileIdc() == validProfiles[i].profile)
+#else
     if (spsPtl.getProfileIdc() == validProfiles[i].profile && !(validProfiles[i].onePictureOnlyFlagMustBe1 && !onePictureOnlyConstraintFlag))
+#endif
     {
       m_pProfile = &(validProfiles[i]);
       break;
