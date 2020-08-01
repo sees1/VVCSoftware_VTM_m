@@ -147,6 +147,11 @@
 
 #define JVET_S0138_GCI_PTL                                1 // JVET-S_Notes_d9: move frame_only_constraint_flag and single_layer_constraint_flag into PTL for easy access
 
+#define JVET_S0113_S0195_GCI                              1 // JVET-S0113: no_rectangular_slice_constraint_flag to constrain pps_rect_slice_flag 
+                                                            //             one_slice_per_subpicture_constraint_flag to constrain pps_single_slice_per_subpic_flag
+                                                            // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
+                                                            //             add no_idr_rpl_constraint_flag
+
 #define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
 
 #define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
