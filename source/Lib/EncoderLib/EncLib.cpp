@@ -1127,7 +1127,14 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
   cinfo->setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
   cinfo->setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
+#if JVET_S0113_S0195_GCI
+  cinfo->setNoIdrRplConstraintFlag(m_noIdrRplConstraintFlag);
+  cinfo->setNoRectSliceConstraintFlag(m_noRectSliceConstraintFlag);
+  cinfo->setOneSlicePerSubpicConstraintFlag(m_oneSlicePerSubpicConstraintFlag);
+  cinfo->setNoSubpicInfoConstraintFlag(m_noSubpicInfoConstraintFlag);
+#else
   cinfo->setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
+#endif
 #if !JVET_S0138_GCI_PTL
   cinfo->setFrameOnlyConstraintFlag     (m_frameOnlyConstraintFlag);
 #endif

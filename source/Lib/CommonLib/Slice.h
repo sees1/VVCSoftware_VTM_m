@@ -246,7 +246,14 @@ class ConstraintInfo
   bool              m_oneTilePerPicConstraintFlag;
   bool              m_picHeaderInSliceHeaderConstraintFlag;
   bool              m_oneSlicePerPicConstraintFlag;
+#if JVET_S0113_S0195_GCI
+  bool              m_noIdrRplConstraintFlag;
+  bool              m_noRectSliceConstraintFlag;
+  bool              m_oneSlicePerSubpicConstraintFlag;
+  bool              m_noSubpicInfoConstraintFlag;
+#else
   bool              m_oneSubpicPerPicConstraintFlag;
+#endif
 #if !JVET_S0138_GCI_PTL
   bool              m_frameOnlyConstraintFlag;
 #endif
@@ -332,7 +339,14 @@ public:
     , m_oneTilePerPicConstraintFlag(false)
     , m_picHeaderInSliceHeaderConstraintFlag(false)
     , m_oneSlicePerPicConstraintFlag(false)
+#if JVET_S0113_S0195_GCI
+    , m_noIdrRplConstraintFlag(false)
+    , m_noRectSliceConstraintFlag(false)
+    , m_oneSlicePerSubpicConstraintFlag(false)
+    , m_noSubpicInfoConstraintFlag(false)
+#else
     , m_oneSubpicPerPicConstraintFlag(false)
+#endif
 #if !JVET_S0138_GCI_PTL
     , m_frameOnlyConstraintFlag  (false)
 #endif
@@ -444,8 +458,22 @@ public:
   bool          getOneSlicePerPicConstraintFlag() const { return m_oneSlicePerPicConstraintFlag; }
   void          setOneSlicePerPicConstraintFlag(bool b) { m_oneSlicePerPicConstraintFlag = b; }
 
+#if JVET_S0113_S0195_GCI
+  bool          getNoIdrRplConstraintFlag() const          { return m_noIdrRplConstraintFlag; }
+  void          setNoIdrRplConstraintFlag(bool b)          { m_noIdrRplConstraintFlag = b; }
+
+  bool          getNoRectSliceConstraintFlag() const       { return m_noRectSliceConstraintFlag; }
+  void          setNoRectSliceConstraintFlag(bool b)       { m_noRectSliceConstraintFlag = b; }
+
+  bool          getOneSlicePerSubpicConstraintFlag() const { return m_oneSlicePerSubpicConstraintFlag; }
+  void          setOneSlicePerSubpicConstraintFlag(bool b) { m_oneSlicePerSubpicConstraintFlag = b; }
+
+  bool          getNoSubpicInfoConstraintFlag() const      { return m_noSubpicInfoConstraintFlag; }
+  void          setNoSubpicInfoConstraintFlag(bool b)      { m_noSubpicInfoConstraintFlag = b; }
+#else
   bool          getOneSubpicPerPicConstraintFlag() const { return m_oneSubpicPerPicConstraintFlag; }
   void          setOneSubpicPerPicConstraintFlag(bool b) { m_oneSubpicPerPicConstraintFlag = b; }
+#endif
 
   bool          getIntraOnlyConstraintFlag() const { return m_intraOnlyConstraintFlag; }
   void          setIntraOnlyConstraintFlag(bool b) { m_intraOnlyConstraintFlag = b; }

@@ -268,7 +268,21 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
     m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
     m_cEncLib.setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
+#if JVET_S0113_S0195_GCI
+    m_cEncLib.setNoIdrRplConstraintFlag(m_noIdrRplConstraintFlag);
+    CHECK(m_noIdrRplConstraintFlag&& m_idrRefParamList, "IDR RPL shall be deactivated when gci_no_idr_rpl_constraint_flag equal to 1");
+
+    m_cEncLib.setNoRectSliceConstraintFlag(m_noRectSliceConstraintFlag);
+    CHECK(m_noRectSliceConstraintFlag && !m_rasterSliceFlag, "Rectangular slice shall be deactivated when gci_no_rectangular_slice_constraint_flag equal to 1");
+
+    m_cEncLib.setOneSlicePerSubpicConstraintFlag(m_oneSlicePerSubpicConstraintFlag);
+    CHECK(m_oneSlicePerSubpicConstraintFlag && !m_singleSlicePerSubPicFlag, "Each picture shall consist of one and only one rectangular slice when gci_one_slice_per_subpic_constraint_flag equal to 1");
+
+    m_cEncLib.setNoSubpicInfoConstraintFlag(m_noSubpicInfoConstraintFlag);
+    CHECK(m_noSubpicInfoConstraintFlag&& m_subPicInfoPresentFlag, "Subpicture information shall not present when gci_no_subpic_info_constraint_flag equal to 1");
+#else
     m_cEncLib.setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
+#endif
 #if !JVET_S0138_GCI_PTL
     m_cEncLib.setFrameOnlyConstraintFlag(m_frameOnlyConstraintFlag);
 #endif
@@ -445,7 +459,14 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setOneTilePerPicConstraintFlag(false);
     m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(false);
     m_cEncLib.setOneSlicePerPicConstraintFlag(false);
+#if JVET_S0113_S0195_GCI
+    m_cEncLib.setNoIdrRplConstraintFlag(false);
+    m_cEncLib.setNoRectSliceConstraintFlag(false);
+    m_cEncLib.setOneSlicePerSubpicConstraintFlag(false);
+    m_cEncLib.setNoSubpicInfoConstraintFlag(false);
+#else
     m_cEncLib.setOneSubpicPerPicConstraintFlag(false);
+#endif
 #if !JVET_S0138_GCI_PTL
     m_cEncLib.setFrameOnlyConstraintFlag(false);
 #endif

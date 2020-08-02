@@ -1856,12 +1856,40 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
 #endif
   }
 
+#if JVET_S0113_S0195_GCI
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getNoIdrRplConstraintFlag())
+  {
+    CHECK(sps->getIDRRefParamListPresent(), "When gci_no_idr_rpl_constraint_flag equal to 1 , the value of sps_idr_rpl_present_flag shall be equal to 0")
+  }
+
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getNoMixedNaluTypesInPicConstraintFlag())
+  {
+    CHECK(pps->getMixedNaluTypesInPicFlag(), "When gci_no_mixed_nalu_types_in_pic_constraint_flag equal to 1, the value of pps_mixed_nalu_types_in_pic_flag shall be equal to 0")
+  }
+
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getNoRectSliceConstraintFlag())
+  {
+    CHECK(pps->getRectSliceFlag(), "When gci_no_rectangular_slice_constraint_flag equal to 1, the value of pps_rect_slice_flag shall be equal to 0")
+  }
+
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getOneSlicePerSubpicConstraintFlag())
+  {
+    CHECK(!(pps->getSingleSlicePerSubPicFlag()), "When gci_one_slice_per_subpic_constraint_flag equal to 1, the value of pps_single_slice_per_subpic_flag shall be equal to 1")
+  }
+
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getNoSubpicInfoConstraintFlag())
+  {
+    CHECK(sps->getSubPicInfoPresentFlag(), "When gci_no_subpic_info_constraint_flag is equal to 1, the value of sps_subpic_info_present_flag shall be equal to 0")
+  }
+#else
 #if JVET_S0050_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getOneSubpicPerPicConstraintFlag())
   {
     CHECK(sps->getNumSubPics() != 1, "When one_subpic_per_pic_constraint_flag is equal to 1, the value of sps_num_subpics_minus1 shall be equal to 0")
   }
 #endif
+#endif
+
 #if JVET_S0066_GCI
   CHECK(sps->getCTUSize() > (1 << sps->getProfileTierLevel()->getConstraintInfo()->getMaxLog2CtuSizeConstraintIdc()), "The CTU size specified by sps_log2_ctu_size_minus5 shall not exceed the constraint specified by gci_three_minus_max_log2_ctu_size_constraint_idc");
 

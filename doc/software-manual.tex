@@ -977,6 +977,18 @@ Valid values are: main, high.
 NB: There is currently only limited validation that the encoder configuration complies with the profile, level and tier constraints.
 \\
 
+\Option{FrameOnlyConstraintFlag} &
+%\ShortOption{\None} &
+\Default{1} &
+Specifies the value of ptl_frame_only_constraint_flag .
+\\
+
+\Option{MultiLayerEnabledFlag} &
+%\ShortOption{\None} &
+\Default{0} &
+Specifies the value of ptl_multilayer_enabled_flag.
+\\
+
 \Option{SubProfile} &
 %\ShortOption{\None} &
 \Default{0} &
@@ -1085,6 +1097,12 @@ Specifies the value of gci_no_gdr_constraint_flag
 Specifies the value of gci_no_aps_constraint_flag
 \\
 
+\Option{NoIdrRplConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_idr_rpl_constraint_flag
+\\
+
 \Option{OneTilePerPicConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
@@ -1102,11 +1120,22 @@ Specifies the value of pic_header_in_slice_header_constraint_flag
 \Default{false} &
 Specifies the value of one_slice_per_pic_constraint_flag
 \\
-
-\Option{OneSubpicPerPicConstraintFlag} &
+\Option{NoRectSliceConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
-Specifies the value of one_subpic_per_pic_constraint_flag
+Specifies the value of gci_no_rectangular_slice_constraint_flag
+\\
+
+\Option{OneSlicePerSubpicConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_one_slice_per_subpic_constraint_flag
+\\
+
+\Option{NoSubpicInfoConstraintFlag} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies the value of gci_no_subpic_info_constraint_flag
 \\
 
 \Option{MaxLog2CtuSizeConstraintIdc} &
@@ -1355,18 +1384,6 @@ Specifies the value of gci_no_ladf_constraint_flag
 Specifies the value of gci_no_virtual_boundaries_constraint_flag
 \\
 
-
-\Option{SingleLayerConstraintFlag} &
-%\ShortOption{\None} &
-\Default{false} &
-Specifies the value of single_layer_constraint_flag
-\\
-
-\Option{FrameOnlyConstraintFlag} &
-%\ShortOption{\None} &
-\Default{false} &
-Specifies the value of general_frame_only_constraint_flag
-\\
 \end{OptionTableNoShorthand}
 
 

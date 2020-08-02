@@ -217,7 +217,14 @@ protected:
   bool          m_oneTilePerPicConstraintFlag;
   bool          m_picHeaderInSliceHeaderConstraintFlag;
   bool          m_oneSlicePerPicConstraintFlag;
+#if JVET_S0113_S0195_GCI
+  bool          m_noIdrRplConstraintFlag;
+  bool          m_noRectSliceConstraintFlag;
+  bool          m_oneSlicePerSubpicConstraintFlag;
+  bool          m_noSubpicInfoConstraintFlag;
+#else
   bool          m_oneSubpicPerPicConstraintFlag;
+#endif
 #if !JVET_S0138_GCI_PTL
   bool          m_frameOnlyConstraintFlag;
 #endif
