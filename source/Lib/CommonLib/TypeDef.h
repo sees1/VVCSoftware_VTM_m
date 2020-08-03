@@ -160,6 +160,8 @@
                                                             // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
                                                             //             add no_idr_rpl_constraint_flag
 
+#define JVET_S0105_GCI_REORDER_IN_CATEGORY                1 // JVET-S0105: reorder and categorize GCI flags (assumes the following macros set to 1: JVET_S0050_GCI, JVET_S0113_S0195_GCI, JVET_S0066_GCI, JVET_S0138_GCI_PTL)
+
 #define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
 
 #define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
