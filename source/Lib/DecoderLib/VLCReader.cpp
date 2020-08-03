@@ -1875,7 +1875,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
       READ_SVLC(qpTableStart, "sps_qp_table_starts_minus26");
       chromaQpMappingTableParams.setQpTableStartMinus26(i, qpTableStart);
       CHECK(qpTableStart < -26 - pcSPS->getQpBDOffset(CHANNEL_TYPE_LUMA) || qpTableStart > 36,
-            "The value of sps_qp_table_start_minus26[ i ] shall be in the range of −26 − QpBdOffset to 36 inclusive");
+            "The value of sps_qp_table_start_minus26[ i ] shall be in the range of -26 - QpBdOffset to 36 inclusive");
       READ_UVLC(uiCode, "sps_num_points_in_qp_table_minus1");
       chromaQpMappingTableParams.setNumPtsInCQPTableMinus1(i, uiCode);
       CHECK(uiCode > 36 - qpTableStart, "The value of sps_num_points_in_qp_table_minus1[ i ] shall be in the range of "
@@ -1985,7 +1985,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   {
     for (int i = 0; i < pcSPS->getNumSubPics(); i++)
     {
-      CHECK(pcSPS->getSubPicTreatedAsPicFlag(i) && (pcSPS->getSubPicWidth(i) != (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "sps_ref_wraparound_enabled_flag cannot be equal to 1 when there is at least one subpicture with SubPicTreatedAsPicFlag equal to 1 and the subpicture’s width is not equal to picture’s width");
+      CHECK(pcSPS->getSubPicTreatedAsPicFlag(i) && (pcSPS->getSubPicWidth(i) != (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize()), "sps_ref_wraparound_enabled_flag cannot be equal to 1 when there is at least one subpicture with SubPicTreatedAsPicFlag equal to 1 and the subpicture's width is not equal to picture's width");
     }
   }
 
