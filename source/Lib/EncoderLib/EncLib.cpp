@@ -1967,7 +1967,11 @@ void EncLib::xInitRPL(SPS &sps, bool isFieldCoding)
 
       for (int k = 0; k < ge.m_numRefPics; k++)
       {
+#if JVET_S0045_SIGN
+        rpl->setRefPicIdentifier(k, -ge.m_deltaRefPics[k], 0, false, 0);
+#else
         rpl->setRefPicIdentifier( k, ge.m_deltaRefPics[k], 0, false, 0 );
+#endif
       }
     }
   }
@@ -1983,7 +1987,11 @@ void EncLib::xInitRPL(SPS &sps, bool isFieldCoding)
       rpl->setNumberOfLongtermPictures(0);
       rpl->setNumberOfActivePictures(1);
       rpl->setLtrpInSliceHeaderFlag(0);
+#if JVET_S0045_SIGN
+      rpl->setRefPicIdentifier(0, -1, 0, false, 0);
+#else
       rpl->setRefPicIdentifier(0, 1, 0, false, 0);
+#endif
       rpl->setPOC(0, 0);
     }
   }

@@ -381,11 +381,22 @@ void HLSyntaxReader::parseRefPicList(SPS* sps, ReferencePictureList* rpl, int rp
         code++;
       }
       int readValue = code;
+#if JVET_S0045_SIGN
+      if (readValue > 0)
+      {
+        READ_FLAG(code, "strp_entry_sign_flag[ listIdx ][ rplsIdx ][ i ]");
+        if (code)
+        {
+          readValue = -readValue;
+        }
+      }
+#else
       if (readValue > 0)
         READ_FLAG(code, "strp_entry_sign_flag[ listIdx ][ rplsIdx ][ i ]");
       else
         code = 1;
       readValue = (code) ? readValue : 0 - readValue; //true means positive delta POC -- false otherwise
+#endif
       if (firstSTRP)
       {
         firstSTRP = false;

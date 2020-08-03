@@ -74,6 +74,8 @@
 
 #define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
 
+#define JVET_S0045_SIGN                                   1 // JVET-S0045: semantics of strp_entry_sign_flag
+
 #define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
 
 #define JVET_S0266_VUI_length                             1 // JVET-S0266: VUI modifications including signalling of VUI length
