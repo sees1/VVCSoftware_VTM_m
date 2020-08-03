@@ -3266,7 +3266,8 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       picHeader->setPicColFromL0Flag(0);
     }
 
-  // mvd L1 zero flag
+#if !JVET_R0324_REORDER
+    // mvd L1 zero flag
     if (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0)
     {
       READ_FLAG(uiCode, "pic_mvd_l1_zero_flag");
@@ -3276,9 +3277,10 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       uiCode = 1;
     }
     picHeader->setMvdL1ZeroFlag( uiCode != 0 );
+#endif
 
-  // merge candidate list size
-  // subblock merge candidate list size
+    // merge candidate list size
+    // subblock merge candidate list size
     if ( sps->getUseAffine() )
     {
       picHeader->setMaxNumAffineMergeCand(sps->getMaxNumAffineMergeCand());
@@ -3299,7 +3301,20 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       picHeader->setDisFracMMVD(false);
     }
 
-  // picture level BDOF disable flags
+#if JVET_R0324_REORDER
+    // mvd L1 zero flag
+    if (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0)
+    {
+      READ_FLAG(uiCode, "ph_mvd_l1_zero_flag");
+    }
+    else
+    {
+      uiCode = 1;
+    }
+    picHeader->setMvdL1ZeroFlag(uiCode != 0);
+#endif
+
+    // picture level BDOF disable flags
     if (sps->getBdofControlPresentFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
     {
       READ_FLAG(uiCode, "ph_disable_bdof_flag");  picHeader->setDisBdofFlag(uiCode != 0);
