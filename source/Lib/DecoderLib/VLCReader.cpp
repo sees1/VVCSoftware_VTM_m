@@ -3726,51 +3726,19 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   }
 
   // raster scan slices
+  uint32_t sliceAddr = 0;
   if(pps->getRectSliceFlag() == 0)
   {
-    uint32_t sliceAddr, numTilesInSlice;
-
     // slice address is the raster scan tile index of first tile in slice
     if( pps->getNumTiles() > 1 )
     {
       int bitsSliceAddress = ceilLog2(pps->getNumTiles());
       READ_CODE(bitsSliceAddress, uiCode, "slice_address");  sliceAddr = uiCode;
-      if (((int)pps->getNumTiles() - (int)sliceAddr) > 1)
-      {
-        READ_UVLC(uiCode, "num_tiles_in_slice_minus1");        numTilesInSlice = uiCode + 1;
-      }
-      else
-      {
-        numTilesInSlice = 1;
-      }
-      if (!pps->getRectSliceFlag() && sps->getProfileTierLevel()->getConstraintInfo()->getOneSlicePerPicConstraintFlag())
-      {
-        CHECK(pps->getNumTiles() != uiCode + 1, "When rect_slice_flag is equal to 0 and one_slice_per_pic_constraint_flag equal to 1, the value of num_tiles_in_slice_minus1 present in each slice header shall be equal to NumTilesInPic - 1");
-      }
     }
-    else {
-      sliceAddr = 0;
-      numTilesInSlice = 1;
-    }
-    CHECK(sliceAddr >= pps->getNumTiles(), "Invalid slice address");
-    pcSlice->initSliceMap();
-    pcSlice->setSliceID(sliceAddr);
-
-    for( uint32_t tileIdx = sliceAddr; tileIdx < sliceAddr + numTilesInSlice; tileIdx++ )
-    {
-      uint32_t tileX = tileIdx % pps->getNumTileColumns();
-      uint32_t tileY = tileIdx / pps->getNumTileColumns();
-      CHECK(tileY >= pps->getNumTileRows(), "Number of tiles in slice exceeds the remaining number of tiles in picture");
-
-      pcSlice->addCtusToSlice(pps->getTileColumnBd(tileX), pps->getTileColumnBd(tileX + 1),
-                              pps->getTileRowBd(tileY), pps->getTileRowBd(tileY + 1), pps->getPicWidthInCtu());
-   }
   }
   // rectangular slices
   else
   {
-    uint32_t sliceAddr;
-
     // slice address is the index of the slice within the current sub-picture
     uint32_t currSubPicIdx = pps->getSubPicIdxFromSubPicId( pcSlice->getSliceSubPicId() );
     SubPic currSubPic = pps->getSubPic(currSubPicIdx);
@@ -3779,10 +3747,6 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       int bitsSliceAddress = ceilLog2(currSubPic.getNumSlicesInSubPic());
       READ_CODE(bitsSliceAddress, uiCode, "slice_address");  sliceAddr = uiCode;
       CHECK(sliceAddr >= currSubPic.getNumSlicesInSubPic(), "Invalid slice address");
-    }
-    else
-    {
-      sliceAddr = 0;
     }
     uint32_t picLevelSliceIdx = sliceAddr;
     for(int subpic = 0; subpic < currSubPicIdx; subpic++)
@@ -3801,6 +3765,35 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     {
       READ_FLAG(uiCode, "sh_extra_bit[ i ]");
     }
+  }
+
+  if(pps->getRectSliceFlag() == 0)
+  {
+    uint32_t numTilesInSlice = 1;
+    if( pps->getNumTiles() > 1 )
+    {
+      if (((int)pps->getNumTiles() - (int)sliceAddr) > 1)
+      {
+        READ_UVLC(uiCode, "num_tiles_in_slice_minus1");        numTilesInSlice = uiCode + 1;
+      }
+      if (!pps->getRectSliceFlag() && sps->getProfileTierLevel()->getConstraintInfo()->getOneSlicePerPicConstraintFlag())
+      {
+        CHECK(pps->getNumTiles() != uiCode + 1, "When rect_slice_flag is equal to 0 and one_slice_per_pic_constraint_flag equal to 1, the value of num_tiles_in_slice_minus1 present in each slice header shall be equal to NumTilesInPic - 1");
+      }
+    }
+    CHECK(sliceAddr >= pps->getNumTiles(), "Invalid slice address");
+    pcSlice->initSliceMap();
+    pcSlice->setSliceID(sliceAddr);
+
+    for( uint32_t tileIdx = sliceAddr; tileIdx < sliceAddr + numTilesInSlice; tileIdx++ )
+    {
+      uint32_t tileX = tileIdx % pps->getNumTileColumns();
+      uint32_t tileY = tileIdx / pps->getNumTileColumns();
+      CHECK(tileY >= pps->getNumTileRows(), "Number of tiles in slice exceeds the remaining number of tiles in picture");
+
+      pcSlice->addCtusToSlice(pps->getTileColumnBd(tileX), pps->getTileColumnBd(tileX + 1),
+                              pps->getTileRowBd(tileY), pps->getTileRowBd(tileY + 1), pps->getPicWidthInCtu());
+   }
   }
 
   if (picHeader->getPicInterSliceAllowedFlag())
