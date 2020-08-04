@@ -787,6 +787,7 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
         sei->m_refLevelFraction[level][subpic] = cfgSubPicLevel.m_fractions[cnt++];
       }
     }
+  }
 #endif
 }
 

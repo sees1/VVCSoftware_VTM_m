@@ -483,10 +483,11 @@ bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit
 #endif
 
 #if JVET_S0158_SUB_BITSTREAM_EXT
-bool BitstreamExtractorApp::xCheckSnSEISnOlsFlag0(SEIScalableNesting *seiNesting, InputNALUnit& nalu, std::vector<int> layerIdInOls, VPS *vps)
+bool BitstreamExtractorApp::xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps)
 {
   int nestingLayerId;
   bool nestingAppliedInTargetOlsLayerId = false;
+  std::vector<int> layerIdInOls = vps->getLayerIdsInOls(m_targetOlsIdx);
 
   if (seiNesting->m_snAllLayersFlag)
   {
@@ -785,51 +786,12 @@ uint32_t BitstreamExtractorApp::decode()
 #if JVET_S0158_SUB_BITSTREAM_EXT
               else
               {
-                ////////////////////add start//////////////////////////////
-                std::vector<int> layerIdInOls = vps->getLayerIdsInOls(m_targetOlsIdx);
-
-                writeInpuNalUnitToStream &= xCheckSnSEISnOlsFlag0(seiNesting, nalu, layerIdInOls, vps);
-
-
-               // writeInpuNalUnitToStream &= xCheckSnSEISnOlsFlag0(seiNesting, nalu, vps->getLayerIdsInOls(m_targetOlsIdx), vps);
-
-                //==================add end==================================
-                //int nestingLayerId;
-                //bool nestingAppliedInTargetOlsLayerId = false;
-                //std::vector<int> layerIdInOls = vps->getLayerIdsInOls(m_targetOlsIdx);
-                //if (seiNesting->m_snAllLayersFlag)
-                //{
-                //  int nestingNumLayers = vps->getMaxLayers() - vps->getGeneralLayerIdx(nalu.m_nuhLayerId);
-                //  for (uint32_t i = 0; i < nestingNumLayers; i++)
-                //  {
-                //    nestingLayerId = vps->getLayerId(vps->getGeneralLayerIdx(nalu.m_nuhLayerId) + i);
-                //    nestingAppliedInTargetOlsLayerId = std::find(layerIdInOls.begin(), layerIdInOls.end(), nestingLayerId) != layerIdInOls.end();
-                //    if (nestingAppliedInTargetOlsLayerId)
-                //    {
-                //      break;
-                //    }
-                //  }
-                //}
-                //else
-                //{
-                //  for (uint32_t i = 0; i <= seiNesting->m_snNumLayersMinus1; i++)
-                //  {
-                //    nestingLayerId = i == 0 ? nalu.m_nuhLayerId : seiNesting->m_snLayerId[i];
-                //    nestingAppliedInTargetOlsLayerId = std::find(layerIdInOls.begin(), layerIdInOls.end(), nestingLayerId) != layerIdInOls.end();
-                //    if (nestingAppliedInTargetOlsLayerId)
-                //    {
-                //      break;
-                //    }
-                //  }
-                //}
-                //writeInpuNalUnitToStream &= nestingAppliedInTargetOlsLayerId;
+                writeInpuNalUnitToStream &= xCheckScalableNestingSEI(seiNesting, nalu, vps);
               }
             }
             // remove unqualified timing related SEI
             if (sei->payloadType() == SEI::BUFFERING_PERIOD || (m_removeTimingSEI && sei->payloadType() == SEI::PICTURE_TIMING) || sei->payloadType() == SEI::DECODING_UNIT_INFO || sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
 #else
-            }
-           // remove unqualified timing related SEI
             if (sei->payloadType() == SEI::BUFFERING_PERIOD || (m_removeTimingSEI && sei->payloadType() == SEI::PICTURE_TIMING ) || sei->payloadType() == SEI::DECODING_UNIT_INFO)
 #endif
             {

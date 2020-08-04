@@ -79,7 +79,7 @@ protected:
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out);
 #endif
 #if JVET_S0158_SUB_BITSTREAM_EXT
-  bool xCheckSnSEISnOlsFlag0(SEIScalableNesting *seiNesting, InputNALUnit& nalu, std::vector<int> layerIdInOls, VPS *vps);
+  bool xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps);
 #endif
 
   void xSetSPSUpdated(int spsId)   { return m_updatedSPSList.push_back(spsId); }

@@ -1144,12 +1144,6 @@ Specifies the value of gci_no_subpic_info_constraint_flag
 Specifies the value of gci_three_minus_max_log2_ctu_size_constraint_idc
 \\
 
-\Option{MaxLog2CtuSizeConstraintIdc} &
-%\ShortOption{\None} &
-\Default{8} &
-Specifies the value of gci_three_minus_max_log2_ctu_size_constraint_idc
-\\
-
 \Option{PartitionConstraintsOverrideConstraintFlag} &
 %\ShortOption{\None} &
 \Default{false} &
@@ -4438,19 +4432,6 @@ List of reference levels to be signalled.
 \begin{tabular}{p{0.49\columnwidth}}
 When sli_sublayer_info_present_flag = 0, the number of input elements shall be equal to numReflevels. List is ordered by level.\\
 When sli_sublayer_info_present_flag = 1, the number of input elements shall be equal to numReflevels * maxSublayers. List is ordered by level then sublayer. For example, let Amn denotes the reference level indices for the m-th sublayer and and n-th reference level, the first N elements (A00...A0n-1) denotes the RefLevelFractions for N levels in the 0-th sublayer, and the following N elements (A10...A1n-1) denotes the RefLevelFractions for N levels in the 1st sublayer, and so on, untill all MxN elements specified.\\
-\end{tabular}
-\\
-\Option{SEISubpicLevelInfoMaxSublayers} &
-\Default{1} &
-Number of sublayers in context of the SEI. Has to be no greater than vps_max_sublayers_minus1 + 1.
-\\
-\Option{SEISubpicLevelInfoSublayerInfoPresentFlag} &
-\Default{0} &
-The level information for subpicture sequences is present for sublayer representation(s).
-\par
-\begin{tabular}{cp{0.45\textwidth}}
-1 & The level information for subpicture sequences is present for sublayer representation(s) in the range of 0 to sli_max_sublayers_minus1, inclusive. \\
-0 & The level information for subpicture sequences is present for the sli_max_sublayers_minus1-th sublayer representation. \\
 \end{tabular}
 \\
 \Option{SEISubpicLevelInfoRefLevelFractions} &
