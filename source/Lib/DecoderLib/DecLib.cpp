@@ -1936,16 +1936,34 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   }
 
 #if JVET_S0156_LEVEL_DEFINITION
-  ProfileLevelTierFeatures ptlFeature;
-  ptlFeature.extractPTLInformation(*sps);
-  CHECK(pps->getNumTileColumns() > ptlFeature.getLevelTierFeatures()->maxTileCols, "Num tile columns signaled in PPS exceed level limits");
-  CHECK(pps->getNumTiles() > ptlFeature.getLevelTierFeatures()->maxTilesPerAu, "Num tiles signaled in PPS exceed level limits");
+  ProfileLevelTierFeatures ptlFeatures;
+  ptlFeatures.extractPTLInformation(*sps);
 #if JVET_S_PROFILES
-  CHECK(sps->getBitDepth(CHANNEL_TYPE_LUMA) > ptlFeature.getProfileFeatures()->maxBitDepth,
-        "Bit depth exceed profile limit");
-  CHECK(sps->getChromaFormatIdc() > ptlFeature.getProfileFeatures()->maxChromaFormat,
-        "Chroma format exceed profile limit");
+  const ProfileFeatures *profileFeatures = ptlFeatures.getProfileFeatures();
+  if (profileFeatures != nullptr)
+  {
+    CHECK(sps->getBitDepth(CHANNEL_TYPE_LUMA) > profileFeatures->maxBitDepth, "Bit depth exceeds profile limit");
+    CHECK(sps->getChromaFormatIdc() > profileFeatures->maxChromaFormat, "Chroma format exceeds profile limit");
+  }
+  else
+  {
+    CHECK(sps->getProfileTierLevel()->getProfileIdc() != Profile::NONE, "Unknown profile");
+    msg(WARNING, "Warning: Profile set to none or unknown value\n");
+  }
 #endif
+  const LevelTierFeatures *levelTierFeatures = ptlFeatures.getLevelTierFeatures();
+  if (levelTierFeatures != nullptr)
+  {
+    CHECK(pps->getNumTileColumns() > levelTierFeatures->maxTileCols,
+          "Number of tile columns signaled in PPS exceeds level limit");
+    CHECK(pps->getNumTiles() > levelTierFeatures->maxTilesPerAu, "Number of tiles signaled in PPS exceeds level limit");
+  }
+  else if (profileFeatures != nullptr)
+  {
+    CHECK(sps->getProfileTierLevel()->getLevelIdc() == Level::LEVEL15_5, "Cannot use level 15.5 with given profile");
+    CHECK(sps->getProfileTierLevel()->getLevelIdc() != Level::NONE, "Unknown level");
+    msg(WARNING, "Warning: Level set to none, invalid or unknown value\n");
+  }
 #endif
 }
 

@@ -96,7 +96,7 @@ class ProfileLevelTierFeatures
     const LevelTierFeatures *m_pLevelTier;
     Level::Tier              m_tier;
   public:
-    ProfileLevelTierFeatures() : m_pProfile(0), m_pLevelTier(0), m_tier(Level::MAIN) { }
+    ProfileLevelTierFeatures() : m_pProfile(nullptr), m_pLevelTier(nullptr), m_tier(Level::MAIN) {}
 
     void extractPTLInformation(const SPS &sps);
 
