@@ -1856,6 +1856,17 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
 #endif
   }
 
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getNoRprConstraintFlag())
+  {
+    CHECK(sps->getRprEnabledFlag(), "When gci_no_ref_pic_resampling_constraint_flag is equal to 1, the value of sps_ref_pic_resampling_enabled_flag shall be equal to 0");
+  }
+  if (sps->getProfileTierLevel()->getConstraintInfo()->getNoResChangeInClvsConstraintFlag())
+  {
+    CHECK(sps->getResChangeInClvsEnabledFlag(), "When gci_no_res_change_in_clvs_constraint_flag is equal to 1, the value of sps_res_change_in_clvs_allowed_flag shall be equal to 0");
+  }
+#endif
+
 #if JVET_S0113_S0195_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoIdrRplConstraintFlag())
   {
