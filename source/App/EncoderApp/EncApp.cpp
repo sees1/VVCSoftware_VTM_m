@@ -212,7 +212,6 @@ void EncApp::xInitLibCfg()
 #else
   CHECK( (m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_444_10) && m_multiLayerEnabledFlag, "ptl_multilayer_enabled_flag shall be equal to 0 for Main 10 and Main 10 4:4:4 profiles");
 #endif
-  CHECK( !m_multiLayerEnabledFlag && m_maxLayers > 1, "There is only one layer in the CVS when ptl_multilayer_enabled_flag equal to 0");
 #endif
   ptls[0].setNumSubProfile                                       ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
@@ -229,7 +228,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setLevel                                             ( m_levelTier, m_level);
 #if JVET_S0138_GCI_PTL
   m_cEncLib.setFrameOnlyConstraintFlag                           ( m_frameOnlyConstraintFlag);
-  m_cEncLib.setMultiLayerEnabledFlag                             ( m_multiLayerEnabledFlag);
+  m_cEncLib.setMultiLayerEnabledFlag                             ( m_multiLayerEnabledFlag || m_maxLayers > 1);
 #endif
   m_cEncLib.setNumSubProfile                                     ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)

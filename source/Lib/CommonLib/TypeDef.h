@@ -125,6 +125,8 @@
 
 #define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.
 
+#define JVET_S0100_ASPECT3                                1 // JVET-S0100 Aspect 3: constraints on vps_dpb_max_tid and vps_hrd_max_tid depending on vps_ptl_max_tid
+
 #define JVET_S0156_LEVEL_DEFINITION                       1 // JVET-S0156: On level definitions
 
 #define JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP           1 // JVET-S0064: Conditionally signal bp_sublayer_dpb_output_offsets_present_flag

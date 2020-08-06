@@ -2578,6 +2578,9 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       {
         READ_CODE(3, uiCode, "dpb_max_temporal_id[i]");
         pcVPS->m_dpbMaxTemporalId.push_back(uiCode);
+#if JVET_S0100_ASPECT3
+        CHECK (uiCode > (pcVPS->getMaxSubLayers() - 1), "The value of vps_dpb_max_tid[i] shall be in the range of 0 to vps_max_sublayers_minus1, inclusive." )
+#endif
       }
       else
       {
@@ -2662,16 +2665,24 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       if (!pcVPS->getAllLayersSameNumSublayersFlag())
       {
         READ_CODE(3, uiCode, "hrd_max_tid[i]");  pcVPS->setHrdMaxTid(i, uiCode);
+#if JVET_S0100_ASPECT3
+        CHECK (uiCode > (pcVPS->getMaxSubLayers() - 1), "The value of vps_hrd_max_tid[i] shall be in the range of 0 to vps_max_sublayers_minus1, inclusive." )
+#endif
       }
       else
       {
         pcVPS->setHrdMaxTid(i, pcVPS->getMaxSubLayers() - 1);
-
       }
       uint32_t firstSublayer = pcVPS->getVPSSublayerCpbParamsPresentFlag() ? 0 : pcVPS->getHrdMaxTid(i);
       parseOlsHrdParameters(pcVPS->getGeneralHrdParameters(),pcVPS->getOlsHrdParameters(i), firstSublayer, pcVPS->getHrdMaxTid(i));
     }
-    for (int i = 0; i < pcVPS->m_numMultiLayeredOlss; i++) 
+#if JVET_S0100_ASPECT3
+    for (int i = pcVPS->getNumOlsHrdParamsMinus1() + 1; i < pcVPS->getTotalNumOLSs(); i++)
+    {
+      pcVPS->setHrdMaxTid(i, pcVPS->getMaxSubLayers() - 1);
+    }
+#endif
+    for (int i = 0; i < pcVPS->m_numMultiLayeredOlss; i++)
     {
       if (((pcVPS->getNumOlsHrdParamsMinus1() + 1) != pcVPS->m_numMultiLayeredOlss) && (pcVPS->getNumOlsHrdParamsMinus1() > 0))
       {
@@ -2693,6 +2704,16 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       CHECK( !isHRDParamReferred[i], "Each ols_hrd_parameters( ) syntax structure in the VPS shall be referred to by at least one value of vps_ols_hrd_idx[ i ] for i in the range of 1 to NumMultiLayerOlss - 1, inclusive");
     }
   }
+#if JVET_S0100_ASPECT3
+  else
+  {
+    for (int i = 0; i < pcVPS->getTotalNumOLSs(); i++)
+    {
+      pcVPS->setHrdMaxTid(i, pcVPS->getMaxSubLayers() - 1);
+    }
+  }
+  #endif
+
 
   READ_FLAG(uiCode, "vps_extension_flag");
   if (uiCode)
@@ -2702,7 +2723,9 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       READ_FLAG(uiCode, "vps_extension_data_flag");
     }
   }
-
+#if JVET_S0100_ASPECT3
+  pcVPS->checkVPS();
+#endif
   xReadRbspTrailingBits();
 }
 

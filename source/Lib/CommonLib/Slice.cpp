@@ -2664,7 +2664,38 @@ void VPS::deriveOutputLayerSets()
       m_numMultiLayeredOlss++;
     }
   }
+#if JVET_S0100_ASPECT3
+  m_multiLayerOlsIdxToOlsIdx.resize(m_numMultiLayeredOlss);
+
+  for (int i=0, j=0; i<m_totalNumOLSs; i++)
+  {
+    if (m_numLayersInOls[i] > 1)
+    {
+      m_multiLayerOlsIdxToOlsIdx[j] = i;
+    }
+  }
+#endif
 }
+
+#if JVET_S0100_ASPECT3
+void VPS::checkVPS()
+{
+  for (int multiLayerOlsIdx=0; multiLayerOlsIdx < m_numMultiLayeredOlss; multiLayerOlsIdx++)
+  {
+    const int olsIdx = m_multiLayerOlsIdxToOlsIdx[multiLayerOlsIdx];
+    const int olsHrdIdx = getOlsHrdIdx(multiLayerOlsIdx);
+    const int olsPtlIdx = getOlsPtlIdx(olsIdx);
+    CHECK (getHrdMaxTid(olsHrdIdx) < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_hrd_max_tid[vps_ols_timing_hrd_idx[m]] shall be greater than or equal to "
+                                                                     "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
+                                                                     "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
+    const int olsDpbParamsIdx = getOlsDpbParamsIdx(multiLayerOlsIdx);
+    CHECK (m_dpbMaxTemporalId[olsDpbParamsIdx] < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_dpb_max_tid[vps_ols_dpb_params_idx[m]] shall be greater than or equal to "
+                                                                     "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
+                                                                     "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
+  }
+}
+#endif
+
 
 void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
 {
