@@ -52,6 +52,8 @@
 
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_S0058_GCI                                    1 // no_mtt_constraint_flag and no_weightedpred_constraint_flag
+
 #define JVET_S0203                                        1 // JVET-S0203 (aspects 1 & 2): change the signalling of sublayer_level_idc[ i ] and ptl_sublayer_level_present_flag[ i ] to be in descending order
 
 #define JVET_S0066_GCI                                    1 // JVET-S0066: Signal new GCI flags gci_three_minus_max_log2_ctu_size_constraint_idc and gci_no_luma_transform_size_64_constraint_flag (no_explicit_scaling_list_constraint_flag already included as part of JVET-S0050)

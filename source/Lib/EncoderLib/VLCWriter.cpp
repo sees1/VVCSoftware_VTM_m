@@ -2728,7 +2728,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 #else
     WRITE_FLAG(cinfo->getOneSubpicPerPicConstraintFlag(), "one_subpic_per_pic_constraint_flag");
 #endif
-
+#if JVET_S0058_GCI
+    WRITE_FLAG(cinfo->getNoMttConstraintFlag() ? 1 : 0, "gci_no_mtt_constraint_flag");
+#endif
     WRITE_FLAG(cinfo->getNoQtbttDualTreeIntraConstraintFlag() ? 1 : 0, "no_qtbtt_dual_tree_intra_constraint_flag");
 #if JVET_S0066_GCI
     WRITE_CODE(3-(cinfo->getMaxLog2CtuSizeConstraintIdc()-5), 2, "gci_three_minus_max_log2_ctu_size_constraint_idc" );
@@ -2741,6 +2743,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoMrlConstraintFlag() ? 1 : 0, "no_mrl_constraint_flag");
     WRITE_FLAG(cinfo->getNoIspConstraintFlag() ? 1 : 0, "no_isp_constraint_flag");
     WRITE_FLAG(cinfo->getNoMipConstraintFlag() ? 1 : 0, "no_mip_constraint_flag");
+#if JVET_S0058_GCI
+    WRITE_FLAG(cinfo->getNoWeightedPredictionConstraintFlag() ? 1 : 0, "gci_no_weighted_prediction_constraint_flag");
+#endif
     WRITE_FLAG(cinfo->getNoRefWraparoundConstraintFlag() ? 1 : 0, "no_ref_wraparound_constraint_flag");
     WRITE_FLAG(cinfo->getNoTemporalMvpConstraintFlag() ? 1 : 0, "no_temporal_mvp_constraint_flag");
     WRITE_FLAG(cinfo->getNoSbtmvpConstraintFlag() ? 1 : 0, "no_sbtmvp_constraint_flag");
