@@ -574,22 +574,25 @@ static bool writePlane( uint32_t orgWidth, uint32_t orgHeight, ostream& fd, cons
     }
 
     // here height444 and orgHeight are luma heights
-    for (uint32_t y444 = height444; y444 < orgHeight; y444++)
+    if ((compID == COMPONENT_Y) || (fileFormat != CHROMA_400 && srcFormat != CHROMA_400))
     {
-      if ((y444 & mask_y_file) == 0) // if this is chroma, determine whether to skip every other row
+      for (uint32_t y444 = height444; y444 < orgHeight; y444++)
       {
-        memset (reinterpret_cast<char*>(buf), 0, stride_file); // TODO: is this correct? Should behave similarly to code block at end of this function
-
-        fd.write (reinterpret_cast<const char*>(buf), stride_file);
-        if (fd.eof() || fd.fail())
+        if ((y444 & mask_y_file) == 0) // if this is chroma, determine whether to skip every other row
         {
-          return false;
-        }
-      }
+          memset (reinterpret_cast<char*>(buf), 0, stride_file); // TODO: is this correct? Should behave similarly to code block at end of this function
 
-      if ((y444 & mask_y_src) == 0)
-      {
-        pSrcBuf += srcbuf_stride;
+          fd.write (reinterpret_cast<const char*>(buf), stride_file);
+          if (fd.eof() || fd.fail())
+          {
+            return false;
+          }
+        }
+
+        if ((y444 & mask_y_src) == 0)
+        {
+          pSrcBuf += srcbuf_stride;
+        }
       }
     }
   }
