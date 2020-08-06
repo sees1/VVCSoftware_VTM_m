@@ -201,43 +201,43 @@ protected:
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
 #if JVET_S0058_GCI
-  bool      m_bNoMttConstraintFlag;
+  bool      m_noMttConstraintFlag;
 #endif
-  bool      m_bNoQtbttDualTreeIntraConstraintFlag;
+  bool      m_noQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
 #endif
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
-  bool      m_bNoSaoConstraintFlag;
-  bool      m_bNoAlfConstraintFlag;
+  bool      m_noSaoConstraintFlag;
+  bool      m_noAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
 #if JVET_S0058_GCI
-  bool      m_bNoWeightedPredictionConstraintFlag;
+  bool      m_noWeightedPredictionConstraintFlag;
 #endif
-  bool      m_bNoRefWraparoundConstraintFlag;
-  bool      m_bNoTemporalMvpConstraintFlag;
-  bool      m_bNoSbtmvpConstraintFlag;
-  bool      m_bNoAmvrConstraintFlag;
-  bool      m_bNoBdofConstraintFlag;
+  bool      m_noRefWraparoundConstraintFlag;
+  bool      m_noTemporalMvpConstraintFlag;
+  bool      m_noSbtmvpConstraintFlag;
+  bool      m_noAmvrConstraintFlag;
+  bool      m_noBdofConstraintFlag;
   bool      m_noDmvrConstraintFlag;
-  bool      m_bNoCclmConstraintFlag;
-  bool      m_bNoMtsConstraintFlag;
+  bool      m_noCclmConstraintFlag;
+  bool      m_noMtsConstraintFlag;
   bool      m_noSbtConstraintFlag;
-  bool      m_bNoAffineMotionConstraintFlag;
-  bool      m_bNoBcwConstraintFlag;
+  bool      m_noAffineMotionConstraintFlag;
+  bool      m_noBcwConstraintFlag;
   bool      m_noIbcConstraintFlag;
-  bool      m_bNoCiipConstraintFlag;
+  bool      m_noCiipConstraintFlag;
   bool      m_noGeoConstraintFlag;
-  bool      m_bNoLadfConstraintFlag;
+  bool      m_noLadfConstraintFlag;
   bool      m_noTransformSkipConstraintFlag;
 #if JVET_S0066_GCI
   bool      m_noLumaTransformSize64ConstraintFlag;
 #endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
-  bool      m_bNoQpDeltaConstraintFlag;
-  bool      m_bNoDepQuantConstraintFlag;
-  bool      m_bNoSignDataHidingConstraintFlag;
+  bool      m_noQpDeltaConstraintFlag;
+  bool      m_noDepQuantConstraintFlag;
+  bool      m_noSignDataHidingConstraintFlag;
   bool      m_noTrailConstraintFlag;
   bool      m_noStsaConstraintFlag;
   bool      m_noRaslConstraintFlag;
@@ -812,7 +812,7 @@ public:
   void      setOnePictureOnlyConstraintFlag(bool b)                        { m_onePictureOnlyConstraintFlag=b; }
 
   bool      getIntraOnlyConstraintFlag() const { return m_bIntraOnlyConstraintFlag; }
-  void      setIntraOnlyConstraintFlag(bool bVal) { m_bIntraOnlyConstraintFlag = bVal; }
+  void      setIntraOnlyConstraintFlag(bool val) { m_bIntraOnlyConstraintFlag = val; }
   uint32_t  getMaxBitDepthConstraintIdc() const { return m_maxBitDepthConstraintIdc; }
   void      setMaxBitDepthConstraintIdc(uint32_t u) { m_maxBitDepthConstraintIdc = u; }
   int       getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
@@ -823,120 +823,120 @@ public:
 #endif
 #if !JVET_S0138_GCI_PTL
   bool          getSingleLayerConstraintFlag() const { return m_singleLayerConstraintFlag; }
-  void          setSingleLayerConstraintFlag(bool bVal) { m_singleLayerConstraintFlag = bVal; }
+  void          setSingleLayerConstraintFlag(bool val) { m_singleLayerConstraintFlag = val; }
 #endif
   bool          getAllLayersIndependentConstraintFlag() const { return m_allLayersIndependentConstraintFlag; }
-  void          setAllLayersIndependentConstraintFlag(bool bVal) { m_allLayersIndependentConstraintFlag = bVal; }
+  void          setAllLayersIndependentConstraintFlag(bool val) { m_allLayersIndependentConstraintFlag = val; }
   bool          getNoMrlConstraintFlag() const { return m_noMrlConstraintFlag; }
-  void          setNoMrlConstraintFlag(bool bVal) { m_noMrlConstraintFlag = bVal; }
+  void          setNoMrlConstraintFlag(bool val) { m_noMrlConstraintFlag = val; }
   bool          getNoIspConstraintFlag() const { return m_noIspConstraintFlag; }
-  void          setNoIspConstraintFlag(bool bVal) { m_noIspConstraintFlag = bVal; }
+  void          setNoIspConstraintFlag(bool val) { m_noIspConstraintFlag = val; }
   bool          getNoMipConstraintFlag() const { return m_noMipConstraintFlag; }
-  void          setNoMipConstraintFlag(bool bVal) { m_noMipConstraintFlag = bVal; }
+  void          setNoMipConstraintFlag(bool val) { m_noMipConstraintFlag = val; }
   bool          getNoLfnstConstraintFlag() const { return m_noLfnstConstraintFlag; }
-  void          setNoLfnstConstraintFlag(bool bVal) { m_noLfnstConstraintFlag = bVal; }
+  void          setNoLfnstConstraintFlag(bool val) { m_noLfnstConstraintFlag = val; }
   bool          getNoMmvdConstraintFlag() const { return m_noMmvdConstraintFlag; }
-  void          setNoMmvdConstraintFlag(bool bVal) { m_noMmvdConstraintFlag = bVal; }
+  void          setNoMmvdConstraintFlag(bool val) { m_noMmvdConstraintFlag = val; }
   bool          getNoSmvdConstraintFlag() const { return m_noSmvdConstraintFlag; }
-  void          setNoSmvdConstraintFlag(bool bVal) { m_noSmvdConstraintFlag = bVal; }
+  void          setNoSmvdConstraintFlag(bool val) { m_noSmvdConstraintFlag = val; }
   bool          getNoProfConstraintFlag() const { return m_noProfConstraintFlag; }
-  void          setNoProfConstraintFlag(bool bVal) { m_noProfConstraintFlag = bVal; }
+  void          setNoProfConstraintFlag(bool val) { m_noProfConstraintFlag = val; }
   bool          getNoPaletteConstraintFlag() const { return m_noPaletteConstraintFlag; }
-  void          setNoPaletteConstraintFlag(bool bVal) { m_noPaletteConstraintFlag = bVal; }
+  void          setNoPaletteConstraintFlag(bool val) { m_noPaletteConstraintFlag = val; }
   bool          getNoActConstraintFlag() const { return m_noActConstraintFlag; }
-  void          setNoActConstraintFlag(bool bVal) { m_noActConstraintFlag = bVal; }
+  void          setNoActConstraintFlag(bool val) { m_noActConstraintFlag = val; }
   bool          getNoLmcsConstraintFlag() const { return m_noLmcsConstraintFlag; }
-  void          setNoLmcsConstraintFlag(bool bVal) { m_noLmcsConstraintFlag = bVal; }
+  void          setNoLmcsConstraintFlag(bool val) { m_noLmcsConstraintFlag = val; }
 #if JVET_S0050_GCI
   bool          getNoExplicitScaleListConstraintFlag() const { return m_noExplicitScaleListConstraintFlag; }
-  void          setNoExplicitScaleListConstraintFlag(bool bVal) { m_noExplicitScaleListConstraintFlag = bVal; }
+  void          setNoExplicitScaleListConstraintFlag(bool val) { m_noExplicitScaleListConstraintFlag = val; }
   bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
-  void          setNoVirtualBoundaryConstraintFlag(bool bVal) { m_noVirtualBoundaryConstraintFlag = bVal; }
+  void          setNoVirtualBoundaryConstraintFlag(bool val) { m_noVirtualBoundaryConstraintFlag = val; }
 #endif
 #if JVET_S0058_GCI
-  bool          getNoMttConstraintFlag() const { return m_bNoMttConstraintFlag; }
-  void          setNoMttConstraintFlag(bool bVal) { m_bNoMttConstraintFlag = bVal; }
+  bool          getNoMttConstraintFlag() const { return m_noMttConstraintFlag; }
+  void          setNoMttConstraintFlag(bool val) { m_noMttConstraintFlag = val; }
 #endif
-  bool      getNoQtbttDualTreeIntraConstraintFlag() const { return m_bNoQtbttDualTreeIntraConstraintFlag; }
-  void      setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_bNoQtbttDualTreeIntraConstraintFlag = bVal; }
+  bool      getNoQtbttDualTreeIntraConstraintFlag() const { return m_noQtbttDualTreeIntraConstraintFlag; }
+  void      setNoQtbttDualTreeIntraConstraintFlag(bool val) { m_noQtbttDualTreeIntraConstraintFlag = val; }
 #if JVET_S0066_GCI
   int       getMaxLog2CtuSizeConstraintIdc() const { return m_maxLog2CtuSizeConstraintIdc; }
   void      setMaxLog2CtuSizeConstraintIdc(int u) { m_maxLog2CtuSizeConstraintIdc = u; }
 #endif
   bool      getNoPartitionConstraintsOverrideConstraintFlag() const { return m_noPartitionConstraintsOverrideConstraintFlag; }
-  void      setNoPartitionConstraintsOverrideConstraintFlag(bool bVal) { m_noPartitionConstraintsOverrideConstraintFlag = bVal; }
-  bool      getNoSaoConstraintFlag() const { return m_bNoSaoConstraintFlag; }
-  void      setNoSaoConstraintFlag(bool bVal) { m_bNoSaoConstraintFlag = bVal; }
-  bool      getNoAlfConstraintFlag() const { return m_bNoAlfConstraintFlag; }
-  void      setNoAlfConstraintFlag(bool bVal) { m_bNoAlfConstraintFlag = bVal; }
+  void      setNoPartitionConstraintsOverrideConstraintFlag(bool val) { m_noPartitionConstraintsOverrideConstraintFlag = val; }
+  bool      getNoSaoConstraintFlag() const { return m_noSaoConstraintFlag; }
+  void      setNoSaoConstraintFlag(bool val) { m_noSaoConstraintFlag = val; }
+  bool      getNoAlfConstraintFlag() const { return m_noAlfConstraintFlag; }
+  void      setNoAlfConstraintFlag(bool val) { m_noAlfConstraintFlag = val; }
   bool      getNoCCAlfConstraintFlag() const { return m_noCCAlfConstraintFlag; }
-  void      setNoCCAlfConstraintFlag(bool bVal) { m_noCCAlfConstraintFlag = bVal; }
+  void      setNoCCAlfConstraintFlag(bool val) { m_noCCAlfConstraintFlag = val; }
 #if JVET_S0058_GCI
-  bool      getWeightedPredictionConstraintFlag() const { return m_bNoWeightedPredictionConstraintFlag; }
-  void      setNoWeightedPredictionConstraintFlag(bool bVal) { m_bNoWeightedPredictionConstraintFlag = bVal; }
+  bool      getWeightedPredictionConstraintFlag() const { return m_noWeightedPredictionConstraintFlag; }
+  void      setNoWeightedPredictionConstraintFlag(bool val) { m_noWeightedPredictionConstraintFlag = val; }
 #endif
-  bool      getNoRefWraparoundConstraintFlag() const { return m_bNoRefWraparoundConstraintFlag; }
-  void      setNoRefWraparoundConstraintFlag(bool bVal) { m_bNoRefWraparoundConstraintFlag = bVal; }
-  bool      getNoTemporalMvpConstraintFlag() const { return m_bNoTemporalMvpConstraintFlag; }
-  void      setNoTemporalMvpConstraintFlag(bool bVal) { m_bNoTemporalMvpConstraintFlag = bVal; }
-  bool      getNoSbtmvpConstraintFlag() const { return m_bNoSbtmvpConstraintFlag; }
-  void      setNoSbtmvpConstraintFlag(bool bVal) { m_bNoSbtmvpConstraintFlag = bVal; }
-  bool      getNoAmvrConstraintFlag() const { return m_bNoAmvrConstraintFlag; }
-  void      setNoAmvrConstraintFlag(bool bVal) { m_bNoAmvrConstraintFlag = bVal; }
-  bool      getNoBdofConstraintFlag() const { return m_bNoBdofConstraintFlag; }
-  void      setNoBdofConstraintFlag(bool bVal) { m_bNoBdofConstraintFlag = bVal; }
+  bool      getNoRefWraparoundConstraintFlag() const { return m_noRefWraparoundConstraintFlag; }
+  void      setNoRefWraparoundConstraintFlag(bool val) { m_noRefWraparoundConstraintFlag = val; }
+  bool      getNoTemporalMvpConstraintFlag() const { return m_noTemporalMvpConstraintFlag; }
+  void      setNoTemporalMvpConstraintFlag(bool val) { m_noTemporalMvpConstraintFlag = val; }
+  bool      getNoSbtmvpConstraintFlag() const { return m_noSbtmvpConstraintFlag; }
+  void      setNoSbtmvpConstraintFlag(bool val) { m_noSbtmvpConstraintFlag = val; }
+  bool      getNoAmvrConstraintFlag() const { return m_noAmvrConstraintFlag; }
+  void      setNoAmvrConstraintFlag(bool val) { m_noAmvrConstraintFlag = val; }
+  bool      getNoBdofConstraintFlag() const { return m_noBdofConstraintFlag; }
+  void      setNoBdofConstraintFlag(bool val) { m_noBdofConstraintFlag = val; }
   bool      getNoDmvrConstraintFlag() const { return m_noDmvrConstraintFlag; }
-  void      setNoDmvrConstraintFlag(bool bVal) { m_noDmvrConstraintFlag = bVal; }
-  bool      getNoCclmConstraintFlag() const { return m_bNoCclmConstraintFlag; }
-  void      setNoCclmConstraintFlag(bool bVal) { m_bNoCclmConstraintFlag = bVal; }
-  bool      getNoMtsConstraintFlag() const { return m_bNoMtsConstraintFlag; }
-  void      setNoMtsConstraintFlag(bool bVal) { m_bNoMtsConstraintFlag = bVal; }
+  void      setNoDmvrConstraintFlag(bool val) { m_noDmvrConstraintFlag = val; }
+  bool      getNoCclmConstraintFlag() const { return m_noCclmConstraintFlag; }
+  void      setNoCclmConstraintFlag(bool val) { m_noCclmConstraintFlag = val; }
+  bool      getNoMtsConstraintFlag() const { return m_noMtsConstraintFlag; }
+  void      setNoMtsConstraintFlag(bool val) { m_noMtsConstraintFlag = val; }
   bool      getNoSbtConstraintFlag() const { return m_noSbtConstraintFlag; }
-  void      setNoSbtConstraintFlag(bool bVal) { m_noSbtConstraintFlag = bVal; }
-  bool      getNoAffineMotionConstraintFlag() const { return m_bNoAffineMotionConstraintFlag; }
-  void      setNoAffineMotionConstraintFlag(bool bVal) { m_bNoAffineMotionConstraintFlag = bVal; }
-  bool      getNoBcwConstraintFlag() const { return m_bNoBcwConstraintFlag; }
-  void      setNoBcwConstraintFlag(bool bVal) { m_bNoBcwConstraintFlag = bVal; }
+  void      setNoSbtConstraintFlag(bool val) { m_noSbtConstraintFlag = val; }
+  bool      getNoAffineMotionConstraintFlag() const { return m_noAffineMotionConstraintFlag; }
+  void      setNoAffineMotionConstraintFlag(bool val) { m_noAffineMotionConstraintFlag = val; }
+  bool      getNoBcwConstraintFlag() const { return m_noBcwConstraintFlag; }
+  void      setNoBcwConstraintFlag(bool val) { m_noBcwConstraintFlag = val; }
   bool      getNoIbcConstraintFlag() const { return m_noIbcConstraintFlag; }
-  void      setNoIbcConstraintFlag(bool bVal) { m_noIbcConstraintFlag = bVal; }
-  bool      getNoCiipConstraintFlag() const { return m_bNoCiipConstraintFlag; }
-  void      setNoCiipConstraintFlag(bool bVal) { m_bNoCiipConstraintFlag = bVal; }
+  void      setNoIbcConstraintFlag(bool val) { m_noIbcConstraintFlag = val; }
+  bool      getNoCiipConstraintFlag() const { return m_noCiipConstraintFlag; }
+  void      setNoCiipConstraintFlag(bool val) { m_noCiipConstraintFlag = val; }
   bool      getNoGeoConstraintFlag() const { return m_noGeoConstraintFlag; }
-  void      setNoGeoConstraintFlag(bool bVal) { m_noGeoConstraintFlag = bVal; }
-  bool      getNoLadfConstraintFlag() const { return m_bNoLadfConstraintFlag; }
-  void      setNoLadfConstraintFlag(bool bVal) { m_bNoLadfConstraintFlag = bVal; }
+  void      setNoGeoConstraintFlag(bool val) { m_noGeoConstraintFlag = val; }
+  bool      getNoLadfConstraintFlag() const { return m_noLadfConstraintFlag; }
+  void      setNoLadfConstraintFlag(bool val) { m_noLadfConstraintFlag = val; }
   bool      getNoTransformSkipConstraintFlag() const { return m_noTransformSkipConstraintFlag; }
-  void      setNoTransformSkipConstraintFlag(bool bVal) { m_noTransformSkipConstraintFlag = bVal; }
+  void      setNoTransformSkipConstraintFlag(bool val) { m_noTransformSkipConstraintFlag = val; }
 #if JVET_S0066_GCI
   bool      getNoLumaTransformSize64ConstraintFlag() const { return m_noLumaTransformSize64ConstraintFlag; }
-  void      setNoLumaTransformSize64ConstraintFlag(bool bVal) { m_noLumaTransformSize64ConstraintFlag = bVal; }
+  void      setNoLumaTransformSize64ConstraintFlag(bool val) { m_noLumaTransformSize64ConstraintFlag = val; }
 #endif
   bool      getNoBDPCMConstraintFlag() const { return m_noBDPCMConstraintFlag; }
-  void      setNoBDPCMConstraintFlag(bool bVal) { m_noBDPCMConstraintFlag = bVal; }
+  void      setNoBDPCMConstraintFlag(bool val) { m_noBDPCMConstraintFlag = val; }
   bool      getNoJointCbCrConstraintFlag() const { return m_noJointCbCrConstraintFlag; }
-  void      setNoJointCbCrConstraintFlag(bool bVal) { m_noJointCbCrConstraintFlag = bVal; }
-  bool      getNoQpDeltaConstraintFlag() const { return m_bNoQpDeltaConstraintFlag; }
-  void      setNoQpDeltaConstraintFlag(bool bVal) { m_bNoQpDeltaConstraintFlag = bVal; }
-  bool      getNoDepQuantConstraintFlag() const { return m_bNoDepQuantConstraintFlag; }
-  void      setNoDepQuantConstraintFlag(bool bVal) { m_bNoDepQuantConstraintFlag = bVal; }
-  bool      getNoSignDataHidingConstraintFlag() const { return m_bNoSignDataHidingConstraintFlag; }
-  void      setNoSignDataHidingConstraintFlag(bool bVal) { m_bNoSignDataHidingConstraintFlag = bVal; }
+  void      setNoJointCbCrConstraintFlag(bool val) { m_noJointCbCrConstraintFlag = val; }
+  bool      getNoQpDeltaConstraintFlag() const { return m_noQpDeltaConstraintFlag; }
+  void      setNoQpDeltaConstraintFlag(bool val) { m_noQpDeltaConstraintFlag = val; }
+  bool      getNoDepQuantConstraintFlag() const { return m_noDepQuantConstraintFlag; }
+  void      setNoDepQuantConstraintFlag(bool val) { m_noDepQuantConstraintFlag = val; }
+  bool      getNoSignDataHidingConstraintFlag() const { return m_noSignDataHidingConstraintFlag; }
+  void      setNoSignDataHidingConstraintFlag(bool val) { m_noSignDataHidingConstraintFlag = val; }
   bool      getNoTrailConstraintFlag() const { return m_noTrailConstraintFlag; }
-  void      setNoTrailConstraintFlag(bool bVal) { m_noTrailConstraintFlag = bVal; }
+  void      setNoTrailConstraintFlag(bool val) { m_noTrailConstraintFlag = val; }
   bool      getNoStsaConstraintFlag() const { return m_noStsaConstraintFlag; }
-  void      setNoStsaConstraintFlag(bool bVal) { m_noStsaConstraintFlag = bVal; }
+  void      setNoStsaConstraintFlag(bool val) { m_noStsaConstraintFlag = val; }
   bool      getNoRaslConstraintFlag() const { return m_noRaslConstraintFlag; }
-  void      setNoRaslConstraintFlag(bool bVal) { m_noRaslConstraintFlag = bVal; }
+  void      setNoRaslConstraintFlag(bool val) { m_noRaslConstraintFlag = val; }
   bool      getNoRadlConstraintFlag() const { return m_noRadlConstraintFlag; }
-  void      setNoRadlConstraintFlag(bool bVal) { m_noRadlConstraintFlag = bVal; }
+  void      setNoRadlConstraintFlag(bool val) { m_noRadlConstraintFlag = val; }
   bool      getNoIdrConstraintFlag() const { return m_noIdrConstraintFlag; }
-  void      setNoIdrConstraintFlag(bool bVal) { m_noIdrConstraintFlag = bVal; }
+  void      setNoIdrConstraintFlag(bool val) { m_noIdrConstraintFlag = val; }
   bool      getNoCraConstraintFlag() const { return m_noCraConstraintFlag; }
-  void      setNoCraConstraintFlag(bool bVal) { m_noCraConstraintFlag = bVal; }
+  void      setNoCraConstraintFlag(bool val) { m_noCraConstraintFlag = val; }
   bool      getNoGdrConstraintFlag() const { return m_noGdrConstraintFlag; }
-  void      setNoGdrConstraintFlag(bool bVal) { m_noGdrConstraintFlag = bVal; }
+  void      setNoGdrConstraintFlag(bool val) { m_noGdrConstraintFlag = val; }
   bool      getNoApsConstraintFlag() const { return m_noApsConstraintFlag; }
-  void      setNoApsConstraintFlag(bool bVal) { m_noApsConstraintFlag = bVal; }
+  void      setNoApsConstraintFlag(bool val) { m_noApsConstraintFlag = val; }
 
 
   void      setFrameRate                    ( int   i )      { m_iFrameRate = i; }

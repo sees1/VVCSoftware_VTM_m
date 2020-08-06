@@ -158,41 +158,41 @@ protected:
 #if JVET_S0058_GCI
   bool      m_noMttConstraintFlag;
 #endif
-  bool      m_bNoQtbttDualTreeIntraConstraintFlag;
+  bool      m_noQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
 #endif
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
-  bool      m_bNoSaoConstraintFlag;
-  bool      m_bNoAlfConstraintFlag;
+  bool      m_noSaoConstraintFlag;
+  bool      m_noAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
 #if JVET_S0058_GCI
   bool      m_noWeightedPredictionConstraintFlag;
 #endif
-  bool      m_bNoRefWraparoundConstraintFlag;
-  bool      m_bNoTemporalMvpConstraintFlag;
-  bool      m_bNoSbtmvpConstraintFlag;
-  bool      m_bNoAmvrConstraintFlag;
-  bool      m_bNoBdofConstraintFlag;
+  bool      m_noRefWraparoundConstraintFlag;
+  bool      m_noTemporalMvpConstraintFlag;
+  bool      m_noSbtmvpConstraintFlag;
+  bool      m_noAmvrConstraintFlag;
+  bool      m_noBdofConstraintFlag;
   bool      m_noDmvrConstraintFlag;
-  bool      m_bNoCclmConstraintFlag;
-  bool      m_bNoMtsConstraintFlag;
+  bool      m_noCclmConstraintFlag;
+  bool      m_noMtsConstraintFlag;
   bool      m_noSbtConstraintFlag;
-  bool      m_bNoAffineMotionConstraintFlag;
-  bool      m_bNoBcwConstraintFlag;
+  bool      m_noAffineMotionConstraintFlag;
+  bool      m_noBcwConstraintFlag;
   bool      m_noIbcConstraintFlag;
-  bool      m_bNoCiipConstraintFlag;
+  bool      m_noCiipConstraintFlag;
   bool      m_noGeoConstraintFlag;
-  bool      m_bNoLadfConstraintFlag;
+  bool      m_noLadfConstraintFlag;
   bool      m_noTransformSkipConstraintFlag;
 #if JVET_S0066_GCI
   bool      m_noLumaTransformSize64ConstraintFlag;
 #endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
-  bool      m_bNoQpDeltaConstraintFlag;
-  bool      m_bNoDepQuantConstraintFlag;
-  bool      m_bNoSignDataHidingConstraintFlag;
+  bool      m_noQpDeltaConstraintFlag;
+  bool      m_noDepQuantConstraintFlag;
+  bool      m_noSignDataHidingConstraintFlag;
   bool      m_noTrailConstraintFlag;
   bool      m_noStsaConstraintFlag;
   bool      m_noRaslConstraintFlag;

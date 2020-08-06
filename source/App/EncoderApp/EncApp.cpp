@@ -297,7 +297,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setSingleLayerConstraintFlag(m_singleLayerConstraintFlag);
 #endif
     m_cEncLib.setAllLayersIndependentConstraintFlag(m_allLayersIndependentConstraintFlag);
-    m_cEncLib.setNoQpDeltaConstraintFlag(m_bNoQpDeltaConstraintFlag);
+    m_cEncLib.setNoQpDeltaConstraintFlag(m_noQpDeltaConstraintFlag);
 
     m_cEncLib.setNoTrailConstraintFlag(m_noTrailConstraintFlag);
     CHECK(m_noTrailConstraintFlag && m_iIntraPeriod != 1, "TRAIL shall be deactivated when m_noTrailConstraintFlag is equal to 1");
@@ -333,8 +333,8 @@ void EncApp::xInitLibCfg()
     CHECK(m_noMttConstraintFlag && (m_uiMaxMTTHierarchyDepth || m_uiMaxMTTHierarchyDepthI || m_uiMaxMTTHierarchyDepthIChroma), "Mtt shall be deactivated when m_bNoMttConstraintFlag is equal to 1");
 #endif
 
-    m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(m_bNoQtbttDualTreeIntraConstraintFlag);
-    CHECK(m_bNoQtbttDualTreeIntraConstraintFlag && m_dualTree, "Dual tree shall be deactivated when m_bNoQtbttDualTreeIntraConstraintFlag is equal to 1");
+    m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);
+    CHECK(m_noQtbttDualTreeIntraConstraintFlag && m_dualTree, "Dual tree shall be deactivated when m_bNoQtbttDualTreeIntraConstraintFlag is equal to 1");
 
 #if JVET_S0066_GCI
     m_cEncLib.setMaxLog2CtuSizeConstraintIdc(m_maxLog2CtuSizeConstraintIdc);
@@ -344,11 +344,11 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(m_noPartitionConstraintsOverrideConstraintFlag);
     CHECK(m_noPartitionConstraintsOverrideConstraintFlag && m_SplitConsOverrideEnabledFlag, "Partition override shall be deactivated when m_noPartitionConstraintsOverrideConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoSaoConstraintFlag(m_bNoSaoConstraintFlag);
-    CHECK(m_bNoSaoConstraintFlag && m_bUseSAO, "SAO shall be deactivated when m_bNoSaoConstraintFlag is equal to 1");
+    m_cEncLib.setNoSaoConstraintFlag(m_noSaoConstraintFlag);
+    CHECK(m_noSaoConstraintFlag && m_bUseSAO, "SAO shall be deactivated when m_bNoSaoConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoAlfConstraintFlag(m_bNoAlfConstraintFlag);
-    CHECK(m_bNoAlfConstraintFlag && m_alf, "ALF shall be deactivated when m_bNoAlfConstraintFlag is equal to 1");
+    m_cEncLib.setNoAlfConstraintFlag(m_noAlfConstraintFlag);
+    CHECK(m_noAlfConstraintFlag && m_alf, "ALF shall be deactivated when m_bNoAlfConstraintFlag is equal to 1");
 
     m_cEncLib.setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
     CHECK(m_noCCAlfConstraintFlag && m_ccalf, "CCALF shall be deactivated when m_noCCAlfConstraintFlag is equal to 1");
@@ -358,51 +358,51 @@ void EncApp::xInitLibCfg()
     CHECK(m_noWeightedPredictionConstraintFlag && (m_useWeightedPred || m_useWeightedBiPred), "Weighted Prediction shall be deactivated when m_bNoWeightedPredictionConstraintFlag is equal to 1");
 #endif
 
-    m_cEncLib.setNoRefWraparoundConstraintFlag(m_bNoRefWraparoundConstraintFlag);
-    CHECK(m_bNoRefWraparoundConstraintFlag && m_wrapAround, "Wrap around shall be deactivated when m_bNoRefWraparoundConstraintFlag is equal to 1");
+    m_cEncLib.setNoRefWraparoundConstraintFlag(m_noRefWraparoundConstraintFlag);
+    CHECK(m_noRefWraparoundConstraintFlag && m_wrapAround, "Wrap around shall be deactivated when m_bNoRefWraparoundConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoTemporalMvpConstraintFlag(m_bNoTemporalMvpConstraintFlag);
-    CHECK(m_bNoTemporalMvpConstraintFlag && m_TMVPModeId, "Temporal MVP shall be deactivated when m_bNoTemporalMvpConstraintFlag is equal to 1");
+    m_cEncLib.setNoTemporalMvpConstraintFlag(m_noTemporalMvpConstraintFlag);
+    CHECK(m_noTemporalMvpConstraintFlag && m_TMVPModeId, "Temporal MVP shall be deactivated when m_bNoTemporalMvpConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoSbtmvpConstraintFlag(m_bNoSbtmvpConstraintFlag);
-    CHECK(m_bNoSbtmvpConstraintFlag && m_sbTmvpEnableFlag,
+    m_cEncLib.setNoSbtmvpConstraintFlag(m_noSbtmvpConstraintFlag);
+    CHECK(m_noSbtmvpConstraintFlag && m_sbTmvpEnableFlag,
           "SbTMVP shall be deactivated when m_bNoSbtmvpConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoAmvrConstraintFlag(m_bNoAmvrConstraintFlag);
-    CHECK(m_bNoAmvrConstraintFlag && (m_ImvMode != IMV_OFF || m_AffineAmvr), "AMVR shall be deactivated when m_bNoAmvrConstraintFlag is equal to 1");
+    m_cEncLib.setNoAmvrConstraintFlag(m_noAmvrConstraintFlag);
+    CHECK(m_noAmvrConstraintFlag && (m_ImvMode != IMV_OFF || m_AffineAmvr), "AMVR shall be deactivated when m_bNoAmvrConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoBdofConstraintFlag(m_bNoBdofConstraintFlag);
-    CHECK(m_bNoBdofConstraintFlag && m_BIO, "BIO shall be deactivated when m_bNoBdofConstraintFlag is equal to 1");
+    m_cEncLib.setNoBdofConstraintFlag(m_noBdofConstraintFlag);
+    CHECK(m_noBdofConstraintFlag && m_BIO, "BIO shall be deactivated when m_bNoBdofConstraintFlag is equal to 1");
 
     m_cEncLib.setNoDmvrConstraintFlag(m_noDmvrConstraintFlag);
     CHECK(m_noDmvrConstraintFlag && m_DMVR, "DMVR shall be deactivated when m_noDmvrConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoCclmConstraintFlag(m_bNoCclmConstraintFlag);
-    CHECK(m_bNoCclmConstraintFlag && m_LMChroma, "CCLM shall be deactivated when m_bNoCclmConstraintFlag is equal to 1");
+    m_cEncLib.setNoCclmConstraintFlag(m_noCclmConstraintFlag);
+    CHECK(m_noCclmConstraintFlag && m_LMChroma, "CCLM shall be deactivated when m_bNoCclmConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoMtsConstraintFlag(m_bNoMtsConstraintFlag);
-    CHECK(m_bNoMtsConstraintFlag && (m_MTS || m_MTSImplicit), "MTS shall be deactivated when m_bNoMtsConstraintFlag is equal to 1");
+    m_cEncLib.setNoMtsConstraintFlag(m_noMtsConstraintFlag);
+    CHECK(m_noMtsConstraintFlag && (m_MTS || m_MTSImplicit), "MTS shall be deactivated when m_bNoMtsConstraintFlag is equal to 1");
 
     m_cEncLib.setNoSbtConstraintFlag(m_noSbtConstraintFlag);
     CHECK(m_noSbtConstraintFlag && m_SBT, "SBT shall be deactivated when mm_noSbtConstraintFlag_nonPackedConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoAffineMotionConstraintFlag(m_bNoAffineMotionConstraintFlag);
-    CHECK(m_bNoAffineMotionConstraintFlag && m_Affine, "Affine shall be deactivated when m_bNoAffineMotionConstraintFlag is equal to 1");
+    m_cEncLib.setNoAffineMotionConstraintFlag(m_noAffineMotionConstraintFlag);
+    CHECK(m_noAffineMotionConstraintFlag && m_Affine, "Affine shall be deactivated when m_bNoAffineMotionConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoBcwConstraintFlag(m_bNoBcwConstraintFlag);
-    CHECK(m_bNoBcwConstraintFlag && m_bcw, "BCW shall be deactivated when m_bNoBcwConstraintFlag is equal to 1");
+    m_cEncLib.setNoBcwConstraintFlag(m_noBcwConstraintFlag);
+    CHECK(m_noBcwConstraintFlag && m_bcw, "BCW shall be deactivated when m_bNoBcwConstraintFlag is equal to 1");
 
     m_cEncLib.setNoIbcConstraintFlag(m_noIbcConstraintFlag);
     CHECK(m_noIbcConstraintFlag && m_IBCMode, "IBC shall be deactivated when m_noIbcConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoCiipConstraintFlag(m_bNoCiipConstraintFlag);
-    CHECK(m_bNoCiipConstraintFlag && m_ciip, "CIIP shall be deactivated when m_bNoCiipConstraintFlag is equal to 1");
+    m_cEncLib.setNoCiipConstraintFlag(m_noCiipConstraintFlag);
+    CHECK(m_noCiipConstraintFlag && m_ciip, "CIIP shall be deactivated when m_bNoCiipConstraintFlag is equal to 1");
 
     m_cEncLib.setNoGeoConstraintFlag(m_noGeoConstraintFlag);
     CHECK(m_noGeoConstraintFlag && m_Geo, "GEO shall be deactivated when m_noGeoConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoLadfConstraintFlag(m_bNoLadfConstraintFlag);
-    CHECK(m_bNoLadfConstraintFlag && m_LadfEnabed, "LADF shall be deactivated when m_bNoLadfConstraintFlag is equal to 1");
+    m_cEncLib.setNoLadfConstraintFlag(m_noLadfConstraintFlag);
+    CHECK(m_noLadfConstraintFlag && m_LadfEnabed, "LADF shall be deactivated when m_bNoLadfConstraintFlag is equal to 1");
 
     m_cEncLib.setNoTransformSkipConstraintFlag(m_noTransformSkipConstraintFlag);
     CHECK(m_noTransformSkipConstraintFlag && m_useTransformSkip, "Transform skip shall be deactivated when m_noTransformSkipConstraintFlag is equal to 1");
@@ -418,11 +418,11 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoJointCbCrConstraintFlag(m_noJointCbCrConstraintFlag);
     CHECK(m_noJointCbCrConstraintFlag && m_JointCbCrMode, "JCCR shall be deactivated when m_noJointCbCrConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoDepQuantConstraintFlag(m_bNoDepQuantConstraintFlag);
-    CHECK(m_bNoDepQuantConstraintFlag && m_depQuantEnabledFlag, "DQ shall be deactivated when m_bNoDepQuantConstraintFlag is equal to 1");
+    m_cEncLib.setNoDepQuantConstraintFlag(m_noDepQuantConstraintFlag);
+    CHECK(m_noDepQuantConstraintFlag && m_depQuantEnabledFlag, "DQ shall be deactivated when m_bNoDepQuantConstraintFlag is equal to 1");
 
-    m_cEncLib.setNoSignDataHidingConstraintFlag(m_bNoSignDataHidingConstraintFlag);
-    CHECK(m_bNoSignDataHidingConstraintFlag && m_signDataHidingEnabledFlag, "SDH shall be deactivated when m_bNoSignDataHidingConstraintFlag is equal to 1");
+    m_cEncLib.setNoSignDataHidingConstraintFlag(m_noSignDataHidingConstraintFlag);
+    CHECK(m_noSignDataHidingConstraintFlag && m_signDataHidingEnabledFlag, "SDH shall be deactivated when m_bNoSignDataHidingConstraintFlag is equal to 1");
 
     m_cEncLib.setNoApsConstraintFlag(m_noApsConstraintFlag);
     CHECK(m_noApsConstraintFlag && (m_lmcsEnabled || (m_useScalingListId != SCALING_LIST_OFF)), "LMCS and explict scaling list shall be deactivated when m_noApsConstraintFlag is equal to 1");
