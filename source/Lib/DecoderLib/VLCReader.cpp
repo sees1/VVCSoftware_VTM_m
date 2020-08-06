@@ -4704,7 +4704,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     }
 #endif
 #if JVET_S0058_GCI
-    READ_FLAG(symbol, "gci_no_Mtt_constraint_flag"                ); cinfo->setNoMttConstraintFlag(symbol > 0 ? true : false);
+    READ_FLAG(symbol, "gci_no_mtt_constraint_flag"                ); cinfo->setNoMttConstraintFlag(symbol > 0 ? true : false);
 #endif
     READ_FLAG(symbol,  "no_qtbtt_dual_tree_intra_constraint_flag" ); cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
 #if !JVET_S0050_GCI

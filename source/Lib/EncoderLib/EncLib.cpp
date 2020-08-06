@@ -1164,37 +1164,37 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
 #endif
 #if JVET_S0058_GCI
-  cinfo->setNoMttConstraintFlag(m_bNoMttConstraintFlag);
+  cinfo->setNoMttConstraintFlag(m_noMttConstraintFlag);
 #endif
-  cinfo->setNoQtbttDualTreeIntraConstraintFlag(m_bNoQtbttDualTreeIntraConstraintFlag);
+  cinfo->setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);
   cinfo->setNoPartitionConstraintsOverrideConstraintFlag(m_noPartitionConstraintsOverrideConstraintFlag);
-  cinfo->setNoSaoConstraintFlag(m_bNoSaoConstraintFlag);
-  cinfo->setNoAlfConstraintFlag(m_bNoAlfConstraintFlag);
+  cinfo->setNoSaoConstraintFlag(m_noSaoConstraintFlag);
+  cinfo->setNoAlfConstraintFlag(m_noAlfConstraintFlag);
   cinfo->setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
 #if JVET_S0058_GCI
-  cinfo->setNoWeightedPredictionConstraintFlag(m_bNoWeightedPredictionConstraintFlag);
+  cinfo->setNoWeightedPredictionConstraintFlag(m_noWeightedPredictionConstraintFlag);
 #endif
-  cinfo->setNoRefWraparoundConstraintFlag(m_bNoRefWraparoundConstraintFlag);
-  cinfo->setNoTemporalMvpConstraintFlag(m_bNoTemporalMvpConstraintFlag);
-  cinfo->setNoSbtmvpConstraintFlag(m_bNoSbtmvpConstraintFlag);
-  cinfo->setNoAmvrConstraintFlag(m_bNoAmvrConstraintFlag);
-  cinfo->setNoBdofConstraintFlag(m_bNoBdofConstraintFlag);
+  cinfo->setNoRefWraparoundConstraintFlag(m_noRefWraparoundConstraintFlag);
+  cinfo->setNoTemporalMvpConstraintFlag(m_noTemporalMvpConstraintFlag);
+  cinfo->setNoSbtmvpConstraintFlag(m_noSbtmvpConstraintFlag);
+  cinfo->setNoAmvrConstraintFlag(m_noAmvrConstraintFlag);
+  cinfo->setNoBdofConstraintFlag(m_noBdofConstraintFlag);
   cinfo->setNoDmvrConstraintFlag(m_noDmvrConstraintFlag);
-  cinfo->setNoCclmConstraintFlag(m_bNoCclmConstraintFlag);
-  cinfo->setNoMtsConstraintFlag(m_bNoMtsConstraintFlag);
+  cinfo->setNoCclmConstraintFlag(m_noCclmConstraintFlag);
+  cinfo->setNoMtsConstraintFlag(m_noMtsConstraintFlag);
   cinfo->setNoSbtConstraintFlag(m_noSbtConstraintFlag);
-  cinfo->setNoAffineMotionConstraintFlag(m_bNoAffineMotionConstraintFlag);
-  cinfo->setNoBcwConstraintFlag(m_bNoBcwConstraintFlag);
+  cinfo->setNoAffineMotionConstraintFlag(m_noAffineMotionConstraintFlag);
+  cinfo->setNoBcwConstraintFlag(m_noBcwConstraintFlag);
   cinfo->setNoIbcConstraintFlag(m_noIbcConstraintFlag);
-  cinfo->setNoCiipConstraintFlag(m_bNoCiipConstraintFlag);
+  cinfo->setNoCiipConstraintFlag(m_noCiipConstraintFlag);
   cinfo->setNoGeoConstraintFlag(m_noGeoConstraintFlag);
-  cinfo->setNoLadfConstraintFlag(m_bNoLadfConstraintFlag);
+  cinfo->setNoLadfConstraintFlag(m_noLadfConstraintFlag);
   cinfo->setNoTransformSkipConstraintFlag(m_noTransformSkipConstraintFlag);
   cinfo->setNoBDPCMConstraintFlag(m_noBDPCMConstraintFlag);
   cinfo->setNoJointCbCrConstraintFlag(m_noJointCbCrConstraintFlag);
-  cinfo->setNoQpDeltaConstraintFlag(m_bNoQpDeltaConstraintFlag);
-  cinfo->setNoDepQuantConstraintFlag(m_bNoDepQuantConstraintFlag);
-  cinfo->setNoSignDataHidingConstraintFlag(m_bNoSignDataHidingConstraintFlag);
+  cinfo->setNoQpDeltaConstraintFlag(m_noQpDeltaConstraintFlag);
+  cinfo->setNoDepQuantConstraintFlag(m_noDepQuantConstraintFlag);
+  cinfo->setNoSignDataHidingConstraintFlag(m_noSignDataHidingConstraintFlag);
   cinfo->setNoTrailConstraintFlag(m_noTrailConstraintFlag);
   cinfo->setNoStsaConstraintFlag(m_noStsaConstraintFlag);
   cinfo->setNoRaslConstraintFlag(m_noRaslConstraintFlag);
