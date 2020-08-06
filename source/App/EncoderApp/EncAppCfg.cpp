@@ -3878,46 +3878,51 @@ void EncAppCfg::xPrintParameter()
   }
   msg(DETAILS, "CTU size / min CU size                 : %d / %d \n", m_uiMaxCUWidth, 1 << m_log2MinCuSize);
 
-  msg(DETAILS, "subpicture info present flag                       : %d\n", m_subPicInfoPresentFlag);
+  msg(DETAILS, "subpicture info present flag           : %s\n", m_subPicInfoPresentFlag ? "Enabled" : "Disabled");
   if (m_subPicInfoPresentFlag)
   {
-    msg(DETAILS, "number of subpictures                            : %d\n", m_numSubPics);
+    msg(DETAILS, "number of subpictures                  : %d\n", m_numSubPics);
 #if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
-    msg(DETAILS, "subpicture size same flag                        : %d\n", m_subPicSameSizeFlag);
+    msg(DETAILS, "subpicture size same flag              : %d\n", m_subPicSameSizeFlag);
     if (m_subPicSameSizeFlag)
     {
-      msg(DETAILS, "[0]th subpictures size                           :[%d %d]\n", m_subPicWidth[0], m_subPicHeight[0]);
+      msg(DETAILS, "[0]th subpicture size                  : [%d %d]\n", m_subPicWidth[0], m_subPicHeight[0]);
     }
     for (int i = 0; i < m_numSubPics; i++)
     {
       if (!m_subPicSameSizeFlag)
       {
-        msg(DETAILS, "[%d]th subpictures location                           :[%d %d]\n", i, m_subPicCtuTopLeftX[i], m_subPicCtuTopLeftY[i]);
-        msg(DETAILS, "[%d]th subpictures size                           :[%d %d]\n", i, m_subPicWidth[i], m_subPicHeight[i]);
+        msg(DETAILS, "[%d]th subpicture location              : [%d %d]\n", i, m_subPicCtuTopLeftX[i],
+            m_subPicCtuTopLeftY[i]);
+        msg(DETAILS, "[%d]th subpicture size                  : [%d %d]\n", i, m_subPicWidth[i], m_subPicHeight[i]);
       }
-      msg(DETAILS, "[%d]th subpictures treated as picture flag                           :%d\n", i, m_subPicTreatedAsPicFlag[i]);
-      msg(DETAILS, "loop filter cross [%d]th subpictures enabled flag                           :%d\n", i, m_loopFilterAcrossSubpicEnabledFlag[i]);
+      msg(DETAILS, "[%d]th subpicture treated as picture    : %d\n", i,
+          m_subPicTreatedAsPicFlag[i] ? "Enabled" : "Disabled");
+      msg(DETAILS, "loop filter across [%d]th subpicture    : %d\n", i,
+          m_loopFilterAcrossSubpicEnabledFlag[i] ? "Enabled" : "Disabled");
     }
 #else
     for (int i = 0; i < m_numSubPics; i++)
     {
-      msg(DETAILS, "[%d]th subpictures location                           :[%d %d]\n", i, m_subPicCtuTopLeftX[i], m_subPicCtuTopLeftY[i]);
-      msg(DETAILS, "[%d]th subpictures size                           :[%d %d]\n", i, m_subPicWidth[i], m_subPicHeight[i]);
-      msg(DETAILS, "[%d]th subpictures treated as picture flag                           :%d\n", i, m_subPicTreatedAsPicFlag[i]);
-      msg(DETAILS, "loop filter cross [%d]th subpictures enabled flag                           :%d\n", i, m_loopFilterAcrossSubpicEnabledFlag[i]);
+      msg(DETAILS, "[%d]th subpictures location             :[%d %d]\n", i, m_subPicCtuTopLeftX[i],
+          m_subPicCtuTopLeftY[i]);
+      msg(DETAILS, "[%d]th subpictures size                 :[%d %d]\n", i, m_subPicWidth[i], m_subPicHeight[i]);
+      msg(DETAILS, "[%d]th subpictures treated as picture flag :%d\n", i, m_subPicTreatedAsPicFlag[i]);
+      msg(DETAILS, "loop filter cross [%d]th subpictures enabled flag :%d\n", i,
+          m_loopFilterAcrossSubpicEnabledFlag[i]);
     }
 #endif
   }
 
-  msg(DETAILS, "subpicture ID present flag                            : %d\n", m_subPicIdMappingExplicitlySignalledFlag);
+  msg(DETAILS, "subpicture ID present flag             : %s\n",
+      m_subPicIdMappingExplicitlySignalledFlag ? "Enabled" : "Disabled");
   if (m_subPicIdMappingExplicitlySignalledFlag)
   {
-    msg(DETAILS, "subpicture ID signalling present flag                            : %d\n", m_subPicIdMappingInSpsFlag);
+    msg(DETAILS, "subpicture ID signalling present flag  : %d\n", m_subPicIdMappingInSpsFlag);
     for (int i = 0; i < m_numSubPics; i++)
     {
-      msg(DETAILS, "[%d]th subpictures ID length                           :%d\n", i, m_subPicIdLen);
-      msg(DETAILS, "[%d]th subpictures ID                          :%d\n", i, m_subPicId[i]);
-
+      msg(DETAILS, "[%d]th subpictures ID length           : %d\n", i, m_subPicIdLen);
+      msg(DETAILS, "[%d]th subpictures ID                  : %d\n", i, m_subPicId[i]);
     }
   }
   msg( DETAILS, "Max TB size                            : %d \n", 1 << m_log2MaxTbSize );
