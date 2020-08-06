@@ -142,6 +142,8 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
 {
   const ProfileTierLevel &spsPtl =*(sps.getProfileTierLevel());
 
+  m_pProfile = nullptr;
+  m_pLevelTier = nullptr;
   m_tier = spsPtl.getTierFlag();
 
   // Identify the profile from the profile Idc, and possibly other constraints.
@@ -161,7 +163,7 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
     }
   }
 
-  if (m_pProfile != 0)
+  if (m_pProfile != nullptr)
   {
     // Now identify the level:
     const LevelTierFeatures *pLTF = m_pProfile->pLevelTiersListInfo;
