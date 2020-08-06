@@ -1123,6 +1123,9 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNonPackedConstraintFlag     (m_nonPackedConstraintFlag);
   cinfo->setNonProjectedConstraintFlag(m_nonProjectedConstraintFlag);
 #endif
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+  cinfo->setNoRprConstraintFlag(m_noRprConstraintFlag);
+#endif
   cinfo->setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
   cinfo->setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
   cinfo->setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
@@ -1503,7 +1506,11 @@ void EncLib::xInitSPS( SPS& sps )
   CHECK( m_vps->getIndependentLayerFlag( m_vps->getGeneralLayerIdx( m_layerId ) ) && sps.getInterLayerPresentFlag(), " When vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id ]]  is equal to 1, the value of inter_layer_ref_pics_present_flag shall be equal to 0." );
 
   sps.setResChangeInClvsEnabledFlag(m_resChangeInClvsEnabled);
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+  sps.setRprEnabledFlag(m_rprEnabledFlag);
+#else
   sps.setRprEnabledFlag((m_resChangeInClvsEnabled) || sps.getInterLayerPresentFlag());
+#endif
 
   sps.setLog2ParallelMergeLevelMinus2( m_log2ParallelMergeLevelMinus2 );
 

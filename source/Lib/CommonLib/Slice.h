@@ -242,6 +242,9 @@ class ConstraintInfo
   bool              m_nonPackedConstraintFlag;
   bool              m_nonProjectedConstraintFlag;
 #endif
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+  bool              m_noRprConstraintFlag;
+#endif
   bool              m_noResChangeInClvsConstraintFlag;
   bool              m_oneTilePerPicConstraintFlag;
   bool              m_picHeaderInSliceHeaderConstraintFlag;
@@ -334,6 +337,9 @@ public:
 #else
     : m_nonPackedConstraintFlag (false)
     , m_nonProjectedConstraintFlag(false)
+#endif
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+    , m_noRprConstraintFlag(false)
 #endif
     , m_noResChangeInClvsConstraintFlag(false)
     , m_oneTilePerPicConstraintFlag(false)
@@ -444,6 +450,11 @@ public:
 #if !JVET_S0266_VUI_length
   bool          getNonProjectedConstraintFlag() const { return m_nonProjectedConstraintFlag; }
   void          setNonProjectedConstraintFlag(bool b) { m_nonProjectedConstraintFlag = b; }
+#endif
+
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+  bool          getNoRprConstraintFlag() const { return m_noRprConstraintFlag; }
+  void          setNoRprConstraintFlag(bool b) { m_noRprConstraintFlag = b; }
 #endif
 
   bool          getNoResChangeInClvsConstraintFlag() const { return m_noResChangeInClvsConstraintFlag; }

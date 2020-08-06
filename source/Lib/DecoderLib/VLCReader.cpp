@@ -1470,6 +1470,12 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 #endif
 
   READ_FLAG(uiCode, "ref_pic_resampling_enabled_flag");          pcSPS->setRprEnabledFlag(uiCode);
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+  if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoRprConstraintFlag())
+  {
+    CHECK(uiCode != 0, "When gci_no_ref_pic_resampling_constraint_flag is equal to 1, sps_ref_pic_resampling_enabled_flag shall be equal to 0");
+  }
+#endif
   if (uiCode)
   {
     READ_FLAG(uiCode, "res_change_in_clvs_allowed_flag");        pcSPS->setResChangeInClvsEnabledFlag(uiCode);
@@ -2171,6 +2177,12 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
 #endif
   READ_FLAG(uiCode, "sps_explicit_scaling_list_enabled_flag");                 pcSPS->setScalingListFlag(uiCode);
+#if JVET_S0050_GCI
+  if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoExplicitScaleListConstraintFlag())
+  {
+    CHECK(uiCode != 0, "When gci_no_explicit_scaling_list_constraint_flag is equal to 1, sps_explicit_scaling_list_enabled_flag shall be equal to 0");
+  }
+#endif
 
   if (pcSPS->getUseLFNST() && pcSPS->getScalingListFlag())
   {
@@ -2189,6 +2201,13 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_FLAG(uiCode, "sps_sign_data_hiding_enabled_flag"); pcSPS->setSignDataHidingEnabledFlag(uiCode);
 
   READ_FLAG( uiCode, "sps_virtual_boundaries_enabled_flag" ); pcSPS->setVirtualBoundariesEnabledFlag( uiCode != 0 );
+#if JVET_S0050_GCI
+  if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoVirtualBoundaryConstraintFlag())
+  {
+    CHECK(uiCode != 0, "When gci_no_virtual_boundaries_constraint_flag is equal to 1, sps_virtual_boundaries_enabled_flag shall be equal to 0");
+  }
+#endif
+
   if( pcSPS->getVirtualBoundariesEnabledFlag() )
   {
     READ_FLAG( uiCode, "sps_loop_filter_across_virtual_boundaries_present_flag" ); pcSPS->setVirtualBoundariesPresentFlag( uiCode != 0 );
@@ -4660,6 +4679,9 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     {
       CHECK(symbol == 0, "When single_layer_constraint_flag is equal to 1, the value of all_layers_independent_ constraint_flag shall be equal to 1");
     }
+#endif
+#if JVET_Q0114_ASPECT5_GCI_FLAG
+    READ_FLAG(symbol,  "gci_no_ref_pic_resampling_constraint_flag"); cinfo->setNoRprConstraintFlag(symbol ? true : false);
 #endif
     READ_FLAG(symbol,  "no_res_change_in_clvs_constraint_flag"    ); cinfo->setNoResChangeInClvsConstraintFlag(symbol ? true : false);
 #if JVET_S0113_S0195_GCI
