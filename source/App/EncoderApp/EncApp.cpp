@@ -464,6 +464,10 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
 #endif
+#if JVET_R0341_GCI
+    m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
+    CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
+#endif
   }
   else
   {
@@ -542,6 +546,9 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoPaletteConstraintFlag(false);
     m_cEncLib.setNoActConstraintFlag(false);
     m_cEncLib.setNoLmcsConstraintFlag(false);
+#if JVET_R0341_GCI
+    m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
+#endif
   }
 
   //====== Coding Structure ========

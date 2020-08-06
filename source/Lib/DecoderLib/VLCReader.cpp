@@ -4852,6 +4852,9 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
 #if JVET_S0050_GCI
     READ_FLAG(symbol, "no_explicit_scaling_list_constraint_flag");   cinfo->setNoExplicitScaleListConstraintFlag(symbol > 0 ? true : false);
 #endif
+#if JVET_R0341_GCI
+    READ_FLAG(symbol, "gci_no_chroma_qp_offset_constraint_flag");    cinfo->setNoChromaQpOffsetConstraintFlag(symbol > 0 ? true : false);
+#endif
     READ_FLAG(symbol, "no_lmcs_constraint_flag");                    cinfo->setNoLmcsConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_qp_delta_constraint_flag");                cinfo->setNoQpDeltaConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_dep_quant_constraint_flag");               cinfo->setNoDepQuantConstraintFlag(symbol > 0 ? true : false);
