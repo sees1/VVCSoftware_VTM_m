@@ -200,6 +200,9 @@ protected:
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
+#if JVET_S0058_GCI
+  bool      m_bNoMttConstraintFlag;
+#endif
   bool      m_bNoQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
@@ -208,6 +211,9 @@ protected:
   bool      m_bNoSaoConstraintFlag;
   bool      m_bNoAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
+#if JVET_S0058_GCI
+  bool      m_bNoWeightedPredictionConstraintFlag;
+#endif
   bool      m_bNoRefWraparoundConstraintFlag;
   bool      m_bNoTemporalMvpConstraintFlag;
   bool      m_bNoSbtmvpConstraintFlag;
@@ -847,6 +853,10 @@ public:
   bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
   void          setNoVirtualBoundaryConstraintFlag(bool bVal) { m_noVirtualBoundaryConstraintFlag = bVal; }
 #endif
+#if JVET_S0058_GCI
+  bool          getNoMttConstraintFlag() const { return m_bNoMttConstraintFlag; }
+  void          setNoMttConstraintFlag(bool bVal) { m_bNoMttConstraintFlag = bVal; }
+#endif
   bool      getNoQtbttDualTreeIntraConstraintFlag() const { return m_bNoQtbttDualTreeIntraConstraintFlag; }
   void      setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_bNoQtbttDualTreeIntraConstraintFlag = bVal; }
 #if JVET_S0066_GCI
@@ -861,6 +871,10 @@ public:
   void      setNoAlfConstraintFlag(bool bVal) { m_bNoAlfConstraintFlag = bVal; }
   bool      getNoCCAlfConstraintFlag() const { return m_noCCAlfConstraintFlag; }
   void      setNoCCAlfConstraintFlag(bool bVal) { m_noCCAlfConstraintFlag = bVal; }
+#if JVET_S0058_GCI
+  bool      getWeightedPredictionConstraintFlag() const { return m_bNoWeightedPredictionConstraintFlag; }
+  void      setNoWeightedPredictionConstraintFlag(bool bVal) { m_bNoWeightedPredictionConstraintFlag = bVal; }
+#endif
   bool      getNoRefWraparoundConstraintFlag() const { return m_bNoRefWraparoundConstraintFlag; }
   void      setNoRefWraparoundConstraintFlag(bool bVal) { m_bNoRefWraparoundConstraintFlag = bVal; }
   bool      getNoTemporalMvpConstraintFlag() const { return m_bNoTemporalMvpConstraintFlag; }

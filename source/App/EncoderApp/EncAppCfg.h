@@ -155,6 +155,9 @@ protected:
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
+#if JVET_S0058_GCI
+  bool      m_noMttConstraintFlag;
+#endif
   bool      m_bNoQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
@@ -163,6 +166,9 @@ protected:
   bool      m_bNoSaoConstraintFlag;
   bool      m_bNoAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
+#if JVET_S0058_GCI
+  bool      m_noWeightedPredictionConstraintFlag;
+#endif
   bool      m_bNoRefWraparoundConstraintFlag;
   bool      m_bNoTemporalMvpConstraintFlag;
   bool      m_bNoSbtmvpConstraintFlag;
