@@ -1166,6 +1166,9 @@ void EncLib::xInitSPS( SPS& sps )
 #if JVET_S0058_GCI
   cinfo->setNoMttConstraintFlag(m_noMttConstraintFlag);
 #endif
+#if JVET_R0341_GCI
+  cinfo->setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
+#endif
   cinfo->setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);
   cinfo->setNoPartitionConstraintsOverrideConstraintFlag(m_noPartitionConstraintsOverrideConstraintFlag);
   cinfo->setNoSaoConstraintFlag(m_noSaoConstraintFlag);

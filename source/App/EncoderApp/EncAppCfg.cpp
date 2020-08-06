@@ -890,6 +890,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 #if JVET_S0050_GCI
   ("NoExplicitScaleListConstraintFlag",               m_noExplicitScaleListConstraintFlag,              false, "Indicate that explicit scaling list is deactivated")
 #endif
+#if JVET_R0341_GCI
+  ("NoChromaQpOffsetConstraintFlag",                  m_noChromaQpOffsetConstraintFlag,                 false, "Indicate that chroma qp offset is zero")
+#endif
   ("NoDepQuantConstraintFlag",                        m_noDepQuantConstraintFlag,                      false, "Indicate that DQ is deactivated")
   ("NoSignDataHidingConstraintFlag",                  m_noSignDataHidingConstraintFlag,                false, "Indicate that SDH is deactivated")
   ("NoQpDeltaConstraintFlag",                         m_noQpDeltaConstraintFlag,                       false, "Indicate that QPdelta is deactivated")

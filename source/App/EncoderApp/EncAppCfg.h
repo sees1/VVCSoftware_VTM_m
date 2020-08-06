@@ -158,6 +158,9 @@ protected:
 #if JVET_S0058_GCI
   bool      m_noMttConstraintFlag;
 #endif
+#if JVET_R0341_GCI
+  bool      m_noChromaQpOffsetConstraintFlag;
+#endif
   bool      m_noQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
