@@ -4684,7 +4684,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     /* CTU and block partitioning */
     READ_CODE(2, symbol, "gci_three_minus_max_log2_ctu_size_constraint_idc");   cinfo->setMaxLog2CtuSizeConstraintIdc(((3 - symbol) + 5));
     READ_FLAG(symbol, "gci_no_partition_constraints_override_constraint_flag"); cinfo->setNoPartitionConstraintsOverrideConstraintFlag(symbol > 0 ? true : false);
-    //placeholder for gci_no_mtt_constraint_flag ==> S0058
+    READ_FLAG(symbol, "gci_no_mtt_constraint_flag");                            cinfo->setNoMttConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_qtbtt_dual_tree_intra_constraint_flag");          cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
 
     /* intra */
@@ -4696,9 +4696,9 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "gci_no_cclm_constraint_flag");                    cinfo->setNoCclmConstraintFlag(symbol > 0 ? true : false);
 
     /* inter */
-    //placeholder for gci_no_ref_pic_resampling_constraint_flag ==> Q0114
+    READ_FLAG(symbol, "gci_no_ref_pic_resampling_constraint_flag");      cinfo->setNoRprConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_res_change_in_clvs_constraint_flag");      cinfo->setNoResChangeInClvsConstraintFlag(symbol > 0 ? true : false);
-    //placeholder for gci_no_weighted_prediction_constraint_flag ==> S0058
+    READ_FLAG(symbol, "gci_no_weighted_prediction_constraint_flag");     cinfo->setNoWeightedPredictionConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_ref_wraparound_constraint_flag");          cinfo->setNoRefWraparoundConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_temporal_mvp_constraint_flag");            cinfo->setNoTemporalMvpConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_sbtmvp_constraint_flag");                  cinfo->setNoSbtmvpConstraintFlag(symbol > 0 ? true : false);
@@ -4726,7 +4726,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "gci_no_dep_quant_constraint_flag");               cinfo->setNoDepQuantConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_sign_data_hiding_constraint_flag");        cinfo->setNoSignDataHidingConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_cu_qp_delta_constraint_flag");             cinfo->setNoQpDeltaConstraintFlag(symbol > 0 ? true : false);
-    //placeholder for gci_no_chroma_qp_offset_constraint_flag ==> R0341
+    READ_FLAG(symbol, "gci_no_chroma_qp_offset_constraint_flag");        cinfo->setNoChromaQpOffsetConstraintFlag(symbol > 0 ? true : false);
 
     /* loop filter */
     READ_FLAG(symbol, "gci_no_sao_constraint_flag");                     cinfo->setNoSaoConstraintFlag(symbol > 0 ? true : false);

@@ -160,8 +160,6 @@
                                                             // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
                                                             //             add no_idr_rpl_constraint_flag
 
-#define JVET_S0105_GCI_REORDER_IN_CATEGORY                1 // JVET-S0105: reorder and categorize GCI flags (assumes the following macros set to 1: JVET_S0050_GCI, JVET_S0113_S0195_GCI, JVET_S0066_GCI, JVET_S0138_GCI_PTL)
-
 #define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
 
 #define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
@@ -171,6 +169,8 @@
 #define JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT            1 // JVET-S0184: Conformance constraints regarding virtual boundary signalling when subpictures are present
 
 #define JVET_Q0114_ASPECT5_GCI_FLAG                       1 // JVET-Q0114 Aspect 5: Add a general constraint on no reference picture resampling
+
+#define JVET_S0105_GCI_REORDER_IN_CATEGORY                1 // JVET-S0105: reorder and categorize GCI flags (assumes the following macros set to 1: JVET_S0050_GCI, JVET_S0113_S0195_GCI, JVET_S0066_GCI, JVET_S0138_GCI_PTL, JVET_S0058_GCI, JVET_R0341_GCI, JVET_Q0114_ASPECT5_GCI_FLAG)
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages

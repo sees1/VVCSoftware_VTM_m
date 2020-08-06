@@ -2690,9 +2690,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 #endif
 #if JVET_S0105_GCI_REORDER_IN_CATEGORY
     /* general */
-    WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(), "gci_intra_only_constraint_flag");
-    WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag(), "gci_all_layers_independent_constraint_flag");
-    WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "gci_one_au_only_constraint_flag");
+    WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag() ? 1 : 0, "gci_intra_only_constraint_flag");
+    WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag() ? 1 : 0, "gci_all_layers_independent_constraint_flag");
+    WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag() ? 1 : 0, "gci_one_au_only_constraint_flag");
 
     /* picture format */
     WRITE_CODE(16 - cinfo->getMaxBitDepthConstraintIdc(), 4, "gci_sixteen_minus_max_bitdepth_constraint_idc");
@@ -2722,7 +2722,7 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     /* CTU and block partitioning */
     WRITE_CODE(3 - (cinfo->getMaxLog2CtuSizeConstraintIdc() - 5), 2, "gci_three_minus_max_log2_ctu_size_constraint_idc");
     WRITE_FLAG(cinfo->getNoPartitionConstraintsOverrideConstraintFlag() ? 1 : 0, "gci_no_partition_constraints_override_constraint_flag");
-    //placeholder for gci_no_mtt_constraint_flag ==> S0058
+    WRITE_FLAG(cinfo->getNoMttConstraintFlag() ? 1 : 0, "gci_no_mtt_constraint_flag");
     WRITE_FLAG(cinfo->getNoQtbttDualTreeIntraConstraintFlag() ? 1 : 0, "gci_no_qtbtt_dual_tree_intra_constraint_flag");
 
     /* intra */
@@ -2734,9 +2734,9 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoCclmConstraintFlag() ? 1 : 0, "gci_no_cclm_constraint_flag");
 
     /* inter */
-    //placeholder for gci_no_ref_pic_resampling_constraint_flag ==> Q0114
-    WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "gci_no_res_change_in_clvs_constraint_flag");
-    //placeholder for gci_no_weighted_prediction_constraint_flag ==> S0058
+    WRITE_FLAG(cinfo->getNoRprConstraintFlag() ? 1 : 0, "gci_no_ref_pic_resampling_constraint_flag");
+    WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag() ? 1 : 0, "gci_no_res_change_in_clvs_constraint_flag");
+    WRITE_FLAG(cinfo->getNoWeightedPredictionConstraintFlag() ? 1 : 0, "gci_no_weighted_prediction_constraint_flag");
     WRITE_FLAG(cinfo->getNoRefWraparoundConstraintFlag() ? 1 : 0, "gci_no_ref_wraparound_constraint_flag");
     WRITE_FLAG(cinfo->getNoTemporalMvpConstraintFlag() ? 1 : 0, "gci_no_temporal_mvp_constraint_flag");
     WRITE_FLAG(cinfo->getNoSbtmvpConstraintFlag() ? 1 : 0, "gci_no_sbtmvp_constraint_flag");
@@ -2764,7 +2764,7 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "gci_no_dep_quant_constraint_flag");
     WRITE_FLAG(cinfo->getNoSignDataHidingConstraintFlag() ? 1 : 0, "gci_no_sign_data_hiding_constraint_flag");
     WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "gci_no_qp_delta_constraint_flag");
-    //placeholder for gci_no_chroma_qp_offset_constraint_flag ==> R0341
+    WRITE_FLAG(cinfo->getNoChromaQpOffsetConstraintFlag() ? 1 : 0, "gci_no_chroma_qp_offset_constraint_flag");
 
     /* loop filter */
     WRITE_FLAG(cinfo->getNoSaoConstraintFlag() ? 1 : 0, "gci_no_sao_constraint_flag");
