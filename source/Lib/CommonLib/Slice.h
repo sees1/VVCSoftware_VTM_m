@@ -937,7 +937,11 @@ private:
   uint32_t              m_vpsCfgPredDirection[MAX_VPS_SUBLAYERS];
   bool                  m_vpsIndependentLayerFlag[MAX_VPS_LAYERS];
   bool                  m_vpsDirectRefLayerFlag[MAX_VPS_LAYERS][MAX_VPS_LAYERS];
+#if JVET_R0193
+  uint32_t              m_vpsMaxTidIlRefPicsPlus1[MAX_VPS_LAYERS][MAX_VPS_LAYERS];
+#else
   uint32_t              m_vpsMaxTidIlRefPicsPlus1[MAX_VPS_LAYERS];
+#endif
   bool                  m_vpsEachLayerIsAnOlsFlag;
   uint32_t              m_vpsOlsModeIdc;
   uint32_t              m_vpsNumOutputLayerSets;
@@ -1011,9 +1015,13 @@ public:
 
   bool              getIndependentLayerFlag(uint32_t layerIdx) const { return m_vpsIndependentLayerFlag[layerIdx]; }
   void              setIndependentLayerFlag(uint32_t layerIdx, bool t) { m_vpsIndependentLayerFlag[layerIdx] = t; }
-
+#if JVET_R0193
+  uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t refLayerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx]; }
+  void              setMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t refLayerIdx, uint32_t i) { m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx] = i; }
+#else
   uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx]; }
   void              setMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t i) { m_vpsMaxTidIlRefPicsPlus1[layerIdx] = i; }
+#endif
 
   bool              getDirectRefLayerFlag(uint32_t layerIdx, uint32_t refLayerIdx) const { return m_vpsDirectRefLayerFlag[layerIdx][refLayerIdx]; }
   void              setDirectRefLayerFlag(uint32_t layerIdx, uint32_t refLayerIdx, bool t) { m_vpsDirectRefLayerFlag[layerIdx][refLayerIdx] = t; }

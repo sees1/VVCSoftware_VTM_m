@@ -771,10 +771,17 @@ uint32_t BitstreamExtractorApp::decode()
         msg (VERBOSE, "APS Info: APS ID = %d Type = %d Layer = %d\n", aps->getAPSId(), aps->getAPSType(), nalu.m_nuhLayerId);
         int apsId = aps->getAPSId();
         int apsType = aps->getAPSType();
-        // note: storeAPS may invalidate the aps pointer!
-        m_parameterSetManager.storeAPS( aps, nalu.getBitstream().getFifo() );
-        // get APS back
-        aps = m_parameterSetManager.getAPS(apsId, apsType);
+#if JVET_S0219_ASPECT1
+        if (writeInpuNalUnitToStream)
+        {
+#endif
+          // note: storeAPS may invalidate the aps pointer!
+          m_parameterSetManager.storeAPS(aps, nalu.getBitstream().getFifo());
+          // get APS back
+          aps = m_parameterSetManager.getAPS(apsId, apsType);
+#if JVET_S0219_ASPECT1
+        }
+#endif
       }
 
       if (nalu.m_nalUnitType == NAL_UNIT_PH)

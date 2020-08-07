@@ -140,6 +140,19 @@ void EncApp::xInitLibCfg()
           {
             vps.setDirectRefLayerFlag(i, j, false);
           }
+#if JVET_R0193
+          bool bSetMaxTid = false;
+          for (int t = 0; t < vps.getMaxSubLayers(); t++)
+          {
+            if (m_cfgVPSParameters.m_maxTidILRefPicsPlus1Str[i].find("layer-"+to_string(j)+":"+to_string(t)) != std::string::npos)
+            {
+              vps.setMaxTidIlRefPicsPlus1(i, j, t);
+              bSetMaxTid = true;
+            }
+          }
+          if(!bSetMaxTid)
+            vps.setMaxTidIlRefPicsPlus1(i, j, vps.getMaxSubLayers());
+#endif
         }
       }
     }

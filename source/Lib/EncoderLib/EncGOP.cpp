@@ -5333,9 +5333,19 @@ void EncGOP::applyDeblockingFilterParameterSelection( Picture* pcPic, const uint
 }
 #endif
 
+#if JVET_R0193
+bool EncGOP::xCheckMaxTidILRefPics(int layerIdx, Picture* refPic, bool currentPicIsIRAP)
+#else
 bool EncGOP::xCheckMaxTidILRefPics(Picture* refPic, bool currentPicIsIRAP)
+#endif
 {
+#if JVET_R0193
+  const VPS* vps = refPic->cs->vps;
+  int refLayerIdx = vps == nullptr ? 0 : vps->getGeneralLayerIdx(refPic->layerId);
+  const int maxTidILRefPicsPlus1 = vps->getMaxTidIlRefPicsPlus1(layerIdx, refLayerIdx);
+#else
   const int maxTidILRefPicsPlus1 = m_pcCfg->getVPSParameters().m_maxTidILRefPicsPlus1;
+#endif
 
   // -1 means not set
   if (maxTidILRefPicsPlus1 < 0)
@@ -5442,7 +5452,11 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         rpcPic = *( iterPic++ );
         int refLayerIdx = vps->getGeneralLayerIdx( rpcPic->layerId );
         if (rpcPic->referenced && rpcPic->getPOC() == pic->getPOC() && vps->getDirectRefLayerFlag(layerIdx, refLayerIdx)
+#if JVET_R0193
+            && xCheckMaxTidILRefPics(layerIdx, rpcPic, slice->isIRAP()))
+#else
             && xCheckMaxTidILRefPics(rpcPic, slice->isIRAP()) )
+#endif
         {
           pLocalRPL0->setRefPicIdentifier( refPicIdxL0, 0, true, true, vps->getInterLayerRefIdc( layerIdx, refLayerIdx ) );
           refPicIdxL0++;
@@ -5564,7 +5578,11 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         rpcPic = *( iterPic++ );
         int refLayerIdx = vps->getGeneralLayerIdx( rpcPic->layerId );
         if (rpcPic->referenced && rpcPic->getPOC() == pic->getPOC() && vps->getDirectRefLayerFlag(layerIdx, refLayerIdx)
+#if JVET_R0193
+            && xCheckMaxTidILRefPics( layerIdx, rpcPic, slice->isIRAP()))
+#else
             && xCheckMaxTidILRefPics( rpcPic, slice->isIRAP() ) )
+#endif
         {
           pLocalRPL1->setRefPicIdentifier( refPicIdxL1, 0, true, true, vps->getInterLayerRefIdc( layerIdx, refLayerIdx ) );
           refPicIdxL1++;

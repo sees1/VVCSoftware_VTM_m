@@ -1138,6 +1138,7 @@ void EncLib::xInitVPS( const SPS& sps )
     m_vps->setHrdMaxTid(i, m_vps->getMaxSubLayers() - 1);
   }
 
+#if !JVET_R0193
   if (m_cfgVPSParameters.m_maxTidILRefPicsPlus1 >= 0)
   {
     for (int i = 0; i < m_vps->getMaxLayers(); i++)
