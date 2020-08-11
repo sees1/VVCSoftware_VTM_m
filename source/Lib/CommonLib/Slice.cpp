@@ -2322,8 +2322,10 @@ void VPS::deriveOutputLayerSets()
       m_numOutputLayersInOls[i] = 1;
       m_outputLayerIdInOls[i][0] = m_vpsLayerId[i];
 #if JVET_R0193_S0141
-      if (m_vpsEachLayerIsAnOlsFlag) 
+      if (m_vpsEachLayerIsAnOlsFlag)
+      {
         m_numSubLayersInLayerInOLS[i][0] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
+      }
       else
       {
         m_numSubLayersInLayerInOLS[i][i] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
