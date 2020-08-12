@@ -580,7 +580,7 @@ static bool writePlane( uint32_t orgWidth, uint32_t orgHeight, ostream& fd, cons
       {
         if ((y444 & mask_y_file) == 0) // if this is chroma, determine whether to skip every other row
         {
-          memset (reinterpret_cast<char*>(buf), 0, stride_file); // TODO: is this correct? Should behave similarly to code block at end of this function
+          memset (reinterpret_cast<char*>(buf), 0, stride_file);
 
           fd.write (reinterpret_cast<const char*>(buf), stride_file);
           if (fd.eof() || fd.fail())
