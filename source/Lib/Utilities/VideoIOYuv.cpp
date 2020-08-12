@@ -472,7 +472,6 @@ static bool writePlane( uint32_t orgWidth, uint32_t orgHeight, ostream& fd, cons
   const uint32_t height_file = height444 >> csy_file;
   const bool     writePYUV   = (packedYUVOutputMode > 0) && (fileBitDepth == 10 || fileBitDepth == 12) && ((width_file & (1 + (fileBitDepth & 3))) == 0);
 
-  CHECK( writePYUV, "Not supported" );
   CHECK( csx_file != csx_src, "Not supported" );
   const uint32_t stride_file = writePYUV ? ( orgWidth * fileBitDepth ) >> ( csx_file + 3 ) : ( orgWidth * ( is16bit ? 2 : 1 ) ) >> csx_file;
 
@@ -571,6 +570,29 @@ static bool writePlane( uint32_t orgWidth, uint32_t orgHeight, ostream& fd, cons
       if ((y444 & mask_y_src) == 0)
       {
         pSrcBuf += srcbuf_stride;
+      }
+    }
+
+    // here height444 and orgHeight are luma heights
+    if ((compID == COMPONENT_Y) || (fileFormat != CHROMA_400 && srcFormat != CHROMA_400))
+    {
+      for (uint32_t y444 = height444; y444 < orgHeight; y444++)
+      {
+        if ((y444 & mask_y_file) == 0) // if this is chroma, determine whether to skip every other row
+        {
+          memset (reinterpret_cast<char*>(buf), 0, stride_file);
+
+          fd.write (reinterpret_cast<const char*>(buf), stride_file);
+          if (fd.eof() || fd.fail())
+          {
+            return false;
+          }
+        }
+
+        if ((y444 & mask_y_src) == 0)
+        {
+          pSrcBuf += srcbuf_stride;
+        }
       }
     }
   }
@@ -678,7 +700,6 @@ static bool writePlane( uint32_t orgWidth, uint32_t orgHeight, ostream& fd, cons
     {
       if( ( y444 & mask_y_file ) == 0 ) // if this is chroma, determine whether to skip every other row
       {
-
         if( !is16bit )
         {
           for( uint32_t x = 0; x < ( orgWidth >> csx_file ); x++ )
