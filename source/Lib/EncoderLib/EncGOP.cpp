@@ -504,6 +504,11 @@ void EncGOP::xWriteLeadingSEIOrdered (SEIMessages& seiMessages, SEIMessages& duI
   xClearSEIs(currentMessages, !testWrite);
 
   // Picture timing SEI must always be following buffering period
+#if JVET_S0102_ASPECT3_PT_SEI
+  // Note: When general_same_pic_timing_in_all_ols_flag is equal to 1, PT SEI messages are required
+  //       to be placed into separate NAL units. The code below conforms to the constraint even if
+  //       general_same_pic_timing_in_all_ols_flag is equal to 0
+#endif
   currentMessages = extractSeisByType(localMessages, SEI::PICTURE_TIMING);
   CHECK(!(currentMessages.size() <= 1), "Unspecified error");
   xWriteSEI(NAL_UNIT_PREFIX_SEI, currentMessages, accessUnit, itNalu, temporalId);
