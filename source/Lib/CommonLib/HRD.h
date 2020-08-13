@@ -176,6 +176,21 @@ public:
 
 };
 
+#if JVET_S0102_ASPECT4
+inline void checkBPSyntaxElementLength(const SEIBufferingPeriod* bp1, const SEIBufferingPeriod* bp2)
+{
+  CHECK(bp1->m_initialCpbRemovalDelayLength != bp2->m_initialCpbRemovalDelayLength ||
+        bp1->m_cpbRemovalDelayLength != bp2->m_cpbRemovalDelayLength ||
+        bp1->m_dpbOutputDelayLength != bp2->m_dpbOutputDelayLength ||
+        bp1->m_duCpbRemovalDelayIncrementLength != bp2->m_duCpbRemovalDelayIncrementLength ||
+        bp1->m_dpbOutputDelayDuLength != bp2->m_dpbOutputDelayDuLength,
+        "All scalable-nested and non-scalable nested BP SEI messages in a CVS shall have the same value for "
+        "each of the syntax elements bp_cpb_initial_removal_delay_length_minus1, bp_cpb_removal_delay_length_minus1, "
+        "bp_dpb_output_delay_length_minus1, bp_du_cpb_removal_delay_increment_length_minus1, "
+        "and bp_dpb_output_delay_du_length_minus1");
+}
+#endif
+
 class HRD
 {
 public:
@@ -195,8 +210,20 @@ public:
   OlsHrdParams*          getOlsHrdParametersAddr() { return m_olsHrdParams; }
   const OlsHrdParams&    getOlsHrdParameters(int idx) const { return m_olsHrdParams[idx]; }
 
+#if JVET_S0102_ASPECT4
+  void                       setBufferingPeriodSEI(const SEIBufferingPeriod* bp)
+  {
+    if (m_bufferingPeriodInitialized)
+    {
+      checkBPSyntaxElementLength(bp, &m_bufferingPeriodSEI);
+    }
+    bp->copyTo(m_bufferingPeriodSEI); 
+    m_bufferingPeriodInitialized = true;
+  }
 
+#else
   void                       setBufferingPeriodSEI(const SEIBufferingPeriod* bp)  { bp->copyTo(m_bufferingPeriodSEI); m_bufferingPeriodInitialized = true; }
+#endif
   const SEIBufferingPeriod*  getBufferingPeriodSEI() const                        { return m_bufferingPeriodInitialized ? &m_bufferingPeriodSEI : nullptr; }
 
   void                       setPictureTimingSEI(const SEIPictureTiming* pt)  { pt->copyTo(m_pictureTimingSEI); m_pictureTimingAvailable = true; }

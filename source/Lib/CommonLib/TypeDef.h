@@ -123,6 +123,8 @@
 
 #define JVET_S0048_SCALING_OFFSET                         1 // JVET-S0048 Aspect2: change the constraint on the value ranges of scaling window offsets to be more flexible
 
+#define JVET_S0102_ASPECT4                                1 // JVET-S0102 Aspect 4: Mandate same value for buffering period syntax elements
+
 #define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.
 
 #define JVET_S0100_ASPECT3                                1 // JVET-S0100 Aspect 3: constraints on vps_dpb_max_tid and vps_hrd_max_tid depending on vps_ptl_max_tid
