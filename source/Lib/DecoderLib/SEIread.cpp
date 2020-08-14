@@ -229,7 +229,11 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       break;
     case SEI::SCALABLE_NESTING:
       sei = new SEIScalableNesting;
+#if JVET_S0102_ASPECT4
+      xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, hrd, pDecodedMessageOutputStream);
+#else
       xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, pDecodedMessageOutputStream);
+#endif
       break;
     case SEI::FRAME_FIELD_INFO:
       sei = new SEIFrameFieldInfo;
@@ -335,7 +339,11 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
 #if JVET_R0294_SUBPIC_HASH
       case SEI::SCALABLE_NESTING:
         sei = new SEIScalableNesting;
+#if JVET_S0102_ASPECT4
+        xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, hrd, pDecodedMessageOutputStream);
+#else
         xParseSEIScalableNesting((SEIScalableNesting&)*sei, nalUnitType, nuh_layer_id, payloadSize, vps, sps, pDecodedMessageOutputStream);
+#endif
         break;
 #endif
       default:
@@ -482,7 +490,11 @@ void SEIReader::xParseSEIDecodedPictureHash(SEIDecodedPictureHash& sei, uint32_t
   }
 }
 
+#if JVET_S0102_ASPECT4
+void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitType nalUnitType, const uint32_t nuhLayerId, uint32_t payloadSize, const VPS* vps, const SPS* sps, HRD &hrd, std::ostream* decodedMessageOutputStream)
+#else
 void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitType nalUnitType, const uint32_t nuhLayerId, uint32_t payloadSize, const VPS *vps, const SPS *sps, std::ostream *decodedMessageOutputStream)
+#endif
 {
   uint32_t symbol;
   SEIMessages seis;
@@ -566,6 +578,13 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
     {
       SEIBufferingPeriod *bp = (SEIBufferingPeriod*) tmpSEIs.front();
       m_nestedHrd.setBufferingPeriodSEI(bp);
+#if JVET_S0102_ASPECT4
+      const SEIBufferingPeriod *nonNestedBp = hrd.getBufferingPeriodSEI();
+      if (nonNestedBp)
+      {
+        checkBPSyntaxElementLength(nonNestedBp, bp);
+      }
+#endif
     }
     sei.m_nestedSEIs.push_back(tmpSEIs.front());
     tmpSEIs.clear();
