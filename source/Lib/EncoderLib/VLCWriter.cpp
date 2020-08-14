@@ -501,18 +501,7 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   WRITE_FLAG( pcPPS->getPictureHeaderExtensionPresentFlag() ? 1 : 0, "picture_header_extension_present_flag");
   WRITE_FLAG( pcPPS->getSliceHeaderExtensionPresentFlag() ? 1 : 0, "slice_header_extension_present_flag");
 
-  bool pps_extension_present_flag=false;
-  bool pps_extension_flags[NUM_PPS_EXTENSION_FLAGS]={false};
-
-  WRITE_FLAG( (pps_extension_present_flag?1:0), "pps_extension_present_flag" );
-
-  if (pps_extension_present_flag)
-  {
-    for(int i=0; i<NUM_PPS_EXTENSION_FLAGS; i++)
-    {
-      WRITE_FLAG( pps_extension_flags[i]?1:0, "pps_extension_data_flag" );
-    }
-  } // pps_extension_present_flag is non-zero
+  WRITE_FLAG(0, "pps_extension_flag");
   xWriteRbspTrailingBits();
 }
 
