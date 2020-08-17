@@ -786,8 +786,8 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   }
 #if !JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP
   sei_read_code( pDecodedMessageOutputStream, 3, code, "bp_max_sub_layers_minus1" );     sei.m_bpMaxSubLayers = code + 1;
-  sei_read_uvlc( pDecodedMessageOutputStream, code, "bp_cpb_cnt_minus1" ); sei.m_bpCpbCnt = code + 1;
 #endif
+ sei_read_uvlc( pDecodedMessageOutputStream, code, "bp_cpb_cnt_minus1" ); sei.m_bpCpbCnt = code + 1;
 #if JVET_S0181_PROPOSAL1
   if (sei.m_bpMaxSubLayers - 1 > 0)
   {
@@ -862,6 +862,10 @@ void SEIReader::xParseSEIPictureTiming(SEIPictureTiming& sei, uint32_t payloadSi
 #if JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP
   sei_read_code( pDecodedMessageOutputStream, bp.m_cpbRemovalDelayLength, symbol, "pt_cpb_removal_delay_minus1[bp_max_sub_layers_minus1]" );
   sei.m_auCpbRemovalDelay[bp.m_bpMaxSubLayers - 1] = symbol + 1;
+  if (bp.m_bpMaxSubLayers == 1)
+  {
+    sei.m_ptSubLayerDelaysPresentFlag[0] = true;
+  }
   for (int i = temporalId; i < bp.m_bpMaxSubLayers - 1; i++)
   {
     sei_read_flag(pDecodedMessageOutputStream, symbol, "pt_sub_layer_delays_present_flag[i]");
@@ -1050,7 +1054,7 @@ void SEIReader::xParseSEIPictureTiming(SEIPictureTiming& sei, uint32_t payloadSi
       sei.m_duCommonCpbRemovalDelayFlag = symbol;
       if( sei.m_duCommonCpbRemovalDelayFlag )
       {
-        for( int i = temporalId; i < bp.m_bpMaxSubLayers - 1; i ++ )
+        for( int i = temporalId; i <= bp.m_bpMaxSubLayers - 1; i ++ )
         {
           if( sei.m_ptSubLayerDelaysPresentFlag[i] )
           {
@@ -1065,7 +1069,7 @@ void SEIReader::xParseSEIPictureTiming(SEIPictureTiming& sei, uint32_t payloadSi
         sei.m_numNalusInDuMinus1[i] = symbol;
         if( !sei.m_duCommonCpbRemovalDelayFlag && i < sei.m_numDecodingUnitsMinus1 )
         {
-          for( int j = temporalId; j < bp.m_bpMaxSubLayers - 1; j ++ )
+          for( int j = temporalId; j <= bp.m_bpMaxSubLayers - 1; j ++ )
           {
             if( sei.m_ptSubLayerDelaysPresentFlag[j] )
             {

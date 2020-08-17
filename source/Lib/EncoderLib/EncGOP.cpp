@@ -849,6 +849,10 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
     pictureTimingSEI->m_auCpbRemovalDelay[maxNumSubLayers-1] = std::min<int>(std::max<int>(1, m_totalCoded[maxNumSubLayers-1] - m_lastBPSEI[maxNumSubLayers-1]), static_cast<int>(pow(2, static_cast<double>(cpbRemovalDelayLegth)))); // Syntax element signalled as minus, hence the .
     CHECK( (m_totalCoded[maxNumSubLayers-1] - m_lastBPSEI[maxNumSubLayers-1]) > pow(2, static_cast<double>(cpbRemovalDelayLegth)), " cpbRemovalDelayLegth too small for m_auCpbRemovalDelay[pt_max_sub_layers_minus1] at picture timing SEI " );
     const uint32_t temporalId = slice->getTLayer();
+    if (maxNumSubLayers == 1)
+    {
+      pictureTimingSEI->m_ptSubLayerDelaysPresentFlag[0] = true;
+    }
     for( int i = temporalId ; i < maxNumSubLayers - 1 ; i ++ )
     {
       int indexWithinGOP = (m_totalCoded[maxNumSubLayers - 1] - m_lastBPSEI[maxNumSubLayers - 1]) % m_pcCfg->getGOPSize();
