@@ -49,6 +49,26 @@ ParameterSetManager::~ParameterSetManager()
 {
 }
 
+VPS* ParameterSetManager::getVPS( int vpsId )
+{
+  if ( vpsId != 0)
+  {
+    return m_vpsMap.getPS( vpsId );
+  }
+  else
+  {
+    // VPS Id zero contains inferred values only. Allocate (with defaults) on first access
+    VPS *vps = m_vpsMap.getPS (0);
+    if (vps == nullptr)
+    {
+      m_vpsMap.allocatePS(0);
+      vps = m_vpsMap.getPS( 0 );
+      vps->deriveOutputLayerSets();
+    }
+    return m_vpsMap.getPS( 0 );
+  }
+};
+
 // activate a PPS and depending on isIRAP parameter also SPS
 // returns true, if activation is successful
 bool ParameterSetManager::activatePPS(int ppsId, bool isIRAP)
@@ -63,31 +83,22 @@ bool ParameterSetManager::activatePPS(int ppsId, bool isIRAP)
       if (sps)
       {
         int vpsId = sps->getVPSId();
-        if(vpsId != 0)
+
+        VPS *vps = m_vpsMap.getPS(vpsId);
+        if(vps)
         {
-          VPS *vps = m_vpsMap.getPS(vpsId);
-          if(vps)
-          {
-            m_activeVPSId = vpsId;
-            m_vpsMap.setActive(vpsId);
-          }
-          else
-          {
-            msg( WARNING, "Warning: tried to activate a PPS that refers to a non-existing VPS." );
-          }
+          m_activeVPSId = vpsId;
+          m_vpsMap.setActive(vpsId);
         }
         else
         {
-          m_vpsMap.clear();
-          m_vpsMap.allocatePS(0);
-          m_activeVPSId = 0;
-          m_vpsMap.setActive(0);
+          msg( WARNING, "Warning: tried to activate a PPS that refers to a non-existing VPS." );
         }
 
-        m_spsMap.clear();
+        m_spsMap.clearActive();
         m_spsMap.setActive(spsId);
         m_activeSPSId = spsId;
-        m_ppsMap.clear();
+        m_ppsMap.clearActive();
         m_ppsMap.setActive(ppsId);
         return true;
       }
