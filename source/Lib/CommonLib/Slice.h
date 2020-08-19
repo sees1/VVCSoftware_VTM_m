@@ -1037,7 +1037,7 @@ class VPS
 {
 private:
   int                   m_VPSId;
-  uint32_t              m_uiMaxLayers;
+  uint32_t              m_maxLayers;
 
   uint32_t              m_vpsMaxSubLayers;
   uint32_t              m_vpsLayerId[MAX_VPS_LAYERS];
@@ -1104,8 +1104,8 @@ public:
   int               getVPSId() const                                     { return m_VPSId;                                                  }
   void              setVPSId(int i)                                      { m_VPSId = i;                                                     }
 
-  uint32_t          getMaxLayers() const                                 { return m_uiMaxLayers;                                            }
-  void              setMaxLayers(uint32_t l)                             { m_uiMaxLayers = l;                                               }
+  uint32_t          getMaxLayers() const                                 { return m_maxLayers;                                            }
+  void              setMaxLayers(uint32_t l)                             { m_maxLayers = l;                                               }
 
   uint32_t          getMaxSubLayers() const                              { return m_vpsMaxSubLayers;                                        }
   void              setMaxSubLayers(uint32_t value)                      { m_vpsMaxSubLayers = value;                                       }

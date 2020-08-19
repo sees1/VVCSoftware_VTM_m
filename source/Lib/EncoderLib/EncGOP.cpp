@@ -3100,7 +3100,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             m_pcALF->setApsIdStart( ALF_CTB_MAX_NUM_APS );
 
             ParameterSetMap<APS>* apsMap = m_pcEncLib->getApsMap();
-            apsMap->clear();
+            apsMap->clearActive();
 
             for( int apsId = 0; apsId < ALF_CTB_MAX_NUM_APS; apsId++ )
             {

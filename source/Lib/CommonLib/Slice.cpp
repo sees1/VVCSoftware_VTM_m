@@ -2431,23 +2431,23 @@ unsigned Slice::getMinPictureDistance() const
 // ------------------------------------------------------------------------------------------------
 VPS::VPS()
   : m_VPSId(0)
-  , m_uiMaxLayers(1)
-  , m_vpsMaxSubLayers(1)
+  , m_maxLayers(1)
+  , m_vpsMaxSubLayers(7)
   , m_vpsAllLayersSameNumSubLayersFlag (true)
   , m_vpsAllIndependentLayersFlag(true)
   , m_vpsEachLayerIsAnOlsFlag (1)
   , m_vpsOlsModeIdc (0)
   , m_vpsNumOutputLayerSets (1)
   , m_vpsNumPtls (1)
-  , m_vpsExtensionFlag()
+  , m_vpsExtensionFlag(false)
   , m_vpsGeneralHrdParamsPresentFlag(false)
   , m_vpsSublayerCpbParamsPresentFlag(false)
   , m_numOlsHrdParamsMinus1(0)
-  , m_totalNumOLSs( 0 )
+  , m_totalNumOLSs( 1 )
   , m_numMultiLayeredOlss( 0 )
   , m_numDpbParams( 0 )
   , m_sublayerDpbParamsPresentFlag( false )
-  , m_targetOlsIdx( -1 )
+  , m_targetOlsIdx( 0 )
 {
   for (int i = 0; i < MAX_VPS_SUBLAYERS; i++)
   {
@@ -2472,10 +2472,14 @@ VPS::VPS()
     {
       m_vpsOlsOutputLayerFlag[i][j] = 0;
     }
-    if(i == 0)
+    if (i == 0)
+    {
       m_ptPresentFlag[i] = 1;
+    }
     else
+    {
       m_ptPresentFlag[i] = 0;
+    }
     m_ptlMaxTemporalId[i] = m_vpsMaxSubLayers - 1;
     m_olsPtlIdx[i] = 0;
     m_hrdMaxTid[i] = m_vpsMaxSubLayers - 1;
@@ -2489,13 +2493,13 @@ VPS::~VPS()
 
 void VPS::deriveOutputLayerSets()
 {
-  if( m_uiMaxLayers == 1 )
+  if( m_maxLayers == 1 )
   {
     m_totalNumOLSs = 1;
   }
   else if( m_vpsEachLayerIsAnOlsFlag || m_vpsOlsModeIdc < 2 )
   {
-    m_totalNumOLSs = m_uiMaxLayers;
+    m_totalNumOLSs = m_maxLayers;
   }
   else if( m_vpsOlsModeIdc == 2 )
   {
@@ -2506,25 +2510,25 @@ void VPS::deriveOutputLayerSets()
   m_olsDpbPicSize.resize( m_totalNumOLSs, Size(0, 0) );
   m_numOutputLayersInOls.resize( m_totalNumOLSs );
   m_numLayersInOls.resize( m_totalNumOLSs );
-  m_outputLayerIdInOls.resize( m_totalNumOLSs, std::vector<int>( m_uiMaxLayers, NOT_VALID ) );
-  m_numSubLayersInLayerInOLS.resize( m_totalNumOLSs, std::vector<int>( m_uiMaxLayers, NOT_VALID ) );
-  m_layerIdInOls.resize( m_totalNumOLSs, std::vector<int>( m_uiMaxLayers, NOT_VALID ) );
+  m_outputLayerIdInOls.resize( m_totalNumOLSs, std::vector<int>( m_maxLayers, NOT_VALID ) );
+  m_numSubLayersInLayerInOLS.resize( m_totalNumOLSs, std::vector<int>( m_maxLayers, NOT_VALID ) );
+  m_layerIdInOls.resize( m_totalNumOLSs, std::vector<int>( m_maxLayers, NOT_VALID ) );
   m_olsDpbChromaFormatIdc.resize(m_totalNumOLSs);
   m_olsDpbBitDepthMinus8.resize(m_totalNumOLSs);
 
-  std::vector<int> numRefLayers( m_uiMaxLayers );
-  std::vector<std::vector<int>> outputLayerIdx( m_totalNumOLSs, std::vector<int>( m_uiMaxLayers, NOT_VALID ) );
-  std::vector<std::vector<int>> layerIncludedInOlsFlag( m_totalNumOLSs, std::vector<int>( m_uiMaxLayers, 0 ) );
-  std::vector<std::vector<int>> dependencyFlag( m_uiMaxLayers, std::vector<int>( m_uiMaxLayers, NOT_VALID ) );
-  std::vector<std::vector<int>> refLayerIdx( m_uiMaxLayers, std::vector<int>( m_uiMaxLayers, NOT_VALID ) );
-  std::vector<int> layerUsedAsRefLayerFlag( m_uiMaxLayers, 0 );
-  std::vector<int> layerUsedAsOutputLayerFlag( m_uiMaxLayers, NOT_VALID );
+  std::vector<int> numRefLayers( m_maxLayers );
+  std::vector<std::vector<int>> outputLayerIdx( m_totalNumOLSs, std::vector<int>( m_maxLayers, NOT_VALID ) );
+  std::vector<std::vector<int>> layerIncludedInOlsFlag( m_totalNumOLSs, std::vector<int>( m_maxLayers, 0 ) );
+  std::vector<std::vector<int>> dependencyFlag( m_maxLayers, std::vector<int>( m_maxLayers, NOT_VALID ) );
+  std::vector<std::vector<int>> refLayerIdx( m_maxLayers, std::vector<int>( m_maxLayers, NOT_VALID ) );
+  std::vector<int> layerUsedAsRefLayerFlag( m_maxLayers, 0 );
+  std::vector<int> layerUsedAsOutputLayerFlag( m_maxLayers, NOT_VALID );
 
-  for( int i = 0; i < m_uiMaxLayers; i++ )
+  for( int i = 0; i < m_maxLayers; i++ )
   {
     int r = 0;
 
-    for( int j = 0; j < m_uiMaxLayers; j++ )
+    for( int j = 0; j < m_maxLayers; j++ )
     {
       dependencyFlag[i][j] = m_vpsDirectRefLayerFlag[i][j];
 
@@ -2553,7 +2557,7 @@ void VPS::deriveOutputLayerSets()
   m_outputLayerIdInOls[0][0] = m_vpsLayerId[0];
   m_numSubLayersInLayerInOLS[0][0] = m_vpsMaxSubLayers;
   layerUsedAsOutputLayerFlag[0] = 1;
-  for (int i = 1; i < m_uiMaxLayers; i++)
+  for (int i = 1; i < m_maxLayers; i++)
   {
     if (m_vpsEachLayerIsAnOlsFlag || m_vpsOlsModeIdc < 2)
     {
@@ -2590,12 +2594,12 @@ void VPS::deriveOutputLayerSets()
     else if( m_vpsOlsModeIdc == 2 )
     {
       int j = 0;
-      for( j = 0; j  <  m_uiMaxLayers; j++ )
+      for( j = 0; j  <  m_maxLayers; j++ )
       {
         m_numSubLayersInLayerInOLS[i][j] = 0;
       }
       j = 0;
-      for( int k = 0; k < m_uiMaxLayers; k++ )
+      for( int k = 0; k < m_maxLayers; k++ )
       {
         if( m_vpsOlsOutputLayerFlag[i][k] )
         {
@@ -2622,7 +2626,7 @@ void VPS::deriveOutputLayerSets()
       }
     }
   }
-  for (int i = 0; i < m_uiMaxLayers; i++)
+  for (int i = 0; i < m_maxLayers; i++)
   {
     CHECK(layerUsedAsRefLayerFlag[i] == 0 && layerUsedAsOutputLayerFlag[i] == 0, "There shall be no layer that is neither an output layer nor a direct reference layer");
   }
@@ -2648,7 +2652,7 @@ void VPS::deriveOutputLayerSets()
     else if( m_vpsOlsModeIdc == 2 )
     {
       int j = 0;
-      for( int k = 0; k < m_uiMaxLayers; k++ )
+      for( int k = 0; k < m_maxLayers; k++ )
       {
         if( layerIncludedInOlsFlag[i][k] )
         {
@@ -2699,7 +2703,7 @@ void VPS::checkVPS()
 
 void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
 {
-  m_targetOlsIdx = targetOlsIdx < 0 ? m_uiMaxLayers - 1 : targetOlsIdx;
+  m_targetOlsIdx = targetOlsIdx < 0 ? m_maxLayers - 1 : targetOlsIdx;
   m_targetOutputLayerIdSet.clear();
   m_targetLayerIdSet.clear();
 

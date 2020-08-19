@@ -1511,12 +1511,13 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
     APS** apss = m_parameterSetManager.getAPSs();
     memset(apss, 0, sizeof(*apss) * ALF_CTB_MAX_NUM_APS);
     const PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId()); // this is a temporary PPS object. Do not store this value
-    CHECK(pps == 0, "No PPS present");
+    CHECK(pps == 0, "Referred to PPS not present");
 
     const SPS *sps = m_parameterSetManager.getSPS(pps->getSPSId());             // this is a temporary SPS object. Do not store this value
-    CHECK(sps == 0, "No SPS present");
+    CHECK(sps == 0, "Referred to SPS not present");
 
-    const VPS *vps = sps->getVPSId() ? m_parameterSetManager.getVPS( sps->getVPSId() ) : nullptr;
+    const VPS *vps = m_parameterSetManager.getVPS( sps->getVPSId() );
+    CHECK(vps == 0, "Referred to VPS not present");
 
     if( nullptr != pps->pcv )
     {
@@ -1531,8 +1532,10 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
       THROW("Parameter set activation failed!");
     }
 
+    // update the stored VPS to the actually referred to VPS
+    m_vps = m_parameterSetManager.getVPS(sps->getVPSId());
 
-    m_parameterSetManager.getApsMap()->clear();
+    m_parameterSetManager.getApsMap()->clearActive();
     for (int i = 0; i < ALF_CTB_MAX_NUM_APS; i++)
     {
       APS* aps = m_parameterSetManager.getAPS(i, ALF_APS);
@@ -2861,17 +2864,23 @@ void DecLib::updatePrevIRAPAndGDRSubpic()
 
 void DecLib::xDecodeVPS( InputNALUnit& nalu )
 {
-  m_vps = new VPS();
+  VPS* vps = new VPS();
   m_HLSReader.setBitstream( &nalu.getBitstream() );
 
   CHECK( nalu.m_temporalId, "The value of TemporalId of VPS NAL units shall be equal to 0" );
 
-  m_HLSReader.parseVPS( m_vps );
+  m_HLSReader.parseVPS( vps );
 
   // storeVPS may directly delete the new VPS in case it is a repetition. Need to retrieve proper initialized memory back
   int vpsID = m_vps->getVPSId();
-  m_parameterSetManager.storeVPS( m_vps, nalu.getBitstream().getFifo());
-  m_vps = m_parameterSetManager.getVPS(vpsID);
+  m_parameterSetManager.storeVPS( vps, nalu.getBitstream().getFifo());
+
+  if (m_vps==nullptr)
+  {
+    // m_vps is used for conformance checks. Unless a VPS is referred to, just set the first one we received
+    // repeated parameter sets may be deleted, set a valid VPS pointer back from parameter set manager
+    m_vps = m_parameterSetManager.getVPS(vpsID);
+  }
 }
 
 void DecLib::xDecodeDCI(InputNALUnit& nalu)

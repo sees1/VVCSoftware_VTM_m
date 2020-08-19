@@ -216,7 +216,7 @@ public:
   }
 
   void setActive(int psId) { m_activePsId.push_back(psId); }
-  void clear() { m_activePsId.clear(); }
+  void clearActive() { m_activePsId.clear(); }
 
 private:
   std::map<int,MapData<T> > m_paramsetMap;
@@ -235,7 +235,7 @@ public:
   // store video parameter set and take ownership of it
   // warning: vps object cannot be used after storing (repeated parameter sets are directly deleted)
   void           storeVPS(VPS *vps, const std::vector<uint8_t> &naluData)    { m_vpsMap.storePS(vps->getVPSId(), vps, &naluData); }
-  VPS*           getVPS( int vpsId )                                         { return m_vpsMap.getPS( vpsId ); };
+  VPS*           getVPS( int vpsId );
 
   // store sequence parameter set and take ownership of it
   // warning: sps object cannot be used after storing (repeated parameter sets are directly deleted)
