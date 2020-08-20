@@ -3288,6 +3288,7 @@ void xTraceAPSHeader();
 void xTracePictureHeader();
 void xTraceSliceHeader();
 void xTraceAccessUnitDelimiter();
+void xTraceFillerData();
 #endif
 
 #endif // __SLICE__

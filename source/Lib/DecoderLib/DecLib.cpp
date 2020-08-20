@@ -3049,6 +3049,15 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
     case NAL_UNIT_EOB:
       return false;
 
+    case NAL_UNIT_FD:
+    {
+      FDReader fdReader;
+      uint32_t fdSize;
+      fdReader.parseFillerData(&(nalu.getBitstream()), fdSize);
+      msg( NOTICE, "Note: found NAL_UNIT_FD with %u bytes payload.\n", fdSize);
+      return false;
+    }
+
     case NAL_UNIT_RESERVED_IRAP_VCL_11:
     case NAL_UNIT_RESERVED_IRAP_VCL_12:
       msg( NOTICE, "Note: found reserved VCL NAL unit.\n");
