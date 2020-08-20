@@ -5604,7 +5604,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   int originalL0LtrpNum = numOfLTRPL0;
   int originalL0IlrpNum = numOfILRPL0;
 
-  for( int ii = 0; numOfNeedToFill > 0 && ii < ( pLocalRPL1->getNumberOfLongtermPictures() + pLocalRPL1->getNumberOfShorttermPictures() + pLocalRPL1->getNumberOfInterLayerPictures() ); ii++ )
+  for( int ii = 0; numOfNeedToFill > 0 && ii < ( numOfLTRPL1 + numOfSTRPL1 + numOfILRPL1 ); ii++ )
   {
     if( ii <= ( numOfLTRPL1 + numOfSTRPL1 + numOfILRPL1 - 1 ) )
     {
