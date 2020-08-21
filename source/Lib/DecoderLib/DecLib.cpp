@@ -2872,7 +2872,7 @@ void DecLib::xDecodeVPS( InputNALUnit& nalu )
   m_HLSReader.parseVPS( vps );
 
   // storeVPS may directly delete the new VPS in case it is a repetition. Need to retrieve proper initialized memory back
-  int vpsID = m_vps->getVPSId();
+  int vpsID = vps->getVPSId();
   m_parameterSetManager.storeVPS( vps, nalu.getBitstream().getFifo());
 
   if (m_vps==nullptr)
