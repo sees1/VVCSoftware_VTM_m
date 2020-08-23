@@ -300,6 +300,8 @@ protected:
 
   void xWriteAccessUnitDelimiter (AccessUnit &accessUnit, Slice *slice);
 
+  void xWriteFillerData (AccessUnit &accessUnit, Slice *slice, uint32_t &fdSize);
+
   void xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS *sps, const PPS *pps);
   void xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice);
   void xCreateFrameFieldInfoSEI (SEIMessages& seiMessages, Slice *slice, bool isField);

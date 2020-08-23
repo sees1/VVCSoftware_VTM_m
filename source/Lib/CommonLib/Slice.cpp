@@ -4787,4 +4787,9 @@ void xTraceAccessUnitDelimiter()
 {
   DTRACE( g_trace_ctx, D_HEADER, "=========== Access Unit Delimiter ===========\n" );
 }
+
+void xTraceFillerData ()
+{
+  DTRACE( g_trace_ctx, D_HEADER, "=========== Filler Data ===========\n" );
+}
 #endif

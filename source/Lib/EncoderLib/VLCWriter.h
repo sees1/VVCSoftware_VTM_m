@@ -107,6 +107,14 @@ public:
   void  codeAUD(OutputBitstream& bs, const bool audIrapOrGdrAuFlag, const int pictureType);
 };
 
+class FDWriter : public VLCWriter
+{
+public:
+  FDWriter() {};
+  virtual ~FDWriter() {};
+
+  void  codeFD(OutputBitstream& bs, uint32_t &fdSize);
+};
 
 
 class HLSWriter : public VLCWriter

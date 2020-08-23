@@ -96,11 +96,6 @@ void  VLCReader::xReadFlagTr(uint32_t& rValue, const char *pSymbolName)
   DTRACE( g_trace_ctx, D_HEADER, "%-50s u(1)  : %d\n", pSymbolName, rValue );
 }
 
-void xTraceFillerData ()
-{
-  DTRACE( g_trace_ctx, D_HEADER, "=========== Filler Data ===========\n");
-}
-
 #endif
 
 #if RExt__DECODER_DEBUG_BIT_STATISTICS || ENABLE_TRACING

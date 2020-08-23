@@ -180,6 +180,21 @@ void AUDWriter::codeAUD(OutputBitstream& bs, const bool audIrapOrGdrAuFlag, cons
   xWriteRbspTrailingBits();
 }
 
+void FDWriter::codeFD(OutputBitstream& bs, uint32_t &fdSize)
+{
+#if ENABLE_TRACING
+  xTraceFillerData();
+#endif
+  setBitstream(&bs);
+  uint32_t ffByte = 0xff;
+  while( fdSize )
+  {
+    WRITE_CODE (ffByte, 8, "ff_byte");
+    fdSize--;
+  }
+  xWriteRbspTrailingBits();
+}
+
 void HLSWriter::xCodeRefPicList( const ReferencePictureList* rpl, bool isLongTermPresent, uint32_t ltLsbBitsCount, const bool isForbiddenZeroDeltaPoc, int rplIdx)
 {
   uint32_t numRefPic = rpl->getNumberOfShorttermPictures() + rpl->getNumberOfLongtermPictures() + rpl->getNumberOfInterLayerPictures();

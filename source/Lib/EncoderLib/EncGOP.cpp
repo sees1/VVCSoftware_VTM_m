@@ -428,6 +428,25 @@ void EncGOP::xWriteAccessUnitDelimiter (AccessUnit &accessUnit, Slice *slice)
   accessUnit.push_front(new NALUnitEBSP(nalu));
 }
 
+void EncGOP::xWriteFillerData (AccessUnit &accessUnit, Slice *slice, uint32_t &fdSize)
+{
+  FDWriter fdWriter;
+  OutputNALUnit nalu(NAL_UNIT_FD);
+  nalu.m_temporalId = slice->getTLayer();
+  int vpsId = slice->getSPS()->getVPSId();
+  if (vpsId == 0)
+  {
+    nalu.m_nuhLayerId = 0;
+  }
+  else
+  {
+    nalu.m_nuhLayerId = slice->getVPS()->getLayerId(0);
+  }
+  CHECK( nalu.m_temporalId != accessUnit.temporalId, "TemporalId shall be equal to the TemporalId of the AU containing the NAL unit" );
+  fdWriter.codeFD(nalu.m_Bitstream, fdSize);
+  accessUnit.push_back(new NALUnitEBSP(nalu));
+}
+
 // write SEI list into one NAL unit and add it to the Access unit at auPos
 void EncGOP::xWriteSEI (NalUnitType naluType, SEIMessages& seiMessages, AccessUnit &accessUnit, AccessUnit::iterator &auPos, int temporalId)
 {
