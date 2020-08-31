@@ -2206,10 +2206,6 @@ VPS::VPS()
     {
       m_vpsDirectRefLayerFlag[i][j] = 0;
       m_directRefLayerIdx[i][j] = MAX_VPS_LAYERS;
-#if JVET_R0193
-      m_vpsMaxTidIlRefPicsPlus1[i][j] = 7;
-#endif
-
       m_interLayerRefIdx[i][i] = NOT_VALID;
     }
   }

@@ -86,6 +86,9 @@ protected:
   void xWriteVPS(VPS *vps, std::ostream& out, int layerId, int temporalId);
   void xWriteSPS(SPS *sps, std::ostream& out, int layerId, int temporalId);
   void xWritePPS(PPS *pps, std::ostream& out, int layerId, int temporalId);
+#if JVET_S0219_ASPECT1
+  void xWriteAPS(APS *aps, std::ostream& out, int layerId, int temporalId, const bool isPrefixNUT);
+#endif
 
   ParameterSetManager   m_parameterSetManager;
   HLSyntaxReader        m_hlSynaxReader;

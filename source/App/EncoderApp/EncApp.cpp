@@ -117,6 +117,9 @@ void EncApp::xInitLibCfg()
     }
   }
 
+#if JVET_R0193
+  m_cfgVPSParameters.m_maxTidILRefPicsPlus1.resize(vps.getMaxLayers(), std::vector<uint32_t>(vps.getMaxLayers(), NOT_VALID));
+#endif
   for (int i = 0; i < vps.getMaxLayers(); i++)
   {
     vps.setGeneralLayerIdx( m_layerId[i], i );
@@ -140,22 +143,20 @@ void EncApp::xInitLibCfg()
           {
             vps.setDirectRefLayerFlag(i, j, false);
           }
-#if JVET_R0193
-          bool bSetMaxTid = false;
-          for (int t = 0; t < vps.getMaxSubLayers(); t++)
-          {
-            if (m_cfgVPSParameters.m_maxTidILRefPicsPlus1Str[i].find(to_string(t)) != std::string::npos)
-            {
-              vps.setMaxTidIlRefPicsPlus1(i, j, t);
-              bSetMaxTid = true;
-            }
-          }
-          if (!bSetMaxTid)
-          {
-            vps.setMaxTidIlRefPicsPlus1(i, j, vps.getMaxSubLayers());
-          }
-#endif
         }
+#if JVET_R0193
+        //m_cfgVPSParameters.m_maxTidILRefPicsPlus1[i][j] = vps.getMaxSubLayers();
+
+        string::size_type beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", 0);
+        string::size_type endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
+        int t = 0;
+        while (string::npos != beginStr || string::npos != endStr)
+        {
+          m_cfgVPSParameters.m_maxTidILRefPicsPlus1[i][t++] = std::stoi(m_maxTidILRefPicsPlus1Str[i].substr(beginStr, endStr - beginStr));
+          beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", endStr);
+          endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
+        }
+#endif
       }
     }
   }

@@ -56,7 +56,7 @@ public:
   virtual ~CfgVPSParameters(){}
 
 #if JVET_R0193
-  std::string m_maxTidILRefPicsPlus1Str[MAX_VPS_LAYERS];
+  std::vector<std::vector<uint32_t>> m_maxTidILRefPicsPlus1;
 #else
   int m_maxTidILRefPicsPlus1;
 #endif

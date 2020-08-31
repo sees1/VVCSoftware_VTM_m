@@ -2174,6 +2174,11 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       pcVPS->setEachLayerIsAnOlsFlag(0);
     }
   }
+#if JVET_R0193
+  std::vector<std::vector<uint32_t>> maxTidilRefPicsPlus1;
+  maxTidilRefPicsPlus1.resize(pcVPS->getMaxLayers(), std::vector<uint32_t>(pcVPS->getMaxLayers(), NOT_VALID));
+  pcVPS->setMaxTidIlRefPicsPlus1(maxTidilRefPicsPlus1);
+#endif
   for (uint32_t i = 0; i < pcVPS->getMaxLayers(); i++)
   {
     READ_CODE(6, uiCode, "vps_layer_id");                     pcVPS->setLayerId(i, uiCode);

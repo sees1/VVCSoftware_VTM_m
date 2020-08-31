@@ -938,7 +938,7 @@ private:
   bool                  m_vpsIndependentLayerFlag[MAX_VPS_LAYERS];
   bool                  m_vpsDirectRefLayerFlag[MAX_VPS_LAYERS][MAX_VPS_LAYERS];
 #if JVET_R0193
-  uint32_t              m_vpsMaxTidIlRefPicsPlus1[MAX_VPS_LAYERS][MAX_VPS_LAYERS];
+  std::vector<std::vector<uint32_t>>              m_vpsMaxTidIlRefPicsPlus1;
 #else
   uint32_t              m_vpsMaxTidIlRefPicsPlus1[MAX_VPS_LAYERS];
 #endif
@@ -1018,6 +1018,7 @@ public:
 #if JVET_R0193
   uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t refLayerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx]; }
   void              setMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t refLayerIdx, uint32_t i) { m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx] = i; }
+  void              setMaxTidIlRefPicsPlus1(std::vector<std::vector<uint32_t>> i) { m_vpsMaxTidIlRefPicsPlus1 = i; }
 #else
   uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx]; }
   void              setMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t i) { m_vpsMaxTidIlRefPicsPlus1[layerIdx] = i; }
