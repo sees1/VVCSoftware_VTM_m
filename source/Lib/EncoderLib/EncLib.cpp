@@ -1041,19 +1041,6 @@ void EncLib::xInitVPS( const SPS& sps )
   profileLevelTierFeatures.extractPTLInformation( sps );
 #if JVET_R0193
   m_vps->setMaxTidIlRefPicsPlus1(m_cfgVPSParameters.m_maxTidILRefPicsPlus1);
-  /*temp.resize(m_vps->getMaxLayers(), std::vector<uint32_t>(m_vps->getMaxLayers(), NOT_VALID));
-  m_vps->getMaxTidIlRefPicsPlus1().resize(m_vps->getMaxLayers(), std::vector<uint32_t>(m_vps->getMaxLayers(), NOT_VALID));
-  for (int i = 0; i < m_vps->getMaxLayers(); i++)
-  {
-    if (!m_vps->getIndependentLayerFlag(i))
-    {
-      for (int j = 0; j < i; j++)
-      {
-        m_vps->setMaxTidIlRefPicsPlus1(i, j, m_cfgVPSParameters.m_maxTidILRefPicsPlus1[i][j]);
-      }
-    }
-  }
-  */
 #endif
   m_vps->deriveOutputLayerSets();
   m_vps->deriveTargetOutputLayerSet( m_vps->m_targetOlsIdx );

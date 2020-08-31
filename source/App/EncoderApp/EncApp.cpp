@@ -145,8 +145,6 @@ void EncApp::xInitLibCfg()
           }
         }
 #if JVET_R0193
-        //m_cfgVPSParameters.m_maxTidILRefPicsPlus1[i][j] = vps.getMaxSubLayers();
-
         string::size_type beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", 0);
         string::size_type endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
         int t = 0;
