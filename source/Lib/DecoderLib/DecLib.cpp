@@ -1534,6 +1534,20 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
 
     // update the stored VPS to the actually referred to VPS
     m_vps = m_parameterSetManager.getVPS(sps->getVPSId());
+#if JVET_S0097_VPS_default_values
+    if(sps->getVPSId() == 0)
+    {
+      //No VPS in bitstream: set defaults values of variables in VPS to the ones signalled in SPS
+      m_vps->setMaxSubLayers( sps->getMaxTLayers() );
+      m_vps->setLayerId( 0, sps->getLayerId() );
+      m_vps->deriveOutputLayerSets(); 
+    }
+    else
+    {
+      //VPS in the bitstream: check that SPS and VPS signalling are compatible
+      CHECK(sps->getMaxTLayers() > m_vps->getMaxSubLayers(), "The SPS signals more temporal sub-layers than allowed by the VPS");
+    }
+#endif
 
     m_parameterSetManager.getApsMap()->clearActive();
     for (int i = 0; i < ALF_CTB_MAX_NUM_APS; i++)
