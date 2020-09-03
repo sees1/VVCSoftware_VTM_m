@@ -294,11 +294,12 @@ void HLSyntaxReader::copyRefPicList(SPS* sps, ReferencePictureList* source_rpl, 
 {
   dest_rp->setNumberOfShorttermPictures(source_rpl->getNumberOfShorttermPictures());
 
-  dest_rp->setNumberOfInterLayerPictures( sps->getInterLayerPresentFlag() ? dest_rp->getNumberOfInterLayerPictures() : 0 );
+  dest_rp->setNumberOfInterLayerPictures( sps->getInterLayerPresentFlag() ? source_rpl->getNumberOfInterLayerPictures() : 0 );
 
   if( sps->getLongTermRefsPresent() )
   {
-    dest_rp->setNumberOfLongtermPictures( dest_rp->getNumberOfLongtermPictures() );
+    dest_rp->setLtrpInSliceHeaderFlag(source_rpl->getLtrpInSliceHeaderFlag());
+    dest_rp->setNumberOfLongtermPictures( source_rpl->getNumberOfLongtermPictures() );
   }
   else
     dest_rp->setNumberOfLongtermPictures(0);
