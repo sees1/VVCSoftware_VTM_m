@@ -498,7 +498,6 @@ protected:
   FastInterSearchMode m_fastInterSearchMode;
   bool      m_bUseEarlyCU;
   bool      m_useFastDecisionForMerge;
-  bool      m_bUseCbfFastMode;
   bool      m_useEarlySkipDetection;
   bool      m_reconBasedCrossCPredictionEstimate;
   bool      m_useTransformSkip;
@@ -1423,7 +1422,6 @@ public:
   void      setFastInterSearchMode          ( FastInterSearchMode m ) { m_fastInterSearchMode = m; }
   void      setUseEarlyCU                   ( bool  b )     { m_bUseEarlyCU = b; }
   void      setUseFastDecisionForMerge      ( bool  b )     { m_useFastDecisionForMerge = b; }
-  void      setUseCbfFastMode               ( bool  b )     { m_bUseCbfFastMode = b; }
   void      setUseEarlySkipDetection        ( bool  b )     { m_useEarlySkipDetection = b; }
   void      setFastUDIUseMPMEnabled         ( bool  b )     { m_bFastUDIUseMPMEnabled = b; }
   void      setFastMEForGenBLowDelayEnabled ( bool  b )     { m_bFastMEForGenBLowDelayEnabled = b; }
@@ -1445,7 +1443,6 @@ public:
   FastInterSearchMode getFastInterSearchMode() const{ return m_fastInterSearchMode;  }
   bool      getUseEarlyCU                   () const{ return m_bUseEarlyCU; }
   bool      getUseFastDecisionForMerge      () const{ return m_useFastDecisionForMerge; }
-  bool      getUseCbfFastMode               () const{ return m_bUseCbfFastMode; }
   bool      getUseEarlySkipDetection        () const{ return m_useEarlySkipDetection; }
   bool      getFastUDIUseMPMEnabled         ()      { return m_bFastUDIUseMPMEnabled; }
   bool      getFastMEForGenBLowDelayEnabled ()      { return m_bFastMEForGenBLowDelayEnabled; }

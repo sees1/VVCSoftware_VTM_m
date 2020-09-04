@@ -1237,7 +1237,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("FEN",                                             tmpFastInterSearchMode,   int(FASTINTERSEARCH_DISABLED), "fast encoder setting")
   ("ECU",                                             m_bUseEarlyCU,                                    false, "Early CU setting")
   ("FDM",                                             m_useFastDecisionForMerge,                         true, "Fast decision for Merge RD Cost")
-  ("CFM",                                             m_bUseCbfFastMode,                                false, "Cbf fast mode setting")
   ("ESD",                                             m_useEarlySkipDetection,                          false, "Early SKIP detection setting")
   ( "RateControl",                                    m_RCEnableRateControl,                            false, "Rate control: enable rate control" )
   ( "TargetBitrate",                                  m_RCTargetBitrate,                                    0, "Rate control: target bit-rate" )
@@ -4021,7 +4020,6 @@ void EncAppCfg::xPrintParameter()
   msg( VERBOSE, "FEN:%d ", int(m_fastInterSearchMode)           );
   msg( VERBOSE, "ECU:%d ", m_bUseEarlyCU                        );
   msg( VERBOSE, "FDM:%d ", m_useFastDecisionForMerge            );
-  msg( VERBOSE, "CFM:%d ", m_bUseCbfFastMode                    );
   msg( VERBOSE, "ESD:%d ", m_useEarlySkipDetection              );
   msg( VERBOSE, "TransformSkip:%d ",     m_useTransformSkip     );
   msg( VERBOSE, "TransformSkipFast:%d ", m_useTransformSkipFast );
