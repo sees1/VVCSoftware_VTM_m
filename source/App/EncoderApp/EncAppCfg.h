@@ -486,7 +486,6 @@ protected:
   FastInterSearchMode m_fastInterSearchMode;                  ///< Parameter that controls fast encoder settings
   bool      m_bUseEarlyCU;                                    ///< flag for using Early CU setting
   bool      m_useFastDecisionForMerge;                        ///< flag for using Fast Decision Merge RD-Cost
-  bool      m_bUseCbfFastMode;                                ///< flag for using Cbf Fast PU Mode Decision
   bool      m_useEarlySkipDetection;                          ///< flag for using Early SKIP Detection
   bool      m_picPartitionFlag;                               ///< enable picture partitioning (0: single tile, single slice, 1: multiple tiles/slices can be used)
   bool      m_mixedLossyLossless;                             ///< enable mixed lossy/lossless coding

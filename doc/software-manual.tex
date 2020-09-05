@@ -876,7 +876,7 @@ Enables harmonization of Gop first field couple.
 
 \Option{AccessUnitDelimiter} &
 %\ShortOption{\None} &
-\Default{1} &
+\Default{0} &
 Add Access Unit Delimiter NAL units between all Access Units.
 \\
 
@@ -1906,12 +1906,6 @@ $GS$ is the gop size.
 Enables or disables the use of early CU determination.  When enabled, skipped CUs will not be split further.
 \\
 
-\Option{CFM} &
-%\ShortOption{\None} &
-\Default{false} &
-Enables or disables the use of Cbf-based fast encoder mode.  When enabled, once a 2Nx2N CU has been evaluated, if the RootCbf is 0, further PU splits will not be evaluated.
-\\
-
 \Option{ESD} &
 %\ShortOption{\None} &
 \Default{false} &
@@ -2733,47 +2727,6 @@ If enabled use a fast ME for generalised B Low Delay slices
 %\ShortOption{\None} &
 \Default{true} &
 Enables use of B-Lambda for non-key low-delay pictures
-\\
-
-\Option{PCMEnabledFlag} &
-%\ShortOption{\None} &
-\Default{false} &
-Enables or disables the use of PCM. The encoder will use cost measures on a CU-by-CU basis to determine if PCM mode is to be applied.
-\\
-
-\Option{PCMLog2MaxSize} &
-%\ShortOption{\None} &
-\Default{5 \\ ($= \mathrm{log}_2(32)$)} &
-Specifies log2 of the maximum PCM block size. When PCM is enabled, the
-PCM mode is available for 2Nx2N intra PUs smaller than or equal to the
-specified maximum PCM block size
-\\
-
-\Option{PCMLog2MinSize} &
-%\ShortOption{\None} &
-\Default{3} &
-Specifies log2 of the minimum PCM block size. When PCM is enabled, the
-PCM mode is available for 2Nx2N intra PUs larger than or equal to the
-specified minimum PCM block size.
-\par
-When larger than PCMLog2MaxSize, PCM mode is not used.
-\\
-
-\Option{PCMInputBitDepthFlag} &
-%\ShortOption{\None} &
-\Default{true} &
-If enabled specifies that PCM sample bit-depth is set equal to
-InputBitDepth. Otherwise, it specifies that PCM sample bit-depth is set
-equal to InternalBitDepth.
-\\
-
-\Option{PCMFilterDisableFlag} &
-%\ShortOption{\None} &
-\Default{false} &
-If enabled specifies that loop-filtering on reconstructed samples of PCM
-blocks is skipped. Otherwise, it specifies that loop-filtering on
-reconstructed samples of PCM blocks is not skipped.
-% 0 = (loop-filtering is not skipped for PCM samples).
 \\
 
 \Option{WeightedPredP (-wpP)} &

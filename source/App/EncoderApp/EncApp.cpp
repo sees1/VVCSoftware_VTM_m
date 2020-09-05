@@ -780,7 +780,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setFastInterSearchMode                               ( m_fastInterSearchMode );
   m_cEncLib.setUseEarlyCU                                        ( m_bUseEarlyCU  );
   m_cEncLib.setUseFastDecisionForMerge                           ( m_useFastDecisionForMerge  );
-  m_cEncLib.setUseCbfFastMode                                    ( m_bUseCbfFastMode  );
   m_cEncLib.setUseEarlySkipDetection                             ( m_useEarlySkipDetection );
   m_cEncLib.setUseFastMerge                                      ( m_useFastMrg );
   m_cEncLib.setUsePbIntraFast                                    ( m_usePbIntraFast );
