@@ -5426,7 +5426,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   Picture* pic = slice->getPic();
   const VPS* vps = slice->getPic()->cs->vps;
   int layerIdx = vps == nullptr ? 0 : vps->getGeneralLayerIdx( pic->layerId );
-  bool isIntraLayerPredAllowed = vps->getIndependentLayerFlag(layerIdx) || (vps->getPredDirection(slice->getTLayer()) != 1);
+  bool isIntraLayerPredAllowed = (vps->getIndependentLayerFlag(layerIdx) || (vps->getPredDirection(slice->getTLayer()) != 1)) && !slice->isIRAP();
   bool isInterLayerPredAllowed = !vps->getIndependentLayerFlag(layerIdx) && (vps->getPredDirection(slice->getTLayer()) != 2);
   ReferencePictureList* pLocalRPL0 = slice->getLocalRPL0();
   *pLocalRPL0 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
