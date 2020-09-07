@@ -2729,13 +2729,15 @@ void VPS::checkVPS()
     const int olsTimingHrdIdx = getOlsTimingHrdIdx(multiLayerOlsIdx);
     const int olsPtlIdx = getOlsPtlIdx(olsIdx);
     CHECK (getHrdMaxTid(olsTimingHrdIdx) < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_hrd_max_tid[vps_ols_timing_hrd_idx[m]] shall be greater than or equal to "
+                                                                     "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
+                                                                     "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
 #else
     const int olsHrdIdx = getOlsHrdIdx(multiLayerOlsIdx);
     const int olsPtlIdx = getOlsPtlIdx(olsIdx);
     CHECK (getHrdMaxTid(olsHrdIdx) < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_hrd_max_tid[vps_ols_timing_hrd_idx[m]] shall be greater than or equal to "
-#endif
                                                                      "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
                                                                      "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
+#endif
     const int olsDpbParamsIdx = getOlsDpbParamsIdx(multiLayerOlsIdx);
     CHECK (m_dpbMaxTemporalId[olsDpbParamsIdx] < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_dpb_max_tid[vps_ols_dpb_params_idx[m]] shall be greater than or equal to "
                                                                      "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
