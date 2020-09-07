@@ -56,7 +56,11 @@ bool ParcatHLSyntaxReader::parsePictureHeaderInSliceHeaderFlag(ParameterSetManag
 
 
   uint32_t  uiCode;
+#if JVET_R0249_SE_PREFIXES
+  READ_FLAG(uiCode, "sh_picture_header_in_slice_header_flag");
+#else
   READ_FLAG(uiCode, "picture_header_in_slice_header_flag");
+#endif
   return (uiCode==1);
 }
 
@@ -68,11 +72,26 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   
 #if JVET_S0076_ASPECT1
   uint32_t uiTmp;
+#if JVET_R0249_SE_PREFIXES
+  READ_FLAG(uiTmp, "ph_gdr_or_irap_pic_flag");
+#else
   READ_FLAG(uiTmp, "gdr_or_irap_pic_flag");
+#endif
   READ_FLAG(uiCode, "ph_non_ref_pic_flag");
   if( uiTmp )
   {
+#if JVET_R0249_SE_PREFIXES
+    READ_FLAG( uiCode, "ph_gdr_pic_flag" );
+#else
     READ_FLAG( uiCode, "gdr_pic_flag" );
+#endif
+  }
+#else
+#if JVET_R0249_SE_PREFIXES
+  READ_FLAG( uiCode, "ph_gdr_or_irap_pic_flag" );
+  if (uiCode)
+  {
+    READ_FLAG(uiCode, "ph_gdr_pic_flag");
   }
 #else
   READ_FLAG( uiCode, "gdr_or_irap_pic_flag" );
@@ -80,6 +99,7 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   {
     READ_FLAG(uiCode, "gdr_pic_flag");
   }
+#endif
 #endif
   READ_FLAG(uiCode, "ph_inter_slice_allowed_flag");
   if (uiCode)

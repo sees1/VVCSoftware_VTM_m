@@ -823,7 +823,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("AllLayersIndependentConstraintFlag",              m_allLayersIndependentConstraintFlag,             false, "Indicate that all layers are independent")
   ("OnePictureOnlyConstraintFlag",                    m_onePictureOnlyConstraintFlag,                   false, "Value of general_intra_constraint_flag. Can only be used for single frame encodings. Will be set to true for still picture profiles")
   ("MaxBitDepthConstraintIdc",                        m_maxBitDepthConstraintIdc,                          16u, "Indicate that sps_bitdepth_minus8 plus 8 shall be in the range of 0 to m_maxBitDepthConstraintIdc")
+#if JVET_R0249_SE_PREFIXES
+  ("MaxChromaFormatConstraintIdc",                    m_maxChromaFormatConstraintIdc,                        3, "Indicate that sps_chroma_format_idc shall be in the range of 0 to m_maxChromaFormatConstraintIdc")
+#else
   ("MaxChromaFormatConstraintIdc",                    m_maxChromaFormatConstraintIdc,                        3, "Indicate that chroma_format_idc shall be in the range of 0 to m_maxChromaFormatConstraintIdc")
+#endif
   ("NoTrailConstraintFlag",                           m_noTrailConstraintFlag,                          false, "Indicate that TRAIL is deactivated")
   ("NoStsaConstraintFlag",                            m_noStsaConstraintFlag,                           false, "Indicate that STSA is deactivated")
   ("NoRaslConstraintFlag",                            m_noRaslConstraintFlag,                           false, "Indicate that RSAL is deactivated")
@@ -1732,8 +1736,13 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     else
     {
       uint32_t numSubpicCols = tmpWidthVal / m_subPicWidth[0];
+#if JVET_R0249_SE_PREFIXES
+      CHECK(tmpWidthVal % m_subPicWidth[0] != 0, "sps_subpic_width_minus1[0] is invalid.");
+      CHECK(tmpHeightVal % m_subPicHeight[0] != 0, "sps_subpic_height_minus1[0] is invalid.");
+#else
       CHECK(tmpWidthVal % m_subPicWidth[0] != 0, "subpic_width_minus1[0] is invalid.");
       CHECK(tmpHeightVal % m_subPicHeight[0] != 0, "subpic_height_minus1[0] is invalid.");
+#endif
       CHECK(numSubpicCols * (tmpHeightVal / m_subPicHeight[0]) != m_numSubPics, "when sps_subpic_same_size_flag is equal to, sps_num_subpics_minus1 is invalid");
     }
 #else

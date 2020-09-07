@@ -52,6 +52,8 @@
 
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_R0249_SE_PREFIXES                            1 // JVET-R0249: Rename syntax elements such that VPS, SPS, PPS, PH, and SH starts with 'vps_', 'sps_', 'pps_', 'ph_' and 'sh_'
+
 #define JVET_S0058_GCI                                    1 // no_mtt_constraint_flag and no_weightedpred_constraint_flag
 
 #define JVET_R0341_GCI                                    1 // JVET-R0341: on constraint flag for local chroma QP control
