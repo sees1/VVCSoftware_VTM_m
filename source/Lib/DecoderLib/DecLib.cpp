@@ -2311,6 +2311,12 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   {
     m_prevSliceSkipped = true;
     m_skippedPOC = m_apcSlicePilot->getPOC();
+    // reset variables for bitstream conformance tests
+    resetAccessUnitNals();
+    resetAccessUnitApsNals();
+    resetAccessUnitPicInfo();
+    m_maxDecSubPicIdx = 0;
+    m_maxDecSliceAddrInSubPic = -1;
     return false;
   }
   // Skip TFD pictures associated with BLA/BLANT pictures
