@@ -193,7 +193,11 @@ protected:
 #endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
+#if JVET_R0227_ASPECT3
+  bool      m_noCuQpDeltaConstraintFlag;
+#else
   bool      m_noQpDeltaConstraintFlag;
+#endif
   bool      m_noDepQuantConstraintFlag;
   bool      m_noSignDataHidingConstraintFlag;
   bool      m_noTrailConstraintFlag;
