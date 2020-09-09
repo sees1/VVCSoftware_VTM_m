@@ -320,17 +320,10 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
       sps0.setPPSValidFlag(pps.getPPSId(), true);
       sps0.setScalingWindowSizeInPPS(pps.getPPSId(), scaledWidth, scaledHeight);
     }
-#if JVET_R0249_SE_PREFIXES
     int curSeqMaxPicWidthY = sps0.getMaxPicWidthInLumaSamples();    // sps_pic_width_max_in_luma_samples
     int curSeqMaxPicHeightY = sps0.getMaxPicHeightInLumaSamples();  // sps_pic_height_max_in_luma_samples
     int curPicWidthY = width;                                       // pps_pic_width_in_luma_samples
     int curPicHeightY = height;                                     // pps_pic_height_in_luma_samples
-#else
-    int curSeqMaxPicWidthY = sps0.getMaxPicWidthInLumaSamples();    // pic_width_max_in_luma_samples
-    int curSeqMaxPicHeightY = sps0.getMaxPicHeightInLumaSamples();  // pic_height_max_in_luma_samples
-    int curPicWidthY = width;                                       // pic_width_in_luma_samples
-    int curPicHeightY = height;                                     // pic_height_in_luma_samples
-#endif
     int max8MinCbSizeY = std::max((int)8, (1 << sps0.getLog2MinCodingBlockSize())); // Max(8, MinCbSizeY)
     //Warning message of potential scaling window size violation
     for (int i = 0; i < 64; i++)
@@ -1014,11 +1007,7 @@ void EncLib::xInitVPS( const SPS& sps )
   // set the VPS profile information.
 
   m_vps->m_olsHrdParams.clear();
-#if JVET_R0249_SE_PREFIXES
   m_vps->m_olsHrdParams.resize(m_vps->getNumOlsTimingHrdParamsMinus1(), std::vector<OlsHrdParams>(m_vps->getMaxSubLayers()));
-#else
-  m_vps->m_olsHrdParams.resize(m_vps->getNumOlsHrdParamsMinus1(), std::vector<OlsHrdParams>(m_vps->getMaxSubLayers()));
-#endif
   ProfileLevelTierFeatures profileLevelTierFeatures;
   profileLevelTierFeatures.extractPTLInformation( sps );
 
@@ -1067,22 +1056,14 @@ void EncLib::xInitVPS( const SPS& sps )
 
       if( m_vps->getMaxSubLayers() == 1 )
       {
-#if JVET_R0249_SE_PREFIXES
         // When vps_max_sublayers_minus1 is equal to 0, the value of vps_dpb_max_tid[ dpbIdx ] is inferred to be equal to 0.
-#else
-        // When vps_max_sublayers_minus1 is equal to 0, the value of dpb_max_temporal_id[ dpbIdx ] is inferred to be equal to 0.
-#endif
         m_vps->m_dpbMaxTemporalId[dpbIdx] = 0;
       }
       else
       {
         if( m_vps->getAllLayersSameNumSublayersFlag() )
         {
-#if JVET_R0249_SE_PREFIXES
           // When vps_max_sublayers_minus1 is greater than 0 and vps_all_layers_same_num_sublayers_flag is equal to 1, the value of vps_dpb_max_tid[ dpbIdx ] is inferred to be equal to vps_max_sublayers_minus1.
-#else
-          // When vps_max_sublayers_minus1 is greater than 0 and vps_all_layers_same_num_sublayers_flag is equal to 1, the value of dpb_max_temporal_id[ dpbIdx ] is inferred to be equal to vps_max_sublayers_minus1.
-#endif
           m_vps->m_dpbMaxTemporalId[dpbIdx] = m_vps->getMaxSubLayers() - 1;
         }
         else
@@ -1342,11 +1323,7 @@ void EncLib::xInitSPS( SPS& sps )
   sps.setUseLmcs                            ( m_lmcsEnabled );
   sps.setUseMRL                ( m_MRL );
   sps.setUseMIP                ( m_MIP );
-#if JVET_R0249_SE_PREFIXES
   CHECK(m_log2MinCUSize > std::min(6, floorLog2(sps.getMaxCUWidth())), "sps_log2_min_luma_coding_block_size_minus2 shall be in the range of 0 to min (4, log2_ctu_size - 2)");
-#else
-  CHECK(m_log2MinCUSize > std::min(6, floorLog2(sps.getMaxCUWidth())), "log2_min_luma_coding_block_size_minus2 shall be in the range of 0 to min (4, log2_ctu_size - 2)");
-#endif
   CHECK(m_uiMaxMTTHierarchyDepth > 2 * (floorLog2(sps.getCTUSize()) - sps.getLog2MinCodingBlockSize()), "sps_max_mtt_hierarchy_depth_inter_slice shall be in the range 0 to 2*(ctbLog2SizeY - log2MinCUSize)");
   CHECK(m_uiMaxMTTHierarchyDepthI > 2 * (floorLog2(sps.getCTUSize()) - sps.getLog2MinCodingBlockSize()), "sps_max_mtt_hierarchy_depth_intra_slice_luma shall be in the range 0 to 2*(ctbLog2SizeY - log2MinCUSize)");
   CHECK(m_uiMaxMTTHierarchyDepthIChroma > 2 * (floorLog2(sps.getCTUSize()) - sps.getLog2MinCodingBlockSize()), "sps_max_mtt_hierarchy_depth_intra_slice_chroma shall be in the range 0 to 2*(ctbLog2SizeY - log2MinCUSize)");
@@ -1502,13 +1479,8 @@ void EncLib::xInitSPS( SPS& sps )
     sps.setSubPicIdMappingExplicitlySignalledFlag(m_subPicIdMappingExplicitlySignalledFlag);
     if (m_subPicIdMappingExplicitlySignalledFlag)
     {
-#if JVET_R0249_SE_PREFIXES
       sps.setSubPicIdMappingPresentFlag(m_subPicIdMappingInSpsFlag);
       if (m_subPicIdMappingInSpsFlag)
-#else
-      sps.setSubPicIdMappingInSpsFlag(m_subPicIdMappingInSpsFlag);
-      if (m_subPicIdMappingInSpsFlag)
-#endif
       {
         sps.setSubPicId(m_subPicId);
       }
@@ -1564,11 +1536,7 @@ void EncLib::xInitSPS( SPS& sps )
 
   sps.setLog2ParallelMergeLevelMinus2( m_log2ParallelMergeLevelMinus2 );
 
-#if JVET_R0249_SE_PREFIXES
   CHECK(sps.getResChangeInClvsEnabledFlag() && sps.getVirtualBoundariesEnabledFlag(), "when the value of sps_res_change_in_clvs_allowed_flag is equal to 1, the value of sps_virtual_boundaries_present_flag shall be equal to 0");
-#else
-  CHECK(sps.getResChangeInClvsEnabledFlag() && sps.getVirtualBoundariesEnabledFlag(), "when the value of res_change_in_clvs_allowed_flag is equal to 1, the value of sps_virtual_boundaries_present_flag shall be equal to 0");
-#endif
 }
 
 void EncLib::xInitHrdParameters(SPS &sps)
@@ -1745,11 +1713,7 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     pps.setWrapAroundOffset                   ( 0 );       
   }
   CHECK( !sps.getWrapAroundEnabledFlag() && pps.getWrapAroundEnabledFlag(), "When sps_ref_wraparound_enabled_flag is equal to 0, the value of pps_ref_wraparound_enabled_flag shall be equal to 0.");
-#if JVET_R0249_SE_PREFIXES
   CHECK( (((sps.getCTUSize() / minCbSizeY) + 1) > ((pps.getPicWidthInLumaSamples() / minCbSizeY) - 1)) && pps.getWrapAroundEnabledFlag(), "When the value of CtbSizeY / MinCbSizeY + 1 is greater than pps_pic_width_in_luma_samples / MinCbSizeY - 1, the value of pps_ref_wraparound_enabled_flag shall be equal to 0.");
-#else
-  CHECK( (((sps.getCTUSize() / minCbSizeY) + 1) > ((pps.getPicWidthInLumaSamples() / minCbSizeY) - 1)) && pps.getWrapAroundEnabledFlag(), "When the value of CtbSizeY / MinCbSizeY + 1 is greater than pic_width_in_luma_samples / MinCbSizeY - 1, the value of pps_ref_wraparound_enabled_flag shall be equal to 0.");
-#endif
 
   pps.setNoPicPartitionFlag( m_noPicPartitionFlag );
   if( m_noPicPartitionFlag == false )
@@ -1995,15 +1959,9 @@ void EncLib::xInitPicHeader(PicHeader &picHeader, const SPS &sps, const PPS &pps
   picHeader.setGdrPicFlag(false);
 
   // BDOF / DMVR / PROF
-#if JVET_R0249_SE_PREFIXES
   picHeader.setBdofDisabledFlag(false);
   picHeader.setDmvrDisabledFlag(false);
   picHeader.setProfDisabledFlag(false);
-#else
-  picHeader.setDisBdofFlag(false);
-  picHeader.setDisDmvrFlag(false);
-  picHeader.setDisProfFlag(false);
-#endif
 }
 
 void EncLib::xInitAPS(APS &aps)

@@ -87,19 +87,11 @@ void EncApp::xInitLibCfg()
   else
   {
     vps.setVPSId(0);
-#if JVET_R0249_SE_PREFIXES
     vps.setEachLayerIsAnOlsFlag(1); // If vps_max_layers_minus1 is equal to 0,
                                     // the value of vps_each_layer_is_an_ols_flag is inferred to be equal to 1.
                                     // Otherwise, when vps_all_independent_layers_flag is equal to 0,
                                     // the value of vps_each_layer_is_an_ols_flag is inferred to be equal to 0.
   }
-#else
-    vps.setEachLayerIsAnOlsFlag(1); // If vps_max_layers_minus1 is equal to 0,
-                                    // the value of each_layer_is_an_ols_flag is inferred to be equal to 1.
-                                    // Otherwise, when vps_all_independent_layers_flag is equal to 0,
-                                    // the value of each_layer_is_an_ols_flag is inferred to be equal to 0.
-  }
-#endif
   vps.setMaxSubLayers(m_maxSublayers);
   if (vps.getMaxLayers() > 1 && vps.getMaxSubLayers() > 1)
   {
@@ -161,11 +153,7 @@ void EncApp::xInitLibCfg()
       vps.setEachLayerIsAnOlsFlag(m_eachLayerIsAnOlsFlag);
       if (vps.getEachLayerIsAnOlsFlag() == 0)
       {
-#if JVET_R0249_SE_PREFIXES
         vps.setOlsModeIdc(2); // When vps_all_independent_layers_flag is equal to 1 and vps_each_layer_is_an_ols_flag is equal to 0, the value of vps_ols_mode_idc is inferred to be equal to 2
-#else
-        vps.setOlsModeIdc(2); // When vps_all_independent_layers_flag is equal to 1 and each_layer_is_an_ols_flag is equal to 0, the value of ols_mode_idc is inferred to be equal to 2
-#endif
       }
     }
     if (!vps.getEachLayerIsAnOlsFlag())

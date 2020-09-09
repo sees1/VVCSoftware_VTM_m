@@ -179,11 +179,7 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
   targetSPS.setNumSubPics(1);
   // set the target subpicture ID as first ID
   targetSPS.setSubPicIdMappingExplicitlySignalledFlag(true);
-#if JVET_R0249_SE_PREFIXES
   targetSPS.setSubPicIdMappingPresentFlag(true);
-#else
-  targetSPS.setSubPicIdMappingInSpsFlag(true);
-#endif
   targetSPS.setSubPicId(0, subPic.getSubPicID());
   targetSPS.setMaxPicWidthInLumaSamples(subPic.getSubPicWidthInLumaSample());
   targetSPS.setMaxPicHeightInLumaSamples(subPic.getSubPicHeightInLumaSample());
@@ -309,11 +305,7 @@ void BitstreamExtractorApp::xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, S
   {
     int targetNumSlices = subPic.getNumSlicesInSubPic();
     targetPPS.setNumSlicesInPic(targetNumSlices);
-#if JVET_R0249_SE_PREFIXES
     // To avoid the bitstream writer writing pps_tile_idx_delta in the bitstream
-#else
-    // To avoid the bitstream writer writing tile_idx_delta in the bitstream
-#endif
     if ( (targetPPS.getNumSlicesInPic() - 1) <= 1)
     {
       targetPPS.setTileIdxDeltaPresentFlag(0);

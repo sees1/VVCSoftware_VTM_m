@@ -589,11 +589,7 @@ void Slice::checkColRefIdx(uint32_t curSliceSegmentIdx, const Picture* pic)
       const int preColRefPOC  = preSlice->getRefPOC( RefPicList(1 - preSlice->getColFromL0Flag()), preSlice->getColRefIdx());
       if(currColRefPOC != preColRefPOC)
       {
-#if JVET_R0249_SE_PREFIXES
         THROW("sh_collocated_ref_idx shall always be the same for all slices of a coded picture!");
-#else
-        THROW("Collocated_ref_idx shall always be the same for all slices of a coded picture!");
-#endif
       }
       else
       {
@@ -1242,11 +1238,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
   // When a picture is a leading picture, it shall be a RADL or RASL picture.
   if(this->getAssociatedIRAPPOC() > this->getPOC())
   {
-#if JVET_R0249_SE_PREFIXES
     //check this only when pps_mixed_nalu_types_in_pic_flag is equal to 0
-#else
-    //check this only when mixed_nalu_types_in_pic_flag is equal to 0
-#endif
     if (pps.getMixedNaluTypesInPicFlag() == 0)
     {
       // Do not check IRAP pictures since they may get a POC lower than their associated IRAP
@@ -1348,19 +1340,11 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
         {
           limitNonLP = 1;
         }
-#if JVET_R0249_SE_PREFIXES
         CHECK(pcPic->poc > this->getAssociatedIRAPPOC() && numNonLPFound > limitNonLP, "If sps_field_seq_flag is equal to 0 and the current picture, with nuh_layer_id "
               "equal to a particular value layerId, is a leading picture associated with an IRAP picture, it shall precede, in decoding order, all non-leading "
               "pictures that are associated with the same IRAP picture.Otherwise, let picA and picB be the first and the last leading pictures, in decoding order, "
               "associated with an IRAP picture, respectively, there shall be at most one non-leading picture with nuh_layer_id equal to layerId preceding picA in "
               "decoding order, and there shall be no non-leading picture with nuh_layer_id equal to layerId between picA and picB in decoding order.");
-#else
-        CHECK(pcPic->poc > this->getAssociatedIRAPPOC() && numNonLPFound > limitNonLP, "If field_seq_flag is equal to 0 and the current picture, with nuh_layer_id "
-              "equal to a particular value layerId, is a leading picture associated with an IRAP picture, it shall precede, in decoding order, all non-leading "
-              "pictures that are associated with the same IRAP picture.Otherwise, let picA and picB be the first and the last leading pictures, in decoding order, "
-              "associated with an IRAP picture, respectively, there shall be at most one non-leading picture with nuh_layer_id equal to layerId preceding picA in "
-              "decoding order, and there shall be no non-leading picture with nuh_layer_id equal to layerId between picA and picB in decoding order.");
-#endif
       }
     }
 
@@ -1402,13 +1386,8 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
 
   if (getPPS()->getMixedNaluTypesInPicFlag() && getSliceType() != I_SLICE)
   {
-#if JVET_R0249_SE_PREFIXES
     CHECK(!getSPS()->getSubPicTreatedAsPicFlag(curSubpicIdx), "When pps_mixed_nalu_types_in_pic_flag is equal 1, the value of sps_subpic_treated_as_pic_flag shall be equal to 1 "
           "for all the subpictures that are in the picture and contain at least one P or B slice");
-#else
-    CHECK(!getSPS()->getSubPicTreatedAsPicFlag(curSubpicIdx), "When pps_mixed_nalu_types_in_pic_flag is equal 1, the value of subpic_treated_as_pic_flag shall be equal to 1 "
-          "for all the subpictures that are in the picture and contain at least one P or B slice");
-#endif
   }
 
   int nalUnitType = getNalUnitType();
@@ -1525,21 +1504,12 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
       {
         numNonLeadingPic++;
         int th = bufPic->cs->sps->getFieldSeqFlag() ? 1 : 0;
-#if JVET_R0249_SE_PREFIXES
         CHECK(bufPic->poc > prevIRAPSubpicPOC && numNonLeadingPic > th, "If sps_field_seq_flag is equal to 0 and the current subpicture, with nuh_layer_id equal to a particular value "
           "layerId and subpicture index equal to a particular value subpicIdx, is a leading subpicture associated with an IRAP subpicture, it shall precede, in decoding order, "
           "all non-leading subpictures that are associated with the same IRAP subpicture. Otherwise, let subpicA and subpicB be the first and the last leading subpictures, in "
           "decoding order, associated with an IRAP subpicture, respectively, there shall be at most one non-leading subpicture with nuh_layer_id equal to layerId and subpicture "
           "index equal to subpicIdx preceding subpicA in decoding order, and there shall be no non-leading picture with nuh_layer_id equal to layerId and subpicture index equal "
           "to subpicIdx between picA and picB in decoding order");
-#else
-        CHECK(bufPic->poc > prevIRAPSubpicPOC && numNonLeadingPic > th, "If field_seq_flag is equal to 0 and the current subpicture, with nuh_layer_id equal to a particular value "
-          "layerId and subpicture index equal to a particular value subpicIdx, is a leading subpicture associated with an IRAP subpicture, it shall precede, in decoding order, "
-          "all non-leading subpictures that are associated with the same IRAP subpicture. Otherwise, let subpicA and subpicB be the first and the last leading subpictures, in "
-          "decoding order, associated with an IRAP subpicture, respectively, there shall be at most one non-leading subpicture with nuh_layer_id equal to layerId and subpicture "
-          "index equal to subpicIdx preceding subpicA in decoding order, and there shall be no non-leading picture with nuh_layer_id equal to layerId and subpicture index equal "
-          "to subpicIdx between picA and picB in decoding order");
-#endif
       }
     }
   }
@@ -2472,11 +2442,7 @@ VPS::VPS()
   , m_vpsExtensionFlag(false)
   , m_vpsGeneralHrdParamsPresentFlag(false)
   , m_vpsSublayerCpbParamsPresentFlag(false)
-#if JVET_R0249_SE_PREFIXES
   , m_numOlsTimingHrdParamsMinus1(0)
-#else
-  , m_numOlsHrdParamsMinus1(0)
-#endif
   , m_totalNumOLSs( 1 )
   , m_numMultiLayeredOlss( 0 )
   , m_numDpbParams( 0 )
@@ -2517,11 +2483,7 @@ VPS::VPS()
     m_ptlMaxTemporalId[i] = m_vpsMaxSubLayers - 1;
     m_olsPtlIdx[i] = 0;
     m_hrdMaxTid[i] = m_vpsMaxSubLayers - 1;
-#if JVET_R0249_SE_PREFIXES
     m_olsTimingHrdIdx[i] = 0;
-#else
-    m_olsHrdIdx[i] = 0;
-#endif
   }
 }
 
@@ -2725,19 +2687,11 @@ void VPS::checkVPS()
   for (int multiLayerOlsIdx=0; multiLayerOlsIdx < m_numMultiLayeredOlss; multiLayerOlsIdx++)
   {
     const int olsIdx = m_multiLayerOlsIdxToOlsIdx[multiLayerOlsIdx];
-#if JVET_R0249_SE_PREFIXES
     const int olsTimingHrdIdx = getOlsTimingHrdIdx(multiLayerOlsIdx);
     const int olsPtlIdx = getOlsPtlIdx(olsIdx);
     CHECK (getHrdMaxTid(olsTimingHrdIdx) < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_hrd_max_tid[vps_ols_timing_hrd_idx[m]] shall be greater than or equal to "
                                                                      "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
                                                                      "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
-#else
-    const int olsHrdIdx = getOlsHrdIdx(multiLayerOlsIdx);
-    const int olsPtlIdx = getOlsPtlIdx(olsIdx);
-    CHECK (getHrdMaxTid(olsHrdIdx) < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_hrd_max_tid[vps_ols_timing_hrd_idx[m]] shall be greater than or equal to "
-                                                                     "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
-                                                                     "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
-#endif
     const int olsDpbParamsIdx = getOlsDpbParamsIdx(multiLayerOlsIdx);
     CHECK (m_dpbMaxTemporalId[olsDpbParamsIdx] < getPtlMaxTemporalId(olsPtlIdx), "The value of vps_dpb_max_tid[vps_ols_dpb_params_idx[m]] shall be greater than or equal to "
                                                                      "vps_ptl_max_tid[ vps_ols_ptl_idx[n]] for each m-th multi-layer OLS for m from 0 to "
@@ -2802,15 +2756,9 @@ PicHeader::PicHeader()
 , m_mvdL1ZeroFlag                                 ( 0 )
 , m_maxNumAffineMergeCand                         ( AFFINE_MRG_MAX_NUM_CANDS )
 , m_disFracMMVD                                   ( 0 )
-#if JVET_R0249_SE_PREFIXES
 , m_bdofDisabledFlag                              ( 0 )
 , m_dmvrDisabledFlag                              ( 0 )
 , m_profDisabledFlag                              ( 0 )
-#else
-, m_disBdofFlag                                   ( 0 )
-, m_disDmvrFlag                                   ( 0 )
-, m_disProfFlag                                   ( 0 )
-#endif
 , m_jointCbCrSignFlag                             ( 0 )
 , m_qpDelta                                       ( 0 )
 , m_numAlfAps                                     ( 0 )
@@ -2900,15 +2848,9 @@ void PicHeader::initPicHeader()
   m_mvdL1ZeroFlag                                 = 0;
   m_maxNumAffineMergeCand                         = AFFINE_MRG_MAX_NUM_CANDS;
   m_disFracMMVD                                   = 0;
-#if JVET_R0249_SE_PREFIXES
   m_bdofDisabledFlag                              = 0;
   m_dmvrDisabledFlag                              = 0;
   m_profDisabledFlag                              = 0;
-#else
-  m_disBdofFlag                                   = 0;
-  m_disDmvrFlag                                   = 0;
-  m_disProfFlag                                   = 0;
-#endif
   m_jointCbCrSignFlag                             = 0;
   m_qpDelta                                       = 0;
   m_numAlfAps                                     = 0;
@@ -3037,11 +2979,7 @@ SPS::SPS()
 , m_subPicSameSizeFlag        (false)
 #endif
 , m_subPicIdMappingExplicitlySignalledFlag ( false )
-#if JVET_R0249_SE_PREFIXES
 , m_subPicIdMappingPresentFlag ( false )
-#else
-, m_subPicIdMappingInSpsFlag ( false )
-#endif
 , m_subPicIdLen(16)
 , m_log2MinCodingBlockSize    (  2)
 , m_CTUSize(0)
@@ -3072,17 +3010,10 @@ SPS::SPS()
 , m_DmvrControlPresentFlag    ( false )
 , m_ProfControlPresentFlag    ( false )
 , m_uiBitsForPOC              (  8)
-#if JVET_R0249_SE_PREFIXES
 , m_pocMsbCycleFlag           ( false )
 , m_pocMsbCycleLen            ( 1 )
 , m_numExtraPHBytes           ( 0 )
 , m_numExtraSHBytes           ( 0 )
-#else
-, m_pocMsbFlag                ( false )
-, m_pocMsbLen                 ( 1 )
-, m_numExtraPHBitsBytes       ( 0 )
-, m_numExtraSHBitsBytes       ( 0 )
-#endif
 , m_numLongTermRefPicSPS      (  0)
 
 , m_log2MaxTbSize             (  6)

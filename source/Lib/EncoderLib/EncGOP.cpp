@@ -3632,11 +3632,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         {
           if(sps->getSubPicIdMappingExplicitlySignalledFlag())
           {
-#if JVET_R0249_SE_PREFIXES
             if(sps->getSubPicIdMappingPresentFlag())
-#else
-            if(sps->getSubPicIdMappingInSpsFlag())
-#endif
             {
               subpicIDs = sps->getSubPicIds();
             }
