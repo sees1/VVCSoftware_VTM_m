@@ -1184,13 +1184,13 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG( pcSPS->getBDOFEnabledFlag() ? 1 : 0,                                   "sps_bdof_enabled_flag" );
   if (pcSPS->getBDOFEnabledFlag())
   {
-    WRITE_FLAG(pcSPS->getBdofControlPresentFlag() ? 1 : 0,                           "sps_bdof_pic_present_flag");
+    WRITE_FLAG(pcSPS->getBdofControlPresentInPhFlag() ? 1 : 0,                        "sps_bdof_control_present_in_ph_flag");
   }
   WRITE_FLAG( pcSPS->getUseSMVD() ? 1 : 0,                                            "sps_smvd_enabled_flag" );
   WRITE_FLAG( pcSPS->getUseDMVR() ? 1 : 0,                                            "sps_dmvr_enabled_flag" );
   if (pcSPS->getUseDMVR())
   {
-    WRITE_FLAG(pcSPS->getDmvrControlPresentFlag() ? 1 : 0,                            "sps_dmvr_pic_present_flag");
+    WRITE_FLAG(pcSPS->getDmvrControlPresentInPhFlag() ? 1 : 0,                        "sps_dmvr_control_present_in_ph_flag");
   }
   WRITE_FLAG(pcSPS->getUseMMVD() ? 1 : 0,                                             "sps_mmvd_enabled_flag");
   if (pcSPS->getUseMMVD())
@@ -1211,7 +1211,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_FLAG( pcSPS->getUsePROF() ? 1 : 0,                                                   "sps_affine_prof_enabled_flag" );
     if (pcSPS->getUsePROF())
     {
-      WRITE_FLAG(pcSPS->getProfControlPresentFlag() ? 1 : 0,                                   "sps_prof_pic_present_flag" );
+      WRITE_FLAG(pcSPS->getProfControlPresentInPhFlag() ? 1 : 0,                                   "sps_prof_control_present_in_ph_flag" );
     }
   }
 
@@ -2090,7 +2090,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
 #endif
 
     // picture level BDOF disable flags
-    if (sps->getBdofControlPresentFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
+    if (sps->getBdofControlPresentInPhFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
     {
       WRITE_FLAG(picHeader->getDisBdofFlag(), "ph_disable_bdof_flag");
     }
@@ -2100,7 +2100,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
     }
 
   // picture level DMVR disable flags
-    if (sps->getDmvrControlPresentFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
+    if (sps->getDmvrControlPresentInPhFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
     {
       WRITE_FLAG(picHeader->getDisDmvrFlag(), "ph_disable_dmvr_flag");
     }
@@ -2110,7 +2110,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "gdr_or_irap_pic_flag");
     }
 
   // picture level PROF disable flags
-    if (sps->getProfControlPresentFlag())
+    if (sps->getProfControlPresentInPhFlag())
     {
       WRITE_FLAG(picHeader->getDisProfFlag(), "ph_disable_prof_flag");
     }

@@ -1313,9 +1313,9 @@ void EncLib::xInitSPS( SPS& sps )
   sps.setUseGeo                ( m_Geo );
   sps.setUseMMVD               ( m_MMVD );
   sps.setFpelMmvdEnabledFlag   (( m_MMVD ) ? m_allowDisFracMMVD : false);
-  sps.setBdofControlPresentFlag(m_BIO);
-  sps.setDmvrControlPresentFlag(m_DMVR);
-  sps.setProfControlPresentFlag(m_PROF);
+  sps.setBdofControlPresentInPhFlag(m_BIO);
+  sps.setDmvrControlPresentInPhFlag(m_DMVR);
+  sps.setProfControlPresentInPhFlag(m_PROF);
   sps.setAffineAmvrEnabledFlag              ( m_AffineAmvr );
   sps.setUseDMVR                            ( m_DMVR );
   sps.setUseColorTrans(m_useColorTrans);
