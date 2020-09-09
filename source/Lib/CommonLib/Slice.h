@@ -1078,9 +1078,9 @@ private:
   bool                  m_vpsExtensionFlag;
   bool                  m_vpsGeneralHrdParamsPresentFlag;
   bool                  m_vpsSublayerCpbParamsPresentFlag;
-  uint32_t              m_numOlsHrdParamsMinus1;
+  uint32_t              m_numOlsTimingHrdParamsMinus1;
   uint32_t              m_hrdMaxTid[MAX_NUM_OLSS];
-  uint32_t              m_olsHrdIdx[MAX_NUM_OLSS];
+  uint32_t              m_olsTimingHrdIdx[MAX_NUM_OLSS];
   GeneralHrdParams      m_generalHrdParams;
   std::vector<Size>             m_olsDpbPicSize;
   std::vector<int>              m_olsDpbParamsIdx;
@@ -1185,13 +1185,12 @@ public:
   void              setVPSGeneralHrdParamsPresentFlag(bool t) { m_vpsGeneralHrdParamsPresentFlag = t; }
   bool              getVPSSublayerCpbParamsPresentFlag() const { return m_vpsSublayerCpbParamsPresentFlag; }
   void              setVPSSublayerCpbParamsPresentFlag(bool t) { m_vpsSublayerCpbParamsPresentFlag = t; }
-  uint32_t          getNumOlsHrdParamsMinus1()                                   const { return m_numOlsHrdParamsMinus1; }
-  void              setNumOlsHrdParamsMinus1(uint32_t val) { m_numOlsHrdParamsMinus1 = val; }
-
+  uint32_t          getNumOlsTimingHrdParamsMinus1()               const { return m_numOlsTimingHrdParamsMinus1; }
+  void              setNumOlsTimingHrdParamsMinus1(uint32_t val)         { m_numOlsTimingHrdParamsMinus1 = val; }
   uint32_t          getHrdMaxTid(int olsIdx)                   const { return m_hrdMaxTid[olsIdx]; }
   void              setHrdMaxTid(int olsIdx, uint32_t val)           { m_hrdMaxTid[olsIdx] = val; }
-  uint32_t          getOlsHrdIdx(int olsIdx)                   const { return m_olsHrdIdx[olsIdx]; }
-  void              setOlsHrdIdx(int olsIdx, uint32_t val)           { m_olsHrdIdx[olsIdx] = val; }
+  uint32_t          getOlsTimingHrdIdx(int olsIdx)                   const { return m_olsTimingHrdIdx[olsIdx]; }
+  void              setOlsTimingHrdIdx(int olsIdx, uint32_t val)           { m_olsTimingHrdIdx[olsIdx] = val; }
 
   OlsHrdParams*          getOlsHrdParameters(int olsIdx) { return &m_olsHrdParams[olsIdx][0]; }
   const OlsHrdParams*    getOlsHrdParameters(int olsIdx) const { return &m_olsHrdParams[olsIdx][0]; }
@@ -1516,7 +1515,7 @@ private:
   std::vector<bool>     m_subPicTreatedAsPicFlag;
   std::vector<bool>     m_loopFilterAcrossSubpicEnabledFlag;
   bool                  m_subPicIdMappingExplicitlySignalledFlag;
-  bool                  m_subPicIdMappingInSpsFlag;
+  bool                  m_subPicIdMappingPresentFlag;
   uint32_t              m_subPicIdLen;                       //!< sub-picture ID length in bits
   std::vector<uint16_t> m_subPicId;                          //!< sub-picture ID for each sub-picture in the sequence
 
@@ -1564,10 +1563,11 @@ private:
   bool              m_DmvrControlPresentFlag;
   bool              m_ProfControlPresentFlag;
   uint32_t          m_uiBitsForPOC;
-  bool              m_pocMsbFlag;
-  uint32_t          m_pocMsbLen;
-  int               m_numExtraPHBitsBytes;
-  int               m_numExtraSHBitsBytes;
+  bool              m_pocMsbCycleFlag;
+  uint32_t          m_pocMsbCycleLen;
+  int               m_numExtraPHBytes;
+  int               m_numExtraSHBytes;
+
   std::vector<bool> m_extraPHBitPresentFlag;
   std::vector<bool> m_extraSHBitPresentFlag;
   uint32_t          m_numLongTermRefPicSPS;
@@ -1737,8 +1737,8 @@ public:
 
   void                    setSubPicIdMappingExplicitlySignalledFlag( bool b )                             { m_subPicIdMappingExplicitlySignalledFlag = b;    }
   bool                    getSubPicIdMappingExplicitlySignalledFlag() const                               { return m_subPicIdMappingExplicitlySignalledFlag; }
-  void                    setSubPicIdMappingInSpsFlag( bool b )                                           { m_subPicIdMappingInSpsFlag = b;                  }
-  bool                    getSubPicIdMappingInSpsFlag() const                                             { return  m_subPicIdMappingInSpsFlag;              }
+  void                    setSubPicIdMappingPresentFlag( bool b )                                           { m_subPicIdMappingPresentFlag = b;                  }
+  bool                    getSubPicIdMappingPresentFlag() const                                             { return  m_subPicIdMappingPresentFlag;              }
   void                    setSubPicIdLen( uint32_t u )                                                    { m_subPicIdLen = u;                       }
   uint32_t                getSubPicIdLen() const                                                          { return  m_subPicIdLen;                   }
   void                    setSubPicId( int i, uint16_t u )                                                { m_subPicId[i] = u;     }
@@ -1807,14 +1807,14 @@ public:
   void                    setBDPCMEnabledFlag( bool b )                                                       { m_BDPCMEnabledFlag = b;                                              }
   void                    setBitsForPOC( uint32_t u )                                                         { m_uiBitsForPOC = u;                                                  }
   uint32_t                    getBitsForPOC() const                                                           { return m_uiBitsForPOC;                                               }
-  void                    setPocMsbFlag(bool b)                                                               { m_pocMsbFlag = b;                                                    }
-  bool                    getPocMsbFlag() const                                                               { return m_pocMsbFlag;                                                 }
-  void                    setPocMsbLen(uint32_t u)                                                            { m_pocMsbLen = u;                                                     }
-  uint32_t                getPocMsbLen() const                                                                { return m_pocMsbLen;                                                  }
-  void                    setNumExtraPHBitsBytes(int i)                                                       { m_numExtraPHBitsBytes = i;                                           }
-  int                     getNumExtraPHBitsBytes() const                                                      { return m_numExtraPHBitsBytes;                                        }
-  void                    setNumExtraSHBitsBytes(int i)                                                       { m_numExtraSHBitsBytes = i;                                           }
-  int                     getNumExtraSHBitsBytes() const                                                      { return m_numExtraSHBitsBytes;                                        }
+  void                    setPocMsbCycleFlag(bool b)                                                          { m_pocMsbCycleFlag = b;                                               }
+  bool                    getPocMsbCycleFlag() const                                                          { return m_pocMsbCycleFlag;                                            }
+  void                    setPocMsbCycleLen(uint32_t u)                                                       { m_pocMsbCycleLen = u;                                                }
+  uint32_t                getPocMsbCycleLen() const                                                           { return m_pocMsbCycleLen;                                             }
+  void                    setNumExtraPHBytes(int i)                                                           { m_numExtraPHBytes = i;                                               }
+  int                     getNumExtraPHBytes() const                                                          { return m_numExtraPHBytes;                                            }
+  void                    setNumExtraSHBytes(int i)                                                           { m_numExtraSHBytes = i;                                               }
+  int                     getNumExtraSHBytes() const                                                          { return m_numExtraSHBytes;                                            }
   void                    setExtraPHBitPresentFlags(const std::vector<bool> &b)                               { m_extraPHBitPresentFlag = b;                                         }
   const std::vector<bool> getExtraPHBitPresentFlags() const                                                   { return m_extraPHBitPresentFlag;                                      }
   void                    setExtraSHBitPresentFlags(const std::vector<bool> &b)                               { m_extraSHBitPresentFlag = b;                                         }
@@ -2522,9 +2522,9 @@ private:
   bool                        m_mvdL1ZeroFlag;                                          //!< L1 MVD set to zero flag
   uint32_t                    m_maxNumAffineMergeCand;                                  //!< max number of sub-block merge candidates
   bool                        m_disFracMMVD;                                            //!< fractional MMVD offsets disabled flag
-  bool                        m_disBdofFlag;                                            //!< picture level BDOF disable flag
-  bool                        m_disDmvrFlag;                                            //!< picture level DMVR disable flag
-  bool                        m_disProfFlag;                                            //!< picture level PROF disable flag
+  bool                        m_bdofDisabledFlag;                                       //!< picture level BDOF disable flag
+  bool                        m_dmvrDisabledFlag;                                       //!< picture level DMVR disable flag
+  bool                        m_profDisabledFlag;                                       //!< picture level PROF disable flag
   bool                        m_jointCbCrSignFlag;                                      //!< joint Cb/Cr residual sign flag
   int                         m_qpDelta;                                                //!< value of Qp delta
   bool                        m_saoEnabledFlag[MAX_NUM_CHANNEL_TYPE];                   //!< sao enabled flags for each channel
@@ -2643,12 +2643,12 @@ public:
   uint32_t                    getMaxNumAffineMergeCand() const                          { return m_maxNumAffineMergeCand;                                                              }
   void                        setDisFracMMVD( bool val )                                { m_disFracMMVD = val;                                                                         }
   bool                        getDisFracMMVD() const                                    { return m_disFracMMVD;                                                                        }
-  void                        setDisBdofFlag( bool val )                                { m_disBdofFlag = val;                                                                         }
-  bool                        getDisBdofFlag() const                                    { return m_disBdofFlag;                                                                        }
-  void                        setDisDmvrFlag( bool val )                                { m_disDmvrFlag = val;                                                                         }
-  bool                        getDisDmvrFlag() const                                    { return m_disDmvrFlag;                                                                        }
-  void                        setDisProfFlag( bool val )                                { m_disProfFlag = val;                                                                         }
-  bool                        getDisProfFlag() const                                    { return m_disProfFlag;                                                                        }
+  void                        setBdofDisabledFlag( bool val )                           { m_bdofDisabledFlag = val;                                                                    }
+  bool                        getBdofDisabledFlag() const                               { return m_bdofDisabledFlag;                                                                   }
+  void                        setDmvrDisabledFlag( bool val )                           { m_dmvrDisabledFlag = val;                                                                    }
+  bool                        getDmvrDisabledFlag() const                               { return m_dmvrDisabledFlag;                                                                   }
+  void                        setProfDisabledFlag( bool val )                           { m_profDisabledFlag = val;                                                                    }
+  bool                        getProfDisabledFlag() const                               { return m_profDisabledFlag;                                                                   }
   void                        setJointCbCrSignFlag( bool b )                            { m_jointCbCrSignFlag = b;                                                                     }
   bool                        getJointCbCrSignFlag() const                              { return m_jointCbCrSignFlag;                                                                  }
   void                        setQpDelta(int b)                                         { m_qpDelta = b;                                                                               }

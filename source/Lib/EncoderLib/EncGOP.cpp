@@ -3632,7 +3632,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         {
           if(sps->getSubPicIdMappingExplicitlySignalledFlag())
           {
-            if(sps->getSubPicIdMappingInSpsFlag())
+            if(sps->getSubPicIdMappingPresentFlag())
             {
               subpicIDs = sps->getSubPicIds();
             }
