@@ -3807,6 +3807,75 @@ bool EncAppCfg::xCheckParameter()
         xConfirmPara( m_gcmpSEIFunctionCoeffU[i] <= 0.0 || m_gcmpSEIFunctionCoeffU[i] > 1.0, "SEIGcmpFunctionCoeffU must be in the range (0, 1]");
         xConfirmPara( m_gcmpSEIFunctionCoeffV[i] <= 0.0 || m_gcmpSEIFunctionCoeffV[i] > 1.0, "SEIGcmpFunctionCoeffV must be in the range (0, 1]");
       }
+#if JVET_S0172_ITEM2_GCMP_CONSTRAINT
+      if (i != 2 && (m_gcmpSEIPackingType == 4 || m_gcmpSEIPackingType == 5))
+      {
+        if (m_gcmpSEIFaceIndex[2] == 0 || m_gcmpSEIFaceIndex[2] == 1)
+        {
+          xConfirmPara( m_gcmpSEIFaceIndex[i] == 0 || m_gcmpSEIFaceIndex[i] == 1, "SEIGcmpFaceIndex[i] must be in the range of 2 to 5 for i equal to 0, 1, 3, or 4 when SEIGcmpFaceIndex[2] is equal to 0 or 1");
+          if (m_gcmpSEIPackingType == 4)
+          {
+            xConfirmPara( m_gcmpSEIFaceRotation[i] != 0 && m_gcmpSEIFaceRotation[i] != 2, "SEIGcmpFaceRotation[i] must be 0 or 2 for i equal to 0, 1, 3, or 4 when SEIGcmpFaceIndex[2] is equal to 0 or 1");
+          }
+          else
+          {
+            xConfirmPara( m_gcmpSEIFaceRotation[i] != 1 && m_gcmpSEIFaceRotation[i] != 3, "SEIGcmpFaceRotation[i] must be 1 or 3 for i equal to 0, 1, 3, or 4 when SEIGcmpFaceIndex[2] is equal to 0 or 1");
+          }
+        }
+        else if (m_gcmpSEIFaceIndex[2] == 2 || m_gcmpSEIFaceIndex[2] == 3)
+        {
+          xConfirmPara( m_gcmpSEIFaceIndex[i] == 2 || m_gcmpSEIFaceIndex[i] == 3, "SEIGcmpFaceIndex[i] must be 0, 1, 4 or 5 for i equal to 0, 1, 3, or 4 when SEIGcmpFaceIndex[2] is equal to 2 or 3");
+          if (m_gcmpSEIPackingType == 4)
+          {
+            if (m_gcmpSEIFaceIndex[i] == 1)
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 0 && m_gcmpSEIFaceRotation[i] != 2, "SEIGcmpFaceRotation[i] must be 0 or 2 when SEIGcmpFaceIndex[2] is equal to 2 or 3 and SEIGcmpFaceIndex[i] is equal to 1");
+            }
+            else
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 1 && m_gcmpSEIFaceRotation[i] != 3, "SEIGcmpFaceRotation[i] must be 1 or 3 when SEIGcmpFaceIndex[2] is equal to 2 or 3 and SEIGcmpFaceIndex[i] is equal to 0, 4 or 5");
+            }
+          }
+          else
+          {
+            if (m_gcmpSEIFaceIndex[i] == 1)
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 1 && m_gcmpSEIFaceRotation[i] != 3, "SEIGcmpFaceRotation[i] must be 1 or 3 when SEIGcmpFaceIndex[2] is equal to 2 or 3 and SEIGcmpFaceIndex[i] is equal to 1");
+            }
+            else
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 0 && m_gcmpSEIFaceRotation[i] != 2, "SEIGcmpFaceRotation[i] must be 0 or 2 when SEIGcmpFaceIndex[2] is equal to 2 or 3 and SEIGcmpFaceIndex[i] is equal to 0, 4 or 5");
+            }
+          }
+        }
+        else if (m_gcmpSEIFaceIndex[2] == 4 || m_gcmpSEIFaceIndex[2] == 5)
+        {
+          xConfirmPara( m_gcmpSEIFaceIndex[i] == 4 || m_gcmpSEIFaceIndex[i] == 5, "SEIGcmpFaceIndex[i] must be in the range of 0 to 3 for i equal to 0, 1, 3, or 4 when SEIGcmpFaceIndex[2] is equal to 4 or 5");
+          if (m_gcmpSEIPackingType == 4)
+          {
+            if (m_gcmpSEIFaceIndex[i] == 0)
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 0 && m_gcmpSEIFaceRotation[i] != 2, "SEIGcmpFaceRotation[i] must be 0 or 2 when SEIGcmpFaceIndex[2] is equal to 4 or 5 and SEIGcmpFaceIndex[i] is equal to 0");
+            }
+            else
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 1 && m_gcmpSEIFaceRotation[i] != 3, "SEIGcmpFaceRotation[i] must be 1 or 3 when SEIGcmpFaceIndex[2] is equal to 4 or 5 and SEIGcmpFaceIndex[i] is equal to 1, 2 or 3");
+            }
+          }
+          else
+          {
+            if (m_gcmpSEIFaceIndex[i] == 0)
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 1 && m_gcmpSEIFaceRotation[i] != 3, "SEIGcmpFaceRotation[i] must be 1 or 3 when SEIGcmpFaceIndex[2] is equal to 4 or 5 and SEIGcmpFaceIndex[i] is equal to 0");
+            }
+            else
+            {
+              xConfirmPara( m_gcmpSEIFaceRotation[i] != 0 && m_gcmpSEIFaceRotation[i] != 2, "SEIGcmpFaceRotation[i] must be 0 or 2 when SEIGcmpFaceIndex[2] is equal to 4 or 5 and SEIGcmpFaceIndex[i] is equal to 1, 2 or 3");
+            }
+          }
+        }
+      }
+#endif
     }
     if (m_gcmpSEIGuardBandFlag)
     {
