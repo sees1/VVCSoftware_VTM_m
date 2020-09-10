@@ -461,21 +461,6 @@ void BitstreamExtractorApp::xWritePPS(PPS *pps, std::ostream& out, int layerId, 
   writeAnnexBNalUnit(out, naluWithHeader, true);
 }
 
-#if JVET_S0219_ASPECT1
-void BitstreamExtractorApp::xWriteAPS(APS *aps, std::ostream& out, int layerId, int temporalId, const bool isPrefixNUT)
-{
-  OutputNALUnit naluOut(isPrefixNUT ? NAL_UNIT_PREFIX_APS : NAL_UNIT_SUFFIX_APS, layerId, temporalId);
-  
-  // write the PPS to the newly created NAL unit buffer
-  m_hlSyntaxWriter.setBitstream(&naluOut.m_Bitstream);
-  m_hlSyntaxWriter.codeAPS(aps);
-#if JVET_R0294_SUBPIC_HASH
-  NALUnitEBSP naluWithHeader(naluOut);
-  writeAnnexBNalUnit(out, naluWithHeader, true);
-#endif
-}
-
-#endif
 
 // returns true, if the NAL unit is to be discarded
 bool BitstreamExtractorApp::xCheckNumSubLayers(InputNALUnit &nalu, VPS *vps)
@@ -791,13 +776,6 @@ uint32_t BitstreamExtractorApp::decode()
         m_parameterSetManager.storeAPS(aps, nalu.getBitstream().getFifo());
         // get APS back
         aps = m_parameterSetManager.getAPS(apsId, apsType);
-#if JVET_S0219_ASPECT1
-        if (writeInpuNalUnitToStream)
-        {
-          xWriteAPS(aps, bitstreamFileOut, nalu.m_nuhLayerId, nalu.m_temporalId, nalu.m_nalUnitType == NAL_UNIT_PREFIX_APS);
-          writeInpuNalUnitToStream = false;
-        }
-#endif
       }
 
       if (nalu.m_nalUnitType == NAL_UNIT_PH)
