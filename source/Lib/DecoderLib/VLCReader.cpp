@@ -2007,19 +2007,19 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_FLAG( uiCode, "sps_bdof_enabled_flag" );                      pcSPS->setBDOFEnabledFlag ( uiCode != 0 );
   if (pcSPS->getBDOFEnabledFlag())
   {
-    READ_FLAG(uiCode, "sps_bdof_pic_present_flag");                 pcSPS->setBdofControlPresentFlag( uiCode != 0 );
+    READ_FLAG(uiCode, "sps_bdof_control_present_in_ph_flag");        pcSPS->setBdofControlPresentInPhFlag( uiCode != 0 );
   }
   else {
-    pcSPS->setBdofControlPresentFlag( false );
+    pcSPS->setBdofControlPresentInPhFlag( false );
   }
   READ_FLAG(uiCode, "sps_smvd_enabled_flag");                       pcSPS->setUseSMVD( uiCode != 0 );
   READ_FLAG(uiCode, "sps_dmvr_enabled_flag");                        pcSPS->setUseDMVR(uiCode != 0);
   if (pcSPS->getUseDMVR())
   {
-    READ_FLAG(uiCode, "sps_dmvr_pic_present_flag");                 pcSPS->setDmvrControlPresentFlag( uiCode != 0 );
+    READ_FLAG(uiCode, "sps_dmvr_control_present_in_ph_flag");                 pcSPS->setDmvrControlPresentInPhFlag( uiCode != 0 );
   }
   else {
-    pcSPS->setDmvrControlPresentFlag( false );
+    pcSPS->setDmvrControlPresentInPhFlag( false );
   }
   READ_FLAG(uiCode, "sps_mmvd_enabled_flag");                        pcSPS->setUseMMVD(uiCode != 0);
   if (pcSPS->getUseMMVD())
@@ -2052,10 +2052,10 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     READ_FLAG( uiCode, "sps_affine_prof_enabled_flag" );            pcSPS->setUsePROF                ( uiCode != 0 );
     if (pcSPS->getUsePROF())
     {
-      READ_FLAG(uiCode, "sps_prof_pic_present_flag");               pcSPS->setProfControlPresentFlag ( uiCode != 0 );
+      READ_FLAG(uiCode, "sps_prof_control_present_in_ph_flag");               pcSPS->setProfControlPresentInPhFlag ( uiCode != 0 );
     }
     else {
-      pcSPS->setProfControlPresentFlag( false );
+      pcSPS->setProfControlPresentInPhFlag( false );
     }
   }
 
@@ -3362,13 +3362,13 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 #endif
 
     // picture level BDOF disable flags
-    if (sps->getBdofControlPresentFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
+    if (sps->getBdofControlPresentInPhFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
     {
       READ_FLAG(uiCode, "ph_bdof_disabled_flag");  picHeader->setBdofDisabledFlag(uiCode != 0);
     }
     else
     {
-      if (sps->getBdofControlPresentFlag() == 0)
+      if (sps->getBdofControlPresentInPhFlag() == 0)
       {
         picHeader->setBdofDisabledFlag(1 - (int)(sps->getBDOFEnabledFlag()));
       }
@@ -3379,13 +3379,13 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     }
 
   // picture level DMVR disable flags
-    if (sps->getDmvrControlPresentFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
+    if (sps->getDmvrControlPresentInPhFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
     {
       READ_FLAG(uiCode, "ph_dmvr_disabled_flag");  picHeader->setDmvrDisabledFlag(uiCode != 0);
     }
     else
     {
-      if (sps->getDmvrControlPresentFlag() == 0)
+      if (sps->getDmvrControlPresentInPhFlag() == 0)
       {
         picHeader->setDmvrDisabledFlag(1 - (int)(sps->getUseDMVR()));
       }
@@ -3396,7 +3396,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     }
 
   // picture level PROF disable flags
-    if (sps->getProfControlPresentFlag())
+    if (sps->getProfControlPresentInPhFlag())
     {
       READ_FLAG(uiCode, "ph_prof_disabled_flag");  picHeader->setProfDisabledFlag(uiCode != 0);
     }

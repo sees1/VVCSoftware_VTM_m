@@ -1559,9 +1559,9 @@ private:
   bool              m_sbtmvpEnabledFlag;
   bool              m_bdofEnabledFlag;
   bool              m_fpelMmvdEnabledFlag;
-  bool              m_BdofControlPresentFlag;
-  bool              m_DmvrControlPresentFlag;
-  bool              m_ProfControlPresentFlag;
+  bool              m_BdofControlPresentInPhFlag;
+  bool              m_DmvrControlPresentInPhFlag;
+  bool              m_ProfControlPresentInPhFlag;
   uint32_t          m_uiBitsForPOC;
   bool              m_pocMsbCycleFlag;
   uint32_t          m_pocMsbCycleLen;
@@ -1883,14 +1883,14 @@ void                    setCCALFEnabledFlag( bool b )                           
   void                    setUseDMVR(bool b)                                                              { m_DMVR = b;    }
   bool                    getUseMMVD()const                                                               { return m_MMVD; }
   void                    setUseMMVD(bool b)                                                              { m_MMVD = b;    }
-  bool                    getBdofControlPresentFlag()const                                                { return m_BdofControlPresentFlag; }
-  void                    setBdofControlPresentFlag(bool b)                                               { m_BdofControlPresentFlag = b;    }
+  bool                    getBdofControlPresentInPhFlag()const                                            { return m_BdofControlPresentInPhFlag; }
+  void                    setBdofControlPresentInPhFlag(bool b)                                           { m_BdofControlPresentInPhFlag = b;    }
 
-  bool                    getDmvrControlPresentFlag()const                                                { return m_DmvrControlPresentFlag; }
-  void                    setDmvrControlPresentFlag(bool b)                                               { m_DmvrControlPresentFlag = b;    }
+  bool                    getDmvrControlPresentInPhFlag()const                                            { return m_DmvrControlPresentInPhFlag; }
+  void                    setDmvrControlPresentInPhFlag(bool b)                                           { m_DmvrControlPresentInPhFlag = b;    }
 
-  bool                    getProfControlPresentFlag()const                                                { return m_ProfControlPresentFlag; }
-  void                    setProfControlPresentFlag(bool b)                                               { m_ProfControlPresentFlag = b;    }
+  bool                    getProfControlPresentInPhFlag()const                                            { return m_ProfControlPresentInPhFlag; }
+  void                    setProfControlPresentInPhFlag(bool b)                                           { m_ProfControlPresentInPhFlag = b;    }
   uint32_t                getMaxTLayers() const                                                           { return m_uiMaxTLayers; }
   void                    setMaxTLayers( uint32_t uiMaxTLayers )                                          { CHECK( uiMaxTLayers > MAX_TLAYER, "Invalid number T-layers" ); m_uiMaxTLayers = uiMaxTLayers; }
 
