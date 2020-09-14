@@ -205,6 +205,7 @@ void Slice::initSlice()
   m_tileGroupCcAlfCrEnabledFlag = 0;
   m_tileGroupCcAlfCbApsId = -1;
   m_tileGroupCcAlfCrApsId = -1;
+  m_nuhLayerId = 0;
 }
 
 void Slice::inheritFromPicHeader( PicHeader *picHeader, const PPS *pps, const SPS *sps )
