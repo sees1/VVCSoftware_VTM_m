@@ -1,4 +1,4 @@
-﻿/* The copyright in this software is being made available under the BSD
+/* The copyright in this software is being made available under the BSD
 * License, included below. This software may be subject to other third party
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
@@ -2234,7 +2234,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     {
 #if JVET_S0047_MINUS1_FOR_VB_POS
       READ_UVLC(uiCode, "sps_virtual_boundary_pos_x_minus1[i]");        pcSPS->setVirtualBoundariesPosX((uiCode + 1) << 3, i);
-      CHECK(uiCode > (ceil(pcSPS->getMaxPicWidthInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples ÷ 8 ) - 2, inclusive.");
+      CHECK(uiCode > (ceil(pcSPS->getMaxPicWidthInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples / 8 ) - 2, inclusive.");
 #else
       READ_UVLC(uiCode, "sps_virtual_boundaries_pos_x");        pcSPS->setVirtualBoundariesPosX(uiCode << 3, i);
 #endif
@@ -2260,7 +2260,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     {
 #if JVET_S0047_MINUS1_FOR_VB_POS
       READ_UVLC(uiCode, "sps_virtual_boundary_pos_y_minus1[i]");        pcSPS->setVirtualBoundariesPosY((uiCode + 1) << 3, i);
-      CHECK(uiCode > (ceil(pcSPS->getMaxPicHeightInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples ÷ 8 ) - 2, inclusive.");
+      CHECK(uiCode > (ceil(pcSPS->getMaxPicHeightInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples / 8 ) - 2, inclusive.");
 #else
       READ_UVLC(uiCode, "sps_virtual_boundaries_pos_y");        pcSPS->setVirtualBoundariesPosY(uiCode << 3, i);
 #endif
@@ -3051,7 +3051,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       {
 #if JVET_S0047_MINUS1_FOR_VB_POS
         READ_UVLC(uiCode, "ph_virtual_boundary_pos_x_minus1[i]");        picHeader->setVirtualBoundariesPosX((uiCode + 1) << 3, i);
-        CHECK(uiCode > (ceil(pps->getPicWidthInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples ÷ 8 ) - 2, inclusive.");
+        CHECK(uiCode > (ceil(pps->getPicWidthInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
 #else
         READ_UVLC(uiCode, "ph_virtual_boundaries_pos_x");        picHeader->setVirtualBoundariesPosX(uiCode << 3, i);
 #endif
@@ -3077,7 +3077,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       {
 #if JVET_S0047_MINUS1_FOR_VB_POS
         READ_UVLC(uiCode, "ph_virtual_boundary_pos_y_minus1[i]");        picHeader->setVirtualBoundariesPosY((uiCode + 1) << 3, i);
-        CHECK(uiCode > (ceil(pps->getPicHeightInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples ÷ 8 ) - 2, inclusive.");
+        CHECK(uiCode > (ceil(pps->getPicHeightInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples / 8 ) - 2, inclusive.");
 #else
         READ_UVLC(uiCode, "ph_virtual_boundaries_pos_y");        picHeader->setVirtualBoundariesPosY(uiCode << 3, i);
 #endif

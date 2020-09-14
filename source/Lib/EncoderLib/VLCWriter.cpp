@@ -1,4 +1,4 @@
-﻿/* The copyright in this software is being made available under the BSD
+/* The copyright in this software is being made available under the BSD
 * License, included below. This software may be subject to other third party
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
@@ -1345,7 +1345,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
       {
 #if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1, "sps_virtual_boundary_pos_x_minus1[i]");
-        CHECK(((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1) > (ceil(pcSPS->getMaxPicWidthInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples ÷ 8 ) - 2, inclusive.");
+        CHECK(((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1) > (ceil(pcSPS->getMaxPicWidthInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples / 8 ) - 2, inclusive.");
 #else
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3), "sps_virtual_boundaries_pos_x");
 #endif
@@ -1371,7 +1371,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
       {
 #if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1, "sps_virtual_boundary_pos_y_minus1[i]");
-        CHECK(((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1) > (ceil(pcSPS->getMaxPicHeightInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples ÷ 8 ) - 2, inclusive.");
+        CHECK(((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1) > (ceil(pcSPS->getMaxPicHeightInLumaSamples() >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples / 8 ) - 2, inclusive.");
 #else
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosY(i)>>3), "sps_virtual_boundaries_pos_y");
 #endif
@@ -1872,7 +1872,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
       {
 #if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
-        CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (ceil(pps->getPicWidthInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples ÷ 8 ) - 2, inclusive.");
+        CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (ceil(pps->getPicWidthInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
 #else
         WRITE_UVLC(picHeader->getVirtualBoundariesPosX(i) >> 3, "ph_virtual_boundaries_pos_x");
 #endif
@@ -1898,7 +1898,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
       {
 #if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((picHeader->getVirtualBoundariesPosY(i)>>3) - 1, "ph_virtual_boundary_pos_y_minus1[i]");
-        CHECK(((picHeader->getVirtualBoundariesPosY(i)>>3) - 1) > (ceil(pps->getPicHeightInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples ÷ 8 ) - 2, inclusive.");
+        CHECK(((picHeader->getVirtualBoundariesPosY(i)>>3) - 1) > (ceil(pps->getPicHeightInLumaSamples() >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples / 8 ) - 2, inclusive.");
 #else
         WRITE_UVLC(picHeader->getVirtualBoundariesPosY(i)>>3, "ph_virtual_boundaries_pos_y");
 #endif
