@@ -56,6 +56,10 @@
 
 #define JVET_R0341_GCI                                    1 // JVET-R0341: on constraint flag for local chroma QP control
 
+#define JVET_S0047_MINUS1_FOR_VB_POS                      1 // JVET-S0047: Add "_minus1" to sps_virtual_boundary_pos_x, sps_virtual_boundary_pos_y, ph_virtual_boundary_pos_x and ph_virtual_boundary_pos_y
+
+#define JVET_S0211_UEV_FOR_NUM_VB                         1 // JVET-S0211: Signal sps_num_ver_virtual_boundaries, sps_num_hor_virtual_boundaries, ph_num_ver_virtual_boundaries, and ph_num_hor_virtual_boundaries using ue(v)
+
 #define JVET_S0203                                        1 // JVET-S0203 (aspects 1 & 2): change the signalling of sublayer_level_idc[ i ] and ptl_sublayer_level_present_flag[ i ] to be in descending order
 
 #define JVET_R0227_ASPECT3                                1 // JVET-R0227 aspect 3: Rename gci_no_qp_delta_constraint_flag to gci_no_cu_qp_delta_constraint_flag 
