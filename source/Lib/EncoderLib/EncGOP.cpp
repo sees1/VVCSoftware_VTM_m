@@ -5441,13 +5441,18 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   uint32_t numOfRefPic = rpl0->getNumberOfShorttermPictures() + rpl0->getNumberOfLongtermPictures();
   uint32_t refPicIdxL0 = 0;
 
+  static_vector<int, MAX_NUM_REF_PICS> higherTLayerRefs;
+
+  higherTLayerRefs.resize(0);
   if (isIntraLayerPredAllowed)
   {
     for (int ii = 0; ii < numOfRefPic; ii++)
     {
       // loop through all pictures in the reference picture buffer
       PicList::iterator iterPic = rcListPic.begin();
-      bool isAvailable = false;
+
+      bool isAvailable  = false;
+      bool hasHigherTId = false;
 
       pocCycle = 1 << (slice->getSPS()->getBitsForPOC());
       while (iterPic != rcListPic.end())
@@ -5456,6 +5461,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
 
         if (rpcPic->layerId == pic->layerId)
         {
+          hasHigherTId = rpcPic->temporalId > pic->temporalId;
 #if JVET_S0045_SIGN
           if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
@@ -5477,11 +5483,18 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
 
       if (isAvailable)
       {
-        pLocalRPL0->setRefPicIdentifier(refPicIdxL0, rpl0->getRefPicIdentifier(ii), rpl0->isRefPicLongterm(ii), false, NOT_VALID);
-        refPicIdxL0++;
-        numOfSTRPL0 = numOfSTRPL0 + ((rpl0->isRefPicLongterm(ii)) ? 0 : 1);
-        numOfLTRPL0 += (rpl0->isRefPicLongterm(ii) && !rpl0->isInterLayerRefPic(ii)) ? 1 : 0;
-        isAvailable = false;
+        if (hasHigherTId)
+        {
+          higherTLayerRefs.push_back(ii);
+        }
+        else
+        {
+          pLocalRPL0->setRefPicIdentifier(refPicIdxL0, rpl0->getRefPicIdentifier(ii), rpl0->isRefPicLongterm(ii), false,
+                                          NOT_VALID);
+          refPicIdxL0++;
+          numOfSTRPL0 = numOfSTRPL0 + ((rpl0->isRefPicLongterm(ii)) ? 0 : 1);
+          numOfLTRPL0 += (rpl0->isRefPicLongterm(ii) && !rpl0->isInterLayerRefPic(ii)) ? 1 : 0;
+        }
       }
     }
   }
@@ -5541,6 +5554,17 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
     }
   }
 
+  // now add higher TId refs
+  for (int i = 0; i < higherTLayerRefs.size(); i++)
+  {
+    const int ii = higherTLayerRefs[i];
+    pLocalRPL0->setRefPicIdentifier(refPicIdxL0, rpl0->getRefPicIdentifier(ii), rpl0->isRefPicLongterm(ii), false,
+                                    NOT_VALID);
+    refPicIdxL0++;
+    numOfSTRPL0 = numOfSTRPL0 + ((rpl0->isRefPicLongterm(ii)) ? 0 : 1);
+    numOfLTRPL0 += (rpl0->isRefPicLongterm(ii) && !rpl0->isInterLayerRefPic(ii)) ? 1 : 0;
+  }
+
   ReferencePictureList* pLocalRPL1 = slice->getLocalRPL1();
   *pLocalRPL1 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
 
@@ -5550,19 +5574,23 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   numOfRefPic = rpl1->getNumberOfShorttermPictures() + rpl1->getNumberOfLongtermPictures();
   uint32_t refPicIdxL1 = 0;
 
+  higherTLayerRefs.resize(0);
   if (isIntraLayerPredAllowed)
   {
     for (int ii = 0; ii < numOfRefPic; ii++)
     {
       // loop through all pictures in the reference picture buffer
       PicList::iterator iterPic = rcListPic.begin();
-      bool isAvailable = false;
+
+      bool isAvailable  = false;
+      bool hasHigherTId = false;
       pocCycle = 1 << (slice->getSPS()->getBitsForPOC());
       while (iterPic != rcListPic.end())
       {
         rpcPic = *(iterPic++);
         if (rpcPic->layerId == pic->layerId)
         {
+          hasHigherTId = rpcPic->temporalId > pic->temporalId;
 #if JVET_S0045_SIGN
           if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
@@ -5584,11 +5612,18 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
 
       if (isAvailable)
       {
-        pLocalRPL1->setRefPicIdentifier(refPicIdxL1, rpl1->getRefPicIdentifier(ii), rpl1->isRefPicLongterm(ii), false, NOT_VALID);
-        refPicIdxL1++;
-        numOfSTRPL1 = numOfSTRPL1 + ((rpl1->isRefPicLongterm(ii)) ? 0 : 1);
-        numOfLTRPL1 += (rpl1->isRefPicLongterm(ii) && !rpl1->isInterLayerRefPic(ii)) ? 1 : 0;
-        isAvailable = false;
+        if (hasHigherTId)
+        {
+          higherTLayerRefs.push_back(ii);
+        }
+        else
+        {
+          pLocalRPL1->setRefPicIdentifier(refPicIdxL1, rpl1->getRefPicIdentifier(ii), rpl1->isRefPicLongterm(ii), false,
+                                          NOT_VALID);
+          refPicIdxL1++;
+          numOfSTRPL1 = numOfSTRPL1 + ((rpl1->isRefPicLongterm(ii)) ? 0 : 1);
+          numOfLTRPL1 += (rpl1->isRefPicLongterm(ii) && !rpl1->isInterLayerRefPic(ii)) ? 1 : 0;
+        }
       }
     }
   }
@@ -5618,6 +5653,17 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         }
       }
     }
+  }
+
+  // now add higher TId refs
+  for (int i = 0; i < higherTLayerRefs.size(); i++)
+  {
+    const int ii = higherTLayerRefs[i];
+    pLocalRPL1->setRefPicIdentifier(refPicIdxL1, rpl1->getRefPicIdentifier(ii), rpl1->isRefPicLongterm(ii), false,
+                                    NOT_VALID);
+    refPicIdxL1++;
+    numOfSTRPL1 = numOfSTRPL1 + ((rpl1->isRefPicLongterm(ii)) ? 0 : 1);
+    numOfLTRPL1 += (rpl1->isRefPicLongterm(ii) && !rpl1->isInterLayerRefPic(ii)) ? 1 : 0;
   }
 
   //Copy from L1 if we have less than active ref pic
