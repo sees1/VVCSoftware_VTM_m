@@ -643,7 +643,7 @@ uint32_t BitstreamExtractorApp::decode()
         // Remove NAL units with nal_unit_type not equal to any of VPS_NUT, DPS_NUT, and EOB_NUT and with nuh_layer_id not included in the list LayerIdInOls[targetOlsIdx].
         NalUnitType t = nalu.m_nalUnitType;
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
-        bool isSpecialNalTypes = t == NAL_UNIT_OPI || NAL_UNIT_VPS || t == NAL_UNIT_DCI || t == NAL_UNIT_EOB;
+        bool isSpecialNalTypes = t == NAL_UNIT_OPI || t == NAL_UNIT_VPS || t == NAL_UNIT_DCI || t == NAL_UNIT_EOB;
 #else
         bool isSpecialNalTypes = t == NAL_UNIT_VPS || t == NAL_UNIT_DCI || t == NAL_UNIT_EOB;
 #endif
