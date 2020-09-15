@@ -3102,6 +3102,9 @@ public:
 
 #if ENABLE_TRACING
 void xTraceVPSHeader();
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+void xTraceOPIHeader();
+#endif
 void xTraceDCIHeader();
 void xTraceSPSHeader();
 void xTracePPSHeader();
