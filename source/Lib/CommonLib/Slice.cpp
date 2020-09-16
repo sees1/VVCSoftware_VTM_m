@@ -421,6 +421,30 @@ Picture* Slice::xGetLongTermRefPic( PicList& rcListPic, const int poc, const boo
   return refPic;
 }
 
+Picture* Slice::xGetLongTermRefPicCandidate( PicList& rcListPic, const int poc, const bool pocHasMsb, const int layerId )
+{
+  // return a nullptr, if picture is not found (might be a short-term or a long-term)
+  Picture*  refPic = nullptr;
+  const int pocCycle = 1 << getSPS()->getBitsForPOC();
+
+  const int refPoc = pocHasMsb ? poc : (poc & (pocCycle - 1));
+
+  for ( auto &currPic : rcListPic )
+  {
+    if( currPic->getPOC() != this->getPOC() && currPic->referenced && currPic->layerId == layerId )
+    {
+      int currPicPoc = pocHasMsb ? currPic->getPOC() : (currPic->getPOC() & (pocCycle - 1));
+      if (refPoc == currPicPoc)
+      {
+        refPic = currPic;
+        break;
+      }
+    }
+  }
+
+  return refPic;
+}
+
 void Slice::setRefPOCList       ()
 {
   for (int iDir = 0; iDir < NUM_REF_PIC_LIST_01; iDir++)
@@ -496,7 +520,7 @@ void Slice::constructRefPicList(PicList& rcListPic)
       {
         ltrpPoc += getPOC() - m_localRPL0.getDeltaPocMSBCycleLT(ii) * (pocMask + 1) - (getPOC() & pocMask);
       }
-      pcRefPic = xGetLongTermRefPic( rcListPic, ltrpPoc, m_localRPL0.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
+      pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_localRPL0.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
       pcRefPic->longTerm = true;
     }
     pcRefPic->extendPicBorder( getPPS() );
@@ -536,7 +560,7 @@ void Slice::constructRefPicList(PicList& rcListPic)
       {
         ltrpPoc += getPOC() - m_localRPL1.getDeltaPocMSBCycleLT(ii) * (pocMask + 1) - (getPOC() & pocMask);
       }
-      pcRefPic = xGetLongTermRefPic( rcListPic, ltrpPoc, m_localRPL1.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
+      pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_localRPL1.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
       pcRefPic->longTerm = true;
     }
     pcRefPic->extendPicBorder( getPPS() );
