@@ -3139,13 +3139,12 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       }
 
       // explicit RPL in picture header
+      auto const rpl = picHeader->getLocalRPL( listIdx );
       if (!uiCode)
       {
-        ReferencePictureList* rpl = picHeader->getLocalRPL( listIdx );
         (*rpl) = ReferencePictureList();
         parseRefPicList(sps, rpl, -1);
         picHeader->setRPLIdx(listIdx, -1);
-        picHeader->setRPL(listIdx, rpl);
       }
       // use list from SPS
       else
@@ -3156,65 +3155,65 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
           int numBits = ceilLog2(sps->getNumRPL( listIdx ));
           READ_CODE(numBits, uiCode, "rpl_idx[i]");
           picHeader->setRPLIdx( listIdx, uiCode );
-          picHeader->setRPL( listIdx, sps->getRPLList( listIdx )->getReferencePictureList(uiCode));
+          *rpl = *sps->getRPLList( listIdx )->getReferencePictureList(uiCode);
         }
         else if (sps->getNumRPL(listIdx) == 1)
         {
           picHeader->setRPLIdx( listIdx, 0 );
-          picHeader->setRPL( listIdx, sps->getRPLList( listIdx )->getReferencePictureList(0));
+          *rpl =  *sps->getRPLList( listIdx )->getReferencePictureList(0);
         }
         else
         {
           assert(picHeader->getRPLIdx(0) != -1);
           picHeader->setRPLIdx( listIdx, picHeader->getRPLIdx(0));
-          picHeader->setRPL( listIdx, sps->getRPLList( listIdx )->getReferencePictureList(picHeader->getRPLIdx( listIdx )));
+          *rpl = *sps->getRPLList( listIdx )->getReferencePictureList(picHeader->getRPLIdx( listIdx ));
         }
       }
 
       // POC MSB cycle signalling for LTRP
-      for (int i = 0; i < picHeader->getRPL( listIdx )->getNumberOfLongtermPictures() + picHeader->getRPL( listIdx )->getNumberOfShorttermPictures(); i++)
+      for (int i = 0; i < rpl->getNumberOfLongtermPictures() + rpl->getNumberOfShorttermPictures(); i++)
       {
-        picHeader->getLocalRPL( listIdx )->setDeltaPocMSBPresentFlag(i, false);
-        picHeader->getLocalRPL( listIdx )->setDeltaPocMSBCycleLT(i, 0);
+        rpl->setDeltaPocMSBPresentFlag(i, false);
+        rpl->setDeltaPocMSBCycleLT(i, 0);
       }
-      if (picHeader->getRPL( listIdx )->getNumberOfLongtermPictures())
+      if (rpl->getNumberOfLongtermPictures())
       {
-        for (int i = 0; i < picHeader->getRPL( listIdx )->getNumberOfLongtermPictures() + picHeader->getRPL( listIdx )->getNumberOfShorttermPictures(); i++)
+        for (int i = 0; i < rpl->getNumberOfLongtermPictures() + rpl->getNumberOfShorttermPictures(); i++)
         {
-          if (picHeader->getRPL( listIdx )->isRefPicLongterm(i))
+          if (rpl->isRefPicLongterm(i))
           {
-            if (picHeader->getRPL( listIdx )->getLtrpInSliceHeaderFlag())
+            if (rpl->getLtrpInSliceHeaderFlag())
             {
               READ_CODE(sps->getBitsForPOC(), uiCode, "poc_lsb_lt[i][j]");
-              picHeader->getLocalRPL( listIdx )->setRefPicIdentifier( i, uiCode, true, false, 0 );
+              rpl->setRefPicIdentifier( i, uiCode, true, false, 0 );
             }
             READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
-            picHeader->getLocalRPL( listIdx )->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
+            rpl->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
             if (uiCode)
             {
               READ_UVLC(uiCode, "delta_poc_msb_cycle_lt[i][j]");
               if(i != 0)
               {
-                uiCode += picHeader->getLocalRPL( listIdx )->getDeltaPocMSBCycleLT(i-1);
+                uiCode += rpl->getDeltaPocMSBCycleLT(i-1);
               }
-              picHeader->getLocalRPL( listIdx )->setDeltaPocMSBCycleLT(i, uiCode);
+              rpl->setDeltaPocMSBCycleLT(i, uiCode);
             }
             else if(i != 0)
             {
-              picHeader->getLocalRPL( listIdx )->setDeltaPocMSBCycleLT(i, picHeader->getLocalRPL( listIdx )->getDeltaPocMSBCycleLT(i-1));
+              rpl->setDeltaPocMSBCycleLT(i, rpl->getDeltaPocMSBCycleLT(i-1));
             }
             else
             {
-              picHeader->getLocalRPL( listIdx )->setDeltaPocMSBCycleLT(i,0);
+              rpl->setDeltaPocMSBCycleLT(i,0);
             }
           }
           else if(i != 0)
           {
-            picHeader->getLocalRPL( listIdx )->setDeltaPocMSBCycleLT(i, picHeader->getLocalRPL( listIdx )->getDeltaPocMSBCycleLT(i-1));
+            rpl->setDeltaPocMSBCycleLT(i, rpl->getDeltaPocMSBCycleLT(i-1));
           }
           else
           {
-            picHeader->getLocalRPL( listIdx )->setDeltaPocMSBCycleLT(i,0);
+            rpl->setDeltaPocMSBCycleLT(i,0);
           }
         }
       }
@@ -4036,8 +4035,6 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 #endif
     if( pps->getRplInfoInPhFlag() )
     {
-      pcSlice->setRPL0(picHeader->getRPL0());
-      pcSlice->setRPL1(picHeader->getRPL1());
       *pcSlice->getLocalRPL0() = *picHeader->getLocalRPL0();
       *pcSlice->getLocalRPL1() = *picHeader->getLocalRPL1();
     }
@@ -4045,10 +4042,8 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     {
       ReferencePictureList* rpl0 = pcSlice->getLocalRPL0();
       (*rpl0) = ReferencePictureList();
-      pcSlice->setRPL0(rpl0);
       ReferencePictureList* rpl1 = pcSlice->getLocalRPL1();
       (*rpl1) = ReferencePictureList();
-      pcSlice->setRPL1(rpl1);
     }
     else
     {
@@ -4066,13 +4061,12 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 
       rplSpsFlag0 = uiCode;
 
+      auto const rpl0 = pcSlice->getLocalRPL0();
       if (!uiCode) //explicitly carried in this SH
       {
-        ReferencePictureList* rpl0 = pcSlice->getLocalRPL0();
         (*rpl0) = ReferencePictureList();
         parseRefPicList(sps, rpl0, -1);
         pcSlice->setRPL0idx(-1);
-        pcSlice->setRPL0(rpl0);
       }
       else    //Refer to list in SPS
       {
@@ -4081,58 +4075,58 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
           int numBits = ceilLog2(sps->getNumRPL0());
           READ_CODE(numBits, uiCode, "ref_pic_list_idx[0]");
           pcSlice->setRPL0idx(uiCode);
-          pcSlice->setRPL0(sps->getRPLList0()->getReferencePictureList(uiCode));
+          *rpl0 = *sps->getRPLList0()->getReferencePictureList(uiCode);
         }
         else
         {
           pcSlice->setRPL0idx(0);
-          pcSlice->setRPL0(sps->getRPLList0()->getReferencePictureList(0));
+          *rpl0 = *sps->getRPLList0()->getReferencePictureList(0);
         }
       }
       //Deal POC Msb cycle signalling for LTRP
-      for (int i = 0; i < pcSlice->getRPL0()->getNumberOfLongtermPictures() + pcSlice->getRPL0()->getNumberOfShorttermPictures(); i++)
+      for (int i = 0; i < rpl0->getNumberOfLongtermPictures() + rpl0->getNumberOfShorttermPictures(); i++)
       {
-        pcSlice->getLocalRPL0()->setDeltaPocMSBPresentFlag(i, false);
-        pcSlice->getLocalRPL0()->setDeltaPocMSBCycleLT(i, 0);
+        rpl0->setDeltaPocMSBPresentFlag(i, false);
+        rpl0->setDeltaPocMSBCycleLT(i, 0);
       }
-      if (pcSlice->getRPL0()->getNumberOfLongtermPictures())
+      if (rpl0->getNumberOfLongtermPictures())
       {
-        for (int i = 0; i < pcSlice->getRPL0()->getNumberOfLongtermPictures() + pcSlice->getRPL0()->getNumberOfShorttermPictures(); i++)
+        for (int i = 0; i < rpl0->getNumberOfLongtermPictures() + rpl0->getNumberOfShorttermPictures(); i++)
         {
-          if (pcSlice->getRPL0()->isRefPicLongterm(i))
+          if (rpl0->isRefPicLongterm(i))
           {
-            if (pcSlice->getRPL0()->getLtrpInSliceHeaderFlag())
+            if (rpl0->getLtrpInSliceHeaderFlag())
             {
               READ_CODE(sps->getBitsForPOC(), uiCode, "slice_poc_lsb_lt[i][j]");
-              pcSlice->getLocalRPL0()->setRefPicIdentifier( i, uiCode, true, false, 0 );
+              rpl0->setRefPicIdentifier( i, uiCode, true, false, 0 );
             }
             READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
-            pcSlice->getLocalRPL0()->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
+            rpl0->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
             if (uiCode)
             {
               READ_UVLC(uiCode, "slice_delta_poc_msb_cycle_lt[i][j]");
               if(i != 0)
               {
-                uiCode += pcSlice->getLocalRPL0()->getDeltaPocMSBCycleLT(i-1);
+                uiCode += rpl0->getDeltaPocMSBCycleLT(i-1);
               }
-              pcSlice->getLocalRPL0()->setDeltaPocMSBCycleLT(i, uiCode);
+              rpl0->setDeltaPocMSBCycleLT(i, uiCode);
             }
             else if(i != 0)
             {
-              pcSlice->getLocalRPL0()->setDeltaPocMSBCycleLT(i, pcSlice->getLocalRPL0()->getDeltaPocMSBCycleLT(i-1));
+              rpl0->setDeltaPocMSBCycleLT(i, rpl0->getDeltaPocMSBCycleLT(i-1));
             }
             else
             {
-              pcSlice->getLocalRPL0()->setDeltaPocMSBCycleLT(i,0);
+              rpl0->setDeltaPocMSBCycleLT(i,0);
             }
           }
           else if(i != 0)
           {
-            pcSlice->getLocalRPL0()->setDeltaPocMSBCycleLT(i, pcSlice->getLocalRPL0()->getDeltaPocMSBCycleLT(i-1));
+            rpl0->setDeltaPocMSBCycleLT(i, rpl0->getDeltaPocMSBCycleLT(i-1));
           }
           else
           {
-            pcSlice->getLocalRPL0()->setDeltaPocMSBCycleLT(i,0);
+            rpl0->setDeltaPocMSBCycleLT(i,0);
           }
         }
       }
@@ -4151,80 +4145,77 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
         uiCode = rplSpsFlag0;
       }
 
+      auto const rpl1 = pcSlice->getLocalRPL1();
       if (uiCode == 1)
       {
         if (sps->getNumRPL(1) > 1 && pps->getRpl1IdxPresentFlag())
         {
           int numBits = ceilLog2(sps->getNumRPL1());
           READ_CODE(numBits, uiCode, "ref_pic_list_idx[1]");
-          pcSlice->setRPL1idx(uiCode);
-          pcSlice->setRPL1(sps->getRPLList1()->getReferencePictureList(uiCode));
+          *rpl1 = *sps->getRPLList1()->getReferencePictureList(uiCode);
         }
         else if (sps->getNumRPL(1) == 1)
         {
-          pcSlice->setRPL1idx(0);
-          pcSlice->setRPL1(sps->getRPLList1()->getReferencePictureList(0));
+          *rpl1 = *sps->getRPLList1()->getReferencePictureList(0);
         }
         else
         {
           assert(pcSlice->getRPL0idx() != -1);
           pcSlice->setRPL1idx(pcSlice->getRPL0idx());
-          pcSlice->setRPL1(sps->getRPLList1()->getReferencePictureList(pcSlice->getRPL0idx()));
+          *rpl1 = *sps->getRPLList1()->getReferencePictureList(pcSlice->getRPL0idx());
         }
       }
       else
       {
-        ReferencePictureList* rpl1 = pcSlice->getLocalRPL1();
         (*rpl1) = ReferencePictureList();
         parseRefPicList(sps, rpl1, -1);
         pcSlice->setRPL1idx(-1);
-        pcSlice->setRPL1(rpl1);
       }
 
       //Deal POC Msb cycle signalling for LTRP
-      for (int i = 0; i < pcSlice->getRPL1()->getNumberOfLongtermPictures() + pcSlice->getRPL1()->getNumberOfShorttermPictures(); i++)
+      for (int i = 0; i < rpl1->getNumberOfLongtermPictures() + rpl1->getNumberOfShorttermPictures(); i++)
       {
-        pcSlice->getLocalRPL1()->setDeltaPocMSBPresentFlag(i, false);
-        pcSlice->getLocalRPL1()->setDeltaPocMSBCycleLT(i, 0);
+        rpl1->setDeltaPocMSBPresentFlag(i, false);
+        rpl1->setDeltaPocMSBCycleLT(i, 0);
       }
-      if (pcSlice->getRPL1()->getNumberOfLongtermPictures())
+      if (rpl1->getNumberOfLongtermPictures())
       {
-        for (int i = 0; i < pcSlice->getRPL1()->getNumberOfLongtermPictures() + pcSlice->getRPL1()->getNumberOfShorttermPictures(); i++)
+        for (int i = 0; i < rpl1->getNumberOfLongtermPictures() + rpl1->getNumberOfShorttermPictures(); i++)
         {
-          if (pcSlice->getRPL1()->isRefPicLongterm(i))
+          if (rpl1->isRefPicLongterm(i))
           {
-            if (pcSlice->getRPL1()->getLtrpInSliceHeaderFlag())
+            if (rpl1->getLtrpInSliceHeaderFlag())
             {
               READ_CODE(sps->getBitsForPOC(), uiCode, "slice_poc_lsb_lt[i][j]");
-              pcSlice->getLocalRPL1()->setRefPicIdentifier( i, uiCode, true, false, 0 );
+              rpl1->setRefPicIdentifier( i, uiCode, true, false, 0 );
             }
             READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
-            pcSlice->getLocalRPL1()->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
+            rpl1->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
             if (uiCode)
             {
               READ_UVLC(uiCode, "slice_delta_poc_msb_cycle_lt[i][j]");
               if(i != 0)
               {
-                uiCode += pcSlice->getLocalRPL1()->getDeltaPocMSBCycleLT(i-1);
+                uiCode += rpl1->getDeltaPocMSBCycleLT(i-1);
               }
-              pcSlice->getLocalRPL1()->setDeltaPocMSBCycleLT(i, uiCode);
+              rpl1->setDeltaPocMSBCycleLT(i, uiCode);
             }
             else if(i != 0)
             {
-              pcSlice->getLocalRPL1()->setDeltaPocMSBCycleLT(i, pcSlice->getLocalRPL1()->getDeltaPocMSBCycleLT(i-1));
+              rpl1->setDeltaPocMSBCycleLT(i, rpl1->getDeltaPocMSBCycleLT(i-1));
             }
             else
             {
-              pcSlice->getLocalRPL1()->setDeltaPocMSBCycleLT(i,0);
+              rpl1->setDeltaPocMSBCycleLT(i,0);
             }
           }
           else if(i != 0)
           {
-            pcSlice->getLocalRPL1()->setDeltaPocMSBCycleLT(i, pcSlice->getLocalRPL1()->getDeltaPocMSBCycleLT(i-1));
+            rpl1->setDeltaPocMSBCycleLT(i, rpl1->getDeltaPocMSBCycleLT(i-1));
           }
           else
           {
-            pcSlice->getLocalRPL1()->setDeltaPocMSBCycleLT(i,0);
+            rpl1->setDeltaPocMSBCycleLT(i,0);
           }
         }
       }

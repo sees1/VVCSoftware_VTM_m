@@ -3334,8 +3334,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         }
         m_pcSliceEncoder->setSliceSegmentIdx(sliceSegmentIdxCount);
 
-        pcSlice->setRPL0(pcPic->slices[0]->getRPL0());
-        pcSlice->setRPL1(pcPic->slices[0]->getRPL1());
+        *pcSlice->getLocalRPL0() = *pcPic->slices[0]->getRPL0();
+        *pcSlice->getLocalRPL1() = *pcPic->slices[0]->getRPL1();
         pcSlice->setRPL0idx(pcPic->slices[0]->getRPL0idx());
         pcSlice->setRPL1idx(pcPic->slices[0]->getRPL1idx());
 
@@ -3369,8 +3369,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           {
             picHeader->setRPL0idx(pcSlice->getRPL0idx());
             picHeader->setRPL1idx(pcSlice->getRPL1idx());
-            picHeader->setRPL0(pcSlice->getRPL0());
-            picHeader->setRPL1(pcSlice->getRPL1());
             *picHeader->getLocalRPL0() = *pcSlice->getLocalRPL0();
             *picHeader->getLocalRPL1() = *pcSlice->getLocalRPL1();
           }
@@ -5432,8 +5430,9 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   int layerIdx = vps == nullptr ? 0 : vps->getGeneralLayerIdx( pic->layerId );
   bool isIntraLayerPredAllowed = (vps->getIndependentLayerFlag(layerIdx) || (vps->getPredDirection(slice->getTLayer()) != 1)) && !slice->isIRAP();
   bool isInterLayerPredAllowed = !vps->getIndependentLayerFlag(layerIdx) && (vps->getPredDirection(slice->getTLayer()) != 2);
-  ReferencePictureList* pLocalRPL0 = slice->getLocalRPL0();
-  *pLocalRPL0 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
+
+  auto localRPL0 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
+  auto const pLocalRPL0 = &localRPL0;
 
   uint32_t numOfSTRPL0 = 0;
   uint32_t numOfLTRPL0 = 0;
@@ -5565,8 +5564,8 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
     numOfLTRPL0 += (rpl0->isRefPicLongterm(ii) && !rpl0->isInterLayerRefPic(ii)) ? 1 : 0;
   }
 
-  ReferencePictureList* pLocalRPL1 = slice->getLocalRPL1();
-  *pLocalRPL1 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
+  auto localRPL1 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
+  auto const pLocalRPL1 = &localRPL1;
 
   uint32_t numOfSTRPL1 = 0;
   uint32_t numOfLTRPL1 = 0;
@@ -5712,7 +5711,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL0->setNumberOfActivePictures( ( numPics < rpl0->getNumberOfActivePictures() ? numPics : rpl0->getNumberOfActivePictures() ) + numOfILRPL0 );
   pLocalRPL0->setLtrpInSliceHeaderFlag( 1 );
   slice->setRPL0idx( -1 );
-  slice->setRPL0( pLocalRPL0 );
+  *slice->getLocalRPL0() = *pLocalRPL0;
 
   //Copy from L0 if we have less than active ref pic
   numOfNeedToFill = pLocalRPL0->getNumberOfActivePictures() - ( numOfLTRPL1 + numOfSTRPL1 );
@@ -5756,6 +5755,6 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL1->setNumberOfActivePictures( ( isDisallowMixedRefPic ? numPics : ( numPics < rpl1->getNumberOfActivePictures() ? numPics : rpl1->getNumberOfActivePictures() ) ) + numOfILRPL1 );
   pLocalRPL1->setLtrpInSliceHeaderFlag( 1 );
   slice->setRPL1idx( -1 );
-  slice->setRPL1( pLocalRPL1 );
+  *slice->getLocalRPL1() = *pLocalRPL1;
 }
 //! \}
