@@ -622,7 +622,7 @@ void Slice::checkCRA(const ReferencePictureList* pRPL0, const ReferencePictureLi
         CHECK(getPOC() - pRPL0->getRefPicIdentifier(i) < pocCRA, "Invalid state");
 #endif
       }
-      else
+      else if (!pRPL0->isInterLayerRefPic(i))
       {
         int pocBits = getSPS()->getBitsForPOC();
         int pocMask = (1 << pocBits) - 1;
@@ -631,7 +631,10 @@ void Slice::checkCRA(const ReferencePictureList* pRPL0, const ReferencePictureLi
         {
           ltrpPoc += getPOC() - pRPL0->getDeltaPocMSBCycleLT(i) * (pocMask + 1) - (getPOC() & pocMask);
         }
-        CHECK( xGetLongTermRefPic( rcListPic, ltrpPoc, pRPL0->getDeltaPocMSBPresentFlag( i ), m_pcPic->layerId )->getPOC() < pocCRA, "Invalid state" );
+        const Picture *ltrp =
+          xGetLongTermRefPic(rcListPic, ltrpPoc, pRPL0->getDeltaPocMSBPresentFlag(i), m_pcPic->layerId);
+        CHECK(ltrp == nullptr, "Long-term pic not found");
+        CHECK(ltrp->getPOC() < pocCRA, "Invalid state");
       }
     }
     numRefPic = pRPL1->getNumberOfShorttermPictures() + pRPL1->getNumberOfLongtermPictures();
@@ -654,7 +657,10 @@ void Slice::checkCRA(const ReferencePictureList* pRPL0, const ReferencePictureLi
         {
           ltrpPoc += getPOC() - pRPL1->getDeltaPocMSBCycleLT(i) * (pocMask + 1) - (getPOC() & pocMask);
         }
-        CHECK( xGetLongTermRefPic( rcListPic, ltrpPoc, pRPL1->getDeltaPocMSBPresentFlag( i ), m_pcPic->layerId )->getPOC() < pocCRA, "Invalid state" );
+        const Picture *ltrp =
+          xGetLongTermRefPic(rcListPic, ltrpPoc, pRPL1->getDeltaPocMSBPresentFlag(i), m_pcPic->layerId);
+        CHECK(ltrp == nullptr, "Long-term pic not found");
+        CHECK(ltrp->getPOC() < pocCRA, "Invalid state");
       }
     }
   }
