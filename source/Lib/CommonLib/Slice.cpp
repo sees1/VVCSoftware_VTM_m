@@ -482,7 +482,7 @@ void Slice::constructRefPicList(PicList& rcListPic)
   numOfActiveRef = getNumRefIdx(REF_PIC_LIST_0);
   int layerIdx = m_pcPic->cs->vps == nullptr ? 0 : m_pcPic->cs->vps->getGeneralLayerIdx( m_pcPic->layerId );
 
-  for (int ii = 0; ii < numOfActiveRef; ii++)
+  for (int ii = 0; ii < m_localRPL0.getNumRefEntries(); ii++)
   {
     if( m_localRPL0.isInterLayerRefPic( ii ) )
     {
@@ -515,14 +515,17 @@ void Slice::constructRefPicList(PicList& rcListPic)
       pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_localRPL0.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
       pcRefPic->longTerm = true;
     }
-    pcRefPic->extendPicBorder( getPPS() );
-    m_apcRefPicList[REF_PIC_LIST_0][ii] = pcRefPic;
-    m_bIsUsedAsLongTerm[REF_PIC_LIST_0][ii] = pcRefPic->longTerm;
+    if(ii < numOfActiveRef)
+    {
+      pcRefPic->extendPicBorder( getPPS() );
+      m_apcRefPicList[REF_PIC_LIST_0][ii] = pcRefPic;
+      m_bIsUsedAsLongTerm[REF_PIC_LIST_0][ii] = pcRefPic->longTerm;
+    }
   }
 
   //construct L1
   numOfActiveRef = getNumRefIdx(REF_PIC_LIST_1);
-  for (int ii = 0; ii < numOfActiveRef; ii++)
+  for (int ii = 0; ii < m_localRPL1.getNumRefEntries(); ii++)
   {
     if( m_localRPL1.isInterLayerRefPic( ii ) )
     {
@@ -555,9 +558,12 @@ void Slice::constructRefPicList(PicList& rcListPic)
       pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_localRPL1.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
       pcRefPic->longTerm = true;
     }
-    pcRefPic->extendPicBorder( getPPS() );
-    m_apcRefPicList[REF_PIC_LIST_1][ii] = pcRefPic;
-    m_bIsUsedAsLongTerm[REF_PIC_LIST_1][ii] = pcRefPic->longTerm;
+    if(ii < numOfActiveRef)
+    {
+      pcRefPic->extendPicBorder( getPPS() );
+      m_apcRefPicList[REF_PIC_LIST_1][ii] = pcRefPic;
+      m_bIsUsedAsLongTerm[REF_PIC_LIST_1][ii] = pcRefPic->longTerm;
+    }
   }
 }
 
