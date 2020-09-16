@@ -2577,7 +2577,8 @@ std::vector<int> EncAdaptiveLoopFilter::getAvaiApsIdsLuma(CodingStructure& cs, i
   int apsIdChecked = 0, curApsId = m_apsIdStart;
   if (curApsId < ALF_CTB_MAX_NUM_APS)
   {
-    while (apsIdChecked < ALF_CTB_MAX_NUM_APS && !cs.slice->isIntra() && result.size() < ALF_CTB_MAX_NUM_APS && !cs.slice->getPendingRasInit() && !cs.slice->isIDRorBLA())
+    while (apsIdChecked < ALF_CTB_MAX_NUM_APS && !cs.slice->isIRAP() && result.size() < ALF_CTB_MAX_NUM_APS
+           && !cs.slice->getPendingRasInit())
     {
       APS* curAPS = cs.slice->getAlfAPSs()[curApsId];
 
@@ -2957,25 +2958,22 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
     }
     for (int curApsId = 0; curApsId < ALF_CTB_MAX_NUM_APS; curApsId++)
     {
-      if ((cs.slice->getPendingRasInit() || cs.slice->isIDRorBLA() || cs.slice->isIntra())
-          && curApsId != newApsIdChroma)
+      const bool reuseExistingAPS = curApsId != newApsIdChroma;
+
+      if ((cs.slice->getPendingRasInit() || cs.slice->isIRAP()) && reuseExistingAPS)
       {
         continue;
       }
       APS *curAPS = m_apsMap->getPS((curApsId << NUM_APS_TYPE_LEN) + ALF_APS);
 
-      if (curAPS && curAPS->getLayerId() != cs.slice->getPic()->layerId)
-      {
-        continue;
-      }
-
       double curCost = m_lambda[CHANNEL_TYPE_CHROMA] * 3;
-      if (curApsId == newApsIdChroma)
+      if (!reuseExistingAPS)
       {
         m_alfParamTemp = alfParamNewFilters;
         curCost += m_lambda[CHANNEL_TYPE_CHROMA] * m_bitsNewFilter[CHANNEL_TYPE_CHROMA];
       }
       else if (curAPS && curAPS->getTemporalId() <= cs.slice->getTLayer()
+               && curAPS->getLayerId() == cs.slice->getPic()->layerId
                && curAPS->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_CHROMA])
       {
         m_alfParamTemp = curAPS->getAlfAPSParam();
@@ -3620,7 +3618,8 @@ std::vector<int> EncAdaptiveLoopFilter::getAvailableCcAlfApsIds(CodingStructure&
   int apsIdChecked = 0, curApsId = m_apsIdStart;
   if (curApsId < ALF_CTB_MAX_NUM_APS)
   {
-    while (apsIdChecked < ALF_CTB_MAX_NUM_APS && !cs.slice->isIntra() && result.size() < ALF_CTB_MAX_NUM_APS && !cs.slice->getPendingRasInit() && !cs.slice->isIDRorBLA())
+    while (apsIdChecked < ALF_CTB_MAX_NUM_APS && !cs.slice->isIRAP() && result.size() < ALF_CTB_MAX_NUM_APS
+           && !cs.slice->getPendingRasInit())
     {
       APS* curAPS = cs.slice->getAlfAPSs()[curApsId];
       if (curAPS && curAPS->getLayerId() == cs.slice->getPic()->layerId
