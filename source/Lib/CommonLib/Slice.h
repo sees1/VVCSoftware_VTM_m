@@ -3205,6 +3205,7 @@ public:
 protected:
   Picture*              xGetRefPic( PicList& rcListPic, const int poc, const int layerId );
   Picture*              xGetLongTermRefPic( PicList& rcListPic, const int poc, const bool pocHasMsb, const int layerId );
+  Picture*              xGetLongTermRefPicCandidate( PicList& rcListPic, const int poc, const bool pocHasMsb, const int layerId );
 public:
   std::unordered_map< Position, std::unordered_map< Size, double> > m_mapPltCost[2];
 private:
