@@ -3334,8 +3334,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         }
         m_pcSliceEncoder->setSliceSegmentIdx(sliceSegmentIdxCount);
 
-        *pcSlice->getLocalRPL0() = *pcPic->slices[0]->getRPL0();
-        *pcSlice->getLocalRPL1() = *pcPic->slices[0]->getRPL1();
+        *pcSlice->getRPL0() = *pcPic->slices[0]->getRPL0();
+        *pcSlice->getRPL1() = *pcPic->slices[0]->getRPL1();
         pcSlice->setRPL0idx(pcPic->slices[0]->getRPL0idx());
         pcSlice->setRPL1idx(pcPic->slices[0]->getRPL1idx());
 
@@ -3369,8 +3369,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           {
             picHeader->setRPL0idx(pcSlice->getRPL0idx());
             picHeader->setRPL1idx(pcSlice->getRPL1idx());
-            *picHeader->getLocalRPL0() = *pcSlice->getLocalRPL0();
-            *picHeader->getLocalRPL1() = *pcSlice->getLocalRPL1();
+            *picHeader->getRPL0() = *pcSlice->getRPL0();
+            *picHeader->getRPL1() = *pcSlice->getRPL1();
           }
 
           // code DBLK in picture header or slice headers
@@ -5711,7 +5711,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL0->setNumberOfActivePictures( ( numPics < rpl0->getNumberOfActivePictures() ? numPics : rpl0->getNumberOfActivePictures() ) + numOfILRPL0 );
   pLocalRPL0->setLtrpInSliceHeaderFlag( 1 );
   slice->setRPL0idx( -1 );
-  *slice->getLocalRPL0() = *pLocalRPL0;
+  *slice->getRPL0() = localRPL0;
 
   //Copy from L0 if we have less than active ref pic
   numOfNeedToFill = pLocalRPL0->getNumberOfActivePictures() - ( numOfLTRPL1 + numOfSTRPL1 );
@@ -5755,6 +5755,6 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL1->setNumberOfActivePictures( ( isDisallowMixedRefPic ? numPics : ( numPics < rpl1->getNumberOfActivePictures() ? numPics : rpl1->getNumberOfActivePictures() ) ) + numOfILRPL1 );
   pLocalRPL1->setLtrpInSliceHeaderFlag( 1 );
   slice->setRPL1idx( -1 );
-  *slice->getLocalRPL1() = *pLocalRPL1;
+  *slice->getRPL1() = localRPL1;
 }
 //! \}

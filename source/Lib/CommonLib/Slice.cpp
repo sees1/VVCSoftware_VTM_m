@@ -213,17 +213,17 @@ void Slice::inheritFromPicHeader( PicHeader *picHeader, const PPS *pps, const SP
   if (pps->getRplInfoInPhFlag())
   {
     setRPL0idx( picHeader->getRPL0idx() );
-    *getLocalRPL0() = *picHeader->getLocalRPL0();
+    m_RPL0 = *picHeader->getRPL0();
     if(getRPL0idx() != -1)
     {
-      *getLocalRPL0() = *sps->getRPLList0()->getReferencePictureList(getRPL0idx());
+      m_RPL0 = *sps->getRPLList0()->getReferencePictureList(getRPL0idx());
     }
 
     setRPL1idx( picHeader->getRPL1idx() );
-    *getLocalRPL1() = *picHeader->getLocalRPL1();
+    m_RPL1 = *picHeader->getRPL1();
     if(getRPL1idx() != -1)
     {
-      *getLocalRPL1() = *sps->getRPLList1()->getReferencePictureList(getRPL1idx());
+      m_RPL1 = *sps->getRPLList1()->getReferencePictureList(getRPL1idx());
     }
   }
 
@@ -482,24 +482,24 @@ void Slice::constructRefPicList(PicList& rcListPic)
   numOfActiveRef = getNumRefIdx(REF_PIC_LIST_0);
   int layerIdx = m_pcPic->cs->vps == nullptr ? 0 : m_pcPic->cs->vps->getGeneralLayerIdx( m_pcPic->layerId );
 
-  for (int ii = 0; ii < m_localRPL0.getNumRefEntries(); ii++)
+  for (int ii = 0; ii < m_RPL0.getNumRefEntries(); ii++)
   {
-    if( m_localRPL0.isInterLayerRefPic( ii ) )
+    if( m_RPL0.isInterLayerRefPic( ii ) )
     {
-      CHECK( m_localRPL0.getInterLayerRefPicIdx( ii ) == NOT_VALID, "Wrong ILRP index" );
+      CHECK( m_RPL0.getInterLayerRefPicIdx( ii ) == NOT_VALID, "Wrong ILRP index" );
 
-      int refLayerId = m_pcPic->cs->vps->getLayerId( m_pcPic->cs->vps->getDirectRefLayerIdx( layerIdx, m_localRPL0.getInterLayerRefPicIdx( ii ) ) );
+      int refLayerId = m_pcPic->cs->vps->getLayerId( m_pcPic->cs->vps->getDirectRefLayerIdx( layerIdx, m_RPL0.getInterLayerRefPicIdx( ii ) ) );
 
       pcRefPic = xGetRefPic( rcListPic, getPOC(), refLayerId );
       pcRefPic->longTerm = true;
     }
     else
-    if (!m_localRPL0.isRefPicLongterm(ii))
+    if (!m_RPL0.isRefPicLongterm(ii))
     {
 #if JVET_S0045_SIGN
-      pcRefPic = xGetRefPic(rcListPic, getPOC() + m_localRPL0.getRefPicIdentifier(ii), m_pcPic->layerId);
+      pcRefPic = xGetRefPic(rcListPic, getPOC() + m_RPL0.getRefPicIdentifier(ii), m_pcPic->layerId);
 #else
-      pcRefPic = xGetRefPic( rcListPic, getPOC() - m_localRPL0.getRefPicIdentifier( ii ), m_pcPic->layerId );
+      pcRefPic = xGetRefPic( rcListPic, getPOC() - m_RPL0.getRefPicIdentifier( ii ), m_pcPic->layerId );
 #endif
       pcRefPic->longTerm = false;
     }
@@ -507,12 +507,12 @@ void Slice::constructRefPicList(PicList& rcListPic)
     {
       int pocBits = getSPS()->getBitsForPOC();
       int pocMask = (1 << pocBits) - 1;
-      int ltrpPoc = m_localRPL0.getRefPicIdentifier(ii) & pocMask;
-      if(m_localRPL0.getDeltaPocMSBPresentFlag(ii))
+      int ltrpPoc = m_RPL0.getRefPicIdentifier(ii) & pocMask;
+      if(m_RPL0.getDeltaPocMSBPresentFlag(ii))
       {
-        ltrpPoc += getPOC() - m_localRPL0.getDeltaPocMSBCycleLT(ii) * (pocMask + 1) - (getPOC() & pocMask);
+        ltrpPoc += getPOC() - m_RPL0.getDeltaPocMSBCycleLT(ii) * (pocMask + 1) - (getPOC() & pocMask);
       }
-      pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_localRPL0.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
+      pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_RPL0.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
       pcRefPic->longTerm = true;
     }
     if(ii < numOfActiveRef)
@@ -525,24 +525,24 @@ void Slice::constructRefPicList(PicList& rcListPic)
 
   //construct L1
   numOfActiveRef = getNumRefIdx(REF_PIC_LIST_1);
-  for (int ii = 0; ii < m_localRPL1.getNumRefEntries(); ii++)
+  for (int ii = 0; ii < m_RPL1.getNumRefEntries(); ii++)
   {
-    if( m_localRPL1.isInterLayerRefPic( ii ) )
+    if( m_RPL1.isInterLayerRefPic( ii ) )
     {
-      CHECK( m_localRPL1.getInterLayerRefPicIdx( ii ) == NOT_VALID, "Wrong ILRP index" );
+      CHECK( m_RPL1.getInterLayerRefPicIdx( ii ) == NOT_VALID, "Wrong ILRP index" );
 
-      int refLayerId = m_pcPic->cs->vps->getLayerId( m_pcPic->cs->vps->getDirectRefLayerIdx( layerIdx, m_localRPL1.getInterLayerRefPicIdx( ii ) ) );
+      int refLayerId = m_pcPic->cs->vps->getLayerId( m_pcPic->cs->vps->getDirectRefLayerIdx( layerIdx, m_RPL1.getInterLayerRefPicIdx( ii ) ) );
 
       pcRefPic = xGetRefPic( rcListPic, getPOC(), refLayerId );
       pcRefPic->longTerm = true;
     }
     else
-    if (!m_localRPL1.isRefPicLongterm(ii))
+    if (!m_RPL1.isRefPicLongterm(ii))
     {
 #if JVET_S0045_SIGN
-      pcRefPic = xGetRefPic(rcListPic, getPOC() + m_localRPL1.getRefPicIdentifier(ii), m_pcPic->layerId);
+      pcRefPic = xGetRefPic(rcListPic, getPOC() + m_RPL1.getRefPicIdentifier(ii), m_pcPic->layerId);
 #else
-      pcRefPic = xGetRefPic( rcListPic, getPOC() - m_localRPL1.getRefPicIdentifier( ii ), m_pcPic->layerId );
+      pcRefPic = xGetRefPic( rcListPic, getPOC() - m_RPL1.getRefPicIdentifier( ii ), m_pcPic->layerId );
 #endif
       pcRefPic->longTerm = false;
     }
@@ -550,12 +550,12 @@ void Slice::constructRefPicList(PicList& rcListPic)
     {
       int pocBits = getSPS()->getBitsForPOC();
       int pocMask = (1 << pocBits) - 1;
-      int ltrpPoc = m_localRPL1.getRefPicIdentifier(ii) & pocMask;
-      if(m_localRPL1.getDeltaPocMSBPresentFlag(ii))
+      int ltrpPoc = m_RPL1.getRefPicIdentifier(ii) & pocMask;
+      if(m_RPL1.getDeltaPocMSBPresentFlag(ii))
       {
-        ltrpPoc += getPOC() - m_localRPL1.getDeltaPocMSBCycleLT(ii) * (pocMask + 1) - (getPOC() & pocMask);
+        ltrpPoc += getPOC() - m_RPL1.getDeltaPocMSBCycleLT(ii) * (pocMask + 1) - (getPOC() & pocMask);
       }
-      pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_localRPL1.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
+      pcRefPic = xGetLongTermRefPicCandidate( rcListPic, ltrpPoc, m_RPL1.getDeltaPocMSBPresentFlag( ii ), m_pcPic->layerId );
       pcRefPic->longTerm = true;
     }
     if(ii < numOfActiveRef)
@@ -1137,8 +1137,8 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   if( cpyAlmostAll ) m_iDepth = pSrc->m_iDepth;
 
   // access channel
-  if (cpyAlmostAll) m_localRPL0 = pSrc->m_localRPL0;
-  if (cpyAlmostAll) m_localRPL1 = pSrc->m_localRPL1;
+  if (cpyAlmostAll) m_RPL0 = pSrc->m_RPL0;
+  if (cpyAlmostAll) m_RPL1 = pSrc->m_RPL1;
   m_iLastIDR             = pSrc->m_iLastIDR;
 
   if( cpyAlmostAll ) m_pcPic  = pSrc->m_pcPic;
@@ -2815,17 +2815,17 @@ PicHeader::PicHeader()
   memset(m_maxBTSize,                               0,    sizeof(m_maxBTSize));
   memset(m_maxTTSize,                               0,    sizeof(m_maxTTSize));
 
-  m_localRPL0.setNumberOfActivePictures(0);
-  m_localRPL0.setNumberOfShorttermPictures(0);
-  m_localRPL0.setNumberOfLongtermPictures(0);
-  m_localRPL0.setLtrpInSliceHeaderFlag(0);
-  m_localRPL0.setNumberOfInterLayerPictures( 0 );
+  m_RPL0.setNumberOfActivePictures(0);
+  m_RPL0.setNumberOfShorttermPictures(0);
+  m_RPL0.setNumberOfLongtermPictures(0);
+  m_RPL0.setLtrpInSliceHeaderFlag(0);
+  m_RPL0.setNumberOfInterLayerPictures( 0 );
 
-  m_localRPL1.setNumberOfActivePictures(0);
-  m_localRPL1.setNumberOfShorttermPictures(0);
-  m_localRPL1.setNumberOfLongtermPictures(0);
-  m_localRPL1.setLtrpInSliceHeaderFlag(0);
-  m_localRPL1.setNumberOfInterLayerPictures( 0 );
+  m_RPL1.setNumberOfActivePictures(0);
+  m_RPL1.setNumberOfShorttermPictures(0);
+  m_RPL1.setNumberOfLongtermPictures(0);
+  m_RPL1.setLtrpInSliceHeaderFlag(0);
+  m_RPL1.setNumberOfInterLayerPictures( 0 );
 
   m_alfApsId.resize(0);
 
@@ -2903,15 +2903,15 @@ void PicHeader::initPicHeader()
   memset(m_maxBTSize,                               0,    sizeof(m_maxBTSize));
   memset(m_maxTTSize,                               0,    sizeof(m_maxTTSize));
 
-  m_localRPL0.setNumberOfActivePictures(0);
-  m_localRPL0.setNumberOfShorttermPictures(0);
-  m_localRPL0.setNumberOfLongtermPictures(0);
-  m_localRPL0.setLtrpInSliceHeaderFlag(0);
+  m_RPL0.setNumberOfActivePictures(0);
+  m_RPL0.setNumberOfShorttermPictures(0);
+  m_RPL0.setNumberOfLongtermPictures(0);
+  m_RPL0.setLtrpInSliceHeaderFlag(0);
 
-  m_localRPL1.setNumberOfActivePictures(0);
-  m_localRPL1.setNumberOfShorttermPictures(0);
-  m_localRPL1.setNumberOfLongtermPictures(0);
-  m_localRPL1.setLtrpInSliceHeaderFlag(0);
+  m_RPL1.setNumberOfActivePictures(0);
+  m_RPL1.setNumberOfShorttermPictures(0);
+  m_RPL1.setNumberOfLongtermPictures(0);
+  m_RPL1.setLtrpInSliceHeaderFlag(0);
 
   m_alfApsId.resize(0);
 }

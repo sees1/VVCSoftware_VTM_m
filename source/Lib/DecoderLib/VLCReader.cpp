@@ -3139,7 +3139,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       }
 
       // explicit RPL in picture header
-      auto const rpl = picHeader->getLocalRPL( listIdx );
+      auto const rpl = picHeader->getRPL( listIdx );
       if (!uiCode)
       {
         (*rpl) = ReferencePictureList();
@@ -4035,14 +4035,14 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 #endif
     if( pps->getRplInfoInPhFlag() )
     {
-      *pcSlice->getLocalRPL0() = *picHeader->getLocalRPL0();
-      *pcSlice->getLocalRPL1() = *picHeader->getLocalRPL1();
+      *pcSlice->getRPL0() = *picHeader->getRPL0();
+      *pcSlice->getRPL1() = *picHeader->getRPL1();
     }
     else if( pcSlice->getIdrPicFlag() && !(sps->getIDRRefParamListPresent()) )
     {
-      ReferencePictureList* rpl0 = pcSlice->getLocalRPL0();
+      ReferencePictureList* rpl0 = pcSlice->getRPL0();
       (*rpl0) = ReferencePictureList();
-      ReferencePictureList* rpl1 = pcSlice->getLocalRPL1();
+      ReferencePictureList* rpl1 = pcSlice->getRPL1();
       (*rpl1) = ReferencePictureList();
     }
     else
@@ -4061,7 +4061,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 
       rplSpsFlag0 = uiCode;
 
-      auto const rpl0 = pcSlice->getLocalRPL0();
+      auto const rpl0 = pcSlice->getRPL0();
       if (!uiCode) //explicitly carried in this SH
       {
         (*rpl0) = ReferencePictureList();
@@ -4145,7 +4145,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
         uiCode = rplSpsFlag0;
       }
 
-      auto const rpl1 = pcSlice->getLocalRPL1();
+      auto const rpl1 = pcSlice->getRPL1();
       if (uiCode == 1)
       {
         if (sps->getNumRPL(1) > 1 && pps->getRpl1IdxPresentFlag())
