@@ -285,13 +285,14 @@ uint32_t DecApp::decode()
         if( m_reconFileName.compare( "/dev/null" ) && m_cDecLib.getVPS() != nullptr && m_cDecLib.getVPS()->getMaxLayers() > 1 && xIsNaluWithinTargetOutputLayerIdSet( &nalu ) )
         {
           size_t pos = reconFileName.find_last_of('.');
+          std::string layerString = std::string(".layer") + std::to_string(nalu.m_nuhLayerId);
           if (pos != string::npos)
           {
-            reconFileName.insert( pos, std::to_string( nalu.m_nuhLayerId ) );
+            reconFileName.insert(pos, layerString);
           }
           else
           {
-            reconFileName.append( std::to_string( nalu.m_nuhLayerId ) );
+            reconFileName.append(layerString);
           }
         }
         if( ( m_cDecLib.getVPS() != nullptr && ( m_cDecLib.getVPS()->getMaxLayers() == 1 || xIsNaluWithinTargetOutputLayerIdSet( &nalu ) ) ) || m_cDecLib.getVPS() == nullptr )
