@@ -390,6 +390,9 @@ void DecApp::writeLineToOutputLog(Picture * pcPic)
     const int croppedWidth  = pcPic->Y().width - leftOffset - rightOffset;
     const int croppedHeight = pcPic->Y().height - topOffset - bottomOffset;
 
+#if OPL_ADD_LAYER_ID
+    m_oplFileStream << std::setw(3) << pcPic->layerId << ",";
+#endif
     m_oplFileStream << std::setw(8) << pcPic->getPOC() << "," << std::setw(5) << croppedWidth << "," << std::setw(5)
                     << croppedHeight << "," << hashToString(recon_digest, numChar) << "\n";
   }

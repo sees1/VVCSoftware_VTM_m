@@ -72,6 +72,8 @@
 
 #define JVET_S_SUB_PROFILE                                1 // Move signalling of ptl_num_sub_profiles
 
+#define OPL_ADD_LAYER_ID                                  1 // Add layer ID to output picture log
+
 #define JVET_R0324_REORDER                                1 // Reordering of syntax elements JVET-R0324/JVET-R2001-v2
  
 #define JVET_S0097_VPS_default_values                     1 // JVET-S0097: infer values of variables in VPS when not present
