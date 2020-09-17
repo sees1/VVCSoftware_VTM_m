@@ -1994,10 +1994,10 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
               WRITE_CODE(picHeader->getRPL(listIdx)->getRefPicIdentifier(i), sps->getBitsForPOC(),
                          "poc_lsb_lt[listIdx][rplsIdx][j]");
             }
-            WRITE_FLAG(picHeader->getLocalRPL(listIdx)->getDeltaPocMSBPresentFlag(i) ? 1 : 0, "delta_poc_msb_present_flag[i][j]");
-            if (picHeader->getLocalRPL(listIdx)->getDeltaPocMSBPresentFlag(i))
+            WRITE_FLAG(picHeader->getRPL(listIdx)->getDeltaPocMSBPresentFlag(i) ? 1 : 0, "delta_poc_msb_present_flag[i][j]");
+            if (picHeader->getRPL(listIdx)->getDeltaPocMSBPresentFlag(i))
             {
-              WRITE_UVLC(picHeader->getLocalRPL(listIdx)->getDeltaPocMSBCycleLT(i), "delta_poc_msb_cycle_lt[i][j]");
+              WRITE_UVLC(picHeader->getRPL(listIdx)->getDeltaPocMSBCycleLT(i), "delta_poc_msb_cycle_lt[i][j]");
             }
           }
         }
@@ -2474,10 +2474,10 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
               WRITE_CODE(pcSlice->getRPL0()->getRefPicIdentifier(i), pcSlice->getSPS()->getBitsForPOC(),
                          "slice_poc_lsb_lt[listIdx][rplsIdx][j]");
             }
-            WRITE_FLAG(pcSlice->getLocalRPL0()->getDeltaPocMSBPresentFlag(i) ? 1 : 0, "delta_poc_msb_present_flag[i][j]");
-            if (pcSlice->getLocalRPL0()->getDeltaPocMSBPresentFlag(i))
+            WRITE_FLAG(pcSlice->getRPL0()->getDeltaPocMSBPresentFlag(i) ? 1 : 0, "delta_poc_msb_present_flag[i][j]");
+            if (pcSlice->getRPL0()->getDeltaPocMSBPresentFlag(i))
             {
-              WRITE_UVLC(pcSlice->getLocalRPL0()->getDeltaPocMSBCycleLT(i), "delta_poc_msb_cycle_lt[i][j]");
+              WRITE_UVLC(pcSlice->getRPL0()->getDeltaPocMSBCycleLT(i), "delta_poc_msb_cycle_lt[i][j]");
             }
           }
         }
@@ -2535,10 +2535,10 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
               WRITE_CODE(pcSlice->getRPL1()->getRefPicIdentifier(i), pcSlice->getSPS()->getBitsForPOC(),
                          "slice_poc_lsb_lt[listIdx][rplsIdx][j]");
             }
-            WRITE_FLAG(pcSlice->getLocalRPL1()->getDeltaPocMSBPresentFlag(i) ? 1 : 0, "delta_poc_msb_present_flag[i][j]");
-            if (pcSlice->getLocalRPL1()->getDeltaPocMSBPresentFlag(i))
+            WRITE_FLAG(pcSlice->getRPL1()->getDeltaPocMSBPresentFlag(i) ? 1 : 0, "delta_poc_msb_present_flag[i][j]");
+            if (pcSlice->getRPL1()->getDeltaPocMSBPresentFlag(i))
             {
-              WRITE_UVLC(pcSlice->getLocalRPL1()->getDeltaPocMSBCycleLT(i), "delta_poc_msb_cycle_lt[i][j]");
+              WRITE_UVLC(pcSlice->getRPL1()->getDeltaPocMSBCycleLT(i), "delta_poc_msb_cycle_lt[i][j]");
             }
           }
         }
