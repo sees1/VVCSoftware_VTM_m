@@ -1699,7 +1699,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
 
   READ_UVLC(uiCode, "sps_bitdepth_minus8");
+#if JVET_S0212_BITDEPTH_RANGE
+  CHECK ( uiCode > 2, "sps_bitdepth_minus8 shall be in the range of 0 to 2, inclusive." );
+#else
   CHECK(uiCode > 8, "Invalid bit depth signalled");
+#endif
   pcSPS->setBitDepth(CHANNEL_TYPE_LUMA, 8 + uiCode);
   pcSPS->setBitDepth(CHANNEL_TYPE_CHROMA, 8 + uiCode);
   pcSPS->setQpBDOffset(CHANNEL_TYPE_LUMA, (int) (6*uiCode) );
@@ -2643,6 +2647,9 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
         READ_UVLC( uiCode, "vps_ols_dpb_pic_height[i]" ); pcVPS->setOlsDpbPicHeight( i, uiCode );
         READ_CODE( 2, uiCode, "vps_ols_dpb_chroma_format[i]"); pcVPS->setOlsDpbChromaFormatIdc(i, uiCode);
         READ_UVLC( uiCode, "vps_ols_dpb_bitdepth_minus8[i]"); pcVPS->setOlsDpbBitDepthMinus8(i, uiCode);
+#if JVET_S0212_BITDEPTH_RANGE
+        CHECK ( uiCode > 2, "The value of vps_ols_dpb_bitdepth_minus8[ i ] shall be in the range of 0 to 2, inclusive." );
+#endif
         if ((pcVPS->m_numDpbParams > 1) && (pcVPS->m_numDpbParams != pcVPS->m_numMultiLayeredOlss))
         {
           READ_UVLC( uiCode, "vps_ols_dpb_params_idx[i]" ); pcVPS->setOlsDpbParamsIdx( i, uiCode );

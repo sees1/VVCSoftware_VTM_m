@@ -993,6 +993,9 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     }
   }
 
+#if JVET_S0212_BITDEPTH_RANGE
+  CHECK ( (pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) - 8) > 2, "sps_bitdepth_minus8 shall be in the range of 0 to 2, inclusive." );
+#endif
   WRITE_UVLC(pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) - 8, "sps_bitdepth_minus8");
   WRITE_FLAG( pcSPS->getEntropyCodingSyncEnabledFlag() ? 1 : 0, "sps_entropy_coding_sync_enabled_flag" );
   WRITE_FLAG( pcSPS->getEntryPointsPresentFlag() ? 1 : 0, "sps_entry_point_offsets_present_flag" );
@@ -1639,6 +1642,9 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
         WRITE_UVLC( pcVPS->getOlsDpbPicSize( i ).width, "vps_ols_dpb_pic_width[i]" );
         WRITE_UVLC( pcVPS->getOlsDpbPicSize( i ).height, "vps_ols_dpb_pic_height[i]" );
         WRITE_CODE( pcVPS->m_olsDpbChromaFormatIdc[i], 2, "vps_ols_dpb_chroma_format[i]");
+#if JVET_S0212_BITDEPTH_RANGE
+        CHECK  (pcVPS->m_olsDpbBitDepthMinus8[i] > 2, "The value of vps_ols_dpb_bitdepth_minus8[ i ] shall be in the range of 0 to 2, inclusive." );
+#endif
         WRITE_UVLC( pcVPS->m_olsDpbBitDepthMinus8[i], "vps_ols_dpb_bitdepth_minus8[i]");
         if( (pcVPS->m_numDpbParams > 1) && (pcVPS->m_numDpbParams != pcVPS->m_numMultiLayeredOlss) )
         {
