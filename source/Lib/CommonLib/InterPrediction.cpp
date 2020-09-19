@@ -226,6 +226,10 @@ void InterPrediction::init( RdCost* pcRdCost, ChromaFormat chromaFormatIDC, cons
     const int MVBUFFER_SIZE = MAX_CU_SIZE / MIN_PU_SIZE;
     m_storedMv = new Mv[MVBUFFER_SIZE*MVBUFFER_SIZE];
   }
+  if (m_IBCBufferWidth != g_IBCBufferSize / ctuSize)
+  {
+    m_IBCBuffer.destroy();
+  }
   if (m_IBCBuffer.bufs.empty())
   {
     m_IBCBufferWidth = g_IBCBufferSize / ctuSize;
