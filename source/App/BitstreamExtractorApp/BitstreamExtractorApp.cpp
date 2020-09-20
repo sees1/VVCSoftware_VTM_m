@@ -837,6 +837,7 @@ uint32_t BitstreamExtractorApp::decode()
             }
             CHECK (!found, "Target subpicture not found");
 #endif
+
             // if the referred SPS was updated, modify and write it
             if (xIsSPSUpdate(sps->getSPSId()))
             {
