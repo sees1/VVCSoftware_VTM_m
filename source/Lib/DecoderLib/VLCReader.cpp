@@ -46,6 +46,9 @@
 #include "CommonLib/CodingStatistics.h"
 #endif
 #include "CommonLib/AdaptiveLoopFilter.h"
+#if JVET_S0212_BITDEPTH_RANGE
+#include "CommonLib/ProfileLevelTier.h"
+#endif
 
 #if ENABLE_TRACING
 
@@ -1701,7 +1704,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_UVLC(uiCode, "sps_bitdepth_minus8");
   CHECK(uiCode > 8, "Invalid bit depth signalled");
 #if JVET_S0212_BITDEPTH_RANGE
-  CHECK ( (pcSPS->getProfileTierLevel()->getProfileIdc() & Profile::MAIN_10) && (uiCode > 2), "sps_bitdepth_minus8 shall be in the range of 0 to 2, inclusive." );
+  const Profile::Name profile = pcSPS->getProfileTierLevel()->getProfileIdc();
+  if (profile != Profile::NONE)
+  {
+    CHECK(uiCode + 8 > ProfileFeatures::getProfileFeatures(profile)->maxBitDepth, "sps_bitdepth_minus8 exceeds range supported by signalled profile");
+  }
 #endif
   pcSPS->setBitDepth(CHANNEL_TYPE_LUMA, 8 + uiCode);
   pcSPS->setBitDepth(CHANNEL_TYPE_CHROMA, 8 + uiCode);
@@ -2647,8 +2654,11 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
         READ_CODE( 2, uiCode, "vps_ols_dpb_chroma_format[i]"); pcVPS->setOlsDpbChromaFormatIdc(i, uiCode);
         READ_UVLC( uiCode, "vps_ols_dpb_bitdepth_minus8[i]"); pcVPS->setOlsDpbBitDepthMinus8(i, uiCode);
 #if JVET_S0212_BITDEPTH_RANGE
-        CHECK ( (pcVPS->getProfileTierLevel(pcVPS->getOlsPtlIdx(i)).getProfileIdc() & Profile::MAIN_10) && (uiCode > 2),
-          "The value of vps_ols_dpb_bitdepth_minus8[ i ] shall be in the range of 0 to 2, inclusive." );
+        const Profile::Name profile = pcVPS->getProfileTierLevel(pcVPS->getOlsPtlIdx(i)).getProfileIdc();
+        if (profile != Profile::NONE)
+        {
+          CHECK(uiCode + 8 > ProfileFeatures::getProfileFeatures(profile)->maxBitDepth, "vps_ols_dpb_bitdepth_minus8[ i ] exceeds range supported by signalled profile");
+        }
 #endif
         if ((pcVPS->m_numDpbParams > 1) && (pcVPS->m_numDpbParams != pcVPS->m_numMultiLayeredOlss))
         {
