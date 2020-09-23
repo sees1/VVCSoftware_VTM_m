@@ -394,8 +394,6 @@ DecLib::DecLib()
   : m_iMaxRefPicNum(0)
   , m_isFirstGeneralHrd(true)
   , m_prevGeneralHrdParams()
-  , m_prevGDRInSameLayerPOC{ MAX_INT }
-  , m_pocCRA{ MAX_INT }
   , m_associatedIRAPDecodingOrderNumber{ 0 }
   , m_decodingOrderCounter(0)
   , m_puCounter(0)
@@ -461,11 +459,13 @@ DecLib::DecLib()
   memset(m_prevEOS, false, sizeof(m_prevEOS));
 #endif
   memset(m_accessUnitEos, false, sizeof(m_accessUnitEos));
+  std::fill_n(m_prevGDRInSameLayerPOC, MAX_VPS_LAYERS, -MAX_INT);
+  std::fill_n(m_pocCRA, MAX_VPS_LAYERS, -MAX_INT);
   for (int i = 0; i < MAX_VPS_LAYERS; i++)
   {
     m_associatedIRAPType[i] = NAL_UNIT_INVALID;
-    std::fill_n(m_prevGDRSubpicPOC[i], MAX_NUM_SUB_PICS, MAX_INT);
-    memset(m_prevIRAPSubpicPOC[i], 0, sizeof(int)*MAX_NUM_SUB_PICS);
+    std::fill_n(m_prevGDRSubpicPOC[i], MAX_NUM_SUB_PICS, -MAX_INT);
+    std::fill_n(m_prevIRAPSubpicPOC[i], MAX_NUM_SUB_PICS, -MAX_INT);
     memset(m_prevIRAPSubpicDecOrderNo[i], 0, sizeof(int)*MAX_NUM_SUB_PICS);
     std::fill_n(m_prevIRAPSubpicType[i], MAX_NUM_SUB_PICS, NAL_UNIT_INVALID);
   }
@@ -3041,15 +3041,15 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
 
     case NAL_UNIT_EOS:
       m_associatedIRAPType[nalu.m_nuhLayerId] = NAL_UNIT_INVALID;
-      m_pocCRA[nalu.m_nuhLayerId] = MAX_INT;
-      m_prevGDRInSameLayerPOC[nalu.m_nuhLayerId] = MAX_INT;
-      std::fill_n(m_prevGDRSubpicPOC[nalu.m_nuhLayerId], MAX_NUM_SUB_PICS, MAX_INT);
-      memset(m_prevIRAPSubpicPOC[nalu.m_nuhLayerId], 0, sizeof(int)*MAX_NUM_SUB_PICS);
+      m_pocCRA[nalu.m_nuhLayerId] = -MAX_INT;
+      m_prevGDRInSameLayerPOC[nalu.m_nuhLayerId] = -MAX_INT;
+      std::fill_n(m_prevGDRSubpicPOC[nalu.m_nuhLayerId], MAX_NUM_SUB_PICS, -MAX_INT);
+      std::fill_n(m_prevIRAPSubpicPOC[nalu.m_nuhLayerId], MAX_NUM_SUB_PICS, -MAX_INT);
       memset(m_prevIRAPSubpicDecOrderNo[nalu.m_nuhLayerId], 0, sizeof(int)*MAX_NUM_SUB_PICS);
       std::fill_n(m_prevIRAPSubpicType[nalu.m_nuhLayerId], MAX_NUM_SUB_PICS, NAL_UNIT_INVALID);
       m_pocRandomAccess = MAX_INT;
       m_prevLayerID = MAX_INT;
-      m_prevPOC = MAX_INT;
+      m_prevPOC = -MAX_INT;
       m_prevSliceSkipped = false;
       m_skippedPOC = 0;
       m_accessUnitEos[nalu.m_nuhLayerId] = true;
