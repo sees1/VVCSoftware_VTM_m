@@ -191,10 +191,10 @@ void SEIEncoder::initSEIBufferingPeriod(SEIBufferingPeriod *bufferingPeriodSEI, 
   bufferingPeriodSEI->m_sublayerDpbOutputOffsetsPresentFlag = true;
   for(int i = 0; i < bufferingPeriodSEI->m_bpMaxSubLayers; i++)
   {
-    bufferingPeriodSEI->m_dpbOutputTidOffset[i] = m_pcCfg->getNumReorderPics(i) * static_cast<int>(pow(2, static_cast<double>(bufferingPeriodSEI->m_bpMaxSubLayers-1-i)));
-    if(bufferingPeriodSEI->m_dpbOutputTidOffset[i] >= m_pcCfg->getNumReorderPics(bufferingPeriodSEI->m_bpMaxSubLayers-1))
+    bufferingPeriodSEI->m_dpbOutputTidOffset[i] = m_pcCfg->getMaxNumReorderPics(i) * static_cast<int>(pow(2, static_cast<double>(bufferingPeriodSEI->m_bpMaxSubLayers-1-i)));
+    if(bufferingPeriodSEI->m_dpbOutputTidOffset[i] >= m_pcCfg->getMaxNumReorderPics(bufferingPeriodSEI->m_bpMaxSubLayers-1))
     {
-      bufferingPeriodSEI->m_dpbOutputTidOffset[i] -= m_pcCfg->getNumReorderPics(bufferingPeriodSEI->m_bpMaxSubLayers-1);
+      bufferingPeriodSEI->m_dpbOutputTidOffset[i] -= m_pcCfg->getMaxNumReorderPics(bufferingPeriodSEI->m_bpMaxSubLayers-1);
     }
     else
     {

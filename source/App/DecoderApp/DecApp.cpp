@@ -462,7 +462,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
   int numPicsNotYetDisplayed = 0;
   int dpbFullness = 0;
   const SPS* activeSPS = (pcListPic->front()->cs->sps);
-  uint32_t numReorderPicsHighestTid;
+  uint32_t maxNumReorderPicsHighestTid;
   uint32_t maxDecPicBufferingHighestTid;
   uint32_t maxNrSublayers = activeSPS->getMaxTLayers();
 
@@ -471,12 +471,12 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
 
   if( referredVPS == nullptr || referredVPS->m_numLayersInOls[referredVPS->m_targetOlsIdx] == 1 )
   {
-    numReorderPicsHighestTid = activeSPS->getNumReorderPics( temporalId );
+    maxNumReorderPicsHighestTid = activeSPS->getMaxNumReorderPics( temporalId );
     maxDecPicBufferingHighestTid = activeSPS->getMaxDecPicBuffering( temporalId );
   }
   else
   {
-    numReorderPicsHighestTid = referredVPS->getNumReorderPics( temporalId );
+    maxNumReorderPicsHighestTid = referredVPS->getMaxNumReorderPics( temporalId );
     maxDecPicBufferingHighestTid = referredVPS->getMaxDecPicBuffering( temporalId );
   }
 
@@ -515,7 +515,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
       Picture* pcPicBottom = *(iterPic);
 
       if ( pcPicTop->neededForOutput && pcPicBottom->neededForOutput &&
-          (numPicsNotYetDisplayed >  numReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid) &&
+          (numPicsNotYetDisplayed >  maxNumReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid) &&
           (!(pcPicTop->getPOC()%2) && pcPicBottom->getPOC() == pcPicTop->getPOC()+1) &&
           (pcPicTop->getPOC() == m_iPOCLastDisplay+1 || m_iPOCLastDisplay < 0))
       {
@@ -569,7 +569,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
       pcPic = *(iterPic);
 
       if(pcPic->neededForOutput && pcPic->getPOC() > m_iPOCLastDisplay &&
-        (numPicsNotYetDisplayed >  numReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid))
+        (numPicsNotYetDisplayed >  maxNumReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid))
       {
         // write to file
         numPicsNotYetDisplayed--;

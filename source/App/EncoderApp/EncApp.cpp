@@ -571,7 +571,7 @@ void EncApp::xInitLibCfg()
 
   for(int i = 0; i < MAX_TLAYER; i++)
   {
-    m_cEncLib.setNumReorderPics                                  ( m_numReorderPics[i], i );
+    m_cEncLib.setMaxNumReorderPics                               ( m_maxNumReorderPics[i], i );
     m_cEncLib.setMaxDecPicBuffering                              ( m_maxDecPicBuffering[i], i );
   }
   for( uint32_t uiLoop = 0; uiLoop < MAX_TLAYER; ++uiLoop )
