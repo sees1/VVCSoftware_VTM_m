@@ -953,11 +953,11 @@ uint32_t BitstreamExtractorApp::decode()
           {
             writeInpuNalUnitToStream = xCheckSeiSubpicture(SEIs, subpicIdTarget[nalu.m_nuhLayerId], rmAllFillerInSubpicExt[nalu.m_nuhLayerId], lastSliceWritten, isVclNalUnitRemoved[nalu.m_nuhLayerId]);
           }
+#endif
           if (m_vpsId == -1)
           {
             delete vps;
           }
-#endif
         }
 #if JVET_R0294_SUBPIC_HASH
 #if JVET_S0154_R0068_ASPECT5

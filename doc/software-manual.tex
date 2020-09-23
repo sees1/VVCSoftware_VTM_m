@@ -2497,10 +2497,10 @@ Length of the subpicture IDs in bits. (1<<SubPicIdLen) must be bigger than the n
 If the value "0" is used, the encoder tries to determine the number of required bits from the number of subpictures or the highest subpicture ID. This mode should not be used, if merging of bistreams is intended. 
 \\
 
-\Option{SubPicId} &
+\Option{SubPicIdx} &
 %\ShortOption{\None} &
 \Default{\None} &
-Array of subpicture IDs. The number of entries must be equal to NumSubPics.
+Target subpic index for target output layers that containing multiple subpictures.
 \\
 
 
@@ -5026,3 +5026,4 @@ bistreams. At least two input bitstreams need to be specified. The merged multi-
 bistream will be stored into the outfile.
 
 \end{document}
+
