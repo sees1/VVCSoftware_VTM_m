@@ -74,7 +74,7 @@ typedef std::list<Picture*> PicList;
 struct DpbParameters
 {
   int m_maxDecPicBuffering[MAX_TLAYER] = { 0 };
-  int m_numReorderPics[MAX_TLAYER] = { 0 };
+  int m_maxNumReorderPics[MAX_TLAYER] = { 0 };
   int m_maxLatencyIncreasePlus1[MAX_TLAYER] = { 0 };
 };
 
@@ -1201,7 +1201,7 @@ public:
   void              setTargetOlsIdx(uint32_t t) { m_targetOlsIdx = t; }
 
   int               getMaxDecPicBuffering( int temporalId ) const        { return m_dpbParameters[m_olsDpbParamsIdx[m_targetOlsIdx]].m_maxDecPicBuffering[temporalId]; }
-  int               getNumReorderPics( int temporalId ) const            { return m_dpbParameters[m_olsDpbParamsIdx[m_targetOlsIdx]].m_numReorderPics[temporalId]; }
+  int               getMaxNumReorderPics( int temporalId ) const         { return m_dpbParameters[m_olsDpbParamsIdx[m_targetOlsIdx]].m_maxNumReorderPics[temporalId]; }
   int               getTotalNumOLSs() const                              { return m_totalNumOLSs; }
   int               getNumMultiLayeredOlss() const                       { return m_numMultiLayeredOlss; }
   Size              getOlsDpbPicSize( int olsIdx ) const                 { return m_olsDpbPicSize[olsIdx];          }
@@ -1541,7 +1541,7 @@ private:
   bool              m_allRplEntriesHasSameSignFlag;
   bool              m_bLongTermRefsPresent;
   bool              m_SPSTemporalMVPEnabledFlag;
-  int               m_numReorderPics[MAX_TLAYER];
+  int               m_maxNumReorderPics[MAX_TLAYER];
 
   // Tool list
 
@@ -1819,8 +1819,8 @@ public:
   const std::vector<bool> getExtraPHBitPresentFlags() const                                                   { return m_extraPHBitPresentFlag;                                      }
   void                    setExtraSHBitPresentFlags(const std::vector<bool> &b)                               { m_extraSHBitPresentFlag = b;                                         }
   const std::vector<bool> getExtraSHBitPresentFlags() const                                                   { return m_extraSHBitPresentFlag;                                      }
-  void                    setNumReorderPics(int i, uint32_t tlayer)                                           { m_numReorderPics[tlayer] = i;                                        }
-  int                     getNumReorderPics(uint32_t tlayer) const                                            { return m_numReorderPics[tlayer];                                     }
+  void                    setMaxNumReorderPics(int i, uint32_t tlayer)                                        { m_maxNumReorderPics[tlayer] = i;                                        }
+  int                     getMaxNumReorderPics(uint32_t tlayer) const                                         { return m_maxNumReorderPics[tlayer];                                     }
   void                    createRPLList0(int numRPL);
   void                    createRPLList1(int numRPL);
   const RPLList*          getRPLList( bool b ) const                                                          { return b==1 ? &m_RPLList1 : &m_RPLList0;                             }

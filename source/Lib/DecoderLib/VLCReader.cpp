@@ -1375,11 +1375,11 @@ void HLSyntaxReader::dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFla
   uint32_t code;
   for (int i = (subLayerInfoFlag ? 0 : maxSubLayersMinus1); i <= maxSubLayersMinus1; i++)
   {
-    READ_UVLC(code, "max_dec_pic_buffering_minus1[i]");
+    READ_UVLC(code, "dpb_max_dec_pic_buffering_minus1[i]");
     pcSPS->setMaxDecPicBuffering(code + 1, i);
-    READ_UVLC(code, "max_num_reorder_pics[i]");
-    pcSPS->setNumReorderPics(code, i);
-    READ_UVLC(code, "max_latency_increase_plus1[i]");
+    READ_UVLC(code, "dpb_max_num_reorder_pics[i]");
+    pcSPS->setMaxNumReorderPics(code, i);
+    READ_UVLC(code, "dpb_max_latency_increase_plus1[i]");
     pcSPS->setMaxLatencyIncreasePlus1(code, i);
   }
 }
@@ -2625,21 +2625,21 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
 
       for( int j = ( pcVPS->m_sublayerDpbParamsPresentFlag ? 0 : pcVPS->m_dpbMaxTemporalId[i] ); j <= pcVPS->m_dpbMaxTemporalId[i]; j++ )
       {
-        READ_UVLC(uiCode, "max_dec_pic_buffering_minus1[i]");
+        READ_UVLC(uiCode, "dpb_max_dec_pic_buffering_minus1[i]");
         pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] = uiCode + 1;
-        READ_UVLC( uiCode, "max_num_reorder_pics[i]" );          pcVPS->m_dpbParameters[i].m_numReorderPics[j] = uiCode;
-        READ_UVLC( uiCode, "max_latency_increase_plus1[i]" );    pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[j] = uiCode;
+        READ_UVLC( uiCode, "dpb_max_num_reorder_pics[i]" );          pcVPS->m_dpbParameters[i].m_maxNumReorderPics[j] = uiCode;
+        READ_UVLC( uiCode, "dpb_max_latency_increase_plus1[i]" );    pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[j] = uiCode;
       }
 
       for( int j = ( pcVPS->m_sublayerDpbParamsPresentFlag ? pcVPS->m_dpbMaxTemporalId[i] : 0 ); j < pcVPS->m_dpbMaxTemporalId[i]; j++ )
       {
-        // When max_dec_pic_buffering_minus1[ i ] is not present for i in the range of 0 to maxSubLayersMinus1 - 1, inclusive, due to subLayerInfoFlag being equal to 0, it is inferred to be equal to max_dec_pic_buffering_minus1[ maxSubLayersMinus1 ].
+        // When dpb_max_dec_pic_buffering_minus1[ i ] is not present for i in the range of 0 to maxSubLayersMinus1 - 1, inclusive, due to subLayerInfoFlag being equal to 0, it is inferred to be equal to dpb_max_dec_pic_buffering_minus1[ maxSubLayersMinus1 ].
         pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[j] = pcVPS->m_dpbParameters[i].m_maxDecPicBuffering[pcVPS->m_dpbMaxTemporalId[i]];
 
-        // When max_num_reorder_pics[ i ] is not present for i in the range of 0 to maxSubLayersMinus1 - 1, inclusive, due to subLayerInfoFlag being equal to 0, it is inferred to be equal to max_num_reorder_pics[ maxSubLayersMinus1 ].
-        pcVPS->m_dpbParameters[i].m_numReorderPics[j] = pcVPS->m_dpbParameters[i].m_numReorderPics[pcVPS->m_dpbMaxTemporalId[i]];
+        // When dpb_max_num_reorder_pics[ i ] is not present for i in the range of 0 to maxSubLayersMinus1 - 1, inclusive, due to subLayerInfoFlag being equal to 0, it is inferred to be equal to dpb_max_num_reorder_pics[ maxSubLayersMinus1 ].
+        pcVPS->m_dpbParameters[i].m_maxNumReorderPics[j] = pcVPS->m_dpbParameters[i].m_maxNumReorderPics[pcVPS->m_dpbMaxTemporalId[i]];
 
-        // When max_latency_increase_plus1[ i ] is not present for i in the range of 0 to maxSubLayersMinus1 - 1, inclusive, due to subLayerInfoFlag being equal to 0, it is inferred to be equal to max_latency_increase_plus1[ maxSubLayersMinus1 ].
+        // When dpb_max_latency_increase_plus1[ i ] is not present for i in the range of 0 to maxSubLayersMinus1 - 1, inclusive, due to subLayerInfoFlag being equal to 0, it is inferred to be equal to dpb_max_latency_increase_plus1[ maxSubLayersMinus1 ].
         pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[j] = pcVPS->m_dpbParameters[i].m_maxLatencyIncreasePlus1[pcVPS->m_dpbMaxTemporalId[i]];
       }
     }

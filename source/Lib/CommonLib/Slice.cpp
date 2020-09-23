@@ -3099,7 +3099,7 @@ SPS::SPS()
   {
     m_uiMaxLatencyIncreasePlus1[i] = 0;
     m_uiMaxDecPicBuffering[i] = 1;
-    m_numReorderPics[i]       = 0;
+    m_maxNumReorderPics[i]    = 0;
   }
 
   ::memset(m_ltRefPicPocLsbSps, 0, sizeof(m_ltRefPicPocLsbSps));

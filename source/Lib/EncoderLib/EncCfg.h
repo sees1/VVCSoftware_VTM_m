@@ -298,7 +298,7 @@ protected:
   int       m_numRPLList1;
   GOPEntry  m_GOPList[MAX_GOP];
   int       m_maxDecPicBuffering[MAX_TLAYER];
-  int       m_numReorderPics[MAX_TLAYER];
+  int       m_maxNumReorderPics[MAX_TLAYER];
   int       m_drapPeriod;
 
   int       m_iQP;                              //  if (AdaptiveQP == OFF)
@@ -1011,7 +1011,7 @@ public:
   int       getRPLCandidateSize(int L01) const { return  (L01 == 0) ? m_numRPLList0 : m_numRPLList1; }
   void      setEncodedFlag(uint32_t  i, bool value) { m_RPLList0[i].m_isEncoded = value; m_RPLList1[i].m_isEncoded = value; m_GOPList[i].m_isEncoded = value; }
   void      setMaxDecPicBuffering           ( uint32_t u, uint32_t tlayer ) { m_maxDecPicBuffering[tlayer] = u;    }
-  void      setNumReorderPics               ( int  i, uint32_t tlayer ) { m_numReorderPics[tlayer] = i;    }
+  void      setMaxNumReorderPics            ( int  i, uint32_t tlayer ) { m_maxNumReorderPics[tlayer] = i;    }
   void      setDrapPeriod                   (int drapPeriod) { m_drapPeriod = drapPeriod; }
 
   void      setBaseQP                       ( int   i )      { m_iQP = i; }
@@ -1364,7 +1364,7 @@ public:
   bool      getReWriteParamSets             ()  const    { return m_rewriteParamSets; }
   int       getGOPSize                      () const     { return  m_iGOPSize; }
   int       getMaxDecPicBuffering           (uint32_t tlayer) { return m_maxDecPicBuffering[tlayer]; }
-  int       getNumReorderPics               (uint32_t tlayer) { return m_numReorderPics[tlayer]; }
+  int       getMaxNumReorderPics            (uint32_t tlayer) { return m_maxNumReorderPics[tlayer]; }
   int       getDrapPeriod                   ()     { return m_drapPeriod; }
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   int       getIntraQPOffset                () const    { return  m_intraQPOffset; }

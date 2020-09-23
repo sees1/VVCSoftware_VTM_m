@@ -261,13 +261,13 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
             int dpbFullness = 0;
             const SPS* activeSPS = (pcListPic->front()->cs->sps);
             uint32_t maxNrSublayers = activeSPS->getMaxTLayers();
-            uint32_t numReorderPicsHighestTid = activeSPS->getNumReorderPics(maxNrSublayers-1);
+            uint32_t maxNumReorderPicsHighestTid = activeSPS->getMaxNumReorderPics(maxNrSublayers-1);
             uint32_t maxDecPicBufferingHighestTid =  activeSPS->getMaxDecPicBuffering(maxNrSublayers-1);
             const VPS* referredVPS = pcListPic->front()->cs->vps;
 
             if( referredVPS != nullptr && referredVPS->m_numLayersInOls[referredVPS->m_targetOlsIdx] > 1 )
             {
-              numReorderPicsHighestTid = referredVPS->getNumReorderPics( maxNrSublayers - 1 );
+              maxNumReorderPicsHighestTid = referredVPS->getMaxNumReorderPics( maxNrSublayers - 1 );
               maxDecPicBufferingHighestTid = referredVPS->getMaxDecPicBuffering( maxNrSublayers - 1 );
             }
 
@@ -307,7 +307,7 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
                 pcCurPic = *(iterPic);
 
                 if(pcCurPic->neededForOutput && pcCurPic->getPOC() > iPOCLastDisplay &&
-                  (numPicsNotYetDisplayed >  numReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid))
+                  (numPicsNotYetDisplayed >  maxNumReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid))
                 {
                     numPicsNotYetDisplayed--;
                   if( ! pcCurPic->referenced )
