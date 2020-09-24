@@ -66,7 +66,7 @@ private:
   static const MvPrecision m_amvrPrecIbc[3];
 
   static const int mvClipPeriod = (1 << MV_BITS);
-  static const int halMvClipPeriod = (1 << (MV_BITS - 1));
+  static const int halfMvClipPeriod = (1 << (MV_BITS - 1));
 
 public:
   int   hor;     ///< horizontal component of motion vector
@@ -264,9 +264,9 @@ public:
   void mvCliptoStorageBitDepth()  // periodic clipping
   {
     hor = (hor + mvClipPeriod) & (mvClipPeriod - 1);
-    hor = (hor >= halMvClipPeriod) ? (hor - mvClipPeriod) : hor;
+    hor = (hor >= halfMvClipPeriod) ? (hor - mvClipPeriod) : hor;
     ver = (ver + mvClipPeriod) & (mvClipPeriod - 1);
-    ver = (ver >= halMvClipPeriod) ? (ver - mvClipPeriod) : ver;
+    ver = (ver >= halfMvClipPeriod) ? (ver - mvClipPeriod) : ver;
   }
 };// END CLASS DEFINITION MV
 
