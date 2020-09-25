@@ -2358,7 +2358,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
     if( m_pcCfg->getUseAMaxBT() )
     {
-      if( !pcSlice->isIntra() )
+      if (!pcSlice->isIRAP())
       {
         int refLayer = pcSlice->getDepth();
         if( refLayer > 9 ) refLayer = 9; // Max layer is 10
