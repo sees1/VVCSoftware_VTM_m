@@ -1384,6 +1384,7 @@ void HLSyntaxReader::dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFla
   }
 }
 
+#if !JVET_S0208_ASPECT1
 void HLSyntaxReader::parseExtraPHBitsStruct( SPS *sps, int numBytes )
 {
   uint32_t symbol;
@@ -1413,6 +1414,7 @@ void HLSyntaxReader::parseExtraSHBitsStruct( SPS *sps, int numBytes )
 
   sps->setExtraSHBitPresentFlags(presentFlags);
 }
+#endif
 
 void HLSyntaxReader::parseSPS(SPS* pcSPS)
 {
@@ -1730,9 +1732,33 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   // extra bits are for future extensions, we will read, but ignore them,
   // unless a meaning is specified in the spec
   READ_CODE(2, uiCode, "sps_num_extra_ph_bytes");  pcSPS->setNumExtraPHBytes(uiCode);
+#if JVET_S0208_ASPECT1
+  int numExtraPhBytes = uiCode;
+  std::vector<bool> extraPhBitPresentFlags;
+  extraPhBitPresentFlags.resize ( 8 * numExtraPhBytes );
+  for (int i=0; i < 8*numExtraPhBytes; i++)
+  {
+    READ_FLAG(uiCode, "sps_extra_ph_bit_present_flag[ i ]");
+    extraPhBitPresentFlags[i] = uiCode;
+  }
+  pcSPS->setExtraPHBitPresentFlags(extraPhBitPresentFlags);
+#else
   parseExtraPHBitsStruct( pcSPS, uiCode );
+#endif
   READ_CODE(2, uiCode, "sps_num_extra_sh_bytes");  pcSPS->setNumExtraSHBytes(uiCode);
+#if JVET_S0208_ASPECT1
+  int numExtraShBytes = uiCode;
+  std::vector<bool> extraShBitPresentFlags;
+  extraShBitPresentFlags.resize ( 8 * numExtraShBytes );
+  for (int i=0; i < 8*numExtraShBytes; i++)
+  {
+    READ_FLAG(uiCode, "sps_extra_sh_bit_present_flag[ i ]");
+    extraShBitPresentFlags[i] = uiCode;
+  }
+  pcSPS->setExtraSHBitPresentFlags(extraShBitPresentFlags);
+#else
   parseExtraSHBitsStruct( pcSPS, uiCode );
+#endif
 
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {
