@@ -141,8 +141,13 @@ public:
   void  codeScalingListAps      ( APS* pcAPS );
   void  codeVPS                 ( const VPS* pcVPS );
   void  codeDCI                 ( const DCI* dci );
+#if JVET_S0162_SUBPIC_MERGE_TOOL
+  void  codePictureHeader       ( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice = 0 );
+  void  codeSliceHeader         ( Slice* pcSlice, PicHeader *picheader = 0 );
+#else
   void  codePictureHeader       ( PicHeader* picHeader, bool writeRbspTrailingBits );
   void  codeSliceHeader         ( Slice* pcSlice );
+#endif
   void  codeConstraintInfo      ( const ConstraintInfo* cinfo );
   void  codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 );
   void  codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd , const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1);
