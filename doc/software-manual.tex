@@ -5025,5 +5025,56 @@ The command line options bistreamX specify the file names of the input single-la
 bistreams. At least two input bitstreams need to be specified. The merged multi-layer 
 bistream will be stored into the outfile.
 
+
+
+
+\section{Using the subpicture merge tool}
+\label{sec:subpicture-merge-tool}
+
+The SubpicMergeApp takes multiple bitstreams as inputs and merges them into one output bitstream where each input bitstream forms a single subpicture. Subpicture layout and input bitstreams are defined in a subpicture list file. Sequence parameter set and picture parameter set are modified accordingly based on the layout.
+
+The merge tool has an alternative mode for merging YUV files. This mode can be used for verifying YUV output after decoding merged bitstream.
+
+If VTM encoder is used for encoding input bitstreams, it is recommnended that ALF, CCALF, joint chroma coding, LMCS and AMaxBT are disabled. This prevents those tools having parameters with different values in different subpictures which would result in merged bitstream being non-conformant.
+
+\subsection{Usage}
+\label{sec:subpicture-merge-usage}
+
+\begin{minted}{bash}
+SubpicMergeApp [-l <subpiclistfile>] [-o <outfile>] [-m 0|1] [-yuv 0|1] [-d <bitdepth>] [-f 400|420|422|444]
+\end{minted}
+
+\begin{table}[ht]
+\footnotesize
+\centering
+\begin{tabular}{lp{0.5\textwidth}}
+\hline
+ \thead{Option} &
+ \thead{Description} \\
+\hline
+\texttt{--help} & Prints parameter usage. \\
+\texttt{-l} & File containing list of input pictures to be merged \\
+\texttt{-o} & Output file name \\
+\texttt{-m} & Enable mixed NALU type bitstreams merging \\
+\texttt{-yuv} & Perform YUV merging (instead of bitstream merging) \\
+\texttt{-d} & Bitdepth for YUV merging \\
+\texttt{-f} & Chroma format for YUV merging, 420 (default), 400, 422 or 444 \\
+\hline
+\end{tabular}
+\end{table}
+
+Format of the subpicture list file given with '-l' command is as follows:
+
+\begin{minted}{bash}
+subpic1_width  subpic1_height  subpic1_x  subpic1_y  subpic1_bitstream_file
+subpic2_width  subpic2_height  subpic2_x  subpic2_y  subpic2_bitstream_file
+...
+subpicN_width  subpicN_height  subpicN_x  subpicN_y  subpicN_bitstream_file
+\end{minted}
+
+Coordinates x and y define the location of top-left corner of the subpicture in the merged picture. Parameters width, height, x and y are given in units of luma samples.
+
+YUV merging uses the same file format, only difference being that YUV file name is supplied instead of bitstream file name.
+
 \end{document}
 
