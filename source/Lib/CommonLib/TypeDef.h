@@ -56,6 +56,10 @@
 
 #define JVET_R0341_GCI                                    1 // JVET-R0341: on constraint flag for local chroma QP control
 
+#define JVET_S0208_ASPECT1                                1 // JVET-S0208 aspect 1: Remove the extra_sh_bits_struct( ) and extra_ph_bits_struct( ) structures and put their content directly in the SPS.
+
+#define JVET_S0208_ASPECT6                                1 // JVET-S0208 aspect 6: Modify the derivation process for the variable TotalNumOlss by removing unnecessary text.
+
 #define JVET_S0212_BITDEPTH_RANGE                         1 // JVET-S0212 aspect 2: Specify a value range of 0..2 for vps_ols_dpb_bitdepth_minus8[ i ]. Also for sps_bitdepth_minus8[ i ]
 
 #define JVET_S0047_MINUS1_FOR_VB_POS                      1 // JVET-S0047: Add "_minus1" to sps_virtual_boundary_pos_x, sps_virtual_boundary_pos_y, ph_virtual_boundary_pos_x and ph_virtual_boundary_pos_y
