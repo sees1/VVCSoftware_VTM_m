@@ -2520,7 +2520,7 @@ VPS::~VPS()
 void VPS::deriveOutputLayerSets()
 {
 #if JVET_S0208_ASPECT6
-if( m_vpsEachLayerIsAnOlsFlag || m_vpsOlsModeIdc < 2 )
+  if( m_vpsEachLayerIsAnOlsFlag || m_vpsOlsModeIdc < 2 )
 #else
   if( m_maxLayers == 1 )
   {
