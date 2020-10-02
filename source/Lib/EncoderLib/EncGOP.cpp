@@ -2460,7 +2460,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
     xUpdateRasInit( pcSlice );
 
-    if ( pcSlice->getPendingRasInit() )
+    if (pcSlice->getPendingRasInit() || pcSlice->isIRAP())
     {
       // this ensures that independently encoded bitstream chunks can be combined to bit-equal
       pcSlice->setEncCABACTableIdx( pcSlice->getSliceType() );
