@@ -354,7 +354,11 @@ void  Slice::sortPicList        (PicList& rcListPic)
     while (iterPicInsert != iterPicExtract)
     {
       pcPicInsert = *(iterPicInsert);
+#if BF_SORT_PICLIST
+      if (pcPicInsert->getPOC() > pcPicExtract->getPOC())
+#else
       if (pcPicInsert->getPOC() >= pcPicExtract->getPOC())
+#endif
       {
         break;
       }
