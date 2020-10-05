@@ -65,6 +65,7 @@ InterPrediction::InterPrediction()
 , m_gradX1(nullptr)
 , m_gradY1(nullptr)
 , m_subPuMC(false)
+, m_IBCBufferWidth(0)
 {
   for( uint32_t ch = 0; ch < MAX_NUM_COMPONENT; ch++ )
   {
