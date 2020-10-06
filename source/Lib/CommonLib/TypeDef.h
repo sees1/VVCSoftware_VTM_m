@@ -88,6 +88,8 @@
 
 #define JVET_R0270                                        1 // JVET-S0270: Treating picture with mixed RASL and RADL slices as RASL picture
 
+#define JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE            1 // JVET-S0202: Require that the bistream shall contain at least one picture with pic_output_flag equal to 1 that is in an output layer.
+
 #define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
 
 #define JVET_S0162_SUBPIC_MERGE_TOOL                      1 // JVET-S0162: Subpicture merging software
