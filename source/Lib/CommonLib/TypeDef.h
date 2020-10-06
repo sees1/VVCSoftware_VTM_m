@@ -52,8 +52,6 @@
 
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
-#define BF_SORT_PICLIST                                   1 // Buf fix on Sorting picture list for output
-
 #define JVET_S0058_GCI                                    1 // no_mtt_constraint_flag and no_weightedpred_constraint_flag
 
 #define JVET_R0341_GCI                                    1 // JVET-R0341: on constraint flag for local chroma QP control
