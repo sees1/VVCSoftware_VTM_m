@@ -331,43 +331,11 @@ bool Slice::getRapPicFlag() const
     || getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA;
 }
 
-
-void  Slice::sortPicList        (PicList& rcListPic)
+void Slice::sortPicList(PicList &picList)
 {
-  Picture*    pcPicExtract;
-  Picture*    pcPicInsert;
-
-  PicList::iterator    iterPicExtract;
-  PicList::iterator    iterPicExtract_1;
-  PicList::iterator    iterPicInsert;
-
-  for (int i = 1; i < (int)(rcListPic.size()); i++)
-  {
-    iterPicExtract = rcListPic.begin();
-    for (int j = 0; j < i; j++)
-    {
-      iterPicExtract++;
-    }
-    pcPicExtract = *(iterPicExtract);
-
-    iterPicInsert = rcListPic.begin();
-    while (iterPicInsert != iterPicExtract)
-    {
-      pcPicInsert = *(iterPicInsert);
-      if (pcPicInsert->getPOC() >= pcPicExtract->getPOC())
-      {
-        break;
-      }
-
-      iterPicInsert++;
-    }
-
-    iterPicExtract_1 = iterPicExtract;    iterPicExtract_1++;
-
-    //  swap iterPicExtract and iterPicInsert, iterPicExtract = curr. / iterPicInsert = insertion position
-    rcListPic.insert( iterPicInsert, iterPicExtract, iterPicExtract_1 );
-    rcListPic.erase( iterPicExtract );
-  }
+  picList.sort([](Picture *const &a, Picture *const &b) {
+    return a->getPOC() < b->getPOC() || (a->getPOC() == b->getPOC() && a->layerId < b->layerId);
+  });
 }
 
 Picture* Slice::xGetRefPic( PicList& rcListPic, const int poc, const int layerId )
