@@ -305,12 +305,17 @@ void LoopFilter::xDeblockCU( CodingUnit& cu, const DeblockEdgeDir edgeDir )
     verEdgeFilter = m_stLFCUParam.internalEdge;
     horEdgeFilter = m_stLFCUParam.internalEdge;
 
-    if( edgeDir == EDGE_HOR && ((areaTu.y % 4) != 0) )
+    if ((edgeDir == EDGE_HOR && areaTu.y % 4 != 0) || (edgeDir == EDGE_VER && areaTu.x % 4 != 0))
     {
-      continue;
-    }
-    if( edgeDir == EDGE_VER && ((areaTu.x % 4) != 0) )
-    {
+      if (currTU.block(COMPONENT_Cb).valid())
+      {
+        if ((edgeDir == EDGE_HOR && currTU.block(COMPONENT_Cb).y % 4 == 0)
+            || (edgeDir == EDGE_VER && currTU.block(COMPONENT_Cb).x % 4 == 0))
+        {
+          // Set max filter length for chroma in narrow/short CUs that use ISP mode
+          xSetMaxFilterLengthPQFromTransformSizes(edgeDir, cu, currTU, COMPONENT_Cb);
+        }
+      }
       continue;
     }
 
@@ -320,7 +325,7 @@ void LoopFilter::xDeblockCU( CodingUnit& cu, const DeblockEdgeDir edgeDir )
     }
     xSetEdgefilterMultiple( cu, EDGE_VER, areaTu, verEdgeFilter );
     xSetEdgefilterMultiple( cu, EDGE_HOR, areaTu, horEdgeFilter );
-    xSetMaxFilterLengthPQFromTransformSizes( edgeDir, cu, currTU );
+    xSetMaxFilterLengthPQFromTransformSizes(edgeDir, cu, currTU, COMPONENT_Y);
     if( cu.Y().valid() )
     {
       edgeIdx.push_back( ( edgeDir == EDGE_HOR ) ? ( currTU.blocks[cu.chType].y - cu.blocks[cu.chType].y ) / 4 : ( currTU.blocks[cu.chType].x - cu.blocks[cu.chType].x ) / 4 );
@@ -484,13 +489,14 @@ inline void LoopFilter::xDeriveEdgefilterParam( const int xPos, const int yPos, 
   }
 }
 
-void LoopFilter::xSetMaxFilterLengthPQFromTransformSizes( const DeblockEdgeDir edgeDir, const CodingUnit& cu, const TransformUnit& currTU )
+void LoopFilter::xSetMaxFilterLengthPQFromTransformSizes(const DeblockEdgeDir edgeDir, const CodingUnit &cu,
+                                                         const TransformUnit &currTU, const int firstComponent)
 {
   const TransformUnit& tuQ = currTU;
 
   if ( edgeDir == EDGE_HOR )
   {
-    for ( int cIdx = 0; cIdx < ::getNumberValidComponents(tuQ.chromaFormat); cIdx++ ) // per component
+    for (int cIdx = firstComponent; cIdx < ::getNumberValidComponents(tuQ.chromaFormat); cIdx++)   // per component
     {
       const ComponentID comp = ComponentID(cIdx);
       const ChannelType ch   = toChannelType(comp);
