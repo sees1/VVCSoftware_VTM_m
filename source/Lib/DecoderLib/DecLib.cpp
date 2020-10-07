@@ -953,12 +953,7 @@ void DecLib::checkPicTypeAfterEos()
 
 void DecLib::checkLayerIdIncludedInCvss()
 {
-  if (getVPS() == nullptr || getVPS()->getMaxLayers() == 1)
-  {
-    return;
-  }
-
-  if (m_audIrapOrGdrAuFlag && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL))
+  if ((getVPS()->getMaxLayers() == 1 || m_audIrapOrGdrAuFlag) && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL))
   {
     // store layerIDs in the first AU
     m_firstAccessUnitPicInfo.assign(m_accessUnitPicInfo.begin(), m_accessUnitPicInfo.end());
@@ -1085,7 +1080,7 @@ void DecLib::checkSEIInAccessUnit()
 #endif
     enum SEI::PayloadType payloadType = std::get<2>(sei);
 #if JVET_S0178_GENERAL_SEI_CHECK
-    if (m_vps != nullptr && naluType == NAL_UNIT_PREFIX_SEI && ((payloadType == SEI::BUFFERING_PERIOD || payloadType == SEI::PICTURE_TIMING || payloadType == SEI::DECODING_UNIT_INFO || payloadType == SEI::SUBPICTURE_LEVEL_INFO)))
+    if (naluType == NAL_UNIT_PREFIX_SEI && ((payloadType == SEI::BUFFERING_PERIOD || payloadType == SEI::PICTURE_TIMING || payloadType == SEI::DECODING_UNIT_INFO || payloadType == SEI::SUBPICTURE_LEVEL_INFO)))
     {
       bool olsIncludeAllLayersFind = false;
       for (int i = 0; i < m_vps->getNumOutputLayerSets(); i++)
