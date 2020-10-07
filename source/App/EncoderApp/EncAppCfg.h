@@ -753,7 +753,11 @@ protected:
   int         m_layerId[MAX_VPS_LAYERS];
   int         m_layerIdx;
   int         m_maxSublayers;
+#if JVET_S0115_VPS
+  bool        m_defaultPtlDpbHrdMaxTidFlag;
+#else
   bool        m_allLayersSameNumSublayersFlag;
+#endif
   bool        m_allIndependentLayersFlag;
   std::string m_predDirectionArray;
 

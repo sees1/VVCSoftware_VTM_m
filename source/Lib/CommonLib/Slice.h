@@ -1054,7 +1054,11 @@ private:
 
   uint32_t              m_vpsMaxSubLayers;
   uint32_t              m_vpsLayerId[MAX_VPS_LAYERS];
+#if JVET_S0115_VPS
+  bool                  m_vpsDefaultPtlDpbHrdMaxTidFlag;
+#else
   bool                  m_vpsAllLayersSameNumSubLayersFlag;
+#endif
   bool                  m_vpsAllIndependentLayersFlag;
   uint32_t              m_vpsCfgPredDirection[MAX_VPS_SUBLAYERS];
   bool                  m_vpsIndependentLayerFlag[MAX_VPS_LAYERS];
@@ -1122,9 +1126,13 @@ public:
 
   uint32_t          getMaxSubLayers() const                              { return m_vpsMaxSubLayers;                                        }
   void              setMaxSubLayers(uint32_t value)                      { m_vpsMaxSubLayers = value;                                       }
-
+#if JVET_S0115_VPS
+  bool              getDefaultPtlDpbHrdMaxTidFlag() const { return m_vpsDefaultPtlDpbHrdMaxTidFlag; }
+  void              setDefaultPtlDpbHrdMaxTidFlag(bool t) { m_vpsDefaultPtlDpbHrdMaxTidFlag = t; }
+#else
   bool              getAllLayersSameNumSublayersFlag() const { return m_vpsAllLayersSameNumSubLayersFlag; }
   void              setAllLayersSameNumSublayersFlag(bool t) { m_vpsAllLayersSameNumSubLayersFlag = t; }
+#endif
 
   uint32_t          getLayerId(uint32_t layerIdx) const { return m_vpsLayerId[layerIdx]; }
   void              setLayerId(uint32_t layerIdx, uint32_t layerId) { m_vpsLayerId[layerIdx] = layerId; }

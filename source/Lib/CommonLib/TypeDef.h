@@ -188,6 +188,10 @@
                                                             // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
                                                             //             add no_idr_rpl_constraint_flag
 
+#define JVET_S0115_VPS                                    1 // JVET-S0115 aspect 2 (JVET-S0142 item 4): Change the name and semantics of vps_all_layers_same_num_sublayers_flag 
+                                                            // (to be vps_default_ptl_dpb_hrd_max_tid_flag) to only control VPS syntax without requiring the number of sublayers 
+                                                            // to be the same for all layers.
+
 #define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
 
 #define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
