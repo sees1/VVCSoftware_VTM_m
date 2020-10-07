@@ -307,7 +307,7 @@ void LoopFilter::xDeblockCU( CodingUnit& cu, const DeblockEdgeDir edgeDir )
 
     if ((edgeDir == EDGE_HOR && areaTu.y % 4 != 0) || (edgeDir == EDGE_VER && areaTu.x % 4 != 0))
     {
-      if (currTU.block(COMPONENT_Cb).valid())
+      if (cu.chromaFormat != CHROMA_400 && currTU.block(COMPONENT_Cb).valid())
       {
         if ((edgeDir == EDGE_HOR && currTU.block(COMPONENT_Cb).y % 4 == 0)
             || (edgeDir == EDGE_VER && currTU.block(COMPONENT_Cb).x % 4 == 0))
