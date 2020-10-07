@@ -143,7 +143,7 @@ uint32_t DecApp::decode()
       PicList::iterator iterPic = pcListPic->begin();
       while (!outputPicturePresentInBitstream && iterPic != pcListPic->end())
       {
-        Picture *pcPic = *(iterPic);
+        Picture *pcPic = *(iterPic++);
         if (pcPic->neededForOutput)
         {
           outputPicturePresentInBitstream = true;
