@@ -329,6 +329,9 @@ uint32_t DecApp::decode()
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+        setOutputPicturePresentInStream();
+#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
         m_cDecLib.setFirstSliceInPicture (false);
       }
@@ -336,6 +339,9 @@ uint32_t DecApp::decode()
       if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
       {
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+        setOutputPicturePresentInStream();
+#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
       }
     }
