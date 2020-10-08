@@ -1604,10 +1604,12 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
     if(i > 0)
       WRITE_FLAG(pcVPS->getPtPresentFlag(i), "vps_pt_present_flag");
 #if JVET_S0115_VPS
-    if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag()) {
+    if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag()) 
+    {
       WRITE_CODE(pcVPS->getPtlMaxTemporalId(i), 3, "vps_ptl_max_tid");
     }
-    else {
+    else 
+    {
       CHECK(pcVPS->getPtlMaxTemporalId(i) != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_ptl_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
     }
 #else
