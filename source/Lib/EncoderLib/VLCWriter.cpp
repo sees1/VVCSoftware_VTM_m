@@ -2288,7 +2288,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 #if JVET_S0121_ASPECT2
     if ( pps->getDbfInfoInPhFlag() )
     {
-      WRITE_FLAG( picHeader->getDeblockingFilterOverrideFlag(), "ph_deblocking_filter_override_flag" );
+      WRITE_FLAG( picHeader->getDeblockingFilterOverrideFlag(), "ph_deblocking_params_present_flag" );
     }
 #else
     if(pps->getDeblockingFilterOverrideEnabledFlag())
