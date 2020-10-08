@@ -1716,7 +1716,8 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       {
         WRITE_CODE(pcVPS->getHrdMaxTid(i), 3, "vps_hrd_max_tid[i]");
       }
-      else {
+      else 
+      {
         CHECK(pcVPS->getHrdMaxTid(i) != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_hrd_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
       }
 #else
