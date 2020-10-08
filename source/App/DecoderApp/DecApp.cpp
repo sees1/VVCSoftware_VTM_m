@@ -136,6 +136,21 @@ uint32_t DecApp::decode()
 
 #if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
   bool outputPicturePresentInBitstream = false;
+  auto setOutputPicturePresentInStream = [&]()
+  {
+    if( !outputPicturePresentInBitstream )
+    {
+      PicList::iterator iterPic = pcListPic->begin();
+      while (!outputPicturePresentInBitstream && iterPic != pcListPic->end())
+      {
+        Picture *pcPic = *(iterPic++);
+        if (pcPic->neededForOutput)
+        {
+          outputPicturePresentInBitstream = true;
+        }
+      }
+    }
+  };
 #endif
 
   while (!!bitstreamFile)
@@ -308,23 +323,15 @@ uint32_t DecApp::decode()
       if( bNewPicture )
       {
 #if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
-        if( !outputPicturePresentInBitstream ) 
-        {
-          PicList::iterator iterPic = pcListPic->begin();
-          while (!outputPicturePresentInBitstream && iterPic != pcListPic->end())
-          {
-            Picture *pcPic = *(iterPic);
-            if( pcPic->neededForOutput )
-            {
-              outputPicturePresentInBitstream = true;
-            }
-          }
-        }
+        setOutputPicturePresentInStream();
 #endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+        setOutputPicturePresentInStream();
+#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
         m_cDecLib.setFirstSliceInPicture (false);
       }
@@ -332,6 +339,9 @@ uint32_t DecApp::decode()
       if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
       {
+#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
+        setOutputPicturePresentInStream();
+#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
       }
     }
@@ -370,18 +380,7 @@ uint32_t DecApp::decode()
   }
 #if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
   // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
-  if( !outputPicturePresentInBitstream ) 
-  {
-    PicList::iterator iterPic = pcListPic->begin();
-    while (!outputPicturePresentInBitstream && iterPic != pcListPic->end())
-    {
-      Picture *pcPic = *(iterPic);
-      if (pcPic->neededForOutput)
-      {
-        outputPicturePresentInBitstream = true;
-      }
-    }
-  }
+  setOutputPicturePresentInStream();
   CHECK(!outputPicturePresentInBitstream, "It is required that there shall be at least one picture with PictureOutputFlag equal to 1 in the bitstream")
 #endif
 
