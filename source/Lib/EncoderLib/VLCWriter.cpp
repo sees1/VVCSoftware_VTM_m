@@ -2285,6 +2285,12 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   // deblocking filter controls
   if (pps->getDeblockingFilterControlPresentFlag())
   {
+#if JVET_S0121_ASPECT2
+    if ( pps->getDbfInfoInPhFlag() )
+    {
+      WRITE_FLAG( picHeader->getDeblockingFilterOverrideFlag(), "ph_deblocking_params_present_flag" );
+    }
+#else
     if(pps->getDeblockingFilterOverrideEnabledFlag())
     {
       if (pps->getDbfInfoInPhFlag())
@@ -2296,6 +2302,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
         picHeader->setDeblockingFilterOverrideFlag(false);
       }
     }
+#endif
     else
     {
       picHeader->setDeblockingFilterOverrideFlag(false);
