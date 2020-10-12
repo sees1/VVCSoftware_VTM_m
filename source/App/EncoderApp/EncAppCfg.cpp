@@ -1471,7 +1471,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ;
   opts.addOptions()
   ( "MaxSublayers",                                   m_maxSublayers,                               7, "Max number of Sublayers")
+#if JVET_S0115_VPS
+  ( "DefaultPtlDpbHrdMaxTidFlag",                     m_defaultPtlDpbHrdMaxTidFlag,              true, "specifies that the syntax elements vps_ptl_max_tid[ i ], vps_dpb_max_tid[ i ], and vps_hrd_max_tid[ i ] are not present and are inferred to be equal to the default value vps_max_sublayers_minus1")
+#else
   ( "AllLayersSameNumSublayersFlag",                  m_allLayersSameNumSublayersFlag,           true, "All layers same num sublayersflag")
+#endif
   ( "AllIndependentLayersFlag",                       m_allIndependentLayersFlag,                true, "All layers are independent layer")
   ("AllowablePredDirection",                          m_predDirectionArray, string(""),                "prediction directions allowed for i-th temporal layer")
   ( "LayerId%d",                                      m_layerId,                    0, MAX_VPS_LAYERS, "Max number of Sublayers")
