@@ -1224,12 +1224,12 @@ void Picture::extendWrapBorder( const PPS *pps )
 
 PelBuf Picture::getBuf( const ComponentID compID, const PictureType &type )
 {
-  return M_BUFS( ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL || PIC_FILTERED_ORIGINAL || type == PIC_ORIGINAL_INPUT || type == PIC_TRUE_ORIGINAL_INPUT || PIC_FILTERED_ORIGINAL_INPUT ) ? 0 : scheduler.getSplitPicId(), type ).getBuf( compID );
+  return M_BUFS( ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL || type == PIC_FILTERED_ORIGINAL || type == PIC_ORIGINAL_INPUT || type == PIC_TRUE_ORIGINAL_INPUT || type == PIC_FILTERED_ORIGINAL_INPUT ) ? 0 : scheduler.getSplitPicId(), type ).getBuf( compID );
 }
 
 const CPelBuf Picture::getBuf( const ComponentID compID, const PictureType &type ) const
 {
-  return M_BUFS( ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL || PIC_FILTERED_ORIGINAL || type == PIC_ORIGINAL_INPUT || type == PIC_TRUE_ORIGINAL_INPUT || PIC_FILTERED_ORIGINAL_INPUT ) ? 0 : scheduler.getSplitPicId(), type ).getBuf( compID );
+  return M_BUFS( ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL || type == PIC_FILTERED_ORIGINAL || type == PIC_ORIGINAL_INPUT || type == PIC_TRUE_ORIGINAL_INPUT || type == PIC_FILTERED_ORIGINAL_INPUT ) ? 0 : scheduler.getSplitPicId(), type ).getBuf( compID );
 }
 
 PelBuf Picture::getBuf( const CompArea &blk, const PictureType &type )
