@@ -118,6 +118,11 @@ struct Picture : public UnitArea
         PelBuf      getTrueOrigBuf(const CompArea &blk);
   const CPelBuf     getTrueOrigBuf(const CompArea &blk) const;
 
+         PelUnitBuf getFilteredOrigBuf();
+  const CPelUnitBuf getFilteredOrigBuf() const;
+         PelBuf     getFilteredOrigBuf(const CompArea &blk);
+  const CPelBuf     getFilteredOrigBuf(const CompArea &blk) const;
+
          PelBuf     getPredBuf(const CompArea &blk);
   const CPelBuf     getPredBuf(const CompArea &blk) const;
          PelUnitBuf getPredBuf(const UnitArea &unit);

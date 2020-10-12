@@ -1195,8 +1195,10 @@ void EncApp::createLib( const int layerIdx )
 
   m_orgPic = new PelStorage;
   m_trueOrgPic = new PelStorage;
+  m_filteredOrgPic = new PelStorage;
   m_orgPic->create( unitArea );
   m_trueOrgPic->create( unitArea );
+  m_filteredOrgPic->create( unitArea );
 
   if( !m_bitstream.is_open() )
   {
@@ -1284,6 +1286,7 @@ bool EncApp::encodePrep( bool& eos )
   if( m_gopBasedTemporalFilterEnabled )
   {
     m_temporalFilter.filter( m_orgPic, m_iFrameRcvd );
+    m_filteredOrgPic->copyFrom(*m_orgPic);
   }
 
   // increase number of received frames
@@ -1305,11 +1308,11 @@ bool EncApp::encodePrep( bool& eos )
   // call encoding function for one frame
   if( m_isField )
   {
-    keepDoing = m_cEncLib.encodePrep( eos, m_flush ? 0 : m_orgPic, m_flush ? 0 : m_trueOrgPic, snrCSC, m_recBufList, m_numEncoded, m_isTopFieldFirst );
+    keepDoing = m_cEncLib.encodePrep( eos, m_flush ? 0 : m_orgPic, m_flush ? 0 : m_trueOrgPic, m_flush ? 0 : m_filteredOrgPic, snrCSC, m_recBufList, m_numEncoded, m_isTopFieldFirst );
   }
   else
   {
-    keepDoing = m_cEncLib.encodePrep( eos, m_flush ? 0 : m_orgPic, m_flush ? 0 : m_trueOrgPic, snrCSC, m_recBufList, m_numEncoded );
+    keepDoing = m_cEncLib.encodePrep( eos, m_flush ? 0 : m_orgPic, m_flush ? 0 : m_trueOrgPic, m_flush ? 0 : m_filteredOrgPic, snrCSC, m_recBufList, m_numEncoded );
   }
 
   return keepDoing;

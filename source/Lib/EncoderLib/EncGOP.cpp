@@ -2855,7 +2855,15 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           if (pcSlice->getSliceType() == I_SLICE)
           {
             //reshape original signal
-            pcPic->getOrigBuf().copyFrom(pcPic->getTrueOrigBuf());
+            if(m_pcCfg->getGopBasedTemporalFilterEnabled())
+            {
+              pcPic->getOrigBuf().copyFrom(pcPic->getFilteredOrigBuf());
+            }
+            else
+            {
+              pcPic->getOrigBuf().copyFrom(pcPic->getTrueOrigBuf());
+            } 
+
             if (pcSlice->getLmcsEnabledFlag())
             {
               pcPic->getOrigBuf(COMPONENT_Y).rspSignal(m_pcReshaper->getFwdLUT());
@@ -2938,7 +2946,15 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           }
         }
         m_pcReshaper->setRecReshaped(false);
-        pcPic->getOrigBuf().copyFrom(pcPic->getTrueOrigBuf());
+
+        if(m_pcCfg->getGopBasedTemporalFilterEnabled())
+        {
+          pcPic->getOrigBuf().copyFrom(pcPic->getFilteredOrigBuf());
+        }
+        else
+        {
+          pcPic->getOrigBuf().copyFrom(pcPic->getTrueOrigBuf());
+        } 
       }
 
       // create SAO object based on the picture size
@@ -4246,7 +4262,7 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
 
   if (m_pcEncLib->isResChangeInClvsEnabled())
   {
-    const CPelBuf& upscaledOrg = sps.getUseLmcs() ? pcPic->M_BUFS( 0, PIC_TRUE_ORIGINAL_INPUT).get( COMPONENT_Y ) : pcPic->M_BUFS( 0, PIC_ORIGINAL_INPUT).get( COMPONENT_Y );
+    const CPelBuf& upscaledOrg = (sps.getUseLmcs() || m_pcCfg->getGopBasedTemporalFilterEnabled()) ? pcPic->M_BUFS( 0, PIC_TRUE_ORIGINAL_INPUT).get( COMPONENT_Y ) : pcPic->M_BUFS( 0, PIC_ORIGINAL_INPUT).get( COMPONENT_Y );
     upscaledRec.create( pic.chromaFormat, Area( Position(), upscaledOrg ) );
 
     int xScale, yScale;
@@ -4307,7 +4323,7 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
 
     if (m_pcEncLib->isResChangeInClvsEnabled())
     {
-      const CPelBuf& upscaledOrg = sps.getUseLmcs() ? pcPic->M_BUFS( 0, PIC_TRUE_ORIGINAL_INPUT ).get( compID ) : pcPic->M_BUFS( 0, PIC_ORIGINAL_INPUT ).get( compID );
+      const CPelBuf& upscaledOrg = (sps.getUseLmcs() || m_pcCfg->getGopBasedTemporalFilterEnabled()) ? pcPic->M_BUFS( 0, PIC_TRUE_ORIGINAL_INPUT).get( compID ) : pcPic->M_BUFS( 0, PIC_ORIGINAL_INPUT).get( compID );
 
       const uint32_t upscaledWidth = upscaledOrg.width - ( m_pcEncLib->getPad( 0 ) >> ::getComponentScaleX( compID, format ) );
       const uint32_t upscaledHeight = upscaledOrg.height - ( m_pcEncLib->getPad( 1 ) >> ( !!bPicIsField + ::getComponentScaleY( compID, format ) ) );
