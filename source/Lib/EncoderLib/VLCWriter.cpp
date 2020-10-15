@@ -1162,7 +1162,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG(pcSPS->getLongTermRefsPresent() ? 1 : 0, "sps_long_term_ref_pics_flag");
   if( pcSPS->getVPSId() > 0 )
   {
-    WRITE_FLAG( pcSPS->getInterLayerPresentFlag() ? 1 : 0, "sps_inter_layer_predictioned_enabled_flag" );
+    WRITE_FLAG( pcSPS->getInterLayerPresentFlag() ? 1 : 0, "sps_inter_layer_prediction_enabled_flag" );
   }
   WRITE_FLAG(pcSPS->getIDRRefParamListPresent() ? 1 : 0, "sps_idr_rpl_present_flag" );
   WRITE_FLAG(pcSPS->getRPL1CopyFromRPL0Flag() ? 1 : 0, "sps_rpl1_same_as_rpl0_flag");
@@ -1320,7 +1320,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 
 
   // KJS: remove scaling lists?
-  WRITE_FLAG( pcSPS->getScalingListFlag() ? 1 : 0,                                   "sps_scaling_list_enabled_flag" );
+  WRITE_FLAG( pcSPS->getScalingListFlag() ? 1 : 0,                                   "sps_explicit_scaling_list_enabled_flag" );
 
   if (pcSPS->getUseLFNST() && pcSPS->getScalingListFlag())
   {
@@ -1400,7 +1400,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {
-  WRITE_FLAG(pcSPS->getGeneralHrdParametersPresentFlag(), "sps_general_hrd_parameters_present_flag");
+  WRITE_FLAG(pcSPS->getGeneralHrdParametersPresentFlag(), "sps_timing_hrd_params_present_flag");
   if (pcSPS->getGeneralHrdParametersPresentFlag())
   {
     codeGeneralHrdparameters(pcSPS->getGeneralHrdParameters());
