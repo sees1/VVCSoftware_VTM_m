@@ -204,7 +204,7 @@ Picture::Picture()
   unscaledPic = nullptr;
 }
 
-void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId )
+void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId, const bool gopBasedTemporalFilterEnabled )
 {
   layerId = _layerId;
   UnitArea::operator=( UnitArea( _chromaFormat, Area( Position{ 0, 0 }, size ) ) );
@@ -217,7 +217,10 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
   {
     M_BUFS( 0, PIC_ORIGINAL ).    create( _chromaFormat, a );
     M_BUFS( 0, PIC_TRUE_ORIGINAL ). create( _chromaFormat, a );
-    M_BUFS( 0, PIC_FILTERED_ORIGINAL ). create( _chromaFormat, a );
+    if(gopBasedTemporalFilterEnabled)
+    {
+      M_BUFS( 0, PIC_FILTERED_ORIGINAL ). create( _chromaFormat, a );
+    }
   }
 #if !KEEP_PRED_AND_RESI_SIGNALS
   m_ctuArea = UnitArea( _chromaFormat, Area( Position{ 0, 0 }, Size( _maxCUSize, _maxCUSize ) ) );

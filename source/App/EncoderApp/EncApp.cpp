@@ -1195,10 +1195,13 @@ void EncApp::createLib( const int layerIdx )
 
   m_orgPic = new PelStorage;
   m_trueOrgPic = new PelStorage;
-  m_filteredOrgPic = new PelStorage;
   m_orgPic->create( unitArea );
   m_trueOrgPic->create( unitArea );
-  m_filteredOrgPic->create( unitArea );
+  if(m_gopBasedTemporalFilterEnabled)
+  {
+    m_filteredOrgPic = new PelStorage;
+    m_filteredOrgPic->create( unitArea );
+  }
 
   if( !m_bitstream.is_open() )
   {
@@ -1256,6 +1259,11 @@ void EncApp::destroyLib()
   m_trueOrgPic->destroy();
   delete m_trueOrgPic;
   delete m_orgPic;
+  if(m_gopBasedTemporalFilterEnabled)
+  {
+    m_filteredOrgPic->destroy();
+    delete m_filteredOrgPic;
+  }
 #if EXTENSION_360_VIDEO
   delete m_ext360;
 #endif
