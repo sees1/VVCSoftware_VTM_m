@@ -2313,22 +2313,22 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {
-  READ_FLAG(uiCode, "sps_general_hrd_params_present_flag");        pcSPS->setGeneralHrdParametersPresentFlag(uiCode);
-  if (pcSPS->getGeneralHrdParametersPresentFlag())
-  {
-    parseGeneralHrdParameters(pcSPS->getGeneralHrdParameters());
-    if ((pcSPS->getMaxTLayers()-1) > 0)
+    READ_FLAG(uiCode, "sps_timing_hrd_params_present_flag");        pcSPS->setGeneralHrdParametersPresentFlag(uiCode);
+    if (pcSPS->getGeneralHrdParametersPresentFlag())
     {
-      READ_FLAG(uiCode, "sps_sublayer_cpb_params_present_flag");  pcSPS->setSubLayerParametersPresentFlag(uiCode);
-    }
-    else if((pcSPS->getMaxTLayers()-1) == 0)
-    {
-      pcSPS->setSubLayerParametersPresentFlag(0);
-    }
+      parseGeneralHrdParameters(pcSPS->getGeneralHrdParameters());
+      if ((pcSPS->getMaxTLayers()-1) > 0)
+      {
+        READ_FLAG(uiCode, "sps_sublayer_cpb_params_present_flag");  pcSPS->setSubLayerParametersPresentFlag(uiCode);
+      }
+      else if((pcSPS->getMaxTLayers()-1) == 0)
+      {
+        pcSPS->setSubLayerParametersPresentFlag(0);
+      }
 
-    uint32_t firstSubLayer = pcSPS->getSubLayerParametersPresentFlag() ? 0 : (pcSPS->getMaxTLayers() - 1);
-    parseOlsHrdParameters(pcSPS->getGeneralHrdParameters(),pcSPS->getOlsHrdParameters(), firstSubLayer, pcSPS->getMaxTLayers() - 1);
-  }
+      uint32_t firstSubLayer = pcSPS->getSubLayerParametersPresentFlag() ? 0 : (pcSPS->getMaxTLayers() - 1);
+      parseOlsHrdParameters(pcSPS->getGeneralHrdParameters(),pcSPS->getOlsHrdParameters(), firstSubLayer, pcSPS->getMaxTLayers() - 1);
+    }
   }
 
   READ_FLAG(     uiCode, "sps_field_seq_flag");                       pcSPS->setFieldSeqFlag(uiCode);
@@ -4717,6 +4717,8 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
   //!KS: need to add error handling code here, if SPS is not available
   CHECK(sps==0, "Invalid SPS");
 
+  DTRACE_UPDATE( g_trace_ctx, std::make_pair( "final", 0 ) );
+
   READ_FLAG(uiCode, "sh_picture_header_in_slice_header_flag");
   if (uiCode == 0)
   {
@@ -4786,6 +4788,7 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
     }
     pcSlice->setPOC(pocMsb + pocLsb);
   }
+  DTRACE_UPDATE( g_trace_ctx, std::make_pair( "final", 1 ) );
 }
 
 void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
