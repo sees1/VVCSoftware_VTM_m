@@ -434,8 +434,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
   {
     //reset the variables used for the tests
     m_regIntraRDListWithCosts.clear();
-    int numTotalPartsHor = (int)width  >> floorLog2(CU::getISPSplitDim(width, height, TU_1D_VERT_SPLIT));
-    int numTotalPartsVer = (int)height >> floorLog2(CU::getISPSplitDim(width, height, TU_1D_HORZ_SPLIT));
+    int numTotalPartsHor = (int)height >> floorLog2(CU::getISPSplitDim(width, height, TU_1D_HORZ_SPLIT));
+    int numTotalPartsVer = (int)width  >> floorLog2(CU::getISPSplitDim(width, height, TU_1D_VERT_SPLIT)); 
     m_ispTestedModes[0].init( numTotalPartsHor, numTotalPartsVer );
     //the total number of subpartitions is modified to take into account the cases where LFNST cannot be combined with ISP due to size restrictions
     numTotalPartsHor = sps.getUseLFNST() && CU::canUseLfnstWithISP(cu.Y(), HOR_INTRA_SUBPARTITIONS) ? numTotalPartsHor : 0;
