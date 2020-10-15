@@ -4724,8 +4724,12 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
   }
   else
   {
-    READ_FLAG(uiCode, "ph_gdr_or_irap_pic_flag");
-    if (uiCode)
+    uint32_t phGdrOrIrapPicFlag;
+    READ_FLAG(phGdrOrIrapPicFlag, "ph_gdr_or_irap_pic_flag");
+#if JVET_S0076_ASPECT1
+    READ_FLAG(uiCode, "ph_non_ref_pic_flag");
+#endif
+    if (phGdrOrIrapPicFlag)
     {
       READ_FLAG(uiCode, "ph_gdr_pic_flag");
     }
@@ -4734,7 +4738,9 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
     {
       READ_FLAG(uiCode, "ph_intra_slice_allowed_flag");
     }
+#if !JVET_S0076_ASPECT1
     READ_FLAG(uiCode, "ph_non_reference_picture_flag");
+#endif
     // parameter sets
     READ_UVLC(uiCode, "ph_pic_parameter_set_id");
     // picture order count
