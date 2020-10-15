@@ -157,6 +157,8 @@ private:
 
   VPS*                      m_vps;
 
+  int*                      m_layerDecPicBuffering;
+
 public:
   SPS*                      getSPS( int spsId ) { return m_spsMap.getPS( spsId ); };
   APS**                     getApss() { return m_apss; }

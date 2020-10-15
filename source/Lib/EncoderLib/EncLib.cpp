@@ -70,6 +70,7 @@ EncLib::EncLib( EncLibCommon* encLibCommon )
   , m_scalinglistAPS( nullptr )
   , m_doPlt( true )
   , m_vps( encLibCommon->getVPS() )
+  , m_layerDecPicBuffering( encLibCommon->getDecPicBuffering() )
 {
   m_iPOCLast          = -1;
   m_iNumPicRcvd       =  0;
@@ -225,6 +226,12 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   }
   // initialize SPS
   xInitSPS( sps0 );
+
+  for( int i = 0; i < MAX_TLAYER; i++ )
+  {
+    m_layerDecPicBuffering[m_layerId * MAX_TLAYER + i] = m_maxDecPicBuffering[i];
+  }
+
   xInitVPS( sps0 );
 
   xInitDCI(m_dci, sps0);
@@ -1079,12 +1086,24 @@ void EncLib::xInitVPS( const SPS& sps )
 #endif
         }
       }
+
+      int decPicBuffering[MAX_TLAYER] = { 0 };
+
+      for( int lIdx = 0; lIdx < m_vps->getNumLayersInOls( i ); lIdx++ )
+      {
+        for( int tId = 0; tId < MAX_TLAYER; tId++ )
+        {
+          decPicBuffering[tId] += m_layerDecPicBuffering[m_vps->getLayerIdInOls( i, lIdx ) * MAX_TLAYER + tId];
+        }
+      }
     
       for( int j = ( m_vps->m_sublayerDpbParamsPresentFlag ? 0 : m_vps->m_dpbMaxTemporalId[dpbIdx] ); j <= m_vps->m_dpbMaxTemporalId[dpbIdx]; j++ )
       {
-        m_vps->m_dpbParameters[dpbIdx].m_maxDecPicBuffering[j] = profileLevelTierFeatures.getMaxDpbSize( m_vps->getOlsDpbPicSize( i ).width * m_vps->getOlsDpbPicSize( i ).height );
-        m_vps->m_dpbParameters[dpbIdx].m_maxNumReorderPics[j] = m_vps->m_dpbParameters[dpbIdx].m_maxDecPicBuffering[j];
+        m_vps->m_dpbParameters[dpbIdx].m_maxDecPicBuffering[j] = decPicBuffering[j] > 0 ? decPicBuffering[j] : profileLevelTierFeatures.getMaxDpbSize( m_vps->getOlsDpbPicSize( i ).width * m_vps->getOlsDpbPicSize( i ).height );
+        m_vps->m_dpbParameters[dpbIdx].m_maxNumReorderPics[j] = m_vps->m_dpbParameters[dpbIdx].m_maxDecPicBuffering[j] - 1;
         m_vps->m_dpbParameters[dpbIdx].m_maxLatencyIncreasePlus1[j] = 0;
+
+        CHECK( m_vps->m_dpbParameters[dpbIdx].m_maxDecPicBuffering[j] > profileLevelTierFeatures.getMaxDpbSize( m_vps->getOlsDpbPicSize( i ).width * m_vps->getOlsDpbPicSize( i ).height ), "DPB size is not sufficient" );
       }
 
       for( int j = ( m_vps->m_sublayerDpbParamsPresentFlag ? m_vps->m_dpbMaxTemporalId[dpbIdx] : 0 ); j < m_vps->m_dpbMaxTemporalId[dpbIdx]; j++ )
