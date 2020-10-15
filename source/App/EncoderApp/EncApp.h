@@ -97,6 +97,7 @@ private:
   int                    m_numEncoded;
   PelStorage*            m_trueOrgPic;
   PelStorage*            m_orgPic;
+  PelStorage*            m_filteredOrgPic;
 #if EXTENSION_360_VIDEO
   TExt360AppEncTop*      m_ext360;
 #endif

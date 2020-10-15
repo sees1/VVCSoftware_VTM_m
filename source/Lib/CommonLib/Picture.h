@@ -99,7 +99,7 @@ struct Picture : public UnitArea
   uint32_t margin;
   Picture();
 
-  void create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned margin, const bool bDecoder, const int layerId );
+  void create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned margin, const bool bDecoder, const int layerId, const bool gopBasedTemporalFilterEnabled = false );
   void destroy();
 
   void createTempBuffers( const unsigned _maxCUSize );
@@ -117,6 +117,11 @@ struct Picture : public UnitArea
   const CPelUnitBuf getTrueOrigBuf() const;
         PelBuf      getTrueOrigBuf(const CompArea &blk);
   const CPelBuf     getTrueOrigBuf(const CompArea &blk) const;
+
+         PelUnitBuf getFilteredOrigBuf();
+  const CPelUnitBuf getFilteredOrigBuf() const;
+         PelBuf     getFilteredOrigBuf(const CompArea &blk);
+  const CPelBuf     getFilteredOrigBuf(const CompArea &blk) const;
 
          PelBuf     getPredBuf(const CompArea &blk);
   const CPelBuf     getPredBuf(const CompArea &blk) const;
