@@ -2454,31 +2454,31 @@ void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 int VPS::deriveTargetOLSIdx(void)
 {
-  int m_lowestIdx = 0;
-  int m_highestNumLayers = m_numLayersInOls[m_lowestIdx];
+  int lowestIdx = 0;
+  int highestNumLayers = m_numLayersInOls[lowestIdx];
 
   if ((m_numLayersInOls.size() > 1 ))
   {
     int idx = 1;
     for (std::vector<int>::const_iterator it = (m_numLayersInOls.begin() + 1); it != m_numLayersInOls.end(); it++)
     {
-      if(m_highestNumLayers == it[idx])
+      if(highestNumLayers == it[idx])
       {
-        if (m_numOutputLayersInOls[m_lowestIdx] < m_numOutputLayersInOls[idx])
+        if (m_numOutputLayersInOls[lowestIdx] < m_numOutputLayersInOls[idx])
         {
-          m_highestNumLayers = it[idx];
-          m_lowestIdx       = idx;
+          highestNumLayers = it[idx];
+          lowestIdx       = idx;
         }
-	}
-      else if(m_highestNumLayers < it[idx])
+      }
+      else if(highestNumLayers < it[idx])
       {
-        m_highestNumLayers = it[idx];
-        m_lowestIdx       = idx;
+        highestNumLayers = it[idx];
+        lowestIdx       = idx;
       }
       idx++;
     }
   }
-  return m_lowestIdx;
+  return lowestIdx;
 }
 
 uint32_t VPS::getMaxTidinTOls(int m_targetOlsIdx)
