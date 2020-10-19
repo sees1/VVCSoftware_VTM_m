@@ -1220,7 +1220,7 @@ void DecLib::checkSeiInPictureUnit()
   for (uint32_t i = 0; i < seiList.size(); i++)
   {
     uint8_t *payload = std::get<2>(seiList[i]);
-    delete   payload;
+    delete[] payload;
   }
   seiList.clear();
 }
