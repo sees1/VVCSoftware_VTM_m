@@ -226,11 +226,7 @@ const int g_IBCBufferSize = 256 * 128;
 void initGeoTemplate();
 extern int16_t** g_GeoParams;
 extern int16_t*  g_globalGeoWeights   [GEO_NUM_PRESTORED_MASK];
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
 extern Pel*      g_globalGeoEncSADmask[GEO_NUM_PRESTORED_MASK];
-#else
-extern int16_t*  g_globalGeoEncSADmask[GEO_NUM_PRESTORED_MASK];
-#endif
 extern int16_t   g_weightOffset       [GEO_NUM_PARTITION_MODE][GEO_NUM_CU_SIZE][GEO_NUM_CU_SIZE][2];
 extern int8_t    g_angle2mask         [GEO_NUM_ANGLES];
 extern int8_t    g_Dis[GEO_NUM_ANGLES];

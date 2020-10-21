@@ -345,7 +345,7 @@
   {  b, -d,  f, -h,  j, -l,  n, -p,  r, -t,  v, -x,  z, -B,  D, -F,  E, -C,  A, -y,  w, -u,  s, -q,  o, -m,  k, -i,  g, -e,  c, -a,}, \
 }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT && RExt__HIGH_PRECISION_FORWARD_TRANSFORM
+#if RExt__HIGH_PRECISION_FORWARD_TRANSFORM
 //--------------------------------------------------------------------------------------------------
 // DCT-2
 const TMatrixCoeff g_trCoreDCT2P2[TRANSFORM_NUMBER_OF_DIRECTIONS][2][2] =

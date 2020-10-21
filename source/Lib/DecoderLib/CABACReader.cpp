@@ -3181,19 +3181,10 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
   return scanPos;
 }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
 static void check_coeff_conformance(const CoeffCodingContext& cctx, const TCoeff coeff)
-#else
-static void check_coeff_conformance(TCoeff coeff)
-#endif
 {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   CHECK( coeff < cctx.minCoeff() || coeff > cctx.maxCoeff(),
          "TransCoeffLevel outside allowable range" );
-#else
-  CHECK( coeff < COEFF_MIN || coeff > COEFF_MAX,
-         "TransCoeffLevel should be in the range [-32768, 32767]" );
-#endif
 }
 
 void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* coeff, const int stateTransTable, int& state )
@@ -3352,11 +3343,7 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
     sumAbs               += AbsCoeff;
     coeff[ sigBlkPos[k] ] = ( signPattern & ( 1u << 31 ) ? -AbsCoeff : AbsCoeff );
     signPattern         <<= 1;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
     check_coeff_conformance( cctx, coeff[ sigBlkPos[k] ] );
-#else
-    check_coeff_conformance( coeff[ sigBlkPos[k] ] );
-#endif
   }
   if( numNonZero > numSigns )
   {
@@ -3368,11 +3355,7 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
 #endif
     sumAbs               += AbsCoeff;
     coeff[ sigBlkPos[k] ] = ( sumAbs & 1 ? -AbsCoeff : AbsCoeff );
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
     check_coeff_conformance( cctx, coeff[ sigBlkPos[k] ] );
-#else
-    check_coeff_conformance( coeff[ sigBlkPos[k] ] );
-#endif
   }
 }
 
@@ -3489,11 +3472,7 @@ void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* 
         DTRACE(g_trace_ctx, D_SYNTAX_RESI, "ts_par_flag() bin=%d ctx=%d\n", parFlag, cctx.parityCtxIdAbsTS());
         cctx.decimateNumCtxBins(1);
       }
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
       coeff[ blkPos ] = (sign ? -1 : 1 ) * (TCoeff)(1 + parFlag + gt1Flag);
-#else
-      coeff[ blkPos ] = (sign ? -1 : 1 ) * (1 + parFlag + gt1Flag);
-#endif
     }
     lastScanPosPass1 = nextSigPos;
   }
@@ -3572,11 +3551,7 @@ void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* 
 #endif
     coeff[ sigBlkPos[k] ] = ( signPattern & 1 ? -AbsCoeff : AbsCoeff );
     signPattern         >>= 1;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
     check_coeff_conformance( cctx, coeff[ sigBlkPos[k] ] );
-#else
-    check_coeff_conformance( coeff[ sigBlkPos[k] ] );
-#endif
   }
 }
 
