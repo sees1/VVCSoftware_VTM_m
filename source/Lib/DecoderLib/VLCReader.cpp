@@ -3345,18 +3345,6 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       picHeader->setPicColFromL0Flag(0);
     }
 
-#if !JVET_R0324_REORDER
-    // mvd L1 zero flag
-    if (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0)
-    {
-      READ_FLAG(uiCode, "pic_mvd_l1_zero_flag");
-    }
-    else
-    {
-      uiCode = 1;
-    }
-    picHeader->setMvdL1ZeroFlag( uiCode != 0 );
-#endif
 
     // merge candidate list size
     // subblock merge candidate list size
@@ -3380,7 +3368,6 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       picHeader->setDisFracMMVD(false);
     }
 
-#if JVET_R0324_REORDER
     // mvd L1 zero flag
     if (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0)
     {
@@ -3391,7 +3378,6 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       uiCode = 1;
     }
     picHeader->setMvdL1ZeroFlag(uiCode != 0);
-#endif
 
     // picture level BDOF disable flags
     if (sps->getBdofControlPresentInPhFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))

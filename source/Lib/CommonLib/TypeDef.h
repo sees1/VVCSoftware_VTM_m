@@ -67,7 +67,6 @@
 
 
 
-#define JVET_R0324_REORDER                                1 // Reordering of syntax elements JVET-R0324/JVET-R2001-v2
  
 #define JVET_S0097_VPS_default_values                     1 // JVET-S0097: infer values of variables in VPS when not present
 
