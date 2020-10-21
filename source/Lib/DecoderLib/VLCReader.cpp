@@ -322,11 +322,7 @@ void HLSyntaxReader::parseRefPicList(SPS* sps, ReferencePictureList* rpl, int rp
   uint32_t numLtrp = 0;
   uint32_t numIlrp = 0;
 
-#if JVET_S0182_RPL_SIGNALLING
   if (sps->getLongTermRefsPresent() && numRefPic > 0 && rplIdx != -1)
-#else
-  if (sps->getLongTermRefsPresent() && rplIdx != -1)
-#endif
   {
     READ_FLAG(code, "ltrp_in_slice_header_flag[ listIdx ][ rplsIdx ]");
     rpl->setLtrpInSliceHeaderFlag(code);

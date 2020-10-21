@@ -127,7 +127,6 @@
                                                             // (to be vps_default_ptl_dpb_hrd_max_tid_flag) to only control VPS syntax without requiring the number of sublayers 
                                                             // to be the same for all layers.
 
-#define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
 
 #define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
 
