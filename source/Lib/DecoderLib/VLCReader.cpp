@@ -4846,9 +4846,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
       CHECK(symbol == 0, "When max_chroma_format_constraint_idc is equal to 0, the value of no_qtbtt_dual_tree_intra_constraint_flag shall be equal to 1");
     }
 #endif
-#if JVET_S0066_GCI
     READ_CODE(2, symbol,  "gci_three_minus_max_log2_ctu_size_constraint_idc"  ); cinfo->setMaxLog2CtuSizeConstraintIdc(((3-symbol)+5));
-#endif
     READ_FLAG(symbol, "no_partition_constraints_override_constraint_flag"); cinfo->setNoPartitionConstraintsOverrideConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_sao_constraint_flag");                    cinfo->setNoSaoConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_alf_constraint_flag");                    cinfo->setNoAlfConstraintFlag(symbol > 0 ? true : false);
@@ -4973,9 +4971,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     }
 #endif
     READ_FLAG(symbol, "no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
-#if JVET_S0066_GCI
     READ_FLAG(symbol, "gci_no_luma_transform_size_64_constraint_flag"); cinfo->setNoLumaTransformSize64ConstraintFlag(symbol > 0 ? true : false);
-#endif
     READ_FLAG(symbol, "no_transform_skip_constraint_flag");          cinfo->setNoTransformSkipConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_bdpcm_constraint_flag");                   cinfo->setNoBDPCMConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_palette_constraint_flag");                 cinfo->setNoPaletteConstraintFlag(symbol > 0 ? true : false);

@@ -158,9 +158,7 @@ protected:
   bool      m_noMttConstraintFlag;
   bool      m_noChromaQpOffsetConstraintFlag;
   bool      m_noQtbttDualTreeIntraConstraintFlag;
-#if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
-#endif
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
   bool      m_noSaoConstraintFlag;
   bool      m_noAlfConstraintFlag;
@@ -182,9 +180,7 @@ protected:
   bool      m_noGeoConstraintFlag;
   bool      m_noLadfConstraintFlag;
   bool      m_noTransformSkipConstraintFlag;
-#if JVET_S0066_GCI
   bool      m_noLumaTransformSize64ConstraintFlag;
-#endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
   bool      m_noCuQpDeltaConstraintFlag;
