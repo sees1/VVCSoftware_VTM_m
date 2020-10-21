@@ -52,7 +52,6 @@
 
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
-#define JVET_S0121_ASPECT2                                1 // JVET-S0121 aspect 2: Remove the condition check of pps_deblocking_filter_override_enabled_flag for the signalling of ph_deblocking_params_present_flag
 
 #define JVET_S0058_GCI                                    1 // no_mtt_constraint_flag and no_weightedpred_constraint_flag
 

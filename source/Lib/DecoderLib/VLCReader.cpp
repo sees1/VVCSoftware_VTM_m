@@ -3598,26 +3598,11 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
   // deblocking filter controls
   if (pps->getDeblockingFilterControlPresentFlag())
   {
-#if JVET_S0121_ASPECT2
     if ( pps->getDbfInfoInPhFlag() )
     {
       READ_FLAG( uiCode, "ph_deblocking_params_present_flag" );
       picHeader->setDeblockingFilterOverrideFlag( uiCode != 0 );
     }
-#else
-    if(pps->getDeblockingFilterOverrideEnabledFlag())
-    {
-      if (pps->getDbfInfoInPhFlag())
-      {
-        READ_FLAG ( uiCode, "ph_deblocking_filter_override_flag" );
-        picHeader->setDeblockingFilterOverrideFlag(uiCode != 0);
-      }
-      else
-      {
-        picHeader->setDeblockingFilterOverrideFlag(false);
-      }
-    }
-#endif
     else
     {
       picHeader->setDeblockingFilterOverrideFlag(false);
