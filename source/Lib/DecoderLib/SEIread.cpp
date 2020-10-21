@@ -801,7 +801,6 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
       }
     }
   }
-#if JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP
   if (sei.m_bpMaxSubLayers-1 > 0) 
   {
     sei_read_flag(pDecodedMessageOutputStream, code, "bp_sublayer_dpb_output_offsets_present_flag");
@@ -811,10 +810,6 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   {
     sei.m_sublayerDpbOutputOffsetsPresentFlag = false;
   }
-#else
-  sei_read_flag( pDecodedMessageOutputStream, code, "sublayer_dpb_output_offsets_present_flag" );
-  sei.m_sublayerDpbOutputOffsetsPresentFlag = code;
-#endif
   if(sei.m_sublayerDpbOutputOffsetsPresentFlag)
   {
     for(int i = 0; i < sei.m_bpMaxSubLayers - 1; i++)

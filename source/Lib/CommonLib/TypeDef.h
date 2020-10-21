@@ -104,7 +104,6 @@
 
 
 
-#define JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP           1 // JVET-S0064: Conditionally signal bp_sublayer_dpb_output_offsets_present_flag
 
 #define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
 
