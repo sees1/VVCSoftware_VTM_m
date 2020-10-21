@@ -95,11 +95,7 @@ void EncApp::xInitLibCfg()
   vps.setMaxSubLayers(m_maxSublayers);
   if (vps.getMaxLayers() > 1 && vps.getMaxSubLayers() > 1)
   {
-#if JVET_S0115_VPS
     vps.setDefaultPtlDpbHrdMaxTidFlag(m_defaultPtlDpbHrdMaxTidFlag);
-#else
-    vps.setAllLayersSameNumSublayersFlag(m_allLayersSameNumSublayersFlag);
-#endif
   }
   if (vps.getMaxLayers() > 1)
   {

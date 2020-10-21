@@ -2174,11 +2174,7 @@ VPS::VPS()
   : m_VPSId(0)
   , m_maxLayers(1)
   , m_vpsMaxSubLayers(7)
-#if JVET_S0115_VPS
   , m_vpsDefaultPtlDpbHrdMaxTidFlag (true)
-#else
-  , m_vpsAllLayersSameNumSubLayersFlag(true)
-#endif
   , m_vpsAllIndependentLayersFlag(true)
   , m_vpsEachLayerIsAnOlsFlag (1)
   , m_vpsOlsModeIdc (0)

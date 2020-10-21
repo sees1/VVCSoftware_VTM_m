@@ -124,7 +124,6 @@
                                                             // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
                                                             //             add no_idr_rpl_constraint_flag
 
-#define JVET_S0115_VPS                                    1 // JVET-S0115 aspect 2 (JVET-S0142 item 4): Change the name and semantics of vps_all_layers_same_num_sublayers_flag 
                                                             // (to be vps_default_ptl_dpb_hrd_max_tid_flag) to only control VPS syntax without requiring the number of sublayers 
                                                             // to be the same for all layers.
 

@@ -2166,19 +2166,11 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
   READ_CODE(3, uiCode, "vps_max_sublayers_minus1");           pcVPS->setMaxSubLayers(uiCode + 1); CHECK(uiCode + 1 > MAX_VPS_SUBLAYERS, "Signalled number of sublayers larger than MAX_VPS_SUBLAYERS.");
   if( pcVPS->getMaxLayers() > 1 && pcVPS->getMaxSubLayers() > 1)
   {
-#if JVET_S0115_VPS
     READ_FLAG(uiCode, "vps_default_ptl_dpb_hrd_max_tid_flag"); pcVPS->setDefaultPtlDpbHrdMaxTidFlag(uiCode);
-#else
-    READ_FLAG(uiCode, "vps_all_layers_same_num_sublayers_flag"); pcVPS->setAllLayersSameNumSublayersFlag(uiCode);
-#endif
   }
   else
   {
-#if JVET_S0115_VPS
     pcVPS->setDefaultPtlDpbHrdMaxTidFlag(1);
-#else
-    pcVPS->setAllLayersSameNumSublayersFlag(1);
-#endif
   }
   if( pcVPS->getMaxLayers() > 1 )
   {
@@ -2275,11 +2267,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
     }
     else
       pcVPS->setPtPresentFlag(0, 1);
-#if JVET_S0115_VPS
     if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag())
-#else
-    if (!pcVPS->getAllLayersSameNumSublayersFlag())
-#endif
     {
       READ_CODE(3, uiCode, "vps_ptl_max_tid");
       pcVPS->setPtlMaxTemporalId(i, uiCode);
@@ -2340,11 +2328,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
 
     for( int i = 0; i < pcVPS->m_numDpbParams; i++ )
     {
-#if JVET_S0115_VPS
       if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag())
-#else
-      if (!pcVPS->getAllLayersSameNumSublayersFlag())
-#endif
       {
         READ_CODE(3, uiCode, "vps_dpb_max_tid[i]");
         pcVPS->m_dpbMaxTemporalId.push_back(uiCode);
@@ -2434,11 +2418,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
     pcVPS->m_olsHrdParams.resize(pcVPS->getNumOlsTimingHrdParamsMinus1(), std::vector<OlsHrdParams>(pcVPS->getMaxSubLayers()));
     for (int i = 0; i <= pcVPS->getNumOlsTimingHrdParamsMinus1(); i++)
     {
-#if JVET_S0115_VPS
       if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag())
-#else
-      if (!pcVPS->getAllLayersSameNumSublayersFlag())
-#endif
       {
         READ_CODE(3, uiCode, "vps_hrd_max_tid[i]");  pcVPS->setHrdMaxTid(i, uiCode);
         CHECK (uiCode > (pcVPS->getMaxSubLayers() - 1), "The value of vps_hrd_max_tid[i] shall be in the range of 0 to vps_max_sublayers_minus1, inclusive." )

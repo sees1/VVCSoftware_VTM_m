@@ -1090,11 +1090,7 @@ void EncLib::xInitVPS( const SPS& sps )
       }
       else
       {
-#if JVET_S0115_VPS
         if( m_vps->getDefaultPtlDpbHrdMaxTidFlag() )
-#else
-        if( m_vps->getAllLayersSameNumSublayersFlag() )
-#endif
         {
           // When vps_max_sublayers_minus1 is greater than 0 and vps_all_layers_same_num_sublayers_flag is equal to 1, the value of vps_dpb_max_tid[ dpbIdx ] is inferred to be equal to vps_max_sublayers_minus1.
           m_vps->m_dpbMaxTemporalId[dpbIdx] = m_vps->getMaxSubLayers() - 1;
