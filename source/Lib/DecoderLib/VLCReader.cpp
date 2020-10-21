@@ -4614,11 +4614,9 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
 void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
 {
   uint32_t symbol;
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   READ_FLAG(symbol, "gci_present_flag"); cinfo->setGciPresentFlag(symbol ? true : false);
   if (cinfo->getGciPresentFlag())
   {
-#endif
 #if JVET_S0105_GCI_REORDER_IN_CATEGORY
     /* general */
     READ_FLAG(symbol, "gci_intra_only_constraint_flag");                 cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);
@@ -4911,7 +4909,6 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "no_virtual_boundaries_constraint_flag");      cinfo->setNoVirtualBoundaryConstraintFlag(symbol > 0 ? true : false);
 #endif
 #endif
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     READ_CODE(8, symbol, "gci_num_reserved_bits");
     uint32_t const numReservedBits = symbol;
     for (int i = 0; i < numReservedBits; i++)
@@ -4923,7 +4920,6 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
   {
     READ_FLAG(symbol, "gci_alignment_zero_bit");                     CHECK(symbol != 0, "gci_alignment_zero_bit not equal to zero");
   }
-#endif
 }
 
 
@@ -4934,9 +4930,6 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
   {
     READ_CODE(7 , symbol,   "general_profile_idc"              ); ptl->setProfileIdc  (Profile::Name(symbol));
     READ_FLAG(    symbol,   "general_tier_flag"                ); ptl->setTierFlag    (symbol ? Level::HIGH : Level::MAIN);
-#if !JVET_S0179_CONDITIONAL_SIGNAL_GCI
-    parseConstraintInfo( ptl->getConstraintInfo() );
-#endif
   }
 
   READ_CODE( 8, symbol, "general_level_idc" ); ptl->setLevelIdc( Level::Name( symbol ) );
@@ -4953,9 +4946,7 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
 
   if(profileTierPresentFlag)
   {
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     parseConstraintInfo(ptl->getConstraintInfo());
-#endif
   }
 
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)

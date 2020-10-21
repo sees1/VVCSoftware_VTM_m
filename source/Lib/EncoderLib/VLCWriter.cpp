@@ -2694,11 +2694,9 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
 
 void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 {
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   WRITE_FLAG(cinfo->getGciPresentFlag(), "gci_present_flag");
   if (cinfo->getGciPresentFlag())
   {
-#endif
 #if JVET_S0105_GCI_REORDER_IN_CATEGORY
     /* general */
     WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag() ? 1 : 0, "gci_intra_only_constraint_flag");
@@ -2876,7 +2874,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "no_virtual_boundaries_constraint_flag");
 #endif
 #endif
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     //The value of gci_num_reserved_bits shall be equal to 0 in bitstreams conforming to this version of this Specification.
     //Other values of gci_num_reserved_bits are reserved for future use by ITU-T | ISO/IEC.
     WRITE_CODE(0, 8, "gci_num_reserved_bits");
@@ -2886,7 +2883,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
   {
     WRITE_FLAG(0, "gci_alignment_zero_bit");
   }
-#endif
 }
 
 void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 )
@@ -2895,9 +2891,6 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
   {
     WRITE_CODE( int(ptl->getProfileIdc()), 7 ,   "general_profile_idc"                     );
     WRITE_FLAG( ptl->getTierFlag()==Level::HIGH, "general_tier_flag"                       );
-#if !JVET_S0179_CONDITIONAL_SIGNAL_GCI
-    codeConstraintInfo( ptl->getConstraintInfo() );
-#endif
   }
 
   WRITE_CODE( int( ptl->getLevelIdc() ), 8, "general_level_idc" );
@@ -2909,9 +2902,7 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 
   if(profileTierPresentFlag)
   {
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     codeConstraintInfo(ptl->getConstraintInfo());
-#endif
   }
 
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)

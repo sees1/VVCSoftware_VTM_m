@@ -260,9 +260,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAvoidIntraInDepLayer                              ( m_avoidIntraInDepLayer );
 
   //====== SPS constraint flags =======
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   m_cEncLib.setGciPresentFlag                                    ( m_gciPresentFlag );
-#endif
   if (m_cEncLib.getGciPresentFlag())
   {
     m_cEncLib.setNonPackedConstraintFlag(m_nonPackedConstraintFlag);
