@@ -156,9 +156,7 @@ protected:
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
   bool      m_noMttConstraintFlag;
-#if JVET_R0341_GCI
   bool      m_noChromaQpOffsetConstraintFlag;
-#endif
   bool      m_noQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;

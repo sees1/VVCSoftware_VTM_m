@@ -3013,9 +3013,7 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 #if JVET_S0050_GCI
     WRITE_FLAG(cinfo->getNoExplicitScaleListConstraintFlag() ? 1 : 0, "no_explicit_scaling_list_constraint_flag");
 #endif
-#if JVET_R0341_GCI
     WRITE_FLAG(cinfo->getNoChromaQpOffsetConstraintFlag() ? 1 : 0, "gic_no_chroma_qp_offset_constraint_flag");
-#endif
     WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "no_lmcs_constraint_flag");
     WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "no_qp_delta_constraint_flag");
     WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "no_dep_quant_constraint_flag");

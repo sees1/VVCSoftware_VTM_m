@@ -54,7 +54,6 @@
 //########### place macros to be removed in next cycle below this line ###############
 
 
-#define JVET_R0341_GCI                                    1 // JVET-R0341: on constraint flag for local chroma QP control
 
 #define JVET_S0208_ASPECT1                                1 // JVET-S0208 aspect 1: Remove the extra_sh_bits_struct( ) and extra_ph_bits_struct( ) structures and put their content directly in the SPS.
 

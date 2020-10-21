@@ -1921,12 +1921,10 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK((sps->getUseWP() || sps->getUseWPBiPred()), "When gci_no_weighted_prediction_constraint_flag is equal to 1, the values of sps_weighted_pred_flag and sps_weighted_bipred_flag shall be equal to 0");
   }
 
-#if JVET_R0341_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoChromaQpOffsetConstraintFlag())
   {
     CHECK((pps->getCuChromaQpOffsetListEnabledFlag()), "When gci_no_ChromaQpOffset_constraint_flag is equal to 1, the values of pps_cu_chroma_qp_offset_list_enabled_flag shall be equal to 0");
   }
-#endif
 
 #if JVET_S0066_GCI
   CHECK(sps->getCTUSize() > (1 << sps->getProfileTierLevel()->getConstraintInfo()->getMaxLog2CtuSizeConstraintIdc()), "The CTU size specified by sps_log2_ctu_size_minus5 shall not exceed the constraint specified by gci_three_minus_max_log2_ctu_size_constraint_idc");

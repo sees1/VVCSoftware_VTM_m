@@ -285,9 +285,7 @@ class ConstraintInfo
   bool              m_noVirtualBoundaryConstraintFlag;
 #endif
   bool              m_noMttConstraintFlag;
-#if JVET_R0341_GCI
   bool              m_noChromaQpOffsetConstraintFlag;
-#endif
   bool              m_noQtbttDualTreeIntraConstraintFlag;
 #if JVET_S0066_GCI
   int               m_maxLog2CtuSizeConstraintIdc;
@@ -394,9 +392,7 @@ public:
     , m_noVirtualBoundaryConstraintFlag(false)
 #endif
     , m_noMttConstraintFlag(false)
-#if JVET_R0341_GCI
     , m_noChromaQpOffsetConstraintFlag(false)
-#endif
     , m_noQtbttDualTreeIntraConstraintFlag(false)
 #if JVET_S0066_GCI
     , m_maxLog2CtuSizeConstraintIdc(8)
@@ -546,10 +542,8 @@ public:
 #endif
   bool          getNoMttConstraintFlag() const { return m_noMttConstraintFlag; }
   void          setNoMttConstraintFlag(bool bVal) { m_noMttConstraintFlag = bVal; }
-#if JVET_R0341_GCI
   bool          getNoChromaQpOffsetConstraintFlag() const { return m_noChromaQpOffsetConstraintFlag; }
   void          setNoChromaQpOffsetConstraintFlag(bool b) { m_noChromaQpOffsetConstraintFlag = b; }
-#endif
   bool          getNoQtbttDualTreeIntraConstraintFlag() const { return m_noQtbttDualTreeIntraConstraintFlag; }
   void          setNoQtbttDualTreeIntraConstraintFlag(bool bVal) { m_noQtbttDualTreeIntraConstraintFlag = bVal; }
 #if JVET_S0066_GCI
