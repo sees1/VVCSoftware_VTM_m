@@ -728,9 +728,7 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
     sei.m_decodingUnitDpbDuParamsInPicTimingSeiFlag = false;
   }
 
-#if JVET_S0248_HRD_CLEANUP
   CHECK(sei.m_altCpbParamsPresentFlag && sei.m_bpDecodingUnitHrdParamsPresentFlag,"When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0");
-#endif
 
   sei_read_flag( pDecodedMessageOutputStream, code, "concatenation_flag");
   sei.m_concatenationFlag = code;
