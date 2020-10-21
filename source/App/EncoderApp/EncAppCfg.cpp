@@ -512,11 +512,7 @@ static uint32_t getMaxTileRowsByLevel( Level::Name level )
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
     default:
-#if JVET_S0156_LEVEL_DEFINITION
       return 22;
-#else
-      return 21;
-#endif
   }
 }
 

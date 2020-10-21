@@ -1943,7 +1943,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK( !sps->getPtlDpbHrdParamsPresentFlag(), "When sps_video_parameter_set_id is greater than 0 and there is an OLS that contains only one layer with nuh_layer_id equal to the nuh_layer_id of the SPS, the value of sps_ptl_dpb_hrd_params_present_flag shall be equal to 1" );
   }
 
-#if JVET_S0156_LEVEL_DEFINITION
   ProfileLevelTierFeatures ptlFeatures;
   ptlFeatures.extractPTLInformation(*sps);
   const ProfileFeatures *profileFeatures = ptlFeatures.getProfileFeatures();
@@ -1970,7 +1969,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK(sps->getProfileTierLevel()->getLevelIdc() != Level::NONE, "Unknown level");
     msg(WARNING, "Warning: Level set to none, invalid or unknown value\n");
   }
-#endif
 }
 
 
