@@ -1363,13 +1363,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_CODE(2, uiCode, "sps_chroma_format_idc");                     pcSPS->setChromaFormatIdc( ChromaFormat(uiCode) );
 #endif
 
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-  if( pcSPS->getChromaFormatIdc() == CHROMA_444 )
-  {
-    READ_FLAG(     uiCode, "separate_colour_plane_flag");        CHECK(uiCode != 0, "separate_colour_plane_flag shall be equal to 0");
-    pcSPS->setSeparateColourPlaneFlag( uiCode != 0 );
-  }
-#endif
 
   READ_FLAG(uiCode, "sps_ref_pic_resampling_enabled_flag");          pcSPS->setRprEnabledFlag(uiCode);
 #if JVET_Q0114_ASPECT5_GCI_FLAG
@@ -1403,9 +1396,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     READ_UVLC(uiCode, "sps_conf_win_top_offset");                conf.setWindowTopOffset(uiCode);
     READ_UVLC(uiCode, "sps_conf_win_bottom_offset");             conf.setWindowBottomOffset(uiCode);
   }
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-  const uint32_t chromaArrayType = (int) pcSPS->getSeparateColourPlaneFlag() ? 0 : pcSPS->getChromaFormatIdc();
-#endif
 
 #if !JVET_S0186_SPS_CLEANUP
   READ_CODE(2, uiCode, "sps_log2_ctu_size_minus5");              pcSPS->setCTUSize(1 << (uiCode + 5));
@@ -1757,11 +1747,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
   READ_FLAG(uiCode, "sps_lfnst_enabled_flag");                    pcSPS->setUseLFNST(uiCode != 0);
 
-#if JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   if (pcSPS->getChromaFormatIdc() != CHROMA_400)
-#else
-  if (chromaArrayType != CHROMA_400)
-#endif
   {
     READ_FLAG(uiCode, "sps_joint_cbcr_enabled_flag");                pcSPS->setJointCbCrEnabledFlag(uiCode ? true : false);
     ChromaQpMappingTableParams chromaQpMappingTableParams;
@@ -2002,11 +1988,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setVerCollocatedChromaFlag(true);
   }
   READ_FLAG( uiCode,  "sps_palette_enabled_flag");                                pcSPS->setPLTMode                ( uiCode != 0 );
-#if JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   if (pcSPS->getChromaFormatIdc() == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
-#else
-  if (chromaArrayType == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
-#endif
   {
     READ_FLAG(uiCode, "sps_act_enabled_flag");                                pcSPS->setUseColorTrans(uiCode != 0);
   }
@@ -3570,9 +3552,6 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && pps->getWpInfoInPhFlag() == 1, "When sh_picture_header_in_slice_header_flag is equal to 1, wp_info_in_ph_flag shall be equal to 0");
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && pps->getQpDeltaInfoInPhFlag() == 1, "When sh_picture_header_in_slice_header_flag is equal to 1, qp_delta_info_in_ph_flag shall be equal to 0");
   CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSubPicInfoPresentFlag() == 1, "When sps_subpic_info_present_flag is equal to 1, the value of sh_picture_header_in_slice_header_flag shall be equal to 0");
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-  CHECK(pcSlice->getPictureHeaderInSliceHeader() && sps->getSeparateColourPlaneFlag() == 1, "when separate_colour_plane_flag is equal to 1, the value of sh_picture_header_in_slice_header_flag shall be equal to 0");
-#endif
 #if JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT
   CHECK(sps->getSubPicInfoPresentFlag() == 1 && sps->getVirtualBoundariesEnabledFlag() == 1 && sps->getVirtualBoundariesPresentFlag() == 0,
         "when sps_subpic_info_present_flag is equal to 1 and sps_virtual_boundaries_enabled_flag is equal to 1, sps_virtual_boundaries_present_flag shall be equal 1");
@@ -3835,18 +3814,6 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     pcSlice->setExplicitScalingListUsed(pcSlice->getPictureHeaderInSliceHeader() ? picHeader->getExplicitScalingListEnabledFlag() : false);
   }
 
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-    // 4:4:4 colour plane ID
-    if( sps->getSeparateColourPlaneFlag() )
-    {
-      READ_CODE( 2, uiCode, "colour_plane_id" ); pcSlice->setColourPlaneId( uiCode );
-      CHECK( uiCode > 2, "colour_plane_id exceeds valid range" );
-    }
-    else
-    {
-      pcSlice->setColourPlaneId( 0 );
-    }
-#endif
     if( pps->getRplInfoInPhFlag() )
     {
       *pcSlice->getRPL0() = *picHeader->getRPL0();

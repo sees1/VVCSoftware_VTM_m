@@ -88,7 +88,6 @@
 
 
 
-#define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
 
 #define JVET_S0123_IDR_UNAVAILABLE_REFERENCE              1 // JVET-S0123: Invoke the generation of unavailable reference picture for an IDR picture that has RPLs.
                                                             //             Change the process for deriving empty RPLs when sps_idr_rpl_present_flag is equal to 0 and nal_unit_type is equal to IDR_W_RADL or IDR_N_LP to involve pps_rpl_info_in_ph_flag.
