@@ -1484,7 +1484,6 @@ void EncLib::xInitSPS( SPS& sps )
   if (m_subPicInfoPresentFlag)
   {
     sps.setNumSubPics(m_numSubPics);
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
     sps.setSubPicSameSizeFlag(m_subPicSameSizeFlag);
     if (m_subPicSameSizeFlag)
     {
@@ -1504,12 +1503,6 @@ void EncLib::xInitSPS( SPS& sps )
       sps.setSubPicWidth(m_subPicWidth);
       sps.setSubPicHeight(m_subPicHeight);
     }
-#else
-    sps.setSubPicCtuTopLeftX(m_subPicCtuTopLeftX);
-    sps.setSubPicCtuTopLeftY(m_subPicCtuTopLeftY);
-    sps.setSubPicWidth(m_subPicWidth);
-    sps.setSubPicHeight(m_subPicHeight);
-#endif
     sps.setSubPicTreatedAsPicFlag(m_subPicTreatedAsPicFlag);
     sps.setLoopFilterAcrossSubpicEnabledFlag(m_loopFilterAcrossSubpicEnabledFlag);
     sps.setSubPicIdLen(m_subPicIdLen);
