@@ -99,7 +99,6 @@
 
 
 
-#define JVET_S0048_SCALING_OFFSET                         1 // JVET-S0048 Aspect2: change the constraint on the value ranges of scaling window offsets to be more flexible
 
 #define JVET_S0102_ASPECT4                                1 // JVET-S0102 Aspect 4: Mandate same value for buffering period syntax elements
 
