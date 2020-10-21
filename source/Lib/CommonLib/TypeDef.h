@@ -57,7 +57,6 @@
 
 
 
-#define JVET_S0212_BITDEPTH_RANGE                         1 // JVET-S0212 aspect 2: Specify a value range of 0..2 for vps_ols_dpb_bitdepth_minus8[ i ]. Also for sps_bitdepth_minus8[ i ]
 
 #define JVET_S0047_MINUS1_FOR_VB_POS                      1 // JVET-S0047: Add "_minus1" to sps_virtual_boundary_pos_x, sps_virtual_boundary_pos_y, ph_virtual_boundary_pos_x and ph_virtual_boundary_pos_y
 
