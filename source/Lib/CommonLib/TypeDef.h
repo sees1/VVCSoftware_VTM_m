@@ -92,7 +92,6 @@
                                                             //             Change the process for deriving empty RPLs when sps_idr_rpl_present_flag is equal to 0 and nal_unit_type is equal to IDR_W_RADL or IDR_N_LP to involve pps_rpl_info_in_ph_flag.
 
 
-#define JVET_S0065_SPS_INFERENCE_RULE                     1 // JVET_S0065_PROPOSAL1: Inference rule for sps_virtual_boundaries_present_flag
 
 #define JVET_S0155_EOS_NALU_CHECK                         1 // JVET-S0155: Constraints on EOS NAL units
 
