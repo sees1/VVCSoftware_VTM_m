@@ -1322,7 +1322,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_CODE( 4,  uiCode, "sps_video_parameter_set_id" );      pcSPS->setVPSId( uiCode );
   READ_CODE(3, uiCode, "sps_max_sub_layers_minus1");          pcSPS->setMaxTLayers   (uiCode + 1);
   CHECK(uiCode > 6, "Invalid maximum number of T-layer signalled");
-#if JVET_S0186_SPS_CLEANUP
   READ_CODE(2, uiCode, "sps_chroma_format_idc");
   pcSPS->setChromaFormatIdc(ChromaFormat(uiCode));
 
@@ -1332,10 +1331,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   unsigned ctbLog2SizeY = uiCode + 5;
   pcSPS->setMaxCUWidth(pcSPS->getCTUSize());
   pcSPS->setMaxCUHeight(pcSPS->getCTUSize());
-#else
-  READ_CODE(4, uiCode, "sps_reserved_zero_4bits");
-  CHECK(uiCode != 0, "sps_reserved_zero_4bits not equal to zero");
-#endif
   READ_FLAG(uiCode, "sps_ptl_dpb_hrd_params_present_flag"); pcSPS->setPtlDpbHrdParamsPresentFlag(uiCode);
 
   if( !pcSPS->getVPSId() )
@@ -1352,9 +1347,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   READ_FLAG(uiCode, "sps_gdr_enabled_flag");
   pcSPS->setGDREnabledFlag(uiCode);
-#if !JVET_S0186_SPS_CLEANUP
-  READ_CODE(2, uiCode, "sps_chroma_format_idc");                     pcSPS->setChromaFormatIdc( ChromaFormat(uiCode) );
-#endif
 
 
   READ_FLAG(uiCode, "sps_ref_pic_resampling_enabled_flag");          pcSPS->setRprEnabledFlag(uiCode);
@@ -1390,13 +1382,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     READ_UVLC(uiCode, "sps_conf_win_bottom_offset");             conf.setWindowBottomOffset(uiCode);
   }
 
-#if !JVET_S0186_SPS_CLEANUP
-  READ_CODE(2, uiCode, "sps_log2_ctu_size_minus5");              pcSPS->setCTUSize(1 << (uiCode + 5));
-  CHECK(uiCode > 2, "sps_log2_ctu_size_minus5 must be less than or equal to 2");
-  unsigned ctbLog2SizeY = uiCode + 5;
-  pcSPS->setMaxCUWidth(pcSPS->getCTUSize());
-  pcSPS->setMaxCUHeight(pcSPS->getCTUSize());
-#endif
 
   READ_FLAG( uiCode, "sps_subpic_info_present_flag" );               pcSPS->setSubPicInfoPresentFlag(uiCode);
 #if JVET_S0113_S0195_GCI

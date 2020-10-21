@@ -795,12 +795,8 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   CHECK(pcSPS->getMaxTLayers() == 0, "Maximum number of temporal sub-layers is '0'");
 
   WRITE_CODE(pcSPS->getMaxTLayers() - 1, 3, "sps_max_sub_layers_minus1");
-#if JVET_S0186_SPS_CLEANUP
   WRITE_CODE(int(pcSPS->getChromaFormatIdc()), 2, "sps_chroma_format_idc");
   WRITE_CODE(floorLog2(pcSPS->getCTUSize()) - 5, 2, "sps_log2_ctu_size_minus5");
-#else
-  WRITE_CODE(0,                          4, "sps_reserved_zero_4bits");
-#endif
   WRITE_FLAG(pcSPS->getPtlDpbHrdParamsPresentFlag(), "sps_ptl_dpb_hrd_params_present_flag");
 
   if( !pcSPS->getVPSId() )
@@ -814,9 +810,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
 
   WRITE_FLAG(pcSPS->getGDREnabledFlag(), "sps_gdr_enabled_flag");
-#if !JVET_S0186_SPS_CLEANUP
-  WRITE_CODE(int(pcSPS->getChromaFormatIdc ()), 2, "chroma_format_idc");
-#endif
 
 
   WRITE_FLAG(pcSPS->getRprEnabledFlag(), "sps_ref_pic_resampling_enabled_flag");
@@ -840,9 +833,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(conf.getWindowBottomOffset(), "sps_conf_win_bottom_offset");
   }
 
-#if !JVET_S0186_SPS_CLEANUP
-  WRITE_CODE(floorLog2(pcSPS->getCTUSize()) - 5, 2, "sps_log2_ctu_size_minus5");
-#endif
 
   WRITE_FLAG(pcSPS->getSubPicInfoPresentFlag(), "sps_subpic_info_present_flag");
 
