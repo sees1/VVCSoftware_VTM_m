@@ -1133,20 +1133,16 @@ void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
 #if ENABLE_TRACING
   DTRACE( g_trace_ctx, D_HEADER, "----------- vui_parameters -----------\n");
 #endif
-#if JVET_S0266_VUI_length
   unsigned vuiPayloadSize = pcSPS->getVuiPayloadSize();
   InputBitstream *bs = getBitstream();
   setBitstream(bs->extractSubstream(vuiPayloadSize * 8));
-#endif
 
   uint32_t  symbol;
 
   READ_FLAG(symbol,  "vui_progressive_source_flag"          ); pcVUI->setProgressiveSourceFlag(symbol ? true : false);
   READ_FLAG(symbol,  "vui_interlaced_source_flag"           ); pcVUI->setInterlacedSourceFlag(symbol ? true : false);
-#if JVET_S0266_VUI_length
   READ_FLAG(symbol, "vui_non_packed_constraint_flag");         pcVUI->setNonPackedFlag(symbol ? true : false);
   READ_FLAG(symbol, "vui_non_projected_constraint_flag");      pcVUI->setNonProjectedFlag(symbol ? true : false);
-#endif
   READ_FLAG( symbol, "vui_aspect_ratio_info_present_flag");           pcVUI->setAspectRatioInfoPresentFlag(symbol);
   if (pcVUI->getAspectRatioInfoPresentFlag())
   {
@@ -1188,7 +1184,6 @@ void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
     }
   }
 
-#if JVET_S0266_VUI_length
   int payloadBitsRem = getBitstream()->getNumBitsLeft();
   if(payloadBitsRem)      //Corresponds to more_data_in_payload()
   {
@@ -1221,7 +1216,6 @@ void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
   }
   delete getBitstream();
   setBitstream(bs);
-#endif
 }
 
 void HLSyntaxReader::parseGeneralHrdParameters(GeneralHrdParams *hrd)
@@ -2237,7 +2231,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   if (pcSPS->getVuiParametersPresentFlag())
   {
-#if JVET_S0266_VUI_length
     READ_UVLC(uiCode, "sps_vui_payload_size_minus1");
     pcSPS->setVuiPayloadSize(uiCode+1);
     while (!isByteAligned())
@@ -2245,7 +2238,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
       READ_FLAG(uiCode, "sps_vui_alignment_zero_bit");
       CHECK(uiCode != 0, "sps_vui_alignment_zero_bit not equal to 0");
     }
-#endif
     parseVUI(pcSPS->getVuiParameters(), pcSPS);
   }
 
@@ -4713,14 +4705,8 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "gci_no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_virtual_boundaries_constraint_flag");      cinfo->setNoVirtualBoundaryConstraintFlag(symbol > 0 ? true : false);
 #else
-#if !JVET_S0266_VUI_length
-    READ_FLAG(symbol,  "general_non_packed_constraint_flag"       ); cinfo->setNonPackedConstraintFlag(symbol ? true : false);
-#endif
 #if !JVET_S0138_GCI_PTL
     READ_FLAG(symbol,  "general_frame_only_constraint_flag"       ); cinfo->setFrameOnlyConstraintFlag(symbol ? true : false);
-#endif
-#if !JVET_S0266_VUI_length
-    READ_FLAG(symbol,  "general_non_projected_constraint_flag"    ); cinfo->setNonProjectedConstraintFlag(symbol ? true : false);
 #endif
     READ_FLAG(symbol,  "general_one_picture_only_constraint_flag"    ); cinfo->setOnePictureOnlyConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "intra_only_constraint_flag"               ); cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);

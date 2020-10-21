@@ -78,7 +78,6 @@
 
 
 
-#define JVET_S0266_VUI_length                             1 // JVET-S0266: VUI modifications including signalling of VUI length
 
 #define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
 

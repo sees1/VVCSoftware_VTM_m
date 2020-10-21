@@ -238,10 +238,6 @@ class ConstraintInfo
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   bool              m_gciPresentFlag;
 #endif
-#if !JVET_S0266_VUI_length
-  bool              m_nonPackedConstraintFlag;
-  bool              m_nonProjectedConstraintFlag;
-#endif
 #if JVET_Q0114_ASPECT5_GCI_FLAG
   bool              m_noRprConstraintFlag;
 #endif
@@ -329,10 +325,6 @@ public:
   ConstraintInfo()
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     : m_gciPresentFlag(true)
-#if !JVET_S0266_VUI_length
-    , m_nonPackedConstraintFlag(false)
-    , m_nonProjectedConstraintFlag(false)
-#endif
 #else
     : m_nonPackedConstraintFlag (false)
     , m_nonProjectedConstraintFlag(false)
@@ -431,10 +423,6 @@ public:
   void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
 #endif
 
-#if !JVET_S0266_VUI_length
-  bool          getNonPackedConstraintFlag() const { return m_nonPackedConstraintFlag; }
-  void          setNonPackedConstraintFlag(bool b) { m_nonPackedConstraintFlag = b; }
-#endif
 #if !JVET_S0138_GCI_PTL
   bool          getFrameOnlyConstraintFlag() const { return m_frameOnlyConstraintFlag; }
   void          setFrameOnlyConstraintFlag(bool b) { m_frameOnlyConstraintFlag = b; }
@@ -445,10 +433,6 @@ public:
   int           getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
   void          setMaxChromaFormatConstraintIdc(int fmt) { m_maxChromaFormatConstraintIdc = fmt; }
 
-#if !JVET_S0266_VUI_length
-  bool          getNonProjectedConstraintFlag() const { return m_nonProjectedConstraintFlag; }
-  void          setNonProjectedConstraintFlag(bool b) { m_nonProjectedConstraintFlag = b; }
-#endif
 
 #if JVET_Q0114_ASPECT5_GCI_FLAG
   bool          getNoRprConstraintFlag() const { return m_noRprConstraintFlag; }
@@ -1239,7 +1223,6 @@ public:
 class VUI
 {
 private:
-#if JVET_S0266_VUI_length
   bool       m_progressiveSourceFlag;
   bool       m_interlacedSourceFlag;
   bool       m_nonPackedFlag;
@@ -1260,30 +1243,9 @@ private:
   int        m_chromaSampleLocTypeTopField;
   int        m_chromaSampleLocTypeBottomField;
   int        m_chromaSampleLocType;
-#else
-  bool       m_aspectRatioInfoPresentFlag;
-  bool       m_aspectRatioConstantFlag;
-  int        m_aspectRatioIdc;
-  int        m_sarWidth;
-  int        m_sarHeight;
-  bool       m_colourDescriptionPresentFlag;
-  int        m_colourPrimaries;
-  int        m_transferCharacteristics;
-  int        m_matrixCoefficients;
-  bool       m_progressiveSourceFlag;
-  bool       m_interlacedSourceFlag;
-  bool       m_chromaLocInfoPresentFlag;
-  int        m_chromaSampleLocTypeTopField;
-  int        m_chromaSampleLocTypeBottomField;
-  int        m_chromaSampleLocType;
-  bool       m_overscanInfoPresentFlag;
-  bool       m_overscanAppropriateFlag;
-  bool       m_videoFullRangeFlag;
-#endif
 
 public:
   VUI()
-#if JVET_S0266_VUI_length
     : m_progressiveSourceFlag             (false) // Default values as documented in VVC D10 are used
     , m_interlacedSourceFlag              (false)
     , m_nonPackedFlag                     (false)
@@ -1304,26 +1266,6 @@ public:
     , m_chromaSampleLocTypeTopField       (6)
     , m_chromaSampleLocTypeBottomField    (6)
     , m_chromaSampleLocType               (6)
-#else
-    : m_aspectRatioInfoPresentFlag        (false) //TODO: This initialiser list contains magic numbers
-    , m_aspectRatioConstantFlag           (true)
-    , m_aspectRatioIdc                    (0)
-    , m_sarWidth                          (0)
-    , m_sarHeight                         (0)
-    , m_colourDescriptionPresentFlag      (false)
-    , m_colourPrimaries                   (2)
-    , m_transferCharacteristics           (2)
-    , m_matrixCoefficients                (2)
-    , m_progressiveSourceFlag             (false)
-    , m_interlacedSourceFlag              (false)
-    , m_chromaLocInfoPresentFlag          (false)
-    , m_chromaSampleLocTypeTopField       (0)
-    , m_chromaSampleLocTypeBottomField    (0)
-    , m_chromaSampleLocType               (0)
-    , m_overscanInfoPresentFlag           (false)
-    , m_overscanAppropriateFlag           (false)
-    , m_videoFullRangeFlag                (false)
-#endif
   {}
 
   virtual           ~VUI() {}
@@ -1360,13 +1302,11 @@ public:
   bool              getInterlacedSourceFlag() const                        { return m_interlacedSourceFlag; }
   void              setInterlacedSourceFlag(bool b)                        { m_interlacedSourceFlag = b; }
 
-#if JVET_S0266_VUI_length
   bool              getNonPackedFlag() const                               { return m_nonPackedFlag; }
   void              setNonPackedFlag(bool b)                               { m_nonPackedFlag = b; }
 
   bool              getNonProjectedFlag() const                            { return m_nonProjectedFlag; }
   void              setNonProjectedFlag(bool b)                            { m_nonProjectedFlag = b; }
-#endif
 
   bool              getChromaLocInfoPresentFlag() const                    { return m_chromaLocInfoPresentFlag;             }
   void              setChromaLocInfoPresentFlag(bool i)                    { m_chromaLocInfoPresentFlag = i;                }
@@ -1565,9 +1505,7 @@ private:
 
   bool              m_fieldSeqFlag;
   bool              m_vuiParametersPresentFlag;
-#if JVET_S0266_VUI_length
   unsigned          m_vuiPayloadSize;
-#endif
   VUI               m_vuiParameters;
 
   SPSRExt           m_spsRangeExtension;
@@ -1909,10 +1847,8 @@ void                    setCCALFEnabledFlag( bool b )                           
   void                    setFieldSeqFlag(bool i)                                                         { m_fieldSeqFlag = i;                            }
   bool                    getVuiParametersPresentFlag() const                                             { return m_vuiParametersPresentFlag;                                   }
   void                    setVuiParametersPresentFlag(bool b)                                             { m_vuiParametersPresentFlag = b;                                      }
-#if JVET_S0266_VUI_length
   unsigned                getVuiPayloadSize() const                                                       { return m_vuiPayloadSize; }
   void                    setVuiPayloadSize(unsigned i)                                                   { m_vuiPayloadSize = i; }
-#endif
   VUI*                    getVuiParameters()                                                              { return &m_vuiParameters;                                             }
   const VUI*              getVuiParameters() const                                                        { return &m_vuiParameters;                                             }
   const ProfileTierLevel* getProfileTierLevel() const                                                     { return &m_profileTierLevel; }

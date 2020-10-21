@@ -77,9 +77,7 @@ protected:
   virtual ~VLCWriter() {}
 
   void  setBitstream          ( OutputBitstream* p )  { m_pcBitIf = p;  }
-#if JVET_S0266_VUI_length
   OutputBitstream* getBitstream( )                    { return m_pcBitIf; }
-#endif
   void  xWriteSCode           ( int  code,  uint32_t length );
   void  xWriteCode            ( uint32_t uiCode, uint32_t uiLength );
   void  xWriteUvlc            ( uint32_t uiCode );

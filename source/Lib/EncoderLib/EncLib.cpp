@@ -1185,10 +1185,6 @@ void EncLib::xInitSPS( SPS& sps )
 #if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   cinfo->setGciPresentFlag(m_gciPresentFlag);
 #endif
-#if !JVET_S0266_VUI_length
-  cinfo->setNonPackedConstraintFlag     (m_nonPackedConstraintFlag);
-  cinfo->setNonProjectedConstraintFlag(m_nonProjectedConstraintFlag);
-#endif
 #if JVET_Q0114_ASPECT5_GCI_FLAG
   cinfo->setNoRprConstraintFlag(m_noRprConstraintFlag);
 #endif
@@ -1441,10 +1437,8 @@ void EncLib::xInitSPS( SPS& sps )
     pcVUI->setMatrixCoefficients(getMatrixCoefficients());
     pcVUI->setProgressiveSourceFlag       (getProgressiveSourceFlag());
     pcVUI->setInterlacedSourceFlag        (getInterlacedSourceFlag());
-#if JVET_S0266_VUI_length
     pcVUI->setNonPackedFlag               (getNonPackedConstraintFlag());
     pcVUI->setNonProjectedFlag            (getNonProjectedConstraintFlag());
-#endif
     pcVUI->setChromaLocInfoPresentFlag(getChromaLocInfoPresentFlag());
     pcVUI->setChromaSampleLocTypeTopField(getChromaSampleLocTypeTopField());
     pcVUI->setChromaSampleLocTypeBottomField(getChromaSampleLocTypeBottomField());

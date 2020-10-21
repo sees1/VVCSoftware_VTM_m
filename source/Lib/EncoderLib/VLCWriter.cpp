@@ -682,10 +682,8 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
 
   WRITE_FLAG(pcVUI->getProgressiveSourceFlag(),   "vui_progressive_source_flag"         );
   WRITE_FLAG(pcVUI->getInterlacedSourceFlag(),    "vui_interlaced_source_flag"          );
-#if JVET_S0266_VUI_length
   WRITE_FLAG(pcVUI->getNonPackedFlag(),           "vui_non_packed_constraint_flag");
   WRITE_FLAG(pcVUI->getNonProjectedFlag(),        "vui_non_projected_constraint_flag");
-#endif
   WRITE_FLAG(pcVUI->getAspectRatioInfoPresentFlag(),            "vui_aspect_ratio_info_present_flag");
   if (pcVUI->getAspectRatioInfoPresentFlag())
   {
@@ -723,7 +721,6 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
       WRITE_UVLC(pcVUI->getChromaSampleLocTypeBottomField(),      "vui_chroma_sample_loc_type_bottom_field");
     }
   }
-#if JVET_S0266_VUI_length
   if(!isByteAligned())
   {
     WRITE_FLAG(1, "vui_payload_bit_equal_to_one");
@@ -732,7 +729,6 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
       WRITE_FLAG(0, "vui_payload_bit_equal_to_zero");
     }
   }
-#endif
 }
 
 void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
@@ -1353,7 +1349,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG( pcSPS->getVuiParametersPresentFlag(),            "sps_vui_parameters_present_flag" );
   if (pcSPS->getVuiParametersPresentFlag())
   {
-#if JVET_S0266_VUI_length
     OutputBitstream *bs = getBitstream();
     OutputBitstream bs_count;
     setBitstream(&bs_count);
@@ -1373,7 +1368,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     {
       WRITE_FLAG(0, "sps_vui_alignment_zero_bit");
     }
-#endif
     codeVUI(pcSPS->getVuiParameters(), pcSPS);
   }
 
@@ -2791,14 +2785,8 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "gci_no_ladf_constraint_flag");
     WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "gci_no_virtual_boundaries_constraint_flag");
 #else
-#if !JVET_S0266_VUI_length
-    WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
-#endif
 #if !JVET_S0138_GCI_PTL
     WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
-#endif
-#if !JVET_S0266_VUI_length
-    WRITE_FLAG(cinfo->getNonProjectedConstraintFlag(), "general_non_projected_constraint_flag");
 #endif
     WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "general_one_picture_only_constraint_flag" );
     WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(),     "intra_only_constraint_flag"      );
