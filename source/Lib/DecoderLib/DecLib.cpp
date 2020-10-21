@@ -2439,27 +2439,12 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     checkPicTypeAfterEos();
 #endif
     // store sub-picture numbers, sizes, and locations with a picture
-#if JVET_S0258_SUBPIC_CONSTRAINTS
     pcSlice->getPic()->subPictures.clear();
 
     for( int subPicIdx = 0; subPicIdx < sps->getNumSubPics(); subPicIdx++ )
     {
       pcSlice->getPic()->subPictures.push_back( pps->getSubPic( subPicIdx ) );
     }
-#else
-    pcSlice->getPic()->numSubpics = sps->getNumSubPics();
-    pcSlice->getPic()->subpicWidthInCTUs.clear();
-    pcSlice->getPic()->subpicHeightInCTUs.clear();
-    pcSlice->getPic()->subpicCtuTopLeftX.clear();
-    pcSlice->getPic()->subpicCtuTopLeftY.clear();
-    for (int subPicIdx = 0; subPicIdx < sps->getNumSubPics(); subPicIdx++)
-    {
-      pcSlice->getPic()->subpicWidthInCTUs.push_back(pps->getSubPic(subPicIdx).getSubPicWidthInCTUs());
-      pcSlice->getPic()->subpicHeightInCTUs.push_back(pps->getSubPic(subPicIdx).getSubPicHeightInCTUs());
-      pcSlice->getPic()->subpicCtuTopLeftX.push_back(pps->getSubPic(subPicIdx).getSubPicCtuTopLeftX());
-      pcSlice->getPic()->subpicCtuTopLeftY.push_back(pps->getSubPic(subPicIdx).getSubPicCtuTopLeftY());
-    }
-#endif
     pcSlice->getPic()->numSlices = pps->getNumSlicesInPic();
     pcSlice->getPic()->sliceSubpicIdx.clear();
   }
@@ -2479,54 +2464,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   pcSlice->scaleRefPicList( scaledRefPic, m_pcPic->cs->picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true );
 
-#if !JVET_S0258_SUBPIC_CONSTRAINTS
-  // For each value of i in the range of 0 to sps_num_subpics_minus1, inclusive, when the value of SubpicIdVal[ i ] of a current picture is not equal to the value of SubpicIdVal[ i ] of a reference picture,
-  // the active entries of the RPLs of the coded slices in the i-th subpicture of the current picture shall not include that reference picture.
-
-  if( sps->getSubPicInfoPresentFlag() )
-  {
-    // store sub-picture IDs with a picture
-    if( m_bFirstSliceInPicture )
-    {
-      pcSlice->getPic()->subPicIDs.clear();
-      for( int subPicIdx = 0; subPicIdx < sps->getNumSubPics(); subPicIdx++ )
-      {
-        pcSlice->getPic()->subPicIDs.push_back( pps->getSubPic( subPicIdx ).getSubPicID() );
-      }
-    }
-
-    if( !pcSlice->isIntra() )
-    {
-      int currentSubPicIdx = NOT_VALID;
-
-      // derive sub-picture index for a slice
-      for( int subPicIdx = 0; subPicIdx < sps->getNumSubPics(); subPicIdx++ )
-      {
-        if( pps->getSubPic( subPicIdx ).getSubPicID() == pcSlice->getSliceSubPicId() )
-        {
-          currentSubPicIdx = subPicIdx;
-          break;
-        }
-      }
-
-      CHECK( currentSubPicIdx == NOT_VALID, "Sub-picture was not found" );
-
-      // check collocated sub-picture ID of each active reference picture
-      for( int refPicList = 0; refPicList < NUM_REF_PIC_LIST_01; refPicList++ )
-      {
-        for( int refIdx = 0; refIdx < pcSlice->getNumRefIdx( RefPicList( refPicList ) ); refIdx++ )
-        {
-          Picture* refPic = pcSlice->getRefPic( RefPicList( refPicList ), refIdx );
-          if( refPic->layerId == nalu.m_nuhLayerId )
-          {
-            CHECK( currentSubPicIdx >= refPic->subPicIDs.size(), "Number of sub-pictures in a reference picture is less then the current slice sub-picture index" );
-            CHECK( refPic->subPicIDs[currentSubPicIdx] != pcSlice->getSliceSubPicId(), "A picture with different sub-picture ID of the collocated sub-picture cannot be used as an active reference picture" );
-          }
-        }
-      }
-    }
-  }
-#endif
 
     if (!pcSlice->isIntra())
     {

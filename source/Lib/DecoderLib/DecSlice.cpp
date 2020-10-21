@@ -127,11 +127,7 @@ void DecSlice::decompressSlice( Slice* slice, InputBitstream* bitstream, int deb
   DTRACE( g_trace_ctx, D_HEADER, "=========== POC: %d ===========\n", slice->getPOC() );
 
 
-#if JVET_S0258_SUBPIC_CONSTRAINTS
   if( slice->getSliceType() != I_SLICE && slice->getRefPic( REF_PIC_LIST_0, 0 )->subPictures.size() > 1 )
-#else
-  if (slice->getSliceType() != I_SLICE && slice->getRefPic(REF_PIC_LIST_0, 0)->numSubpics > 1)
-#endif
   {
     clipMv = clipMvInSubpic;
   }
@@ -171,11 +167,7 @@ void DecSlice::decompressSlice( Slice* slice, InputBitstream* bitstream, int deb
         {
           Picture *refPic = slice->getRefPic((RefPicList)rlist, idx);
 
-#if JVET_S0258_SUBPIC_CONSTRAINTS
           if( !refPic->getSubPicSaved() && refPic->subPictures.size() > 1 )
-#else
-          if (!refPic->getSubPicSaved() && refPic->numSubpics > 1)
-#endif
           {
             refPic->saveSubPicBorder(refPic->getPOC(), subPicX, subPicY, subPicWidth, subPicHeight);
             refPic->extendSubPicBorder(refPic->getPOC(), subPicX, subPicY, subPicWidth, subPicHeight);

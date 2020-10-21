@@ -81,7 +81,6 @@
 
 
 
-#define JVET_S0258_SUBPIC_CONSTRAINTS                     1 // JVET-S0258: sub-picture constraints
 
 #define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
