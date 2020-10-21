@@ -3022,11 +3022,7 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 #endif
   }
 
-#if JVET_S0203
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
-#else
-  for (int i = 0; i < maxNumSubLayersMinus1; i++)
-#endif
   {
     WRITE_FLAG( ptl->getSubLayerLevelPresentFlag(i),   "sub_layer_level_present_flag[i]" );
   }
@@ -3040,11 +3036,7 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 #endif
   }
 
-#if JVET_S0203
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
-#else
-  for(int i = 0; i < maxNumSubLayersMinus1; i++)
-#endif
   {
     if( ptl->getSubLayerLevelPresentFlag(i) )
     {

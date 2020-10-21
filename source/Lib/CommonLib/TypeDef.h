@@ -60,7 +60,6 @@
 
 
 
-#define JVET_S0203                                        1 // JVET-S0203 (aspects 1 & 2): change the signalling of sublayer_level_idc[ i ] and ptl_sublayer_level_present_flag[ i ] to be in descending order
 
 #define JVET_R0227_ASPECT3                                1 // JVET-R0227 aspect 3: Rename gci_no_qp_delta_constraint_flag to gci_no_cu_qp_delta_constraint_flag 
 
