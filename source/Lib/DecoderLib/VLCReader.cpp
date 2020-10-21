@@ -4774,11 +4774,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "gci_no_explicit_scaling_list_constraint_flag");   cinfo->setNoExplicitScaleListConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_dep_quant_constraint_flag");               cinfo->setNoDepQuantConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_sign_data_hiding_constraint_flag");        cinfo->setNoSignDataHidingConstraintFlag(symbol > 0 ? true : false);
-#if JVET_R0227_ASPECT3
     READ_FLAG(symbol, "gci_no_cu_qp_delta_constraint_flag");             cinfo->setNoCuQpDeltaConstraintFlag(symbol > 0 ? true : false);
-#else
-    READ_FLAG(symbol, "gci_no_cu_qp_delta_constraint_flag");             cinfo->setNoQpDeltaConstraintFlag(symbol > 0 ? true : false);
-#endif
     READ_FLAG(symbol, "gci_no_chroma_qp_offset_constraint_flag");        cinfo->setNoChromaQpOffsetConstraintFlag(symbol > 0 ? true : false);
 
     /* loop filter */

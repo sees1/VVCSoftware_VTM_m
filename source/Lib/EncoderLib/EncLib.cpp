@@ -1255,11 +1255,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoTransformSkipConstraintFlag(m_noTransformSkipConstraintFlag);
   cinfo->setNoBDPCMConstraintFlag(m_noBDPCMConstraintFlag);
   cinfo->setNoJointCbCrConstraintFlag(m_noJointCbCrConstraintFlag);
-#if JVET_R0227_ASPECT3
   cinfo->setNoCuQpDeltaConstraintFlag(m_noCuQpDeltaConstraintFlag);
-#else
-  cinfo->setNoQpDeltaConstraintFlag(m_noQpDeltaConstraintFlag);
-#endif
   cinfo->setNoDepQuantConstraintFlag(m_noDepQuantConstraintFlag);
   cinfo->setNoSignDataHidingConstraintFlag(m_noSignDataHidingConstraintFlag);
   cinfo->setNoTrailConstraintFlag(m_noTrailConstraintFlag);

@@ -61,7 +61,6 @@
 
 
 
-#define JVET_R0227_ASPECT3                                1 // JVET-R0227 aspect 3: Rename gci_no_qp_delta_constraint_flag to gci_no_cu_qp_delta_constraint_flag 
 
 #define JVET_S0066_GCI                                    1 // JVET-S0066: Signal new GCI flags gci_three_minus_max_log2_ctu_size_constraint_idc and gci_no_luma_transform_size_64_constraint_flag (no_explicit_scaling_list_constraint_flag already included as part of JVET-S0050)
 

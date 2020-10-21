@@ -316,11 +316,7 @@ class ConstraintInfo
 #endif
   bool              m_noBDPCMConstraintFlag;
   bool              m_noJointCbCrConstraintFlag;
-#if JVET_R0227_ASPECT3
   bool              m_noCuQpDeltaConstraintFlag;
-#else
-  bool              m_noQpDeltaConstraintFlag;
-#endif
   bool              m_noDepQuantConstraintFlag;
   bool              m_noSignDataHidingConstraintFlag;
   bool              m_noMixedNaluTypesInPicConstraintFlag;
@@ -423,11 +419,7 @@ public:
 #endif
     , m_noBDPCMConstraintFlag    (false)
     , m_noJointCbCrConstraintFlag (false)
-#if JVET_R0227_ASPECT3
     , m_noCuQpDeltaConstraintFlag  (false)
-#else
-    , m_noQpDeltaConstraintFlag  (false)
-#endif
     , m_noDepQuantConstraintFlag (false)
     , m_noSignDataHidingConstraintFlag(false)
     , m_noMixedNaluTypesInPicConstraintFlag(false)
@@ -600,13 +592,8 @@ public:
 #endif
   bool          getNoBDPCMConstraintFlag() const { return m_noBDPCMConstraintFlag; }
   void          setNoBDPCMConstraintFlag(bool bVal) { m_noBDPCMConstraintFlag = bVal; }
-#if JVET_R0227_ASPECT3
   bool          getNoCuQpDeltaConstraintFlag() const { return m_noCuQpDeltaConstraintFlag; }
   void          setNoCuQpDeltaConstraintFlag(bool bVal) { m_noCuQpDeltaConstraintFlag = bVal; }
-#else
-  bool          getNoQpDeltaConstraintFlag() const { return m_noQpDeltaConstraintFlag; }
-  void          setNoQpDeltaConstraintFlag(bool bVal) { m_noQpDeltaConstraintFlag = bVal; }
-#endif
   bool          getNoDepQuantConstraintFlag() const { return m_noDepQuantConstraintFlag; }
   void          setNoDepQuantConstraintFlag(bool bVal) { m_noDepQuantConstraintFlag = bVal; }
   bool          getNoSignDataHidingConstraintFlag() const { return m_noSignDataHidingConstraintFlag; }

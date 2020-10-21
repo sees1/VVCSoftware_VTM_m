@@ -300,11 +300,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setSingleLayerConstraintFlag(m_singleLayerConstraintFlag);
 #endif
     m_cEncLib.setAllLayersIndependentConstraintFlag(m_allLayersIndependentConstraintFlag);
-#if JVET_R0227_ASPECT3
     m_cEncLib.setNoCuQpDeltaConstraintFlag(m_noCuQpDeltaConstraintFlag);
-#else
-    m_cEncLib.setNoQpDeltaConstraintFlag(m_noQpDeltaConstraintFlag);
-#endif
 
     m_cEncLib.setNoTrailConstraintFlag(m_noTrailConstraintFlag);
     CHECK(m_noTrailConstraintFlag && m_iIntraPeriod != 1, "TRAIL shall be deactivated when m_noTrailConstraintFlag is equal to 1");
@@ -522,11 +518,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoTransformSkipConstraintFlag(false);
     m_cEncLib.setNoBDPCMConstraintFlag(false);
     m_cEncLib.setNoJointCbCrConstraintFlag(false);
-#if JVET_R0227_ASPECT3
     m_cEncLib.setNoCuQpDeltaConstraintFlag(false);
-#else
-    m_cEncLib.setNoQpDeltaConstraintFlag(false);
-#endif
     m_cEncLib.setNoDepQuantConstraintFlag(false);
     m_cEncLib.setNoSignDataHidingConstraintFlag(false);
     m_cEncLib.setNoTrailConstraintFlag(false);

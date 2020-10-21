@@ -232,11 +232,7 @@ protected:
 #endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
-#if JVET_R0227_ASPECT3
   bool      m_noCuQpDeltaConstraintFlag;
-#else
-  bool      m_noQpDeltaConstraintFlag;
-#endif
   bool      m_noDepQuantConstraintFlag;
   bool      m_noSignDataHidingConstraintFlag;
   bool      m_noTrailConstraintFlag;
@@ -913,13 +909,8 @@ public:
   void      setNoBDPCMConstraintFlag(bool val) { m_noBDPCMConstraintFlag = val; }
   bool      getNoJointCbCrConstraintFlag() const { return m_noJointCbCrConstraintFlag; }
   void      setNoJointCbCrConstraintFlag(bool val) { m_noJointCbCrConstraintFlag = val; }
-#if JVET_R0227_ASPECT3
   bool      getNoCuQpDeltaConstraintFlag() const { return m_noCuQpDeltaConstraintFlag; }
   void      setNoCuQpDeltaConstraintFlag(bool val) { m_noCuQpDeltaConstraintFlag = val; }
-#else
-  bool      getNoQpDeltaConstraintFlag() const { return m_noQpDeltaConstraintFlag; }
-  void      setNoQpDeltaConstraintFlag(bool val) { m_noQpDeltaConstraintFlag = val; }
-#endif
   bool      getNoDepQuantConstraintFlag() const { return m_noDepQuantConstraintFlag; }
   void      setNoDepQuantConstraintFlag(bool val) { m_noDepQuantConstraintFlag = val; }
   bool      getNoSignDataHidingConstraintFlag() const { return m_noSignDataHidingConstraintFlag; }
