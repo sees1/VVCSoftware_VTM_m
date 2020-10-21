@@ -250,14 +250,10 @@ protected:
   bool m_oneTilePerPicConstraintFlag;
   bool m_picHeaderInSliceHeaderConstraintFlag;
   bool m_oneSlicePerPicConstraintFlag;
-#if JVET_S0113_S0195_GCI
   bool m_noIdrRplConstraintFlag;
   bool m_noRectSliceConstraintFlag;
   bool m_oneSlicePerSubpicConstraintFlag;
   bool m_noSubpicInfoConstraintFlag;
-#else
-  bool m_oneSubpicPerPicConstraintFlag;
-#endif
   bool m_intraOnlyConstraintFlag;
 
   //====== Coding Structure ========
@@ -1864,7 +1860,6 @@ public:
   bool         getOneSlicePerPicConstraintFlag() const               { return m_oneSlicePerPicConstraintFlag; }
   void         setOneSlicePerPicConstraintFlag(bool b)               { m_oneSlicePerPicConstraintFlag = b; }
 
-#if JVET_S0113_S0195_GCI
   bool         getNoIdrRplConstraintFlag() const                     { return m_noIdrRplConstraintFlag; }
   void         setNoIdrRplConstraintFlag(bool b)                     { m_noIdrRplConstraintFlag = b; }
 
@@ -1876,10 +1871,6 @@ public:
 
   bool         getNoSubpicInfoConstraintFlag() const                 { return m_noSubpicInfoConstraintFlag; }
   void         setNoSubpicInfoConstraintFlag(bool b)                 { m_noSubpicInfoConstraintFlag = b; }
-#else
-  bool         getOneSubpicPerPicConstraintFlag() const              { return m_oneSubpicPerPicConstraintFlag; }
-  void         setOneSubpicPerPicConstraintFlag(bool b)              { m_oneSubpicPerPicConstraintFlag = b; }
-#endif
 
   void         setSummaryOutFilename(const std::string &s)           { m_summaryOutFilename = s; }
   const std::string& getSummaryOutFilename() const                   { return m_summaryOutFilename; }

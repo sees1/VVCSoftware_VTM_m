@@ -2651,19 +2651,13 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoRprConstraintFlag(), "gci_no_ref_pic_resampling_constraint_flag");
 #endif
     WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "no_res_change_in_clvs_constraint_flag");
-#if JVET_S0113_S0195_GCI
     WRITE_FLAG(cinfo->getNoIdrRplConstraintFlag(), "gci_no_idr_rpl_constraint_flag");
-#endif
     WRITE_FLAG(cinfo->getOneTilePerPicConstraintFlag(), "one_tile_per_pic_constraint_flag");
     WRITE_FLAG(cinfo->getPicHeaderInSliceHeaderConstraintFlag(), "pic_header_in_slice_header_constraint_flag");
     WRITE_FLAG(cinfo->getOneSlicePerPicConstraintFlag(), "one_slice_per_pic_constraint_flag");
-#if JVET_S0113_S0195_GCI
     WRITE_FLAG(cinfo->getNoRectSliceConstraintFlag(), "gci_no_rectangular_slice_constraint_flag");
     WRITE_FLAG(cinfo->getOneSlicePerSubpicConstraintFlag(), "gci_one_slice_per_subpic_constraint_flag");
     WRITE_FLAG(cinfo->getNoSubpicInfoConstraintFlag(), "gci_no_subpic_info_constraint_flag");
-#else
-    WRITE_FLAG(cinfo->getOneSubpicPerPicConstraintFlag(), "one_subpic_per_pic_constraint_flag");
-#endif
     WRITE_FLAG(cinfo->getNoMttConstraintFlag() ? 1 : 0, "gci_no_mtt_constraint_flag");
     WRITE_FLAG(cinfo->getNoQtbttDualTreeIntraConstraintFlag() ? 1 : 0, "no_qtbtt_dual_tree_intra_constraint_flag");
     WRITE_CODE(3-(cinfo->getMaxLog2CtuSizeConstraintIdc()-5), 2, "gci_three_minus_max_log2_ctu_size_constraint_idc" );

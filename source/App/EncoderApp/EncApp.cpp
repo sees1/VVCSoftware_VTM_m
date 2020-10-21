@@ -264,7 +264,6 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
     m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
     m_cEncLib.setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
-#if JVET_S0113_S0195_GCI
     m_cEncLib.setNoIdrRplConstraintFlag(m_noIdrRplConstraintFlag);
     CHECK(m_noIdrRplConstraintFlag&& m_idrRefParamList, "IDR RPL shall be deactivated when gci_no_idr_rpl_constraint_flag equal to 1");
 
@@ -276,9 +275,6 @@ void EncApp::xInitLibCfg()
 
     m_cEncLib.setNoSubpicInfoConstraintFlag(m_noSubpicInfoConstraintFlag);
     CHECK(m_noSubpicInfoConstraintFlag&& m_subPicInfoPresentFlag, "Subpicture information shall not present when gci_no_subpic_info_constraint_flag equal to 1");
-#else
-    m_cEncLib.setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
-#endif
     m_cEncLib.setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
     m_cEncLib.setIntraOnlyConstraintFlag(m_intraOnlyConstraintFlag);
     m_cEncLib.setNoIdrConstraintFlag(m_noIdrConstraintFlag);
@@ -453,14 +449,10 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setOneTilePerPicConstraintFlag(false);
     m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(false);
     m_cEncLib.setOneSlicePerPicConstraintFlag(false);
-#if JVET_S0113_S0195_GCI
     m_cEncLib.setNoIdrRplConstraintFlag(false);
     m_cEncLib.setNoRectSliceConstraintFlag(false);
     m_cEncLib.setOneSlicePerSubpicConstraintFlag(false);
     m_cEncLib.setNoSubpicInfoConstraintFlag(false);
-#else
-    m_cEncLib.setOneSubpicPerPicConstraintFlag(false);
-#endif
     m_cEncLib.setOnePictureOnlyConstraintFlag(false);
     m_cEncLib.setIntraOnlyConstraintFlag(false);
     m_cEncLib.setMaxBitDepthConstraintIdc(16);

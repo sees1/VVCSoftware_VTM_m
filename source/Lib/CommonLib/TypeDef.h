@@ -120,7 +120,6 @@
                                                             //             Remove all constraints that require GCI fields to be equal to a value that imposes a constraint
 
 
-#define JVET_S0113_S0195_GCI                              1 // JVET-S0113: no_rectangular_slice_constraint_flag to constrain pps_rect_slice_flag 
                                                             //             one_slice_per_subpicture_constraint_flag to constrain pps_single_slice_per_subpic_flag
                                                             // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
                                                             //             add no_idr_rpl_constraint_flag

@@ -796,14 +796,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("OneTilePerPicConstraintFlag",                     m_oneTilePerPicConstraintFlag,                    false, "Indicate that each picture shall contain only one tile")
   ("PicHeaderInSliceHeaderConstraintFlag",            m_picHeaderInSliceHeaderConstraintFlag,           false, "Indicate that picture header is present in slice header")
   ("OneSlicePerPicConstraintFlag",                    m_oneSlicePerPicConstraintFlag,                   false, "Indicate that each picture shall contain only one slice")
-#if JVET_S0113_S0195_GCI
   ("NoIdrRplConstraintFlag",                          m_noIdrRplConstraintFlag,                         false, "Indicate that RPL is not present in SH of IDR slices")
   ("NoRectSliceConstraintFlag",                       m_noRectSliceConstraintFlag,                      false, "Indicate that rectagular slice is deactivated")
   ("OneSlicePerSubpicConstraintFlag",                 m_oneSlicePerSubpicConstraintFlag,                false, "Indicate that each subpicture shall contain only one slice")
   ("NoSubpicInfoConstraintFlag",                      m_noSubpicInfoConstraintFlag,                     false, "Indicate that subpicture information is not present")
-#else
-  ("OneSubpicPerPicConstraintFlag",                   m_oneSubpicPerPicConstraintFlag,                  false, "Indicate that each picture shall contain only one subpicture")
-#endif
   ("MaxLog2CtuSizeConstraintIdc",                     m_maxLog2CtuSizeConstraintIdc,                        8, "Indicate that Log2CtuSize shall be in the range of 0 to m_maxLog2CtuSizeConstraintIdc")
   ("NoPartitionConstraintsOverrideConstraintFlag",    m_noPartitionConstraintsOverrideConstraintFlag,   false, "Indicate that Partition Override is deactivated")
   ("MttConstraintFlag",                               m_noMttConstraintFlag,                            false, "Indicate that Mtt is deactivated")

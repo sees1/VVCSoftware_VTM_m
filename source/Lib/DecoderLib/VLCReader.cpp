@@ -1384,23 +1384,15 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
 
   READ_FLAG( uiCode, "sps_subpic_info_present_flag" );               pcSPS->setSubPicInfoPresentFlag(uiCode);
-#if JVET_S0113_S0195_GCI
   if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoSubpicInfoConstraintFlag())
   {
     CHECK(uiCode != 0, "When gci_no_subpic_info_constraint_flag is equal to 1, the value of sps_subpic_info_present_flag shall be equal to 0");
   }
-#endif
 
   if (pcSPS->getSubPicInfoPresentFlag())
   {
     READ_UVLC(uiCode, "sps_num_subpics_minus1"); pcSPS->setNumSubPics(uiCode + 1);
     CHECK(uiCode > (pcSPS->getMaxPicWidthInLumaSamples() / (1 << pcSPS->getCTUSize())) * (pcSPS->getMaxPicHeightInLumaSamples() / (1 << pcSPS->getCTUSize())) - 1, "Invalid sps_num_subpics_minus1 value");
-#if !JVET_S0113_S0195_GCI
-    if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getOneSubpicPerPicConstraintFlag())
-    {
-      CHECK(uiCode != 0, "When one_subpic_per_pic_constraint_flag is equal to 1, each picture shall contain only one subpicture");
-    }
-#endif
     if( pcSPS->getNumSubPics() == 1 )
     {
       pcSPS->setSubPicCtuTopLeftX( 0, 0 );
@@ -1734,12 +1726,10 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setInterLayerPresentFlag(0);
   }
   READ_FLAG( uiCode, "sps_idr_rpl_present_flag" );       pcSPS->setIDRRefParamListPresent( (bool) uiCode );
-#if JVET_S0113_S0195_GCI
   if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoIdrRplConstraintFlag())
   {
     CHECK(uiCode != 0, "When gci_no_idr_rpl_constraint_flag equal to 1 , the value of sps_idr_rpl_present_flag shall be equal to 0");
   }
-#endif
 
   READ_FLAG(uiCode, "sps_rpl1_same_as_rpl0_flag");
   pcSPS->setRPL1CopyFromRPL0Flag(uiCode);
@@ -4496,19 +4486,13 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol,  "gci_no_ref_pic_resampling_constraint_flag"); cinfo->setNoRprConstraintFlag(symbol ? true : false);
 #endif
     READ_FLAG(symbol,  "no_res_change_in_clvs_constraint_flag"    ); cinfo->setNoResChangeInClvsConstraintFlag(symbol ? true : false);
-#if JVET_S0113_S0195_GCI
     READ_FLAG(symbol, "gci_no_idr_rpl_constraint_flag"            ); cinfo->setNoIdrRplConstraintFlag(symbol ? true : false);
-#endif
     READ_FLAG(symbol,  "one_tile_per_pic_constraint_flag"         ); cinfo->setOneTilePerPicConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "pic_header_in_slice_header_constraint_flag"); cinfo->setPicHeaderInSliceHeaderConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "one_slice_per_pic_constraint_flag"        ); cinfo->setOneSlicePerPicConstraintFlag(symbol ? true : false);
-#if JVET_S0113_S0195_GCI
     READ_FLAG(symbol,  "gci_no_rectangular_slice_constraint_flag" ); cinfo->setNoRectSliceConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "gci_one_slice_per_subpic_constraint_flag" ); cinfo->setOneSlicePerSubpicConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "gci_no_subpic_info_constraint_flag"       ); cinfo->setNoSubpicInfoConstraintFlag(symbol ? true : false);
-#else
-    READ_FLAG(symbol,  "one_subpic_per_pic_constraint_flag"       ); cinfo->setOneSubpicPerPicConstraintFlag(symbol ? true : false);
-#endif
     READ_FLAG(symbol, "gci_no_mtt_constraint_flag"                ); cinfo->setNoMttConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol,  "no_qtbtt_dual_tree_intra_constraint_flag" ); cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
     READ_CODE(2, symbol,  "gci_three_minus_max_log2_ctu_size_constraint_idc"  ); cinfo->setMaxLog2CtuSizeConstraintIdc(((3-symbol)+5));

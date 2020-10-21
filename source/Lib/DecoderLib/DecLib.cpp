@@ -1826,7 +1826,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   }
 #endif
 
-#if JVET_S0113_S0195_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoIdrRplConstraintFlag())
   {
     CHECK(sps->getIDRRefParamListPresent(), "When gci_no_idr_rpl_constraint_flag equal to 1 , the value of sps_idr_rpl_present_flag shall be equal to 0")
@@ -1851,12 +1850,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   {
     CHECK(sps->getSubPicInfoPresentFlag(), "When gci_no_subpic_info_constraint_flag is equal to 1, the value of sps_subpic_info_present_flag shall be equal to 0")
   }
-#else
-  if (sps->getProfileTierLevel()->getConstraintInfo()->getOneSubpicPerPicConstraintFlag())
-  {
-    CHECK(sps->getNumSubPics() != 1, "When one_subpic_per_pic_constraint_flag is equal to 1, the value of sps_num_subpics_minus1 shall be equal to 0")
-  }
-#endif
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoMttConstraintFlag())
   {
     CHECK((sps->getMaxMTTHierarchyDepth() || sps->getMaxMTTHierarchyDepthI() || sps->getMaxMTTHierarchyDepthIChroma()), "When gci_no_mtt_constraint_flag is equal to 1, the values of sps_max_mtt_hierarchy_depth_intra_slice_luma, sps_max_mtt_hierarchy_depth_inter_slice and sps_max_mtt_hierarchy_depth_intra_slice_chroma shall be equal to 0");
