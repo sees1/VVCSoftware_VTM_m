@@ -77,7 +77,6 @@
 
 
 
-#define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
 
 #define JVET_S0266_VUI_length                             1 // JVET-S0266: VUI modifications including signalling of VUI length
 

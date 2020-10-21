@@ -2397,7 +2397,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         m_uiPrevISlicePOC = pcSlice->getPOC();
         m_bInitAMaxBT = true;
       }
-#if JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX
       bool identicalToSPS=true;
       const SPS* sps =pcSlice->getSPS();
 
@@ -2441,7 +2440,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         picHeader->setSplitConsOverrideFlag(false);
       }
-#endif
     }
 
     //  Slice info. refinement
