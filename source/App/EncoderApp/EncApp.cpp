@@ -335,10 +335,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setMaxChromaFormatConstraintIdc(m_maxChromaFormatConstraintIdc);
     CHECK(m_chromaFormatIDC > m_maxChromaFormatConstraintIdc, "Chroma format Idc shall be less than or equal to m_maxBitDepthConstraintIdc");
 
-#if JVET_S0058_GCI
     m_cEncLib.setNoMttConstraintFlag(m_noMttConstraintFlag);
     CHECK(m_noMttConstraintFlag && (m_uiMaxMTTHierarchyDepth || m_uiMaxMTTHierarchyDepthI || m_uiMaxMTTHierarchyDepthIChroma), "Mtt shall be deactivated when m_bNoMttConstraintFlag is equal to 1");
-#endif
 
     m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);
     CHECK(m_noQtbttDualTreeIntraConstraintFlag && m_dualTree, "Dual tree shall be deactivated when m_bNoQtbttDualTreeIntraConstraintFlag is equal to 1");
@@ -360,10 +358,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
     CHECK(m_noCCAlfConstraintFlag && m_ccalf, "CCALF shall be deactivated when m_noCCAlfConstraintFlag is equal to 1");
 
-#if JVET_S0058_GCI
     m_cEncLib.setNoWeightedPredictionConstraintFlag(m_noWeightedPredictionConstraintFlag);
     CHECK(m_noWeightedPredictionConstraintFlag && (m_useWeightedPred || m_useWeightedBiPred), "Weighted Prediction shall be deactivated when m_bNoWeightedPredictionConstraintFlag is equal to 1");
-#endif
 
     m_cEncLib.setNoRefWraparoundConstraintFlag(m_noRefWraparoundConstraintFlag);
     CHECK(m_noRefWraparoundConstraintFlag && m_wrapAround, "Wrap around shall be deactivated when m_bNoRefWraparoundConstraintFlag is equal to 1");
@@ -503,17 +499,13 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setIntraOnlyConstraintFlag(false);
     m_cEncLib.setMaxBitDepthConstraintIdc(16);
     m_cEncLib.setMaxChromaFormatConstraintIdc(3);
-#if JVET_S0058_GCI
     m_cEncLib.setNoMttConstraintFlag(false);
-#endif
     m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(false);
     m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(false);
     m_cEncLib.setNoSaoConstraintFlag(false);
     m_cEncLib.setNoAlfConstraintFlag(false);
     m_cEncLib.setNoCCAlfConstraintFlag(false);
-#if JVET_S0058_GCI
     m_cEncLib.setNoWeightedPredictionConstraintFlag(false);
-#endif
     m_cEncLib.setNoRefWraparoundConstraintFlag(false);
     m_cEncLib.setNoTemporalMvpConstraintFlag(false);
     m_cEncLib.setNoSbtmvpConstraintFlag(false);

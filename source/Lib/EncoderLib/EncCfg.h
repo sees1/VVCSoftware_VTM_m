@@ -200,9 +200,7 @@ protected:
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
-#if JVET_S0058_GCI
   bool      m_noMttConstraintFlag;
-#endif
 #if JVET_R0341_GCI
   bool      m_noChromaQpOffsetConstraintFlag;
 #endif
@@ -214,9 +212,7 @@ protected:
   bool      m_noSaoConstraintFlag;
   bool      m_noAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
-#if JVET_S0058_GCI
   bool      m_noWeightedPredictionConstraintFlag;
-#endif
   bool      m_noRefWraparoundConstraintFlag;
   bool      m_noTemporalMvpConstraintFlag;
   bool      m_noSbtmvpConstraintFlag;
@@ -859,10 +855,8 @@ public:
   bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
   void          setNoVirtualBoundaryConstraintFlag(bool val) { m_noVirtualBoundaryConstraintFlag = val; }
 #endif
-#if JVET_S0058_GCI
   bool          getNoMttConstraintFlag() const { return m_noMttConstraintFlag; }
   void          setNoMttConstraintFlag(bool val) { m_noMttConstraintFlag = val; }
-#endif
 #if JVET_R0341_GCI
   bool      getNoChromaQpOffsetConstraintFlag() const { return m_noChromaQpOffsetConstraintFlag; }
   void      setNoChromaQpOffsetConstraintFlag(bool bVal) { m_noChromaQpOffsetConstraintFlag = bVal; }
@@ -881,10 +875,8 @@ public:
   void      setNoAlfConstraintFlag(bool val) { m_noAlfConstraintFlag = val; }
   bool      getNoCCAlfConstraintFlag() const { return m_noCCAlfConstraintFlag; }
   void      setNoCCAlfConstraintFlag(bool val) { m_noCCAlfConstraintFlag = val; }
-#if JVET_S0058_GCI
   bool      getWeightedPredictionConstraintFlag() const { return m_noWeightedPredictionConstraintFlag; }
   void      setNoWeightedPredictionConstraintFlag(bool val) { m_noWeightedPredictionConstraintFlag = val; }
-#endif
   bool      getNoRefWraparoundConstraintFlag() const { return m_noRefWraparoundConstraintFlag; }
   void      setNoRefWraparoundConstraintFlag(bool val) { m_noRefWraparoundConstraintFlag = val; }
   bool      getNoTemporalMvpConstraintFlag() const { return m_noTemporalMvpConstraintFlag; }

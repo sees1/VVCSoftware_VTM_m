@@ -1912,7 +1912,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   }
 #endif
 #endif
-#if JVET_S0058_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoMttConstraintFlag())
   {
     CHECK((sps->getMaxMTTHierarchyDepth() || sps->getMaxMTTHierarchyDepthI() || sps->getMaxMTTHierarchyDepthIChroma()), "When gci_no_mtt_constraint_flag is equal to 1, the values of sps_max_mtt_hierarchy_depth_intra_slice_luma, sps_max_mtt_hierarchy_depth_inter_slice and sps_max_mtt_hierarchy_depth_intra_slice_chroma shall be equal to 0");
@@ -1921,7 +1920,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   {
     CHECK((sps->getUseWP() || sps->getUseWPBiPred()), "When gci_no_weighted_prediction_constraint_flag is equal to 1, the values of sps_weighted_pred_flag and sps_weighted_bipred_flag shall be equal to 0");
   }
-#endif
 
 #if JVET_R0341_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoChromaQpOffsetConstraintFlag())

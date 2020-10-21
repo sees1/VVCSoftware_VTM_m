@@ -284,9 +284,7 @@ class ConstraintInfo
   bool              m_noExplicitScaleListConstraintFlag;
   bool              m_noVirtualBoundaryConstraintFlag;
 #endif
-#if JVET_S0058_GCI
   bool              m_noMttConstraintFlag;
-#endif
 #if JVET_R0341_GCI
   bool              m_noChromaQpOffsetConstraintFlag;
 #endif
@@ -298,9 +296,7 @@ class ConstraintInfo
   bool              m_noSaoConstraintFlag;
   bool              m_noAlfConstraintFlag;
   bool              m_noCCAlfConstraintFlag;
-#if JVET_S0058_GCI
   bool              m_noWeightedPredictionConstraintFlag;
-#endif
   bool              m_noRefWraparoundConstraintFlag;
   bool              m_noTemporalMvpConstraintFlag;
   bool              m_noSbtmvpConstraintFlag;
@@ -397,9 +393,7 @@ public:
     , m_noExplicitScaleListConstraintFlag(false)
     , m_noVirtualBoundaryConstraintFlag(false)
 #endif
-#if JVET_S0058_GCI
     , m_noMttConstraintFlag(false)
-#endif
 #if JVET_R0341_GCI
     , m_noChromaQpOffsetConstraintFlag(false)
 #endif
@@ -411,9 +405,7 @@ public:
     , m_noSaoConstraintFlag      (false)
     , m_noAlfConstraintFlag      (false)
     , m_noCCAlfConstraintFlag      (false)
-#if JVET_S0058_GCI
     , m_noWeightedPredictionConstraintFlag(false)
-#endif
     , m_noRefWraparoundConstraintFlag(false)
     , m_noTemporalMvpConstraintFlag(false)
     , m_noSbtmvpConstraintFlag   (false)
@@ -552,10 +544,8 @@ public:
   bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
   void          setNoVirtualBoundaryConstraintFlag(bool b) { m_noVirtualBoundaryConstraintFlag = b; }
 #endif
-#if JVET_S0058_GCI
   bool          getNoMttConstraintFlag() const { return m_noMttConstraintFlag; }
   void          setNoMttConstraintFlag(bool bVal) { m_noMttConstraintFlag = bVal; }
-#endif
 #if JVET_R0341_GCI
   bool          getNoChromaQpOffsetConstraintFlag() const { return m_noChromaQpOffsetConstraintFlag; }
   void          setNoChromaQpOffsetConstraintFlag(bool b) { m_noChromaQpOffsetConstraintFlag = b; }
@@ -576,10 +566,8 @@ public:
   void          setNoCCAlfConstraintFlag(bool val) { m_noCCAlfConstraintFlag = val; }
   bool          getNoJointCbCrConstraintFlag() const { return m_noJointCbCrConstraintFlag; }
   void          setNoJointCbCrConstraintFlag(bool bVal) { m_noJointCbCrConstraintFlag = bVal; }
-#if JVET_S0058_GCI
   bool          getNoWeightedPredictionConstraintFlag() const { return m_noWeightedPredictionConstraintFlag; }
   void          setNoWeightedPredictionConstraintFlag(bool bVal) { m_noWeightedPredictionConstraintFlag = bVal; }
-#endif
   bool          getNoRefWraparoundConstraintFlag() const { return m_noRefWraparoundConstraintFlag; }
   void          setNoRefWraparoundConstraintFlag(bool bVal) { m_noRefWraparoundConstraintFlag = bVal; }
   bool          getNoTemporalMvpConstraintFlag() const { return m_noTemporalMvpConstraintFlag; }

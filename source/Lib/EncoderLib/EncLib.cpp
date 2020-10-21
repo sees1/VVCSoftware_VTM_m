@@ -1229,9 +1229,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
   cinfo->setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
 #endif
-#if JVET_S0058_GCI
   cinfo->setNoMttConstraintFlag(m_noMttConstraintFlag);
-#endif
 #if JVET_R0341_GCI
   cinfo->setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
 #endif
@@ -1240,9 +1238,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoSaoConstraintFlag(m_noSaoConstraintFlag);
   cinfo->setNoAlfConstraintFlag(m_noAlfConstraintFlag);
   cinfo->setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
-#if JVET_S0058_GCI
   cinfo->setNoWeightedPredictionConstraintFlag(m_noWeightedPredictionConstraintFlag);
-#endif
   cinfo->setNoRefWraparoundConstraintFlag(m_noRefWraparoundConstraintFlag);
   cinfo->setNoTemporalMvpConstraintFlag(m_noTemporalMvpConstraintFlag);
   cinfo->setNoSbtmvpConstraintFlag(m_noSbtmvpConstraintFlag);

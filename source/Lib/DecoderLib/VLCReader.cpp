@@ -4927,9 +4927,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
       CHECK(symbol == 0, "When one_slice_per_pic_constraint_flag is equal to 1, the value of one_subpic_per_pic_constraint_flag shall be equal to 1");
     }
 #endif
-#if JVET_S0058_GCI
     READ_FLAG(symbol, "gci_no_mtt_constraint_flag"                ); cinfo->setNoMttConstraintFlag(symbol > 0 ? true : false);
-#endif
     READ_FLAG(symbol,  "no_qtbtt_dual_tree_intra_constraint_flag" ); cinfo->setNoQtbttDualTreeIntraConstraintFlag(symbol > 0 ? true : false);
 #if !JVET_S0050_GCI
     if (cinfo->getMaxChromaFormatConstraintIdc() == 0)
@@ -4960,9 +4958,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "no_mrl_constraint_flag");                     cinfo->setNoMrlConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_isp_constraint_flag");                     cinfo->setNoIspConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "no_mip_constraint_flag");                     cinfo->setNoMipConstraintFlag(symbol > 0 ? true : false);
-#if JVET_S0058_GCI
     READ_FLAG(symbol, "gci_no_weighted_prediction_constraint_flag"); cinfo->setNoWeightedPredictionConstraintFlag(symbol > 0 ? true : false);
-#endif
     READ_FLAG(symbol,  "no_ref_wraparound_constraint_flag");         cinfo->setNoRefWraparoundConstraintFlag(symbol > 0 ? true : false);
 #if !JVET_S0050_GCI
     if (cinfo->getIntraOnlyConstraintFlag() == 1)

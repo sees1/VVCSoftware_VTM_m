@@ -155,9 +155,7 @@ protected:
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
 #endif
-#if JVET_S0058_GCI
   bool      m_noMttConstraintFlag;
-#endif
 #if JVET_R0341_GCI
   bool      m_noChromaQpOffsetConstraintFlag;
 #endif
@@ -169,9 +167,7 @@ protected:
   bool      m_noSaoConstraintFlag;
   bool      m_noAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
-#if JVET_S0058_GCI
   bool      m_noWeightedPredictionConstraintFlag;
-#endif
   bool      m_noRefWraparoundConstraintFlag;
   bool      m_noTemporalMvpConstraintFlag;
   bool      m_noSbtmvpConstraintFlag;
