@@ -64,12 +64,8 @@ protected:
   void xPrintVPSInfo (VPS *vps);
   void xPrintSubPicInfo (PPS *pps);
   void xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, SubPic &subPic);
-#if JVET_S0154_R0068_ASPECT5
   void xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, const SPS &sourceSPS, SubPic &subPic);
   bool xCheckSeiSubpicture(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten, bool isVclNalUnitRemoved);
-#else
-  void xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, SubPic &subPic);
-#endif
 
 #if JVET_R0107_BITSTREAM_EXTACTION
   Slice xParseSliceHeader(InputNALUnit &nalu);
@@ -78,11 +74,7 @@ protected:
   bool xCheckSliceSubpicture(InputNALUnit &nalu, int subPicId);
 #endif
   void xReadPicHeader(InputNALUnit &nalu);
-#if JVET_S0154_R0068_ASPECT5
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId);
-#else
-  bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out);
-#endif
   bool xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps);
 
   void xSetSPSUpdated(int spsId)   { return m_updatedSPSList.push_back(spsId); }

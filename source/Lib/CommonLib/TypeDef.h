@@ -134,7 +134,6 @@
 
 
 
-#define JVET_S0154_R0068_ASPECT5                          1 // JVET-S0154: On the subpicture sub-bitstream extraction process
                                                             // JVET-R0069 Aspect5: In subpicture extraction using subpic index instead of subpic ID
 
 //########### place macros to be be kept below this line ###############

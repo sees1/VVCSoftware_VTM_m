@@ -72,11 +72,7 @@ namespace po = df::program_options_lite;
   ("BitstreamFileOut,o",        m_bitstreamFileNameOut,                string(""), "bitstream output file name")
   ("MaxTemporalLayer,t",        m_maxTemporalLayer,                    -1,         "Maximum Temporal Layer to be decoded. -1 to decode all layers")
   ("TargetOutputLayerSet,p",    m_targetOlsIdx,                        -1,         "Target output layer set index")
-#if JVET_S0154_R0068_ASPECT5
   ("SubPicIdx,s",               m_subPicIdx,                           -1,         "Target subpic index for target output layers that containing multiple subpictures. -1 to decode all subpictures")
-#else
-  ("SubPicId,s",                m_subPicId,                            -1,         "Target subpic ID")
-#endif
 
 #if ENABLE_TRACING
   ("TraceChannelsList",         printTracingChannelsList,              false,        "List all available tracing channels" )
@@ -146,11 +142,7 @@ BitstreamExtractorAppCfg::BitstreamExtractorAppCfg()
 , m_bitstreamFileNameOut()
 , m_maxTemporalLayer( 0 )
 , m_targetOlsIdx( 0 )
-#if JVET_S0154_R0068_ASPECT5
 , m_subPicIdx( -1 )
-#else
-, m_subPicId( -1 )
-#endif
 {
 }
 

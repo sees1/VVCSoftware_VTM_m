@@ -50,11 +50,7 @@ protected:
   std::string   m_bitstreamFileNameOut;               //  input bitstream file name
   int           m_maxTemporalLayer;
   int           m_targetOlsIdx;
-#if JVET_S0154_R0068_ASPECT5
   int           m_subPicIdx;
-#else
-  int           m_subPicId;
-#endif
 
 public:
   BitstreamExtractorAppCfg();
