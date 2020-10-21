@@ -56,7 +56,6 @@
 
 
 
-#define JVET_S0208_ASPECT6                                1 // JVET-S0208 aspect 6: Modify the derivation process for the variable TotalNumOlss by removing unnecessary text.
 
 #define JVET_S0212_BITDEPTH_RANGE                         1 // JVET-S0212 aspect 2: Specify a value range of 0..2 for vps_ols_dpb_bitdepth_minus8[ i ]. Also for sps_bitdepth_minus8[ i ]
 
