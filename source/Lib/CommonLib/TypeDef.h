@@ -66,7 +66,6 @@
 
 
 
-#define OPL_ADD_LAYER_ID                                  1 // Add layer ID to output picture log
 
 #define JVET_R0324_REORDER                                1 // Reordering of syntax elements JVET-R0324/JVET-R2001-v2
  
