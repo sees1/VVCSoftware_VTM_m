@@ -80,7 +80,6 @@
 
 
 
-#define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
 
 #define JVET_S0258_SUBPIC_CONSTRAINTS                     1 // JVET-S0258: sub-picture constraints
 
