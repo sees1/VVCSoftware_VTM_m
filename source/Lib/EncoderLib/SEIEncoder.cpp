@@ -396,16 +396,11 @@ void SEIEncoder::initSEISampleAspectRatioInfo(SEISampleAspectRatioInfo* seiSampl
 //! initialize scalable nesting SEI message.
 //! Note: The SEI message structures input into this function will become part of the scalable nesting SEI and will be
 //!       automatically freed, when the nesting SEI is disposed.
-#if JVET_R0294_SUBPIC_HASH
 //  either targetOLS or targetLayer should be active, call with empty vector for the inactive mode
 void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t> &subpictureIDs)
-#else
-void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<uint16_t> &subpictureIDs)
-#endif
 {
   CHECK(!(m_isInitialized), "Scalable Nesting SEI already initialized ");
   CHECK(!(scalableNestingSEI != NULL), "No Scalable Nesting SEI object passed");
-#if JVET_R0294_SUBPIC_HASH
   CHECK (targetOLSs.size() > 0 && targetLayers.size() > 0, "Scalable Nesting SEI can apply to either OLS or layer(s), not both");
 
   scalableNestingSEI->m_snOlsFlag = (targetOLSs.size() > 0) ? 1 : 0;  // If the nested SEI messages are picture buffering SEI messages, picture timing SEI messages or sub-picture timing SEI messages, nesting_ols_flag shall be equal to 1, by default case
@@ -442,30 +437,6 @@ void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, 
       scalableNestingSEI->m_snLayerId[i] = targetLayers[i];
     }
   }
-#else
-  //KJS: OLS and layer targeting needs to be fixed for the actual OLSs in the bitstream
-  scalableNestingSEI->m_snOlsFlag = 1;         // If the nested SEI messages are picture buffering SEI messages, picture timing SEI messages or sub-picture timing SEI messages, nesting_ols_flag shall be equal to 1, by default case
-  scalableNestingSEI->m_snNumOlssMinus1 =  1;  // by default the nesting scalable SEI message applies to two OLSs.
-  for (int i = 0; i <= scalableNestingSEI->m_snNumOlssMinus1; i++)
-  {
-    scalableNestingSEI->m_snOlsIdxDeltaMinus1[i] = 0; // first ols to which nesting SEI applies is
-  }
-  for (int i = 0; i <= scalableNestingSEI->m_snNumOlssMinus1; i++)
-  {
-    if (i == 0)
-    {
-      scalableNestingSEI->m_snOlsIdx[i] = scalableNestingSEI->m_snOlsIdxDeltaMinus1[i];
-    }
-    else
-    {
-      scalableNestingSEI->m_snOlsIdx[i] = scalableNestingSEI->m_snOlsIdxDeltaMinus1[i] + scalableNestingSEI->m_snOlsIdxDeltaMinus1[i - 1] + 1;
-    }
-  }
-
-  scalableNestingSEI->m_snAllLayersFlag = 1; // nesting is not applied to all layers
-  scalableNestingSEI->m_snNumLayersMinus1 = 2 - 1;  //nesting_num_layers_minus1
-  scalableNestingSEI->m_snLayerId[0] = 0;
-#endif
   if (!subpictureIDs.empty())
   {
     scalableNestingSEI->m_snSubpicFlag = 1;

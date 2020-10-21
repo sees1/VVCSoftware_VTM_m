@@ -106,7 +106,6 @@
 
 
 
-#define JVET_R0294_SUBPIC_HASH                            1 // JVET-R0294: Allow decoded picture hash SEI messages to be nested in subpicture context
 
 #define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
 

@@ -499,9 +499,7 @@ protected:
   bool      m_bUseBLambdaForNonKeyLowDelayPictures;
 
   HashType  m_decodedPictureHashSEIType;                      ///< Checksum mode for decoded picture hash SEI message
-#if JVET_R0294_SUBPIC_HASH
   HashType  m_subpicDecodedPictureHashType;
-#endif
   bool      m_bufferingPeriodSEIEnabled;
   bool      m_pictureTimingSEIEnabled;
   bool      m_bpDeltasGOPStructure;

@@ -446,22 +446,8 @@ void BitstreamExtractorApp::xWriteVPS(VPS *vps, std::ostream& out, int layerId, 
   m_hlSyntaxWriter.setBitstream( &naluOut.m_Bitstream );
   m_hlSyntaxWriter.codeVPS( vps );
 
-#if JVET_R0294_SUBPIC_HASH
   NALUnitEBSP naluWithHeader(naluOut);
   writeAnnexBNalUnit(out, naluWithHeader, true);
-#else
-  // create a dummy AU
-  AccessUnit tmpAu;
-  // convert to EBSP (this adds emulation prevention!) and add into NAL unit
-  tmpAu.push_back(new NALUnitEBSP(naluOut));
-
-  // write the dummy AU
-  // note: The first NAL unit in an access unit will be written with a 4-byte start code
-  //       Parameter sets are also coded with a 4-byte start code, so writing the dummy
-  //       AU works without chaning the start code length.
-  //       This cannot be done for VLC NAL units!
-  writeAnnexB (out, tmpAu);
-#endif
 }
 
 void BitstreamExtractorApp::xWriteSPS(SPS *sps, std::ostream& out, int layerId, int temporalId)
@@ -474,22 +460,8 @@ void BitstreamExtractorApp::xWriteSPS(SPS *sps, std::ostream& out, int layerId, 
   m_hlSyntaxWriter.setBitstream( &naluOut.m_Bitstream );
   m_hlSyntaxWriter.codeSPS( sps );
 
-#if JVET_R0294_SUBPIC_HASH
   NALUnitEBSP naluWithHeader(naluOut);
   writeAnnexBNalUnit(out, naluWithHeader, true);
-#else
-  // create a dummy AU
-  AccessUnit tmpAu;
-  // convert to EBSP (this adds emulation prevention!) and add into NAL unit
-  tmpAu.push_back(new NALUnitEBSP(naluOut));
-
-  // write the dummy AU
-  // note: The first NAL unit in an access unit will be written with a 4-byte start code
-  //       Parameter sets are also coded with a 4-byte start code, so writing the dummy
-  //       AU works without chaning the start code length.
-  //       This cannot be done for VLC NAL units!
-  writeAnnexB (out, tmpAu);
-#endif
 }
 
 void BitstreamExtractorApp::xWritePPS(PPS *pps, std::ostream& out, int layerId, int temporalId)
@@ -501,22 +473,8 @@ void BitstreamExtractorApp::xWritePPS(PPS *pps, std::ostream& out, int layerId, 
   m_hlSyntaxWriter.setBitstream( &naluOut.m_Bitstream );
   m_hlSyntaxWriter.codePPS( pps );
 
-#if JVET_R0294_SUBPIC_HASH
   NALUnitEBSP naluWithHeader(naluOut);
   writeAnnexBNalUnit(out, naluWithHeader, true);
-#else
-  // create a dummy AU
-  AccessUnit tmpAu;
-  // convert to EBSP (this adds emulation prevention!) and add into NAL unit
-  tmpAu.push_back(new NALUnitEBSP(naluOut));
-
-  // write the dummy AU
-  // note: The first NAL unit in an access unit will be written with a 4-byte start code
-  //       Parameter sets are also coded with a 4-byte start code, so writing the dummy
-  //       AU works without chaning the start code length.
-  //       This cannot be done for VLC NAL units!
-  writeAnnexB (out, tmpAu);
-#endif
 }
 
 // returns true, if the NAL unit is to be discarded
@@ -536,7 +494,6 @@ bool BitstreamExtractorApp::xCheckNumSubLayers(InputNALUnit &nalu, VPS *vps)
   return retval;
 }
 
-#if JVET_R0294_SUBPIC_HASH
 bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId)
 {
   SEIMessages scalableNestingSEIs = getSeisByType(SEIs, SEI::SCALABLE_NESTING);
@@ -580,7 +537,6 @@ bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit
   // keep all other SEIs
   return true;
 }
-#endif
 
 #if JVET_S0158_SUB_BITSTREAM_EXT
 bool BitstreamExtractorApp::xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps)
@@ -885,29 +841,13 @@ uint32_t BitstreamExtractorApp::decode()
       {
         xReadPicHeader(nalu);
       }
-#if JVET_R0294_SUBPIC_HASH
       if ( (nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI) || (nalu.m_nalUnitType == NAL_UNIT_SUFFIX_SEI))
       {
-#else
-      if (m_targetOlsIdx>=0)
-      {
-#if JVET_S0154_R0068_ASPECT5
-        if (nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI || nalu.m_nalUnitType == NAL_UNIT_SUFFIX_SEI)
-#else
-        if (nalu.m_nalUnitType == NAL_UNIT_PREFIX_SEI)
-#endif
-        {
-#endif
         // decode SEI
         SEIMessages SEIs;
-#if !JVET_R0294_SUBPIC_HASH
-        HRD hrd;
-        m_seiReader.parseSEImessage(&(nalu.getBitstream()), SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, m_parameterSetManager.getActiveSPS(), hrd, &std::cout);
-#else
         m_seiReader.parseSEImessage(&(nalu.getBitstream()), SEIs, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, m_parameterSetManager.getActiveSPS(), m_hrd, &std::cout);
         if (m_targetOlsIdx>=0)
         {
-#endif
           for (auto sei : SEIs)
           {
             // remove unqualified scalable nesting SEI
@@ -943,9 +883,6 @@ uint32_t BitstreamExtractorApp::decode()
               writeInpuNalUnitToStream &= !targetOlsIdxGreaterThanZero;
             }
           }
-#if !JVET_R0294_SUBPIC_HASH
-        }
-#endif
 #if JVET_S0154_R0068_ASPECT5
           if (m_subPicIdx >= 0 && writeInpuNalUnitToStream)
           {
@@ -957,7 +894,6 @@ uint32_t BitstreamExtractorApp::decode()
             delete vps;
           }
         }
-#if JVET_R0294_SUBPIC_HASH
 #if JVET_S0154_R0068_ASPECT5
         if (m_subPicIdx >= 0)
         {
@@ -970,7 +906,6 @@ uint32_t BitstreamExtractorApp::decode()
         }
 #endif
       }
-#endif
 
 #if JVET_R0107_BITSTREAM_EXTACTION
       Slice slice;
