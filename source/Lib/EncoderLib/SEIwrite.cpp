@@ -791,17 +791,14 @@ void SEIWriter::xWriteSEISubpictureLevelInfo(const SEISubpicureLevelInfo &sei)
   if (sei.m_explicitFractionPresentFlag)
   {
     WRITE_UVLC(         sei.m_numSubpics -1 ,                                 "sli_num_subpics_minus1");
-#if JVET_S0176_SLI_SEI
     WRITE_CODE( (uint32_t)sei.m_sliMaxSublayers - 1, 3,                       "sli_max_sublayers_minus1");
     WRITE_FLAG(           sei.m_sliSublayerInfoPresentFlag,                   "sli_sublayer_info_present_flag");
-#endif
     while (!isByteAligned())
     {
       WRITE_FLAG(       0,                                                    "sli_alignment_zero_bit");
     }
   }
 
-#if JVET_S0176_SLI_SEI
   for (int k = sei.m_sliSublayerInfoPresentFlag ? 0 : sei.m_sliMaxSublayers - 1; k < sei.m_sliMaxSublayers; k++)
   {
     for (int i = 0; i < sei.m_numRefLevels; i++)
@@ -818,20 +815,6 @@ void SEIWriter::xWriteSEISubpictureLevelInfo(const SEISubpicureLevelInfo &sei)
       }
     }
   }
-#else
-  for (int i = 0; i < sei.m_numRefLevels; i++)
-  {
-    WRITE_CODE( (uint32_t)sei.m_refLevelIdc[i], 8,                            "sli_ref_level_idc[i]");
-    if (sei.m_explicitFractionPresentFlag)
-    {
-      CHECK(sei.m_numSubpics != (int)sei.m_refLevelFraction[i].size(),        "SEISubpicureLevelInfo: number of fractions differs from number of subpictures");
-      for (int j = 0; j < sei.m_numSubpics; j++)
-      {
-        WRITE_CODE( (uint32_t)sei.m_refLevelFraction[i][j], 8,                "sli_ref_level_fraction_minus1[i][j]");
-      }
-    }
-  }
-#endif
 }
 
 void SEIWriter::xWriteSEISampleAspectRatioInfo(const SEISampleAspectRatioInfo &sei)

@@ -113,7 +113,6 @@
 
 
 
-#define JVET_S0176_SLI_SEI                                1 // JVET-S0176: On the subpicture level information SEI message
 
 #define JVET_S0186_SPS_CLEANUP                            1 // JVET-S0186: Proposal 1, move sps_chroma_format_idc and sps_log2_ctu_size_minus5 to take place sps_reserved_zero_4bits
 

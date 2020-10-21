@@ -661,7 +661,6 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
 {
   const EncCfgParam::CfgSEISubpictureLevel &cfgSubPicLevel = m_pcCfg->getSubpicureLevelInfoSEICfg();
 
-#if JVET_S0176_SLI_SEI
   sei->m_sliSublayerInfoPresentFlag = cfgSubPicLevel.m_sliSublayerInfoPresentFlag;
   sei->m_sliMaxSublayers = cfgSubPicLevel.m_sliMaxSublayers;
   sei->m_numRefLevels = cfgSubPicLevel.m_sliSublayerInfoPresentFlag ? (int)cfgSubPicLevel.m_refLevels.size() / cfgSubPicLevel.m_sliMaxSublayers : (int)cfgSubPicLevel.m_refLevels.size();
@@ -733,25 +732,6 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
       }
     }
   }
-#else
-    sei->m_numRefLevels = (int)cfgSubPicLevel.m_refLevels.size();
-    sei->m_refLevelIdc = cfgSubPicLevel.m_refLevels;
-    sei->m_explicitFractionPresentFlag = cfgSubPicLevel.m_explicitFraction;
-    if (cfgSubPicLevel.m_explicitFraction)
-    {
-      CHECK(sps->getNumSubPics() != cfgSubPicLevel.m_numSubpictures, "Number of subpictures must be equal in SPS and subpicture level information SEI");
-      sei->m_numSubpics = cfgSubPicLevel.m_numSubpictures;
-      sei->m_refLevelFraction.resize(sei->m_numRefLevels);
-    for (int level=0, cnt=0; level < sei->m_numRefLevels; level++)
-    {
-      sei->m_refLevelFraction[level].resize(sei->m_numSubpics);
-      for (int subpic=0; subpic<sei->m_numSubpics; subpic++)
-      {
-        sei->m_refLevelFraction[level][subpic] = cfgSubPicLevel.m_fractions[cnt++];
-      }
-    }
-  }
-#endif
 }
 
 
