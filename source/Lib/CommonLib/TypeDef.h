@@ -130,7 +130,6 @@
 
 
 
-#define JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT            1 // JVET-S0184: Conformance constraints regarding virtual boundary signalling when subpictures are present
 
 #define JVET_Q0114_ASPECT5_GCI_FLAG                       1 // JVET-Q0114 Aspect 5: Add a general constraint on no reference picture resampling
 
