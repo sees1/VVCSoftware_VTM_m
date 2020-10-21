@@ -132,7 +132,6 @@
 
 
 
-#define JVET_S0105_GCI_REORDER_IN_CATEGORY                1 // JVET-S0105: reorder and categorize GCI flags (assumes the following macros set to 1: JVET_S0050_GCI, JVET_S0113_S0195_GCI, JVET_S0066_GCI, JVET_S0138_GCI_PTL, JVET_S0058_GCI, JVET_R0341_GCI, JVET_Q0114_ASPECT5_GCI_FLAG)
 
 #define JVET_S0158_SUB_BITSTREAM_EXT                      1 // JVET-S0158: On the general sub-bitstream extraction process
 
