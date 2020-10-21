@@ -77,9 +77,7 @@ protected:
   virtual ~VLCWriter() {}
 
   void  setBitstream          ( OutputBitstream* p )  { m_pcBitIf = p;  }
-#if JVET_S0266_VUI_length
   OutputBitstream* getBitstream( )                    { return m_pcBitIf; }
-#endif
   void  xWriteSCode           ( int  code,  uint32_t length );
   void  xWriteCode            ( uint32_t uiCode, uint32_t uiLength );
   void  xWriteUvlc            ( uint32_t uiCode );
@@ -141,24 +139,15 @@ public:
   void  codeScalingListAps      ( APS* pcAPS );
   void  codeVPS                 ( const VPS* pcVPS );
   void  codeDCI                 ( const DCI* dci );
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   void  codePictureHeader       ( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice = 0 );
   void  codeSliceHeader         ( Slice* pcSlice, PicHeader *picheader = 0 );
-#else
-  void  codePictureHeader       ( PicHeader* picHeader, bool writeRbspTrailingBits );
-  void  codeSliceHeader         ( Slice* pcSlice );
-#endif
   void  codeConstraintInfo      ( const ConstraintInfo* cinfo );
   void  codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 );
   void  codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd , const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1);
 
   void codeGeneralHrdparameters(const GeneralHrdParams *hrd);
   void  codeTilesWPPEntryPoint  ( Slice* pSlice );
-#if JVET_R0433
   void codeScalingList(const ScalingList &scalingList, bool aps_chromaPresentFlag);
-#else
-  void  codeScalingList         ( const ScalingList &scalingList );
-#endif
   void alfFilter( const AlfParam& alfParam, const bool isChroma, const int altIdx );
   void dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, const SPS *pcSPS);
 private:

@@ -131,15 +131,10 @@ protected:
   bool      m_bClipOutputVideoToRec709Range;
   bool      m_packedYUVMode;                                  ///< If true, output 10-bit and 12-bit YUV data as 5-byte and 3-byte (respectively) packed YUV data
 
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   bool      m_gciPresentFlag;
-#endif
   bool      m_bIntraOnlyConstraintFlag;
   uint32_t  m_maxBitDepthConstraintIdc;
   int       m_maxChromaFormatConstraintIdc;
-#if !JVET_S0138_GCI_PTL
-  bool      m_singleLayerConstraintFlag;
-#endif
   bool      m_allLayersIndependentConstraintFlag;
   bool      m_noMrlConstraintFlag;
   bool      m_noIspConstraintFlag;
@@ -151,27 +146,17 @@ protected:
   bool      m_noPaletteConstraintFlag;
   bool      m_noActConstraintFlag;
   bool      m_noLmcsConstraintFlag;
-#if JVET_S0050_GCI
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
-#endif
-#if JVET_S0058_GCI
   bool      m_noMttConstraintFlag;
-#endif
-#if JVET_R0341_GCI
   bool      m_noChromaQpOffsetConstraintFlag;
-#endif
   bool      m_noQtbttDualTreeIntraConstraintFlag;
-#if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
-#endif
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
   bool      m_noSaoConstraintFlag;
   bool      m_noAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
-#if JVET_S0058_GCI
   bool      m_noWeightedPredictionConstraintFlag;
-#endif
   bool      m_noRefWraparoundConstraintFlag;
   bool      m_noTemporalMvpConstraintFlag;
   bool      m_noSbtmvpConstraintFlag;
@@ -188,16 +173,10 @@ protected:
   bool      m_noGeoConstraintFlag;
   bool      m_noLadfConstraintFlag;
   bool      m_noTransformSkipConstraintFlag;
-#if JVET_S0066_GCI
   bool      m_noLumaTransformSize64ConstraintFlag;
-#endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
-#if JVET_R0227_ASPECT3
   bool      m_noCuQpDeltaConstraintFlag;
-#else
-  bool      m_noQpDeltaConstraintFlag;
-#endif
   bool      m_noDepQuantConstraintFlag;
   bool      m_noSignDataHidingConstraintFlag;
   bool      m_noTrailConstraintFlag;
@@ -213,10 +192,8 @@ protected:
   Profile::Name m_profile;
   Level::Tier   m_levelTier;
   Level::Name   m_level;
-#if JVET_S0138_GCI_PTL
   bool          m_frameOnlyConstraintFlag;
   bool          m_multiLayerEnabledFlag;
-#endif
   std::vector<uint32_t>  m_subProfile;
   uint8_t      m_numSubProfile;
 
@@ -226,24 +203,15 @@ protected:
   bool          m_intraOnlyConstraintFlag;
   bool          m_nonPackedConstraintFlag;
   bool          m_nonProjectedConstraintFlag;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool          m_noRprConstraintFlag;
-#endif
   bool          m_noResChangeInClvsConstraintFlag;
   bool          m_oneTilePerPicConstraintFlag;
   bool          m_picHeaderInSliceHeaderConstraintFlag;
   bool          m_oneSlicePerPicConstraintFlag;
-#if JVET_S0113_S0195_GCI
   bool          m_noIdrRplConstraintFlag;
   bool          m_noRectSliceConstraintFlag;
   bool          m_oneSlicePerSubpicConstraintFlag;
   bool          m_noSubpicInfoConstraintFlag;
-#else
-  bool          m_oneSubpicPerPicConstraintFlag;
-#endif
-#if !JVET_S0138_GCI_PTL
-  bool          m_frameOnlyConstraintFlag;
-#endif
   // coding structure
   int       m_iIntraPeriod;                                   ///< period of I-slice (random access period)
   int       m_iDecodingRefreshType;                           ///< random access type
@@ -319,9 +287,7 @@ protected:
   unsigned  m_uiCTUSize;
   bool m_subPicInfoPresentFlag;
   unsigned m_numSubPics;
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
   bool m_subPicSameSizeFlag;
-#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;
@@ -517,9 +483,7 @@ protected:
   bool      m_bUseBLambdaForNonKeyLowDelayPictures;
 
   HashType  m_decodedPictureHashSEIType;                      ///< Checksum mode for decoded picture hash SEI message
-#if JVET_R0294_SUBPIC_HASH
   HashType  m_subpicDecodedPictureHashType;
-#endif
   bool      m_bufferingPeriodSEIEnabled;
   bool      m_pictureTimingSEIEnabled;
   bool      m_bpDeltasGOPStructure;
@@ -732,9 +696,7 @@ protected:
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool        m_rprEnabledFlag;
-#endif
   double      m_scalingRatioHor;
   double      m_scalingRatioVer;
   bool        m_resChangeInClvsEnabled;
@@ -753,11 +715,7 @@ protected:
   int         m_layerId[MAX_VPS_LAYERS];
   int         m_layerIdx;
   int         m_maxSublayers;
-#if JVET_S0115_VPS
   bool        m_defaultPtlDpbHrdMaxTidFlag;
-#else
-  bool        m_allLayersSameNumSublayersFlag;
-#endif
   bool        m_allIndependentLayersFlag;
   std::string m_predDirectionArray;
 

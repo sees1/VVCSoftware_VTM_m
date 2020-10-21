@@ -175,16 +175,11 @@ protected:
   bool      m_printSequenceMSE;
   bool      m_cabacZeroWordPaddingEnabled;
 
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   bool      m_gciPresentFlag;
-#endif
   bool      m_onePictureOnlyConstraintFlag;
   bool      m_bIntraOnlyConstraintFlag;
   uint32_t  m_maxBitDepthConstraintIdc;
   int  m_maxChromaFormatConstraintIdc;
-#if !JVET_S0138_GCI_PTL
-  bool      m_singleLayerConstraintFlag;
-#endif
   bool      m_allLayersIndependentConstraintFlag;
   bool      m_noMrlConstraintFlag;
   bool      m_noIspConstraintFlag;
@@ -196,27 +191,17 @@ protected:
   bool      m_noPaletteConstraintFlag;
   bool      m_noActConstraintFlag;
   bool      m_noLmcsConstraintFlag;
-#if JVET_S0050_GCI
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
-#endif
-#if JVET_S0058_GCI
   bool      m_noMttConstraintFlag;
-#endif
-#if JVET_R0341_GCI
   bool      m_noChromaQpOffsetConstraintFlag;
-#endif
   bool      m_noQtbttDualTreeIntraConstraintFlag;
-#if JVET_S0066_GCI
   int       m_maxLog2CtuSizeConstraintIdc;
-#endif
   bool      m_noPartitionConstraintsOverrideConstraintFlag;
   bool      m_noSaoConstraintFlag;
   bool      m_noAlfConstraintFlag;
   bool      m_noCCAlfConstraintFlag;
-#if JVET_S0058_GCI
   bool      m_noWeightedPredictionConstraintFlag;
-#endif
   bool      m_noRefWraparoundConstraintFlag;
   bool      m_noTemporalMvpConstraintFlag;
   bool      m_noSbtmvpConstraintFlag;
@@ -233,16 +218,10 @@ protected:
   bool      m_noGeoConstraintFlag;
   bool      m_noLadfConstraintFlag;
   bool      m_noTransformSkipConstraintFlag;
-#if JVET_S0066_GCI
   bool      m_noLumaTransformSize64ConstraintFlag;
-#endif
   bool      m_noBDPCMConstraintFlag;
   bool      m_noJointCbCrConstraintFlag;
-#if JVET_R0227_ASPECT3
   bool      m_noCuQpDeltaConstraintFlag;
-#else
-  bool      m_noQpDeltaConstraintFlag;
-#endif
   bool      m_noDepQuantConstraintFlag;
   bool      m_noSignDataHidingConstraintFlag;
   bool      m_noTrailConstraintFlag;
@@ -258,32 +237,21 @@ protected:
   Profile::Name m_profile;
   Level::Tier   m_levelTier;
   Level::Name   m_level;
-#if JVET_S0138_GCI_PTL
   bool m_frameOnlyConstraintFlag;
   bool m_multiLayerEnabledFlag;
-#endif
   std::vector<uint32_t>      m_subProfile;
   uint8_t       m_numSubProfile;
   bool m_nonPackedConstraintFlag;
   bool m_nonProjectedConstraintFlag;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool m_noRprConstraintFlag;
-#endif
   bool m_noResChangeInClvsConstraintFlag;
   bool m_oneTilePerPicConstraintFlag;
   bool m_picHeaderInSliceHeaderConstraintFlag;
   bool m_oneSlicePerPicConstraintFlag;
-#if JVET_S0113_S0195_GCI
   bool m_noIdrRplConstraintFlag;
   bool m_noRectSliceConstraintFlag;
   bool m_oneSlicePerSubpicConstraintFlag;
   bool m_noSubpicInfoConstraintFlag;
-#else
-  bool m_oneSubpicPerPicConstraintFlag;
-#endif
-#if !JVET_S0138_GCI_PTL
-  bool m_frameOnlyConstraintFlag;
-#endif
   bool m_intraOnlyConstraintFlag;
 
   //====== Coding Structure ========
@@ -319,9 +287,7 @@ protected:
   unsigned  m_CTUSize;
   bool                  m_subPicInfoPresentFlag;
   uint32_t              m_numSubPics;
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
   bool                  m_subPicSameSizeFlag;
-#endif
   std::vector<uint32_t> m_subPicCtuTopLeftX;
   std::vector<uint32_t> m_subPicCtuTopLeftY;
   std::vector<uint32_t> m_subPicWidth;
@@ -546,9 +512,7 @@ protected:
   bool      m_entryPointPresentFlag;                           ///< flag for the presence of entry points
 
   HashType  m_decodedPictureHashSEIType;
-#if JVET_R0294_SUBPIC_HASH
   HashType  m_subpicDecodedPictureHashType;
-#endif
   bool      m_bufferingPeriodSEIEnabled;
   bool      m_pictureTimingSEIEnabled;
   bool      m_frameFieldInfoSEIEnabled;
@@ -786,9 +750,7 @@ protected:
 #endif
   double      m_scalingRatioHor;
   double      m_scalingRatioVer;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool        m_rprEnabledFlag;
-#endif
   bool        m_resChangeInClvsEnabled;
   int         m_switchPocPeriod;
   int         m_upscaledOutput;
@@ -805,12 +767,10 @@ public:
 
   void setProfile(Profile::Name profile) { m_profile = profile; }
   void setLevel(Level::Tier tier, Level::Name level) { m_levelTier = tier; m_level = level; }
-#if JVET_S0138_GCI_PTL
   bool      getFrameOnlyConstraintFlag() const { return m_frameOnlyConstraintFlag; }
   void      setFrameOnlyConstraintFlag(bool b) { m_frameOnlyConstraintFlag = b;    }
   bool      getMultiLayerEnabledFlag() const   { return m_multiLayerEnabledFlag;   }
   void      setMultiLayerEnabledFlag(bool b)   { m_multiLayerEnabledFlag = b;      }
-#endif
   void setNumSubProfile( uint8_t numSubProfile) { m_numSubProfile = numSubProfile; m_subProfile.resize(m_numSubProfile); }
   void setSubProfile( int i, uint32_t subProfile) { m_subProfile[i] = subProfile; }
 
@@ -823,14 +783,8 @@ public:
   void      setMaxBitDepthConstraintIdc(uint32_t u) { m_maxBitDepthConstraintIdc = u; }
   int       getMaxChromaFormatConstraintIdc() const { return m_maxChromaFormatConstraintIdc; }
   void      setMaxChromaFormatConstraintIdc(int u) { m_maxChromaFormatConstraintIdc = u; }
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   bool          getGciPresentFlag() const { return m_gciPresentFlag; }
   void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
-#endif
-#if !JVET_S0138_GCI_PTL
-  bool          getSingleLayerConstraintFlag() const { return m_singleLayerConstraintFlag; }
-  void          setSingleLayerConstraintFlag(bool val) { m_singleLayerConstraintFlag = val; }
-#endif
   bool          getAllLayersIndependentConstraintFlag() const { return m_allLayersIndependentConstraintFlag; }
   void          setAllLayersIndependentConstraintFlag(bool val) { m_allLayersIndependentConstraintFlag = val; }
   bool          getNoMrlConstraintFlag() const { return m_noMrlConstraintFlag; }
@@ -853,26 +807,18 @@ public:
   void          setNoActConstraintFlag(bool val) { m_noActConstraintFlag = val; }
   bool          getNoLmcsConstraintFlag() const { return m_noLmcsConstraintFlag; }
   void          setNoLmcsConstraintFlag(bool val) { m_noLmcsConstraintFlag = val; }
-#if JVET_S0050_GCI
   bool          getNoExplicitScaleListConstraintFlag() const { return m_noExplicitScaleListConstraintFlag; }
   void          setNoExplicitScaleListConstraintFlag(bool val) { m_noExplicitScaleListConstraintFlag = val; }
   bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
   void          setNoVirtualBoundaryConstraintFlag(bool val) { m_noVirtualBoundaryConstraintFlag = val; }
-#endif
-#if JVET_S0058_GCI
   bool          getNoMttConstraintFlag() const { return m_noMttConstraintFlag; }
   void          setNoMttConstraintFlag(bool val) { m_noMttConstraintFlag = val; }
-#endif
-#if JVET_R0341_GCI
   bool      getNoChromaQpOffsetConstraintFlag() const { return m_noChromaQpOffsetConstraintFlag; }
   void      setNoChromaQpOffsetConstraintFlag(bool bVal) { m_noChromaQpOffsetConstraintFlag = bVal; }
-#endif
   bool      getNoQtbttDualTreeIntraConstraintFlag() const { return m_noQtbttDualTreeIntraConstraintFlag; }
   void      setNoQtbttDualTreeIntraConstraintFlag(bool val) { m_noQtbttDualTreeIntraConstraintFlag = val; }
-#if JVET_S0066_GCI
   int       getMaxLog2CtuSizeConstraintIdc() const { return m_maxLog2CtuSizeConstraintIdc; }
   void      setMaxLog2CtuSizeConstraintIdc(int u) { m_maxLog2CtuSizeConstraintIdc = u; }
-#endif
   bool      getNoPartitionConstraintsOverrideConstraintFlag() const { return m_noPartitionConstraintsOverrideConstraintFlag; }
   void      setNoPartitionConstraintsOverrideConstraintFlag(bool val) { m_noPartitionConstraintsOverrideConstraintFlag = val; }
   bool      getNoSaoConstraintFlag() const { return m_noSaoConstraintFlag; }
@@ -881,10 +827,8 @@ public:
   void      setNoAlfConstraintFlag(bool val) { m_noAlfConstraintFlag = val; }
   bool      getNoCCAlfConstraintFlag() const { return m_noCCAlfConstraintFlag; }
   void      setNoCCAlfConstraintFlag(bool val) { m_noCCAlfConstraintFlag = val; }
-#if JVET_S0058_GCI
   bool      getWeightedPredictionConstraintFlag() const { return m_noWeightedPredictionConstraintFlag; }
   void      setNoWeightedPredictionConstraintFlag(bool val) { m_noWeightedPredictionConstraintFlag = val; }
-#endif
   bool      getNoRefWraparoundConstraintFlag() const { return m_noRefWraparoundConstraintFlag; }
   void      setNoRefWraparoundConstraintFlag(bool val) { m_noRefWraparoundConstraintFlag = val; }
   bool      getNoTemporalMvpConstraintFlag() const { return m_noTemporalMvpConstraintFlag; }
@@ -917,21 +861,14 @@ public:
   void      setNoLadfConstraintFlag(bool val) { m_noLadfConstraintFlag = val; }
   bool      getNoTransformSkipConstraintFlag() const { return m_noTransformSkipConstraintFlag; }
   void      setNoTransformSkipConstraintFlag(bool val) { m_noTransformSkipConstraintFlag = val; }
-#if JVET_S0066_GCI
   bool      getNoLumaTransformSize64ConstraintFlag() const { return m_noLumaTransformSize64ConstraintFlag; }
   void      setNoLumaTransformSize64ConstraintFlag(bool val) { m_noLumaTransformSize64ConstraintFlag = val; }
-#endif
   bool      getNoBDPCMConstraintFlag() const { return m_noBDPCMConstraintFlag; }
   void      setNoBDPCMConstraintFlag(bool val) { m_noBDPCMConstraintFlag = val; }
   bool      getNoJointCbCrConstraintFlag() const { return m_noJointCbCrConstraintFlag; }
   void      setNoJointCbCrConstraintFlag(bool val) { m_noJointCbCrConstraintFlag = val; }
-#if JVET_R0227_ASPECT3
   bool      getNoCuQpDeltaConstraintFlag() const { return m_noCuQpDeltaConstraintFlag; }
   void      setNoCuQpDeltaConstraintFlag(bool val) { m_noCuQpDeltaConstraintFlag = val; }
-#else
-  bool      getNoQpDeltaConstraintFlag() const { return m_noQpDeltaConstraintFlag; }
-  void      setNoQpDeltaConstraintFlag(bool val) { m_noQpDeltaConstraintFlag = val; }
-#endif
   bool      getNoDepQuantConstraintFlag() const { return m_noDepQuantConstraintFlag; }
   void      setNoDepQuantConstraintFlag(bool val) { m_noDepQuantConstraintFlag = val; }
   bool      getNoSignDataHidingConstraintFlag() const { return m_noSignDataHidingConstraintFlag; }
@@ -1054,26 +991,17 @@ public:
                                                                                       m_loopFilterAcrossSubpicEnabledFlag.resize(m_numSubPics);
                                                                                       m_subPicId.resize(m_numSubPics);
                                                                                     }
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
   void      setSubPicSameSizeFlag                       (bool b)                    { m_subPicSameSizeFlag = b; }
-#endif
   void      setSubPicCtuTopLeftX                        (uint32_t u, int i)         { m_subPicCtuTopLeftX[i] = u; }
   void      setSubPicCtuTopLeftY                        (uint32_t u, int i)         { m_subPicCtuTopLeftY[i] = u; }
   void      setSubPicWidth                              (uint32_t u, int i)         { m_subPicWidth[i] = u; }
   void      setSubPicHeight                             (uint32_t u, int i)         { m_subPicHeight[i] = u; }
   void      setSubPicTreatedAsPicFlag                   (bool b, int i)             { m_subPicTreatedAsPicFlag[i] = b; }
   void      setLoopFilterAcrossSubpicEnabledFlag        (bool b, int i)             { m_loopFilterAcrossSubpicEnabledFlag[i] = b; }
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
   void      setSubPicCtuTopLeftX                        (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 0 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 0(subPicSameSize=1)"); m_subPicCtuTopLeftX = v; }
   void      setSubPicCtuTopLeftY                        (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 0 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 0(subPicSameSize=1)"); m_subPicCtuTopLeftY = v; }
   void      setSubPicWidth                              (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 1 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 1(subPicSameSize=1)"); m_subPicWidth = v; }
   void      setSubPicHeight                             (const std::vector<uint32_t> &v)   { CHECK(v.size() != (m_subPicSameSizeFlag ? 1 : m_numSubPics), "number of vector entries must be equal to numSubPics(subPicSameSize=0) or 1(subPicSameSize=1)"); m_subPicHeight = v; }
-#else
-  void      setSubPicCtuTopLeftX                        (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicCtuTopLeftX = v; }
-  void      setSubPicCtuTopLeftY                        (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicCtuTopLeftY = v; }
-  void      setSubPicWidth                              (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicWidth = v; }
-  void      setSubPicHeight                             (const std::vector<uint32_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicHeight = v; }
-#endif
   void      setSubPicTreatedAsPicFlag                   (const std::vector<bool> &v)       { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_subPicTreatedAsPicFlag = v; }
   void      setLoopFilterAcrossSubpicEnabledFlag        (const std::vector<bool> &v)       { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics") ;m_loopFilterAcrossSubpicEnabledFlag = v; }
 
@@ -1084,9 +1012,7 @@ public:
   void      setSubPicId                                 (const std::vector<uint16_t> &v)   { CHECK(v.size()!=m_numSubPics, "number of vector entries must be equal to numSubPics"); m_subPicId = v; }
 
   bool      getSubPicInfoPresentFlag                    ()                          { return m_subPicInfoPresentFlag; }
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
   bool      getSubPicSameSizeFlag                       ()                          { return m_subPicSameSizeFlag; }
-#endif
   uint32_t  getNumSubPics                               ()                          { return m_numSubPics; }
   uint32_t  getSubPicCtuTopLeftX                        (int i)                     { return m_subPicCtuTopLeftX[i]; }
   uint32_t  getSubPicCtuTopLeftY                        (int i)                     { return m_subPicCtuTopLeftY[i]; }
@@ -1539,10 +1465,8 @@ public:
   void  setEntryPointPresentFlag(bool b)                             { m_entryPointPresentFlag = b; }
   void  setDecodedPictureHashSEIType(HashType m)                     { m_decodedPictureHashSEIType = m; }
   HashType getDecodedPictureHashSEIType() const                      { return m_decodedPictureHashSEIType; }
-#if JVET_R0294_SUBPIC_HASH
   void  setSubpicDecodedPictureHashType(HashType m)                  { m_subpicDecodedPictureHashType = m; }
   HashType getSubpicDecodedPictureHashType() const                   { return m_subpicDecodedPictureHashType; }
-#endif
 
   void  setBufferingPeriodSEIEnabled(bool b)                         { m_bufferingPeriodSEIEnabled = b; }
   bool  getBufferingPeriodSEIEnabled() const                         { return m_bufferingPeriodSEIEnabled; }
@@ -1915,10 +1839,8 @@ public:
   bool         getNonProjectedConstraintFlag() const                 { return m_nonProjectedConstraintFlag; }
   void         setNonProjectedConstraintFlag(bool b)                 { m_nonProjectedConstraintFlag = b; }
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool         getNoRprConstraintFlag() const                        { return m_noRprConstraintFlag; }
   void         setNoRprConstraintFlag(bool b)                        { m_noRprConstraintFlag = b; }
-#endif
 
   bool         getNoResChangeInClvsConstraintFlag() const            { return m_noResChangeInClvsConstraintFlag; }
   void         setNoResChangeInClvsConstraintFlag(bool b)            { m_noResChangeInClvsConstraintFlag = b; }
@@ -1932,7 +1854,6 @@ public:
   bool         getOneSlicePerPicConstraintFlag() const               { return m_oneSlicePerPicConstraintFlag; }
   void         setOneSlicePerPicConstraintFlag(bool b)               { m_oneSlicePerPicConstraintFlag = b; }
 
-#if JVET_S0113_S0195_GCI
   bool         getNoIdrRplConstraintFlag() const                     { return m_noIdrRplConstraintFlag; }
   void         setNoIdrRplConstraintFlag(bool b)                     { m_noIdrRplConstraintFlag = b; }
 
@@ -1944,15 +1865,7 @@ public:
 
   bool         getNoSubpicInfoConstraintFlag() const                 { return m_noSubpicInfoConstraintFlag; }
   void         setNoSubpicInfoConstraintFlag(bool b)                 { m_noSubpicInfoConstraintFlag = b; }
-#else
-  bool         getOneSubpicPerPicConstraintFlag() const              { return m_oneSubpicPerPicConstraintFlag; }
-  void         setOneSubpicPerPicConstraintFlag(bool b)              { m_oneSubpicPerPicConstraintFlag = b; }
-#endif
 
-#if !JVET_S0138_GCI_PTL
-  bool         getFrameOnlyConstraintFlag() const                    { return m_frameOnlyConstraintFlag; }
-  void         setFrameOnlyConstraintFlag(bool b)                    { m_frameOnlyConstraintFlag = b; }
-#endif
   void         setSummaryOutFilename(const std::string &s)           { m_summaryOutFilename = s; }
   const std::string& getSummaryOutFilename() const                   { return m_summaryOutFilename; }
   void         setSummaryPicFilenameBase(const std::string &s)       { m_summaryPicFilenameBase = s; }
@@ -2020,10 +1933,8 @@ public:
   void        setCalculateHdrMetrics(bool value)                      { m_calculateHdrMetrics = value;}
   bool        getCalcluateHdrMetrics()                          const { return m_calculateHdrMetrics;}
 #endif
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   void        setRprEnabled(bool b)                                   { m_rprEnabledFlag = b; }
   bool        isRprEnabled()                                    const { return m_rprEnabledFlag; }
-#endif
   void        setScalingRatio( double hor, double ver )              { m_scalingRatioHor = hor, m_scalingRatioVer = ver;  }
   void        setResChangeInClvsEnabled(bool b)                      { m_resChangeInClvsEnabled = b; }
   bool        isResChangeInClvsEnabled()                        const { return m_resChangeInClvsEnabled; }

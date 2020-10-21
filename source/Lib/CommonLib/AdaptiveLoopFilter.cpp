@@ -504,11 +504,7 @@ void AdaptiveLoopFilter::ALFProcess(CodingStructure& cs)
               deriveClassification( m_classifier, buf.get(COMPONENT_Y), blkDst, blkSrc );
               short filterSetIndex = alfCtuFilterIndex[ctuIdx];
               short *coeff;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
               Pel *clip;
-#else
-              short *clip;
-#endif
               if (filterSetIndex >= NUM_FIXED_FILTER_SETS)
               {
                 coeff = m_coeffApsLuma[filterSetIndex - NUM_FIXED_FILTER_SETS];
@@ -572,11 +568,7 @@ void AdaptiveLoopFilter::ALFProcess(CodingStructure& cs)
           deriveClassification( m_classifier, tmpYuv.get( COMPONENT_Y ), blk, blk );
           short filterSetIndex = alfCtuFilterIndex[ctuIdx];
           short *coeff;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
           Pel *clip;
-#else
-          short *clip;
-#endif
           if (filterSetIndex >= NUM_FIXED_FILTER_SETS)
           {
             coeff = m_coeffApsLuma[filterSetIndex - NUM_FIXED_FILTER_SETS];
@@ -671,11 +663,7 @@ void AdaptiveLoopFilter::reconstructCoeff( AlfParam& alfParam, ChannelType chann
   {
     int numFilters = isLuma( channel ) ? alfParam.numLumaFilters : 1;
     short* coeff = isLuma( channel ) ? alfParam.lumaCoeff : alfParam.chromaCoeff[altIdx];
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
     Pel* clipp = isLuma( channel ) ? alfParam.lumaClipp : alfParam.chromaClipp[altIdx];
-#else
-    short* clipp = isLuma( channel ) ? alfParam.lumaClipp : alfParam.chromaClipp[altIdx];
-#endif
 
     for( int filterIdx = 0; filterIdx < numFilters; filterIdx++ )
     {
@@ -1071,11 +1059,7 @@ void AdaptiveLoopFilter::deriveClassificationBlk(AlfClassifier **classifier, int
 template<AlfFilterType filtType>
 void AdaptiveLoopFilter::filterBlk(AlfClassifier **classifier, const PelUnitBuf &recDst, const CPelUnitBuf &recSrc,
                                    const Area &blkDst, const Area &blk, const ComponentID compId,
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
                                    const short *filterSet, const Pel *fClipSet, const ClpRng &clpRng,
-#else
-                                   const short *filterSet, const short *fClipSet, const ClpRng &clpRng,
-#endif
                                    CodingStructure &cs, const int vbCTUHeight, int vbPos)
 {
   CHECK((vbCTUHeight & (vbCTUHeight - 1)) != 0, "vbCTUHeight must be a power of 2");
@@ -1104,11 +1088,7 @@ void AdaptiveLoopFilter::filterBlk(AlfClassifier **classifier, const PelUnitBuf 
   const Pel *pImg0, *pImg1, *pImg2, *pImg3, *pImg4, *pImg5, *pImg6;
 
   const short *coef = filterSet;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   const Pel *clip = fClipSet;
-#else
-  const short *clip = fClipSet;
-#endif
   const int shift = m_NUM_BITS - 1;
 
   const int offset = 1 << ( shift - 1 );

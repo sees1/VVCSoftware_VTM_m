@@ -68,9 +68,7 @@ private:
 
   std::ofstream   m_oplFileStream;                ///< Used to output log file for confomance testing
 
-#if JVET_R0270
   bool            m_newCLVS[MAX_NUM_LAYER_IDS];   ///< used to record a new CLVSS
-#endif
 
 
 private:

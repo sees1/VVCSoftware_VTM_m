@@ -2334,25 +2334,14 @@ void IntraSearch::calcPixelPred(CodingStructure& cs, Partitioner& partitioner, u
       if (lossless)
       {
         escapeValue.at(xPos, yPos) = orgBuf[ch].at(xPos, yPos);
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
         recBuf.at(xPos, yPos)      = orgBuf[ch].at(xPos, yPos);
-#else
-        recBuf.at(xPos, yPos)      = escapeValue.at(xPos, yPos);
-#endif
       }
       else
       {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
       escapeValue.at(xPos, yPos) = std::max<TCoeff>(0, ((orgBuf[ch].at(xPos, yPos) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch]));
       assert(escapeValue.at(xPos, yPos) < (TCoeff(1) << (channelBitDepth + 1)));
       TCoeff value = (((escapeValue.at(xPos, yPos)*g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch]) >> invquantiserRightShift[ch];
       recBuf.at(xPos, yPos) = Pel(ClipBD<TCoeff>(value, channelBitDepth));//to be checked
-#else
-      escapeValue.at(xPos, yPos) = TCoeff(std::max<int>(0, ((orgBuf[ch].at(xPos, yPos) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch])));
-      assert(escapeValue.at(xPos, yPos) < (1 << (channelBitDepth + 1)));
-      recBuf.at(xPos, yPos) = (((escapeValue.at(xPos, yPos)*g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch]) >> invquantiserRightShift[ch];
-      recBuf.at(xPos, yPos) = Pel(ClipBD<int>(recBuf.at(xPos, yPos), channelBitDepth));//to be checked
-#endif
       }
     }
     else if (compBegin == COMPONENT_Y && ch > 0 && yPos % (1 << scaleY) == 0 && xPos % (1 << scaleX) == 0)
@@ -2362,30 +2351,16 @@ void IntraSearch::calcPixelPred(CodingStructure& cs, Partitioner& partitioner, u
       if (lossless)
       {
         escapeValue.at(xPosC, yPosC) = orgBuf[ch].at(xPosC, yPosC);
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
         recBuf.at(xPosC, yPosC)      = orgBuf[ch].at(xPosC, yPosC);
-#else
-        recBuf.at(xPosC, yPosC)      = escapeValue.at(xPosC, yPosC);
-#endif
       }
       else
       {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
         escapeValue.at(xPosC, yPosC) = std::max<TCoeff>(
           0, ((orgBuf[ch].at(xPosC, yPosC) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch]));
         assert(escapeValue.at(xPosC, yPosC) < (TCoeff(1) << (channelBitDepth + 1)));
         TCoeff value = (((escapeValue.at(xPosC, yPosC) * g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch])
                        >> invquantiserRightShift[ch];
         recBuf.at(xPosC, yPosC) = Pel(ClipBD<TCoeff>(value, channelBitDepth));   // to be checked
-#else
-        escapeValue.at(xPosC, yPosC) = TCoeff(std::max<int>(
-          0, ((orgBuf[ch].at(xPosC, yPosC) * quantiserScale[ch] + rightShiftOffset[ch]) >> quantiserRightShift[ch])));
-        assert(escapeValue.at(xPosC, yPosC) < (1 << (channelBitDepth + 1)));
-        recBuf.at(xPosC, yPosC) =
-          (((escapeValue.at(xPosC, yPosC) * g_invQuantScales[0][qpRem[ch]]) << qpPer[ch]) + add[ch])
-          >> invquantiserRightShift[ch];
-        recBuf.at(xPosC, yPosC) = Pel(ClipBD<int>(recBuf.at(xPosC, yPosC), channelBitDepth));   // to be checked
-#endif
       }
     }
   }
@@ -3519,16 +3494,6 @@ void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &c
     }
   }
 
-#if !JVET_S0234_ACT_CRS_FIX
-  if (flag && uiAbsSum > 0 && isChroma(compID) && slice.getPicHeader()->getLmcsChromaResidualScaleFlag())
-  {
-    piResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(compID));
-    if (jointCbCr)
-    {
-      crResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(COMPONENT_Cr));
-    }
-  }
-#endif
   if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
   m_pcTrQuant->lambdaAdjustColorTrans(false);
 
@@ -4218,7 +4183,6 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
     PelUnitBuf predBuf = csFull->getPredBuf(tu);
     PelUnitBuf resiBuf = csFull->getResiBuf(tu);
     PelUnitBuf orgResiBuf = csFull->getOrgResiBuf(tu);
-#if JVET_S0234_ACT_CRS_FIX
     bool doReshaping = (slice.getLmcsEnabledFlag() && slice.getPicHeader()->getLmcsChromaResidualScaleFlag() && (slice.isIntra() || m_pcReshape->getCTUFlag()) && (tu.blocks[COMPONENT_Cb].width * tu.blocks[COMPONENT_Cb].height > 4));
     if (doReshaping)
     {
@@ -4227,7 +4191,6 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       int             adj = m_pcReshape->calculateChromaAdjVpduNei(tu, areaY);
       tu.setChromaAdj(adj);
     }
-#endif
 
     for (int i = 0; i < getNumberValidComponents(tu.chromaFormat); i++)
     {
@@ -4259,14 +4222,12 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
         piResi.rspSignal(m_pcReshape->getFwdLUT());
         piResi.subtract(tmpPred);
       }
-#if JVET_S0234_ACT_CRS_FIX
       else if (doReshaping && (compID != COMPONENT_Y))
       {
         piResi.subtract(piPred);
         int cResScaleInv = tu.getChromaAdj();
         piResi.scaleSignal(cResScaleInv, 1, slice.clpRng(compID));
       }
-#endif
       else
       {
         piResi.subtract(piPred);
@@ -4566,30 +4527,12 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
 
     tu.jointCbCr = 0;
 
-#if !JVET_S0234_ACT_CRS_FIX
-    bool doReshaping = (slice.getLmcsEnabledFlag() && slice.getPicHeader()->getLmcsChromaResidualScaleFlag() && (slice.isIntra() || m_pcReshape->getCTUFlag()) && (cbArea.width * cbArea.height > 4));
-    if (doReshaping)
-    {
-      const Area      area = tu.Y().valid() ? tu.Y() : Area(recalcPosition(tu.chromaFormat, tu.chType, CHANNEL_TYPE_LUMA, tu.blocks[tu.chType].pos()), recalcSize(tu.chromaFormat, tu.chType, CHANNEL_TYPE_LUMA, tu.blocks[tu.chType].size()));
-      const CompArea &areaY = CompArea(COMPONENT_Y, tu.chromaFormat, area);
-      int             adj = m_pcReshape->calculateChromaAdjVpduNei(tu, areaY);
-      tu.setChromaAdj(adj);
-    }
-#endif
 
     CompStorage  orgResiCb[5], orgResiCr[5]; // 0:std, 1-3:jointCbCr (placeholder at this stage), 4:crossComp
     orgResiCb[0].create(cbArea);
     orgResiCr[0].create(crArea);
     orgResiCb[0].copyFrom(csFull->getOrgResiBuf(cbArea));
     orgResiCr[0].copyFrom(csFull->getOrgResiBuf(crArea));
-#if !JVET_S0234_ACT_CRS_FIX
-    if (doReshaping)
-    {
-      int cResScaleInv = tu.getChromaAdj();
-      orgResiCb[0].scaleSignal(cResScaleInv, 1, slice.clpRng(COMPONENT_Cb));
-      orgResiCr[0].scaleSignal(cResScaleInv, 1, slice.clpRng(COMPONENT_Cr));
-    }
-#endif
 
     // 3.1 regular chroma residual coding
     csFull->getResiBuf(cbArea).copyFrom(orgResiCb[0]);
@@ -4627,7 +4570,6 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
         }
       }
       if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
-#if JVET_S0234_ACT_CRS_FIX
       {
         if (doReshaping)
         {
@@ -4639,11 +4581,6 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
           m_pcRdCost->lambdaAdjustColorTrans(true, compID);
         }
       }
-#else
-      {
-        m_pcRdCost->lambdaAdjustColorTrans(true, compID);
-      }
-#endif
 
       TempCtx ctxBegin(m_CtxCache);
       ctxBegin = m_CABACEstimator->getCtx();
@@ -4724,12 +4661,10 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       PelBuf            piPred = csFull->getPredBuf(area);
       PelBuf            piResi = invColorTransResidual.bufs[compID];
 
-#if JVET_S0234_ACT_CRS_FIX
       if (doReshaping && (compID != COMPONENT_Y))
       {
         piResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(compID));
       }
-#endif
       piReco.reconstruct(piPred, piResi, cs.slice->clpRng(compID));
 
       if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcEncCfg->getLmcs()
@@ -4840,12 +4775,10 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
             PelBuf            piPred = csFull->getPredBuf(area);
             PelBuf            piResi = invColorTransResidual.bufs[compID];
 
-#if JVET_S0234_ACT_CRS_FIX
             if (doReshaping && (compID != COMPONENT_Y))
             {
               piResi.scaleSignal(tu.getChromaAdj(), 0, slice.clpRng(compID));
             }
-#endif
             piReco.reconstruct(piPred, piResi, cs.slice->clpRng(compID));
             if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled()
                 || (m_pcEncCfg->getLmcs() & slice.getLmcsEnabledFlag()

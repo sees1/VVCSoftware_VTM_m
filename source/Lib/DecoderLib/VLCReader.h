@@ -178,20 +178,12 @@ public:
 
   void  parsePredWeightTable( Slice* pcSlice, const SPS *sps );
   void parsePredWeightTable ( PicHeader *picHeader, const SPS *sps );
-#if JVET_R0433
   void parseScalingList     ( ScalingList *scalingList, bool aps_chromaPresentFlag );
-#else
-  void  parseScalingList    ( ScalingList *scalingList );
-#endif
   void  decodeScalingList   ( ScalingList *scalingList, uint32_t scalingListId, bool isPredictor);
   void parseReshaper        ( SliceReshapeInfo& sliceReshaperInfo, const SPS* pcSPS, const bool isIntra );
   void alfFilter( AlfParam& alfParam, const bool isChroma, const int altIdx );
   void ccAlfFilter( Slice *pcSlice );
   void dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, SPS *pcSPS);
-#if !JVET_S0208_ASPECT1
-  void parseExtraPHBitsStruct( SPS *sps, int numBytes );
-  void parseExtraSHBitsStruct( SPS *sps, int numBytes );
-#endif
 private:
 
 protected:

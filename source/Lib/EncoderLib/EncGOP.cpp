@@ -523,11 +523,9 @@ void EncGOP::xWriteLeadingSEIOrdered (SEIMessages& seiMessages, SEIMessages& duI
   xClearSEIs(currentMessages, !testWrite);
 
   // Picture timing SEI must always be following buffering period
-#if JVET_S0102_ASPECT3_PT_SEI
   // Note: When general_same_pic_timing_in_all_ols_flag is equal to 1, PT SEI messages are required
   //       to be placed into separate NAL units. The code below conforms to the constraint even if
   //       general_same_pic_timing_in_all_ols_flag is equal to 0
-#endif
   currentMessages = extractSeisByType(localMessages, SEI::PICTURE_TIMING);
   CHECK(!(currentMessages.size() <= 1), "Unspecified error");
   xWriteSEI(NAL_UNIT_PREFIX_SEI, currentMessages, accessUnit, itNalu, temporalId);
@@ -776,11 +774,7 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
 
 }
 
-#if JVET_R0294_SUBPIC_HASH
 void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t>& subpicIDs)
-#else
-void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<uint16_t>& subpicIDs)
-#endif
 {
   SEIMessages tmpMessages;
   while (!nestedSeiMessages.empty())
@@ -789,11 +783,7 @@ void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& ne
     nestedSeiMessages.pop_front();
     tmpMessages.push_back(sei);
     SEIScalableNesting *nestingSEI = new SEIScalableNesting();
-#if JVET_R0294_SUBPIC_HASH
     m_seiEncoder.initSEIScalableNesting(nestingSEI, tmpMessages, targetOLSs, targetLayers, subpicIDs);
-#else
-    m_seiEncoder.initSEIScalableNesting(nestingSEI, tmpMessages, subpicIDs);
-#endif
     seiMessages.push_back(nestingSEI);
     tmpMessages.clear();
   }
@@ -1236,18 +1226,12 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
     }
   }
 }
-#if JVET_Q0406_CABAC_ZERO
 static std::size_t
-#else
-static void
-#endif
 cabac_zero_word_padding(const Slice *const pcSlice,
                         const Picture *const pcPic,
                         const std::size_t binCountsInNalUnits,
                         const std::size_t numBytesInVclNalUnits,
-#if JVET_Q0406_CABAC_ZERO
                         const std::size_t numZeroWordsAlreadyInserted,
-#endif
                               std::ostringstream &nalUnitData,
                         const bool cabacZeroWordPaddingEnabled,
                         const ProfileLevelTierFeatures &plt)
@@ -1273,11 +1257,7 @@ cabac_zero_word_padding(const Slice *const pcSlice,
 
     if (targetNumBytesInVclNalUnits>numBytesInVclNalUnits) // It should be!
     {
-#if JVET_Q0406_CABAC_ZERO
       const std::size_t numberOfAdditionalBytesNeeded= std::max<std::size_t>(0, targetNumBytesInVclNalUnits - numBytesInVclNalUnits - numZeroWordsAlreadyInserted * 3);
-#else
-      const std::size_t numberOfAdditionalBytesNeeded=targetNumBytesInVclNalUnits - numBytesInVclNalUnits;
-#endif
       const std::size_t numberOfAdditionalCabacZeroWords=(numberOfAdditionalBytesNeeded+2)/3;
       const std::size_t numberOfAdditionalCabacZeroBytes=numberOfAdditionalCabacZeroWords*3;
       if (cabacZeroWordPaddingEnabled)
@@ -1294,14 +1274,10 @@ cabac_zero_word_padding(const Slice *const pcSlice,
       {
         msg( NOTICE, "Standard would normally require adding %d bytes of padding\n", uint32_t( numberOfAdditionalCabacZeroWords * 3 ) );
       }
-#if JVET_Q0406_CABAC_ZERO
       return numberOfAdditionalCabacZeroWords;
-#endif
     }
   }
-#if JVET_Q0406_CABAC_ZERO
       return 0;
-#endif
 }
 
 class EfficientFieldIRAPMapping
@@ -2256,11 +2232,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             const ReferencePictureList* rpl0 = pcSlice->getSPS()->getRPLList0()->getReferencePictureList(ii);
             for (int jj = 0; jj < pcSlice->getRPL0()->getNumberOfActivePictures(); jj++)
             {
-#if JVET_S0045_SIGN
               int tPoc = pcSlice->getPOC() + rpl0->getRefPicIdentifier(jj);
-#else
-              int tPoc = pcSlice->getPOC() - rpl0->getRefPicIdentifier(jj);
-#endif
               int kk = 0;
               for (kk = 0; kk<m_pcCfg->getGOPSize(); kk++)
               {
@@ -2279,11 +2251,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             const ReferencePictureList* rpl1 = pcSlice->getSPS()->getRPLList1()->getReferencePictureList(ii);
             for (int jj = 0; jj < pcSlice->getRPL1()->getNumberOfActivePictures(); jj++)
             {
-#if JVET_S0045_SIGN
               int tPoc = pcSlice->getPOC() + rpl1->getRefPicIdentifier(jj);
-#else
-              int tPoc = pcSlice->getPOC() - rpl1->getRefPicIdentifier(jj);
-#endif
               int kk = 0;
               for (kk = 0; kk<m_pcCfg->getGOPSize(); kk++)
               {
@@ -2325,27 +2293,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     pcSlice->constructRefPicList(rcListPic);
 
     // store sub-picture numbers, sizes, and locations with a picture
-#if JVET_S0258_SUBPIC_CONSTRAINTS
     pcSlice->getPic()->subPictures.clear();
 
     for( int subPicIdx = 0; subPicIdx < pcPic->cs->pps->getNumSubPics(); subPicIdx++ )
     {
       pcSlice->getPic()->subPictures.push_back( pcPic->cs->pps->getSubPic( subPicIdx ) );
     }
-#else
-    pcSlice->getPic()->numSubpics = pcPic->cs->pps->getNumSubPics();
-    pcSlice->getPic()->subpicWidthInCTUs.clear();
-    pcSlice->getPic()->subpicHeightInCTUs.clear();
-    pcSlice->getPic()->subpicCtuTopLeftX.clear();
-    pcSlice->getPic()->subpicCtuTopLeftY.clear();
-    for (int subPicIdx = 0; subPicIdx < pcPic->cs->pps->getNumSubPics(); subPicIdx++)
-    {
-      pcSlice->getPic()->subpicWidthInCTUs.push_back(pcPic->cs->pps->getSubPic(subPicIdx).getSubPicWidthInCTUs());
-      pcSlice->getPic()->subpicHeightInCTUs.push_back(pcPic->cs->pps->getSubPic(subPicIdx).getSubPicHeightInCTUs());
-      pcSlice->getPic()->subpicCtuTopLeftX.push_back(pcPic->cs->pps->getSubPic(subPicIdx).getSubPicCtuTopLeftX());
-      pcSlice->getPic()->subpicCtuTopLeftY.push_back(pcPic->cs->pps->getSubPic(subPicIdx).getSubPicCtuTopLeftY());
-    }
-#endif
 
     const VPS* vps = pcPic->cs->vps;
     int layerIdx = vps == nullptr ? 0 : vps->getGeneralLayerIdx(pcPic->layerId);
@@ -2405,7 +2358,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         m_uiPrevISlicePOC = pcSlice->getPOC();
         m_bInitAMaxBT = true;
       }
-#if JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX
       bool identicalToSPS=true;
       const SPS* sps =pcSlice->getSPS();
 
@@ -2449,7 +2401,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         picHeader->setSplitConsOverrideFlag(false);
       }
-#endif
     }
 
     //  Slice info. refinement
@@ -2885,11 +2836,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         }
         m_pcSliceEncoder->setLosslessSlice(pcPic, isLossless);
 
-#if JVET_S0258_SUBPIC_CONSTRAINTS
         if( pcSlice->getSliceType() != I_SLICE && pcSlice->getRefPic( REF_PIC_LIST_0, 0 )->subPictures.size() > 1 )
-#else
-        if (pcSlice->getSliceType() != I_SLICE && pcSlice->getRefPic(REF_PIC_LIST_0, 0)->numSubpics > 1)
-#endif
         {
           clipMv = clipMvInSubpic;
           m_pcEncLib->getInterSearch()->setClipMvInSubPic(true);
@@ -3263,9 +3210,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         bool writeAPS = aps && apsMap->getChangedFlag((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
         if (writeAPS)
         {
-#if JVET_R0433
           aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
-#endif
           actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
           apsMap->clearChangedFlag((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
           CHECK(aps != picHeader->getLmcsAPS(), "Wrong LMCS APS pointer in compressGOP");
@@ -3281,9 +3226,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         bool writeAPS = aps && apsMap->getChangedFlag( ( apsId << NUM_APS_TYPE_LEN ) + SCALING_LIST_APS );
         if( writeAPS )
         {
-#if JVET_R0433
           aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
-#endif
           actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
           apsMap->clearChangedFlag( ( apsId << NUM_APS_TYPE_LEN ) + SCALING_LIST_APS );
           CHECK( aps != picHeader->getScalingListAPS(), "Wrong SCALING LIST APS pointer in compressGOP" );
@@ -3318,9 +3261,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
           if (writeAPS )
           {
-#if JVET_R0433
             aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
-#endif
             actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
             apsMap->clearChangedFlag((apsId << NUM_APS_TYPE_LEN) + ALF_APS);
             CHECK(aps != pcSlice->getAlfAPSs()[apsId] && apsId != pcSlice->getTileGroupCcAlfCbApsId() && apsId != pcSlice->getTileGroupCcAlfCrApsId(), "Wrong APS pointer in compressGOP");
@@ -3336,10 +3277,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       // pcSlice is currently slice 0.
       std::size_t binCountsInNalUnits   = 0; // For implementation of cabac_zero_word stuffing (section 7.4.3.10)
       std::size_t numBytesInVclNalUnits = 0; // For implementation of cabac_zero_word stuffing (section 7.4.3.10)
-#if JVET_Q0406_CABAC_ZERO
       std::size_t sumZeroWords          = 0; // sum of cabac_zero_word inserted per sub-picture
       std::vector<EncBitstreamParams> subPicStats (pcPic->cs->pps->getNumSubPics());
-#endif
 
       for(uint32_t sliceSegmentIdxCount = 0; sliceSegmentIdxCount < pcPic->cs->pps->getNumSlicesInPic(); sliceSegmentIdxCount++ )
       {
@@ -3368,11 +3307,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           {
             if (pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || pcSlice->getNalUnitType() >= NAL_UNIT_CODED_SLICE_GDR)
             {
-#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
               pcSlice->setNoOutputOfPriorPicsFlag(true);
-#else
-              picHeader->setNoOutputOfPriorPicsFlag(true);
-#endif
             }
           }
         }
@@ -3475,16 +3410,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         pcSlice->resetNumberOfSubstream( );
         pcSlice->setNumSubstream( pcSlice->getSPS(), pcSlice->getPPS() );
         pcSlice->clearSubstreamSizes(  );
-#if JVET_Q0406_CABAC_ZERO
         const int subpicIdx = pcPic->cs->pps->getSubPicIdxFromSubPicId(pcSlice->getSliceSubPicId());
-#endif
         {
           uint32_t numBinsCoded = 0;
           m_pcSliceEncoder->encodeSlice(pcPic, &(substreamsOut[0]), numBinsCoded);
           binCountsInNalUnits+=numBinsCoded;
-#if JVET_Q0406_CABAC_ZERO
           subPicStats[subpicIdx].numBinsWritten += numBinsCoded;
-#endif
         }
         {
           // Construct the final bitstream by concatenating substreams.
@@ -3510,9 +3441,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         accessUnit.push_back(new NALUnitEBSP(nalu));
         actualTotalBits += uint32_t(accessUnit.back()->m_nalUnitData.str().size()) * 8;
         numBytesInVclNalUnits += (std::size_t)(accessUnit.back()->m_nalUnitData.str().size());
-#if JVET_Q0406_CABAC_ZERO
         subPicStats[subpicIdx].numBytesInVclNalUnits += (std::size_t)(accessUnit.back()->m_nalUnitData.str().size());
-#endif
         bNALUAlignedWrittenToList = true;
 
         if (!bNALUAlignedWrittenToList)
@@ -3537,7 +3466,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           duData.back().accumBitsDU = ( numRBSPBytes << 3 );
           duData.back().accumNalsDU = numNalus;
         }
-#if JVET_Q0406_CABAC_ZERO
         if (pcSlice->isLastSliceInSubpic())
         {
           // Check picture level encoding constraints/requirements
@@ -3546,7 +3474,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           sumZeroWords += cabac_zero_word_padding(pcSlice, pcPic, subPicStats[subpicIdx].numBinsWritten, subPicStats[subpicIdx].numBytesInVclNalUnits, 0,
                                                   accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
         }
-#endif
       } // end iteration over slices
 
       {
@@ -3555,11 +3482,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         profileLevelTierFeatures.extractPTLInformation(*(pcSlice->getSPS()));
         validateMinCrRequirements(profileLevelTierFeatures, numBytesInVclNalUnits, pcPic, m_pcCfg);
         // cabac_zero_words processing
-#if JVET_Q0406_CABAC_ZERO
         cabac_zero_word_padding(pcSlice, pcPic, binCountsInNalUnits, numBytesInVclNalUnits, sumZeroWords, accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
-#else
-        cabac_zero_word_padding(pcSlice, pcPic, binCountsInNalUnits, numBytesInVclNalUnits, accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
-#endif
       }
 
       //-- For time output for each slice
@@ -3574,7 +3497,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         m_seiEncoder.initDecodedPictureHashSEI(decodedPictureHashSei, recoBuf, digestStr, pcSlice->getSPS()->getBitDepths());
         trailingSeiMessages.push_back(decodedPictureHashSei);
       }
-#if JVET_R0294_SUBPIC_HASH
       // create per-subpicture decoded picture hash SEI messages, if more than one subpicture is enabled
       const PPS* pps = pcPic->cs->pps;
       const int numSubpics = pps->getNumSubPics();
@@ -3596,7 +3518,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           xCreateScalableNestingSEI(trailingSeiMessages, nestedSEI, targetOLS, targetLayers, subPicIds);
         }
       }
-#endif
 
       m_pcCfg->setEncodedFlag(iGOPid, true);
 
@@ -3669,15 +3590,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             }
           }
         }
-#if JVET_R0294_SUBPIC_HASH
         // Note (KJS): Using targetOLS = 0, 1 is as random as encapsulating the same SEIs in scalable nesting.
         //             This can just be seen as example regarding how to write scalable nesting, not what to write.
         std::vector<int> targetOLS = {0, 1};
         std::vector<int> targetLayers;
         xCreateScalableNestingSEI(leadingSeiMessages, nestedSeiMessages, targetOLS, targetLayers, subpicIDs);
-#else
-        xCreateScalableNestingSEI(leadingSeiMessages, nestedSeiMessages, subpicIDs);
-#endif
       }
 
       xWriteLeadingSEIMessages( leadingSeiMessages, duInfoSeiMessages, accessUnit, pcSlice->getTLayer(), pcSlice->getSPS(), duData );
@@ -5477,13 +5394,9 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
-#if JVET_S0045_SIGN
           if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#else
-          if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced && rpcPic->getPOC() == slice->getPOC() - rpl0->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;
@@ -5558,11 +5471,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
       else
       {
         // Adding associated IRAP as shortterm picture
-#if JVET_S0045_SIGN
         pLocalRPL0->setRefPicIdentifier(refPicIdxL0, slice->getAssociatedIRAPPOC() - slice->getPOC(), false, false, 0);
-#else
-        pLocalRPL0->setRefPicIdentifier( refPicIdxL0, slice->getPOC() - slice->getAssociatedIRAPPOC(), false, false, 0 );
-#endif
         refPicIdxL0++;
         numOfSTRPL0++;
       }
@@ -5606,13 +5515,9 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
-#if JVET_S0045_SIGN
           if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#else
-          if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced && rpcPic->getPOC() == slice->getPOC() - rpl1->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;

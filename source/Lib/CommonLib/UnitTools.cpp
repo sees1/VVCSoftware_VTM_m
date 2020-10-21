@@ -126,7 +126,6 @@ bool CU::getRprScaling( const SPS* sps, const PPS* curPPS, Picture* refPic, int&
   CHECK(curPicWidth > refPicWidth * 8, "curPicWidth shall be less than or equal to refPicWidth * 8");
   CHECK(curPicHeight > refPicHeight * 8, "curPicHeight shall be less than or equal to refPicHeight * 8");
 
-#if JVET_S0048_SCALING_OFFSET
   int subWidthC = SPS::getWinUnitX(sps->getChromaFormatIdc());
   int subHeightC = SPS::getWinUnitY(sps->getChromaFormatIdc());
 
@@ -144,10 +143,6 @@ bool CU::getRprScaling( const SPS* sps, const PPS* curPPS, Picture* refPic, int&
   CHECK(subWidthC * (curScalingWindow.getWindowLeftOffset() + curScalingWindow.getWindowRightOffset()) >= curPicWidthY, "The value of SubWidthC * ( pps_scaling_win_left_offset + pps_scaling_win_right_offset ) shall be less than pps_pic_width_in_luma_samples");
   CHECK(subHeightC * (curScalingWindow.getWindowTopOffset() + curScalingWindow.getWindowBottomOffset()) < (-curPicHeightY) * 15, "The value of SubHeightC * ( pps_scaling_win_top_offset + pps_scaling_win_bottom_offset ) shall be greater than or equal to -pps_pic_height_in_luma_samples * 15");
   CHECK(subHeightC * (curScalingWindow.getWindowTopOffset() + curScalingWindow.getWindowBottomOffset()) >= curPicHeightY, "The value of SubHeightC * ( pps_scaling_win_top_offset + pps_scaling_win_bottom_offset ) shall be less than pps_pic_height_in_luma_samples");
-#else
-  CHECK(SPS::getWinUnitX(sps->getChromaFormatIdc()) * (abs(curScalingWindow.getWindowLeftOffset()) + abs(curScalingWindow.getWindowRightOffset())) > curPPS->getPicWidthInLumaSamples(), "The value of SubWidthC * ( Abs(pps_scaling_win_left_offset) + Abs(pps_scaling_win_right_offset) ) shall be less than pps_pic_width_in_luma_samples");
-  CHECK(SPS::getWinUnitY(sps->getChromaFormatIdc()) * (abs(curScalingWindow.getWindowTopOffset()) + abs(curScalingWindow.getWindowBottomOffset())) > curPPS->getPicHeightInLumaSamples(), "The value of SubHeightC * ( Abs(pps_scaling_win_top_offset) + Abs(pps_scaling_win_bottom_offset) ) shall be less than pps_pic_height_in_luma_samples");
-#endif
 
   return refPic->isRefScaled( curPPS );
 }
@@ -156,7 +151,6 @@ void CU::checkConformanceILRP(Slice *slice)
 {
   const int numRefList = slice->isInterB() ? 2 : 1;
 
-#if JVET_S0258_SUBPIC_CONSTRAINTS
   int currentSubPicIdx = NOT_VALID;
 
   // derive sub-picture index for the current slice
@@ -175,7 +169,6 @@ void CU::checkConformanceILRP(Slice *slice)
   {
     return;
   }
-#endif
 
   //constraint 1: The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] has the same subpicture layout as the current picture 
   bool isAllRefSameSubpicLayout = true;
@@ -185,15 +178,9 @@ void CU::checkConformanceILRP(Slice *slice)
 
     for (int refIdx = 0; refIdx < slice->getNumRefIdx(eRefPicList); refIdx++)
     {
-#if JVET_S0258_SUBPIC_CONSTRAINTS
       const Picture* refPic = slice->getRefPic( eRefPicList, refIdx );
 
       if( refPic->subPictures.size() != slice->getPic()->cs->pps->getNumSubPics() )
-#else
-      const Picture* refPic = slice->getRefPic(eRefPicList, refIdx)->unscaledPic;
-
-      if (refPic->numSubpics != slice->getPic()->cs->pps->getNumSubPics())
-#endif
       {
         isAllRefSameSubpicLayout = false;
         refList = numRefList;
@@ -201,7 +188,6 @@ void CU::checkConformanceILRP(Slice *slice)
       }
       else
       {
-#if JVET_S0258_SUBPIC_CONSTRAINTS
         for( int i = 0; i < refPic->subPictures.size(); i++ )
         {
           const SubPic& refSubPic = refPic->subPictures[i];
@@ -213,14 +199,6 @@ void CU::checkConformanceILRP(Slice *slice)
             || refSubPic.getSubPicCtuTopLeftY() != curSubPic.getSubPicCtuTopLeftY()
             || ( refPic->layerId != slice->getPic()->layerId && refSubPic.getSubPicID() != curSubPic.getSubPicID() )
             || refSubPic.getTreatedAsPicFlag() != curSubPic.getTreatedAsPicFlag())
-#else
-        for (int i = 0; i < refPic->numSubpics; i++)
-        {
-          if (refPic->subpicWidthInCTUs[i] != slice->getPic()->cs->pps->getSubPic(i).getSubPicWidthInCTUs()
-            || refPic->subpicHeightInCTUs[i] != slice->getPic()->cs->pps->getSubPic(i).getSubPicHeightInCTUs()
-            || refPic->subpicCtuTopLeftX[i] != slice->getPic()->cs->pps->getSubPic(i).getSubPicCtuTopLeftX()
-            || refPic->subpicCtuTopLeftY[i] != slice->getPic()->cs->pps->getSubPic(i).getSubPicCtuTopLeftY())
-#endif
           {
             isAllRefSameSubpicLayout = false;
             refIdx = slice->getNumRefIdx(eRefPicList);
@@ -229,13 +207,11 @@ void CU::checkConformanceILRP(Slice *slice)
           }
         }
 
-#if JVET_S0258_SUBPIC_CONSTRAINTS
         // A picture with different sub-picture ID of the collocated sub-picture cannot be used as an active reference picture in the same layer
         if( refPic->layerId == slice->getPic()->layerId )
         {
           isAllRefSameSubpicLayout = isAllRefSameSubpicLayout && refPic->subPictures[currentSubPicIdx].getSubPicID() == slice->getSliceSubPicId();
         }
-#endif
       }
     }
   }
@@ -248,13 +224,8 @@ void CU::checkConformanceILRP(Slice *slice)
       RefPicList  eRefPicList = (refList ? REF_PIC_LIST_1 : REF_PIC_LIST_0);
       for (int refIdx = 0; refIdx < slice->getNumRefIdx(eRefPicList); refIdx++)
       {
-#if JVET_S0258_SUBPIC_CONSTRAINTS
         const Picture* refPic = slice->getRefPic( eRefPicList, refIdx );
         CHECK( refPic->layerId == slice->getPic()->layerId || refPic->subPictures.size() > 1, "The inter-layer reference shall contain a single subpicture or have same subpicture layout with the current picture" );
-#else
-        const Picture* refPic = slice->getRefPic(eRefPicList, refIdx)->unscaledPic;
-        CHECK(!(refPic->layerId != slice->getPic()->layerId && refPic->numSubpics == 1), "The inter-layer reference shall contain a single subpicture or have same subpicture layout with the current picture");
-#endif
       }
     }
   }

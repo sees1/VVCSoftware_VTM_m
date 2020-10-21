@@ -44,9 +44,7 @@
 #include "CommonLib/dtrace_next.h"
 #include "EncAdaptiveLoopFilter.h"
 #include "CommonLib/AdaptiveLoopFilter.h"
-#if JVET_S0212_BITDEPTH_RANGE
 #include "CommonLib/ProfileLevelTier.h"
-#endif
 
 //! \ingroup EncoderLib
 //! \{
@@ -203,11 +201,7 @@ void HLSWriter::xCodeRefPicList( const ReferencePictureList* rpl, bool isLongTer
   uint32_t numRefPic = rpl->getNumberOfShorttermPictures() + rpl->getNumberOfLongtermPictures() + rpl->getNumberOfInterLayerPictures();
   WRITE_UVLC( numRefPic, "num_ref_entries[ listIdx ][ rplsIdx ]" );
 
-#if JVET_S0182_RPL_SIGNALLING
   if (isLongTermPresent && numRefPic > 0 && rplIdx != -1)
-#else
-  if (isLongTermPresent && rplIdx != -1)
-#endif
   {
     WRITE_FLAG(rpl->getLtrpInSliceHeaderFlag(), "ltrp_in_slice_header_flag[ listIdx ][ rplsIdx ]");
   }
@@ -254,15 +248,10 @@ void HLSWriter::xCodeRefPicList( const ReferencePictureList* rpl, bool isLongTer
       }
       else
       WRITE_UVLC(absDeltaValue, "abs_delta_poc_st[ listIdx ][ rplsIdx ][ i ]");
-#if JVET_S0045_SIGN
       if (absDeltaValue > 0)
       {
         WRITE_FLAG(deltaValue < 0 ? 1 : 0, "strp_entry_sign_flag[ listIdx ][ rplsIdx ][ i ]");
       }
-#else
-      if (absDeltaValue > 0)
-        WRITE_FLAG((deltaValue < 0) ? 0 : 1, "strp_entry_sign_flag[ listIdx ][ rplsIdx ][ i ]");  //0  means negative delta POC : 1 means positive
-#endif
     }
     else if (!rpl->getLtrpInSliceHeaderFlag())
     {
@@ -286,13 +275,8 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   WRITE_UVLC( pcPPS->getPicHeightInLumaSamples(), "pps_pic_height_in_luma_samples" );
 
   Window conf = pcPPS->getConformanceWindow();
-#if JVET_R0068_ASPECT6_ENC_RESTRICTION
   WRITE_FLAG(pcPPS->getConformanceWindowFlag(), "pps_conformance_window_flag");
   if (pcPPS->getConformanceWindowFlag())
-#else
-  WRITE_FLAG(conf.getWindowEnabledFlag(), "pps_conformance_window_flag");
-  if (conf.getWindowEnabledFlag())
-#endif
   {
     WRITE_UVLC(conf.getWindowLeftOffset(), "pps_conf_win_left_offset");
     WRITE_UVLC(conf.getWindowRightOffset(), "pps_conf_win_right_offset");
@@ -431,7 +415,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   WRITE_UVLC( pcPPS->getNumRefIdxL0DefaultActive()-1,     "pps_num_ref_idx_default_active_minus1[0]");
   WRITE_UVLC( pcPPS->getNumRefIdxL1DefaultActive()-1,     "pps_num_ref_idx_default_active_minus1[1]");
   WRITE_FLAG( pcPPS->getRpl1IdxPresentFlag() ? 1 : 0,     "pps_rpl1_idx_present_flag");
-#if JVET_S0132_HLS_REORDER
   WRITE_FLAG( pcPPS->getUseWP() ? 1 : 0,  "pps_weighted_pred_flag" );   // Use of Weighting Prediction (P_SLICE)
   WRITE_FLAG( pcPPS->getWPBiPred() ? 1 : 0, "pps_weighted_bipred_flag" );  // Use of Weighting Bi-Prediction (B_SLICE)
   WRITE_FLAG( pcPPS->getWrapAroundEnabledFlag() ? 1 : 0, "pps_ref_wraparound_enabled_flag" );
@@ -439,7 +422,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   {
     WRITE_UVLC(pcPPS->getPicWidthMinusWrapAroundOffset(), "pps_pic_width_minus_wraparound_offset");
   }
-#endif
 
   WRITE_SVLC( pcPPS->getPicInitQPMinus26(),                  "pps_init_qp_minus26");
   WRITE_FLAG( pcPPS->getUseDQP() ? 1 : 0, "pps_cu_qp_delta_enabled_flag" );
@@ -472,10 +454,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
     }
   }
   }
-#if !JVET_S0132_HLS_REORDER
-  WRITE_FLAG( pcPPS->getUseWP() ? 1 : 0,  "pps_weighted_pred_flag" );   // Use of Weighting Prediction (P_SLICE)
-  WRITE_FLAG( pcPPS->getWPBiPred() ? 1 : 0, "pps_weighted_bipred_flag" );  // Use of Weighting Bi-Prediction (B_SLICE)
-#endif
   WRITE_FLAG( pcPPS->getDeblockingFilterControlPresentFlag()?1 : 0,       "pps_deblocking_filter_control_present_flag");
   if(pcPPS->getDeblockingFilterControlPresentFlag())
   {
@@ -509,13 +487,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
     }
     WRITE_FLAG(pcPPS->getQpDeltaInfoInPhFlag() ? 1 : 0, "pps_qp_delta_info_in_ph_flag");
   }
-#if !JVET_S0132_HLS_REORDER
-  WRITE_FLAG( pcPPS->getWrapAroundEnabledFlag() ? 1 : 0, "pps_ref_wraparound_enabled_flag" );
-  if( pcPPS->getWrapAroundEnabledFlag() )
-  {
-    WRITE_UVLC(pcPPS->getPicWidthMinusWrapAroundOffset(), "pps_pic_width_minus_wraparound_offset");
-  }
-#endif
 
   WRITE_FLAG( pcPPS->getPictureHeaderExtensionPresentFlag() ? 1 : 0, "pps_picture_header_extension_present_flag");
   WRITE_FLAG( pcPPS->getSliceHeaderExtensionPresentFlag() ? 1 : 0, "pps_slice_header_extension_present_flag");
@@ -530,16 +501,9 @@ void HLSWriter::codeAPS( APS* pcAPS )
   xTraceAPSHeader();
 #endif
 
-#if JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE
   WRITE_CODE((int)pcAPS->getAPSType(), 3, "aps_params_type");
   WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
-#else
-  WRITE_CODE(pcAPS->getAPSId(), 5, "adaptation_parameter_set_id");
-  WRITE_CODE( (int)pcAPS->getAPSType(), 3, "aps_params_type" );
-#endif
-#if JVET_R0433
   WRITE_FLAG(pcAPS->chromaPresentFlag, "aps_chroma_present_flag");
-#endif
 
   if (pcAPS->getAPSType() == ALF_APS)
   {
@@ -562,25 +526,17 @@ void HLSWriter::codeAlfAps( APS* pcAPS )
   AlfParam param = pcAPS->getAlfAPSParam();
 
   WRITE_FLAG(param.newFilterFlag[CHANNEL_TYPE_LUMA], "alf_luma_new_filter");
-#if JVET_R0433
   if (pcAPS->chromaPresentFlag)
   {
-#endif
   WRITE_FLAG(param.newFilterFlag[CHANNEL_TYPE_CHROMA], "alf_chroma_new_filter");
-#if JVET_R0433
   }
-#endif
 
   CcAlfFilterParam paramCcAlf = pcAPS->getCcAlfAPSParam();
-#if JVET_R0433
   if (pcAPS->chromaPresentFlag)
   {
-#endif
     WRITE_FLAG(paramCcAlf.newCcAlfFilter[COMPONENT_Cb - 1], "alf_cc_cb_filter_signal_flag");
     WRITE_FLAG(paramCcAlf.newCcAlfFilter[COMPONENT_Cr - 1], "alf_cc_cr_filter_signal_flag");
-#if JVET_R0433
   }
-#endif
 
   if (param.newFilterFlag[CHANNEL_TYPE_LUMA])
   {
@@ -673,21 +629,13 @@ void HLSWriter::codeLmcsAps( APS* pcAPS )
       WRITE_FLAG(signCW, "lmcs_delta_sign_cw_flag[ i ]");
     }
   }
-#if JVET_R0433
   int deltaCRS = pcAPS->chromaPresentFlag ? param.chrResScalingOffset : 0;
-#else
-  int deltaCRS = param.chrResScalingOffset;
-#endif
   int signCRS = (deltaCRS < 0) ? 1 : 0;
   int absCRS = (deltaCRS < 0) ? (-deltaCRS) : deltaCRS;
-#if JVET_R0433
   if (pcAPS->chromaPresentFlag)
   {
-#endif
     WRITE_CODE(absCRS, 3, "lmcs_delta_abs_crs");
-#if JVET_R0433
   }
-#endif
   if (absCRS > 0)
   {
     WRITE_FLAG(signCRS, "lmcs_delta_sign_crs_flag");
@@ -697,11 +645,7 @@ void HLSWriter::codeLmcsAps( APS* pcAPS )
 void HLSWriter::codeScalingListAps( APS* pcAPS )
 {
   ScalingList param = pcAPS->getScalingList();
-#if JVET_R0433
   codeScalingList(param, pcAPS->chromaPresentFlag);
-#else
-  codeScalingList( param );
-#endif
 }
 
 void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
@@ -716,10 +660,8 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
 
   WRITE_FLAG(pcVUI->getProgressiveSourceFlag(),   "vui_progressive_source_flag"         );
   WRITE_FLAG(pcVUI->getInterlacedSourceFlag(),    "vui_interlaced_source_flag"          );
-#if JVET_S0266_VUI_length
   WRITE_FLAG(pcVUI->getNonPackedFlag(),           "vui_non_packed_constraint_flag");
   WRITE_FLAG(pcVUI->getNonProjectedFlag(),        "vui_non_projected_constraint_flag");
-#endif
   WRITE_FLAG(pcVUI->getAspectRatioInfoPresentFlag(),            "vui_aspect_ratio_info_present_flag");
   if (pcVUI->getAspectRatioInfoPresentFlag())
   {
@@ -757,7 +699,6 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
       WRITE_UVLC(pcVUI->getChromaSampleLocTypeBottomField(),      "vui_chroma_sample_loc_type_bottom_field");
     }
   }
-#if JVET_S0266_VUI_length
   if(!isByteAligned())
   {
     WRITE_FLAG(1, "vui_payload_bit_equal_to_one");
@@ -766,7 +707,6 @@ void HLSWriter::codeVUI( const VUI *pcVUI, const SPS* pcSPS )
       WRITE_FLAG(0, "vui_payload_bit_equal_to_zero");
     }
   }
-#endif
 }
 
 void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
@@ -851,12 +791,8 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   CHECK(pcSPS->getMaxTLayers() == 0, "Maximum number of temporal sub-layers is '0'");
 
   WRITE_CODE(pcSPS->getMaxTLayers() - 1, 3, "sps_max_sub_layers_minus1");
-#if JVET_S0186_SPS_CLEANUP
   WRITE_CODE(int(pcSPS->getChromaFormatIdc()), 2, "sps_chroma_format_idc");
   WRITE_CODE(floorLog2(pcSPS->getCTUSize()) - 5, 2, "sps_log2_ctu_size_minus5");
-#else
-  WRITE_CODE(0,                          4, "sps_reserved_zero_4bits");
-#endif
   WRITE_FLAG(pcSPS->getPtlDpbHrdParamsPresentFlag(), "sps_ptl_dpb_hrd_params_present_flag");
 
   if( !pcSPS->getVPSId() )
@@ -870,30 +806,14 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
 
   WRITE_FLAG(pcSPS->getGDREnabledFlag(), "sps_gdr_enabled_flag");
-#if !JVET_S0186_SPS_CLEANUP
-  WRITE_CODE(int(pcSPS->getChromaFormatIdc ()), 2, "chroma_format_idc");
-#endif
 
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-  const ChromaFormat format                = pcSPS->getChromaFormatIdc();
-  const uint32_t  separate_colour_plane_flag = pcSPS->getSeparateColourPlaneFlag();
-  if( format == CHROMA_444 )
-  {
-     CHECK(separate_colour_plane_flag != 0,         "separate_colour_plane_flag is not '0'");
-     WRITE_FLAG( separate_colour_plane_flag,        "separate_colour_plane_flag");
-  }
-
-  const uint32_t chromaArrayType = separate_colour_plane_flag ? 0 : format;
-#endif
 
   WRITE_FLAG(pcSPS->getRprEnabledFlag(), "sps_ref_pic_resampling_enabled_flag");
   if (pcSPS->getRprEnabledFlag())
   {
     WRITE_FLAG(pcSPS->getResChangeInClvsEnabledFlag(), "sps_res_change_in_clvs_allowed_flag");
   }
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   CHECK(!pcSPS->getRprEnabledFlag() && pcSPS->getResChangeInClvsEnabledFlag(), "When sps_ref_pic_resampling_enabled_flag is equal to 0, sps_res_change_in_clvs_allowed_flag shall be equal to 0");
-#endif
 
   WRITE_UVLC( pcSPS->getMaxPicWidthInLumaSamples(), "sps_pic_width_max_in_luma_samples" );
   WRITE_UVLC( pcSPS->getMaxPicHeightInLumaSamples(), "sps_pic_height_max_in_luma_samples" );
@@ -907,9 +827,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(conf.getWindowBottomOffset(), "sps_conf_win_bottom_offset");
   }
 
-#if !JVET_S0186_SPS_CLEANUP
-  WRITE_CODE(floorLog2(pcSPS->getCTUSize()) - 5, 2, "sps_log2_ctu_size_minus5");
-#endif
 
   WRITE_FLAG(pcSPS->getSubPicInfoPresentFlag(), "sps_subpic_info_present_flag");
 
@@ -919,7 +836,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(pcSPS->getNumSubPics() - 1, "sps_num_subpics_minus1");
     if( pcSPS->getNumSubPics() > 1 )
     {
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
       WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
       WRITE_FLAG(pcSPS->getSubPicSameSizeFlag(), "sps_subpic_same_size_flag");
       uint32_t tmpWidthVal = (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
@@ -951,33 +867,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
           WRITE_FLAG(pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx), "sps_loop_filter_across_subpic_enabled_flag[ i ]");
         }
       }
-#else
-    WRITE_FLAG(pcSPS->getIndependentSubPicsFlag(), "sps_independent_subpics_flag");
-    for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
-    {
-      if ((picIdx > 0) && (pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize()))
-      {
-        WRITE_CODE( pcSPS->getSubPicCtuTopLeftX(picIdx), ceilLog2(( pcSPS->getMaxPicWidthInLumaSamples()  +  pcSPS->getCTUSize() - 1)  / pcSPS->getCTUSize()), "subpic_ctu_top_left_x[ i ]"  );
-      }
-      if ((picIdx > 0) && (pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize()))
-      {
-        WRITE_CODE( pcSPS->getSubPicCtuTopLeftY(picIdx), ceilLog2(( pcSPS->getMaxPicHeightInLumaSamples() +  pcSPS->getCTUSize() - 1)  / pcSPS->getCTUSize()), "subpic_ctu_top_left_y[ i ]"  );
-      }
-      if (picIdx<pcSPS->getNumSubPics()-1 && pcSPS->getMaxPicWidthInLumaSamples() > pcSPS->getCTUSize())
-      {
-        WRITE_CODE( pcSPS->getSubPicWidth(picIdx) - 1,   ceilLog2(( pcSPS->getMaxPicWidthInLumaSamples()  +  pcSPS->getCTUSize() - 1)  / pcSPS->getCTUSize()), "subpic_width_minus1[ i ]"    );
-      }
-      if (picIdx<pcSPS->getNumSubPics() - 1 && pcSPS->getMaxPicHeightInLumaSamples() > pcSPS->getCTUSize())
-      {
-        WRITE_CODE( pcSPS->getSubPicHeight(picIdx) - 1,  ceilLog2(( pcSPS->getMaxPicHeightInLumaSamples() +  pcSPS->getCTUSize() - 1)  / pcSPS->getCTUSize()), "subpic_height_minus1[ i ]"   );
-      }
-      if (!pcSPS->getIndependentSubPicsFlag())
-      {
-        WRITE_FLAG( pcSPS->getSubPicTreatedAsPicFlag(picIdx),  "subpic_treated_as_pic_flag[ i ]" );
-        WRITE_FLAG( pcSPS->getLoopFilterAcrossSubpicEnabledFlag(picIdx),  "loop_filter_across_subpic_enabled_flag[ i ]" );
-      }
-    }
-#endif
     }
 
     CHECK(pcSPS->getSubPicIdLen() < 1, "SPS: SubPicIdLen cannot be less than 1");
@@ -996,13 +885,11 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     }
   }
 
-#if JVET_S0212_BITDEPTH_RANGE
   const Profile::Name profile = pcSPS->getProfileTierLevel()->getProfileIdc();
   if (profile != Profile::NONE)
   {
     CHECK(pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) > ProfileFeatures::getProfileFeatures(profile)->maxBitDepth, "sps_bitdepth_minus8 exceeds range supported by signalled profile");
   }
-#endif
   WRITE_UVLC(pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) - 8, "sps_bitdepth_minus8");
   WRITE_FLAG( pcSPS->getEntropyCodingSyncEnabledFlag() ? 1 : 0, "sps_entropy_coding_sync_enabled_flag" );
   WRITE_FLAG( pcSPS->getEntryPointsPresentFlag() ? 1 : 0, "sps_entry_point_offsets_present_flag" );
@@ -1015,19 +902,11 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
   // extra bits are for future extensions, so these are currently hard coded to not being sent
   WRITE_CODE(0, 2, "sps_num_extra_ph_bytes");
-#if JVET_S0208_ASPECT1
   // for( i = 0; i < (sps_num_extra_ph_bytes * 8 ); i++ )
   //   sps_extra_ph_bit_present_flag[ i ]
-#else
-  // extra_ph_bits_struct( sps_num_extra_ph_bytes )
-#endif
   WRITE_CODE(0, 2, "sps_num_extra_sh_bytes");
-#if JVET_S0208_ASPECT1
   // for( i = 0; i < (sps_num_extra_sh_bytes * 8 ); i++ )
   //   sps_extra_sh_bit_present_flag[ i ]
-#else
-  // extra_sh_bits_struct( sps_num_extra_sh_bytes )
-#endif
 
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {
@@ -1038,12 +917,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     dpb_parameters(pcSPS->getMaxTLayers() - 1, pcSPS->getSubLayerDpbParamsFlag(), pcSPS);
   }
   CHECK( pcSPS->getMaxCUWidth() != pcSPS->getMaxCUHeight(),                          "Rectangular CTUs not supported" );
-#if !JVET_S0132_HLS_REORDER
-  if( pcSPS->getChromaFormatIdc() != CHROMA_400 )
-  {
-    WRITE_FLAG(pcSPS->getUseDualITree(), "sps_qtbtt_dual_tree_intra_flag");
-  }
-#endif
   WRITE_UVLC(pcSPS->getLog2MinCodingBlockSize() - 2, "sps_log2_min_luma_coding_block_size_minus2");
   WRITE_FLAG(pcSPS->getSplitConsOverrideEnabledFlag(), "sps_partition_constraints_override_enabled_flag");
   WRITE_UVLC(floorLog2(pcSPS->getMinQTSize(I_SLICE)) - pcSPS->getLog2MinCodingBlockSize(), "sps_log2_diff_min_qt_min_cb_intra_slice_luma");
@@ -1053,7 +926,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(floorLog2(pcSPS->getMaxBTSizeI()) - floorLog2(pcSPS->getMinQTSize(I_SLICE)), "sps_log2_diff_max_bt_min_qt_intra_slice_luma");
     WRITE_UVLC(floorLog2(pcSPS->getMaxTTSizeI()) - floorLog2(pcSPS->getMinQTSize(I_SLICE)), "sps_log2_diff_max_tt_min_qt_intra_slice_luma");
   }
-#if JVET_S0132_HLS_REORDER
   if( pcSPS->getChromaFormatIdc() != CHROMA_400 )
   {
     WRITE_FLAG(pcSPS->getUseDualITree(), "sps_qtbtt_dual_tree_intra_flag");
@@ -1068,7 +940,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
       WRITE_UVLC(floorLog2(pcSPS->getMaxTTSizeIChroma()) - floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)), "sps_log2_diff_max_tt_min_qt_intra_slice_chroma");
     }
   }
-#endif
   WRITE_UVLC(floorLog2(pcSPS->getMinQTSize(B_SLICE)) - pcSPS->getLog2MinCodingBlockSize(), "sps_log2_diff_min_qt_min_cb_inter_slice");
   WRITE_UVLC(pcSPS->getMaxMTTHierarchyDepth(), "sps_max_mtt_hierarchy_depth_inter_slice");
   if (pcSPS->getMaxMTTHierarchyDepth() != 0)
@@ -1076,22 +947,9 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(floorLog2(pcSPS->getMaxBTSize()) - floorLog2(pcSPS->getMinQTSize(B_SLICE)), "sps_log2_diff_max_bt_min_qt_inter_slice");
     WRITE_UVLC(floorLog2(pcSPS->getMaxTTSize()) - floorLog2(pcSPS->getMinQTSize(B_SLICE)), "sps_log2_diff_max_tt_min_qt_inter_slice");
   }
-#if !JVET_S0132_HLS_REORDER
-  if (pcSPS->getUseDualITree())
-  {
-    WRITE_UVLC(floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)) - pcSPS->getLog2MinCodingBlockSize(), "sps_log2_diff_min_qt_min_cb_intra_slice_chroma");
-    WRITE_UVLC(pcSPS->getMaxMTTHierarchyDepthIChroma(), "sps_max_mtt_hierarchy_depth_intra_slice_chroma");
-    if (pcSPS->getMaxMTTHierarchyDepthIChroma() != 0)
-    {
-      WRITE_UVLC(floorLog2(pcSPS->getMaxBTSizeIChroma()) - floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)), "sps_log2_diff_max_bt_min_qt_intra_slice_chroma");
-      WRITE_UVLC(floorLog2(pcSPS->getMaxTTSizeIChroma()) - floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)), "sps_log2_diff_max_tt_min_qt_intra_slice_chroma");
-    }
-  }
-#endif
   if (pcSPS->getCTUSize() > 32)
     WRITE_FLAG( (pcSPS->getLog2MaxTbSize() - 5) ? 1 : 0,                       "sps_max_luma_transform_size_64_flag" );
 
-#if JVET_S0074_SPS_REORDER
   WRITE_FLAG(pcSPS->getTransformSkipEnabledFlag() ? 1 : 0, "sps_transform_skip_enabled_flag");
   if (pcSPS->getTransformSkipEnabledFlag())
   {
@@ -1109,13 +967,8 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_FLAG(pcSPS->getUseInterMTS() ? 1 : 0, "sps_explicit_mts_inter_enabled_flag");
   }
   WRITE_FLAG(pcSPS->getUseLFNST() ? 1 : 0, "sps_lfnst_enabled_flag");
-#endif
 
-#if JVET_S0052_RM_SEPARATE_COLOUR_PLANE
   if (pcSPS->getChromaFormatIdc() != CHROMA_400)
-#else
-  if (chromaArrayType != CHROMA_400)
-#endif
   {
     WRITE_FLAG(pcSPS->getJointCbCrEnabledFlag(), "sps_joint_cbcr_enabled_flag");
     const ChromaQpMappingTable& chromaQpMappingTable = pcSPS->getChromaQpMappingTable();
@@ -1142,20 +995,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   {
     WRITE_FLAG( pcSPS->getCCALFEnabledFlag(),                                            "sps_ccalf_enabled_flag" );
   }
-#if JVET_S0074_SPS_REORDER
   WRITE_FLAG(pcSPS->getUseLmcs() ? 1 : 0, "sps_lmcs_enable_flag");
-#else
-  WRITE_FLAG(pcSPS->getTransformSkipEnabledFlag() ? 1 : 0, "sps_transform_skip_enabled_flag");
-  if (pcSPS->getTransformSkipEnabledFlag())
-  {
-    WRITE_UVLC(pcSPS->getLog2MaxTransformSkipBlockSize() - 2, "sps_log2_transform_skip_max_size_minus2");
-    WRITE_FLAG(pcSPS->getBDPCMEnabledFlag() ? 1 : 0, "sps_bdpcm_enabled_flag");
-  }
-  else
-  {
-    CHECK(pcSPS->getBDPCMEnabledFlag(), "BDPCM cannot be used when transform skip is disabled");
-  }
-#endif
   WRITE_FLAG(pcSPS->getUseWP() ? 1 : 0, "sps_weighted_pred_flag");           // Use of Weighting Prediction (P_SLICE)
   WRITE_FLAG(pcSPS->getUseWPBiPred() ? 1 : 0, "sps_weighted_bipred_flag");   // Use of Weighting Bi-Prediction (B_SLICE)
 
@@ -1275,14 +1115,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     CHECK(pcSPS->getHorCollocatedChromaFlag() != 1, "Invalid value for horizontal collocated chroma flag");
     CHECK(pcSPS->getVerCollocatedChromaFlag() != 1, "Invalid value for vertical collocated chroma flag");
   }
-#if !JVET_S0074_SPS_REORDER
-  WRITE_FLAG( pcSPS->getUseMTS() ? 1 : 0,                                                      "sps_mts_enabled_flag" );
-  if ( pcSPS->getUseMTS() )
-  {
-    WRITE_FLAG( pcSPS->getUseIntraMTS() ? 1 : 0,                                               "sps_explicit_mts_intra_enabled_flag" );
-    WRITE_FLAG( pcSPS->getUseInterMTS() ? 1 : 0,                                               "sps_explicit_mts_inter_enabled_flag" );
-  }
-#endif
   CHECK(pcSPS->getMaxNumMergeCand() > MRG_MAX_NUM_CANDS, "More merge candidates signalled than supported");
   WRITE_FLAG(pcSPS->getPLTMode() ? 1 : 0,                                                    "sps_palette_enabled_flag" );
   if (pcSPS->getChromaFormatIdc() == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
@@ -1299,10 +1131,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     CHECK(pcSPS->getMaxNumIBCMergeCand() > IBC_MRG_MAX_NUM_CANDS, "More IBC merge candidates signalled than supported");
     WRITE_UVLC(IBC_MRG_MAX_NUM_CANDS - pcSPS->getMaxNumIBCMergeCand(), "sps_six_minus_max_num_ibc_merge_cand");
   }
-#if !JVET_S0074_SPS_REORDER
-  WRITE_FLAG(pcSPS->getUseLmcs() ? 1 : 0, "sps_lmcs_enable_flag");
-  WRITE_FLAG( pcSPS->getUseLFNST() ? 1 : 0,                                                    "sps_lfnst_enabled_flag" );
-#endif
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
   WRITE_FLAG( pcSPS->getLadfEnabled() ? 1 : 0,                                                 "sps_ladf_enabled_flag" );
   if ( pcSPS->getLadfEnabled() )
@@ -1344,57 +1172,33 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_FLAG( pcSPS->getVirtualBoundariesPresentFlag(), "sps_loop_filter_across_virtual_boundaries_present_flag" );
     if( pcSPS->getVirtualBoundariesPresentFlag() )
     {
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC( pcSPS->getNumVerVirtualBoundaries(), "sps_num_ver_virtual_boundaries");
-#else
-      WRITE_CODE( pcSPS->getNumVerVirtualBoundaries(), 2, "sps_num_ver_virtual_boundaries");
-#endif
-#if JVET_S0221_NUM_VB_CHECK
       if (pcSPS->getMaxPicWidthInLumaSamples() <= 8)
       {
         CHECK(pcSPS->getNumVerVirtualBoundaries() != 0, "SPS: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(pcSPS->getNumVerVirtualBoundaries() > 3, "SPS: The number of vertical virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
-#endif
       for( unsigned i = 0; i < pcSPS->getNumVerVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1, "sps_virtual_boundary_pos_x_minus1[i]");
         CHECK(((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1) > (((pcSPS->getMaxPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3), "sps_virtual_boundaries_pos_x");
-#endif
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(pcSPS->getNumHorVirtualBoundaries(), "sps_num_hor_virtual_boundaries");
-#else
-      WRITE_CODE(pcSPS->getNumHorVirtualBoundaries(), 2, "sps_num_hor_virtual_boundaries");
-#endif
-#if JVET_S0221_NUM_VB_CHECK
       if (pcSPS->getMaxPicHeightInLumaSamples() <= 8)
       {
         CHECK(pcSPS->getNumHorVirtualBoundaries() != 0, "SPS: When picture height is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(pcSPS->getNumHorVirtualBoundaries() > 3, "SPS: The number of horizontal virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
-#endif
       for( unsigned i = 0; i < pcSPS->getNumHorVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1, "sps_virtual_boundary_pos_y_minus1[i]");
         CHECK(((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1) > (((pcSPS->getMaxPicHeightInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC((pcSPS->getVirtualBoundariesPosY(i)>>3), "sps_virtual_boundaries_pos_y");
-#endif
       }
     }
   }
@@ -1417,7 +1221,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG( pcSPS->getVuiParametersPresentFlag(),            "sps_vui_parameters_present_flag" );
   if (pcSPS->getVuiParametersPresentFlag())
   {
-#if JVET_S0266_VUI_length
     OutputBitstream *bs = getBitstream();
     OutputBitstream bs_count;
     setBitstream(&bs_count);
@@ -1437,7 +1240,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     {
       WRITE_FLAG(0, "sps_vui_alignment_zero_bit");
     }
-#endif
     codeVUI(pcSPS->getVuiParameters(), pcSPS);
   }
 
@@ -1531,11 +1333,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   WRITE_CODE(pcVPS->getMaxSubLayers() - 1, 3, "vps_max_sublayers_minus1");
   if (pcVPS->getMaxLayers() > 1 && pcVPS->getMaxSubLayers() > 1)
   {
-#if JVET_S0115_VPS
     WRITE_FLAG(pcVPS->getDefaultPtlDpbHrdMaxTidFlag(), "vps_default_ptl_dpb_hrd_max_tid_flag");
-#else
-    WRITE_FLAG(pcVPS->getAllLayersSameNumSublayersFlag(), "vps_all_layers_same_num_sublayers_flag");
-#endif
   }
   if (pcVPS->getMaxLayers() > 1)
   {
@@ -1575,11 +1373,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       }
       if (pcVPS->getOlsModeIdc() == 2)
       {
-#if JVET_S0183_VPS_INFORMATION_SIGNALLING
         WRITE_CODE(pcVPS->getNumOutputLayerSets() - 2, 8, "vps_num_output_layer_sets_minus2");
-#else
-        WRITE_CODE(pcVPS->getNumOutputLayerSets() - 1, 8, "vps_num_output_layer_sets_minus1");
-#endif
         for (uint32_t i = 1; i < pcVPS->getNumOutputLayerSets(); i++)
         {
           for (uint32_t j = 0; j < pcVPS->getMaxLayers(); j++)
@@ -1589,21 +1383,15 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
         }
       }
     }
-#if JVET_S0063_VPS_SIGNALLING
     CHECK(pcVPS->getNumPtls() - 1 >= pcVPS->getTotalNumOLSs(), "vps_num_ptls_minus1 shall be less than TotalNumOlss");
     WRITE_CODE(pcVPS->getNumPtls() - 1, 8, "vps_num_ptls_minus1");
-#endif
   }
 
   int totalNumOlss = pcVPS->getTotalNumOLSs();
-#if !JVET_S0063_VPS_SIGNALLING
-  WRITE_CODE(pcVPS->getNumPtls() - 1, 8, "vps_num_ptls_minus1");
-#endif
   for (int i = 0; i < pcVPS->getNumPtls(); i++)
   {
     if(i > 0)
       WRITE_FLAG(pcVPS->getPtPresentFlag(i), "vps_pt_present_flag");
-#if JVET_S0115_VPS
     if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag()) 
     {
       WRITE_CODE(pcVPS->getPtlMaxTemporalId(i), 3, "vps_ptl_max_tid");
@@ -1612,19 +1400,11 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
     {
       CHECK(pcVPS->getPtlMaxTemporalId(i) != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_ptl_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
     }
-#else
-    if (!pcVPS->getAllLayersSameNumSublayersFlag())
-      WRITE_CODE(pcVPS->getPtlMaxTemporalId(i) ,3, "vps_ptl_max_tid");
-#endif
   }
   int cnt = 0;
   while (m_pcBitIf->getNumBitsUntilByteAligned())
   {
-#if JVET_S0138_GCI_PTL
     WRITE_FLAG( 0, "vps_ptl_reserved_zero_bit");
-#else
-    WRITE_FLAG( 0, "vps_ptl_alignment_zero_bit");
-#endif
     cnt++;
   }
   CHECK(cnt>=8, "More than '8' alignment bytes written");
@@ -1649,21 +1429,13 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
 
     for( int i = 0; i < pcVPS->m_numDpbParams; i++ )
     {
-#if JVET_S0115_VPS
       if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag())
-#else
-      if (!pcVPS->getAllLayersSameNumSublayersFlag())
-#endif
       {
         WRITE_CODE(pcVPS->m_dpbMaxTemporalId[i], 3, "vps_dpb_max_tid[i]");
       }
       else
       {
-#if JVET_S0115_VPS
         CHECK(pcVPS->m_dpbMaxTemporalId[i] != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_dpb_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
-#else
-        CHECK(pcVPS->m_dpbMaxTemporalId[i] != pcVPS->getMaxSubLayers() - 1, "When vps_all_layers_same_num_sublayers_flag is equal to 1, the value of vps_dpb_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
-#endif
       }
 
       for( int j = ( pcVPS->m_sublayerDpbParamsPresentFlag ? 0 : pcVPS->m_dpbMaxTemporalId[i] ); j <= pcVPS->m_dpbMaxTemporalId[i]; j++ )
@@ -1682,13 +1454,11 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
         WRITE_UVLC( pcVPS->getOlsDpbPicSize( i ).width, "vps_ols_dpb_pic_width[i]" );
         WRITE_UVLC( pcVPS->getOlsDpbPicSize( i ).height, "vps_ols_dpb_pic_height[i]" );
         WRITE_CODE( pcVPS->m_olsDpbChromaFormatIdc[i], 2, "vps_ols_dpb_chroma_format[i]");
-#if JVET_S0212_BITDEPTH_RANGE
         const Profile::Name profile = pcVPS->getProfileTierLevel(pcVPS->getOlsPtlIdx(i)).getProfileIdc();
         if (profile != Profile::NONE)
         {
           CHECK(pcVPS->m_olsDpbBitDepthMinus8[i] + 8 > ProfileFeatures::getProfileFeatures(profile)->maxBitDepth, "vps_ols_dpb_bitdepth_minus8[ i ] exceeds range supported by signalled profile");
         }
-#endif
         WRITE_UVLC( pcVPS->m_olsDpbBitDepthMinus8[i], "vps_ols_dpb_bitdepth_minus8[i]");
         if( (pcVPS->m_numDpbParams > 1) && (pcVPS->m_numDpbParams != pcVPS->m_numMultiLayeredOlss) )
         {
@@ -1711,7 +1481,6 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
     WRITE_UVLC(pcVPS->getNumOlsTimingHrdParamsMinus1(), "vps_num_ols_timing_hrd_params_minus1");
     for (int i = 0; i <= pcVPS->getNumOlsTimingHrdParamsMinus1(); i++)
     {
-#if JVET_S0115_VPS
       if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag())
       {
         WRITE_CODE(pcVPS->getHrdMaxTid(i), 3, "vps_hrd_max_tid[i]");
@@ -1720,12 +1489,6 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       {
         CHECK(pcVPS->getHrdMaxTid(i) != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_hrd_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
       }
-#else
-      if (!pcVPS->getAllLayersSameNumSublayersFlag())
-      {
-        WRITE_CODE(pcVPS->getHrdMaxTid(i), 3, "vps_hrd_max_tid[i]");
-      }
-#endif
       uint32_t firstSublayer = pcVPS->getVPSSublayerCpbParamsPresentFlag() ? 0 : pcVPS->getHrdMaxTid(i);
       codeOlsHrdParameters(pcVPS->getGeneralHrdParameters(), pcVPS->getOlsHrdParameters(i),firstSublayer, pcVPS->getHrdMaxTid(i));
     }
@@ -1744,11 +1507,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   xWriteRbspTrailingBits();
 }
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
 void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice )
-#else
-void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingBits )
-#endif
 {
   const PPS*  pps = NULL;
   const SPS*  sps = NULL;
@@ -1757,18 +1516,12 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
   xTracePictureHeader ();
 #endif
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   if (!slice)
   {
     slice = picHeader->getPic()->cs->slice;
   }
-#else
-  CodingStructure& cs = *picHeader->getPic()->cs;
-#endif
 WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
-#if JVET_S0076_ASPECT1
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
-#endif
   if (picHeader->getGdrOrIrapPicFlag())
   {
     WRITE_FLAG(picHeader->getGdrPicFlag(), "ph_gdr_pic_flag");
@@ -1779,12 +1532,8 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   {
     WRITE_FLAG(picHeader->getPicIntraSliceAllowedFlag(), "ph_intra_slice_allowed_flag");
   }
-#if !JVET_S0076_ASPECT1
-  WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_reference_picture_flag");
-#endif
   // parameter sets
   WRITE_UVLC(picHeader->getPPSId(), "ph_pic_parameter_set_id");
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   pps = slice->getPPS();
   CHECK(pps == 0, "Invalid PPS");
   sps = slice->getSPS();
@@ -1792,21 +1541,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   int pocBits = slice->getSPS()->getBitsForPOC();
   int pocMask = (1 << pocBits) - 1;
   WRITE_CODE(slice->getPOC() & pocMask, pocBits, "ph_pic_order_cnt_lsb");
-#else
-  pps = cs.slice->getPPS();
-  CHECK(pps == 0, "Invalid PPS");
-  sps = cs.slice->getSPS();
-  CHECK(sps == 0, "Invalid SPS");
-  int pocBits = cs.slice->getSPS()->getBitsForPOC();
-  int pocMask = (1 << pocBits) - 1;
-  WRITE_CODE(cs.slice->getPOC() & pocMask, pocBits, "ph_pic_order_cnt_lsb");
-#endif
-#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
-  if (picHeader->getGdrOrIrapPicFlag())
-  {
-    WRITE_FLAG(picHeader->getNoOutputOfPriorPicsFlag(), "no_output_of_prior_pics_flag");
-  }
-#endif
   if( picHeader->getGdrPicFlag() )
   {
     WRITE_UVLC(picHeader->getRecoveryPocCnt(), "ph_recovery_poc_cnt");
@@ -1933,57 +1667,33 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     WRITE_FLAG( picHeader->getVirtualBoundariesPresentFlag(), "ph_virtual_boundaries_present_flag" );
     if( picHeader->getVirtualBoundariesPresentFlag() )
     {
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
-#else
-      WRITE_CODE(picHeader->getNumVerVirtualBoundaries(), 2, "ph_num_ver_virtual_boundaries");
-#endif
-#if JVET_S0221_NUM_VB_CHECK
       if (pps->getPicWidthInLumaSamples() <= 8)
       {
         CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
-#endif
       for( unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC(picHeader->getVirtualBoundariesPosX(i) >> 3, "ph_virtual_boundaries_pos_x");
-#endif
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(picHeader->getNumHorVirtualBoundaries(), "ph_num_hor_virtual_boundaries");
-#else
-      WRITE_CODE(picHeader->getNumHorVirtualBoundaries(), 2, "ph_num_hor_virtual_boundaries");
-#endif
-#if JVET_S0221_NUM_VB_CHECK
       if (pps->getPicHeightInLumaSamples() <= 8)
       {
         CHECK(picHeader->getNumHorVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(picHeader->getNumHorVirtualBoundaries() > 3, "PH: The number of horizontal virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
-#endif
       for( unsigned i = 0; i < picHeader->getNumHorVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((picHeader->getVirtualBoundariesPosY(i)>>3) - 1, "ph_virtual_boundary_pos_y_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosY(i)>>3) - 1) > (((pps->getPicHeightInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC(picHeader->getVirtualBoundariesPosY(i)>>3, "ph_virtual_boundaries_pos_y");
-#endif
       }
     }
     else
@@ -2195,13 +1905,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
       picHeader->setEnableTMVPFlag(false);
     }
 
-#if !JVET_R0324_REORDER
-    // mvd L1 zero flag
-    if (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0)
-    {
-      WRITE_FLAG(picHeader->getMvdL1ZeroFlag(), "pic_mvd_l1_zero_flag");
-    }
-#endif
 
     // merge candidate list size
     // subblock merge candidate list size
@@ -2224,13 +1927,11 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
       picHeader->setDisFracMMVD(false);
     }
 
-#if JVET_R0324_REORDER
     // mvd L1 zero flag
     if (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0)
     {
       WRITE_FLAG(picHeader->getMvdL1ZeroFlag(), "ph_mvd_l1_zero_flag");
     }
-#endif
 
     // picture level BDOF disable flags
     if (sps->getBdofControlPresentInPhFlag() && (!pps->getRplInfoInPhFlag() || picHeader->getRPL(1)->getNumRefEntries() > 0))
@@ -2319,24 +2020,10 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   // deblocking filter controls
   if (pps->getDeblockingFilterControlPresentFlag())
   {
-#if JVET_S0121_ASPECT2
     if ( pps->getDbfInfoInPhFlag() )
     {
       WRITE_FLAG( picHeader->getDeblockingFilterOverrideFlag(), "ph_deblocking_params_present_flag" );
     }
-#else
-    if(pps->getDeblockingFilterOverrideEnabledFlag())
-    {
-      if (pps->getDbfInfoInPhFlag())
-      {
-        WRITE_FLAG ( picHeader->getDeblockingFilterOverrideFlag(), "ph_deblocking_filter_override_flag" );
-      }
-      else
-      {
-        picHeader->setDeblockingFilterOverrideFlag(false);
-      }
-    }
-#endif
     else
     {
       picHeader->setDeblockingFilterOverrideFlag(false);
@@ -2396,26 +2083,17 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   }
 }
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
 void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
-#else
-void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
-#endif
 {
 #if ENABLE_TRACING
   xTraceSliceHeader ();
 #endif
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   if (!picHeader)
   {
     CodingStructure& cs = *pcSlice->getPic()->cs;
     picHeader = cs.picHeader;
   }
-#else
-  CodingStructure& cs = *pcSlice->getPic()->cs;
-  PicHeader *picHeader = cs.picHeader;
-#endif
   const ChromaFormat format                = pcSlice->getSPS()->getChromaFormatIdc();
   const uint32_t         numberValidComponents = getNumberValidComponents(format);
   const bool         chromaEnabled         = isChromaEnabled(format);
@@ -2468,12 +2146,10 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
   {
     WRITE_UVLC(pcSlice->getSliceType(), "sh_slice_type");
   }
-#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
   if (pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR)
   {
     WRITE_FLAG(pcSlice->getNoOutputOfPriorPicsFlag(), "sh_no_output_of_prior_pics_flag");
   }
-#endif
   if (!picHeader->getPicIntraSliceAllowedFlag())
   {
     CHECK(pcSlice->getSliceType() == I_SLICE, "when ph_intra_slice_allowed_flag = 0, no I_Slice is allowed");
@@ -2533,13 +2209,6 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
     WRITE_FLAG(pcSlice->getExplicitScalingListUsed(), "sh_explicit_scaling_list_used_flag");
   }
 
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-    // 4:4:4 colour plane ID
-    if( pcSlice->getSPS()->getSeparateColourPlaneFlag() )
-    {
-      WRITE_CODE( pcSlice->getColourPlaneId(), 2, "colour_plane_id" );
-    }
-#endif
   if( !pcSlice->getPPS()->getRplInfoInPhFlag() && (!pcSlice->getIdrPicFlag() || pcSlice->getSPS()->getIDRRefParamListPresent()))
     {
       //Write L0 related syntax elements
@@ -2849,12 +2518,9 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
 
 void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
 {
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   WRITE_FLAG(cinfo->getGciPresentFlag(), "gci_present_flag");
   if (cinfo->getGciPresentFlag())
   {
-#endif
-#if JVET_S0105_GCI_REORDER_IN_CATEGORY
     /* general */
     WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag() ? 1 : 0, "gci_intra_only_constraint_flag");
     WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag() ? 1 : 0, "gci_all_layers_independent_constraint_flag");
@@ -2929,11 +2595,7 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoExplicitScaleListConstraintFlag() ? 1 : 0, "gci_no_explicit_scaling_list_constraint_flag");
     WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "gci_no_dep_quant_constraint_flag");
     WRITE_FLAG(cinfo->getNoSignDataHidingConstraintFlag() ? 1 : 0, "gci_no_sign_data_hiding_constraint_flag");
-#if JVET_R0227_ASPECT3
     WRITE_FLAG(cinfo->getNoCuQpDeltaConstraintFlag() ? 1 : 0, "gci_no_cu_qp_delta_constraint_flag");
-#else
-    WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "gci_no_qp_delta_constraint_flag");
-#endif
     WRITE_FLAG(cinfo->getNoChromaQpOffsetConstraintFlag() ? 1 : 0, "gci_no_chroma_qp_offset_constraint_flag");
 
     /* loop filter */
@@ -2943,115 +2605,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "gci_no_lmcs_constraint_flag");
     WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "gci_no_ladf_constraint_flag");
     WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "gci_no_virtual_boundaries_constraint_flag");
-#else
-#if !JVET_S0266_VUI_length
-    WRITE_FLAG(cinfo->getNonPackedConstraintFlag(), "general_non_packed_constraint_flag"      );
-#endif
-#if !JVET_S0138_GCI_PTL
-    WRITE_FLAG(cinfo->getFrameOnlyConstraintFlag(), "general_frame_only_constraint_flag"      );
-#endif
-#if !JVET_S0266_VUI_length
-    WRITE_FLAG(cinfo->getNonProjectedConstraintFlag(), "general_non_projected_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getOnePictureOnlyConstraintFlag(), "general_one_picture_only_constraint_flag" );
-    WRITE_FLAG(cinfo->getIntraOnlyConstraintFlag(),     "intra_only_constraint_flag"      );
-
-#if JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT
-    WRITE_CODE(16-cinfo->getMaxBitDepthConstraintIdc(), 4, "gci_sixteen_minus_max_bitdepth_constraint_idc" );
-    WRITE_CODE(3-cinfo->getMaxChromaFormatConstraintIdc(), 2, "gci_three_minus_max_chroma_format_constraint_idc" );
-#else
-    WRITE_CODE(cinfo->getMaxBitDepthConstraintIdc(), 4, "max_bitdepth_constraint_idc" );
-    WRITE_CODE(cinfo->getMaxChromaFormatConstraintIdc(), 2, "max_chroma_format_constraint_idc" );
-#endif
-#if !JVET_S0138_GCI_PTL
-    WRITE_FLAG(cinfo->getSingleLayerConstraintFlag(), "single_layer_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getAllLayersIndependentConstraintFlag(), "all_layers_independent_constraint_flag");
-#if JVET_Q0114_ASPECT5_GCI_FLAG
-    WRITE_FLAG(cinfo->getNoRprConstraintFlag(), "gci_no_ref_pic_resampling_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getNoResChangeInClvsConstraintFlag(), "no_res_change_in_clvs_constraint_flag");
-#if JVET_S0113_S0195_GCI
-    WRITE_FLAG(cinfo->getNoIdrRplConstraintFlag(), "gci_no_idr_rpl_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getOneTilePerPicConstraintFlag(), "one_tile_per_pic_constraint_flag");
-    WRITE_FLAG(cinfo->getPicHeaderInSliceHeaderConstraintFlag(), "pic_header_in_slice_header_constraint_flag");
-    WRITE_FLAG(cinfo->getOneSlicePerPicConstraintFlag(), "one_slice_per_pic_constraint_flag");
-#if JVET_S0113_S0195_GCI
-    WRITE_FLAG(cinfo->getNoRectSliceConstraintFlag(), "gci_no_rectangular_slice_constraint_flag");
-    WRITE_FLAG(cinfo->getOneSlicePerSubpicConstraintFlag(), "gci_one_slice_per_subpic_constraint_flag");
-    WRITE_FLAG(cinfo->getNoSubpicInfoConstraintFlag(), "gci_no_subpic_info_constraint_flag");
-#else
-    WRITE_FLAG(cinfo->getOneSubpicPerPicConstraintFlag(), "one_subpic_per_pic_constraint_flag");
-#endif
-#if JVET_S0058_GCI
-    WRITE_FLAG(cinfo->getNoMttConstraintFlag() ? 1 : 0, "gci_no_mtt_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getNoQtbttDualTreeIntraConstraintFlag() ? 1 : 0, "no_qtbtt_dual_tree_intra_constraint_flag");
-#if JVET_S0066_GCI
-    WRITE_CODE(3-(cinfo->getMaxLog2CtuSizeConstraintIdc()-5), 2, "gci_three_minus_max_log2_ctu_size_constraint_idc" );
-#endif
-    WRITE_FLAG(cinfo->getNoPartitionConstraintsOverrideConstraintFlag() ? 1 : 0, "no_partition_constraints_override_constraint_flag");
-    WRITE_FLAG(cinfo->getNoSaoConstraintFlag() ? 1 : 0, "no_sao_constraint_flag");
-    WRITE_FLAG(cinfo->getNoAlfConstraintFlag() ? 1 : 0, "no_alf_constraint_flag");
-    WRITE_FLAG(cinfo->getNoCCAlfConstraintFlag() ? 1 : 0, "no_ccalf_constraint_flag");
-    WRITE_FLAG(cinfo->getNoJointCbCrConstraintFlag() ? 1 : 0, "no_joint_cbcr_constraint_flag");
-    WRITE_FLAG(cinfo->getNoMrlConstraintFlag() ? 1 : 0, "no_mrl_constraint_flag");
-    WRITE_FLAG(cinfo->getNoIspConstraintFlag() ? 1 : 0, "no_isp_constraint_flag");
-    WRITE_FLAG(cinfo->getNoMipConstraintFlag() ? 1 : 0, "no_mip_constraint_flag");
-#if JVET_S0058_GCI
-    WRITE_FLAG(cinfo->getNoWeightedPredictionConstraintFlag() ? 1 : 0, "gci_no_weighted_prediction_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getNoRefWraparoundConstraintFlag() ? 1 : 0, "no_ref_wraparound_constraint_flag");
-    WRITE_FLAG(cinfo->getNoTemporalMvpConstraintFlag() ? 1 : 0, "no_temporal_mvp_constraint_flag");
-    WRITE_FLAG(cinfo->getNoSbtmvpConstraintFlag() ? 1 : 0, "no_sbtmvp_constraint_flag");
-    WRITE_FLAG(cinfo->getNoAmvrConstraintFlag() ? 1 : 0, "no_amvr_constraint_flag");
-    WRITE_FLAG(cinfo->getNoBdofConstraintFlag() ? 1 : 0, "no_bdof_constraint_flag");
-    WRITE_FLAG(cinfo->getNoDmvrConstraintFlag() ? 1 : 0, "no_dmvr_constraint_flag");
-    WRITE_FLAG(cinfo->getNoCclmConstraintFlag() ? 1 : 0, "no_cclm_constraint_flag");
-    WRITE_FLAG(cinfo->getNoMtsConstraintFlag() ? 1 : 0, "no_mts_constraint_flag");
-    WRITE_FLAG(cinfo->getNoSbtConstraintFlag() ? 1 : 0, "no_sbt_constraint_flag");
-    WRITE_FLAG(cinfo->getNoLfnstConstraintFlag() ? 1 : 0, "no_lfnst_constraint_flag");
-    WRITE_FLAG(cinfo->getNoAffineMotionConstraintFlag() ? 1 : 0, "no_affine_motion_constraint_flag");
-    WRITE_FLAG(cinfo->getNoMmvdConstraintFlag() ? 1 : 0, "no_mmvd_constraint_flag");
-    WRITE_FLAG(cinfo->getNoSmvdConstraintFlag() ? 1 : 0, "no_smvd_constraint_flag");
-    WRITE_FLAG(cinfo->getNoProfConstraintFlag() ? 1 : 0, "no_prof_constraint_flag");
-    WRITE_FLAG(cinfo->getNoBcwConstraintFlag() ? 1 : 0, "no_bcw_constraint_flag");
-    WRITE_FLAG(cinfo->getNoIbcConstraintFlag() ? 1 : 0, "no_ibc_constraint_flag");
-    WRITE_FLAG(cinfo->getNoCiipConstraintFlag() ? 1 : 0, "no_ciip_constraint_flag");
-    WRITE_FLAG(cinfo->getNoGeoConstraintFlag() ? 1 : 0, "no_gpm_constraint_flag");
-    WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "no_ladf_constraint_flag");
-    WRITE_FLAG(cinfo->getNoTransformSkipConstraintFlag() ? 1 : 0, "no_transform_skip_constraint_flag");
-#if JVET_S0066_GCI
-    WRITE_FLAG(cinfo->getNoLumaTransformSize64ConstraintFlag() ? 1 : 0, "gci_no_luma_transform_size_64_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getNoBDPCMConstraintFlag() ? 1 : 0, "no_bdpcm_constraint_flag");
-    WRITE_FLAG(cinfo->getNoPaletteConstraintFlag() ? 1 : 0, "no_palette_constraint_flag");
-    WRITE_FLAG(cinfo->getNoActConstraintFlag() ? 1 : 0, "no_act_constraint_flag");
-#if JVET_S0050_GCI
-    WRITE_FLAG(cinfo->getNoExplicitScaleListConstraintFlag() ? 1 : 0, "no_explicit_scaling_list_constraint_flag");
-#endif
-#if JVET_R0341_GCI
-    WRITE_FLAG(cinfo->getNoChromaQpOffsetConstraintFlag() ? 1 : 0, "gic_no_chroma_qp_offset_constraint_flag");
-#endif
-    WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "no_lmcs_constraint_flag");
-    WRITE_FLAG(cinfo->getNoQpDeltaConstraintFlag() ? 1 : 0, "no_qp_delta_constraint_flag");
-    WRITE_FLAG(cinfo->getNoDepQuantConstraintFlag() ? 1 : 0, "no_dep_quant_constraint_flag");
-    WRITE_FLAG(cinfo->getNoSignDataHidingConstraintFlag() ? 1 : 0, "no_sign_data_hiding_constraint_flag");
-    WRITE_FLAG(cinfo->getNoMixedNaluTypesInPicConstraintFlag() ? 1 : 0, "no_mixed_nalu_types_in_pic_constraint_flag");
-    WRITE_FLAG(cinfo->getNoTrailConstraintFlag() ? 1 : 0, "no_trail_constraint_flag");
-    WRITE_FLAG(cinfo->getNoStsaConstraintFlag() ? 1 : 0, "no_stsa_constraint_flag");
-    WRITE_FLAG(cinfo->getNoRaslConstraintFlag() ? 1 : 0, "no_rasl_constraint_flag");
-    WRITE_FLAG(cinfo->getNoRadlConstraintFlag() ? 1 : 0, "no_radl_constraint_flag");
-    WRITE_FLAG(cinfo->getNoIdrConstraintFlag() ? 1 : 0, "no_idr_constraint_flag");
-    WRITE_FLAG(cinfo->getNoCraConstraintFlag() ? 1 : 0, "no_cra_constraint_flag");
-    WRITE_FLAG(cinfo->getNoGdrConstraintFlag() ? 1 : 0, "no_gdr_constraint_flag");
-    WRITE_FLAG(cinfo->getNoApsConstraintFlag() ? 1 : 0, "no_aps_constraint_flag");
-#if JVET_S0050_GCI
-    WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "no_virtual_boundaries_constraint_flag");
-#endif
-#endif
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     //The value of gci_num_reserved_bits shall be equal to 0 in bitstreams conforming to this version of this Specification.
     //Other values of gci_num_reserved_bits are reserved for future use by ITU-T | ISO/IEC.
     WRITE_CODE(0, 8, "gci_num_reserved_bits");
@@ -3061,7 +2614,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
   {
     WRITE_FLAG(0, "gci_alignment_zero_bit");
   }
-#endif
 }
 
 void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 )
@@ -3070,55 +2622,29 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
   {
     WRITE_CODE( int(ptl->getProfileIdc()), 7 ,   "general_profile_idc"                     );
     WRITE_FLAG( ptl->getTierFlag()==Level::HIGH, "general_tier_flag"                       );
-#if !JVET_S0179_CONDITIONAL_SIGNAL_GCI
-    codeConstraintInfo( ptl->getConstraintInfo() );
-#endif
   }
 
   WRITE_CODE( int( ptl->getLevelIdc() ), 8, "general_level_idc" );
 
-#if JVET_S0138_GCI_PTL
   WRITE_FLAG( ptl->getFrameOnlyConstraintFlag(), "ptl_frame_only_constraint_flag" );
   WRITE_FLAG( ptl->getMultiLayerEnabledFlag(),   "ptl_multilayer_enabled_flag"    );
-#endif
 
   if(profileTierPresentFlag)
   {
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
     codeConstraintInfo(ptl->getConstraintInfo());
-#endif
-#if !JVET_S_SUB_PROFILE
-    WRITE_CODE(ptl->getNumSubProfile(), 8, "num_sub_profiles");
-    for (int i = 0; i < ptl->getNumSubProfile(); i++)
-    {
-      WRITE_CODE(ptl->getSubProfileIdc(i) , 32, "general_sub_profile_idc[i]");
-    }
-#endif
   }
 
-#if JVET_S0203
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
-#else
-  for (int i = 0; i < maxNumSubLayersMinus1; i++)
-#endif
   {
     WRITE_FLAG( ptl->getSubLayerLevelPresentFlag(i),   "sub_layer_level_present_flag[i]" );
   }
 
   while (!isByteAligned())
   {
-#if JVET_S0138_GCI_PTL
     WRITE_FLAG(0, "ptl_reserved_zero_bit");
-#else
-    WRITE_FLAG(0, "ptl_alignment_zero_bit");
-#endif
   }
 
-#if JVET_S0203
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
-#else
-  for(int i = 0; i < maxNumSubLayersMinus1; i++)
-#endif
   {
     if( ptl->getSubLayerLevelPresentFlag(i) )
     {
@@ -3126,7 +2652,6 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
     }
   }
 
-#if JVET_S_SUB_PROFILE
   if (profileTierPresentFlag)
   {
     WRITE_CODE(ptl->getNumSubProfile(), 8, "ptl_num_sub_profiles");
@@ -3135,7 +2660,6 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
       WRITE_CODE(ptl->getSubProfileIdc(i), 32, "general_sub_profile_idc[i]");
     }
   }
-#endif
 }
 
 
@@ -3363,23 +2887,12 @@ void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const SPS *sps)
 /** code quantization matrix
 *  \param scalingList quantization matrix information
 */
-#if JVET_R0433
 void HLSWriter::codeScalingList( const ScalingList &scalingList, bool aps_chromaPresentFlag )
-#else
-void HLSWriter::codeScalingList( const ScalingList &scalingList )
-#endif
 {
   //for each size
-#if !JVET_R0433
-  WRITE_FLAG(scalingList.getChromaScalingListPresentFlag(), "scaling_list_chroma_present_flag");
-#endif
   for (uint32_t scalingListId = 0; scalingListId < 28; scalingListId++)
   {
-#if JVET_R0433
     if (aps_chromaPresentFlag || scalingList.isLumaScalingList(scalingListId))
-#else
-    if(scalingList.getChromaScalingListPresentFlag()|| scalingList.isLumaScalingList(scalingListId))
-#endif
    {
     bool scalingListCopyModeFlag = scalingList.getScalingListCopyModeFlag(scalingListId);
     WRITE_FLAG(scalingListCopyModeFlag, "scaling_list_copy_mode_flag"); //copy mode
@@ -3475,11 +2988,7 @@ void HLSWriter::alfFilter( const AlfParam& alfParam, const bool isChroma, const 
 {
   AlfFilterShape alfShape(isChroma ? 5 : 7);
   const short* coeff = isChroma ? alfParam.chromaCoeff[altIdx] : alfParam.lumaCoeff;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   const Pel* clipp = isChroma ? alfParam.chromaClipp[altIdx] : alfParam.lumaClipp;
-#else
-  const short* clipp = isChroma ? alfParam.chromaClipp[altIdx] : alfParam.lumaClipp;
-#endif
   const int numFilters = isChroma ? 1 : alfParam.numLumaFilters;
 
   // vlc for all

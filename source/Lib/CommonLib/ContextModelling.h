@@ -102,10 +102,8 @@ public:
   void            decimateNumCtxBins(int n) { m_remainingContextBins -= n; }
   void            increaseNumCtxBins(int n) { m_remainingContextBins += n; }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   TCoeff          minCoeff()                                const { return m_minCoeff; }
   TCoeff          maxCoeff()                                const { return m_maxCoeff; }
-#endif
 
   unsigned sigCtxIdAbs( int scanPos, const TCoeff* coeff, const int state )
   {
@@ -114,13 +112,8 @@ public:
     const TCoeff* pData     = coeff + posX + posY * m_width;
     const int     diag      = posX + posY;
     int           numPos    = 0;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff        sumAbs    = 0;
 #define UPDATE(x) {TCoeff a=abs(x);sumAbs+=std::min(4+(a&1),a);numPos+=int(!!a);}
-#else
-    int           sumAbs    = 0;
-#define UPDATE(x) {int a=abs(x);sumAbs+=std::min(4+(a&1),a);numPos+=!!a;}
-#endif
     if( posX < m_width-1 )
     {
       UPDATE( pData[1] );
@@ -144,11 +137,7 @@ public:
 #undef UPDATE
 
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     int ctxOfs = int(std::min<TCoeff>((sumAbs+1)>>1, 3)) + ( diag < 2 ? 4 : 0 );
-#else
-    int ctxOfs = std::min((sumAbs+1)>>1, 3) + ( diag < 2 ? 4 : 0 );
-#endif
 
     if( m_chType == CHANNEL_TYPE_LUMA )
     {
@@ -165,11 +154,7 @@ public:
     int offset = 0;
     if( m_tmplCpDiag != -1 )
     {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
       offset  = int(std::min<TCoeff>( m_tmplCpSum1, 4 )) + 1;
-#else
-      offset  = std::min( m_tmplCpSum1, 4 ) + 1;
-#endif
       offset += ( !m_tmplCpDiag ? ( m_chType == CHANNEL_TYPE_LUMA ? 15 : 5 ) : m_chType == CHANNEL_TYPE_LUMA ? m_tmplCpDiag < 3 ? 10 : ( m_tmplCpDiag < 10 ? 5 : 0 ) : 0 );
     }
     return uint8_t(offset);
@@ -183,11 +168,7 @@ public:
     const uint32_t  posY  = m_scan[scanPos].y;
     const uint32_t  posX  = m_scan[scanPos].x;
     const TCoeff*   pData = coeff + posX + posY * m_width;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff          sum   = 0;
-#else
-    int             sum   = 0;
-#endif
     if (posX < m_width - 1)
     {
       sum += abs(pData[1]);
@@ -208,11 +189,7 @@ public:
         sum += abs(pData[m_width << 1]);
       }
     }
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     return unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
-#else
-    return std::max(std::min(sum - 5 * baseLevel, 31), 0);
-#endif
   }
 
   unsigned sigCtxIdAbsTS( int scanPos, const TCoeff* coeff )
@@ -221,11 +198,7 @@ public:
     const uint32_t  posX   = m_scan[scanPos].x;
     const TCoeff*   posC   = coeff + posX + posY * m_width;
     int             numPos = 0;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
 #define UPDATE(x) {TCoeff a=abs(x);numPos+=int(!!a);}
-#else
-#define UPDATE(x) {int a=abs(x);numPos+=!!a;}
-#endif
     if( posX > 0 )
     {
       UPDATE( posC[-1] );
@@ -249,11 +222,7 @@ public:
     const TCoeff*   posC = coeff + posX + posY * m_width;
 
     int             numPos = 0;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
 #define UPDATE(x) {TCoeff a=abs(x);numPos+=int(!!a);}
-#else
-#define UPDATE(x) {int a=abs(x);numPos+=!!a;}
-#endif
 
     if (bdpcm)
     {
@@ -275,13 +244,11 @@ public:
     return m_tsLrg1FlagCtxSet(numPos);
   }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   template <typename T> int sgn(T val)
   {
     return (T(0) < val) - (val < T(0));
   }
 
-#endif
   unsigned signCtxIdAbsTS(int scanPos, const TCoeff* coeff, int bdpcm)
   {
     const uint32_t  posY = m_scan[scanPos].y;
@@ -293,19 +260,11 @@ public:
 
     if (posX > 0)
     {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
       rightSign = sgn(pData[-1]);
-#else
-      rightSign = pData[-1];
-#endif
     }
     if (posY > 0)
     {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
       belowSign = sgn(pData[-(int)m_width]);
-#else
-      belowSign = pData[-(int)m_width];
-#endif
     }
 
     if ((rightSign == 0 && belowSign == 0) || ((rightSign*belowSign) < 0))
@@ -337,69 +296,41 @@ public:
 
     if (posX > 0)
     {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
       rightPixel = int(data[-1]);
-#else
-      rightPixel = data[-1];
-#endif
     }
     if (posY > 0)
     {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
       belowPixel = int(data[-(int)m_width]);
-#else
-      belowPixel = data[-(int)m_width];
-#endif
     }
   }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   int deriveModCoeff(int rightPixel, int belowPixel, TCoeff absCoeff, int bdpcm = 0)
-#else
-  int deriveModCoeff(int rightPixel, int belowPixel, int absCoeff, int bdpcm = 0)
-#endif
   {
 
     if (absCoeff == 0)
       return 0;
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     int absCoeffMod = int(absCoeff);
-#else
-    int absCoeffMod = absCoeff;
-#endif
 
     if (bdpcm == 0)
     {
       pred1 = std::max(absBelow, absRight);
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
       if (absCoeffMod == pred1)
-#else
-      if (absCoeff == pred1)
-#endif
       {
         absCoeffMod = 1;
       }
       else
       {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
         absCoeffMod = absCoeffMod < pred1 ? absCoeffMod + 1 : absCoeffMod;
-#else
-        absCoeffMod = absCoeff < pred1 ? absCoeff + 1 : absCoeff;
-#endif
       }
     }
 
     return(absCoeffMod);
   }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   TCoeff decDeriveModCoeff(int rightPixel, int belowPixel, TCoeff absCoeff)
-#else
-  int decDeriveModCoeff(int rightPixel, int belowPixel, int absCoeff)
-#endif
   {
 
     if (absCoeff == 0)
@@ -408,11 +339,7 @@ public:
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
     pred1 = std::max(absBelow, absRight);
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff absCoeffMod;
-#else
-    int absCoeffMod;
-#endif
 
     if (absCoeff == 1 && pred1 > 0)
     {
@@ -461,10 +388,8 @@ private:
   const int                 m_lastShiftX;
   const int                 m_lastShiftY;
   const bool                m_TrafoBypass;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
   const TCoeff              m_minCoeff;
   const TCoeff              m_maxCoeff;
-#endif
   // modified
   int                       m_scanPosLast;
   int                       m_subSetId;
@@ -474,11 +399,7 @@ private:
   int                       m_minSubPos;
   int                       m_maxSubPos;
   unsigned                  m_sigGroupCtxId;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   TCoeff                    m_tmplCpSum1;
-#else
-  int                       m_tmplCpSum1;
-#endif
   int                       m_tmplCpDiag;
   CtxSet                    m_sigFlagCtxSet[3];
   CtxSet                    m_parFlagCtxSet;

@@ -1554,11 +1554,7 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
         {
           Picture *refPic = pcSlice->getRefPic((RefPicList)rlist, idx);
 
-#if JVET_S0258_SUBPIC_CONSTRAINTS
           if( !refPic->getSubPicSaved() && refPic->subPictures.size() > 1 )
-#else
-          if (!refPic->getSubPicSaved() && refPic->numSubpics > 1)
-#endif
           {
             refPic->saveSubPicBorder(refPic->getPOC(), subPicX, subPicY, subPicWidth, subPicHeight);
             refPic->extendSubPicBorder(refPic->getPOC(), subPicX, subPicY, subPicWidth, subPicHeight);

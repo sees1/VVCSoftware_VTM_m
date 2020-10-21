@@ -52,170 +52,11 @@
 
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
-#define JVET_S0121_ASPECT2                                1 // JVET-S0121 aspect 2: Remove the condition check of pps_deblocking_filter_override_enabled_flag for the signalling of ph_deblocking_params_present_flag
 
-#define JVET_S0058_GCI                                    1 // no_mtt_constraint_flag and no_weightedpred_constraint_flag
-
-#define JVET_R0341_GCI                                    1 // JVET-R0341: on constraint flag for local chroma QP control
-
-#define JVET_S0208_ASPECT1                                1 // JVET-S0208 aspect 1: Remove the extra_sh_bits_struct( ) and extra_ph_bits_struct( ) structures and put their content directly in the SPS.
-
-#define JVET_S0208_ASPECT6                                1 // JVET-S0208 aspect 6: Modify the derivation process for the variable TotalNumOlss by removing unnecessary text.
-
-#define JVET_S0212_BITDEPTH_RANGE                         1 // JVET-S0212 aspect 2: Specify a value range of 0..2 for vps_ols_dpb_bitdepth_minus8[ i ]. Also for sps_bitdepth_minus8[ i ]
-
-#define JVET_S0047_MINUS1_FOR_VB_POS                      1 // JVET-S0047: Add "_minus1" to sps_virtual_boundary_pos_x, sps_virtual_boundary_pos_y, ph_virtual_boundary_pos_x and ph_virtual_boundary_pos_y
-
-#define JVET_S0211_UEV_FOR_NUM_VB                         1 // JVET-S0211: Signal sps_num_ver_virtual_boundaries, sps_num_hor_virtual_boundaries, ph_num_ver_virtual_boundaries, and ph_num_hor_virtual_boundaries using ue(v)
-
-#define JVET_S0203                                        1 // JVET-S0203 (aspects 1 & 2): change the signalling of sublayer_level_idc[ i ] and ptl_sublayer_level_present_flag[ i ] to be in descending order
-
-#define JVET_R0227_ASPECT3                                1 // JVET-R0227 aspect 3: Rename gci_no_qp_delta_constraint_flag to gci_no_cu_qp_delta_constraint_flag 
-
-#define JVET_S0066_GCI                                    1 // JVET-S0066: Signal new GCI flags gci_three_minus_max_log2_ctu_size_constraint_idc and gci_no_luma_transform_size_64_constraint_flag (no_explicit_scaling_list_constraint_flag already included as part of JVET-S0050)
-
-#define JVET_S0193_NO_OUTPUT_PRIOR_PIC                    1 // JVET-S0193: Move ph_no_output_of_prior_pics_flag to SH
-
-#define JVET_S_PROFILES                                   1 // Profile definitions
-
-#define JVET_S_SUB_PROFILE                                1 // Move signalling of ptl_num_sub_profiles
-
-#define OPL_ADD_LAYER_ID                                  1 // Add layer ID to output picture log
-
-#define JVET_R0324_REORDER                                1 // Reordering of syntax elements JVET-R0324/JVET-R2001-v2
- 
-#define JVET_S0097_VPS_default_values                     1 // JVET-S0097: infer values of variables in VPS when not present
-
-#define JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE   1 // JVET-S0219 aspect2: change the order to put the aps_params_type before the aps_adaptation_parameter_set_id.
-
-#define JVET_R0270                                        1 // JVET-S0270: Treating picture with mixed RASL and RADL slices as RASL picture
-
-#define JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE            1 // JVET-S0202: Require that the bistream shall contain at least one picture with pic_output_flag equal to 1 that is in an output layer.
-
-#define JVET_S0081_NON_REFERENCED_PIC                     1 // JVET-S0081: exclude non-referenced picture to be used as prevTid0 picture
-
-#define JVET_S0162_SUBPIC_MERGE_TOOL                      1 // JVET-S0162: Subpicture merging software
-
-#define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
-
-#define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
-
-#define JVET_S0045_SIGN                                   1 // JVET-S0045: semantics of strp_entry_sign_flag
-
-#define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
-
-#define JVET_S0266_VUI_length                             1 // JVET-S0266: VUI modifications including signalling of VUI length
-
-#define JVET_S0179_CONDITIONAL_SIGNAL_GCI                 1 // JVET-S0179: Conditional signalling of GCI fields
-
-#define JVET_S0049_ASPECT4                                1 // JVET-S0049 aspect 4: Constrain the value of pps_alf_info_in_ph_flag to be equal to 0 when the PH is in the SH
-
-#define JVET_S0258_SUBPIC_CONSTRAINTS                     1 // JVET-S0258: sub-picture constraints
-
-#define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
-
-#define JVET_S0234_ACT_CRS_FIX                            1 // JVET-S0234: perform chroma residual scaling in RGB domain when ACT is on
-
-#define JVET_S0102_ASPECT3_PT_SEI                         1 // JVET-S0102 Aspect 3: Place PT SEI messages in individual SEI NAL units when general_same_pic_timing_in_all_ols_flag is equal to 1
-
-#define JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT       1 // JVET-S0094: 0 for constraint flags for chroma format and bit depth mean unconstrained, by coding these constraints as subtractive
-
-#define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
-
-#define JVET_S0221_NUM_VB_CHECK                           1 // JVET_S0221: Constraints on the number of virtual boundaries
-
-#define JVET_S0052_RM_SEPARATE_COLOUR_PLANE               1 // JVET-S0052: Remove separate colour plane coding from VVC version 1
-
-#define JVET_S0123_IDR_UNAVAILABLE_REFERENCE              1 // JVET-S0123: Invoke the generation of unavailable reference picture for an IDR picture that has RPLs.
-                                                            //             Change the process for deriving empty RPLs when sps_idr_rpl_present_flag is equal to 0 and nal_unit_type is equal to IDR_W_RADL or IDR_N_LP to involve pps_rpl_info_in_ph_flag.
-#define JVET_S0124_UNAVAILABLE_REFERENCE                  1 // JVET-S0124: Add TemporalId, ph_non_ref_pic_flag, and ph_pic_parameter_set_id for generating unavailable reference pictures
-
-#define JVET_S0063_VPS_SIGNALLING                         1 // Modifications to VPS signalling - conditionally signal vps_num_ptls_minus1
-
-#define JVET_S0065_SPS_INFERENCE_RULE                     1 // JVET_S0065_PROPOSAL1: Inference rule for sps_virtual_boundaries_present_flag
-
-#define JVET_S0155_EOS_NALU_CHECK                         1 // JVET-S0155: Constraints on EOS NAL units
-
-#define JVET_R0093_SUBPICS_AND_CONF_WINDOW                1 // JVET-R0093 and JVET-R0294: Constraint on subpictures and conformance cropping window, and rewriting of conformance cropping window in subpicture extraction
-
-#define JVET_S0160_ASPECT1_ASPECT9                        1 // JVET-S0160: Aspect 1 Infer the value of pps_loop_filter_across_tiles_enabled_flag to be equal to 0 (instead of 1) when not present
-                                                            //             Aspect 9 The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture
-
-#define JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT                1 // JVET-S0071 : shortcut when all subpictures have the same size
-
-#define JVET_S0098_SLI_FRACTION                           1 // JVET-S0098 Item 3: Add non_subpic_layers_fraction syntax element
-
-#define JVET_S0048_SCALING_OFFSET                         1 // JVET-S0048 Aspect2: change the constraint on the value ranges of scaling window offsets to be more flexible
-
-#define JVET_S0102_ASPECT4                                1 // JVET-S0102 Aspect 4: Mandate same value for buffering period syntax elements
-
-#define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.
-
-#define JVET_S0100_ASPECT3                                1 // JVET-S0100 Aspect 3: constraints on vps_dpb_max_tid and vps_hrd_max_tid depending on vps_ptl_max_tid
-
-#define JVET_S0156_LEVEL_DEFINITION                       1 // JVET-S0156: On level definitions
-
-#define JVET_S0064_SEI_BUFFERING_PERIOD_CLEANUP           1 // JVET-S0064: Conditionally signal bp_sublayer_dpb_output_offsets_present_flag
-
-#define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
-
-#define JVET_R0294_SUBPIC_HASH                            1 // JVET-R0294: Allow decoded picture hash SEI messages to be nested in subpicture context
-
-#define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
-
-#define JVET_S0172_ITEM2_GCMP_CONSTRAINT                  1 // JVET-S0172 item 2: Constraints on GCMP for the hemisphere cubemap (gcmp_packing_type == 4 or 5)
-
-#define JVET_Q0406_CABAC_ZERO                             1 // JVET-Q0406: signal cabac_zero_words per sub-picture
-
-#define JVET_S0177_SCALABLE_NESTING_SEI                   1 // JVET-S0177: Constraints on the scalable nesting SEI message
-
-#define JVET_R0068_ASPECT6_ENC_RESTRICTION                1 // encoder restriction for JVET-R0068 apsect 6
-
-#define JVET_S0178_GENERAL_SEI_CHECK                      1 // JVET-S0178: General SEI semantics and constraints
-
-#define JVET_S0176_SLI_SEI                                1 // JVET-S0176: On the subpicture level information SEI message
-
-#define JVET_S0186_SPS_CLEANUP                            1 // JVET-S0186: Proposal 1, move sps_chroma_format_idc and sps_log2_ctu_size_minus5 to take place sps_reserved_zero_4bits
-
-#define JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP     1 // JVET-S0181 Proposal2: Move signalling of bp_max_sublayers_minus1 and conditionally signal bp_cpb_removal_delay_deltas_present_flag, bp_num_cpb_removal_delay_deltas_minus1, and bp_cpb_removal_delay
-
-#define JVET_S0050_GCI                                    1 // JVET-S0050: Signal new GCI flags no_virtual_boundaries_constraint_flag and no_explicit_scaling_list_constraint_flag
-                                                            //             Constrain the value of one_subpic_per_pic_constraint_flag, one_slice_per_pic_constraint_flag and no_aps_constraint_flag
-                                                            //             Remove all constraints that require GCI fields to be equal to a value that imposes a constraint
-
-#define JVET_S0138_GCI_PTL                                1 // JVET-S_Notes_d9: move frame_only_constraint_flag and single_layer_constraint_flag into PTL for easy access
-
-#define JVET_S0113_S0195_GCI                              1 // JVET-S0113: no_rectangular_slice_constraint_flag to constrain pps_rect_slice_flag 
-                                                            //             one_slice_per_subpicture_constraint_flag to constrain pps_single_slice_per_subpic_flag
-                                                            // JVET-S0195: replace one_subpic_per_pic_constraint_flag with no_subpic_info_constraint_flag and its semantics
-                                                            //             add no_idr_rpl_constraint_flag
-
-#define JVET_S0115_VPS                                    1 // JVET-S0115 aspect 2 (JVET-S0142 item 4): Change the name and semantics of vps_all_layers_same_num_sublayers_flag 
-                                                            // (to be vps_default_ptl_dpb_hrd_max_tid_flag) to only control VPS syntax without requiring the number of sublayers 
-                                                            // to be the same for all layers.
-
-#define JVET_S0182_RPL_SIGNALLING                         1 // JVET-S0182: modifications to rpl information signalling
-
-#define JVET_S0185_PROPOSAl1_PICTURE_TIMING_CLEANUP       1 // JVET-S0185: Proposal 1, put syntax element pt_cpb_removal_delay_minus1[] first, followed by similar information for sub-layers, followed by pt_dpb_output_delay
-
-#define JVET_S0183_VPS_INFORMATION_SIGNALLING             1 // JVET-S0183: Proposal 1, signal vps_num_output_layer_sets_minus1 as vps_num_output_layer_sets_minus2
-
-#define JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT            1 // JVET-S0184: Conformance constraints regarding virtual boundary signalling when subpictures are present
-
-#define JVET_Q0114_ASPECT5_GCI_FLAG                       1 // JVET-Q0114 Aspect 5: Add a general constraint on no reference picture resampling
-
-#define JVET_S0105_GCI_REORDER_IN_CATEGORY                1 // JVET-S0105: reorder and categorize GCI flags (assumes the following macros set to 1: JVET_S0050_GCI, JVET_S0113_S0195_GCI, JVET_S0066_GCI, JVET_S0138_GCI_PTL, JVET_S0058_GCI, JVET_R0341_GCI, JVET_Q0114_ASPECT5_GCI_FLAG)
-
-#define JVET_S0158_SUB_BITSTREAM_EXT                      1 // JVET-S0158: On the general sub-bitstream extraction process
-
-#define JVET_S0154_R0068_ASPECT5                          1 // JVET-S0154: On the subpicture sub-bitstream extraction process
-                                                            // JVET-R0069 Aspect5: In subpicture extraction using subpic index instead of subpic ID
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
-#define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT                 1 // JVET-R0351: high bit depth coding support (syntax changes, no mathematical differences for CTCs)
-#define JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS              1 // JVET-R0351: high bit depth coding support (syntax changes for Visual Studio)
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
 
 #define JVET_R0164_MEAN_SCALED_SATD                       1 // JVET-R0164: Use a mean scaled version of SATD in encoder decisions
@@ -832,7 +673,6 @@ namespace Profile
 {
   enum Name
   {
-#if JVET_S_PROFILES
     NONE                                 = 0,
     STILL_PICTURE                        = 64,
     MAIN_10                              = 1,
@@ -843,11 +683,6 @@ namespace Profile
     MAIN_10_444_STILL_PICTURE            = MAIN_10_444 | STILL_PICTURE,
     MULTILAYER_MAIN_10_444               = 49,
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
-#else
-    NONE        = 0,
-    MAIN_10     = 1,
-    MAIN_444_10 = 2
-#endif
   };
 }
 

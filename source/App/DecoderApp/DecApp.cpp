@@ -59,12 +59,10 @@
 DecApp::DecApp()
 : m_iPOCLastDisplay(-MAX_INT)
 {
-#if JVET_R0270
   for (int i = 0; i < MAX_NUM_LAYER_IDS; i++)
   {
     m_newCLVS[i] = true;
   }
-#endif
 }
 
 // ====================================================================================================================
@@ -130,11 +128,8 @@ uint32_t DecApp::decode()
 
   bool bPicSkipped = false;
 
-#if JVET_S0155_EOS_NALU_CHECK
   bool isEosPresentInPu = false;
-#endif
 
-#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
   bool outputPicturePresentInBitstream = false;
   auto setOutputPicturePresentInStream = [&]()
   {
@@ -151,7 +146,6 @@ uint32_t DecApp::decode()
       }
     }
   };
-#endif
 
   while (!!bitstreamFile)
   {
@@ -186,12 +180,9 @@ uint32_t DecApp::decode()
             (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
              nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP))
         {
-#if JVET_R0270
           m_newCLVS[nalu.m_nuhLayerId] = true;   // An IDR picture starts a new CLVS
-#endif
           xFlushOutput(pcListPic, nalu.m_nuhLayerId);
         }
-#if JVET_R0270
         if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInPu)
         {
           // A CRA that is immediately preceded by an EOS is a CLVSS
@@ -202,7 +193,6 @@ uint32_t DecApp::decode()
           // A CRA that is not immediately precede by an EOS is not a CLVSS
           m_newCLVS[nalu.m_nuhLayerId] = false;
         }
-#endif
 
         // parse NAL unit syntax if within target decoding layer
         if( ( m_iMaxTemporalLayer < 0 || nalu.m_temporalId <= m_iMaxTemporalLayer ) && xIsNaluWithinTargetDecLayerIdSet( &nalu ) )
@@ -238,21 +228,17 @@ uint32_t DecApp::decode()
           bPicSkipped = true;
         }
       }
-#if JVET_S0155_EOS_NALU_CHECK
       // once an EOS NAL unit appears in the current PU, mark the variable isEosPresentInPu as true
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
         isEosPresentInPu = true;
-#if JVET_R0270
         m_newCLVS[nalu.m_nuhLayerId] = true;  //The presence of EOS means that the next picture is the beginning of new CLVS
-#endif
       }
       // within the current PU, only EOS and EOB are allowed to be sent after an EOS nal unit
       if(isEosPresentInPu)
       {
         CHECK(nalu.m_nalUnitType != NAL_UNIT_EOS && nalu.m_nalUnitType != NAL_UNIT_EOB, "When an EOS NAL unit is present in a PU, it shall be the last NAL unit among all NAL units within the PU other than other EOS NAL units or an EOB NAL unit");
       }
-#endif
     }
 
     if ((bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS) && !m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId) && !bPicSkipped)
@@ -260,11 +246,7 @@ uint32_t DecApp::decode()
       if (!loopFiltered[nalu.m_nuhLayerId] || bitstreamFile)
       {
         m_cDecLib.executeLoopFilters();
-#if JVET_R0270
         m_cDecLib.finishPicture(poc, pcListPic, INFO, m_newCLVS[nalu.m_nuhLayerId]);
-#else
-        m_cDecLib.finishPicture( poc, pcListPic );
-#endif
       }
       loopFiltered[nalu.m_nuhLayerId] = (nalu.m_nalUnitType == NAL_UNIT_EOS);
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
@@ -322,16 +304,12 @@ uint32_t DecApp::decode()
       // write reconstruction to file
       if( bNewPicture )
       {
-#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
         setOutputPicturePresentInStream();
-#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
-#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
         setOutputPicturePresentInStream();
-#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
         m_cDecLib.setFirstSliceInPicture (false);
       }
@@ -339,9 +317,7 @@ uint32_t DecApp::decode()
       if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
       {
-#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
         setOutputPicturePresentInStream();
-#endif
         xWriteOutput( pcListPic, nalu.m_temporalId );
       }
     }
@@ -349,10 +325,8 @@ uint32_t DecApp::decode()
     {
       m_cDecLib.checkSeiInPictureUnit();
       m_cDecLib.resetPictureSeiNalus();
-#if JVET_S0155_EOS_NALU_CHECK
       // reset the EOS present status for the next PU check
       isEosPresentInPu = false;
-#endif
     }
     if (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS)
     {
@@ -378,11 +352,9 @@ uint32_t DecApp::decode()
       m_cDecLib.resetAccessUnitPicInfo();
     }
   }
-#if JVET_S0202_AT_LEAST_ONE_OUTPUT_PICTURE
   // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
   setOutputPicturePresentInStream();
   CHECK(!outputPicturePresentInBitstream, "It is required that there shall be at least one picture with PictureOutputFlag equal to 1 in the bitstream")
-#endif
 
   xFlushOutput( pcListPic );
 
@@ -423,9 +395,7 @@ void DecApp::writeLineToOutputLog(Picture * pcPic)
     const int croppedWidth  = pcPic->Y().width - leftOffset - rightOffset;
     const int croppedHeight = pcPic->Y().height - topOffset - bottomOffset;
 
-#if OPL_ADD_LAYER_ID
     m_oplFileStream << std::setw(3) << pcPic->layerId << ",";
-#endif
     m_oplFileStream << std::setw(8) << pcPic->getPOC() << "," << std::setw(5) << croppedWidth << "," << std::setw(5)
                     << croppedHeight << "," << hashToString(recon_digest, numChar) << "\n";
   }

@@ -396,16 +396,11 @@ void SEIEncoder::initSEISampleAspectRatioInfo(SEISampleAspectRatioInfo* seiSampl
 //! initialize scalable nesting SEI message.
 //! Note: The SEI message structures input into this function will become part of the scalable nesting SEI and will be
 //!       automatically freed, when the nesting SEI is disposed.
-#if JVET_R0294_SUBPIC_HASH
 //  either targetOLS or targetLayer should be active, call with empty vector for the inactive mode
 void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t> &subpictureIDs)
-#else
-void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<uint16_t> &subpictureIDs)
-#endif
 {
   CHECK(!(m_isInitialized), "Scalable Nesting SEI already initialized ");
   CHECK(!(scalableNestingSEI != NULL), "No Scalable Nesting SEI object passed");
-#if JVET_R0294_SUBPIC_HASH
   CHECK (targetOLSs.size() > 0 && targetLayers.size() > 0, "Scalable Nesting SEI can apply to either OLS or layer(s), not both");
 
   scalableNestingSEI->m_snOlsFlag = (targetOLSs.size() > 0) ? 1 : 0;  // If the nested SEI messages are picture buffering SEI messages, picture timing SEI messages or sub-picture timing SEI messages, nesting_ols_flag shall be equal to 1, by default case
@@ -442,30 +437,6 @@ void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, 
       scalableNestingSEI->m_snLayerId[i] = targetLayers[i];
     }
   }
-#else
-  //KJS: OLS and layer targeting needs to be fixed for the actual OLSs in the bitstream
-  scalableNestingSEI->m_snOlsFlag = 1;         // If the nested SEI messages are picture buffering SEI messages, picture timing SEI messages or sub-picture timing SEI messages, nesting_ols_flag shall be equal to 1, by default case
-  scalableNestingSEI->m_snNumOlssMinus1 =  1;  // by default the nesting scalable SEI message applies to two OLSs.
-  for (int i = 0; i <= scalableNestingSEI->m_snNumOlssMinus1; i++)
-  {
-    scalableNestingSEI->m_snOlsIdxDeltaMinus1[i] = 0; // first ols to which nesting SEI applies is
-  }
-  for (int i = 0; i <= scalableNestingSEI->m_snNumOlssMinus1; i++)
-  {
-    if (i == 0)
-    {
-      scalableNestingSEI->m_snOlsIdx[i] = scalableNestingSEI->m_snOlsIdxDeltaMinus1[i];
-    }
-    else
-    {
-      scalableNestingSEI->m_snOlsIdx[i] = scalableNestingSEI->m_snOlsIdxDeltaMinus1[i] + scalableNestingSEI->m_snOlsIdxDeltaMinus1[i - 1] + 1;
-    }
-  }
-
-  scalableNestingSEI->m_snAllLayersFlag = 1; // nesting is not applied to all layers
-  scalableNestingSEI->m_snNumLayersMinus1 = 2 - 1;  //nesting_num_layers_minus1
-  scalableNestingSEI->m_snLayerId[0] = 0;
-#endif
   if (!subpictureIDs.empty())
   {
     scalableNestingSEI->m_snSubpicFlag = 1;
@@ -690,7 +661,6 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
 {
   const EncCfgParam::CfgSEISubpictureLevel &cfgSubPicLevel = m_pcCfg->getSubpicureLevelInfoSEICfg();
 
-#if JVET_S0176_SLI_SEI
   sei->m_sliSublayerInfoPresentFlag = cfgSubPicLevel.m_sliSublayerInfoPresentFlag;
   sei->m_sliMaxSublayers = cfgSubPicLevel.m_sliMaxSublayers;
   sei->m_numRefLevels = cfgSubPicLevel.m_sliSublayerInfoPresentFlag ? (int)cfgSubPicLevel.m_refLevels.size() / cfgSubPicLevel.m_sliMaxSublayers : (int)cfgSubPicLevel.m_refLevels.size();
@@ -698,15 +668,11 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
   sei->m_explicitFractionPresentFlag = cfgSubPicLevel.m_explicitFraction;
 
   // sei parameters initialization
-#if JVET_S0098_SLI_FRACTION
   sei->m_nonSubpicLayersFraction.resize(sei->m_numRefLevels);
-#endif
   sei->m_refLevelIdc.resize(sei->m_numRefLevels);
   for (int level = 0; level < sei->m_numRefLevels; level++)
   {
-#if JVET_S0098_SLI_FRACTION
     sei->m_nonSubpicLayersFraction[level].resize(sei->m_sliMaxSublayers);
-#endif
     sei->m_refLevelIdc[level].resize(sei->m_sliMaxSublayers);
     for (int sublayer = 0; sublayer < sei->m_sliMaxSublayers; sublayer++)
     {
@@ -735,9 +701,7 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
   {
     for (int level = 0; level < sei->m_numRefLevels; level++)
     {
-#if JVET_S0098_SLI_FRACTION
       sei->m_nonSubpicLayersFraction[level][sublayer] = cfgSubPicLevel.m_nonSubpicLayersFraction[cnta];
-#endif
       sei->m_refLevelIdc[level][sublayer] = cfgSubPicLevel.m_refLevels[cnta++];
       if (sei->m_explicitFractionPresentFlag)
       {
@@ -756,9 +720,7 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
     {
       for (int level = 0; level < sei->m_numRefLevels; level++)
       {
-#if JVET_S0098_SLI_FRACTION
         sei->m_nonSubpicLayersFraction[level][sublayer] = sei->m_nonSubpicLayersFraction[level][sei->m_sliMaxSublayers - 1];
-#endif
         sei->m_refLevelIdc[level][sublayer] = sei->m_refLevelIdc[level][sei->m_sliMaxSublayers - 1];
         if (sei->m_explicitFractionPresentFlag)
         {
@@ -770,25 +732,6 @@ void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SP
       }
     }
   }
-#else
-    sei->m_numRefLevels = (int)cfgSubPicLevel.m_refLevels.size();
-    sei->m_refLevelIdc = cfgSubPicLevel.m_refLevels;
-    sei->m_explicitFractionPresentFlag = cfgSubPicLevel.m_explicitFraction;
-    if (cfgSubPicLevel.m_explicitFraction)
-    {
-      CHECK(sps->getNumSubPics() != cfgSubPicLevel.m_numSubpictures, "Number of subpictures must be equal in SPS and subpicture level information SEI");
-      sei->m_numSubpics = cfgSubPicLevel.m_numSubpictures;
-      sei->m_refLevelFraction.resize(sei->m_numRefLevels);
-    for (int level=0, cnt=0; level < sei->m_numRefLevels; level++)
-    {
-      sei->m_refLevelFraction[level].resize(sei->m_numSubpics);
-      for (int subpic=0; subpic<sei->m_numSubpics; subpic++)
-      {
-        sei->m_refLevelFraction[level][subpic] = cfgSubPicLevel.m_fractions[cnt++];
-      }
-    }
-  }
-#endif
 }
 
 

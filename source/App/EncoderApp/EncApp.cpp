@@ -95,11 +95,7 @@ void EncApp::xInitLibCfg()
   vps.setMaxSubLayers(m_maxSublayers);
   if (vps.getMaxLayers() > 1 && vps.getMaxSubLayers() > 1)
   {
-#if JVET_S0115_VPS
     vps.setDefaultPtlDpbHrdMaxTidFlag(m_defaultPtlDpbHrdMaxTidFlag);
-#else
-    vps.setAllLayersSameNumSublayersFlag(m_allLayersSameNumSublayersFlag);
-#endif
   }
   if (vps.getMaxLayers() > 1)
   {
@@ -205,18 +201,12 @@ void EncApp::xInitLibCfg()
   ptls[0].setLevelIdc                                            ( m_level );
   ptls[0].setProfileIdc                                          ( m_profile);
   ptls[0].setTierFlag                                            ( m_levelTier );
-#if JVET_S0138_GCI_PTL
   ptls[0].setFrameOnlyConstraintFlag                             ( m_frameOnlyConstraintFlag);
   ptls[0].setMultiLayerEnabledFlag                               ( m_multiLayerEnabledFlag);
-#if JVET_S_PROFILES
   CHECK((m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_10_444
          || m_profile == Profile::MAIN_10_STILL_PICTURE || m_profile == Profile::MAIN_10_444_STILL_PICTURE)
           && m_multiLayerEnabledFlag,
         "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#else
-  CHECK( (m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_444_10) && m_multiLayerEnabledFlag, "ptl_multilayer_enabled_flag shall be equal to 0 for Main 10 and Main 10 4:4:4 profiles");
-#endif
-#endif
   ptls[0].setNumSubProfile                                       ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
   {
@@ -230,10 +220,8 @@ void EncApp::xInitLibCfg()
   vps.setVPSExtensionFlag                                        ( false );
   m_cEncLib.setProfile                                           ( m_profile);
   m_cEncLib.setLevel                                             ( m_levelTier, m_level);
-#if JVET_S0138_GCI_PTL
   m_cEncLib.setFrameOnlyConstraintFlag                           ( m_frameOnlyConstraintFlag);
   m_cEncLib.setMultiLayerEnabledFlag                             ( m_multiLayerEnabledFlag || m_maxLayers > 1);
-#endif
   m_cEncLib.setNumSubProfile                                     ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
   {
@@ -253,9 +241,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setSourceHeight                                      ( m_iSourceHeight );
   m_cEncLib.setConformanceWindow                                 ( m_confWinLeft / SPS::getWinUnitX( m_InputChromaFormatIDC ), m_confWinRight / SPS::getWinUnitX( m_InputChromaFormatIDC ), m_confWinTop / SPS::getWinUnitY( m_InputChromaFormatIDC ), m_confWinBottom / SPS::getWinUnitY( m_InputChromaFormatIDC ) );
   m_cEncLib.setScalingRatio                                      ( m_scalingRatioHor, m_scalingRatioVer );
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   m_cEncLib.setRprEnabled                                        (m_rprEnabledFlag);
-#endif
   m_cEncLib.setResChangeInClvsEnabled                            ( m_resChangeInClvsEnabled );
   m_cEncLib.setSwitchPocPeriod                                   ( m_switchPocPeriod );
   m_cEncLib.setUpscaledOutput                                    ( m_upscaledOutput );
@@ -264,9 +250,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAvoidIntraInDepLayer                              ( m_avoidIntraInDepLayer );
 
   //====== SPS constraint flags =======
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   m_cEncLib.setGciPresentFlag                                    ( m_gciPresentFlag );
-#endif
   if (m_cEncLib.getGciPresentFlag())
   {
     m_cEncLib.setNonPackedConstraintFlag(m_nonPackedConstraintFlag);
@@ -274,7 +258,6 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
     m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
     m_cEncLib.setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
-#if JVET_S0113_S0195_GCI
     m_cEncLib.setNoIdrRplConstraintFlag(m_noIdrRplConstraintFlag);
     CHECK(m_noIdrRplConstraintFlag&& m_idrRefParamList, "IDR RPL shall be deactivated when gci_no_idr_rpl_constraint_flag equal to 1");
 
@@ -286,25 +269,12 @@ void EncApp::xInitLibCfg()
 
     m_cEncLib.setNoSubpicInfoConstraintFlag(m_noSubpicInfoConstraintFlag);
     CHECK(m_noSubpicInfoConstraintFlag&& m_subPicInfoPresentFlag, "Subpicture information shall not present when gci_no_subpic_info_constraint_flag equal to 1");
-#else
-    m_cEncLib.setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
-#endif
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setFrameOnlyConstraintFlag(m_frameOnlyConstraintFlag);
-#endif
     m_cEncLib.setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
     m_cEncLib.setIntraOnlyConstraintFlag(m_intraOnlyConstraintFlag);
     m_cEncLib.setNoIdrConstraintFlag(m_noIdrConstraintFlag);
     m_cEncLib.setNoGdrConstraintFlag(m_noGdrConstraintFlag);
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setSingleLayerConstraintFlag(m_singleLayerConstraintFlag);
-#endif
     m_cEncLib.setAllLayersIndependentConstraintFlag(m_allLayersIndependentConstraintFlag);
-#if JVET_R0227_ASPECT3
     m_cEncLib.setNoCuQpDeltaConstraintFlag(m_noCuQpDeltaConstraintFlag);
-#else
-    m_cEncLib.setNoQpDeltaConstraintFlag(m_noQpDeltaConstraintFlag);
-#endif
 
     m_cEncLib.setNoTrailConstraintFlag(m_noTrailConstraintFlag);
     CHECK(m_noTrailConstraintFlag && m_iIntraPeriod != 1, "TRAIL shall be deactivated when m_noTrailConstraintFlag is equal to 1");
@@ -321,10 +291,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoCraConstraintFlag(m_noCraConstraintFlag);
     CHECK(m_noCraConstraintFlag && (m_iDecodingRefreshType == 1), "CRA shall be deactivated when m_noCraConstraintFlag is equal to 1");
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
     m_cEncLib.setNoRprConstraintFlag(m_noRprConstraintFlag);
     CHECK(m_noRprConstraintFlag && m_rprEnabledFlag, "Reference picture resampling shall be deactivated when m_noRprConstraintFlag is equal to 1");
-#endif
 
     m_cEncLib.setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
     CHECK(m_noResChangeInClvsConstraintFlag && m_resChangeInClvsEnabled, "Resolution change in CLVS shall be deactivated when m_noResChangeInClvsConstraintFlag is equal to 1");
@@ -335,19 +303,15 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setMaxChromaFormatConstraintIdc(m_maxChromaFormatConstraintIdc);
     CHECK(m_chromaFormatIDC > m_maxChromaFormatConstraintIdc, "Chroma format Idc shall be less than or equal to m_maxBitDepthConstraintIdc");
 
-#if JVET_S0058_GCI
     m_cEncLib.setNoMttConstraintFlag(m_noMttConstraintFlag);
     CHECK(m_noMttConstraintFlag && (m_uiMaxMTTHierarchyDepth || m_uiMaxMTTHierarchyDepthI || m_uiMaxMTTHierarchyDepthIChroma), "Mtt shall be deactivated when m_bNoMttConstraintFlag is equal to 1");
-#endif
 
     m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);
     CHECK(m_noQtbttDualTreeIntraConstraintFlag && m_dualTree, "Dual tree shall be deactivated when m_bNoQtbttDualTreeIntraConstraintFlag is equal to 1");
 
-#if JVET_S0066_GCI
     m_cEncLib.setMaxLog2CtuSizeConstraintIdc(m_maxLog2CtuSizeConstraintIdc);
     CHECK( m_uiCTUSize > (1<<(m_maxLog2CtuSizeConstraintIdc)), "CTUSize shall be less than or equal to 1 << m_maxLog2CtuSize");
 
-#endif
     m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(m_noPartitionConstraintsOverrideConstraintFlag);
     CHECK(m_noPartitionConstraintsOverrideConstraintFlag && m_SplitConsOverrideEnabledFlag, "Partition override shall be deactivated when m_noPartitionConstraintsOverrideConstraintFlag is equal to 1");
 
@@ -360,10 +324,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
     CHECK(m_noCCAlfConstraintFlag && m_ccalf, "CCALF shall be deactivated when m_noCCAlfConstraintFlag is equal to 1");
 
-#if JVET_S0058_GCI
     m_cEncLib.setNoWeightedPredictionConstraintFlag(m_noWeightedPredictionConstraintFlag);
     CHECK(m_noWeightedPredictionConstraintFlag && (m_useWeightedPred || m_useWeightedBiPred), "Weighted Prediction shall be deactivated when m_bNoWeightedPredictionConstraintFlag is equal to 1");
-#endif
 
     m_cEncLib.setNoRefWraparoundConstraintFlag(m_noRefWraparoundConstraintFlag);
     CHECK(m_noRefWraparoundConstraintFlag && m_wrapAround, "Wrap around shall be deactivated when m_bNoRefWraparoundConstraintFlag is equal to 1");
@@ -414,11 +376,9 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoTransformSkipConstraintFlag(m_noTransformSkipConstraintFlag);
     CHECK(m_noTransformSkipConstraintFlag && m_useTransformSkip, "Transform skip shall be deactivated when m_noTransformSkipConstraintFlag is equal to 1");
 
-#if JVET_S0066_GCI
     m_cEncLib.setNoLumaTransformSize64ConstraintFlag(m_noLumaTransformSize64ConstraintFlag);
     CHECK(m_noLumaTransformSize64ConstraintFlag && m_log2MaxTbSize > 5, "Max transform size shall be less than 64 when m_noLumaTransformSize64ConstraintFlag is equal to 1");
 
-#endif
     m_cEncLib.setNoBDPCMConstraintFlag(m_noBDPCMConstraintFlag);
     CHECK(m_noBDPCMConstraintFlag && m_useBDPCM, "BDPCM shall be deactivated when m_noBDPCMConstraintFlag is equal to 1");
 
@@ -464,56 +424,38 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoLmcsConstraintFlag(m_noLmcsConstraintFlag);
     CHECK(m_noLmcsConstraintFlag && m_lmcsEnabled, "LMCS shall be deactivated when m_noLmcsConstraintFlag is equal to 1");
 
-#if JVET_S0050_GCI
     m_cEncLib.setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
     CHECK(m_noExplicitScaleListConstraintFlag && m_useScalingListId != SCALING_LIST_OFF, "Explicit scaling list shall be deactivated when m_noExplicitScaleListConstraintFlag is equal to 1");
 
     m_cEncLib.setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
-#endif
-#if JVET_R0341_GCI
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
-#endif
   }
   else
   {
     m_cEncLib.setNonPackedConstraintFlag(false);
     m_cEncLib.setNonProjectedConstraintFlag(false);
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setSingleLayerConstraintFlag(false);
-#endif
     m_cEncLib.setAllLayersIndependentConstraintFlag(false);
     m_cEncLib.setNoResChangeInClvsConstraintFlag(false);
     m_cEncLib.setOneTilePerPicConstraintFlag(false);
     m_cEncLib.setPicHeaderInSliceHeaderConstraintFlag(false);
     m_cEncLib.setOneSlicePerPicConstraintFlag(false);
-#if JVET_S0113_S0195_GCI
     m_cEncLib.setNoIdrRplConstraintFlag(false);
     m_cEncLib.setNoRectSliceConstraintFlag(false);
     m_cEncLib.setOneSlicePerSubpicConstraintFlag(false);
     m_cEncLib.setNoSubpicInfoConstraintFlag(false);
-#else
-    m_cEncLib.setOneSubpicPerPicConstraintFlag(false);
-#endif
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setFrameOnlyConstraintFlag(false);
-#endif
     m_cEncLib.setOnePictureOnlyConstraintFlag(false);
     m_cEncLib.setIntraOnlyConstraintFlag(false);
     m_cEncLib.setMaxBitDepthConstraintIdc(16);
     m_cEncLib.setMaxChromaFormatConstraintIdc(3);
-#if JVET_S0058_GCI
     m_cEncLib.setNoMttConstraintFlag(false);
-#endif
     m_cEncLib.setNoQtbttDualTreeIntraConstraintFlag(false);
     m_cEncLib.setNoPartitionConstraintsOverrideConstraintFlag(false);
     m_cEncLib.setNoSaoConstraintFlag(false);
     m_cEncLib.setNoAlfConstraintFlag(false);
     m_cEncLib.setNoCCAlfConstraintFlag(false);
-#if JVET_S0058_GCI
     m_cEncLib.setNoWeightedPredictionConstraintFlag(false);
-#endif
     m_cEncLib.setNoRefWraparoundConstraintFlag(false);
     m_cEncLib.setNoTemporalMvpConstraintFlag(false);
     m_cEncLib.setNoSbtmvpConstraintFlag(false);
@@ -532,11 +474,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoTransformSkipConstraintFlag(false);
     m_cEncLib.setNoBDPCMConstraintFlag(false);
     m_cEncLib.setNoJointCbCrConstraintFlag(false);
-#if JVET_R0227_ASPECT3
     m_cEncLib.setNoCuQpDeltaConstraintFlag(false);
-#else
-    m_cEncLib.setNoQpDeltaConstraintFlag(false);
-#endif
     m_cEncLib.setNoDepQuantConstraintFlag(false);
     m_cEncLib.setNoSignDataHidingConstraintFlag(false);
     m_cEncLib.setNoTrailConstraintFlag(false);
@@ -557,9 +495,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoPaletteConstraintFlag(false);
     m_cEncLib.setNoActConstraintFlag(false);
     m_cEncLib.setNoLmcsConstraintFlag(false);
-#if JVET_R0341_GCI
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
-#endif
   }
 
   //====== Coding Structure ========
@@ -679,9 +615,7 @@ void EncApp::xInitLibCfg()
   if(m_subPicInfoPresentFlag)
   {
     m_cEncLib.setNumSubPics                                      ( m_numSubPics );
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
     m_cEncLib.setSubPicSameSizeFlag                              ( m_subPicSameSizeFlag );
-#endif
     m_cEncLib.setSubPicCtuTopLeftX                               ( m_subPicCtuTopLeftX );
     m_cEncLib.setSubPicCtuTopLeftY                               ( m_subPicCtuTopLeftY );
     m_cEncLib.setSubPicWidth                                     ( m_subPicWidth );
@@ -880,9 +814,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setSaoGreedyMergeEnc                                 ( m_saoGreedyMergeEnc);
   m_cEncLib.setIntraSmoothingDisabledFlag                        (!m_enableIntraReferenceSmoothing );
   m_cEncLib.setDecodedPictureHashSEIType                         ( m_decodedPictureHashSEIType );
-#if JVET_R0294_SUBPIC_HASH
   m_cEncLib.setSubpicDecodedPictureHashType                      ( m_subpicDecodedPictureHashType );
-#endif
   m_cEncLib.setDependentRAPIndicationSEIEnabled                  ( m_drapPeriod > 0 );
   m_cEncLib.setBufferingPeriodSEIEnabled                         ( m_bufferingPeriodSEIEnabled );
   m_cEncLib.setPictureTimingSEIEnabled                           ( m_pictureTimingSEIEnabled );
@@ -1437,11 +1369,7 @@ void EncApp::xWriteOutput( int iNumEncoded, std::list<PelUnitBuf*>& recBufList )
 
 void EncApp::outputAU( const AccessUnit& au )
 {
-#if JVET_R0294_SUBPIC_HASH
   const vector<uint32_t>& stats = writeAnnexBAccessUnit(m_bitstream, au);
-#else
-  const vector<uint32_t>& stats = writeAnnexB(m_bitstream, au);
-#endif
   rateStatsAccum(au, stats);
   m_bitstream.flush();
 }

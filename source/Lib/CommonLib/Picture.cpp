@@ -186,9 +186,7 @@ Picture::Picture()
   fieldPic             = false;
   topField             = false;
   precedingDRAP        = false;
-#if JVET_S0124_UNAVAILABLE_REFERENCE
   nonReferencePictureFlag = false;
-#endif
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
   {
@@ -197,9 +195,6 @@ Picture::Picture()
   m_spliceIdx = NULL;
   m_ctuNums = 0;
   layerId = NOT_VALID;
-#if !JVET_S0258_SUBPIC_CONSTRAINTS
-  numSubpics = 1;
-#endif
   numSlices = 1;
   unscaledPic = nullptr;
 }

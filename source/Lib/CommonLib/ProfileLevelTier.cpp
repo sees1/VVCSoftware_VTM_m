@@ -56,7 +56,6 @@ static const uint64_t MAX_CNFUINT64 = std::numeric_limits<uint64_t>::max();
 
 static const LevelTierFeatures mainLevelTierInfo[] =
 {
-#if JVET_S0156_LEVEL_DEFINITION
       //  level,       maxlumaps,      maxcpb[tier],,  maxSlicesPerAu,maxTilesPerAu,cols, maxLumaSr,       maxBr[tier],,    minCr[tier],,
     { Level::LEVEL1  ,    36864, {      350,        0 },       16,        1,        1,     552960ULL, {     128,        0 }, { 2, 2} },
     { Level::LEVEL2  ,   122880, {     1500,        0 },       16,        1,        1,    3686400ULL, {    1500,        0 }, { 2, 2} },
@@ -73,30 +72,11 @@ static const LevelTierFeatures mainLevelTierInfo[] =
     { Level::LEVEL6_2, 35651584, {   180000,   800000 },      600,      440,       20, 4278190080ULL, {  240000,   800000 }, { 8, 4} },
     { Level::LEVEL15_5, MAX_UINT,{ MAX_UINT, MAX_UINT }, MAX_UINT, MAX_UINT, MAX_UINT, MAX_CNFUINT64, {MAX_UINT, MAX_UINT }, { 0, 0} },
     { Level::NONE    }
-#else
-    //  level        , maxlumaps,      maxcpb[tier],,    maxSlice,    tile rows, cols,     maxLumaSr,       maxBr[tier],,  , minCr[tier],,
-    { Level::LEVEL1  ,    36864, {      350,        0 },       16,        1,        1,     552960ULL, {     128,        0 }, { 2, 2} },
-    { Level::LEVEL2  ,   122880, {     1500,        0 },       16,        1,        1,    3686400ULL, {    1500,        0 }, { 2, 2} },
-    { Level::LEVEL2_1,   245760, {     3000,        0 },       20,        1,        1,    7372800ULL, {    3000,        0 }, { 2, 2} },
-    { Level::LEVEL3  ,   552960, {     6000,        0 },       30,        2,        2,   16588800ULL, {    6000,        0 }, { 2, 2} },
-    { Level::LEVEL3_1,   983040, {    10000,        0 },       40,        3,        3,   33177600ULL, {   10000,        0 }, { 2, 2} },
-    { Level::LEVEL4  ,  2228224, {    12000,    30000 },       75,        5,        5,   66846720ULL, {   12000,    30000 }, { 4, 4} },
-    { Level::LEVEL4_1,  2228224, {    20000,    50000 },       75,        5,        5,  133693440ULL, {   20000,    50000 }, { 4, 4} },
-    { Level::LEVEL5  ,  8912896, {    25000,   100000 },      200,       11,       10,  267386880ULL, {   25000,   100000 }, { 6, 4} },
-    { Level::LEVEL5_1,  8912896, {    40000,   160000 },      200,       11,       10,  534773760ULL, {   40000,   160000 }, { 8, 4} },
-    { Level::LEVEL5_2,  8912896, {    60000,   240000 },      200,       11,       10, 1069547520ULL, {   60000,   240000 }, { 8, 4} },
-    { Level::LEVEL6  , 35651584, {    80000,   240000 },      600,       22,       20, 1069547520ULL, {   60000,   240000 }, { 8, 4} },
-    { Level::LEVEL6_1, 35651584, {   120000,   480000 },      600,       22,       20, 2139095040ULL, {  120000,   480000 }, { 8, 4} },
-    { Level::LEVEL6_2, 35651584, {   180000,   800000 },      600,       22,       20, 4278190080ULL, {  240000,   800000 }, { 8, 4} },
-    { Level::LEVEL15_5, MAX_UINT, { MAX_UINT, MAX_UINT }, MAX_UINT, MAX_UINT, MAX_UINT, MAX_CNFUINT64, {MAX_UINT, MAX_UINT }, { 0, 0} },
-    { Level::NONE    }
-#endif
 };
 
 static const ProfileFeatures validProfiles[] = {
 // profile, pNameString, maxBitDepth, maxChrFmt, lvl15.5, cpbvcl, cpbnal, fcf*1000, mincr*100, levelInfo
 // most constrained profiles must appear first.
-#if JVET_S_PROFILES
   { Profile::MAIN_10_STILL_PICTURE, "Main_10_Still_Picture", 10, CHROMA_420, true, 1000, 1100, 1875, 100,
     mainLevelTierInfo, true },
   { Profile::MULTILAYER_MAIN_10_STILL_PICTURE, "Multilayer_Main_10_Still_Picture", 10, CHROMA_420, true, 1000, 1100,
@@ -111,17 +91,9 @@ static const ProfileFeatures validProfiles[] = {
   { Profile::MAIN_10_444, "Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75, mainLevelTierInfo, false },
   { Profile::MULTILAYER_MAIN_10_444, "Multilayer_Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75,
     mainLevelTierInfo, false },
-#else
-  { Profile::MAIN_10, "Main_10_Still_Picture", 10, CHROMA_420, true, 1000, 1100, 1875, 100, mainLevelTierInfo, true },
-  { Profile::MAIN_444_10, "Main_444_10_Still_Picture", 10, CHROMA_444, true, 2500, 2750, 3750, 75, mainLevelTierInfo,
-    true },
-  { Profile::MAIN_10, "Main_10", 10, CHROMA_420, false, 1000, 1100, 1875, 100, mainLevelTierInfo, false },
-  { Profile::MAIN_444_10, "Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75, mainLevelTierInfo, false },
-#endif
   { Profile::NONE, 0 },
 };
 
-#if JVET_S_PROFILES
 const ProfileFeatures *ProfileFeatures::getProfileFeatures(const Profile::Name p)
 {
   int i;
@@ -135,7 +107,6 @@ const ProfileFeatures *ProfileFeatures::getProfileFeatures(const Profile::Name p
 
   return &validProfiles[i];
 }
-#endif
 
 void
 ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
@@ -147,16 +118,9 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
   m_tier = spsPtl.getTierFlag();
 
   // Identify the profile from the profile Idc, and possibly other constraints.
-#if !JVET_S_PROFILES
-  bool onePictureOnlyConstraintFlag=spsPtl.getConstraintInfo()->getOnePictureOnlyConstraintFlag();
-#endif
   for(int32_t i=0; validProfiles[i].profile != Profile::NONE; i++)
   {
-#if JVET_S_PROFILES
     if (spsPtl.getProfileIdc() == validProfiles[i].profile)
-#else
-    if (spsPtl.getProfileIdc() == validProfiles[i].profile && !(validProfiles[i].onePictureOnlyFlagMustBe1 && !onePictureOnlyConstraintFlag))
-#endif
     {
       m_pProfile = &(validProfiles[i]);
       break;

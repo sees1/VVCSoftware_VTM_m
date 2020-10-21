@@ -64,10 +64,8 @@ public:
   : m_enabled (false)
   , m_explicitFraction (false)
   , m_numSubpictures (1)
-#if JVET_S0176_SLI_SEI
   , m_sliMaxSublayers(1)
   , m_sliSublayerInfoPresentFlag (false)
-#endif
   {}
 
   virtual ~CfgSEISubpictureLevel(){}
@@ -76,14 +74,10 @@ public:
   std::vector<Level::Name>  m_refLevels;
   bool                      m_explicitFraction;
   int                       m_numSubpictures;
-#if JVET_S0098_SLI_FRACTION
   std::vector<int>          m_nonSubpicLayersFraction;
-#endif
   std::vector<int>          m_fractions;
-#if JVET_S0176_SLI_SEI
   int                       m_sliMaxSublayers;
   bool                      m_sliSublayerInfoPresentFlag;
-#endif
 };
 
 }

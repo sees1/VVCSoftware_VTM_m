@@ -266,7 +266,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   // initialize PPS
   pps0.setPicWidthInLumaSamples( m_iSourceWidth );
   pps0.setPicHeightInLumaSamples( m_iSourceHeight );
-#if JVET_R0068_ASPECT6_ENC_RESTRICTION
   if (pps0.getPicWidthInLumaSamples() == sps0.getMaxPicWidthInLumaSamples() && pps0.getPicHeightInLumaSamples() == sps0.getMaxPicHeightInLumaSamples())
   {
     pps0.setConformanceWindow( sps0.getConformanceWindow() );
@@ -277,9 +276,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
     pps0.setConformanceWindow( m_conformanceWindow );
     pps0.setConformanceWindowFlag( m_conformanceWindow.getWindowEnabledFlag() );
   }
-#else
-  pps0.setConformanceWindow( m_conformanceWindow );
-#endif
   xInitPPS(pps0, sps0);
   // initialize APS
   xInitRPL(sps0, isFieldCoding);
@@ -302,7 +298,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
 
     Window conformanceWindow;
     conformanceWindow.setWindow( 0, ( width - scaledWidth ) / SPS::getWinUnitX( sps0.getChromaFormatIdc() ), 0, ( height - scaledHeight ) / SPS::getWinUnitY( sps0.getChromaFormatIdc() ) );
-#if JVET_R0068_ASPECT6_ENC_RESTRICTION
     if (pps.getPicWidthInLumaSamples() == sps0.getMaxPicWidthInLumaSamples() && pps.getPicHeightInLumaSamples() == sps0.getMaxPicHeightInLumaSamples())
     {
       pps.setConformanceWindow( sps0.getConformanceWindow() );
@@ -313,9 +308,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
       pps.setConformanceWindow( conformanceWindow );
       pps.setConformanceWindowFlag( pps.getConformanceWindow().getWindowEnabledFlag() );
     }
-#else
-    pps.setConformanceWindow( conformanceWindow );
-#endif
 
     Window scalingWindow;
     scalingWindow.setWindow( 0, ( width - scaledWidth ) / SPS::getWinUnitX( sps0.getChromaFormatIdc() ), 0, ( height - scaledHeight ) / SPS::getWinUnitY( sps0.getChromaFormatIdc() ) );
@@ -1098,22 +1090,14 @@ void EncLib::xInitVPS( const SPS& sps )
       }
       else
       {
-#if JVET_S0115_VPS
         if( m_vps->getDefaultPtlDpbHrdMaxTidFlag() )
-#else
-        if( m_vps->getAllLayersSameNumSublayersFlag() )
-#endif
         {
           // When vps_max_sublayers_minus1 is greater than 0 and vps_all_layers_same_num_sublayers_flag is equal to 1, the value of vps_dpb_max_tid[ dpbIdx ] is inferred to be equal to vps_max_sublayers_minus1.
           m_vps->m_dpbMaxTemporalId[dpbIdx] = m_vps->getMaxSubLayers() - 1;
         }
         else
         {
-#if JVET_S0100_ASPECT3
           m_vps->m_dpbMaxTemporalId[dpbIdx] = m_vps->getMaxSubLayers() - 1;
-#else
-          m_vps->m_dpbMaxTemporalId[dpbIdx] = m_maxTempLayer;
-#endif
         }
       }
 
@@ -1149,12 +1133,10 @@ void EncLib::xInitVPS( const SPS& sps )
       }
     }
   }
-#if JVET_S0100_ASPECT3
   for (int i = 0; i < m_vps->getNumOutputLayerSets(); i++)
   {
     m_vps->setHrdMaxTid(i, m_vps->getMaxSubLayers() - 1);
   }
-#endif
 
   if (m_cfgVPSParameters.m_maxTidILRefPicsPlus1 >= 0)
   {
@@ -1163,9 +1145,7 @@ void EncLib::xInitVPS( const SPS& sps )
       m_vps->setMaxTidIlRefPicsPlus1(i, m_cfgVPSParameters.m_maxTidILRefPicsPlus1);
     }
   }
-#if JVET_S0100_ASPECT3
   m_vps->checkVPS();
-#endif
 }
 
 void EncLib::xInitDCI(DCI& dci, const SPS& sps)
@@ -1182,38 +1162,20 @@ void EncLib::xInitSPS( SPS& sps )
   ProfileTierLevel* profileTierLevel = sps.getProfileTierLevel();
   ConstraintInfo* cinfo = profileTierLevel->getConstraintInfo();
 
-#if JVET_S0179_CONDITIONAL_SIGNAL_GCI
   cinfo->setGciPresentFlag(m_gciPresentFlag);
-#endif
-#if !JVET_S0266_VUI_length
-  cinfo->setNonPackedConstraintFlag     (m_nonPackedConstraintFlag);
-  cinfo->setNonProjectedConstraintFlag(m_nonProjectedConstraintFlag);
-#endif
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   cinfo->setNoRprConstraintFlag(m_noRprConstraintFlag);
-#endif
   cinfo->setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
   cinfo->setOneTilePerPicConstraintFlag(m_oneTilePerPicConstraintFlag);
   cinfo->setPicHeaderInSliceHeaderConstraintFlag(m_picHeaderInSliceHeaderConstraintFlag);
   cinfo->setOneSlicePerPicConstraintFlag(m_oneSlicePerPicConstraintFlag);
-#if JVET_S0113_S0195_GCI
   cinfo->setNoIdrRplConstraintFlag(m_noIdrRplConstraintFlag);
   cinfo->setNoRectSliceConstraintFlag(m_noRectSliceConstraintFlag);
   cinfo->setOneSlicePerSubpicConstraintFlag(m_oneSlicePerSubpicConstraintFlag);
   cinfo->setNoSubpicInfoConstraintFlag(m_noSubpicInfoConstraintFlag);
-#else
-  cinfo->setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
-#endif
-#if !JVET_S0138_GCI_PTL
-  cinfo->setFrameOnlyConstraintFlag     (m_frameOnlyConstraintFlag);
-#endif
   cinfo->setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
   cinfo->setIntraOnlyConstraintFlag         (m_intraOnlyConstraintFlag);
   cinfo->setMaxBitDepthConstraintIdc    (m_maxBitDepthConstraintIdc);
   cinfo->setMaxChromaFormatConstraintIdc((int)m_maxChromaFormatConstraintIdc);
-#if !JVET_S0138_GCI_PTL
-  cinfo->setSingleLayerConstraintFlag (m_singleLayerConstraintFlag);
-#endif
   cinfo->setAllLayersIndependentConstraintFlag (m_allLayersIndependentConstraintFlag);
   cinfo->setNoMrlConstraintFlag (m_noMrlConstraintFlag);
   cinfo->setNoIspConstraintFlag (m_noIspConstraintFlag);
@@ -1225,24 +1187,16 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoPaletteConstraintFlag (m_noPaletteConstraintFlag);
   cinfo->setNoActConstraintFlag (m_noActConstraintFlag);
   cinfo->setNoLmcsConstraintFlag (m_noLmcsConstraintFlag);
-#if JVET_S0050_GCI
   cinfo->setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
   cinfo->setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
-#endif
-#if JVET_S0058_GCI
   cinfo->setNoMttConstraintFlag(m_noMttConstraintFlag);
-#endif
-#if JVET_R0341_GCI
   cinfo->setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
-#endif
   cinfo->setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);
   cinfo->setNoPartitionConstraintsOverrideConstraintFlag(m_noPartitionConstraintsOverrideConstraintFlag);
   cinfo->setNoSaoConstraintFlag(m_noSaoConstraintFlag);
   cinfo->setNoAlfConstraintFlag(m_noAlfConstraintFlag);
   cinfo->setNoCCAlfConstraintFlag(m_noCCAlfConstraintFlag);
-#if JVET_S0058_GCI
   cinfo->setNoWeightedPredictionConstraintFlag(m_noWeightedPredictionConstraintFlag);
-#endif
   cinfo->setNoRefWraparoundConstraintFlag(m_noRefWraparoundConstraintFlag);
   cinfo->setNoTemporalMvpConstraintFlag(m_noTemporalMvpConstraintFlag);
   cinfo->setNoSbtmvpConstraintFlag(m_noSbtmvpConstraintFlag);
@@ -1261,11 +1215,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoTransformSkipConstraintFlag(m_noTransformSkipConstraintFlag);
   cinfo->setNoBDPCMConstraintFlag(m_noBDPCMConstraintFlag);
   cinfo->setNoJointCbCrConstraintFlag(m_noJointCbCrConstraintFlag);
-#if JVET_R0227_ASPECT3
   cinfo->setNoCuQpDeltaConstraintFlag(m_noCuQpDeltaConstraintFlag);
-#else
-  cinfo->setNoQpDeltaConstraintFlag(m_noQpDeltaConstraintFlag);
-#endif
   cinfo->setNoDepQuantConstraintFlag(m_noDepQuantConstraintFlag);
   cinfo->setNoSignDataHidingConstraintFlag(m_noSignDataHidingConstraintFlag);
   cinfo->setNoTrailConstraintFlag(m_noTrailConstraintFlag);
@@ -1280,10 +1230,8 @@ void EncLib::xInitSPS( SPS& sps )
   profileTierLevel->setLevelIdc                    (m_level);
   profileTierLevel->setTierFlag                    (m_levelTier);
   profileTierLevel->setProfileIdc                  (m_profile);
-#if JVET_S0138_GCI_PTL
   profileTierLevel->setFrameOnlyConstraintFlag     (m_frameOnlyConstraintFlag);
   profileTierLevel->setMultiLayerEnabledFlag       (m_multiLayerEnabledFlag);
-#endif
   profileTierLevel->setNumSubProfile(m_numSubProfile);
   for (int k = 0; k < m_numSubProfile; k++)
   {
@@ -1451,10 +1399,8 @@ void EncLib::xInitSPS( SPS& sps )
     pcVUI->setMatrixCoefficients(getMatrixCoefficients());
     pcVUI->setProgressiveSourceFlag       (getProgressiveSourceFlag());
     pcVUI->setInterlacedSourceFlag        (getInterlacedSourceFlag());
-#if JVET_S0266_VUI_length
     pcVUI->setNonPackedFlag               (getNonPackedConstraintFlag());
     pcVUI->setNonProjectedFlag            (getNonProjectedConstraintFlag());
-#endif
     pcVUI->setChromaLocInfoPresentFlag(getChromaLocInfoPresentFlag());
     pcVUI->setChromaSampleLocTypeTopField(getChromaSampleLocTypeTopField());
     pcVUI->setChromaSampleLocTypeBottomField(getChromaSampleLocTypeBottomField());
@@ -1502,7 +1448,6 @@ void EncLib::xInitSPS( SPS& sps )
   if (m_subPicInfoPresentFlag)
   {
     sps.setNumSubPics(m_numSubPics);
-#if JVET_S0071_SAME_SIZE_SUBPIC_LAYOUT
     sps.setSubPicSameSizeFlag(m_subPicSameSizeFlag);
     if (m_subPicSameSizeFlag)
     {
@@ -1522,12 +1467,6 @@ void EncLib::xInitSPS( SPS& sps )
       sps.setSubPicWidth(m_subPicWidth);
       sps.setSubPicHeight(m_subPicHeight);
     }
-#else
-    sps.setSubPicCtuTopLeftX(m_subPicCtuTopLeftX);
-    sps.setSubPicCtuTopLeftY(m_subPicCtuTopLeftY);
-    sps.setSubPicWidth(m_subPicWidth);
-    sps.setSubPicHeight(m_subPicHeight);
-#endif
     sps.setSubPicTreatedAsPicFlag(m_subPicTreatedAsPicFlag);
     sps.setLoopFilterAcrossSubpicEnabledFlag(m_loopFilterAcrossSubpicEnabledFlag);
     sps.setSubPicIdLen(m_subPicIdLen);
@@ -1583,11 +1522,7 @@ void EncLib::xInitSPS( SPS& sps )
   CHECK( m_vps->getIndependentLayerFlag( m_vps->getGeneralLayerIdx( m_layerId ) ) && sps.getInterLayerPresentFlag(), " When vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id ]]  is equal to 1, the value of inter_layer_ref_pics_present_flag shall be equal to 0." );
 
   sps.setResChangeInClvsEnabledFlag(m_resChangeInClvsEnabled);
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   sps.setRprEnabledFlag(m_rprEnabledFlag);
-#else
-  sps.setRprEnabledFlag((m_resChangeInClvsEnabled) || sps.getInterLayerPresentFlag());
-#endif
 
   sps.setLog2ParallelMergeLevelMinus2( m_log2ParallelMergeLevelMinus2 );
 
@@ -1875,12 +1810,7 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
   {
     chromaDbfOffsetNotSameAsLuma = false;
   }
-#if !JVET_S0052_RM_SEPARATE_COLOUR_PLANE
-  const uint32_t chromaArrayType = (int)sps.getSeparateColourPlaneFlag() ? 0 : sps.getChromaFormatIdc();
-  if( ( chromaArrayType != CHROMA_400 ) && ( chromaQPOffsetNotZero || chromaDbfOffsetNotSameAsLuma ) )
-#else
   if ((sps.getChromaFormatIdc() != CHROMA_400) && (chromaQPOffsetNotZero || chromaDbfOffsetNotSameAsLuma))
-#endif
   {
     pps.setPPSChromaToolFlag(true);
   }
@@ -2051,11 +1981,7 @@ void EncLib::xInitRPL(SPS &sps, bool isFieldCoding)
 
       for (int k = 0; k < ge.m_numRefPics; k++)
       {
-#if JVET_S0045_SIGN
         rpl->setRefPicIdentifier(k, -ge.m_deltaRefPics[k], 0, false, 0);
-#else
-        rpl->setRefPicIdentifier( k, ge.m_deltaRefPics[k], 0, false, 0 );
-#endif
       }
     }
   }
@@ -2071,11 +1997,7 @@ void EncLib::xInitRPL(SPS &sps, bool isFieldCoding)
       rpl->setNumberOfLongtermPictures(0);
       rpl->setNumberOfActivePictures(1);
       rpl->setLtrpInSliceHeaderFlag(0);
-#if JVET_S0045_SIGN
       rpl->setRefPicIdentifier(0, -1, 0, false, 0);
-#else
-      rpl->setRefPicIdentifier(0, 1, 0, false, 0);
-#endif
       rpl->setPOC(0, 0);
     }
   }

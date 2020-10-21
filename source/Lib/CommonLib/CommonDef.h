@@ -203,10 +203,6 @@ static const int MAX_BDOF_APPLICATION_REGION =                     16;
 static const int MAX_CPB_CNT =                                     32; ///< Upper bound of (cpb_cnt_minus1 + 1)
 static const int MAX_NUM_LAYER_IDS =                               64;
 static const int COEF_REMAIN_BIN_REDUCTION =                        5; ///< indicates the level at which the VLC transitions from Golomb-Rice to TU+EG(k)
-#if !JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
-static const int COEFF_MIN =                                   -32768;
-static const int COEFF_MAX =                                    32767;
-#endif
 static const int CU_DQP_TU_CMAX =                                   5; ///< max number bins for truncated unary
 static const int CU_DQP_EG_k =                                      0; ///< expgolomb order
 
@@ -221,12 +217,7 @@ static const int NUM_APS_TYPE_LEN =                                 3;  //Curren
 static const int MAX_NUM_APS_TYPE =                                 8;  //Currently APS Type has 3 bits so the max type is 8
 
 static const int MAX_TILE_COLS =                                   20;  ///< Maximum number of tile columns
-#if JVET_S0156_LEVEL_DEFINITION
 static const int MAX_TILES =                                      440;  ///< Maximum number of tiles
-#else
-static const int MAX_TILE_ROWS =                                   22;  ///< Maximum number of tile rows
-static const int MAX_TILES =            MAX_TILE_COLS * MAX_TILE_ROWS;  ///< Maximum number of tiles
-#endif
 static const int MAX_SLICES =                                     600;  ///< Maximum number of slices per picture
 static const int MLS_GRP_NUM =                                   1024; ///< Max number of coefficient groups, max(16, 256)
 
@@ -635,11 +626,7 @@ const char* read_x86_extension(const std::string &extStrId);
 template <typename ValueType> inline ValueType leftShift       (const ValueType value, const int shift) { return (shift >= 0) ? ( value                                  << shift) : ( value                                   >> -shift); }
 template <typename ValueType> inline ValueType rightShift      (const ValueType value, const int shift) { return (shift >= 0) ? ( value                                  >> shift) : ( value                                   << -shift); }
 template <typename ValueType> inline ValueType leftShift_round (const ValueType value, const int shift) { return (shift >= 0) ? ( value                                  << shift) : ((value + (ValueType(1) << (-shift - 1))) >> -shift); }
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
 template <typename ValueType> inline ValueType rightShift_round(const ValueType value, const int shift) { return (shift > 0) ? ((value + (ValueType(1) << (shift - 1))) >> shift) : ( value                                   << -shift); }
-#else
-template <typename ValueType> inline ValueType rightShift_round(const ValueType value, const int shift) { return (shift >= 0) ? ((value + (ValueType(1) << (shift - 1))) >> shift) : ( value                                   << -shift); }
-#endif
 
 static inline int floorLog2(uint32_t x)
 {

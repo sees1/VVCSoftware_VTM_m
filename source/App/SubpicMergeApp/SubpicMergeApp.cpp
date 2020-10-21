@@ -967,11 +967,7 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
   copyNalUnitsToAccessUnit(accessUnit, subpic0.nalus, (int)NAL_UNIT_EOS);
   copyNalUnitsToAccessUnit(accessUnit, subpic0.nalus, (int)NAL_UNIT_EOB);
 
-#if JVET_R0294_SUBPIC_HASH
   writeAnnexBAccessUnit(m_outputStream, accessUnit);
-#else
-  writeAnnexB(m_outputStream, accessUnit);
-#endif
 }
 
 /**

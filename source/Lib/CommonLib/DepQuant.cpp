@@ -629,11 +629,7 @@ namespace DQIntern
     Quantizer() {}
     void  dequantBlock         ( const TransformUnit& tu, const ComponentID compID, const QpParam& cQP, CoeffBuf& recCoeff, bool enableScalingLists, int* piDequantCoef ) const;
     void  initQuantBlock       ( const TransformUnit& tu, const ComponentID compID, const QpParam& cQP, const double lambda, int gValue );
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     inline void   preQuantCoeff( const TCoeff absCoeff, PQData *pqData, TCoeff quanCoeff ) const;
-#else
-    inline void   preQuantCoeff( const TCoeff absCoeff, PQData *pqData, int quanCoeff ) const;
-#endif
     inline TCoeff getLastThreshold() const { return m_thresLast; }
     inline TCoeff getSSbbThreshold() const { return m_thresSSbb; }
 
@@ -686,11 +682,7 @@ namespace DQIntern
     // quant parameters
     m_QShift                    = QUANT_SHIFT  - 1 + qpPer + transformShift;
     m_QAdd                      = -( ( 3 << m_QShift ) >> 1 );
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     int               invShift  = IQUANT_SHIFT + 1 - qpPer - transformShift;
-#else
-    Intermediate_Int  invShift  = IQUANT_SHIFT + 1 - qpPer - transformShift;
-#endif
     m_QScale                    = g_quantScales[needsSqrt2ScaleAdjustment?1:0][ qpRem ];
     const unsigned    qIdxBD    = std::min<unsigned>( maxLog2TrDynamicRange + 1, 8*sizeof(Intermediate_Int) + invShift - IQUANT_SHIFT - 1 );
     m_maxQIdx                   = ( 1 << (qIdxBD-1) ) - 4;
@@ -777,11 +769,7 @@ namespace DQIntern
     }
   }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   inline void Quantizer::preQuantCoeff(const TCoeff absCoeff, PQData *pqData, TCoeff quanCoeff) const
-#else
-  inline void Quantizer::preQuantCoeff(const TCoeff absCoeff, PQData *pqData, int quanCoeff) const
-#endif
   {
     int64_t scaledOrg = int64_t( absCoeff ) * quanCoeff;
     TCoeff  qIdx      = std::max<TCoeff>( 1, std::min<TCoeff>( m_maxQIdx, TCoeff( ( scaledOrg + m_QAdd ) >> m_QShift ) ) );
@@ -898,22 +886,14 @@ namespace DQIntern
             rdCostA += m_coeffFracBits.bits[ pqDataA.absLevel ];
           else
           {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
             const TCoeff value = ( pqDataA.absLevel - 4 ) >> 1;
-#else
-            const unsigned value = ( pqDataA.absLevel - 4 ) >> 1;
-#endif
             rdCostA += m_coeffFracBits.bits[ pqDataA.absLevel - ( value << 1 ) ] + goRiceTab[ value < RICEMAX ? value : RICEMAX - 1 ];
           }
           if( pqDataB.absLevel < 4 )
             rdCostB += m_coeffFracBits.bits[ pqDataB.absLevel ];
           else
           {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
             const TCoeff value = ( pqDataB.absLevel - 4 ) >> 1;
-#else
-            const unsigned value = ( pqDataB.absLevel - 4 ) >> 1;
-#endif
             rdCostB += m_coeffFracBits.bits[ pqDataB.absLevel - ( value << 1 ) ] + goRiceTab[ value < RICEMAX ? value : RICEMAX - 1 ];
           }
           if( spt == SCAN_ISCSBB )
@@ -974,11 +954,7 @@ namespace DQIntern
       }
       else
       {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
         const TCoeff value = (pqData.absLevel - 4) >> 1;
-#else
-        const unsigned value = (pqData.absLevel - 4) >> 1;
-#endif
         rdCost += m_coeffFracBits.bits[pqData.absLevel - (value << 1)] + g_goRiceBits[m_goRicePar][value < RICEMAX ? value : RICEMAX-1];
       }
       if( rdCost < decision.rdCost )
@@ -1054,11 +1030,7 @@ namespace DQIntern
         m_goRicePar             = prvState->m_goRicePar;
         if( m_remRegBins >= 4 )
         {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
           m_remRegBins -= (decision.absLevel < 2 ? (unsigned)decision.absLevel : 3);
-#else
-          m_remRegBins -= (decision.absLevel < 2 ? decision.absLevel : 3);
-#endif
         }
         ::memcpy( m_absLevelsAndCtxInit, prvState->m_absLevelsAndCtxInit, 48*sizeof(uint8_t) );
       }
@@ -1067,11 +1039,7 @@ namespace DQIntern
         m_numSigSbb     =  1;
         m_refSbbCtxId   = -1;
         int ctxBinSampleRatio = (scanInfo.chType == CHANNEL_TYPE_LUMA) ? MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_LUMA : MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_CHROMA;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
         m_remRegBins = (effWidth * effHeight *ctxBinSampleRatio) / 16 - (decision.absLevel < 2 ? (unsigned)decision.absLevel : 3);
-#else
-        m_remRegBins = (effWidth * effHeight *ctxBinSampleRatio) / 16 - (decision.absLevel < 2 ? decision.absLevel : 3);
-#endif
         ::memset( m_absLevelsAndCtxInit, 0, 48*sizeof(uint8_t) );
       }
 
@@ -1116,11 +1084,7 @@ namespace DQIntern
         }
 #undef UPDATE
         TCoeff sumGt1 = sumAbs1 - sumNum;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
         m_sigFracBits = m_sigFracBitsArray[scanInfo.sigCtxOffsetNext + std::min<TCoeff>( (sumAbs1+1)>>1, 3 )];
-#else
-        m_sigFracBits = m_sigFracBitsArray[scanInfo.sigCtxOffsetNext + std::min( (sumAbs1+1)>>1, 3 )];
-#endif
         m_coeffFracBits = m_gtxFracBitsArray[scanInfo.gtxCtxOffsetNext + (sumGt1 < 4 ? sumGt1 : 4)];
 
         TCoeff  sumAbs = m_absLevelsAndCtxInit[8 + scanInfo.nextInsidePos] >> 8;
@@ -1234,11 +1198,7 @@ namespace DQIntern
       TCoeff  sumNum  =   tinit        & 7;
       TCoeff  sumAbs1 = ( tinit >> 3 ) & 31;
       TCoeff  sumGt1  = sumAbs1        - sumNum;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT
       m_sigFracBits   = m_sigFracBitsArray[ scanInfo.sigCtxOffsetNext + std::min<TCoeff>( (sumAbs1+1)>>1, 3 ) ];
-#else
-      m_sigFracBits   = m_sigFracBitsArray[ scanInfo.sigCtxOffsetNext + std::min( (sumAbs1+1)>>1, 3 ) ];
-#endif
       m_coeffFracBits = m_gtxFracBitsArray[ scanInfo.gtxCtxOffsetNext + ( sumGt1  < 4 ? sumGt1  : 4 ) ];
     }
   }
@@ -1331,13 +1291,8 @@ namespace DQIntern
     void    dequant ( const TransformUnit& tu, CoeffBuf& recCoeff, const ComponentID compID, const QpParam& cQP, bool enableScalingLists, int* quantCoeff );
 
   private:
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     void    xDecideAndUpdate  ( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, TCoeff quantCoeff);
     void    xDecide           ( const ScanPosType spt, const TCoeff absCoeff, const int lastOffset, Decision* decisions, bool zeroOut, TCoeff quantCoeff );
-#else
-    void    xDecideAndUpdate  ( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, int quantCoeff);
-    void    xDecide           ( const ScanPosType spt, const TCoeff absCoeff, const int lastOffset, Decision* decisions, bool zeroOut, int quantCoeff );
-#endif
 
   private:
     CommonCtx   m_commonCtx;
@@ -1375,11 +1330,7 @@ namespace DQIntern
 #undef  DINIT
 
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   void DepQuant::xDecide( const ScanPosType spt, const TCoeff absCoeff, const int lastOffset, Decision* decisions, bool zeroOut, TCoeff quanCoeff)
-#else
-  void DepQuant::xDecide( const ScanPosType spt, const TCoeff absCoeff, const int lastOffset, Decision* decisions, bool zeroOut, int quanCoeff)
-#endif
   {
     ::memcpy( decisions, startDec, 8*sizeof(Decision) );
 
@@ -1413,11 +1364,7 @@ namespace DQIntern
     m_startState.checkRdCostStart( lastOffset, pqData[2], decisions[2] );
   }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   void DepQuant::xDecideAndUpdate( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, TCoeff quantCoeff )
-#else
-  void DepQuant::xDecideAndUpdate( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, int quantCoeff )
-#endif
   {
     Decision* decisions = m_trellis[ scanInfo.scanIdx ];
 
