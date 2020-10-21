@@ -935,11 +935,7 @@ void TrQuant::transformNxN( TransformUnit& tu, const ComponentID& compID, const 
       xT( tu, compID, resiBuf, tempCoeff, width, height );
     }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff sumAbs = 0;
-#else
-    int sumAbs = 0;
-#endif
     for( int pos = 0; pos < width*height; pos++ )
     {
       sumAbs += abs( tempCoeff.buf[pos] );
@@ -957,11 +953,7 @@ void TrQuant::transformNxN( TransformUnit& tu, const ComponentID& compID, const 
       scaleSAD *= pow(2, trShift);
     }
 
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     trCosts.push_back( TrCost( int(std::min<double>(sumAbs*scaleSAD, std::numeric_limits<int>::max())), pos++ ) );
-#else
-    trCosts.push_back( TrCost( int(sumAbs*scaleSAD), pos++ ) );
-#endif
     it++;
   }
 

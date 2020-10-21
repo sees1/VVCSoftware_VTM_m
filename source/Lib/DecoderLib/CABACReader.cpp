@@ -1930,11 +1930,7 @@ void CABACReader::cuPaletteSubblockInfo(CodingUnit& cu, ComponentID compBegin, u
           if (compID == COMPONENT_Y || compBegin != COMPONENT_Y)
           {
             escapeValue.at(posx, posy) = exp_golomb_eqprob(5);
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
             assert(escapeValue.at(posx, posy) < (TCoeff(1) << (cu.cs->sps->getBitDepth(toChannelType((ComponentID)comp)) + 1)));
-#else
-            assert(escapeValue.at(posx, posy) < (1 << (cu.cs->sps->getBitDepth(toChannelType((ComponentID)comp)) + 1)));
-#endif
             DTRACE(g_trace_ctx, D_SYNTAX, "plt_escape_val() value=%d etype=%d sp=%d\n", escapeValue.at(posx, posy), comp, curPos);
           }
           if (compBegin == COMPONENT_Y && compID != COMPONENT_Y && posy % (1 << scaleY) == 0 && posx % (1 << scaleX) == 0)
@@ -1942,11 +1938,7 @@ void CABACReader::cuPaletteSubblockInfo(CodingUnit& cu, ComponentID compBegin, u
             uint32_t posxC = posx >> scaleX;
             uint32_t posyC = posy >> scaleY;
             escapeValue.at(posxC, posyC) = exp_golomb_eqprob(5);
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
             assert(escapeValue.at(posxC, posyC) < (TCoeff(1) << (cu.cs->sps->getBitDepth(toChannelType(compID)) + 1)));
-#else
-            assert(escapeValue.at(posxC, posyC) < (1 << (cu.cs->sps->getBitDepth(toChannelType(compID)) + 1)));
-#endif
             DTRACE(g_trace_ctx, D_SYNTAX, "plt_escape_val() value=%d etype=%d sp=%d\n", escapeValue.at(posx, posy), comp, curPos);
           }
       }
@@ -3328,18 +3320,10 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   unsigned        signPattern = m_BinDecoder.decodeBinsEP( numSigns ) << ( 32 - numSigns );
 
   //===== set final coefficents =====
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   TCoeff sumAbs = 0;
-#else
-  int sumAbs = 0;
-#endif
   for( unsigned k = 0; k < numSigns; k++ )
   {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff AbsCoeff       = coeff[ sigBlkPos[ k ] ];
-#else
-    int AbsCoeff          = coeff[ sigBlkPos[ k ] ];
-#endif
     sumAbs               += AbsCoeff;
     coeff[ sigBlkPos[k] ] = ( signPattern & ( 1u << 31 ) ? -AbsCoeff : AbsCoeff );
     signPattern         <<= 1;
@@ -3348,11 +3332,7 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   if( numNonZero > numSigns )
   {
     int k                 = numSigns;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff AbsCoeff       = coeff[ sigBlkPos[ k ] ];
-#else
-    int AbsCoeff          = coeff[ sigBlkPos[ k ] ];
-#endif
     sumAbs               += AbsCoeff;
     coeff[ sigBlkPos[k] ] = ( sumAbs & 1 ? -AbsCoeff : AbsCoeff );
     check_coeff_conformance( cctx, coeff[ sigBlkPos[k] ] );
@@ -3544,11 +3524,7 @@ void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* 
   //===== set final coefficents =====
   for( unsigned k = 0; k < numNonZero; k++ )
   {
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     TCoeff AbsCoeff       = coeff[ sigBlkPos[ k ] ];
-#else
-    int AbsCoeff          = coeff[ sigBlkPos[ k ] ];
-#endif
     coeff[ sigBlkPos[k] ] = ( signPattern & 1 ? -AbsCoeff : AbsCoeff );
     signPattern         >>= 1;
     check_coeff_conformance( cctx, coeff[ sigBlkPos[k] ] );

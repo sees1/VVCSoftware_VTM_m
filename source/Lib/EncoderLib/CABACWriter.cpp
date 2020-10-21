@@ -2910,11 +2910,7 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   const int inferSigPos   = nextSigPos != cctx.scanPosLast() ? ( cctx.isNotFirst() ? minSubPos : -1 ) : nextSigPos;
   int       firstNZPos    = nextSigPos;
   int       lastNZPos     = -1;
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
   TCoeff    remAbsLevel   = -1;
-#else
-  int       remAbsLevel   = -1;
-#endif
   int       numNonZero    =  0;
   unsigned  signPattern   =  0;
   int       remRegBins    = cctx.regBinLimit;
@@ -2980,11 +2976,7 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   {
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
     ricePar = g_auiGoRiceParsCoeff[sumAll];
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     unsigned absLevel = (unsigned) abs( coeff[ cctx.blockPos( scanPos ) ] );
-#else
-    unsigned absLevel = abs( coeff[ cctx.blockPos( scanPos ) ] );
-#endif
     if( absLevel >= 4 )
     {
       unsigned rem      = ( absLevel - 4 ) >> 1;
@@ -2997,11 +2989,7 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   for( int scanPos = firstPosMode2; scanPos >= minSubPos; scanPos-- )
   {
     TCoeff    Coeff     = coeff[ cctx.blockPos( scanPos ) ];
-#if JVET_R0351_HIGH_BIT_DEPTH_SUPPORT_VS
     unsigned    absLevel  = (unsigned) abs( Coeff );
-#else
-    unsigned  absLevel  = abs( Coeff );
-#endif
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
     int       rice      = g_auiGoRiceParsCoeff                        [sumAll];
     int       pos0      = g_auiGoRicePosCoeff0(state, rice);
