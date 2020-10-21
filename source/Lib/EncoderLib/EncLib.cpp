@@ -266,7 +266,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   // initialize PPS
   pps0.setPicWidthInLumaSamples( m_iSourceWidth );
   pps0.setPicHeightInLumaSamples( m_iSourceHeight );
-#if JVET_R0068_ASPECT6_ENC_RESTRICTION
   if (pps0.getPicWidthInLumaSamples() == sps0.getMaxPicWidthInLumaSamples() && pps0.getPicHeightInLumaSamples() == sps0.getMaxPicHeightInLumaSamples())
   {
     pps0.setConformanceWindow( sps0.getConformanceWindow() );
@@ -277,9 +276,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
     pps0.setConformanceWindow( m_conformanceWindow );
     pps0.setConformanceWindowFlag( m_conformanceWindow.getWindowEnabledFlag() );
   }
-#else
-  pps0.setConformanceWindow( m_conformanceWindow );
-#endif
   xInitPPS(pps0, sps0);
   // initialize APS
   xInitRPL(sps0, isFieldCoding);
@@ -302,7 +298,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
 
     Window conformanceWindow;
     conformanceWindow.setWindow( 0, ( width - scaledWidth ) / SPS::getWinUnitX( sps0.getChromaFormatIdc() ), 0, ( height - scaledHeight ) / SPS::getWinUnitY( sps0.getChromaFormatIdc() ) );
-#if JVET_R0068_ASPECT6_ENC_RESTRICTION
     if (pps.getPicWidthInLumaSamples() == sps0.getMaxPicWidthInLumaSamples() && pps.getPicHeightInLumaSamples() == sps0.getMaxPicHeightInLumaSamples())
     {
       pps.setConformanceWindow( sps0.getConformanceWindow() );
@@ -313,9 +308,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
       pps.setConformanceWindow( conformanceWindow );
       pps.setConformanceWindowFlag( pps.getConformanceWindow().getWindowEnabledFlag() );
     }
-#else
-    pps.setConformanceWindow( conformanceWindow );
-#endif
 
     Window scalingWindow;
     scalingWindow.setWindow( 0, ( width - scaledWidth ) / SPS::getWinUnitX( sps0.getChromaFormatIdc() ), 0, ( height - scaledHeight ) / SPS::getWinUnitY( sps0.getChromaFormatIdc() ) );
