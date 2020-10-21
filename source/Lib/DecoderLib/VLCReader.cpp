@@ -1384,37 +1384,6 @@ void HLSyntaxReader::dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFla
   }
 }
 
-#if !JVET_S0208_ASPECT1
-void HLSyntaxReader::parseExtraPHBitsStruct( SPS *sps, int numBytes )
-{
-  uint32_t symbol;
-  std::vector<bool> presentFlags;
-  presentFlags.resize ( 8 * numBytes );
-
-  for (int i=0; i < 8*numBytes; i++)
-  {
-    READ_FLAG(symbol, "sps_extra_ph_bit_present_flag[ i ]");
-    presentFlags[i] = symbol;
-  }
-
-  sps->setExtraPHBitPresentFlags(presentFlags);
-}
-
-void HLSyntaxReader::parseExtraSHBitsStruct( SPS *sps, int numBytes )
-{
-  uint32_t symbol;
-  std::vector<bool> presentFlags;
-  presentFlags.resize ( 8 * numBytes );
-
-  for (int i=0; i < 8*numBytes; i++)
-  {
-    READ_FLAG(symbol, "sps_extra_sh_bit_present_flag[ i ]");
-    presentFlags[i] = symbol;
-  }
-
-  sps->setExtraSHBitPresentFlags(presentFlags);
-}
-#endif
 
 void HLSyntaxReader::parseSPS(SPS* pcSPS)
 {
@@ -1732,7 +1701,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   // extra bits are for future extensions, we will read, but ignore them,
   // unless a meaning is specified in the spec
   READ_CODE(2, uiCode, "sps_num_extra_ph_bytes");  pcSPS->setNumExtraPHBytes(uiCode);
-#if JVET_S0208_ASPECT1
   int numExtraPhBytes = uiCode;
   std::vector<bool> extraPhBitPresentFlags;
   extraPhBitPresentFlags.resize ( 8 * numExtraPhBytes );
@@ -1742,11 +1710,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     extraPhBitPresentFlags[i] = uiCode;
   }
   pcSPS->setExtraPHBitPresentFlags(extraPhBitPresentFlags);
-#else
-  parseExtraPHBitsStruct( pcSPS, uiCode );
-#endif
   READ_CODE(2, uiCode, "sps_num_extra_sh_bytes");  pcSPS->setNumExtraSHBytes(uiCode);
-#if JVET_S0208_ASPECT1
   int numExtraShBytes = uiCode;
   std::vector<bool> extraShBitPresentFlags;
   extraShBitPresentFlags.resize ( 8 * numExtraShBytes );
@@ -1756,9 +1720,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     extraShBitPresentFlags[i] = uiCode;
   }
   pcSPS->setExtraSHBitPresentFlags(extraShBitPresentFlags);
-#else
-  parseExtraSHBitsStruct( pcSPS, uiCode );
-#endif
 
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {

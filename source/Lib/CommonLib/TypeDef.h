@@ -55,7 +55,6 @@
 
 
 
-#define JVET_S0208_ASPECT1                                1 // JVET-S0208 aspect 1: Remove the extra_sh_bits_struct( ) and extra_ph_bits_struct( ) structures and put their content directly in the SPS.
 
 #define JVET_S0208_ASPECT6                                1 // JVET-S0208 aspect 6: Modify the derivation process for the variable TotalNumOlss by removing unnecessary text.
 

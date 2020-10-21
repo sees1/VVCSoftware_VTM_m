@@ -188,10 +188,6 @@ public:
   void alfFilter( AlfParam& alfParam, const bool isChroma, const int altIdx );
   void ccAlfFilter( Slice *pcSlice );
   void dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, SPS *pcSPS);
-#if !JVET_S0208_ASPECT1
-  void parseExtraPHBitsStruct( SPS *sps, int numBytes );
-  void parseExtraSHBitsStruct( SPS *sps, int numBytes );
-#endif
 private:
 
 protected:

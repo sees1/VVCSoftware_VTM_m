@@ -1015,19 +1015,11 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   }
   // extra bits are for future extensions, so these are currently hard coded to not being sent
   WRITE_CODE(0, 2, "sps_num_extra_ph_bytes");
-#if JVET_S0208_ASPECT1
   // for( i = 0; i < (sps_num_extra_ph_bytes * 8 ); i++ )
   //   sps_extra_ph_bit_present_flag[ i ]
-#else
-  // extra_ph_bits_struct( sps_num_extra_ph_bytes )
-#endif
   WRITE_CODE(0, 2, "sps_num_extra_sh_bytes");
-#if JVET_S0208_ASPECT1
   // for( i = 0; i < (sps_num_extra_sh_bytes * 8 ); i++ )
   //   sps_extra_sh_bit_present_flag[ i ]
-#else
-  // extra_sh_bits_struct( sps_num_extra_sh_bytes )
-#endif
 
   if (pcSPS->getPtlDpbHrdParamsPresentFlag())
   {
