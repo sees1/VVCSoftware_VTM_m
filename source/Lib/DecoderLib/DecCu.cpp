@@ -346,11 +346,7 @@ void DecCu::xIntraRecACTBlk(TransformUnit& tu)
   CHECK(pu.intraDir[CHANNEL_TYPE_CHROMA] != DM_CHROMA_IDX, "chroma should use DM mode for adaptive color transform");
 
   bool flag = slice.getLmcsEnabledFlag() && (slice.isIntra() || (!slice.isIntra() && m_pcReshape->getCTUFlag()));
-#if JVET_S0234_ACT_CRS_FIX
   if (flag && slice.getPicHeader()->getLmcsChromaResidualScaleFlag())
-#else
-  if (flag && slice.getPicHeader()->getLmcsChromaResidualScaleFlag() && (tu.cbf[COMPONENT_Cb] || tu.cbf[COMPONENT_Cr]))
-#endif
   {
     const Area      area = tu.Y().valid() ? tu.Y() : Area(recalcPosition(tu.chromaFormat, tu.chType, CHANNEL_TYPE_LUMA, tu.blocks[tu.chType].pos()), recalcSize(tu.chromaFormat, tu.chType, CHANNEL_TYPE_LUMA, tu.blocks[tu.chType].size()));
     const CompArea &areaY = CompArea(COMPONENT_Y, tu.chromaFormat, area);
@@ -410,13 +406,6 @@ void DecCu::xIntraRecACTBlk(TransformUnit& tu)
       }
     }
 
-#if !JVET_S0234_ACT_CRS_FIX 
-    flag = flag && (tu.blocks[compID].width*tu.blocks[compID].height > 4);
-    if (flag && (TU::getCbf(tu, compID) || tu.jointCbCr) && isChroma(compID) && slice.getPicHeader()->getLmcsChromaResidualScaleFlag())
-    {
-      piResi.scaleSignal(tu.getChromaAdj(), 0, tu.cu->cs->slice->clpRng(compID));
-    }
-#endif
 
     cs.setDecomp(area);
   }
@@ -440,12 +429,10 @@ void DecCu::xIntraRecACTBlk(TransformUnit& tu)
       tmpPred.copyFrom(piPred);
     }
 
-#if JVET_S0234_ACT_CRS_FIX
     if (flag && isChroma(compID) && (tu.blocks[compID].width*tu.blocks[compID].height > 4) && slice.getPicHeader()->getLmcsChromaResidualScaleFlag())
     {
       piResi.scaleSignal(tu.getChromaAdj(), 0, tu.cu->cs->slice->clpRng(compID));
     }
-#endif
     piPred.reconstruct(piPred, piResi, tu.cu->cs->slice->clpRng(compID));
     piReco.copyFrom(piPred);
 
@@ -719,12 +706,6 @@ void DecCu::xReconInter(CodingUnit &cu)
 
   if (cu.rootCbf)
   {
-#if !JVET_S0234_ACT_CRS_FIX
-    if (cu.colorTransform)
-    {
-      cs.getResiBuf(cu).colorSpaceConvert(cs.getResiBuf(cu), false, cu.cs->slice->clpRng(COMPONENT_Y));
-    }
-#endif
 #if REUSE_CU_RESULTS
     const CompArea &area = cu.blocks[COMPONENT_Y];
     CompArea    tmpArea(COMPONENT_Y, area.chromaFormat, Position(0, 0), area.size());
@@ -815,11 +796,7 @@ void DecCu::xDecodeInterTU( TransformUnit & currTU, const ComponentID compID )
 
   //===== reconstruction =====
   const Slice           &slice = *cs.slice;
-#if JVET_S0234_ACT_CRS_FIX
   if (!currTU.cu->colorTransform && slice.getLmcsEnabledFlag() && isChroma(compID) && (TU::getCbf(currTU, compID) || currTU.jointCbCr)
-#else
-  if (slice.getLmcsEnabledFlag() && isChroma(compID) && (TU::getCbf(currTU, compID) || currTU.jointCbCr)
-#endif
    && slice.getPicHeader()->getLmcsChromaResidualScaleFlag() && currTU.blocks[compID].width * currTU.blocks[compID].height > 4)
   {
     resiBuf.scaleSignal(currTU.getChromaAdj(), 0, currTU.cu->cs->slice->clpRng(compID));
@@ -835,7 +812,6 @@ void DecCu::xDecodeInterTexture(CodingUnit &cu)
 
   const uint32_t uiNumVaildComp = getNumberValidComponents(cu.chromaFormat);
 
-#if JVET_S0234_ACT_CRS_FIX
   if (cu.colorTransform)
   {
     CodingStructure  &cs = *cu.cs;
@@ -864,7 +840,6 @@ void DecCu::xDecodeInterTexture(CodingUnit &cu)
   }
   else
   {
-#endif
   for (uint32_t ch = 0; ch < uiNumVaildComp; ch++)
   {
     const ComponentID compID = ComponentID(ch);
@@ -882,9 +857,7 @@ void DecCu::xDecodeInterTexture(CodingUnit &cu)
       xDecodeInterTU( currTU, compID );
     }
   }
-#if JVET_S0234_ACT_CRS_FIX
   }
-#endif
 }
 
 void DecCu::xDeriveCUMV( CodingUnit &cu )

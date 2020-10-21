@@ -83,7 +83,6 @@
 
 
 
-#define JVET_S0234_ACT_CRS_FIX                            1 // JVET-S0234: perform chroma residual scaling in RGB domain when ACT is on
 
 #define JVET_S0102_ASPECT3_PT_SEI                         1 // JVET-S0102 Aspect 3: Place PT SEI messages in individual SEI NAL units when general_same_pic_timing_in_all_ols_flag is equal to 1
 
