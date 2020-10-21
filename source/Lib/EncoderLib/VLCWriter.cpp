@@ -1705,11 +1705,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   xWriteRbspTrailingBits();
 }
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
 void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice )
-#else
-void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingBits )
-#endif
 {
   const PPS*  pps = NULL;
   const SPS*  sps = NULL;
@@ -1718,14 +1714,10 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
   xTracePictureHeader ();
 #endif
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   if (!slice)
   {
     slice = picHeader->getPic()->cs->slice;
   }
-#else
-  CodingStructure& cs = *picHeader->getPic()->cs;
-#endif
 WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 #if JVET_S0076_ASPECT1
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
@@ -1745,7 +1737,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 #endif
   // parameter sets
   WRITE_UVLC(picHeader->getPPSId(), "ph_pic_parameter_set_id");
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   pps = slice->getPPS();
   CHECK(pps == 0, "Invalid PPS");
   sps = slice->getSPS();
@@ -1753,15 +1744,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   int pocBits = slice->getSPS()->getBitsForPOC();
   int pocMask = (1 << pocBits) - 1;
   WRITE_CODE(slice->getPOC() & pocMask, pocBits, "ph_pic_order_cnt_lsb");
-#else
-  pps = cs.slice->getPPS();
-  CHECK(pps == 0, "Invalid PPS");
-  sps = cs.slice->getSPS();
-  CHECK(sps == 0, "Invalid SPS");
-  int pocBits = cs.slice->getSPS()->getBitsForPOC();
-  int pocMask = (1 << pocBits) - 1;
-  WRITE_CODE(cs.slice->getPOC() & pocMask, pocBits, "ph_pic_order_cnt_lsb");
-#endif
   if( picHeader->getGdrPicFlag() )
   {
     WRITE_UVLC(picHeader->getRecoveryPocCnt(), "ph_recovery_poc_cnt");
@@ -2308,26 +2290,17 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   }
 }
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
 void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
-#else
-void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
-#endif
 {
 #if ENABLE_TRACING
   xTraceSliceHeader ();
 #endif
 
-#if JVET_S0162_SUBPIC_MERGE_TOOL
   if (!picHeader)
   {
     CodingStructure& cs = *pcSlice->getPic()->cs;
     picHeader = cs.picHeader;
   }
-#else
-  CodingStructure& cs = *pcSlice->getPic()->cs;
-  PicHeader *picHeader = cs.picHeader;
-#endif
   const ChromaFormat format                = pcSlice->getSPS()->getChromaFormatIdc();
   const uint32_t         numberValidComponents = getNumberValidComponents(format);
   const bool         chromaEnabled         = isChromaEnabled(format);

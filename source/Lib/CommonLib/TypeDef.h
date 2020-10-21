@@ -73,7 +73,6 @@
 
 
 
-#define JVET_S0162_SUBPIC_MERGE_TOOL                      1 // JVET-S0162: Subpicture merging software
 
 #define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
 
