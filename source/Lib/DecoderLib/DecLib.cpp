@@ -455,9 +455,7 @@ DecLib::DecLib()
 #if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
 #endif
-#if JVET_S0155_EOS_NALU_CHECK
   memset(m_prevEOS, false, sizeof(m_prevEOS));
-#endif
   memset(m_accessUnitEos, false, sizeof(m_accessUnitEos));
   std::fill_n(m_prevGDRInSameLayerPOC, MAX_VPS_LAYERS, -MAX_INT);
   std::fill_n(m_pocCRA, MAX_VPS_LAYERS, -MAX_INT);
@@ -925,7 +923,6 @@ void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailableP
     m_pocRandomAccess = iUnavailablePoc;
   }
 }
-#if JVET_S0155_EOS_NALU_CHECK
 void DecLib::checkPicTypeAfterEos()
 {
   int layerId = m_pcPic->slices[0]->getNalUnitLayerId();
@@ -937,7 +934,6 @@ void DecLib::checkPicTypeAfterEos()
     m_prevEOS[layerId] = false;
   }
 }
-#endif
 
 void DecLib::checkLayerIdIncludedInCvss()
 {
@@ -964,7 +960,6 @@ void DecLib::checkLayerIdIncludedInCvss()
     }
 
 
-#if JVET_S0155_EOS_NALU_CHECK
     // check whether the layerID of EOS_NUT is included in the layerIDs of the first AU
     for (int i = 0; i < getVPS()->getMaxLayers(); i++)
     {
@@ -983,7 +978,6 @@ void DecLib::checkLayerIdIncludedInCvss()
         CHECK(!eosLayerIdFind, "When nal_unit_type is equal to EOS_NUT, nuh_layer_id shall be equal to one of the nuh_layer_id values of the layers present in the CVS");
       }
     }
-#endif
   }
 
   // update the value of m_isFirstAuInCvs for the next AU according to NAL_UNIT_EOS in each layer
@@ -2417,9 +2411,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_pcPic->setDecodingOrderNumber(m_decodingOrderCounter);
     m_decodingOrderCounter++;
     m_pcPic->setPictureType(nalu.m_nalUnitType);
-#if JVET_S0155_EOS_NALU_CHECK
     checkPicTypeAfterEos();
-#endif
     // store sub-picture numbers, sizes, and locations with a picture
     pcSlice->getPic()->subPictures.clear();
 
@@ -2927,9 +2919,7 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       m_prevSliceSkipped = false;
       m_skippedPOC = 0;
       m_accessUnitEos[nalu.m_nuhLayerId] = true;
-#if JVET_S0155_EOS_NALU_CHECK
       m_prevEOS[nalu.m_nuhLayerId] = true;
-#endif
       return false;
 
     case NAL_UNIT_ACCESS_UNIT_DELIMITER:

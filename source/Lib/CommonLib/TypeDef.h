@@ -93,7 +93,6 @@
 
 
 
-#define JVET_S0155_EOS_NALU_CHECK                         1 // JVET-S0155: Constraints on EOS NAL units
 
 #define JVET_R0093_SUBPICS_AND_CONF_WINDOW                1 // JVET-R0093 and JVET-R0294: Constraint on subpictures and conformance cropping window, and rewriting of conformance cropping window in subpicture extraction
 
