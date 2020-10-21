@@ -82,7 +82,6 @@
 
 
 
-#define JVET_S0074_SPS_REORDER                            1 // JVET-S0074: aspect 1, rearrange some syntax elements in SPS
 
 #define JVET_S0234_ACT_CRS_FIX                            1 // JVET-S0234: perform chroma residual scaling in RGB domain when ACT is on
 
