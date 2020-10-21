@@ -112,7 +112,6 @@
 
 
 
-#define JVET_S0178_GENERAL_SEI_CHECK                      1 // JVET-S0178: General SEI semantics and constraints
 
 #define JVET_S0176_SLI_SEI                                1 // JVET-S0176: On the subpicture level information SEI message
 
