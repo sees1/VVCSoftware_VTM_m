@@ -76,7 +76,6 @@
 
 
 
-#define JVET_S0045_SIGN                                   1 // JVET-S0045: semantics of strp_entry_sign_flag
 
 #define JVET_S0133_PH_SYNTAX_OVERRIDE_ENC_FIX             1 // JVET-S0133: Encoder-only fix on the override of partition constriants in PH
 

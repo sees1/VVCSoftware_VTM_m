@@ -2256,11 +2256,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             const ReferencePictureList* rpl0 = pcSlice->getSPS()->getRPLList0()->getReferencePictureList(ii);
             for (int jj = 0; jj < pcSlice->getRPL0()->getNumberOfActivePictures(); jj++)
             {
-#if JVET_S0045_SIGN
               int tPoc = pcSlice->getPOC() + rpl0->getRefPicIdentifier(jj);
-#else
-              int tPoc = pcSlice->getPOC() - rpl0->getRefPicIdentifier(jj);
-#endif
               int kk = 0;
               for (kk = 0; kk<m_pcCfg->getGOPSize(); kk++)
               {
@@ -2279,11 +2275,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             const ReferencePictureList* rpl1 = pcSlice->getSPS()->getRPLList1()->getReferencePictureList(ii);
             for (int jj = 0; jj < pcSlice->getRPL1()->getNumberOfActivePictures(); jj++)
             {
-#if JVET_S0045_SIGN
               int tPoc = pcSlice->getPOC() + rpl1->getRefPicIdentifier(jj);
-#else
-              int tPoc = pcSlice->getPOC() - rpl1->getRefPicIdentifier(jj);
-#endif
               int kk = 0;
               for (kk = 0; kk<m_pcCfg->getGOPSize(); kk++)
               {
@@ -5467,13 +5459,9 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
-#if JVET_S0045_SIGN
           if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#else
-          if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced && rpcPic->getPOC() == slice->getPOC() - rpl0->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;
@@ -5548,11 +5536,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
       else
       {
         // Adding associated IRAP as shortterm picture
-#if JVET_S0045_SIGN
         pLocalRPL0->setRefPicIdentifier(refPicIdxL0, slice->getAssociatedIRAPPOC() - slice->getPOC(), false, false, 0);
-#else
-        pLocalRPL0->setRefPicIdentifier( refPicIdxL0, slice->getPOC() - slice->getAssociatedIRAPPOC(), false, false, 0 );
-#endif
         refPicIdxL0++;
         numOfSTRPL0++;
       }
@@ -5596,13 +5580,9 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
-#if JVET_S0045_SIGN
           if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#else
-          if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced && rpcPic->getPOC() == slice->getPOC() - rpl1->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;

@@ -252,15 +252,10 @@ void HLSWriter::xCodeRefPicList( const ReferencePictureList* rpl, bool isLongTer
       }
       else
       WRITE_UVLC(absDeltaValue, "abs_delta_poc_st[ listIdx ][ rplsIdx ][ i ]");
-#if JVET_S0045_SIGN
       if (absDeltaValue > 0)
       {
         WRITE_FLAG(deltaValue < 0 ? 1 : 0, "strp_entry_sign_flag[ listIdx ][ rplsIdx ][ i ]");
       }
-#else
-      if (absDeltaValue > 0)
-        WRITE_FLAG((deltaValue < 0) ? 0 : 1, "strp_entry_sign_flag[ listIdx ][ rplsIdx ][ i ]");  //0  means negative delta POC : 1 means positive
-#endif
     }
     else if (!rpl->getLtrpInSliceHeaderFlag())
     {
