@@ -4432,7 +4432,6 @@ bool             operator != (const ProfileTierLevel& op1, const ProfileTierLeve
   return !(op1 == op2);
 }
 
-#if JVET_Q0406_CABAC_ZERO
 bool Slice::isLastSliceInSubpic()
 {
   CHECK(m_pcPPS == NULL, "PPS pointer not initialized");
@@ -4452,7 +4451,6 @@ bool Slice::isLastSliceInSubpic()
     return lastCTUAddrInSlice == (picSizeInCtus-1);
   }
 }
-#endif
 
 
 #if ENABLE_TRACING
