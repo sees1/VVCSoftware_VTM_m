@@ -3368,11 +3368,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           {
             if (pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || pcSlice->getNalUnitType() >= NAL_UNIT_CODED_SLICE_GDR)
             {
-#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
               pcSlice->setNoOutputOfPriorPicsFlag(true);
-#else
-              picHeader->setNoOutputOfPriorPicsFlag(true);
-#endif
             }
           }
         }

@@ -1767,12 +1767,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   int pocMask = (1 << pocBits) - 1;
   WRITE_CODE(cs.slice->getPOC() & pocMask, pocBits, "ph_pic_order_cnt_lsb");
 #endif
-#if !JVET_S0193_NO_OUTPUT_PRIOR_PIC
-  if (picHeader->getGdrOrIrapPicFlag())
-  {
-    WRITE_FLAG(picHeader->getNoOutputOfPriorPicsFlag(), "no_output_of_prior_pics_flag");
-  }
-#endif
   if( picHeader->getGdrPicFlag() )
   {
     WRITE_UVLC(picHeader->getRecoveryPocCnt(), "ph_recovery_poc_cnt");
@@ -2400,12 +2394,10 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice )
   {
     WRITE_UVLC(pcSlice->getSliceType(), "sh_slice_type");
   }
-#if JVET_S0193_NO_OUTPUT_PRIOR_PIC
   if (pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR)
   {
     WRITE_FLAG(pcSlice->getNoOutputOfPriorPicsFlag(), "sh_no_output_of_prior_pics_flag");
   }
-#endif
   if (!picHeader->getPicIntraSliceAllowedFlag())
   {
     CHECK(pcSlice->getSliceType() == I_SLICE, "when ph_intra_slice_allowed_flag = 0, no I_Slice is allowed");

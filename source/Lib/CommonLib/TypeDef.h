@@ -63,7 +63,6 @@
 
 
 
-#define JVET_S0193_NO_OUTPUT_PRIOR_PIC                    1 // JVET-S0193: Move ph_no_output_of_prior_pics_flag to SH
 
 #define JVET_S_PROFILES                                   1 // Profile definitions
 
