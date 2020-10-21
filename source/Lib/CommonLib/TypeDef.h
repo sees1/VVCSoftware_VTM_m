@@ -90,7 +90,6 @@
 
 
                                                             //             Change the process for deriving empty RPLs when sps_idr_rpl_present_flag is equal to 0 and nal_unit_type is equal to IDR_W_RADL or IDR_N_LP to involve pps_rpl_info_in_ph_flag.
-#define JVET_S0124_UNAVAILABLE_REFERENCE                  1 // JVET-S0124: Add TemporalId, ph_non_ref_pic_flag, and ph_pic_parameter_set_id for generating unavailable reference pictures
 
 #define JVET_S0063_VPS_SIGNALLING                         1 // Modifications to VPS signalling - conditionally signal vps_num_ptls_minus1
 

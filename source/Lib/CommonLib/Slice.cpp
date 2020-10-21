@@ -614,7 +614,6 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 
   int irapPOC = getAssociatedIRAPPOC();
 
-#if JVET_S0124_UNAVAILABLE_REFERENCE
   const int numEntries[] = { pRPL0->getNumberOfShorttermPictures() + pRPL0->getNumberOfLongtermPictures() + pRPL0->getNumberOfInterLayerPictures(), pRPL1->getNumberOfShorttermPictures() + pRPL1->getNumberOfLongtermPictures() + pRPL1->getNumberOfInterLayerPictures() };
   const int numActiveEntries[] = { getNumRefIdx( REF_PIC_LIST_0 ), getNumRefIdx( REF_PIC_LIST_1 ) };
   const ReferencePictureList* rpl[] = { pRPL0, pRPL1 };
@@ -666,13 +665,11 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
             "to by an entry in RefPicList[ 0 ] or RefPicList[ 1 ] that precedes that IRAP picture in output order or decoding order." );
         }
 
-#if JVET_S0124_UNAVAILABLE_REFERENCE
         // Generated reference picture does not have picture header
         const bool isGeneratedRefPic = pcRefPic->slices[0]->getPicHeader() ? false : true;
 
         const bool nonReferencePictureFlag = isGeneratedRefPic ? pcRefPic->slices[0]->getPicHeader()->getNonReferencePictureFlag() : pcRefPic->nonReferencePictureFlag;
         CHECK( pcRefPic == m_pcPic || nonReferencePictureFlag, "The picture referred to by each entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall not be the current picture and shall have ph_non_ref_pic_flag equal to 0" );
-#endif
 
         if( i < numActiveEntries[refPicList] )
         {
@@ -690,173 +687,11 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
             CHECK( refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "RADL picture detected that violate the rule that no active entry in RefPicList[] shall precede the associated IRAP picture in decoding order" );
           }
 
-#if JVET_S0124_UNAVAILABLE_REFERENCE
           CHECK( pcRefPic->temporalId > m_pcPic->temporalId, "The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall be present in the DPB and shall have TemporalId less than or equal to that of the current picture." );
-#endif
         }
       }
     }
   }
-#else
-  // remove spagetti code, RPL0 and RPL1 checks are the same
-  int numEntriesL0 = pRPL0->getNumberOfShorttermPictures() + pRPL0->getNumberOfLongtermPictures() + pRPL0->getNumberOfInterLayerPictures();
-  int numEntriesL1 = pRPL1->getNumberOfShorttermPictures() + pRPL1->getNumberOfLongtermPictures() + pRPL1->getNumberOfInterLayerPictures();
-
-  int numActiveEntriesL0 = getNumRefIdx(REF_PIC_LIST_0);
-  int numActiveEntriesL1 = getNumRefIdx(REF_PIC_LIST_1);
-
-  bool fieldSeqFlag = getSPS()->getFieldSeqFlag();
-
-  int layerIdx = m_pcPic->cs->vps == nullptr ? 0 : m_pcPic->cs->vps->getGeneralLayerIdx(m_pcPic->layerId);
-
-#if JVET_S0160_ASPECT1_ASPECT9
-  if ( m_pcPic->cs->vps && !m_pcPic->cs->vps->getIndependentLayerFlag(layerIdx) && (pRPL0->getNumberOfInterLayerPictures() || pRPL1->getNumberOfInterLayerPictures()))
-  {
-    CHECK( getPicHeader()->getPocMsbPresentFlag(), "The value of ph_poc_msb_cycle_present_flag is required to be equal to 0 when vps_independent_layer_flag[GeneralLayerIdx[nuh_layer_id]] is equal to 0 and there is an ILRP entry in RefPicList[0] or RefPicList[1] of a slice of the current picture" );
-  }
-#endif
-
-  for (int i = 0; i < numEntriesL0; i++)
-  {
-    if (pRPL0->isInterLayerRefPic(i))
-    {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL0->getInterLayerRefPicIdx(i)));
-      pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
-      refPicPOC = pcRefPic->getPOC();
-    }
-    else if (!pRPL0->isRefPicLongterm(i))
-    {
-      refPicPOC = getPOC() + pRPL0->getRefPicIdentifier(i);
-      pcRefPic = xGetRefPic(rcListPic, refPicPOC, m_pcPic->layerId);
-    }
-    else
-    {
-      int pocBits = getSPS()->getBitsForPOC();
-      int pocMask = (1 << pocBits) - 1;
-      int ltrpPoc = pRPL0->getRefPicIdentifier(i) & pocMask;
-      if(pRPL0->getDeltaPocMSBPresentFlag(i))
-      {
-        ltrpPoc += getPOC() - pRPL0->getDeltaPocMSBCycleLT(i) * (pocMask + 1) - (getPOC() & pocMask);
-      }
-      pcRefPic = xGetLongTermRefPic(rcListPic, ltrpPoc, pRPL0->getDeltaPocMSBPresentFlag(i), m_pcPic->layerId);
-      refPicPOC = pcRefPic->getPOC();
-    }
-    if (pcRefPic)
-    {
-      refPicDecodingOrderNumber = pcRefPic->getDecodingOrderNumber();
-
-      if (m_eNalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP )
-      {
-        CHECK(refPicPOC < irapPOC || refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "When the current picture, with nuh_layer_id equal to a particular value layerId, "
-             "is an IRAP picture, there shall be no picture referred to by an entry in RefPicList[ 0 ] that precedes, in output order or decoding order, any preceding IRAP picture "
-             "with nuh_layer_id equal to layerId in decoding order (when present).");
-      }
-
-      if (irapPOC < getPOC() && !fieldSeqFlag)
-      {
-        CHECK(refPicPOC < irapPOC || refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "When the current picture follows an IRAP picture having the same value "
-              "of nuh_layer_id and the leading pictures, if any, associated with that IRAP picture, in both decoding order and output order, there shall be no picture referred "
-              "to by an entry in RefPicList[ 0 ] or RefPicList[ 1 ] that precedes that IRAP picture in output order or decoding order.");
-      }
-
-#if JVET_S0124_UNAVAILABLE_REFERENCE
-      // Generated reference picture does not have picture header
-      bool nonReferencePictureFlag = pcRefPic->slices[0]->getPicHeader() ? pcRefPic->slices[0]->getPicHeader()->getNonReferencePictureFlag() : pcRefPic->nonReferencePictureFlag;
-      CHECK( pcRefPic == m_pcPic || nonReferencePictureFlag, "The picture referred to by each entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall not be the current picture and shall have ph_non_ref_pic_flag equal to 0" );
-#endif
-
-      if (i < numActiveEntriesL0)
-      {
-        if (irapPOC < getPOC())
-        {
-          CHECK(refPicPOC < irapPOC || refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "When the current picture follows an IRAP picture having the same value "
-                "of nuh_layer_id in both decoding order and output order, there shall be no picture referred to by an active entry in RefPicList[ 0 ] or RefPicList[ 1 ] that "
-                "precedes that IRAP picture in output order or decoding order.");
-        }
-
-        // Checking this: "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or
-        // RefPicList[ 1 ] that is any of the following: A picture that precedes the associated IRAP picture in decoding order"
-        if (m_eNalUnitType == NAL_UNIT_CODED_SLICE_RADL)
-        {
-          CHECK(refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "RADL picture detected that violate the rule that no active entry in RefPicList[] shall precede the associated IRAP picture in decoding order");
-        }
-
-#if JVET_S0124_UNAVAILABLE_REFERENCE
-        CHECK( pcRefPic->temporalId > m_pcPic->temporalId, "The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall be present in the DPB and shall have TemporalId less than or equal to that of the current picture." );
-#endif
-      }
-    }
-  }
-
-  for (int i = 0; i < numEntriesL1; i++)
-  {
-    if (pRPL1->isInterLayerRefPic(i))
-    {
-      int refLayerId = m_pcPic->cs->vps->getLayerId(m_pcPic->cs->vps->getDirectRefLayerIdx(layerIdx, pRPL1->getInterLayerRefPicIdx(i)));
-      pcRefPic = xGetRefPic(rcListPic, getPOC(), refLayerId);
-      refPicPOC = pcRefPic->getPOC();
-    }
-    else if (!pRPL1->isRefPicLongterm(i))
-    {
-      refPicPOC = getPOC() + pRPL1->getRefPicIdentifier(i);
-      pcRefPic = xGetRefPic(rcListPic, refPicPOC, m_pcPic->layerId);
-    }
-    else
-    {
-      int pocBits = getSPS()->getBitsForPOC();
-      int pocMask = (1 << pocBits) - 1;
-      int ltrpPoc = pRPL1->getRefPicIdentifier(i) & pocMask;
-      if(pRPL1->getDeltaPocMSBPresentFlag(i))
-      {
-        ltrpPoc += getPOC() - pRPL1->getDeltaPocMSBCycleLT(i) * (pocMask + 1) - (getPOC() & pocMask);
-      }
-      pcRefPic = xGetLongTermRefPic(rcListPic, ltrpPoc, pRPL1->getDeltaPocMSBPresentFlag(i), m_pcPic->layerId);
-      refPicPOC = pcRefPic->getPOC();
-    }
-    if (pcRefPic)
-    {
-      refPicDecodingOrderNumber = pcRefPic->getDecodingOrderNumber();
-
-      if ((m_eNalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP))
-      {
-          CHECK(refPicPOC < irapPOC || refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "When the current picture, with nuh_layer_id equal to a particular value layerId, "
-               "is an IRAP picture, there shall be no picture referred to by an entry in RefPicList[ 1 ] that precedes, in output order or decoding order, any preceding IRAP picture "
-               "with nuh_layer_id equal to layerId in decoding order (when present).");
-      }
-
-      if (irapPOC < getPOC() && !fieldSeqFlag)
-      {
-        CHECK(refPicPOC < irapPOC || refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "When the current picture follows an IRAP picture having the same value of "
-              "nuh_layer_id and the leading pictures, if any, associated with that IRAP picture, in both decoding order and output order, there shall be no picture referred to "
-              "by an entry in RefPicList[ 0 ] or RefPicList[ 1 ] that precedes that IRAP picture in output order or decoding order.");
-      }
-
-#if JVET_S0124_UNAVAILABLE_REFERENCE
-      // Generated reference picture does not have picture header
-      bool nonReferencePictureFlag = pcRefPic->slices[0]->getPicHeader() ? pcRefPic->slices[0]->getPicHeader()->getNonReferencePictureFlag() : pcRefPic->nonReferencePictureFlag;
-      CHECK( pcRefPic == m_pcPic || nonReferencePictureFlag, "The picture referred to by each entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall not be the current picture and shall have ph_non_ref_pic_flag equal to 0" );
-#endif
-
-      if (i < numActiveEntriesL1)
-      {
-        if (irapPOC < getPOC())
-        {
-          CHECK(refPicPOC < irapPOC || refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "When the current picture follows an IRAP picture having the same value "
-                "of nuh_layer_id in both decoding order and output order, there shall be no picture referred to by an active entry in RefPicList[ 0 ] or RefPicList[ 1 ] that "
-                "precedes that IRAP picture in output order or decoding order.");
-        }
-        if (m_eNalUnitType == NAL_UNIT_CODED_SLICE_RADL)
-        {
-          CHECK(refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "RADL picture detected that violate the rule that no active entry in RefPicList[] shall precede the associated IRAP picture in decoding order");
-        }
-
-#if JVET_S0124_UNAVAILABLE_REFERENCE
-        CHECK( pcRefPic->temporalId > m_pcPic->temporalId, "The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall be present in the DPB and shall have TemporalId less than or equal to that of the current picture." );
-#endif
-      }
-    }
-  }
-#endif
 }
 
 void Slice::checkSTSA(PicList& rcListPic)
