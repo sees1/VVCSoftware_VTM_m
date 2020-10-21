@@ -241,9 +241,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setSourceHeight                                      ( m_iSourceHeight );
   m_cEncLib.setConformanceWindow                                 ( m_confWinLeft / SPS::getWinUnitX( m_InputChromaFormatIDC ), m_confWinRight / SPS::getWinUnitX( m_InputChromaFormatIDC ), m_confWinTop / SPS::getWinUnitY( m_InputChromaFormatIDC ), m_confWinBottom / SPS::getWinUnitY( m_InputChromaFormatIDC ) );
   m_cEncLib.setScalingRatio                                      ( m_scalingRatioHor, m_scalingRatioVer );
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   m_cEncLib.setRprEnabled                                        (m_rprEnabledFlag);
-#endif
   m_cEncLib.setResChangeInClvsEnabled                            ( m_resChangeInClvsEnabled );
   m_cEncLib.setSwitchPocPeriod                                   ( m_switchPocPeriod );
   m_cEncLib.setUpscaledOutput                                    ( m_upscaledOutput );
@@ -293,10 +291,8 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoCraConstraintFlag(m_noCraConstraintFlag);
     CHECK(m_noCraConstraintFlag && (m_iDecodingRefreshType == 1), "CRA shall be deactivated when m_noCraConstraintFlag is equal to 1");
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
     m_cEncLib.setNoRprConstraintFlag(m_noRprConstraintFlag);
     CHECK(m_noRprConstraintFlag && m_rprEnabledFlag, "Reference picture resampling shall be deactivated when m_noRprConstraintFlag is equal to 1");
-#endif
 
     m_cEncLib.setNoResChangeInClvsConstraintFlag(m_noResChangeInClvsConstraintFlag);
     CHECK(m_noResChangeInClvsConstraintFlag && m_resChangeInClvsEnabled, "Resolution change in CLVS shall be deactivated when m_noResChangeInClvsConstraintFlag is equal to 1");

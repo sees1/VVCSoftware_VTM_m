@@ -243,9 +243,7 @@ protected:
   uint8_t       m_numSubProfile;
   bool m_nonPackedConstraintFlag;
   bool m_nonProjectedConstraintFlag;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool m_noRprConstraintFlag;
-#endif
   bool m_noResChangeInClvsConstraintFlag;
   bool m_oneTilePerPicConstraintFlag;
   bool m_picHeaderInSliceHeaderConstraintFlag;
@@ -752,9 +750,7 @@ protected:
 #endif
   double      m_scalingRatioHor;
   double      m_scalingRatioVer;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool        m_rprEnabledFlag;
-#endif
   bool        m_resChangeInClvsEnabled;
   int         m_switchPocPeriod;
   int         m_upscaledOutput;
@@ -1843,10 +1839,8 @@ public:
   bool         getNonProjectedConstraintFlag() const                 { return m_nonProjectedConstraintFlag; }
   void         setNonProjectedConstraintFlag(bool b)                 { m_nonProjectedConstraintFlag = b; }
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool         getNoRprConstraintFlag() const                        { return m_noRprConstraintFlag; }
   void         setNoRprConstraintFlag(bool b)                        { m_noRprConstraintFlag = b; }
-#endif
 
   bool         getNoResChangeInClvsConstraintFlag() const            { return m_noResChangeInClvsConstraintFlag; }
   void         setNoResChangeInClvsConstraintFlag(bool b)            { m_noResChangeInClvsConstraintFlag = b; }
@@ -1939,10 +1933,8 @@ public:
   void        setCalculateHdrMetrics(bool value)                      { m_calculateHdrMetrics = value;}
   bool        getCalcluateHdrMetrics()                          const { return m_calculateHdrMetrics;}
 #endif
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   void        setRprEnabled(bool b)                                   { m_rprEnabledFlag = b; }
   bool        isRprEnabled()                                    const { return m_rprEnabledFlag; }
-#endif
   void        setScalingRatio( double hor, double ver )              { m_scalingRatioHor = hor, m_scalingRatioVer = ver;  }
   void        setResChangeInClvsEnabled(bool b)                      { m_resChangeInClvsEnabled = b; }
   bool        isResChangeInClvsEnabled()                        const { return m_resChangeInClvsEnabled; }

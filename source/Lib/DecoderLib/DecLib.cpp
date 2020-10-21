@@ -1815,7 +1815,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK( pps->getRectSliceFlag() && pps->getNumSlicesInPic() != 1, "When one_slice_per_pic_constraint_flag is equal to 1 and if pps_rect_slice_flag is equal to 1, the value of pps_num_slices_in_pic_minus1 shall be equal to 0");
   }
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoRprConstraintFlag())
   {
     CHECK(sps->getRprEnabledFlag(), "When gci_no_ref_pic_resampling_constraint_flag is equal to 1, the value of sps_ref_pic_resampling_enabled_flag shall be equal to 0");
@@ -1824,7 +1823,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   {
     CHECK(sps->getResChangeInClvsEnabledFlag(), "When gci_no_res_change_in_clvs_constraint_flag is equal to 1, the value of sps_res_change_in_clvs_allowed_flag shall be equal to 0");
   }
-#endif
 
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoIdrRplConstraintFlag())
   {

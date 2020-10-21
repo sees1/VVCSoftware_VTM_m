@@ -203,9 +203,7 @@ protected:
   bool          m_intraOnlyConstraintFlag;
   bool          m_nonPackedConstraintFlag;
   bool          m_nonProjectedConstraintFlag;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool          m_noRprConstraintFlag;
-#endif
   bool          m_noResChangeInClvsConstraintFlag;
   bool          m_oneTilePerPicConstraintFlag;
   bool          m_picHeaderInSliceHeaderConstraintFlag;
@@ -698,9 +696,7 @@ protected:
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool        m_rprEnabledFlag;
-#endif
   double      m_scalingRatioHor;
   double      m_scalingRatioVer;
   bool        m_resChangeInClvsEnabled;

@@ -236,9 +236,7 @@ private:
 class ConstraintInfo
 {
   bool              m_gciPresentFlag;
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool              m_noRprConstraintFlag;
-#endif
   bool              m_noResChangeInClvsConstraintFlag;
   bool              m_oneTilePerPicConstraintFlag;
   bool              m_picHeaderInSliceHeaderConstraintFlag;
@@ -310,9 +308,7 @@ class ConstraintInfo
 public:
   ConstraintInfo()
     : m_gciPresentFlag(true)
-#if JVET_Q0114_ASPECT5_GCI_FLAG
     , m_noRprConstraintFlag(false)
-#endif
     , m_noResChangeInClvsConstraintFlag(false)
     , m_oneTilePerPicConstraintFlag(false)
     , m_picHeaderInSliceHeaderConstraintFlag(false)
@@ -392,10 +388,8 @@ public:
   void          setMaxChromaFormatConstraintIdc(int fmt) { m_maxChromaFormatConstraintIdc = fmt; }
 
 
-#if JVET_Q0114_ASPECT5_GCI_FLAG
   bool          getNoRprConstraintFlag() const { return m_noRprConstraintFlag; }
   void          setNoRprConstraintFlag(bool b) { m_noRprConstraintFlag = b; }
-#endif
 
   bool          getNoResChangeInClvsConstraintFlag() const { return m_noResChangeInClvsConstraintFlag; }
   void          setNoResChangeInClvsConstraintFlag(bool b) { m_noResChangeInClvsConstraintFlag = b; }
