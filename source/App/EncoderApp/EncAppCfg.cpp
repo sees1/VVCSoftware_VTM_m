@@ -3670,7 +3670,6 @@ bool EncAppCfg::xCheckParameter()
         xConfirmPara( m_gcmpSEIFunctionCoeffU[i] <= 0.0 || m_gcmpSEIFunctionCoeffU[i] > 1.0, "SEIGcmpFunctionCoeffU must be in the range (0, 1]");
         xConfirmPara( m_gcmpSEIFunctionCoeffV[i] <= 0.0 || m_gcmpSEIFunctionCoeffV[i] > 1.0, "SEIGcmpFunctionCoeffV must be in the range (0, 1]");
       }
-#if JVET_S0172_ITEM2_GCMP_CONSTRAINT
       if (i != 2 && (m_gcmpSEIPackingType == 4 || m_gcmpSEIPackingType == 5))
       {
         if (m_gcmpSEIFaceIndex[2] == 0 || m_gcmpSEIFaceIndex[2] == 1)
@@ -3738,7 +3737,6 @@ bool EncAppCfg::xCheckParameter()
           }
         }
       }
-#endif
     }
     if (m_gcmpSEIGuardBandFlag)
     {
