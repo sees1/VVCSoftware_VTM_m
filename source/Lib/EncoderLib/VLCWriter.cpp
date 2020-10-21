@@ -1351,12 +1351,8 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 #endif
       for( unsigned i = 0; i < pcSPS->getNumVerVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1, "sps_virtual_boundary_pos_x_minus1[i]");
         CHECK(((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1) > (((pcSPS->getMaxPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3), "sps_virtual_boundaries_pos_x");
-#endif
       }
 #if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(pcSPS->getNumHorVirtualBoundaries(), "sps_num_hor_virtual_boundaries");
@@ -1377,12 +1373,8 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 #endif
       for( unsigned i = 0; i < pcSPS->getNumHorVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1, "sps_virtual_boundary_pos_y_minus1[i]");
         CHECK(((pcSPS->getVirtualBoundariesPosY(i)>>3) - 1) > (((pcSPS->getMaxPicHeightInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC((pcSPS->getVirtualBoundariesPosY(i)>>3), "sps_virtual_boundaries_pos_y");
-#endif
       }
     }
   }
@@ -1938,12 +1930,8 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 #endif
       for( unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC(picHeader->getVirtualBoundariesPosX(i) >> 3, "ph_virtual_boundaries_pos_x");
-#endif
       }
 #if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(picHeader->getNumHorVirtualBoundaries(), "ph_num_hor_virtual_boundaries");
@@ -1964,12 +1952,8 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 #endif
       for( unsigned i = 0; i < picHeader->getNumHorVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         WRITE_UVLC((picHeader->getVirtualBoundariesPosY(i)>>3) - 1, "ph_virtual_boundary_pos_y_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosY(i)>>3) - 1) > (((pps->getPicHeightInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        WRITE_UVLC(picHeader->getVirtualBoundariesPosY(i)>>3, "ph_virtual_boundaries_pos_y");
-#endif
       }
     }
     else

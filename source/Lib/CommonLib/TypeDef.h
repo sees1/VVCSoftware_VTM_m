@@ -58,7 +58,6 @@
 
 
 
-#define JVET_S0047_MINUS1_FOR_VB_POS                      1 // JVET-S0047: Add "_minus1" to sps_virtual_boundary_pos_x, sps_virtual_boundary_pos_y, ph_virtual_boundary_pos_x and ph_virtual_boundary_pos_y
 
 #define JVET_S0211_UEV_FOR_NUM_VB                         1 // JVET-S0211: Signal sps_num_ver_virtual_boundaries, sps_num_hor_virtual_boundaries, ph_num_ver_virtual_boundaries, and ph_num_hor_virtual_boundaries using ue(v)
 

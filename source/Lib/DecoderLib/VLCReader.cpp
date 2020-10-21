@@ -2221,12 +2221,8 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 #endif
     for( unsigned i = 0; i < pcSPS->getNumVerVirtualBoundaries(); i++ )
     {
-#if JVET_S0047_MINUS1_FOR_VB_POS
       READ_UVLC(uiCode, "sps_virtual_boundary_pos_x_minus1[i]");        pcSPS->setVirtualBoundariesPosX((uiCode + 1) << 3, i);
       CHECK(uiCode > (((pcSPS->getMaxPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-      READ_UVLC(uiCode, "sps_virtual_boundaries_pos_x");        pcSPS->setVirtualBoundariesPosX(uiCode << 3, i);
-#endif
     }
 #if JVET_S0211_UEV_FOR_NUM_VB
     READ_UVLC(uiCode, "sps_num_hor_virtual_boundaries");        pcSPS->setNumHorVirtualBoundaries( uiCode );
@@ -2247,12 +2243,8 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 #endif
     for( unsigned i = 0; i < pcSPS->getNumHorVirtualBoundaries(); i++ )
     {
-#if JVET_S0047_MINUS1_FOR_VB_POS
       READ_UVLC(uiCode, "sps_virtual_boundary_pos_y_minus1[i]");        pcSPS->setVirtualBoundariesPosY((uiCode + 1) << 3, i);
       CHECK(uiCode > (((pcSPS->getMaxPicHeightInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_height_max_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-      READ_UVLC(uiCode, "sps_virtual_boundaries_pos_y");        pcSPS->setVirtualBoundariesPosY(uiCode << 3, i);
-#endif
     }
   }
   else
@@ -3063,12 +3055,8 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 #endif
       for( unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         READ_UVLC(uiCode, "ph_virtual_boundary_pos_x_minus1[i]");        picHeader->setVirtualBoundariesPosX((uiCode + 1) << 3, i);
         CHECK(uiCode > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        READ_UVLC(uiCode, "ph_virtual_boundaries_pos_x");        picHeader->setVirtualBoundariesPosX(uiCode << 3, i);
-#endif
       }
 #if JVET_S0211_UEV_FOR_NUM_VB
       READ_UVLC(uiCode, "ph_num_hor_virtual_boundaries");        picHeader->setNumHorVirtualBoundaries( uiCode );
@@ -3089,12 +3077,8 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 #endif
       for( unsigned i = 0; i < picHeader->getNumHorVirtualBoundaries(); i++ )
       {
-#if JVET_S0047_MINUS1_FOR_VB_POS
         READ_UVLC(uiCode, "ph_virtual_boundary_pos_y_minus1[i]");        picHeader->setVirtualBoundariesPosY((uiCode + 1) << 3, i);
         CHECK(uiCode > (((pps->getPicHeightInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_y_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_height_in_luma_samples / 8 ) - 2, inclusive.");
-#else
-        READ_UVLC(uiCode, "ph_virtual_boundaries_pos_y");        picHeader->setVirtualBoundariesPosY(uiCode << 3, i);
-#endif
       }
     }
     else
