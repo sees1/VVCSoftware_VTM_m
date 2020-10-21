@@ -709,7 +709,6 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
 
   sei_read_code( pDecodedMessageOutputStream, ( sei.m_cpbRemovalDelayLength ), code, "au_cpb_removal_delay_delta_minus1" );
   sei.m_auCpbRemovalDelayDelta = code + 1;
-#if JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP
   sei_read_code(pDecodedMessageOutputStream, 3, code, "bp_max_sub_layers_minus1");
   sei.m_bpMaxSubLayers = code + 1;
   if (sei.m_bpMaxSubLayers - 1 > 0)
@@ -721,9 +720,6 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
   {
     sei.m_cpbRemovalDelayDeltasPresentFlag = false;
   }
-#else
-  sei_read_flag( pDecodedMessageOutputStream, code, "cpb_removal_delay_deltas_present_flag" );               sei.m_cpbRemovalDelayDeltasPresentFlag = code;
-#endif
   if (sei.m_cpbRemovalDelayDeltasPresentFlag)
   {
     sei_read_uvlc( pDecodedMessageOutputStream, code, "num_cpb_removal_delay_deltas_minus1" );               sei.m_numCpbRemovalDelayDeltas = code + 1;
@@ -733,9 +729,6 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
       sei.m_cpbRemovalDelayDelta[ i ] = code;
     }
   }
-#if !JVET_S0181_PROPOSAL2_BUFFERING_PERIOD_CLEANUP
-  sei_read_code( pDecodedMessageOutputStream, 3, code, "bp_max_sub_layers_minus1" );     sei.m_bpMaxSubLayers = code + 1;
-#endif
  sei_read_uvlc( pDecodedMessageOutputStream, code, "bp_cpb_cnt_minus1" ); sei.m_bpCpbCnt = code + 1;
   if (sei.m_bpMaxSubLayers - 1 > 0)
   {
