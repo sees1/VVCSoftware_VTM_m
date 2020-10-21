@@ -693,7 +693,6 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
 
   READ_FLAG(uiCode, "pps_rpl1_idx_present_flag");
   pcPPS->setRpl1IdxPresentFlag(uiCode);
-#if JVET_S0132_HLS_REORDER
   READ_FLAG( uiCode, "pps_weighted_pred_flag" );          // Use of Weighting Prediction (P_SLICE)
   pcPPS->setUseWP( uiCode==1 );
   READ_FLAG( uiCode, "pps_weighted_bipred_flag" );         // Use of Bi-Directional Weighting Prediction (B_SLICE)
@@ -708,7 +707,6 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
   {
     pcPPS->setPicWidthMinusWrapAroundOffset(0);
   }
-#endif
 
   READ_SVLC(iCode, "pps_init_qp_minus26" );                            pcPPS->setPicInitQPMinus26(iCode);
   READ_FLAG( uiCode, "pps_cu_qp_delta_enabled_flag" );            pcPPS->setUseDQP( uiCode ? true : false );
@@ -790,12 +788,6 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
     pcPPS->setSliceChromaQpFlag(0);
     pcPPS->clearChromaQpOffsetList();
   }
-#if !JVET_S0132_HLS_REORDER
-  READ_FLAG( uiCode, "pps_weighted_pred_flag" );          // Use of Weighting Prediction (P_SLICE)
-  pcPPS->setUseWP( uiCode==1 );
-  READ_FLAG( uiCode, "pps_weighted_bipred_flag" );         // Use of Bi-Directional Weighting Prediction (B_SLICE)
-  pcPPS->setWPBiPred( uiCode==1 );
-#endif
   READ_FLAG( uiCode, "pps_deblocking_filter_control_present_flag" );       pcPPS->setDeblockingFilterControlPresentFlag( uiCode ? true : false );
   if(pcPPS->getDeblockingFilterControlPresentFlag())
   {
@@ -877,18 +869,6 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
     pcPPS->setQpDeltaInfoInPhFlag(false);
   }
 
-#if !JVET_S0132_HLS_REORDER
-  READ_FLAG(uiCode, "pps_ref_wraparound_enabled_flag");           pcPPS->setWrapAroundEnabledFlag( uiCode ? true : false );
-  if (pcPPS->getWrapAroundEnabledFlag())
-  {
-    READ_UVLC(uiCode, "pps_ref_wraparound_offset");               
-    pcPPS->setPicWidthMinusWrapAroundOffset(uiCode);
-  }
-  else
-  {
-    pcPPS->setPicWidthMinusWrapAroundOffset(0);
-  }
-#endif
   READ_FLAG( uiCode, "pps_picture_header_extension_present_flag");
   pcPPS->setPictureHeaderExtensionPresentFlag(uiCode);
   READ_FLAG( uiCode, "pps_slice_header_extension_present_flag");
@@ -1684,16 +1664,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   unsigned  maxBTSize[3] = { 0, 0, 0 };
   unsigned  maxTTSize[3] = { 0, 0, 0 };
-#if !JVET_S0132_HLS_REORDER
-  if( pcSPS->getChromaFormatIdc() != CHROMA_400 )
-  {
-    READ_FLAG(uiCode, "sps_qtbtt_dual_tree_intra_flag");           pcSPS->setUseDualITree(uiCode);
-  }
-  else
-  {
-    pcSPS->setUseDualITree(0);
-  }
-#endif
   READ_UVLC(uiCode, "sps_log2_min_luma_coding_block_size_minus2");
   int log2MinCUSize = uiCode + 2;
   pcSPS->setLog2MinCodingBlockSize(log2MinCUSize);
@@ -1722,7 +1692,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     CHECK(uiCode > ctbLog2SizeY - minQtLog2SizeIntraY, "The value of sps_log2_diff_max_tt_min_qt_intra_slice_luma shall be in the range of 0 to CtbLog2SizeY - MinQtLog2SizeIntraY");
     CHECK(maxTTSize[0] > 64, "The value of sps_log2_diff_max_tt_min_qt_intra_slice_luma shall be in the range of 0 to min(6,CtbLog2SizeY) - MinQtLog2SizeIntraY");
   }
-#if JVET_S0132_HLS_REORDER
   if( pcSPS->getChromaFormatIdc() != CHROMA_400 )
   {
     READ_FLAG(uiCode, "sps_qtbtt_dual_tree_intra_flag");           pcSPS->setUseDualITree(uiCode);
@@ -1745,7 +1714,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
       CHECK(maxBTSize[2] > 64, "The value of sps_log2_diff_max_bt_min_qt_intra_slice_chroma shall be in the range of 0 to min(6,CtbLog2SizeY) - MinQtLog2SizeIntraChroma");
     }
   }
-#endif
   READ_UVLC(uiCode, "sps_log2_diff_min_qt_min_cb_inter_slice");
   unsigned minQtLog2SizeInterY = uiCode + pcSPS->getLog2MinCodingBlockSize();
   minQT[1] = 1 << minQtLog2SizeInterY;
@@ -1760,22 +1728,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     CHECK(uiCode > ctbLog2SizeY - minQtLog2SizeInterY, "The value of sps_log2_diff_max_tt_min_qt_inter_slice shall be in the range of 0 to CtbLog2SizeY - MinQtLog2SizeInterY");
     CHECK(maxTTSize[1] > 64, "The value of sps_log2_diff_max_tt_min_qt_inter_slice shall be in the range of 0 to min(6,CtbLog2SizeY) - MinQtLog2SizeInterY");
   }
-#if !JVET_S0132_HLS_REORDER
-  if (pcSPS->getUseDualITree())
-  {
-    READ_UVLC(uiCode, "sps_log2_diff_min_qt_min_cb_intra_slice_chroma"); minQT[2] = 1 << (uiCode + pcSPS->getLog2MinCodingBlockSize());
-    READ_UVLC(uiCode, "sps_max_mtt_hierarchy_depth_intra_slice_chroma"); maxBTD[2] = uiCode;
-    CHECK(uiCode > 2 * (ctbLog2SizeY - log2MinCUSize), "sps_max_mtt_hierarchy_depth_intra_slice_chroma shall be in the range 0 to 2*(ctbLog2SizeY - log2MinCUSize)");
-    maxTTSize[2] = maxBTSize[2] = minQT[2];
-    if (maxBTD[2] != 0)
-    {
-      READ_UVLC(uiCode, "sps_log2_diff_max_bt_min_qt_intra_slice_chroma");       maxBTSize[2] <<= uiCode;
-      READ_UVLC(uiCode, "sps_log2_diff_max_tt_min_qt_intra_slice_chroma");       maxTTSize[2] <<= uiCode;
-      CHECK(maxTTSize[2] > 64, "The value of sps_log2_diff_max_tt_min_qt_intra_slice_chroma shall be in the range of 0 to min(6,CtbLog2SizeY) - MinQtLog2SizeIntraChroma");
-      CHECK(maxBTSize[2] > 64, "The value of sps_log2_diff_max_bt_min_qt_intra_slice_chroma shall be in the range of 0 to min(6,CtbLog2SizeY) - MinQtLog2SizeIntraChroma");
-    }
-}
-#endif
 
   pcSPS->setMinQTSizes(minQT);
   pcSPS->setMaxMTTHierarchyDepth(maxBTD[1], maxBTD[0], maxBTD[2]);

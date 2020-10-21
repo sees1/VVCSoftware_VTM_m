@@ -424,7 +424,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   WRITE_UVLC( pcPPS->getNumRefIdxL0DefaultActive()-1,     "pps_num_ref_idx_default_active_minus1[0]");
   WRITE_UVLC( pcPPS->getNumRefIdxL1DefaultActive()-1,     "pps_num_ref_idx_default_active_minus1[1]");
   WRITE_FLAG( pcPPS->getRpl1IdxPresentFlag() ? 1 : 0,     "pps_rpl1_idx_present_flag");
-#if JVET_S0132_HLS_REORDER
   WRITE_FLAG( pcPPS->getUseWP() ? 1 : 0,  "pps_weighted_pred_flag" );   // Use of Weighting Prediction (P_SLICE)
   WRITE_FLAG( pcPPS->getWPBiPred() ? 1 : 0, "pps_weighted_bipred_flag" );  // Use of Weighting Bi-Prediction (B_SLICE)
   WRITE_FLAG( pcPPS->getWrapAroundEnabledFlag() ? 1 : 0, "pps_ref_wraparound_enabled_flag" );
@@ -432,7 +431,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
   {
     WRITE_UVLC(pcPPS->getPicWidthMinusWrapAroundOffset(), "pps_pic_width_minus_wraparound_offset");
   }
-#endif
 
   WRITE_SVLC( pcPPS->getPicInitQPMinus26(),                  "pps_init_qp_minus26");
   WRITE_FLAG( pcPPS->getUseDQP() ? 1 : 0, "pps_cu_qp_delta_enabled_flag" );
@@ -465,10 +463,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
     }
   }
   }
-#if !JVET_S0132_HLS_REORDER
-  WRITE_FLAG( pcPPS->getUseWP() ? 1 : 0,  "pps_weighted_pred_flag" );   // Use of Weighting Prediction (P_SLICE)
-  WRITE_FLAG( pcPPS->getWPBiPred() ? 1 : 0, "pps_weighted_bipred_flag" );  // Use of Weighting Bi-Prediction (B_SLICE)
-#endif
   WRITE_FLAG( pcPPS->getDeblockingFilterControlPresentFlag()?1 : 0,       "pps_deblocking_filter_control_present_flag");
   if(pcPPS->getDeblockingFilterControlPresentFlag())
   {
@@ -502,13 +496,6 @@ void HLSWriter::codePPS( const PPS* pcPPS )
     }
     WRITE_FLAG(pcPPS->getQpDeltaInfoInPhFlag() ? 1 : 0, "pps_qp_delta_info_in_ph_flag");
   }
-#if !JVET_S0132_HLS_REORDER
-  WRITE_FLAG( pcPPS->getWrapAroundEnabledFlag() ? 1 : 0, "pps_ref_wraparound_enabled_flag" );
-  if( pcPPS->getWrapAroundEnabledFlag() )
-  {
-    WRITE_UVLC(pcPPS->getPicWidthMinusWrapAroundOffset(), "pps_pic_width_minus_wraparound_offset");
-  }
-#endif
 
   WRITE_FLAG( pcPPS->getPictureHeaderExtensionPresentFlag() ? 1 : 0, "pps_picture_header_extension_present_flag");
   WRITE_FLAG( pcPPS->getSliceHeaderExtensionPresentFlag() ? 1 : 0, "pps_slice_header_extension_present_flag");
@@ -990,12 +977,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     dpb_parameters(pcSPS->getMaxTLayers() - 1, pcSPS->getSubLayerDpbParamsFlag(), pcSPS);
   }
   CHECK( pcSPS->getMaxCUWidth() != pcSPS->getMaxCUHeight(),                          "Rectangular CTUs not supported" );
-#if !JVET_S0132_HLS_REORDER
-  if( pcSPS->getChromaFormatIdc() != CHROMA_400 )
-  {
-    WRITE_FLAG(pcSPS->getUseDualITree(), "sps_qtbtt_dual_tree_intra_flag");
-  }
-#endif
   WRITE_UVLC(pcSPS->getLog2MinCodingBlockSize() - 2, "sps_log2_min_luma_coding_block_size_minus2");
   WRITE_FLAG(pcSPS->getSplitConsOverrideEnabledFlag(), "sps_partition_constraints_override_enabled_flag");
   WRITE_UVLC(floorLog2(pcSPS->getMinQTSize(I_SLICE)) - pcSPS->getLog2MinCodingBlockSize(), "sps_log2_diff_min_qt_min_cb_intra_slice_luma");
@@ -1005,7 +986,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(floorLog2(pcSPS->getMaxBTSizeI()) - floorLog2(pcSPS->getMinQTSize(I_SLICE)), "sps_log2_diff_max_bt_min_qt_intra_slice_luma");
     WRITE_UVLC(floorLog2(pcSPS->getMaxTTSizeI()) - floorLog2(pcSPS->getMinQTSize(I_SLICE)), "sps_log2_diff_max_tt_min_qt_intra_slice_luma");
   }
-#if JVET_S0132_HLS_REORDER
   if( pcSPS->getChromaFormatIdc() != CHROMA_400 )
   {
     WRITE_FLAG(pcSPS->getUseDualITree(), "sps_qtbtt_dual_tree_intra_flag");
@@ -1020,7 +1000,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
       WRITE_UVLC(floorLog2(pcSPS->getMaxTTSizeIChroma()) - floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)), "sps_log2_diff_max_tt_min_qt_intra_slice_chroma");
     }
   }
-#endif
   WRITE_UVLC(floorLog2(pcSPS->getMinQTSize(B_SLICE)) - pcSPS->getLog2MinCodingBlockSize(), "sps_log2_diff_min_qt_min_cb_inter_slice");
   WRITE_UVLC(pcSPS->getMaxMTTHierarchyDepth(), "sps_max_mtt_hierarchy_depth_inter_slice");
   if (pcSPS->getMaxMTTHierarchyDepth() != 0)
@@ -1028,18 +1007,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_UVLC(floorLog2(pcSPS->getMaxBTSize()) - floorLog2(pcSPS->getMinQTSize(B_SLICE)), "sps_log2_diff_max_bt_min_qt_inter_slice");
     WRITE_UVLC(floorLog2(pcSPS->getMaxTTSize()) - floorLog2(pcSPS->getMinQTSize(B_SLICE)), "sps_log2_diff_max_tt_min_qt_inter_slice");
   }
-#if !JVET_S0132_HLS_REORDER
-  if (pcSPS->getUseDualITree())
-  {
-    WRITE_UVLC(floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)) - pcSPS->getLog2MinCodingBlockSize(), "sps_log2_diff_min_qt_min_cb_intra_slice_chroma");
-    WRITE_UVLC(pcSPS->getMaxMTTHierarchyDepthIChroma(), "sps_max_mtt_hierarchy_depth_intra_slice_chroma");
-    if (pcSPS->getMaxMTTHierarchyDepthIChroma() != 0)
-    {
-      WRITE_UVLC(floorLog2(pcSPS->getMaxBTSizeIChroma()) - floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)), "sps_log2_diff_max_bt_min_qt_intra_slice_chroma");
-      WRITE_UVLC(floorLog2(pcSPS->getMaxTTSizeIChroma()) - floorLog2(pcSPS->getMinQTSize(I_SLICE, CHANNEL_TYPE_CHROMA)), "sps_log2_diff_max_tt_min_qt_intra_slice_chroma");
-    }
-  }
-#endif
   if (pcSPS->getCTUSize() > 32)
     WRITE_FLAG( (pcSPS->getLog2MaxTbSize() - 5) ? 1 : 0,                       "sps_max_luma_transform_size_64_flag" );
 

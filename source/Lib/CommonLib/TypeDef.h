@@ -86,7 +86,6 @@
 
 
 
-#define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
 
 #define JVET_S0221_NUM_VB_CHECK                           1 // JVET_S0221: Constraints on the number of virtual boundaries
 
