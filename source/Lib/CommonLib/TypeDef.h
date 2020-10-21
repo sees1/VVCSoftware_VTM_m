@@ -105,7 +105,6 @@
 
 
 
-#define JVET_S0185_PROPOSAL2_SEI_CLEANUP                  1 // JVET-S0185_PROPOSAL2: Move signalling of syntax element bp_alt_cpb_params_present_flag
 
 #define JVET_R0294_SUBPIC_HASH                            1 // JVET-R0294: Allow decoded picture hash SEI messages to be nested in subpicture context
 
