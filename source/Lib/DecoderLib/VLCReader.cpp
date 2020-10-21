@@ -2732,9 +2732,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 #endif
 
   READ_FLAG(uiCode, "ph_gdr_or_irap_pic_flag");               picHeader->setGdrOrIrapPicFlag(uiCode != 0);
-#if JVET_S0076_ASPECT1  
   READ_FLAG(uiCode, "ph_non_ref_pic_flag");                picHeader->setNonReferencePictureFlag(uiCode != 0);
-#endif
   if (picHeader->getGdrOrIrapPicFlag())
   {
     READ_FLAG(uiCode, "ph_gdr_pic_flag");                     picHeader->setGdrPicFlag(uiCode != 0);
@@ -2753,9 +2751,6 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     picHeader->setPicIntraSliceAllowedFlag(true);
   }
   CHECK(picHeader->getPicInterSliceAllowedFlag() == 0 && picHeader->getPicIntraSliceAllowedFlag() == 0, "Invalid picture without intra or inter slice");
-#if !JVET_S0076_ASPECT1
-  READ_FLAG(uiCode, "non_reference_picture_flag");       picHeader->setNonReferencePictureFlag( uiCode != 0 );
-#endif
   // parameter sets
   READ_UVLC(uiCode, "ph_pic_parameter_set_id");
   picHeader->setPPSId(uiCode);
@@ -4574,9 +4569,7 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
   {
     uint32_t phGdrOrIrapPicFlag;
     READ_FLAG(phGdrOrIrapPicFlag, "ph_gdr_or_irap_pic_flag");
-#if JVET_S0076_ASPECT1
     READ_FLAG(uiCode, "ph_non_ref_pic_flag");
-#endif
     if (phGdrOrIrapPicFlag)
     {
       READ_FLAG(uiCode, "ph_gdr_pic_flag");
@@ -4586,9 +4579,6 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
     {
       READ_FLAG(uiCode, "ph_intra_slice_allowed_flag");
     }
-#if !JVET_S0076_ASPECT1
-    READ_FLAG(uiCode, "ph_non_reference_picture_flag");
-#endif
     // parameter sets
     READ_UVLC(uiCode, "ph_pic_parameter_set_id");
     // picture order count

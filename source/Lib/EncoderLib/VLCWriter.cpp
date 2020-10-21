@@ -1697,9 +1697,7 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
     slice = picHeader->getPic()->cs->slice;
   }
 WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
-#if JVET_S0076_ASPECT1
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
-#endif
   if (picHeader->getGdrOrIrapPicFlag())
   {
     WRITE_FLAG(picHeader->getGdrPicFlag(), "ph_gdr_pic_flag");
@@ -1710,9 +1708,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   {
     WRITE_FLAG(picHeader->getPicIntraSliceAllowedFlag(), "ph_intra_slice_allowed_flag");
   }
-#if !JVET_S0076_ASPECT1
-  WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_reference_picture_flag");
-#endif
   // parameter sets
   WRITE_UVLC(picHeader->getPPSId(), "ph_pic_parameter_set_id");
   pps = slice->getPPS();

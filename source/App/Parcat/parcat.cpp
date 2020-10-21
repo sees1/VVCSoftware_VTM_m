@@ -66,7 +66,6 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   PPS* pps = NULL;
   SPS* sps = NULL;
   
-#if JVET_S0076_ASPECT1
   uint32_t uiTmp;
   READ_FLAG(uiTmp, "ph_gdr_or_irap_pic_flag");
   READ_FLAG(uiCode, "ph_non_ref_pic_flag");
@@ -74,21 +73,11 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   {
     READ_FLAG( uiCode, "ph_gdr_pic_flag" );
   }
-#else
-  READ_FLAG( uiCode, "ph_gdr_or_irap_pic_flag" );
-  if (uiCode)
-  {
-    READ_FLAG(uiCode, "ph_gdr_pic_flag");
-  }
-#endif
   READ_FLAG(uiCode, "ph_inter_slice_allowed_flag");
   if (uiCode)
   {
     READ_FLAG(uiCode, "ph_intra_slice_allowed_flag");
   }
-#if !JVET_S0076_ASPECT1
-  READ_FLAG(uiCode, "non_reference_picture_flag");
-#endif
   // parameter sets
   READ_UVLC(uiCode, "ph_pic_parameter_set_id");
   pps = parameterSetManager->getPPS(uiCode);
