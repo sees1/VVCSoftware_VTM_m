@@ -1332,44 +1332,32 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
     WRITE_FLAG( pcSPS->getVirtualBoundariesPresentFlag(), "sps_loop_filter_across_virtual_boundaries_present_flag" );
     if( pcSPS->getVirtualBoundariesPresentFlag() )
     {
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC( pcSPS->getNumVerVirtualBoundaries(), "sps_num_ver_virtual_boundaries");
-#else
-      WRITE_CODE( pcSPS->getNumVerVirtualBoundaries(), 2, "sps_num_ver_virtual_boundaries");
-#endif
 #if JVET_S0221_NUM_VB_CHECK
       if (pcSPS->getMaxPicWidthInLumaSamples() <= 8)
       {
         CHECK(pcSPS->getNumVerVirtualBoundaries() != 0, "SPS: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(pcSPS->getNumVerVirtualBoundaries() > 3, "SPS: The number of vertical virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
 #endif
       for( unsigned i = 0; i < pcSPS->getNumVerVirtualBoundaries(); i++ )
       {
         WRITE_UVLC((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1, "sps_virtual_boundary_pos_x_minus1[i]");
         CHECK(((pcSPS->getVirtualBoundariesPosX(i)>>3) - 1) > (((pcSPS->getMaxPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of sps_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( sps_pic_width_max_in_luma_samples / 8 ) - 2, inclusive.");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(pcSPS->getNumHorVirtualBoundaries(), "sps_num_hor_virtual_boundaries");
-#else
-      WRITE_CODE(pcSPS->getNumHorVirtualBoundaries(), 2, "sps_num_hor_virtual_boundaries");
-#endif
 #if JVET_S0221_NUM_VB_CHECK
       if (pcSPS->getMaxPicHeightInLumaSamples() <= 8)
       {
         CHECK(pcSPS->getNumHorVirtualBoundaries() != 0, "SPS: When picture height is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(pcSPS->getNumHorVirtualBoundaries() > 3, "SPS: The number of horizontal virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
 #endif
       for( unsigned i = 0; i < pcSPS->getNumHorVirtualBoundaries(); i++ )
       {
@@ -1911,44 +1899,32 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     WRITE_FLAG( picHeader->getVirtualBoundariesPresentFlag(), "ph_virtual_boundaries_present_flag" );
     if( picHeader->getVirtualBoundariesPresentFlag() )
     {
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
-#else
-      WRITE_CODE(picHeader->getNumVerVirtualBoundaries(), 2, "ph_num_ver_virtual_boundaries");
-#endif
 #if JVET_S0221_NUM_VB_CHECK
       if (pps->getPicWidthInLumaSamples() <= 8)
       {
         CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
 #endif
       for( unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++ )
       {
         WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       WRITE_UVLC(picHeader->getNumHorVirtualBoundaries(), "ph_num_hor_virtual_boundaries");
-#else
-      WRITE_CODE(picHeader->getNumHorVirtualBoundaries(), 2, "ph_num_hor_virtual_boundaries");
-#endif
 #if JVET_S0221_NUM_VB_CHECK
       if (pps->getPicHeightInLumaSamples() <= 8)
       {
         CHECK(picHeader->getNumHorVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of horizontal virtual boundaries shall be equal to 0");
       }
-#if JVET_S0211_UEV_FOR_NUM_VB
       else
       {
         CHECK(picHeader->getNumHorVirtualBoundaries() > 3, "PH: The number of horizontal virtual boundaries shall be in the range of 0 to 3");
       }
-#endif
 #endif
       for( unsigned i = 0; i < picHeader->getNumHorVirtualBoundaries(); i++ )
       {
