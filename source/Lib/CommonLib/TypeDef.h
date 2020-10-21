@@ -107,7 +107,6 @@
 
 
 
-#define JVET_S0181_PROPOSAL1                              1 // JVET-0181_Proposal1: Conditionally signal bp_sublayer_initial_cpb_removal_delay_present_flag
 
 #define JVET_S0172_ITEM2_GCMP_CONSTRAINT                  1 // JVET-S0172 item 2: Constraints on GCMP for the hemisphere cubemap (gcmp_packing_type == 4 or 5)
 
