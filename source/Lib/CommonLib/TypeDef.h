@@ -129,7 +129,6 @@
 
 
 
-#define JVET_S0183_VPS_INFORMATION_SIGNALLING             1 // JVET-S0183: Proposal 1, signal vps_num_output_layer_sets_minus1 as vps_num_output_layer_sets_minus2
 
 #define JVET_S0184_VIRTUAL_BOUNDARY_CONSTRAINT            1 // JVET-S0184: Conformance constraints regarding virtual boundary signalling when subpictures are present
 
