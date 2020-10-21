@@ -65,7 +65,6 @@
 
 
 
-#define JVET_S_SUB_PROFILE                                1 // Move signalling of ptl_num_sub_profiles
 
 #define OPL_ADD_LAYER_ID                                  1 // Add layer ID to output picture log
 
