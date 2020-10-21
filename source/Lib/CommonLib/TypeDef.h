@@ -119,7 +119,6 @@
                                                             //             Constrain the value of one_subpic_per_pic_constraint_flag, one_slice_per_pic_constraint_flag and no_aps_constraint_flag
                                                             //             Remove all constraints that require GCI fields to be equal to a value that imposes a constraint
 
-#define JVET_S0138_GCI_PTL                                1 // JVET-S_Notes_d9: move frame_only_constraint_flag and single_layer_constraint_flag into PTL for easy access
 
 #define JVET_S0113_S0195_GCI                              1 // JVET-S0113: no_rectangular_slice_constraint_flag to constrain pps_rect_slice_flag 
                                                             //             one_slice_per_subpicture_constraint_flag to constrain pps_single_slice_per_subpic_flag

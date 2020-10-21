@@ -205,14 +205,12 @@ void EncApp::xInitLibCfg()
   ptls[0].setLevelIdc                                            ( m_level );
   ptls[0].setProfileIdc                                          ( m_profile);
   ptls[0].setTierFlag                                            ( m_levelTier );
-#if JVET_S0138_GCI_PTL
   ptls[0].setFrameOnlyConstraintFlag                             ( m_frameOnlyConstraintFlag);
   ptls[0].setMultiLayerEnabledFlag                               ( m_multiLayerEnabledFlag);
   CHECK((m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_10_444
          || m_profile == Profile::MAIN_10_STILL_PICTURE || m_profile == Profile::MAIN_10_444_STILL_PICTURE)
           && m_multiLayerEnabledFlag,
         "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#endif
   ptls[0].setNumSubProfile                                       ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
   {
@@ -226,10 +224,8 @@ void EncApp::xInitLibCfg()
   vps.setVPSExtensionFlag                                        ( false );
   m_cEncLib.setProfile                                           ( m_profile);
   m_cEncLib.setLevel                                             ( m_levelTier, m_level);
-#if JVET_S0138_GCI_PTL
   m_cEncLib.setFrameOnlyConstraintFlag                           ( m_frameOnlyConstraintFlag);
   m_cEncLib.setMultiLayerEnabledFlag                             ( m_multiLayerEnabledFlag || m_maxLayers > 1);
-#endif
   m_cEncLib.setNumSubProfile                                     ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
   {
@@ -283,16 +279,10 @@ void EncApp::xInitLibCfg()
 #else
     m_cEncLib.setOneSubpicPerPicConstraintFlag(m_oneSubpicPerPicConstraintFlag);
 #endif
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setFrameOnlyConstraintFlag(m_frameOnlyConstraintFlag);
-#endif
     m_cEncLib.setOnePictureOnlyConstraintFlag(m_onePictureOnlyConstraintFlag);
     m_cEncLib.setIntraOnlyConstraintFlag(m_intraOnlyConstraintFlag);
     m_cEncLib.setNoIdrConstraintFlag(m_noIdrConstraintFlag);
     m_cEncLib.setNoGdrConstraintFlag(m_noGdrConstraintFlag);
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setSingleLayerConstraintFlag(m_singleLayerConstraintFlag);
-#endif
     m_cEncLib.setAllLayersIndependentConstraintFlag(m_allLayersIndependentConstraintFlag);
     m_cEncLib.setNoCuQpDeltaConstraintFlag(m_noCuQpDeltaConstraintFlag);
 
@@ -458,9 +448,6 @@ void EncApp::xInitLibCfg()
   {
     m_cEncLib.setNonPackedConstraintFlag(false);
     m_cEncLib.setNonProjectedConstraintFlag(false);
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setSingleLayerConstraintFlag(false);
-#endif
     m_cEncLib.setAllLayersIndependentConstraintFlag(false);
     m_cEncLib.setNoResChangeInClvsConstraintFlag(false);
     m_cEncLib.setOneTilePerPicConstraintFlag(false);
@@ -473,9 +460,6 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoSubpicInfoConstraintFlag(false);
 #else
     m_cEncLib.setOneSubpicPerPicConstraintFlag(false);
-#endif
-#if !JVET_S0138_GCI_PTL
-    m_cEncLib.setFrameOnlyConstraintFlag(false);
 #endif
     m_cEncLib.setOnePictureOnlyConstraintFlag(false);
     m_cEncLib.setIntraOnlyConstraintFlag(false);

@@ -251,17 +251,11 @@ class ConstraintInfo
 #else
   bool              m_oneSubpicPerPicConstraintFlag;
 #endif
-#if !JVET_S0138_GCI_PTL
-  bool              m_frameOnlyConstraintFlag;
-#endif
   bool              m_intraOnlyConstraintFlag;
   uint32_t          m_maxBitDepthConstraintIdc;
   int               m_maxChromaFormatConstraintIdc;
   bool              m_onePictureOnlyConstraintFlag;
   bool              m_lowerBitRateConstraintFlag;
-#if !JVET_S0138_GCI_PTL
-  bool              m_singleLayerConstraintFlag;
-#endif
   bool              m_allLayersIndependentConstraintFlag;
   bool              m_noMrlConstraintFlag;
   bool              m_noIspConstraintFlag;
@@ -335,17 +329,11 @@ public:
 #else
     , m_oneSubpicPerPicConstraintFlag(false)
 #endif
-#if !JVET_S0138_GCI_PTL
-    , m_frameOnlyConstraintFlag  (false)
-#endif
     , m_intraOnlyConstraintFlag  (false)
     , m_maxBitDepthConstraintIdc  (  16)
     , m_maxChromaFormatConstraintIdc(CHROMA_444)
     , m_onePictureOnlyConstraintFlag (false)
     , m_lowerBitRateConstraintFlag (false )
-#if !JVET_S0138_GCI_PTL
-    , m_singleLayerConstraintFlag(false)
-#endif
     , m_allLayersIndependentConstraintFlag(false)
     , m_noMrlConstraintFlag(false)
     , m_noIspConstraintFlag(false)
@@ -405,10 +393,6 @@ public:
   bool          getGciPresentFlag() const { return m_gciPresentFlag; }
   void          setGciPresentFlag(bool b) { m_gciPresentFlag = b; }
 
-#if !JVET_S0138_GCI_PTL
-  bool          getFrameOnlyConstraintFlag() const { return m_frameOnlyConstraintFlag; }
-  void          setFrameOnlyConstraintFlag(bool b) { m_frameOnlyConstraintFlag = b; }
-#endif
   uint32_t      getMaxBitDepthConstraintIdc() const { return m_maxBitDepthConstraintIdc; }
   void          setMaxBitDepthConstraintIdc(uint32_t bitDepth) { m_maxBitDepthConstraintIdc = bitDepth; }
 
@@ -458,10 +442,6 @@ public:
 
   bool          getLowerBitRateConstraintFlag() const { return m_lowerBitRateConstraintFlag; }
   void          setLowerBitRateConstraintFlag(bool b) { m_lowerBitRateConstraintFlag = b; }
-#if !JVET_S0138_GCI_PTL
-  bool          getSingleLayerConstraintFlag() const { return m_singleLayerConstraintFlag; }
-  void          setSingleLayerConstraintFlag(bool b) { m_singleLayerConstraintFlag = b; }
-#endif
   bool          getAllLayersIndependentConstraintFlag() const { return m_allLayersIndependentConstraintFlag; }
   void          setAllLayersIndependentConstraintFlag(bool b) { m_allLayersIndependentConstraintFlag = b; }
   bool          getNoMrlConstraintFlag() const { return m_noMrlConstraintFlag; }
@@ -580,10 +560,8 @@ class ProfileTierLevel
   uint8_t           m_numSubProfile;
   std::vector<uint32_t>          m_subProfileIdc;
   Level::Name       m_levelIdc;
-#if JVET_S0138_GCI_PTL
   bool              m_frameOnlyConstraintFlag;
   bool              m_multiLayerEnabledFlag;
-#endif
   ConstraintInfo    m_constraintInfo;
   bool              m_subLayerLevelPresentFlag[MAX_TLAYER - 1];
   Level::Name       m_subLayerLevelIdc[MAX_TLAYER];
@@ -606,13 +584,11 @@ public:
   Level::Name   getLevelIdc() const                         { return m_levelIdc;                    }
   void          setLevelIdc(Level::Name x)                  { m_levelIdc = x;                       }
 
-#if JVET_S0138_GCI_PTL
   bool                    getFrameOnlyConstraintFlag() const { return m_frameOnlyConstraintFlag; }
   void                    setFrameOnlyConstraintFlag(bool x) { m_frameOnlyConstraintFlag = x; }
 
   bool                    getMultiLayerEnabledFlag() const { return m_multiLayerEnabledFlag; }
   void                    setMultiLayerEnabledFlag(bool x) { m_multiLayerEnabledFlag = x; }
-#endif
 
   ConstraintInfo*         getConstraintInfo()              { return &m_constraintInfo; }
   const ConstraintInfo*   getConstraintInfo() const        { return &m_constraintInfo; }

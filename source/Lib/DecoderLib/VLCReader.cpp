@@ -2049,9 +2049,7 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   }
 
   READ_FLAG(     uiCode, "sps_field_seq_flag");                       pcSPS->setFieldSeqFlag(uiCode);
-#if JVET_S0138_GCI_PTL
   CHECK( pcSPS->getProfileTierLevel()->getFrameOnlyConstraintFlag() && uiCode, "When ptl_frame_only_constraint_flag equal to 1 , the value of sps_field_seq_flag shall be equal to 0");
-#endif
 
   READ_FLAG( uiCode, "sps_vui_parameters_present_flag" );             pcSPS->setVuiParametersPresentFlag(uiCode);
 
@@ -2304,11 +2302,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
   int cnt = 0;
   while (m_pcBitstream->getNumBitsUntilByteAligned())
   {
-#if JVET_S0138_GCI_PTL
     READ_FLAG( uiCode, "vps_ptl_reserved_zero_bit");
-#else
-    READ_FLAG( uiCode, "vps_ptl_alignment_zero_bit");
-#endif
     CHECK(uiCode!=0, "Alignment bit is not '0'");
     cnt++;
   }
@@ -4491,18 +4485,12 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "gci_no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_virtual_boundaries_constraint_flag");      cinfo->setNoVirtualBoundaryConstraintFlag(symbol > 0 ? true : false);
 #else
-#if !JVET_S0138_GCI_PTL
-    READ_FLAG(symbol,  "general_frame_only_constraint_flag"       ); cinfo->setFrameOnlyConstraintFlag(symbol ? true : false);
-#endif
     READ_FLAG(symbol,  "general_one_picture_only_constraint_flag"    ); cinfo->setOnePictureOnlyConstraintFlag(symbol ? true : false);
     READ_FLAG(symbol,  "intra_only_constraint_flag"               ); cinfo->setIntraOnlyConstraintFlag(symbol ? true : false);
 
     READ_CODE(4, symbol,  "gci_sixteen_minus_max_bitdepth_constraint_idc"     ); cinfo->setMaxBitDepthConstraintIdc(symbol>8 ? 16 : (16-symbol));
     CHECK(symbol>8, "gci_sixteen_minus_max_bitdepth_constraint_idc shall be in the range 0 to 8, inclusive");
     READ_CODE(2, symbol,  "gci_three_minus_max_chroma_format_constraint_idc"  ); cinfo->setMaxChromaFormatConstraintIdc((ChromaFormat)(3-symbol));
-#if !JVET_S0138_GCI_PTL
-    READ_FLAG(symbol, "single_layer_constraint_flag");               cinfo->setSingleLayerConstraintFlag(symbol ? true : false);
-#endif
     READ_FLAG(symbol, "all_layers_independent_constraint_flag");     cinfo->setAllLayersIndependentConstraintFlag(symbol ? true : false);
 #if JVET_Q0114_ASPECT5_GCI_FLAG
     READ_FLAG(symbol,  "gci_no_ref_pic_resampling_constraint_flag"); cinfo->setNoRprConstraintFlag(symbol ? true : false);
@@ -4599,7 +4587,6 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
 
   READ_CODE( 8, symbol, "general_level_idc" ); ptl->setLevelIdc( Level::Name( symbol ) );
 
-#if JVET_S0138_GCI_PTL
   READ_FLAG(      symbol,   "ptl_frame_only_constraint_flag"   ); ptl->setFrameOnlyConstraintFlag(symbol);
   READ_FLAG(      symbol,   "ptl_multilayer_enabled_flag"      ); ptl->setMultiLayerEnabledFlag(symbol);
   CHECK((ptl->getProfileIdc() == Profile::MAIN_10 || ptl->getProfileIdc() == Profile::MAIN_10_444
@@ -4607,7 +4594,6 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
          || ptl->getProfileIdc() == Profile::MAIN_10_444_STILL_PICTURE)
           && symbol,
         "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#endif
 
   if(profileTierPresentFlag)
   {
@@ -4621,11 +4607,7 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
 
   while (!isByteAligned())
   {
-#if JVET_S0138_GCI_PTL
     READ_FLAG(    symbol,   "ptl_reserved_zero_bit"         ); CHECK (symbol != 0, "ptl_reserved_zero_bit not equal to zero");
-#else
-    READ_FLAG(    symbol,   "ptl_alignment_zero_bit"        ); CHECK (symbol != 0, "ptl_alignment_zero_bit not equal to zero");
-#endif
   }
 
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
