@@ -1109,11 +1109,7 @@ void EncLib::xInitVPS( const SPS& sps )
         }
         else
         {
-#if JVET_S0100_ASPECT3
           m_vps->m_dpbMaxTemporalId[dpbIdx] = m_vps->getMaxSubLayers() - 1;
-#else
-          m_vps->m_dpbMaxTemporalId[dpbIdx] = m_maxTempLayer;
-#endif
         }
       }
 
@@ -1149,12 +1145,10 @@ void EncLib::xInitVPS( const SPS& sps )
       }
     }
   }
-#if JVET_S0100_ASPECT3
   for (int i = 0; i < m_vps->getNumOutputLayerSets(); i++)
   {
     m_vps->setHrdMaxTid(i, m_vps->getMaxSubLayers() - 1);
   }
-#endif
 
   if (m_cfgVPSParameters.m_maxTidILRefPicsPlus1 >= 0)
   {
@@ -1163,9 +1157,7 @@ void EncLib::xInitVPS( const SPS& sps )
       m_vps->setMaxTidIlRefPicsPlus1(i, m_cfgVPSParameters.m_maxTidILRefPicsPlus1);
     }
   }
-#if JVET_S0100_ASPECT3
   m_vps->checkVPS();
-#endif
 }
 
 void EncLib::xInitDCI(DCI& dci, const SPS& sps)

@@ -2409,7 +2409,6 @@ void VPS::deriveOutputLayerSets()
       m_numMultiLayeredOlss++;
     }
   }
-#if JVET_S0100_ASPECT3
   m_multiLayerOlsIdxToOlsIdx.resize(m_numMultiLayeredOlss);
 
   for (int i=0, j=0; i<m_totalNumOLSs; i++)
@@ -2419,10 +2418,8 @@ void VPS::deriveOutputLayerSets()
       m_multiLayerOlsIdxToOlsIdx[j] = i;
     }
   }
-#endif
 }
 
-#if JVET_S0100_ASPECT3
 void VPS::checkVPS()
 {
   for (int multiLayerOlsIdx=0; multiLayerOlsIdx < m_numMultiLayeredOlss; multiLayerOlsIdx++)
@@ -2439,7 +2436,6 @@ void VPS::checkVPS()
                                                                      "NumMultiLayerOlss - 1, inclusive, and n being the OLS index of the m-th multi-layer OLS among all OLSs.");
   }
 }
-#endif
 
 
 void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )

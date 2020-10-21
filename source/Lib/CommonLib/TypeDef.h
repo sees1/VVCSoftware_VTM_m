@@ -102,7 +102,6 @@
 
 
 
-#define JVET_S0100_ASPECT3                                1 // JVET-S0100 Aspect 3: constraints on vps_dpb_max_tid and vps_hrd_max_tid depending on vps_ptl_max_tid
 
 #define JVET_S0156_LEVEL_DEFINITION                       1 // JVET-S0156: On level definitions
 

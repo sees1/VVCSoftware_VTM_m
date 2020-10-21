@@ -1018,10 +1018,8 @@ private:
   std::vector<std::vector<int>> m_outputLayerIdInOls;
   std::vector<std::vector<int>> m_numSubLayersInLayerInOLS;
 
-#if JVET_S0100_ASPECT3
   std::vector<int> m_multiLayerOlsIdxToOlsIdx; // mapping from multi-layer OLS index to OLS index. Initialized in deriveOutputLayerSets()
                                                // m_multiLayerOlsIdxToOlsIdx[n] is the OLSidx of the n-th multi-layer OLS.
-#endif
 public:
   std::vector<std::vector<OlsHrdParams>> m_olsHrdParams;
   int                           m_totalNumOLSs;
@@ -1154,9 +1152,7 @@ public:
   void              deriveOutputLayerSets();
   void              deriveTargetOutputLayerSet( int targetOlsIdx );
 
-#if JVET_S0100_ASPECT3
   void              checkVPS();
-#endif
 
   void              setNumLayersInOls(int olsIdx, int numLayers)         { m_numLayersInOls[olsIdx]  = numLayers; }
   int               getNumLayersInOls(int olsIdx)      const             { return m_numLayersInOls[olsIdx]; }
