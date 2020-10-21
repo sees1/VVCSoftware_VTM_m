@@ -74,7 +74,6 @@
 
 
 
-#define JVET_R0433                                        1 // JVET-R0433: APS signaling and semantics cleanup
 
 #define JVET_S0076_ASPECT1                                1 // JVET-S0076: aspect 1: Move ph_non_ref_pic_flag to earlier position
 

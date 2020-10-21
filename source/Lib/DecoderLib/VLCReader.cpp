@@ -926,11 +926,9 @@ void HLSyntaxReader::parseAPS( APS* aps )
 
   READ_CODE(5, code, "adaptation_parameter_set_id");
   aps->setAPSId(code);
-#if JVET_R0433
   uint32_t codeApsChromaPresentFlag;
   READ_FLAG(codeApsChromaPresentFlag, "aps_chroma_present_flag");
   aps->chromaPresentFlag = codeApsChromaPresentFlag;
-#endif
 
   const ApsType apsType = aps->getAPSType();
 
@@ -967,47 +965,35 @@ void HLSyntaxReader::parseAlfAps( APS* aps )
   READ_FLAG(code, "alf_luma_new_filter");
   param.newFilterFlag[CHANNEL_TYPE_LUMA] = code;
 
-  #if JVET_R0433
   if (aps->chromaPresentFlag)
   {
-#endif
     READ_FLAG(code, "alf_chroma_new_filter");
     param.newFilterFlag[CHANNEL_TYPE_CHROMA] = code;
-#if JVET_R0433
   }
   else
   {
     param.newFilterFlag[CHANNEL_TYPE_CHROMA] = 0;
   }
-#endif
 
   CcAlfFilterParam ccAlfParam = aps->getCcAlfAPSParam();
-#if JVET_R0433
   if (aps->chromaPresentFlag)
   {
-#endif
   READ_FLAG(code, "alf_cc_cb_filter_signal_flag");
   ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] = code;
-#if JVET_R0433
   }
   else
   {
     ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] = 0;
   }
-#endif
-#if JVET_R0433
   if (aps->chromaPresentFlag)
   {
-#endif
   READ_FLAG(code, "alf_cc_cr_filter_signal_flag");
   ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] = code;
-#if JVET_R0433
   }
   else
   {
     ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] = 0;
   }
-#endif
   CHECK(param.newFilterFlag[CHANNEL_TYPE_LUMA] == 0 && param.newFilterFlag[CHANNEL_TYPE_CHROMA] == 0
           && ccAlfParam.newCcAlfFilter[COMPONENT_Cb - 1] == 0 && ccAlfParam.newCcAlfFilter[COMPONENT_Cr - 1] == 0,
         "bitstream conformance error: one of alf_luma_filter_signal_flag, alf_chroma_filter_signal_flag, "
@@ -1129,17 +1115,11 @@ void HLSyntaxReader::parseLmcsAps( APS* aps )
     int signCW = code;
     info.reshaperModelBinCWDelta[i] = (1 - 2 * signCW) * absCW;
   }
-#if JVET_R0433
   if (aps->chromaPresentFlag)
   {
-#endif
   READ_CODE(3, code, "lmcs_delta_abs_crs");
-#if JVET_R0433
   }
   int absCW = aps->chromaPresentFlag ? code : 0;
-#else
-  int absCW = code;
-#endif
   if (absCW > 0)
   {
     READ_CODE(1, code, "lmcs_delta_sign_crs_flag");
@@ -1153,11 +1133,7 @@ void HLSyntaxReader::parseLmcsAps( APS* aps )
 void HLSyntaxReader::parseScalingListAps( APS* aps )
 {
   ScalingList& info = aps->getScalingList();
-#if JVET_R0433
   parseScalingList(&info, aps->chromaPresentFlag);
-#else
-  parseScalingList( &info );
-#endif
 }
 
 void  HLSyntaxReader::parseVUI(VUI* pcVUI, SPS *pcSPS)
@@ -5378,29 +5354,14 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
 /** decode quantization matrix
 * \param scalingList quantization matrix information
 */
-#if JVET_R0433
 void HLSyntaxReader::parseScalingList(ScalingList *scalingList, bool aps_chromaPrsentFlag)
-#else
-void HLSyntaxReader::parseScalingList(ScalingList* scalingList)
-#endif
 {
   uint32_t  code;
   bool scalingListCopyModeFlag;
-#if !JVET_R0433
-  READ_FLAG(code, "scaling_list_chroma_present_flag");
-#endif
-#if JVET_R0433
   scalingList->setChromaScalingListPresentFlag(aps_chromaPrsentFlag);
-#else
-  scalingList->setChromaScalingListPresentFlag(code ? true : false);
-#endif
   for (int scalingListId = 0; scalingListId < 28; scalingListId++)
   {
-#if JVET_R0433
     if (aps_chromaPrsentFlag || scalingList->isLumaScalingList(scalingListId))
-#else
-  if(scalingList->getChromaScalingListPresentFlag()|| scalingList->isLumaScalingList(scalingListId))
-#endif
   {
     READ_FLAG(code, "scaling_list_copy_mode_flag");
     scalingListCopyModeFlag = (code) ? true : false;

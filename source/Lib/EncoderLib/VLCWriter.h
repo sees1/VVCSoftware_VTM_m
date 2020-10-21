@@ -149,11 +149,7 @@ public:
 
   void codeGeneralHrdparameters(const GeneralHrdParams *hrd);
   void  codeTilesWPPEntryPoint  ( Slice* pSlice );
-#if JVET_R0433
   void codeScalingList(const ScalingList &scalingList, bool aps_chromaPresentFlag);
-#else
-  void  codeScalingList         ( const ScalingList &scalingList );
-#endif
   void alfFilter( const AlfParam& alfParam, const bool isChroma, const int altIdx );
   void dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFlag, const SPS *pcSPS);
 private:
