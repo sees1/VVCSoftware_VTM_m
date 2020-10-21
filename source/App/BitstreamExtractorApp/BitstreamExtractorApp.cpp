@@ -261,7 +261,6 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
   targetSPS.setMaxPicWidthInLumaSamples(subPic.getSubPicWidthInLumaSample());
   targetSPS.setMaxPicHeightInLumaSamples(subPic.getSubPicHeightInLumaSample());
 
-#if JVET_R0093_SUBPICS_AND_CONF_WINDOW
   // Set the new conformance window
   Window& conf = targetSPS.getConformanceWindow();
   int subpicConfWinLeftOffset = (subPic.getSubPicCtuTopLeftX() == 0) ? conf.getWindowLeftOffset() : 0;
@@ -274,7 +273,6 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
   conf.setWindowRightOffset(subpicConfWinRightOffset);
   conf.setWindowTopOffset(subpicConfWinTopOffset);
   conf.setWindowBottomOffset(subpicConfWinBottomOffset);
-#endif
 }
 
 #if JVET_S0154_R0068_ASPECT5

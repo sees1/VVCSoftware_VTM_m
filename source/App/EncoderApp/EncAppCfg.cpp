@@ -2019,7 +2019,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     }
   }
 
-#if JVET_R0093_SUBPICS_AND_CONF_WINDOW
   if( m_conformanceWindowMode > 0 && m_subPicInfoPresentFlag )
   {
     for(int i = 0; i < m_numSubPics; i++)
@@ -2034,7 +2033,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
           "No subpicture can be located completely outside of the conformance cropping window");
     }
   }
-#endif
 
   if (tmpDecodedPictureHashSEIMappedType<0 || tmpDecodedPictureHashSEIMappedType>=int(NUMBER_OF_HASHTYPES))
   {
