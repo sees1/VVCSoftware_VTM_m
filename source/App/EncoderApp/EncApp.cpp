@@ -76,7 +76,18 @@ EncApp::~EncApp()
 void EncApp::xInitLibCfg()
 {
   VPS& vps = *m_cEncLib.getVPS();
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  if (m_targetOlsIdx != 500)
+  {
+    vps.m_targetOlsIdx = m_targetOlsIdx;
+  }
+  else
+  {
+    vps.m_targetOlsIdx = -1;
+  }
+#else
   vps.m_targetOlsIdx = m_targetOlsIdx;
+#endif
 
   vps.setMaxLayers( m_maxLayers );
 
@@ -1054,11 +1065,11 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setOPIEnabled                                         ( m_OPIEnabled );
   if (m_OPIEnabled)
   {
-    if (m_maxTemporalLayer != MAX_INT)
+    if (m_maxTemporalLayer != 500)
     {
       m_cEncLib.setHtidPlus1                                     ( m_maxTemporalLayer + 1);
     }
-    if (m_targetOlsIdx != MAX_INT)
+    if (m_targetOlsIdx != 500)
     {
       m_cEncLib.setTargetOlsIdx                                   (m_targetOlsIdx);
     }

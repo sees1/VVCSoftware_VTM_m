@@ -148,14 +148,6 @@ uint32_t DecApp::decode()
   };
 
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
-    if (!m_mTidExternalSet)
-    {
-      m_iMaxTemporalLayer = -1;
-    }
-    if (!m_tOlsIdxTidExternalSet)
-    {
-      m_targetOlsIdx = -1;
-    }
     m_cDecLib.setHTidExternalSetFlag(m_mTidExternalSet);
     m_cDecLib.setTOlsIdxExternalFlag(m_tOlsIdxTidExternalSet);
 #endif

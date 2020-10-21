@@ -89,8 +89,8 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   ("OutputBitDepthC,d",         m_outputBitDepth[CHANNEL_TYPE_CHROMA], 0,          "bit depth of YUV output chroma component (default: use luma output bit-depth)")
   ("OutputColourSpaceConvert",  outputColourSpaceConvert,              string(""), "Colour space conversion to apply to input 444 video. Permitted values are (empty string=UNCHANGED) " + getListOfColourSpaceConverts(false))
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
-  ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   MAX_INT,    "Maximum Temporal Layer to be decoded. -1 to decode all layers")
-  ("TargetOutputLayerSet,p",    m_targetOlsIdx,                        MAX_INT,    "Target output layer set index")
+  ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   500,    "Maximum Temporal Layer to be decoded. -1 to decode all layers")
+  ("TargetOutputLayerSet,p",    m_targetOlsIdx,                        500,    "Target output layer set index")
 #else
   ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   -1,         "Maximum Temporal Layer to be decoded. -1 to decode all layers")
   ("TargetOutputLayerSet,p",    m_targetOlsIdx,                          -1,       "Target output layer set index")
@@ -226,13 +226,21 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
     }
   }
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
-  if (m_iMaxTemporalLayer != MAX_INT)
+  if (m_iMaxTemporalLayer != 500)
   {
     m_mTidExternalSet = true;
   }
-  if ( m_targetOlsIdx != MAX_INT)
+  else
+  {
+    m_iMaxTemporalLayer = -1;
+  }
+  if ( m_targetOlsIdx != 500)
   {
     m_tOlsIdxTidExternalSet = true;
+  }
+  else
+  {
+    m_targetOlsIdx = -1;
   }
 #endif
   return true;
@@ -246,14 +254,11 @@ DecAppCfg::DecAppCfg()
 , m_iSkipFrame(0)
 // m_outputBitDepth array initialised below
 , m_outputColourSpaceConvert(IPCOLOURSPACE_UNCHANGED)
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
-, m_targetOlsIdx(MAX_INT)
-, m_iMaxTemporalLayer(MAX_INT)
-, m_mTidExternalSet(false)
-, m_tOlsIdxTidExternalSet(false)
-#else
 , m_targetOlsIdx(0)
 , m_iMaxTemporalLayer(-1)
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+, m_mTidExternalSet(false)
+, m_tOlsIdxTidExternalSet(false)
 #endif
 , m_decodedPictureHashSEIEnabled(0)
 , m_decodedNoDisplaySEIEnabled(false)
