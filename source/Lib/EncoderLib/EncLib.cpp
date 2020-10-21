@@ -1203,10 +1203,8 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoPaletteConstraintFlag (m_noPaletteConstraintFlag);
   cinfo->setNoActConstraintFlag (m_noActConstraintFlag);
   cinfo->setNoLmcsConstraintFlag (m_noLmcsConstraintFlag);
-#if JVET_S0050_GCI
   cinfo->setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
   cinfo->setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
-#endif
   cinfo->setNoMttConstraintFlag(m_noMttConstraintFlag);
   cinfo->setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
   cinfo->setNoQtbttDualTreeIntraConstraintFlag(m_noQtbttDualTreeIntraConstraintFlag);

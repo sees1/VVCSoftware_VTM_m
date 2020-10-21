@@ -446,13 +446,11 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoLmcsConstraintFlag(m_noLmcsConstraintFlag);
     CHECK(m_noLmcsConstraintFlag && m_lmcsEnabled, "LMCS shall be deactivated when m_noLmcsConstraintFlag is equal to 1");
 
-#if JVET_S0050_GCI
     m_cEncLib.setNoExplicitScaleListConstraintFlag(m_noExplicitScaleListConstraintFlag);
     CHECK(m_noExplicitScaleListConstraintFlag && m_useScalingListId != SCALING_LIST_OFF, "Explicit scaling list shall be deactivated when m_noExplicitScaleListConstraintFlag is equal to 1");
 
     m_cEncLib.setNoVirtualBoundaryConstraintFlag(m_noVirtualBoundaryConstraintFlag);
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
-#endif
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
   }

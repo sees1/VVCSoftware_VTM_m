@@ -842,9 +842,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoJointCbCrConstraintFlag",                       m_noJointCbCrConstraintFlag,                      false, "Indicate that JCCR is deactivated")
   ("NoSbtConstraintFlag",                             m_noSbtConstraintFlag,                            false, "Indicate that SBT is deactivated")
   ("NoActConstraintFlag",                             m_noActConstraintFlag,                            false, "Indicate that ACT is deactivated")
-#if JVET_S0050_GCI
   ("NoExplicitScaleListConstraintFlag",               m_noExplicitScaleListConstraintFlag,              false, "Indicate that explicit scaling list is deactivated")
-#endif
   ("NoChromaQpOffsetConstraintFlag",                  m_noChromaQpOffsetConstraintFlag,                 false, "Indicate that chroma qp offset is zero")
   ("NoDepQuantConstraintFlag",                        m_noDepQuantConstraintFlag,                      false, "Indicate that DQ is deactivated")
   ("NoSignDataHidingConstraintFlag",                  m_noSignDataHidingConstraintFlag,                false, "Indicate that SDH is deactivated")
@@ -854,9 +852,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoCCAlfConstraintFlag",                           m_noCCAlfConstraintFlag,                          false, "Indicate that CCALF is deactivated")
   ("NoLmcsConstraintFlag",                            m_noLmcsConstraintFlag,                           false, "Indicate that LMCS is deactivated")
   ("NoLadfConstraintFlag",                            m_noLadfConstraintFlag,                          false, "Indicate that LADF is deactivated")
-#if JVET_S0050_GCI
   ("NoVirtualBoundaryConstraintFlag",                 m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
-#endif
 #if !JVET_S0138_GCI_PTL
   ("SingleLayerConstraintFlag",                       m_singleLayerConstraintFlag,                      false, "Indicate that the bitstream contains only one layer")
   ("FrameOnlyConstraintFlag",                         m_frameOnlyConstraintFlag,                        false, "Indicate that the bitstream contains only frames")

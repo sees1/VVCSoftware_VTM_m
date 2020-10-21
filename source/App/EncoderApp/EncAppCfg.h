@@ -149,10 +149,8 @@ protected:
   bool      m_noPaletteConstraintFlag;
   bool      m_noActConstraintFlag;
   bool      m_noLmcsConstraintFlag;
-#if JVET_S0050_GCI
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
-#endif
   bool      m_noMttConstraintFlag;
   bool      m_noChromaQpOffsetConstraintFlag;
   bool      m_noQtbttDualTreeIntraConstraintFlag;

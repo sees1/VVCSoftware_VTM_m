@@ -194,10 +194,8 @@ protected:
   bool      m_noPaletteConstraintFlag;
   bool      m_noActConstraintFlag;
   bool      m_noLmcsConstraintFlag;
-#if JVET_S0050_GCI
   bool      m_noExplicitScaleListConstraintFlag;
   bool      m_noVirtualBoundaryConstraintFlag;
-#endif
   bool      m_noMttConstraintFlag;
   bool      m_noChromaQpOffsetConstraintFlag;
   bool      m_noQtbttDualTreeIntraConstraintFlag;
@@ -831,12 +829,10 @@ public:
   void          setNoActConstraintFlag(bool val) { m_noActConstraintFlag = val; }
   bool          getNoLmcsConstraintFlag() const { return m_noLmcsConstraintFlag; }
   void          setNoLmcsConstraintFlag(bool val) { m_noLmcsConstraintFlag = val; }
-#if JVET_S0050_GCI
   bool          getNoExplicitScaleListConstraintFlag() const { return m_noExplicitScaleListConstraintFlag; }
   void          setNoExplicitScaleListConstraintFlag(bool val) { m_noExplicitScaleListConstraintFlag = val; }
   bool          getNoVirtualBoundaryConstraintFlag() const { return m_noVirtualBoundaryConstraintFlag; }
   void          setNoVirtualBoundaryConstraintFlag(bool val) { m_noVirtualBoundaryConstraintFlag = val; }
-#endif
   bool          getNoMttConstraintFlag() const { return m_noMttConstraintFlag; }
   void          setNoMttConstraintFlag(bool val) { m_noMttConstraintFlag = val; }
   bool      getNoChromaQpOffsetConstraintFlag() const { return m_noChromaQpOffsetConstraintFlag; }

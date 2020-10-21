@@ -4347,10 +4347,8 @@ bool             operator == (const ConstraintInfo& op1, const ConstraintInfo& o
   if (op1.m_noPaletteConstraintFlag                      != op2.m_noPaletteConstraintFlag                        ) return false;
   if (op1.m_noActConstraintFlag                          != op2.m_noActConstraintFlag                            ) return false;
   if (op1.m_noLmcsConstraintFlag                         != op2.m_noLmcsConstraintFlag                           ) return false;
-#if JVET_S0050_GCI
   if (op1.m_noExplicitScaleListConstraintFlag            != op2.m_noExplicitScaleListConstraintFlag              ) return false;
   if (op1.m_noVirtualBoundaryConstraintFlag              != op2.m_noVirtualBoundaryConstraintFlag                ) return false;
-#endif
   if (op1.m_noChromaQpOffsetConstraintFlag               != op2.m_noChromaQpOffsetConstraintFlag                 ) return false;
 #if JVET_Q0114_ASPECT5_GCI_FLAG
   if (op1.m_noRprConstraintFlag                          != op2.m_noRprConstraintFlag                            ) return false;

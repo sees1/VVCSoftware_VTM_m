@@ -116,7 +116,6 @@
 
 
 
-#define JVET_S0050_GCI                                    1 // JVET-S0050: Signal new GCI flags no_virtual_boundaries_constraint_flag and no_explicit_scaling_list_constraint_flag
                                                             //             Constrain the value of one_subpic_per_pic_constraint_flag, one_slice_per_pic_constraint_flag and no_aps_constraint_flag
                                                             //             Remove all constraints that require GCI fields to be equal to a value that imposes a constraint
 
