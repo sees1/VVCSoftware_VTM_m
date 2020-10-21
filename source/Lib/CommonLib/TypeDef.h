@@ -85,7 +85,6 @@
 
 
 
-#define JVET_S0094_CHROMAFORMAT_BITDEPTH_CONSTRAINT       1 // JVET-S0094: 0 for constraint flags for chroma format and bit depth mean unconstrained, by coding these constraints as subtractive
 
 #define JVET_S0132_HLS_REORDER                            1 // Rearrange syntax elements in SPS and PPS
 
