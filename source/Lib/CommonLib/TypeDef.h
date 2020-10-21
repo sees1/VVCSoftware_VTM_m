@@ -100,7 +100,6 @@
 
 
 
-#define JVET_S0102_ASPECT4                                1 // JVET-S0102 Aspect 4: Mandate same value for buffering period syntax elements
 
 #define JVET_S0248_HRD_CLEANUP                            1 // JVET-S0248 Aspect7: When bp_alt_cpb_params_present_flag is equal to 1, the value of bp_du_hrd_params_present_flag shall be equal to 0.
 
