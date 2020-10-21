@@ -68,7 +68,6 @@
 
 
  
-#define JVET_S0097_VPS_default_values                     1 // JVET-S0097: infer values of variables in VPS when not present
 
 #define JVET_S0219_ASPECT2_CHANGE_ORDER_APS_PARAMS_TYPE   1 // JVET-S0219 aspect2: change the order to put the aps_params_type before the aps_adaptation_parameter_set_id.
 
