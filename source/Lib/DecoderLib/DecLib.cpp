@@ -1972,7 +1972,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
 #if JVET_S0156_LEVEL_DEFINITION
   ProfileLevelTierFeatures ptlFeatures;
   ptlFeatures.extractPTLInformation(*sps);
-#if JVET_S_PROFILES
   const ProfileFeatures *profileFeatures = ptlFeatures.getProfileFeatures();
   if (profileFeatures != nullptr)
   {
@@ -1984,7 +1983,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK(sps->getProfileTierLevel()->getProfileIdc() != Profile::NONE, "Unknown profile");
     msg(WARNING, "Warning: Profile set to none or unknown value\n");
   }
-#endif
   const LevelTierFeatures *levelTierFeatures = ptlFeatures.getLevelTierFeatures();
   if (levelTierFeatures != nullptr)
   {

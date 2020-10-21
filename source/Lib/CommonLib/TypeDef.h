@@ -64,7 +64,6 @@
 
 
 
-#define JVET_S_PROFILES                                   1 // Profile definitions
 
 #define JVET_S_SUB_PROFILE                                1 // Move signalling of ptl_num_sub_profiles
 
@@ -820,7 +819,6 @@ namespace Profile
 {
   enum Name
   {
-#if JVET_S_PROFILES
     NONE                                 = 0,
     STILL_PICTURE                        = 64,
     MAIN_10                              = 1,
@@ -831,11 +829,6 @@ namespace Profile
     MAIN_10_444_STILL_PICTURE            = MAIN_10_444 | STILL_PICTURE,
     MULTILAYER_MAIN_10_444               = 49,
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
-#else
-    NONE        = 0,
-    MAIN_10     = 1,
-    MAIN_444_10 = 2
-#endif
   };
 }
 
