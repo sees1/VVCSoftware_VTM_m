@@ -1834,7 +1834,12 @@ double EncAdaptiveLoopFilter::deriveCoeffQuant( int *filterClipp, int *filterCoe
   filterCoeffQuant[numCoeff - 1] = 0;
 
   int modified=1;
-
+#if JVET_T0064
+  if( m_encCfg->getALFStrength() != 1.0 )
+  {
+    modified = 0;
+  }
+#endif
   double errRef=cov.calcErrorForCoeffs( filterClipp, filterCoeffQuant, numCoeff, bitDepth );
   while( modified )
   {
@@ -1878,7 +1883,11 @@ void EncAdaptiveLoopFilter::roundFiltCoeff( int *filterCoeffQuant, double *filte
   for( int i = 0; i < numCoeff; i++ )
   {
     int sign = filterCoeff[i] > 0 ? 1 : -1;
+#if JVET_T0064
+    filterCoeffQuant[i] = int((filterCoeff[i] * m_encCfg->getALFStrength()) * sign * factor + 0.5) * sign;
+#else
     filterCoeffQuant[i] = int( filterCoeff[i] * sign * factor + 0.5 ) * sign;
+#endif
   }
 }
 
@@ -2721,7 +2730,16 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
           double         costOn = MAX_DOUBLE;
           ctxTempStart = AlfCtx(m_CABACEstimator->getCtx());
           int iBestFilterSetIdx = 0;
+#if JVET_T0064
+          int firstFilterSetIdx = 0;
+          if (m_encCfg->getALFStrength() != 1.0)
+          {
+            firstFilterSetIdx = NUM_FIXED_FILTER_SETS;
+          }
+          for (int filterSetIdx = firstFilterSetIdx; filterSetIdx < numFilterSet; filterSetIdx++)
+#else
           for (int filterSetIdx = 0; filterSetIdx < numFilterSet; filterSetIdx++)
+#endif
           {
             //rate
             m_CABACEstimator->getCtx() = AlfCtx(ctxTempStart);
