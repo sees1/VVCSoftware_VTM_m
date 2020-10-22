@@ -265,7 +265,7 @@ void TrQuant::fwdLfnstNxN( TCoeff* src, TCoeff* dst, const uint32_t mode, const 
     trMat += trSize;
   }
 
-  ::memset( out, 0, ( trSize - zeroOutSize ) * sizeof( int ) );
+  ::memset( out, 0, ( trSize - zeroOutSize ) * sizeof( TCoeff ) );
 }
 
 void TrQuant::invLfnstNxN( TCoeff* src, TCoeff* dst, const uint32_t mode, const uint32_t index, const uint32_t size, int zeroOutSize, const int maxLog2TrDynamicRange )
