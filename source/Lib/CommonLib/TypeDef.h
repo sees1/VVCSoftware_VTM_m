@@ -52,7 +52,7 @@
 
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
-
+#define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
@@ -770,7 +770,11 @@ enum NalUnitType
   NAL_UNIT_CODED_SLICE_GDR,         // 10
 
   NAL_UNIT_RESERVED_IRAP_VCL_11,
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  NAL_UNIT_OPI,                     // 12
+#else
   NAL_UNIT_RESERVED_IRAP_VCL_12,
+#endif
   NAL_UNIT_DCI,                     // 13
   NAL_UNIT_VPS,                     // 14
   NAL_UNIT_SPS,                     // 15
