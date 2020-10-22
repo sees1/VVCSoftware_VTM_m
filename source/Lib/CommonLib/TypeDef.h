@@ -53,26 +53,8 @@
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_S0219_ASPECT1                                1 // JVET-S0219 aspect1 : removal non-referred APS parameter set in the non-output layer. 
-<<<<<<< .mine
-#define JVET_S0121_ASPECT2                                1 // JVET-S0121 aspect 2: Remove the condition check of pps_deblocking_filter_override_enabled_flag for the signalling of ph_deblocking_params_present_flag
-=======
-
->>>>>>> .theirs
-
 #define JVET_R0193                                        1 // JVET-R0193: signalling of the number of maximum sublayers used for inter-layer prediction for each layer
-<<<<<<< .mine
-
-=======
-
->>>>>>> .theirs
 #define JVET_R0193_S0141                                  1 // JVET-S0141 item 47 : item 47: In the general sub-bitstream extraction process, specify the conditions under which an output sub-bitstream is required to be a conforming bitstream such that the value of tIdTarget is specified to be in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive (instead of 0 to 6 inclusive). (JVET-S0158 aspect 1)
-<<<<<<< .mine
-
-#define JVET_S0058_GCI                                    1 // no_mtt_constraint_flag and no_weightedpred_constraint_flag
-=======
-
-
->>>>>>> .theirs
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
