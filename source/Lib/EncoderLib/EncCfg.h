@@ -1800,8 +1800,8 @@ public:
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   bool         getOPIEnabled()                      { return m_OPIEnabled; }
   void         setOPIEnabled(bool i)                { m_OPIEnabled = i; }
-  void         setHtidPlus1(int HTid)               { if (HTid != MAX_INT) { m_opi.setHtidInfoPresentFlag(true); m_opi.setOpiHtidPlus1(HTid);} }
-  void         setTargetOlsIdx(int TOlsIdx)         { if (TOlsIdx != MAX_INT) { m_opi.setOlsInfoPresentFlag(true); m_opi.setOpiOlsIdx(TOlsIdx); } }
+  void         setHtidPlus1(int HTid)               { m_opi.setHtidInfoPresentFlag(true); m_opi.setOpiHtidPlus1(HTid); }
+  void         setTargetOlsIdx(int TOlsIdx)         { m_opi.setOlsInfoPresentFlag(true); m_opi.setOpiOlsIdx(TOlsIdx); }
 #endif
 
   bool         getDCIEnabled()                      { return m_DCIEnabled; }

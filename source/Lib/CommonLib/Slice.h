@@ -936,8 +936,8 @@ public:
   OPI()
     : m_olsinfopresentflag (false)
     ,  m_htidinfopresentflag (false)
-    ,  m_opiolsidx (MAX_INT)
-    ,  m_opihtidplus1 (MAX_INT)
+    ,  m_opiolsidx (-1)
+    ,  m_opihtidplus1 (-1)
   {};
 
   virtual ~OPI() {};
