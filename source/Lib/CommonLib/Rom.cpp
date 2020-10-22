@@ -70,6 +70,9 @@ const char* nalUnitTypeToString(NalUnitType type)
   case NAL_UNIT_CODED_SLICE_IDR_N_LP:   return "IDR_N_LP";
   case NAL_UNIT_CODED_SLICE_CRA:        return "CRA";
   case NAL_UNIT_CODED_SLICE_GDR:        return "GDR";
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  case NAL_UNIT_OPI:                    return "OPI";
+#endif
   case NAL_UNIT_DCI:                    return "DCI";
   case NAL_UNIT_VPS:                    return "VPS";
   case NAL_UNIT_SPS:                    return "SPS";

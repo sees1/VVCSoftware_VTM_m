@@ -1323,6 +1323,30 @@ void HLSWriter::codeDCI(const DCI* dci)
   WRITE_FLAG(0, "dci_extension_flag");
   xWriteRbspTrailingBits();
 }
+
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+void HLSWriter::codeOPI(const OPI *opi)
+{
+#if ENABLE_TRACING
+  xTraceOPIHeader();
+#endif
+  WRITE_FLAG(opi->getOlsInfoPresentFlag(), "opi_ols_info_present_flag");
+  WRITE_FLAG(opi->getHtidInfoPresentFlag(), "opi_htid_info_present_flag");
+
+  if (opi->getOlsInfoPresentFlag()) 
+  {
+    WRITE_UVLC(opi->getOpiOlsIdx(), "opi_ols_idx");  
+  }
+
+  if (opi->getHtidInfoPresentFlag()) 
+  {
+    WRITE_CODE(opi->getOpiHtidPlus1(), 3, "opi_htid_plus1");  
+  }
+  WRITE_FLAG(0, "opi_extension_flag");
+  xWriteRbspTrailingBits();
+}
+#endif
+
 void HLSWriter::codeVPS(const VPS* pcVPS)
 {
 #if ENABLE_TRACING

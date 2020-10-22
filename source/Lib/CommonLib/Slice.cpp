@@ -2451,6 +2451,41 @@ void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
   }
 }
 
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+int VPS::deriveTargetOLSIdx(void)
+{
+  int m_lowestIdx = 0;
+  int m_highestNumLayers = m_numLayersInOls[m_lowestIdx];
+
+  if ((m_numLayersInOls.size() > 1 ))
+  {
+    for (std::vector<int>::const_iterator it = (m_numLayersInOls.begin() + 1), int idx = 1; it != m_numLayersInOls.end(); it++, idx++)
+    {
+      if(m_highestNumLayers == it[idx])
+      {
+        if (m_numOutputLayersInOls[m_lowestIdx] < m_numOutputLayersInOls[idx])
+        {
+          m_highestNumLayers = it[idx];
+          m_lowestIdx       = idx;
+        }
+	}
+      else if(m_highestNumLayers < it[idx])
+      {
+        m_highestNumLayers = it[idx];
+        m_lowestIdx       = idx;
+      }
+    }
+  }
+  return m_lowestIdx;
+}
+
+uint32_t VPS::getMaxTidinTOls(int m_targetOlsIdx)
+{
+  return getPtlMaxTemporalId(getOlsPtlIdx(m_targetOlsIdx));
+}
+
+#endif
+
 // ------------------------------------------------------------------------------------------------
 // Picture Header
 // ------------------------------------------------------------------------------------------------
@@ -4442,6 +4477,13 @@ void xTraceVPSHeader()
 {
   DTRACE( g_trace_ctx, D_HEADER, "=========== Video Parameter Set     ===========\n" );
 }
+
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+void xTraceOPIHeader()
+{
+  DTRACE(g_trace_ctx, D_HEADER, "=========== Operating Point Information     ===========\n");
+}
+#endif
 
 void xTraceDCIHeader()
 {

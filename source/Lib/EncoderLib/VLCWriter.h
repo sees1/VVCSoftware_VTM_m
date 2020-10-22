@@ -141,6 +141,9 @@ public:
   void  codeDCI                 ( const DCI* dci );
   void  codePictureHeader       ( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice = 0 );
   void  codeSliceHeader         ( Slice* pcSlice, PicHeader *picheader = 0 );
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  void  codeOPI                 ( const OPI* opi );
+#endif
   void  codeConstraintInfo      ( const ConstraintInfo* cinfo );
   void  codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 );
   void  codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd , const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1);

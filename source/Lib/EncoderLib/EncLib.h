@@ -167,6 +167,9 @@ public:
 
 protected:
   void  xGetNewPicBuffer  ( std::list<PelUnitBuf*>& rcListPicYuvRecOut, Picture*& rpcPic, int ppsId ); ///< get picture buffer which will be processed. If ppsId<0, then the ppsMap will be queried for the first match.
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  void  xInitOPI(OPI& opi, const SPS& sps); ///< initialize Operating point Information (OPI) from encoder options
+#endif
   void  xInitDCI(DCI& dci, const SPS& sps); ///< initialize Decoding Capability Information (DCI) from encoder options
   void  xInitVPS( const SPS& sps ); ///< initialize VPS from encoder options
   void  xInitSPS( SPS& sps );       ///< initialize SPS from encoder options
