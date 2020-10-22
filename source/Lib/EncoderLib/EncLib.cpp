@@ -1149,6 +1149,7 @@ void EncLib::xInitVPS( const SPS& sps )
       m_vps->setMaxTidIlRefPicsPlus1(i, m_cfgVPSParameters.m_maxTidILRefPicsPlus1);
     }
   }
+#endif
   m_vps->checkVPS();
 }
 
