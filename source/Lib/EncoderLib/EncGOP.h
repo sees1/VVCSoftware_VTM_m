@@ -331,7 +331,11 @@ protected:
   void applyDeblockingFilterParameterSelection( Picture* pcPic, const uint32_t numSlices, const int gopID );
 #endif
   void xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicList& rcListPic, const ReferencePictureList *rpl0, const ReferencePictureList *rpl1 );
+#if JVET_R0193
+  bool xCheckMaxTidILRefPics(int layerIdx, Picture* refPic, bool currentPicIsIRAP);
+#else
   bool xCheckMaxTidILRefPics(Picture* refPic, bool currentPicIsIRAP);
+#endif
 };// END CLASS DEFINITION EncGOP
 
 //! \}

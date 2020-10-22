@@ -2198,7 +2198,9 @@ VPS::VPS()
   {
     m_vpsLayerId[i] = 0;
     m_vpsIndependentLayerFlag[i] = true;
+#if !JVET_R0193
     m_vpsMaxTidIlRefPicsPlus1[i] = 7;
+#endif
     m_generalLayerIdx[i] = 0;
     for (int j = 0; j < MAX_VPS_LAYERS; j++)
     {
@@ -2292,7 +2294,11 @@ void VPS::deriveOutputLayerSets()
 
   m_numOutputLayersInOls[0] = 1;
   m_outputLayerIdInOls[0][0] = m_vpsLayerId[0];
+#if JVET_R0193_S0141
+  m_numSubLayersInLayerInOLS[0][0] = m_ptlMaxTemporalId[m_olsPtlIdx[0]] + 1;
+#else
   m_numSubLayersInLayerInOLS[0][0] = m_vpsMaxSubLayers;
+#endif
   layerUsedAsOutputLayerFlag[0] = 1;
   for (int i = 1; i < m_maxLayers; i++)
   {
@@ -2305,18 +2311,40 @@ void VPS::deriveOutputLayerSets()
       layerUsedAsOutputLayerFlag[i] = 0;
     }
   }
-
   for( int i = 1; i < m_totalNumOLSs; i++ )
   {
     if( m_vpsEachLayerIsAnOlsFlag || m_vpsOlsModeIdc == 0 )
     {
       m_numOutputLayersInOls[i] = 1;
       m_outputLayerIdInOls[i][0] = m_vpsLayerId[i];
+#if JVET_R0193_S0141
+      if (m_vpsEachLayerIsAnOlsFlag)
+      {
+        m_numSubLayersInLayerInOLS[i][0] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
+      }
+      else
+      {
+        m_numSubLayersInLayerInOLS[i][i] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
+        for (int k = i - 1; k >= 0; k--)
+        {
+          m_numSubLayersInLayerInOLS[i][k] = 0;
+          for (int m = k + 1; m <= i; m++)
+          {
+            uint32_t maxSublayerNeeded = std::min((uint32_t)m_numSubLayersInLayerInOLS[i][m], m_vpsMaxTidIlRefPicsPlus1[m][k]);
+            if (m_vpsDirectRefLayerFlag[m][k] && m_numSubLayersInLayerInOLS[i][k] < maxSublayerNeeded)
+            {
+              m_numSubLayersInLayerInOLS[i][k] = maxSublayerNeeded;
+            }
+          }
+      }
+      }
+#else
       for(int  j = 0; j < i  &&  ( m_vpsOlsModeIdc  ==  0 ); j++ )
       {
         m_numSubLayersInLayerInOLS[i][j] = m_vpsMaxTidIlRefPicsPlus1[i];
       }
       m_numSubLayersInLayerInOLS[i][i] = m_vpsMaxSubLayers;
+#endif
     }
     else if( m_vpsOlsModeIdc == 1 )
     {
@@ -2325,12 +2353,19 @@ void VPS::deriveOutputLayerSets()
       for( int j = 0; j < m_numOutputLayersInOls[i]; j++ )
       {
         m_outputLayerIdInOls[i][j] = m_vpsLayerId[j];
+#if JVET_R0193_S0141
+        m_numSubLayersInLayerInOLS[i][j] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
+#else
         m_numSubLayersInLayerInOLS[i][j] = m_vpsMaxSubLayers;
+#endif
       }
     }
     else if( m_vpsOlsModeIdc == 2 )
     {
       int j = 0;
+#if JVET_R0193
+      int highestIncludedLayer = 0;
+#endif
       for( j = 0; j  <  m_maxLayers; j++ )
       {
         m_numSubLayersInLayerInOLS[i][j] = 0;
@@ -2341,10 +2376,17 @@ void VPS::deriveOutputLayerSets()
         if( m_vpsOlsOutputLayerFlag[i][k] )
         {
           layerIncludedInOlsFlag[i][k] = 1;
+#if JVET_R0193
+          highestIncludedLayer = k;
+#endif
           layerUsedAsOutputLayerFlag[k] = 1;
           outputLayerIdx[i][j] = k;
           m_outputLayerIdInOls[i][j++] = m_vpsLayerId[k];
+#if JVET_R0193_S0141
+          m_numSubLayersInLayerInOLS[i][k] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
+#else
           m_numSubLayersInLayerInOLS[i][k] = m_vpsMaxSubLayers;
+#endif
         }
       }
       m_numOutputLayersInOls[i] = j;
@@ -2355,12 +2397,30 @@ void VPS::deriveOutputLayerSets()
         for( int k = 0; k < numRefLayers[idx]; k++ )
         {
           layerIncludedInOlsFlag[i][refLayerIdx[idx][k]] = 1;
+#if !JVET_R0193
           if( m_numSubLayersInLayerInOLS[i][ refLayerIdx[idx][k] ] < m_vpsMaxTidIlRefPicsPlus1[ m_outputLayerIdInOls[i][j] ] )
           {
             m_numSubLayersInLayerInOLS[i][ refLayerIdx[idx][k] ] =  m_vpsMaxTidIlRefPicsPlus1[ m_outputLayerIdInOls[i][j] ];
           }
+#endif
         }
       }
+#if JVET_R0193
+      for (int k = highestIncludedLayer - 1; k >= 0; k--)
+      {
+        if (layerIncludedInOlsFlag[i][k] && !m_vpsOlsOutputLayerFlag[i][k])
+        {
+          for (int m = k + 1; m <= highestIncludedLayer; m++)
+          {
+            uint32_t maxSublayerNeeded = std::min((uint32_t)m_numSubLayersInLayerInOLS[i][m], m_vpsMaxTidIlRefPicsPlus1[m][k]);
+            if (m_vpsDirectRefLayerFlag[m][k] && layerIncludedInOlsFlag[i][m] && m_numSubLayersInLayerInOLS[i][k] < maxSublayerNeeded)
+            {
+              m_numSubLayersInLayerInOLS[i][k] = maxSublayerNeeded;
+            }
+          }
+        }
+      }
+#endif
     }
   }
   for (int i = 0; i < m_maxLayers; i++)

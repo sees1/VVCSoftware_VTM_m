@@ -461,6 +461,7 @@ void BitstreamExtractorApp::xWritePPS(PPS *pps, std::ostream& out, int layerId, 
   writeAnnexBNalUnit(out, naluWithHeader, true);
 }
 
+
 // returns true, if the NAL unit is to be discarded
 bool BitstreamExtractorApp::xCheckNumSubLayers(InputNALUnit &nalu, VPS *vps)
 {
@@ -772,7 +773,7 @@ uint32_t BitstreamExtractorApp::decode()
         int apsId = aps->getAPSId();
         int apsType = aps->getAPSType();
         // note: storeAPS may invalidate the aps pointer!
-        m_parameterSetManager.storeAPS( aps, nalu.getBitstream().getFifo() );
+        m_parameterSetManager.storeAPS(aps, nalu.getBitstream().getFifo());
         // get APS back
         aps = m_parameterSetManager.getAPS(apsId, apsType);
       }

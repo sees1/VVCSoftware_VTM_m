@@ -1039,9 +1039,12 @@ void EncLib::xInitVPS( const SPS& sps )
   m_vps->m_olsHrdParams.resize(m_vps->getNumOlsTimingHrdParamsMinus1(), std::vector<OlsHrdParams>(m_vps->getMaxSubLayers()));
   ProfileLevelTierFeatures profileLevelTierFeatures;
   profileLevelTierFeatures.extractPTLInformation( sps );
-
+#if JVET_R0193
+  m_vps->setMaxTidIlRefPicsPlus1(m_cfgVPSParameters.m_maxTidILRefPicsPlus1);
+#endif
   m_vps->deriveOutputLayerSets();
   m_vps->deriveTargetOutputLayerSet( m_vps->m_targetOlsIdx );
+
 
   // number of the DPB parameters is set equal to the number of OLS containing multi layers
   if( !m_vps->getEachLayerIsAnOlsFlag() )
@@ -1138,6 +1141,7 @@ void EncLib::xInitVPS( const SPS& sps )
     m_vps->setHrdMaxTid(i, m_vps->getMaxSubLayers() - 1);
   }
 
+#if !JVET_R0193
   if (m_cfgVPSParameters.m_maxTidILRefPicsPlus1 >= 0)
   {
     for (int i = 0; i < m_vps->getMaxLayers(); i++)
@@ -1145,6 +1149,7 @@ void EncLib::xInitVPS( const SPS& sps )
       m_vps->setMaxTidIlRefPicsPlus1(i, m_cfgVPSParameters.m_maxTidILRefPicsPlus1);
     }
   }
+#endif
   m_vps->checkVPS();
 }
 

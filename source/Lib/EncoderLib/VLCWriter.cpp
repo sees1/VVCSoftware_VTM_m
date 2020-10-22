@@ -1347,6 +1347,22 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       WRITE_FLAG(pcVPS->getIndependentLayerFlag(i), "vps_independent_layer_flag");
       if (!pcVPS->getIndependentLayerFlag(i))
       {
+#if JVET_R0193
+        bool presentFlag = false;
+        for (int j = 0; j < i; j++)
+        {
+          presentFlag |= ((pcVPS->getMaxTidIlRefPicsPlus1(i, j) != 7) && pcVPS->getDirectRefLayerFlag(i, j));
+        }
+        WRITE_FLAG(presentFlag, "max_tid_ref_present_flag[ i ]");
+        for (int j = 0; j < i; j++)
+        {
+          WRITE_FLAG(pcVPS->getDirectRefLayerFlag(i, j), "vps_direct_ref_layer_flag");
+          if (presentFlag && pcVPS->getDirectRefLayerFlag(i, j))
+          {
+            WRITE_CODE(pcVPS->getMaxTidIlRefPicsPlus1(i, j), 3, "max_tid_il_ref_pics_plus1[ i ][ j ]");
+          }
+        }
+#else
         for (int j = 0; j < i; j++)
         {
           WRITE_FLAG(pcVPS->getDirectRefLayerFlag(i, j), "vps_direct_dependency_flag");
@@ -1357,6 +1373,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
         {
           WRITE_CODE(pcVPS->getMaxTidIlRefPicsPlus1(i), 3, "vps_max_tid_il_ref_pics_plus1[ i ]");
         }
+#endif
       }
     }
   }

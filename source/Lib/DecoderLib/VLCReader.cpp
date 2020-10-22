@@ -2174,6 +2174,11 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       pcVPS->setEachLayerIsAnOlsFlag(0);
     }
   }
+#if JVET_R0193
+  std::vector<std::vector<uint32_t>> maxTidilRefPicsPlus1;
+  maxTidilRefPicsPlus1.resize(pcVPS->getMaxLayers(), std::vector<uint32_t>(pcVPS->getMaxLayers(), NOT_VALID));
+  pcVPS->setMaxTidIlRefPicsPlus1(maxTidilRefPicsPlus1);
+#endif
   for (uint32_t i = 0; i < pcVPS->getMaxLayers(); i++)
   {
     READ_CODE(6, uiCode, "vps_layer_id");                     pcVPS->setLayerId(i, uiCode);
@@ -2184,6 +2189,31 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       READ_FLAG(uiCode, "vps_independent_layer_flag");     pcVPS->setIndependentLayerFlag(i, uiCode);
       if (!pcVPS->getIndependentLayerFlag(i))
       {
+#if JVET_R0193
+        READ_FLAG(uiCode, "max_tid_ref_present_flag[ i ]");
+        bool presentFlag = uiCode;
+        uint16_t sumUiCode = 0;
+        for (int j = 0, k = 0; j < i; j++)
+        {
+          READ_FLAG(uiCode, "vps_direct_ref_layer_flag"); pcVPS->setDirectRefLayerFlag(i, j, uiCode);
+          if (uiCode)
+          {
+            pcVPS->setInterLayerRefIdc(i, j, k);
+            pcVPS->setDirectRefLayerIdx(i, k++, j);
+            sumUiCode++;
+          }
+          if (presentFlag && pcVPS->getDirectRefLayerFlag(i, j))
+          {
+            READ_CODE(3, uiCode, "max_tid_il_ref_pics_plus1[ i ][ j ]");
+            pcVPS->setMaxTidIlRefPicsPlus1(i, j, uiCode);
+          }
+          else
+          {
+            pcVPS->setMaxTidIlRefPicsPlus1(i, j, 7);
+          }
+        }
+        CHECK(sumUiCode == 0, "There has to be at least one value of j such that the value of vps_direct_dependency_flag[ i ][ j ] is equal to 1,when vps_independent_layer_flag[ i ] is equal to 0 ");
+#else
         uint16_t sumUiCode = 0;
         for (int j = 0, k = 0; j < i; j++)
         {
@@ -2206,6 +2236,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
         {
           pcVPS->setMaxTidIlRefPicsPlus1(i, 7);
         }
+#endif
       }
     }
   }
