@@ -50,6 +50,8 @@
 #include <assert.h>
 #include <cassert>
 
+#define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
+
 // clang-format off
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_S0219_ASPECT1                                1 // JVET-S0219 aspect1 : removal non-referred APS parameter set in the non-output layer. 
