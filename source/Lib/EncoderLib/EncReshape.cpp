@@ -228,7 +228,11 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
         {
           for (bx = x1; bx <= x2; bx++)
           {
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+            tempSq = (int64_t)pWinY[bx] * (int64_t)pWinY[bx];
+#else
             tempSq = pWinY[bx] * pWinY[bx];
+#endif
             leftSum += pWinY[bx];
             leftSumSq += tempSq;
             leftColSum[bx] += pWinY[bx];
@@ -255,7 +259,11 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
           for (bx = x1; bx <= x2; bx++)
           {
             topRowSum[y + winLens] += pWinY[bx];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+            topRowSumSq[y + winLens] += (int64_t)pWinY[bx] * (int64_t)pWinY[bx];
+#else
             topRowSumSq[y + winLens] += pWinY[bx] * pWinY[bx];
+#endif
           }
           topSum += topRowSum[y + winLens];
           topSumSq += topRowSumSq[y + winLens];
@@ -274,7 +282,11 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
           for (bx = x1; bx <= x2; bx++)
           {
             leftColSum[bx] += pWinY[bx];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+            leftColSumSq[bx] += (int64_t)pWinY[bx] * (int64_t)pWinY[bx];
+#else
             leftColSumSq[bx] += pWinY[bx] * pWinY[bx];
+#endif
           }
           pWinY += stride;
         }
@@ -295,7 +307,11 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
             for (by = y1; by <= y2; by++)
             {
               leftColSum[x + winLens] += pWinY[x + winLens];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+              leftColSumSq[x + winLens] += (int64_t)pWinY[x + winLens] * (int64_t)pWinY[x + winLens];
+#else
               leftColSumSq[x + winLens] += pWinY[x + winLens] * pWinY[x + winLens];
+#endif
               pWinY += stride;
             }
           }
@@ -308,14 +324,22 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
               pWinY = &picY.buf[0];
               pWinY += winLens * stride;
               leftColSum[x + winLens] += pWinY[x + winLens];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+              leftColSumSq[x + winLens] += (int64_t)pWinY[x + winLens] * (int64_t)pWinY[x + winLens];
+#else
               leftColSumSq[x + winLens] += pWinY[x + winLens] * pWinY[x + winLens];
+#endif
             }
             if (y > winLens)
             {
               pWinY = &picY.buf[0];
               pWinY -= (winLens + 1) * stride;
               leftColSum[x + winLens] -= pWinY[x + winLens];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+              leftColSumSq[x + winLens] -= (int64_t)pWinY[x + winLens] * (int64_t)pWinY[x + winLens];
+#else
               leftColSumSq[x + winLens] -= pWinY[x + winLens] * pWinY[x + winLens];
+#endif
             }
           }
           topColSum[x + winLens] = leftColSum[x + winLens];
@@ -399,7 +423,11 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
     for (int x = 0; x < width; x++)
     {
       avgY += picY.buf[x];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+      varY += (double)picY.buf[x] * (double)picY.buf[x];
+#else
       varY += picY.buf[x] * picY.buf[x];
+#endif
     }
     picY.buf += stride;
   }
@@ -421,8 +449,13 @@ void EncReshape::calcSeqStats(Picture *pcPic, SeqInfo &stats)
       {
         avgU += picU.buf[x];
         avgV += picV.buf[x];
+#if JVET_T0091_LMCS_ENC_OVERFLOW_FIX
+        varU += (int64_t)picU.buf[x] * (int64_t)picU.buf[x];
+        varV += (int64_t)picV.buf[x] * (int64_t)picV.buf[x];
+#else
         varU += picU.buf[x] * picU.buf[x];
         varV += picV.buf[x] * picV.buf[x];
+#endif
       }
       picU.buf += strideC;
       picV.buf += strideC;
