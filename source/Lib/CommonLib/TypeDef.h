@@ -56,7 +56,7 @@
 #define JVET_R0193                                        1 // JVET-R0193: signalling of the number of maximum sublayers used for inter-layer prediction for each layer
 #define JVET_R0193_S0141                                  1 // JVET-S0141 item 47 : item 47: In the general sub-bitstream extraction process, specify the conditions under which an output sub-bitstream is required to be a conforming bitstream such that the value of tIdTarget is specified to be in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive (instead of 0 to 6 inclusive). (JVET-S0158 aspect 1)
 #define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
-#define JVET_R0264_IRAP_CONSTRAINT                                        1 // when max_tid_il_ref_pic_plus1[i][j] is equal to 0, it would be prohibited to have mixtures of IRAP and non-IRAP NAL units in the picture
+#define JVET_R0264_IRAP_CONSTRAINT                        1 // when max_tid_il_ref_pic_plus1[i][j] is equal to 0, it would be prohibited to have mixtures of IRAP and non-IRAP NAL units in the picture
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
