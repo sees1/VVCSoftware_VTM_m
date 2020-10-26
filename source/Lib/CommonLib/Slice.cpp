@@ -685,6 +685,18 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_RADL )
           {
             CHECK( refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "RADL picture detected that violate the rule that no active entry in RefPicList[] shall precede the associated IRAP picture in decoding order" );
+#if JVET_S0084_S0110_RADL
+            // Checking this: "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or 
+            // RefPicList[ 1 ] that is any of the following: A RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0
+            for (int i = 0; i < pcRefPic->numSlices; i++)
+            {
+              if (pcRefPic->slices[i]->getPPS()->getMixedNaluTypesInPicFlag() == 0)
+              {
+                CHECK(pcRefPic->slices[i]->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL, "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or RefPicList[ 1 ] that is a RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0");
+              }
+            }
+#endif
+
           }
 
           CHECK( pcRefPic->temporalId > m_pcPic->temporalId, "The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall be present in the DPB and shall have TemporalId less than or equal to that of the current picture." );
