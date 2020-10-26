@@ -1801,6 +1801,16 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
         CHECK(curLayerChromaFormat != refLayerChromaFormat, "The chroma formats of the current layer and the reference layer are different");
         int refLayerBitDepth = m_layerBitDepth[i];
         CHECK(curLayerBitDepth != refLayerBitDepth, "The bit-depth of the current layer and the reference layer are different");
+#if JVET_R0264_IRAP_CONSTRAINT
+        if (vps->getMaxTidIlRefPicsPlus1(curLayerIdx, i) == 0 && pps->getMixedNaluTypesInPicFlag() == 1)
+        {
+          for (int j = 0; j < m_uiSliceSegmentIdx; j++)
+          {
+            Slice* PreSlice = m_pcPic->slices[j];
+            CHECK( (PreSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || PreSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || PreSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA), "mixed IRAP and non-IRAP NAL units in the picture when sps_video_parameter_set_id is greater than 0 and vps_max_tid_il_ref_pics_plus1[i][j] is equal to 0");
+          }
+        }
+#endif
       }
     }
   }
@@ -2981,7 +2991,6 @@ void DecLib::checkNalUnitConstraints( uint32_t naluType )
     const ConstraintInfo *cInfo = m_parameterSetManager.getActiveSPS()->getProfileTierLevel()->getConstraintInfo();
     xCheckNalUnitConstraintFlags( cInfo, naluType );
   }
-
 }
 void DecLib::xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType )
 {
