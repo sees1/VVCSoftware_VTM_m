@@ -1351,7 +1351,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
         bool presentFlag = false;
         for (int j = 0; j < i; j++)
         {
-          presentFlag |= ((pcVPS->getMaxTidIlRefPicsPlus1(i, j) != 7) && pcVPS->getDirectRefLayerFlag(i, j));
+          presentFlag |= ((pcVPS->getMaxTidIlRefPicsPlus1(i, j) != MAX_TLAYER) && pcVPS->getDirectRefLayerFlag(i, j));
         }
         WRITE_FLAG(presentFlag, "max_tid_ref_present_flag[ i ]");
         for (int j = 0; j < i; j++)
