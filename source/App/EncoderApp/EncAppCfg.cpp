@@ -1404,7 +1404,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("EnsureWppBitEqual",                               m_ensureWppBitEqual,                      false, "Ensure the results are equal to results with WPP-style parallelism, even if WPP is off")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
 #if JVET_T0064
-  ("ALFStrength", m_alfStrength, 1.0, "Adaptive Loop Filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma.")
+  ("ALFStrength", m_alfStrength, 1.0, "Adaptive Loop Filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma. Valid range is 0.0 <= ALFStrength <= 1.0")
 #endif
   ( "CCALF",                                           m_ccalf,                                  true, "Cross-component Adaptive Loop Filter" )
   ( "CCALFQpTh",                                       m_ccalfQpThreshold,                         37, "QP threshold above which encoder reduces CCALF usage")
@@ -2765,6 +2765,13 @@ bool EncAppCfg::xCheckParameter()
     msg( WARNING, "****************************************************************************\n");
     m_dualTree = false;
   }
+#if JVET_T0064
+  if (m_alf)
+  {
+    xConfirmPara(m_alfStrength < 0.0, "ALFStrength is less than 0. Valid range is 0.0 <= ALFStrength <= 1.0" );
+    xConfirmPara(m_alfStrength > 1.0, "ALFStrength is greater than 1. Valid range is 0.0 <= ALFStrength <= 1.0" );
+  }
+#endif
   if (m_ccalf && (m_chromaFormatIDC == CHROMA_400))
   {
     msg( WARNING, "****************************************************************************\n");
