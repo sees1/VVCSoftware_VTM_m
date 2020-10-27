@@ -711,7 +711,10 @@ protected:
 
   int         m_maxLayers;
   int         m_targetOlsIdx;
-
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  bool        m_OPIEnabled;                                     ///< enable Operating Point Information (OPI)
+  int         m_maxTemporalLayer;
+#endif
   int         m_layerId[MAX_VPS_LAYERS];
   int         m_layerIdx;
   int         m_maxSublayers;

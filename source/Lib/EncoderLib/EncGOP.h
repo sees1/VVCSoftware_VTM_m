@@ -318,6 +318,9 @@ protected:
   void xWriteTrailingSEIMessages (SEIMessages& seiMessages, AccessUnit &accessUnit, int temporalId);
   void xWriteDuSEIMessages       (SEIMessages& duInfoSeiMessages, AccessUnit &accessUnit, int temporalId, std::deque<DUData> &duData);
 
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  int xWriteOPI (AccessUnit &accessUnit, const OPI *opi);
+#endif
   int xWriteVPS (AccessUnit &accessUnit, const VPS *vps);
   int xWriteDCI (AccessUnit &accessUnit, const DCI *dci);
   int xWriteSPS( AccessUnit &accessUnit, const SPS *sps, const int layerId = 0 );

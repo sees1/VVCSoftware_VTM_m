@@ -923,6 +923,36 @@ public:
   }
 };
 
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+class OPI
+{
+private:
+  bool m_olsinfopresentflag;
+  bool m_htidinfopresentflag;
+  uint32_t  m_opiolsidx;
+  uint32_t  m_opihtidplus1;
+
+public:
+  OPI()
+    : m_olsinfopresentflag (false)
+    ,  m_htidinfopresentflag (false)
+    ,  m_opiolsidx (-1)
+    ,  m_opihtidplus1 (-1)
+  {};
+
+  virtual ~OPI() {};
+
+  bool getOlsInfoPresentFlag() const { return m_olsinfopresentflag; }
+  void setOlsInfoPresentFlag(bool val) { m_olsinfopresentflag = val; }
+  bool getHtidInfoPresentFlag() const { return m_htidinfopresentflag; }
+  void setHtidInfoPresentFlag(bool val) { m_htidinfopresentflag = val; }
+  uint32_t getOpiOlsIdx() const { return m_opiolsidx; }
+  void setOpiOlsIdx(uint32_t val) { m_opiolsidx = val; }
+  uint32_t getOpiHtidPlus1() const { return m_opihtidplus1; }
+  void setOpiHtidPlus1(uint32_t val) { m_opihtidplus1 = val; }
+
+};
+#endif
 
 class VPS
 {
@@ -1102,6 +1132,10 @@ public:
 
   void              deriveOutputLayerSets();
   void              deriveTargetOutputLayerSet( int targetOlsIdx );
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  int               deriveTargetOLSIdx();
+  uint32_t          getMaxTidinTOls(int m_targetOlsIdx);
+#endif
 
   void              checkVPS();
 
@@ -3077,6 +3111,9 @@ public:
 
 #if ENABLE_TRACING
 void xTraceVPSHeader();
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+void xTraceOPIHeader();
+#endif
 void xTraceDCIHeader();
 void xTraceSPSHeader();
 void xTracePPSHeader();

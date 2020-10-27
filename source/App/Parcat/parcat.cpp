@@ -279,7 +279,11 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
       }
       first_idr_slice_after_ph_nal = false;
     }
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+    if(inp_nalu.m_nalUnitType == NAL_UNIT_PH || (nalu_type < NAL_UNIT_CODED_SLICE_IDR_W_RADL) || (nalu_type > NAL_UNIT_CODED_SLICE_IDR_N_LP && nalu_type <= NAL_UNIT_RESERVED_IRAP_VCL_11) )
+#else
     if(inp_nalu.m_nalUnitType == NAL_UNIT_PH || (nalu_type < NAL_UNIT_CODED_SLICE_IDR_W_RADL) || (nalu_type > NAL_UNIT_CODED_SLICE_IDR_N_LP && nalu_type <= NAL_UNIT_RESERVED_IRAP_VCL_12) )
+#endif
     {
       parcatHLSReader.setBitstream( &inp_nalu.getBitstream() );
       if (inp_nalu.m_nalUnitType == NAL_UNIT_PH)
@@ -329,8 +333,14 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
       skip_next_sei = true;
       idr_found = true;
     }
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+    if ((idx > 1 && (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP)) 
+      || ((idx > 1 && !idr_found) && (nalu_type == NAL_UNIT_OPI || nalu_type == NAL_UNIT_DCI || nalu_type == NAL_UNIT_VPS || nalu_type == NAL_UNIT_SPS || nalu_type == NAL_UNIT_PPS || nalu_type == NAL_UNIT_PREFIX_APS || nalu_type == NAL_UNIT_SUFFIX_APS || nalu_type == NAL_UNIT_PH || nalu_type == NAL_UNIT_ACCESS_UNIT_DELIMITER)) 
+      || (nalu_type == NAL_UNIT_SUFFIX_SEI && skip_next_sei))
+#else
     if ((idx > 1 && (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP)) || ((idx > 1 && !idr_found) && (nalu_type == NAL_UNIT_DCI || nalu_type == NAL_UNIT_VPS || nalu_type == NAL_UNIT_SPS || nalu_type == NAL_UNIT_PPS || nalu_type == NAL_UNIT_PREFIX_APS || nalu_type == NAL_UNIT_SUFFIX_APS || nalu_type == NAL_UNIT_PH || nalu_type == NAL_UNIT_ACCESS_UNIT_DELIMITER))
       || (nalu_type == NAL_UNIT_SUFFIX_SEI && skip_next_sei))
+#endif
     {
     }
     else

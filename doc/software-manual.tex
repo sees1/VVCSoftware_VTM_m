@@ -1434,10 +1434,30 @@ Specifies the value to use to derive the vps_max_layers_minus1 for layered codin
 Specifies the maximum number of temporal sublayers to signal in the VPS
 \\
 
+
 \Option{DefaultPtlDpbHrdMaxTidFlag} &
 %\ShortOption{\None} &
 \Default{true} &
 Specifies the value of vps_default_ptl_dpb_hrd_max_tid_flag in the VPS
+\\
+
+\Option{EnableOperatingPointInformation} &
+%\ShortOption{\None} &
+\Default{false} &
+Enables writing of a operating point information (OPI). If disabled, no OPI will
+be written.
+\\
+
+\Option{TargetOutputLayerSet} &
+%\ShortOption{\None} &
+\Default{\NotSet} &
+Specifies the target Output Layer Set Idx to be signalled in OPI. When not provided the value may be inferred from the VPS.
+\\
+
+\Option{MaxTemporalLayer} &
+%\ShortOption{\None} &
+\Default{\NotSet} &
+Defines the maximum temporal layer to be signalled in OPI. When not provided the value may be inferred from the VPS.
 \\
 
 \Option{AllowablePredDirection} &
@@ -4650,7 +4670,7 @@ Defines the input bit stream file name.
 \Option{ReconFile (-o)} &
 %\ShortOption{-o} &
 \Default{\NotSet} &
-Defines the reconstructed video file name. If empty, no file is generated. If the bitstream contains multiple layer and no single target layer is specified (i.e. TargetLayer=-1), a reconstructed file is written for each layer and the layer index is added as suffix to ReconFile. If one or more dots exist in the file name, the layer id is added before the last dot, e.g. 'decoded.yuv' becomes 'decoded0.yuv' for layer id 0, 'decoded' becomes 'decoded0'.
+Defines the reconstructed video file name. If empty, no file is generated. If the bitstream contains multiple layer and no single target layer is specified (i.e. TargetOutputLayerSet=-1), a reconstructed file is written for each layer and the layer index is added as suffix to ReconFile. If one or more dots exist in the file name, the layer id is added before the last dot, e.g. 'decoded.yuv' becomes 'decoded0.yuv' for layer id 0, 'decoded' becomes 'decoded0'.
 \\
 
 \Option{OplFile (-opl)} &
@@ -4667,8 +4687,8 @@ Defines the number of pictures in decoding order to skip.
 
 \Option{MaxTemporalLayer (-t)} &
 %\ShortOption{-t} &
-\Default{-1} &
-Defines the maximum temporal layer to be decoded. If -1, then all layers are decoded.
+\Default{\NotSet} &
+Defines the maximum temporal layer to be decoded. If -1, then all layers are decoded. When not provided the value may be inferred from the OPI NAL unit or the VPS NAL unit of the bitstream.
 \\
 
 \Option{TarDecLayerIdSetFile (-l)} &
@@ -4692,11 +4712,11 @@ Defines the chroma bit-depth of the reconstructed YUV file (the value 0 indicate
 that the native bit-depth is used)
 \\
 
-\Option{TargetLayer (-p)} &
+\Option{TargetOutputLayerSet (-p)} &
 %\ShortOption{-p} &
-\Default{-1 \\ (Native)} &
+\Default{\NotSet} &
 Specifies the target bitstream Layer to be decoded. (the value -1 indicates
-that decoding the whole bitstream )
+that decoding the whole bitstream ). When not provided the value may be inferred from the OPI NAL unit or the VPS NAL unit of the bitstream.
 \\
 
 \Option{SEIDecodedPictureHash} &

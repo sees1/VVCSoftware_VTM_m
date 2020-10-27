@@ -233,7 +233,9 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   }
 
   xInitVPS( sps0 );
-
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  xInitOPI(m_opi);
+#endif
   xInitDCI(m_dci, sps0);
 #if ENABLE_SPLIT_PARALLELISM
   if( omp_get_dynamic() )
@@ -1152,6 +1154,25 @@ void EncLib::xInitVPS( const SPS& sps )
 #endif
   m_vps->checkVPS();
 }
+
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+void EncLib::xInitOPI(OPI& opi)
+{
+  if (m_OPIEnabled && m_vps)
+  {
+    if (!opi.getOlsInfoPresentFlag())
+    {
+      opi.setOpiOlsIdx(m_vps->deriveTargetOLSIdx());
+      opi.setOlsInfoPresentFlag(true);    
+    }
+    if (!opi.getHtidInfoPresentFlag())
+    {
+      opi.setOpiHtidPlus1(m_vps->getMaxTidinTOls(opi.getOpiOlsIdx()) + 1);
+      opi.setHtidInfoPresentFlag(true);
+    }
+  }
+}
+#endif
 
 void EncLib::xInitDCI(DCI& dci, const SPS& sps)
 {

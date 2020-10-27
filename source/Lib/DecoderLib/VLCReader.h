@@ -156,6 +156,9 @@ protected:
 
 public:
   void  setBitstream        ( InputBitstream* p )   { m_pcBitstream = p; }
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+  void  parseOPI            ( OPI* opi );
+#endif
   void  parseVPS            ( VPS* pcVPS );
   void  parseDCI            ( DCI* dci );
   void  parseSPS            ( SPS* pcSPS );

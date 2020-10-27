@@ -2109,6 +2109,44 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   xReadRbspTrailingBits();
 }
 
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+void HLSyntaxReader::parseOPI(OPI* opi)
+{
+#if ENABLE_TRACING
+  xTraceOPIHeader();
+#endif
+  uint32_t  symbol;
+
+  READ_FLAG(symbol, "opi_ols_info_present_flag");
+  opi->setOlsInfoPresentFlag(symbol);
+  READ_FLAG(symbol, "opi_htid_info_present_flag");
+  opi->setHtidInfoPresentFlag(symbol);
+
+  if (opi->getOlsInfoPresentFlag()) 
+  {
+    READ_UVLC(symbol, "opi_ols_idx");  
+    opi->setOpiOlsIdx(symbol);
+  }
+
+  if (opi->getHtidInfoPresentFlag()) 
+  {
+    READ_CODE(3, symbol, "opi_htid_plus1");
+    opi->setOpiHtidPlus1(symbol);
+  }
+
+  READ_FLAG(symbol, "opi_extension_flag");
+  if (symbol)
+  {
+    while (xMoreRbspData())
+    {
+      READ_FLAG(symbol, "opi_extension_data_flag");
+    }
+  }
+  xReadRbspTrailingBits();
+}
+#endif
+
+
 void HLSyntaxReader::parseDCI(DCI* dci)
 {
 #if ENABLE_TRACING
