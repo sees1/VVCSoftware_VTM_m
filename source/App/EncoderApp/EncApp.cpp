@@ -118,7 +118,7 @@ void EncApp::xInitLibCfg()
   }
 
 #if JVET_R0193
-  m_cfgVPSParameters.m_maxTidILRefPicsPlus1.resize(vps.getMaxLayers(), std::vector<uint32_t>(vps.getMaxLayers(), NOT_VALID));
+  m_cfgVPSParameters.m_maxTidILRefPicsPlus1.resize(vps.getMaxLayers(), std::vector<uint32_t>(vps.getMaxLayers(), MAX_TLAYER));
 #endif
   for (int i = 0; i < vps.getMaxLayers(); i++)
   {
