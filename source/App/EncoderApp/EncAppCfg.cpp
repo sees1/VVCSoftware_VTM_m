@@ -1405,7 +1405,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
 #if JVET_T0064
   ("ALFStrength", m_alfStrength, 1.0, "Adaptive Loop Filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma. Valid range is 0.0 <= ALFStrength <= 1.0")
-##endif
+#endif
   ( "CCALF",                                           m_ccalf,                                  true, "Cross-component Adaptive Loop Filter" )
   ( "CCALFQpTh",                                       m_ccalfQpThreshold,                         37, "QP threshold above which encoder reduces CCALF usage")
   ( "RPR",                                            m_rprEnabledFlag,                          true, "Reference Sample Resolution" )
