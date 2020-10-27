@@ -382,11 +382,19 @@ uint32_t DecApp::decode()
       }
     }
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
+#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
+    if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_OPI)
+        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
+    {
+      firstSliceInAU = false;
+    }
+#else
     if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
     {
       firstSliceInAU = false;
     }
+#endif
 #endif
     if( bNewPicture )
     {
