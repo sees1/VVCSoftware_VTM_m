@@ -129,6 +129,9 @@ uint32_t DecApp::decode()
   bool bPicSkipped = false;
 
   bool isEosPresentInPu = false;
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+  bool firstSliceInAU = true;
+#endif
 
   bool outputPicturePresentInBitstream = false;
   auto setOutputPicturePresentInStream = [&]()
@@ -181,7 +184,9 @@ uint32_t DecApp::decode()
              nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP))
         {
           m_newCLVS[nalu.m_nuhLayerId] = true;   // An IDR picture starts a new CLVS
+#if !JVET_S0078_NOOUTPUTPRIORPICFLAG
           xFlushOutput(pcListPic, nalu.m_nuhLayerId);
+#endif
         }
         if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInPu)
         {
@@ -318,9 +323,47 @@ uint32_t DecApp::decode()
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
       {
         setOutputPicturePresentInStream();
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+        bool firstPicInCVSAUThatIsNotAU0 = false;
+        if (firstSliceInAU)
+        {
+          if (m_targetDecLayerIdSet.size() > 0)
+          {
+            if (m_cDecLib.getAudIrapOrGdrAuFlag())
+            {
+              firstPicInCVSAUThatIsNotAU0 = true;
+            }
+          }
+          else
+          {
+            if (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL
+                || nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP
+                || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInPu))
+            {
+              firstPicInCVSAUThatIsNotAU0 = true;
+            }
+          }
+        }
+        if (firstPicInCVSAUThatIsNotAU0)
+        {
+          xFlushOutput(pcListPic, NOT_VALID, m_cDecLib.getNoOutputPriorPicsFlag());
+        }
+        else
+        {
+          xWriteOutput(pcListPic, nalu.m_temporalId);
+        }
+#else
         xWriteOutput( pcListPic, nalu.m_temporalId );
+#endif
       }
     }
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+    if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
+        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
+    {
+      firstSliceInAU = false;
+    }
+#endif
     if( bNewPicture )
     {
       m_cDecLib.checkSeiInPictureUnit();
@@ -350,6 +393,9 @@ uint32_t DecApp::decode()
       m_cDecLib.resetAccessUnitNals();
       m_cDecLib.resetAccessUnitApsNals();
       m_cDecLib.resetAccessUnitPicInfo();
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+      firstSliceInAU = true;
+#endif
     }
   }
   // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
@@ -623,7 +669,11 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
 
 /** \param pcListPic list of pictures to be written to file
  */
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+void DecApp::xFlushOutput( PicList *pcListPic, const int layerId, bool noOutputOfPriorPicsFlag)
+#else
 void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
+#endif
 {
   if(!pcListPic || pcListPic->empty())
   {
@@ -652,13 +702,17 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
 
       if ( pcPicTop->neededForOutput && pcPicBottom->neededForOutput && !(pcPicTop->getPOC()%2) && (pcPicBottom->getPOC() == pcPicTop->getPOC()+1) )
       {
-        // write to file
-        if ( !m_reconFileName.empty() )
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+        if (!noOutputOfPriorPicsFlag)
         {
-          const Window &conf = pcPicTop->cs->pps->getConformanceWindow();
-          const bool    isTff   = pcPicTop->topField;
+#endif
+          // write to file
+          if ( !m_reconFileName.empty() )
+          {
+            const Window &conf = pcPicTop->cs->pps->getConformanceWindow();
+            const bool    isTff   = pcPicTop->topField;
 
-          m_cVideoIOYuvReconFile[pcPicTop->layerId].write( pcPicTop->getRecoBuf(), pcPicBottom->getRecoBuf(),
+            m_cVideoIOYuvReconFile[pcPicTop->layerId].write( pcPicTop->getRecoBuf(), pcPicBottom->getRecoBuf(),
                                         m_outputColourSpaceConvert,
                                         false, // TODO: m_packedYUVMode,
                                         conf.getWindowLeftOffset() * SPS::getWinUnitX( pcPicTop->cs->sps->getChromaFormatIdc() ),
@@ -666,9 +720,12 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                         conf.getWindowTopOffset() * SPS::getWinUnitY( pcPicTop->cs->sps->getChromaFormatIdc() ),
                                         conf.getWindowBottomOffset() * SPS::getWinUnitY( pcPicTop->cs->sps->getChromaFormatIdc() ),
                                         NUM_CHROMA_FORMAT, isTff );
+          }
+          writeLineToOutputLog(pcPicTop);
+          writeLineToOutputLog(pcPicBottom);
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
         }
-        writeLineToOutputLog(pcPicTop);
-        writeLineToOutputLog(pcPicBottom);
+#endif
         // update POC of display order
         m_iPOCLastDisplay = pcPicBottom->getPOC();
 
@@ -713,20 +770,23 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
 
       if (pcPic->neededForOutput)
       {
-        // write to file
-
-        if (!m_reconFileName.empty())
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
+        if (!noOutputOfPriorPicsFlag)
         {
-          const Window &conf = pcPic->getConformanceWindow();
-          const SPS* sps = pcPic->cs->sps;
-          ChromaFormat chromaFormatIDC = sps->getChromaFormatIdc();
-          if( m_upscaledOutput )
+#endif
+          // write to file
+          if (!m_reconFileName.empty())
           {
-            m_cVideoIOYuvReconFile[pcPic->layerId].writeUpscaledPicture( *sps, *pcPic->cs->pps, pcPic->getRecoBuf(), m_outputColourSpaceConvert, m_packedYUVMode, m_upscaledOutput, NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
-          }
-          else
-          {
-            m_cVideoIOYuvReconFile[pcPic->layerId].write( pcPic->getRecoBuf().get( COMPONENT_Y ).width, pcPic->getRecoBuf().get( COMPONENT_Y ).height, pcPic->getRecoBuf(),
+            const Window &conf = pcPic->getConformanceWindow();
+            const SPS* sps = pcPic->cs->sps;
+            ChromaFormat chromaFormatIDC = sps->getChromaFormatIdc();
+            if( m_upscaledOutput )
+            {
+              m_cVideoIOYuvReconFile[pcPic->layerId].writeUpscaledPicture( *sps, *pcPic->cs->pps, pcPic->getRecoBuf(), m_outputColourSpaceConvert, m_packedYUVMode, m_upscaledOutput, NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
+            }
+            else
+            {
+              m_cVideoIOYuvReconFile[pcPic->layerId].write( pcPic->getRecoBuf().get( COMPONENT_Y ).width, pcPic->getRecoBuf().get( COMPONENT_Y ).height, pcPic->getRecoBuf(),
                                         m_outputColourSpaceConvert,
                                         m_packedYUVMode,
                                         conf.getWindowLeftOffset() * SPS::getWinUnitX( chromaFormatIDC ),
@@ -734,10 +794,12 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                         conf.getWindowTopOffset() * SPS::getWinUnitY( chromaFormatIDC ),
                                         conf.getWindowBottomOffset() * SPS::getWinUnitY( chromaFormatIDC ),
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
-            }
+              }
+          }
+          writeLineToOutputLog(pcPic);
+#if JVET_S0078_NOOUTPUTPRIORPICFLAG
         }
-        writeLineToOutputLog(pcPic);
-
+#endif
         // update POC of display order
         m_iPOCLastDisplay = pcPic->getPOC();
 
