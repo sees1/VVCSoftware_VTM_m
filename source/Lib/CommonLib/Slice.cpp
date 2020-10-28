@@ -2519,23 +2519,20 @@ int VPS::deriveTargetOLSIdx(void)
 
   if ((m_numLayersInOls.size() > 1 ))
   {
-    int idx = 1;
-    for (std::vector<int>::const_iterator it = (m_numLayersInOls.begin() + 1); it != m_numLayersInOls.end(); it++)
+    for (int idx = 1; idx < m_numLayersInOls.size(); idx++)
     {
-      if(highestNumLayers == it[idx])
+      if(highestNumLayers == m_numLayersInOls[idx])
       {
         if (m_numOutputLayersInOls[lowestIdx] < m_numOutputLayersInOls[idx])
         {
-          highestNumLayers = it[idx];
           lowestIdx       = idx;
         }
       }
-      else if(highestNumLayers < it[idx])
+      else if(highestNumLayers < m_numLayersInOls[idx])
       {
-        highestNumLayers = it[idx];
+        highestNumLayers = m_numLayersInOls[idx];
         lowestIdx       = idx;
       }
-      idx++;
     }
   }
   return lowestIdx;
