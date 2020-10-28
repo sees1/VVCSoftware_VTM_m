@@ -307,7 +307,7 @@ class ConstraintInfo
 
 public:
   ConstraintInfo()
-    : m_gciPresentFlag(true)
+    : m_gciPresentFlag(false)
     , m_noRprConstraintFlag(false)
     , m_noResChangeInClvsConstraintFlag(false)
     , m_oneTilePerPicConstraintFlag(false)
