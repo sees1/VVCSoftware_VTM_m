@@ -173,6 +173,7 @@ protected:
   bool      m_printHexPsnr;
   bool      m_printFrameMSE;
   bool      m_printSequenceMSE;
+  bool      m_printMSSSIM;
   bool      m_cabacZeroWordPaddingEnabled;
 
   bool      m_gciPresentFlag;
@@ -913,6 +914,9 @@ public:
 
   bool      getPrintSequenceMSE             ()         const { return m_printSequenceMSE;           }
   void      setPrintSequenceMSE             (bool value)     { m_printSequenceMSE = value;          }
+
+  bool      getPrintMSSSIM                  ()         const { return m_printMSSSIM;               }
+  void      setPrintMSSSIM                  (bool value)     { m_printMSSSIM = value;              }
 
   bool      getCabacZeroWordPaddingEnabled()           const { return m_cabacZeroWordPaddingEnabled;  }
   void      setCabacZeroWordPaddingEnabled(bool value)       { m_cabacZeroWordPaddingEnabled = value; }

@@ -289,7 +289,8 @@ public:
                int& iNumEncoded, bool isTff );
 
 
-  void printSummary(bool isField) { m_cGOPEncoder.printOutSummary(m_uiNumAllPicCoded, isField, m_printMSEBasedSequencePSNR, m_printSequenceMSE, m_printHexPsnr, m_resChangeInClvsEnabled, m_spsMap.getFirstPS()->getBitDepths()); }
+  void printSummary(bool isField) { m_cGOPEncoder.printOutSummary(m_uiNumAllPicCoded, isField, m_printMSEBasedSequencePSNR, 
+    m_printSequenceMSE, m_printMSSSIM, m_printHexPsnr, m_resChangeInClvsEnabled, m_spsMap.getFirstPS()->getBitDepths()); }
 
   int getLayerId() const { return m_layerId; }
   VPS* getVPS()          { return m_vps;     }
