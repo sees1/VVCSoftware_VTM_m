@@ -626,7 +626,8 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
       m_cRateCtrl.initRCGOP( m_iNumPicRcvd );
     }
 
-    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false, snrCSC, m_printFrameMSE, true, 0 );
+    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false, 
+      snrCSC, m_printFrameMSE, m_printMSSSIM, true, 0 );
 
 #if JVET_O0756_CALCULATE_HDRMETRICS
     m_metricTime = m_cGOPEncoder.getMetricTime();
@@ -777,7 +778,7 @@ bool EncLib::encode( const InputColourSpaceConversion snrCSC, std::list<PelUnitB
 {
   // compress GOP
   m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut,
-    false, false, snrCSC, m_printFrameMSE, false, m_picIdInGOP );
+    false, false, snrCSC, m_printFrameMSE, m_printMSSSIM, false, m_picIdInGOP );
 
   m_picIdInGOP++;
 
@@ -913,7 +914,8 @@ bool EncLib::encode( const InputColourSpaceConversion snrCSC, std::list<PelUnitB
     m_iPOCLast = m_iPOCLast < 2 ? fieldNum : m_iPOCLast;
 
     // compress GOP
-    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iPOCLast < 2 ? m_iPOCLast + 1 : m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, true, isTff, snrCSC, m_printFrameMSE, false, m_picIdInGOP );
+    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iPOCLast < 2 ? m_iPOCLast + 1 : m_iNumPicRcvd, m_cListPic, 
+      rcListPicYuvRecOut, true, isTff, snrCSC, m_printFrameMSE, m_printMSSSIM, false, m_picIdInGOP );
 #if JVET_O0756_CALCULATE_HDRMETRICS
     m_metricTime = m_cGOPEncoder.getMetricTime();
 #endif

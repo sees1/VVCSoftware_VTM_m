@@ -66,10 +66,11 @@ class Analyze
 private:
   double    m_dPSNRSum[MAX_NUM_COMPONENT];
   double    m_dAddBits;
-  uint32_t      m_uiNumPic;
+  uint32_t  m_uiNumPic;
   double    m_dFrmRate; //--CFG_KDY
   double    m_MSEyuvframe[MAX_NUM_COMPONENT]; // sum of MSEs
   double    m_upscaledPSNR[MAX_NUM_COMPONENT];
+  double    m_msssim[MAX_NUM_COMPONENT];
 #if EXTENSION_360_VIDEO
   TExt360EncAnalyze m_ext360;
 #endif
@@ -82,10 +83,8 @@ public:
   virtual ~Analyze()  {}
   Analyze() { clear(); }
 
-  void  addResult( double psnr[MAX_NUM_COMPONENT], double bits, const double MSEyuvframe[MAX_NUM_COMPONENT]
-    , const double upscaledPSNR[MAX_NUM_COMPONENT]
-    , bool isEncodeLtRef
-  )
+  void  addResult( double psnr[MAX_NUM_COMPONENT], double bits, const double MSEyuvframe[MAX_NUM_COMPONENT],
+    const double upscaledPSNR[MAX_NUM_COMPONENT], const double msssim[MAX_NUM_COMPONENT], bool isEncodeLtRef )
   {
     m_dAddBits  += bits;
     if (isEncodeLtRef)
@@ -95,6 +94,7 @@ public:
       m_dPSNRSum[i] += psnr[i];
       m_MSEyuvframe[i] += MSEyuvframe[i];
       m_upscaledPSNR[i] += upscaledPSNR[i];
+      m_msssim[i] += msssim[i];
     }
 
     m_uiNumPic++;
@@ -103,6 +103,7 @@ public:
   double  getWPSNR      (const ComponentID compID) const { return m_dPSNRSum[compID] / (double)m_uiNumPic; }
 #endif
   double  getPsnr(ComponentID compID) const { return  m_dPSNRSum[compID];  }
+  double  getMsssim(ComponentID compID) const { return  m_msssim[compID];  }
 #if JVET_O0756_CALCULATE_HDRMETRICS
   double getDeltaE()                  const { return m_logDeltaESum[0];  }
   double getPsnrL()                   const { return m_psnrLSum[0];  }
@@ -133,6 +134,7 @@ public:
       m_dPSNRSum[i] = 0;
       m_MSEyuvframe[i] = 0;
       m_upscaledPSNR[i] = 0;
+      m_msssim[i] = 0;
     }
     m_uiNumPic = 0;
 #if EXTENSION_360_VIDEO
@@ -188,13 +190,15 @@ public:
   }
 
 #if ENABLE_QPA || WCG_WPSNR
-  void    printOut( char cDelim, const ChromaFormat chFmt, const bool printMSEBasedSNR, const bool printSequenceMSE, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths, const bool useWPSNR = false
+  void    printOut( char cDelim, const ChromaFormat chFmt, const bool printMSEBasedSNR, const bool printSequenceMSE, const bool printMSSSIM, 
+    const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths, const bool useWPSNR = false
 #if JVET_O0756_CALCULATE_HDRMETRICS
       , const bool printHdrMetrics = false
 #endif
   )
 #else
-  void    printOut ( char cDelim, const ChromaFormat chFmt, const bool printMSEBasedSNR, const bool printSequenceMSE, const bool printHexPsnr, const BitDepths &bitDepths
+  void    printOut ( char cDelim, const ChromaFormat chFmt, const bool printMSEBasedSNR, const bool printSequenceMSE, const bool printMSSSIM,
+    const bool printHexPsnr, const BitDepths &bitDepths
 #if JVET_O0756_CALCULATE_HDRMETRICS
       , const bool printHdrMetrics = false
 #endif
@@ -252,6 +256,10 @@ public:
             msg(e_msg_level, "xY-PSNR           ");
           }
 
+          if (printMSSSIM)
+          {
+            msg(e_msg_level, "    Y-MS-SSIM");
+          }
           if (printSequenceMSE)
           {
             msg( e_msg_level, "    Y-MSE\n" );
@@ -283,6 +291,10 @@ public:
             msg(e_msg_level, "   %16" PRIx64 " ", xPsnr);
           }
 
+          if (printMSSSIM)
+          {
+            printf("    %8.6lf", getMsssim(COMPONENT_Y) / (double)getNumPic());
+          }
           if (printSequenceMSE)
           {
             msg( e_msg_level, "  %8.4lf\n", m_MSEyuvframe[COMPONENT_Y] / (double)getNumPic() );
@@ -311,6 +323,10 @@ public:
             msg(e_msg_level, "xY-PSNR           ");
           }
 
+          if (printMSSSIM)
+          {
+            printf( "Y-MS-SSIM");
+          }
           if (printSequenceMSE)
           {
             msg( e_msg_level, "    Y-MSE\n" );
@@ -342,6 +358,10 @@ public:
             msg(e_msg_level, "   %16" PRIx64 " ", xPsnr);
           }
 
+          if (printMSSSIM)
+          {
+            printf("%8.6lf", getMsssim(COMPONENT_Y) / (double)getNumPic());
+          }
           if (printSequenceMSE)
           {
             msg( e_msg_level, "  %8.4lf\n", m_MSEyuvframe[COMPONENT_Y] / (double)getNumPic() );
@@ -375,6 +395,10 @@ public:
               msg(e_msg_level, "xY-PSNR           "  "xU-PSNR           "  "xV-PSNR           ");
             }
 
+            if (printMSSSIM)
+            {
+              printf(" Y-MS-SSIM    " "U-MS-SSIM    " "V-MS-SSIM ");
+            }
             if (printSequenceMSE)
             {
               msg( e_msg_level, " Y-MSE     "  "U-MSE     "  "V-MSE    "  "YUV-MSE \n" );
@@ -417,6 +441,13 @@ public:
               msg(e_msg_level, "   %16" PRIx64 "  %16" PRIx64 "  %16" PRIx64, xPsnr[COMPONENT_Y], xPsnr[COMPONENT_Cb], xPsnr[COMPONENT_Cr]);
             }
 
+            if (printMSSSIM)
+            {
+              printf("    %8.6lf     " "%8.6lf     " "%8.6lf ",
+                     getMsssim(COMPONENT_Y) / (double)getNumPic(),
+                     getMsssim(COMPONENT_Cb) / (double)getNumPic(),
+                     getMsssim(COMPONENT_Cr) / (double)getNumPic());
+            }
             if (printSequenceMSE)
             {
               msg( e_msg_level, "  %8.4lf  "   "%8.4lf  "    "%8.4lf  "   "%8.4lf\n",
@@ -459,6 +490,10 @@ public:
             if (printHexPsnr)
             {
               msg(e_msg_level, "xY-PSNR           "  "xU-PSNR           "  "xV-PSNR           ");
+            }
+            if (printMSSSIM)
+            {
+              printf(" Y-MS-SSIM    " "U-MS-SSIM    " "V-MS-SSIM ");
             }
 #if JVET_O0756_CALCULATE_HDRMETRICS
             if (printHdrMetrics && printHexPsnr)
@@ -516,6 +551,13 @@ public:
                   reinterpret_cast<uint8_t *>(&xPsnr[i]));
               }
               msg(e_msg_level, "   %16" PRIx64 "  %16" PRIx64 "  %16" PRIx64 , xPsnr[COMPONENT_Y], xPsnr[COMPONENT_Cb], xPsnr[COMPONENT_Cr]);
+            }
+            if (printMSSSIM)
+            {
+              printf("    %8.6lf     " "%8.6lf     " "%8.6lf ",
+                     getMsssim(COMPONENT_Y) / (double)getNumPic(),
+                     getMsssim(COMPONENT_Cb) / (double)getNumPic(),
+                     getMsssim(COMPONENT_Cr) / (double)getNumPic());
             }
 #if JVET_O0756_CALCULATE_HDRMETRICS
             if (printHexPsnr && printHdrMetrics)
