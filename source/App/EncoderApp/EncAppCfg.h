@@ -558,6 +558,9 @@ protected:
   std::vector<int>      m_omniViewportSEITiltCentre;
   std::vector<uint32_t> m_omniViewportSEIHorRange;
   std::vector<uint32_t> m_omniViewportSEIVerRange;
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
+#endif
   bool                  m_rwpSEIEnabled;
   bool                  m_rwpSEIRwpCancelFlag;
   bool                  m_rwpSEIRwpPersistenceFlag;

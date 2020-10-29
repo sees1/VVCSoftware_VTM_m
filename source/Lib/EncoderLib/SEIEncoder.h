@@ -86,6 +86,10 @@ public:
   void initSEIContentLightLevel(SEIContentLightLevelInfo *sei);
   void initSEIAmbientViewingEnvironment(SEIAmbientViewingEnvironment *sei);
   void initSEIContentColourVolume(SEIContentColourVolume *sei);
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  bool initSEIAnnotatedRegions(SEIAnnotatedRegions *sei, int currPOC);
+  void readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed);
+#endif
 private:
   EncCfg* m_pcCfg;
   EncLib* m_pcEncLib;

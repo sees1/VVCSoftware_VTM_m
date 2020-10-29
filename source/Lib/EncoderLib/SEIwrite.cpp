@@ -127,6 +127,11 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::SAMPLE_ASPECT_RATIO_INFO:
     xWriteSEISampleAspectRatioInfo(*static_cast<const SEISampleAspectRatioInfo*>(&sei));
     break;
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  case SEI::ANNOTATED_REGIONS:
+    xWriteSEIAnnotatedRegions(*static_cast<const SEIAnnotatedRegions*>(&sei));
+    break;
+#endif
   default:
     THROW("Trying to write unhandled SEI message");
     break;
@@ -596,6 +601,98 @@ void SEIWriter::xWriteSEIMasteringDisplayColourVolume(const SEIMasteringDisplayC
   WRITE_CODE( sei.values.minLuminance,     32,  "mdcv_min_display_mastering_luminance" );
 }
 
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+void SEIWriter::xWriteSEIAnnotatedRegions(const SEIAnnotatedRegions &sei)
+{
+  WRITE_FLAG(sei.m_hdr.m_cancelFlag, "ar_cancel_flag");
+  if (!sei.m_hdr.m_cancelFlag)
+  {
+    WRITE_FLAG(sei.m_hdr.m_notOptimizedForViewingFlag, "ar_not_optimized_for_viewing_flag");
+    WRITE_FLAG(sei.m_hdr.m_trueMotionFlag, "ar_true_motion_flag");
+    WRITE_FLAG(sei.m_hdr.m_occludedObjectFlag, "ar_occluded_object_flag");
+    WRITE_FLAG(sei.m_hdr.m_partialObjectFlagPresentFlag, "ar_partial_object_flag_present_flag");
+    WRITE_FLAG(sei.m_hdr.m_objectLabelPresentFlag, "ar_object_label_present_flag");
+    WRITE_FLAG(sei.m_hdr.m_objectConfidenceInfoPresentFlag, "ar_object_confidence_info_present_flag");
+    if (sei.m_hdr.m_objectConfidenceInfoPresentFlag)
+    {
+      assert(sei.m_hdr.m_objectConfidenceLength <= 16 && sei.m_hdr.m_objectConfidenceLength>0);
+      WRITE_CODE((sei.m_hdr.m_objectConfidenceLength - 1), 4, "ar_object_confidence_length_minus_1");
+    }
+    if (sei.m_hdr.m_objectLabelPresentFlag)
+    {
+      WRITE_FLAG(sei.m_hdr.m_objectLabelLanguagePresentFlag, "ar_object_label_language_present_flag");
+      if (sei.m_hdr.m_objectLabelLanguagePresentFlag)
+      {
+        xWriteByteAlign();
+        assert(sei.m_hdr.m_annotatedRegionsObjectLabelLang.size()<256);
+        for (uint32_t j = 0; j < sei.m_hdr.m_annotatedRegionsObjectLabelLang.size(); j++)
+        {
+          char ch = sei.m_hdr.m_annotatedRegionsObjectLabelLang[j];
+          WRITE_CODE(ch, 8, "ar_object_label_language");
+        }
+        WRITE_CODE('\0', 8, "ar_label_language");
+      }
+    }
+    WRITE_UVLC((uint32_t)sei.m_annotatedLabels.size(), "ar_num_label_updates");
+    assert(sei.m_annotatedLabels.size()<256);
+    for(auto it=sei.m_annotatedLabels.begin(); it!=sei.m_annotatedLabels.end(); it++)
+    {
+      assert(it->first < 256);
+      WRITE_UVLC(it->first, "ar_label_idx[]");
+      const SEIAnnotatedRegions::AnnotatedRegionLabel &ar=it->second;
+      WRITE_FLAG(!ar.labelValid, "ar_label_cancel_flag");
+      if (ar.labelValid)
+      {
+        xWriteByteAlign();
+        assert(ar.label.size()<256);
+        for (uint32_t j = 0; j < ar.label.size(); j++)
+        {
+          char ch = ar.label[j];
+          WRITE_CODE(ch, 8, "ar_label[]");
+        }
+        WRITE_CODE('\0', 8, "ar_label[]");
+      }
+    }
+    WRITE_UVLC((uint32_t)sei.m_annotatedRegions.size(), "ar_num_object_updates");
+    assert(sei.m_annotatedRegions.size()<256);
+    for (auto it=sei.m_annotatedRegions.begin(); it!=sei.m_annotatedRegions.end(); it++)
+    {
+      const SEIAnnotatedRegions::AnnotatedRegionObject &ar = it->second;
+      WRITE_UVLC(it->first, "ar_object_idx");
+      WRITE_FLAG(ar.objectCancelFlag, "ar_object_cancel_flag");
+      if (!ar.objectCancelFlag)
+      {
+        if (sei.m_hdr.m_objectLabelPresentFlag)
+        {
+          WRITE_FLAG(ar.objectLabelValid, "ar_object_label_update_flag");
+          if (ar.objectLabelValid)
+          {
+            assert(ar.objLabelIdx<256);
+            WRITE_UVLC(ar.objLabelIdx, "ar_object_label_idx");
+          }
+        }
+        WRITE_FLAG(ar.boundingBoxValid, "ar_object_bounding_box_update_flag");
+        if (ar.boundingBoxValid)
+        {
+          WRITE_CODE(ar.boundingBoxTop,   16, "ar_bounding_box_top");
+          WRITE_CODE(ar.boundingBoxLeft,  16, "ar_bounding_box_left");
+          WRITE_CODE(ar.boundingBoxWidth, 16, "ar_bounding_box_width");
+          WRITE_CODE(ar.boundingBoxHeight,16, "ar_bounding_box_height");
+          if (sei.m_hdr.m_partialObjectFlagPresentFlag)
+          {
+            WRITE_UVLC(ar.partialObjectFlag, "ar_partial_object_flag");
+          }
+          if (sei.m_hdr.m_objectConfidenceInfoPresentFlag)
+          {
+            assert(ar.objectConfidence < (1<<sei.m_hdr.m_objectConfidenceLength));
+            WRITE_CODE(ar.objectConfidence, sei.m_hdr.m_objectConfidenceLength, "ar_object_confidence");
+          }
+        }
+      }
+    }
+  }
+}
+#endif
 void SEIWriter::xWriteByteAlign()
 {
   if( m_pcBitIf->getNumberOfWrittenBits() % 8 != 0)

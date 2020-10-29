@@ -123,6 +123,19 @@ uint32_t DecApp::decode()
     }
   }
 
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  // clear contents of annotated-Regions-SEI output file
+  if (!m_annotatedRegionsSEIFileName.empty())
+  {
+    std::ofstream ofile(m_annotatedRegionsSEIFileName.c_str());
+    if (!ofile.good() || !ofile.is_open())
+    {
+      fprintf(stderr, "\nUnable to open file '%s' for writing annotated-Regions-SEI\n", m_annotatedRegionsSEIFileName.c_str());
+      exit(EXIT_FAILURE);
+    }
+  }
+#endif
+
   // main decoder loop
   bool loopFiltered[MAX_VPS_LAYERS] = { false };
 
@@ -325,6 +338,12 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].open( reconFileName, true, m_outputBitDepth, m_outputBitDepth, bitDepths.recon ); // write mode
         }
       }
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+      if (!m_annotatedRegionsSEIFileName.empty())
+      {
+        xOutputAnnotatedRegions(pcListPic);
+      }
+#endif
       // write reconstruction to file
       if( bNewPicture )
       {
@@ -333,6 +352,12 @@ uint32_t DecApp::decode()
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+        if (!m_annotatedRegionsSEIFileName.empty() && bNewPicture)
+        {
+          xOutputAnnotatedRegions(pcListPic);
+        }
+#endif
         setOutputPicturePresentInStream();
         xWriteOutput( pcListPic, nalu.m_temporalId );
         m_cDecLib.setFirstSliceInPicture (false);
@@ -430,6 +455,12 @@ uint32_t DecApp::decode()
 #endif
     }
   }
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  if (!m_annotatedRegionsSEIFileName.empty())
+  {
+    xOutputAnnotatedRegions(pcListPic);
+  }
+#endif
   // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
   setOutputPicturePresentInStream();
   CHECK(!outputPicturePresentInBitstream, "It is required that there shall be at least one picture with PictureOutputFlag equal to 1 in the bitstream")
@@ -861,6 +892,155 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
   pcListPic->clear();
   m_iPOCLastDisplay = -MAX_INT;
 }
+
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+/** \param pcListPic list of pictures to be written to file
+ */
+void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
+{
+  if(!pcListPic || pcListPic->empty())
+  {
+    return;
+  }
+  PicList::iterator iterPic   = pcListPic->begin();
+
+  while (iterPic != pcListPic->end())
+  {
+    Picture* pcPic = *(iterPic);
+    if (pcPic->neededForOutput)
+    {
+      // Check if any annotated region SEI has arrived
+      SEIMessages annotatedRegionSEIs = getSeisByType(pcPic->SEIs, SEI::ANNOTATED_REGIONS);
+      for(auto it=annotatedRegionSEIs.begin(); it!=annotatedRegionSEIs.end(); it++)
+      {
+        const SEIAnnotatedRegions &seiAnnotatedRegions = *(SEIAnnotatedRegions*)(*it);
+        
+        if (seiAnnotatedRegions.m_hdr.m_cancelFlag)
+        {
+          m_arObjects.clear();
+          m_arLabels.clear();
+        }
+        else
+        {
+          if (m_arHeader.m_receivedSettingsOnce)
+          {
+            // validate those settings that must stay constant are constant.
+            assert(m_arHeader.m_occludedObjectFlag              == seiAnnotatedRegions.m_hdr.m_occludedObjectFlag);
+            assert(m_arHeader.m_partialObjectFlagPresentFlag    == seiAnnotatedRegions.m_hdr.m_partialObjectFlagPresentFlag);
+            assert(m_arHeader.m_objectConfidenceInfoPresentFlag == seiAnnotatedRegions.m_hdr.m_objectConfidenceInfoPresentFlag);
+            assert((!m_arHeader.m_objectConfidenceInfoPresentFlag) || m_arHeader.m_objectConfidenceLength == seiAnnotatedRegions.m_hdr.m_objectConfidenceLength);
+          }
+          else
+          {
+            m_arHeader.m_receivedSettingsOnce=true;
+            m_arHeader=seiAnnotatedRegions.m_hdr; // copy the settings.
+          }
+          // Process label updates
+          if (seiAnnotatedRegions.m_hdr.m_objectLabelPresentFlag)
+          {
+            for(auto srcIt=seiAnnotatedRegions.m_annotatedLabels.begin(); srcIt!=seiAnnotatedRegions.m_annotatedLabels.end(); srcIt++)
+            {
+              const uint32_t labIdx = srcIt->first;
+              if (srcIt->second.labelValid)
+              {
+                m_arLabels[labIdx] = srcIt->second.label;
+              }
+              else
+              {
+                m_arLabels.erase(labIdx);
+              }
+            }
+          }
+    
+          // Process object updates
+          for(auto srcIt=seiAnnotatedRegions.m_annotatedRegions.begin(); srcIt!=seiAnnotatedRegions.m_annotatedRegions.end(); srcIt++)
+          {
+            uint32_t objIdx = srcIt->first;
+            const SEIAnnotatedRegions::AnnotatedRegionObject &src =srcIt->second;
+    
+            if (src.objectCancelFlag)
+            {
+              m_arObjects.erase(objIdx);
+            }
+            else
+            {
+              auto destIt = m_arObjects.find(objIdx);
+    
+              if (destIt == m_arObjects.end())
+              {
+                //New object arrived, needs to be appended to the map of tracked objects
+                m_arObjects[objIdx] = src;
+              }
+              else //Existing object, modifications to be done
+              {
+                SEIAnnotatedRegions::AnnotatedRegionObject &dst=destIt->second;
+    
+                if (seiAnnotatedRegions.m_hdr.m_objectLabelPresentFlag && src.objectLabelValid)
+                {
+                  dst.objectLabelValid=true;
+                  dst.objLabelIdx = src.objLabelIdx;
+                }
+                if (src.boundingBoxValid)
+                {
+                  dst.boundingBoxTop    = src.boundingBoxTop   ;
+                  dst.boundingBoxLeft   = src.boundingBoxLeft  ;
+                  dst.boundingBoxWidth  = src.boundingBoxWidth ;
+                  dst.boundingBoxHeight = src.boundingBoxHeight;
+                  if (seiAnnotatedRegions.m_hdr.m_partialObjectFlagPresentFlag)
+                  {
+                    dst.partialObjectFlag = src.partialObjectFlag;
+                  }
+                  if (seiAnnotatedRegions.m_hdr.m_objectConfidenceInfoPresentFlag)
+                  {
+                    dst.objectConfidence = src.objectConfidence;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!m_arObjects.empty())
+      {
+        FILE *fp_persist = fopen(m_annotatedRegionsSEIFileName.c_str(), "ab");
+        if (fp_persist == NULL)
+        {
+          std::cout << "Not able to open file for writing persist SEI messages" << std::endl;
+        }
+        else
+        {
+          fprintf(fp_persist, "\n");
+          fprintf(fp_persist, "Number of objects = %d\n", (int)m_arObjects.size());
+          for (auto it = m_arObjects.begin(); it != m_arObjects.end(); ++it)
+          {
+            fprintf(fp_persist, "Object Idx = %d\n",    it->first);
+            fprintf(fp_persist, "Object Top = %d\n",    it->second.boundingBoxTop);
+            fprintf(fp_persist, "Object Left = %d\n",   it->second.boundingBoxLeft);
+            fprintf(fp_persist, "Object Width = %d\n",  it->second.boundingBoxWidth);
+            fprintf(fp_persist, "Object Height = %d\n", it->second.boundingBoxHeight);
+            if (it->second.objectLabelValid)
+            {
+              auto labelIt=m_arLabels.find(it->second.objLabelIdx);
+              fprintf(fp_persist, "Object Label = %s\n", labelIt!=m_arLabels.end() ? (labelIt->second.c_str()) : "<UNKNOWN>");
+            }
+            if (m_arHeader.m_partialObjectFlagPresentFlag)
+            {
+              fprintf(fp_persist, "Object Partial = %d\n", it->second.partialObjectFlag?1:0);
+            }
+            if (m_arHeader.m_objectConfidenceInfoPresentFlag)
+            {
+              fprintf(fp_persist, "Object Conf = %d\n", it->second.objectConfidence);
+            }
+          }
+          fclose(fp_persist);
+        }
+      }
+    }
+   iterPic++;
+  }
+}
+#endif
 
 /** \param nalu Input nalu to check whether its LayerId is within targetDecLayerIdSet
  */

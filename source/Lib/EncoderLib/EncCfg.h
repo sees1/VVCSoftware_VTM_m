@@ -637,6 +637,9 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
+#endif
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
   bool      m_useWeightedBiPred;    //< Use of Bi-directional Weighting Prediction (B_SLICE)
@@ -770,7 +773,9 @@ public:
 
   virtual ~EncCfg()
   {}
-
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  std::map<uint32_t, SEIAnnotatedRegions::AnnotatedRegionObject> m_arObjects;
+#endif
   void setProfile(Profile::Name profile) { m_profile = profile; }
   void setLevel(Level::Tier tier, Level::Name level) { m_levelTier = tier; m_level = level; }
   bool      getFrameOnlyConstraintFlag() const { return m_frameOnlyConstraintFlag; }
@@ -1552,6 +1557,10 @@ public:
   uint32_t  getOmniViewportSEIHorRange(int idx)                      { return m_omniViewportSEIHorRange[idx]; }
   void  setOmniViewportSEIVerRange(const std::vector<uint32_t>& vi)  { m_omniViewportSEIVerRange = vi; }
   uint32_t  getOmniViewportSEIVerRange(int idx)                      { return m_omniViewportSEIVerRange[idx]; }
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  void  setAnnotatedRegionSEIFileRoot(const std::string &s)          { m_arSEIFileRoot = s; m_arObjects.clear();}
+  const std::string &getAnnotatedRegionSEIFileRoot() const           { return m_arSEIFileRoot; }
+#endif
   void     setRwpSEIEnabled(bool b)                                                                     { m_rwpSEIEnabled = b; }
   bool     getRwpSEIEnabled()                                                                           { return m_rwpSEIEnabled; }
   void     setRwpSEIRwpCancelFlag(bool b)                                                               { m_rwpSEIRwpCancelFlag = b; }
