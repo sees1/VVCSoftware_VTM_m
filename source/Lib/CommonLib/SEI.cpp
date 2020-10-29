@@ -180,6 +180,9 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::GENERALIZED_CUBEMAP_PROJECTION:       return "Generalized cubemap projection";
     case SEI::SAMPLE_ASPECT_RATIO_INFO:             return "Sample aspect ratio information";
     case SEI::SUBPICTURE_LEVEL_INFO:                return "Subpicture level information";
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+    case SEI::ANNOTATED_REGIONS:                    return "Annotated Region";
+#endif
     default:                                        return "Unknown";
   }
 }

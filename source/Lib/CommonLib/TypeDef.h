@@ -101,6 +101,10 @@ typedef std::pair<int, int>  TrCost;
 #define EXTENSION_360_VIDEO                               0   ///< extension for 360/spherical video coding support; this macro should be controlled by makefile, as it would be used to control whether the library is built and linked
 #endif
 
+#ifndef JVET_T0053_ANNOTATED_REGIONS_SEI
+#define JVET_T0053_ANNOTATED_REGIONS_SEI                  1 //Enable/disable the annotated regions SEI 
+#endif
+
 #ifndef EXTENSION_HDRTOOLS
 #define EXTENSION_HDRTOOLS                                0 //< extension for HDRTools/Metrics support; this macro should be controlled by makefile, as it would be used to control whether the library is built and linked
 #endif
