@@ -216,9 +216,16 @@ static const int MAX_NUM_APS =                                     32;  //Curren
 static const int NUM_APS_TYPE_LEN =                                 3;  //Currently APS Type has 3 bits
 static const int MAX_NUM_APS_TYPE =                                 8;  //Currently APS Type has 3 bits so the max type is 8
 
+#if JVET_T0065_LEVEL_6_3
+static constexpr int MAX_TILE_COLS = 30;   // Maximum number of tile columns
+static constexpr int MAX_TILES     = 990;  // Maximum number of tiles
+static constexpr int MAX_SLICES    = 1000; // Maximum number of slices per picture
+
+#else
 static const int MAX_TILE_COLS =                                   20;  ///< Maximum number of tile columns
 static const int MAX_TILES =                                      440;  ///< Maximum number of tiles
 static const int MAX_SLICES =                                     600;  ///< Maximum number of slices per picture
+#endif
 static const int MLS_GRP_NUM =                                   1024; ///< Max number of coefficient groups, max(16, 256)
 
 static const int MLS_CG_SIZE =                                      4; ///< Coefficient group size of 4x4; = MLS_CG_LOG2_WIDTH + MLS_CG_LOG2_HEIGHT
