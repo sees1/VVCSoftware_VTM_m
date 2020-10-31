@@ -229,6 +229,9 @@ strToLevel[] =
   {"6",   Level::LEVEL6},
   {"6.1", Level::LEVEL6_1},
   {"6.2", Level::LEVEL6_2},
+#if JVET_T0065_LEVEL_6_3
+  {"6.3", Level::LEVEL6_3},
+#endif
   {"15.5", Level::LEVEL15_5},
 };
 
@@ -484,8 +487,16 @@ static uint32_t getMaxTileColsByLevel( Level::Name level )
     case Level::LEVEL6:
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
+#if !JVET_T0065_LEVEL_6_3
     default:
+#endif
       return 20;
+#if JVET_T0065_LEVEL_6_3
+    case Level::LEVEL6_3:
+      return 30;
+    default:
+      return MAX_TILE_COLS;
+#endif
   }
 }
 
@@ -511,8 +522,16 @@ static uint32_t getMaxTileRowsByLevel( Level::Name level )
     case Level::LEVEL6:
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
+#if !JVET_T0065_LEVEL_6_3
     default:
+#endif
       return 22;
+#if JVET_T0065_LEVEL_6_3
+    case Level::LEVEL6_3:
+      return 33;
+    default:
+      return MAX_TILES / MAX_TILE_COLS;
+#endif
   }
 }
 
@@ -539,8 +558,16 @@ static uint32_t getMaxSlicesByLevel( Level::Name level )
     case Level::LEVEL6:
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
+#if !JVET_T0065_LEVEL_6_3
     default:
+#endif
       return 600;
+#if JVET_T0065_LEVEL_6_3
+    case Level::LEVEL6_3:
+      return 1000;
+    default:
+      return MAX_SLICES;
+#endif
   }
 }
 
