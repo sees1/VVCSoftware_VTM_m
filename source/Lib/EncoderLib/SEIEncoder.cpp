@@ -35,6 +35,7 @@
 #include "CommonLib/SEI.h"
 #include "EncGOP.h"
 #include "EncLib.h"
+#include <fstream>
 
 uint32_t calcMD5(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
 uint32_t calcCRC(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
