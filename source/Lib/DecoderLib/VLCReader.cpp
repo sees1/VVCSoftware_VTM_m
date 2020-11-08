@@ -2919,7 +2919,12 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
           *rpl = *sps->getRPLList( listIdx )->getReferencePictureList(picHeader->getRPLIdx( listIdx ));
         }
       }
-
+#if JVET_S0096_RPL_CONSTRAINT
+      if (picHeader->getPicInterSliceAllowedFlag() && listIdx == 0)
+      {
+          CHECK(picHeader->getRPL(0)->getNumRefEntries() <= 0, "When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0");
+      }
+#endif
       // POC MSB cycle signalling for LTRP
       for (int i = 0; i < rpl->getNumberOfLongtermPictures() + rpl->getNumberOfShorttermPictures(); i++)
       {
