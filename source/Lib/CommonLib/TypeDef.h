@@ -55,7 +55,7 @@
 //########### place macros to be removed in next cycle below this line ###############
 
 #define JVET_S0096_RPL_CONSTRAINT                         1// JVET-S0096 aspect 1: When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0.
-#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   1 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
+#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
 #define JVET_S0219_ASPECT1                                1 // JVET-S0219 aspect1 : removal non-referred APS parameter set in the non-output layer.
 #define JVET_R0193                                        1 // JVET-R0193: signalling of the number of maximum sublayers used for inter-layer prediction for each layer
 #define JVET_R0193_S0141                                  1 // JVET-S0141 item 47 : item 47: In the general sub-bitstream extraction process, specify the conditions under which an output sub-bitstream is required to be a conforming bitstream such that the value of tIdTarget is specified to be in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive (instead of 0 to 6 inclusive). (JVET-S0158 aspect 1)
