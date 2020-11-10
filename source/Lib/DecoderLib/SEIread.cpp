@@ -134,7 +134,7 @@ void SEIReader::parseSEImessage(InputBitstream* bs, SEIMessages& seis, const Nal
   const SEIMessages fillerData = getSeisByType(seiListInCurNalu, SEI::FILLER_PAYLOAD);
   CHECK(fillerData.size() > 0 && fillerData.size() != seiListInCurNalu.size(), "When an SEI NAL unit contains an SEI message with payloadType equal to filler payload, the SEI NAL unit shall not contain any other SEI message with payloadType not equal to filler payload");
   const SEIMessages pictureTiming = getSeisByType(seiListInCurNalu, SEI::PICTURE_TIMING);
-  CHECK(hrd.getGeneralHrdParameters().getGeneralSamePicTimingInAllOlsFlag() && pictureTiming.size() > 0 && pictureTiming.size() != pictureTiming.size(),
+  CHECK(hrd.getGeneralHrdParameters().getGeneralSamePicTimingInAllOlsFlag() && pictureTiming.size() > 0 && pictureTiming.size() != seiListInCurNalu.size(),
         "When general_same_pic_timing_in_all_ols_flag is equal to 1 [...], and when an SEI NAL unit contains a non-scalable-nested SEI message with "
         "payloadType equal to 1 (PT), the SEI NAL unit shall not contain any other SEI message with payloadType not equal 1.");
 
@@ -521,7 +521,8 @@ void SEIReader::xParseSEIScalableNesting(SEIScalableNesting& sei, const NalUnitT
     if (!sei.m_snAllLayersFlag)
     {
       sei_read_uvlc(decodedMessageOutputStream, symbol, "sn_num_layers_minus1"); sei.m_snNumLayersMinus1 = symbol;
-      for (uint32_t i = 0; i <= sei.m_snNumLayersMinus1; i++)
+      sei.m_snLayerId[0] = nuhLayerId;
+      for (uint32_t i = 1; i <= sei.m_snNumLayersMinus1; i++)
       {
         sei_read_code(decodedMessageOutputStream, 6, symbol, "sn_layer_id[i]"); sei.m_snLayerId[i] = symbol;
       }
