@@ -1,4 +1,4 @@
-﻿/* The copyright in this software is being made available under the BSD
+/* The copyright in this software is being made available under the BSD
  * License, included below. This software may be subject to other third party
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
@@ -62,8 +62,7 @@
 #define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
 #define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
 #define JVET_R0266_GCI                                    1 // JVET-R0266 #5: Specify that no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag shall be equal to 0
-#define JVET_S0084_S0110_RADL                             1 // When the current picture is a RADL picture, allow RASL pictures with pps_mixed_nalu_types_in_pic_flag is equal to 1 in active entries in RefPicList[ 0 ] or RefPicList[ 1 ]#define JVET_R0046_IRAP_ASPECT2                           1 // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to Max( 0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] − 1 ), with refPicVpsLayerId equal to the value of the nuh_layer_id of the referenced picture.
-#define JVET_R0046_IRAP_ASPECT2                           1 // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to Max( 0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] − 1 ), with refPicVpsLayerId equal to the value of the nuh_layer_id of the referenced picture.
+#define JVET_S0084_S0110_RADL                             1 // When the current picture is a RADL picture, allow RASL pictures with pps_mixed_nalu_types_in_pic_flag is equal to 1 in active entries in RefPicList[ 0 ] or RefPicList[ 1 ]
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
