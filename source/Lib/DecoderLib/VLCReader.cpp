@@ -1475,6 +1475,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
           READ_FLAG(uiCode, "sps_loop_filter_across_subpic_enabled_flag[ i ]");
           pcSPS->setLoopFilterAcrossSubpicEnabledFlag(picIdx, uiCode);
         }
+        else
+        {
+          pcSPS->setSubPicTreatedAsPicFlag(picIdx, 1);
+          pcSPS->setLoopFilterAcrossSubpicEnabledFlag(picIdx, 0);
+        }
       }
     }
 
