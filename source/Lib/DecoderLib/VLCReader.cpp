@@ -3214,7 +3214,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 
     if( (pps->getUseWP() || pps->getWPBiPred()) && pps->getWpInfoInPhFlag() )
     {
-      parsePredWeightTable(picHeader, sps);
+      parsePredWeightTable(picHeader, pps, sps);
     }
   }
   // inherit constraint values from SPS
@@ -4773,7 +4773,7 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
   CHECK(uiTotalSignalledWeightFlags>24, "Too many weight flag signalled");
 }
 
-void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
+void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const PPS *pps, const SPS *sps)
 {
   WPScalingParam *   wp;
   const ChromaFormat chFmt                     = sps->getChromaFormatIdc();
@@ -4904,7 +4904,7 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
 
     if (numRef == 0)
     {
-      if (picHeader->getRPL(1)->getNumRefEntries() > 0)
+      if (pps->getWPBiPred() && picHeader->getRPL(1)->getNumRefEntries() > 0)
       {
         READ_UVLC(numLxWeights, "num_l1_weights");
       }
