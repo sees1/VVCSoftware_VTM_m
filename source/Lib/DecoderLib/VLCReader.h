@@ -180,7 +180,7 @@ public:
   void  parseRemainingBytes ( bool noTrailingBytesExpected );
 
   void  parsePredWeightTable( Slice* pcSlice, const SPS *sps );
-  void parsePredWeightTable ( PicHeader *picHeader, const SPS *sps );
+  void parsePredWeightTable ( PicHeader *picHeader, const PPS *pps, const SPS *sps );
   void parseScalingList     ( ScalingList *scalingList, bool aps_chromaPresentFlag );
   void  decodeScalingList   ( ScalingList *scalingList, uint32_t scalingListId, bool isPredictor);
   void parseReshaper        ( SliceReshapeInfo& sliceReshaperInfo, const SPS* pcSPS, const bool isIntra );

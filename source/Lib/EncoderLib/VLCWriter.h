@@ -125,7 +125,7 @@ private:
   void xCodeRefPicList( const ReferencePictureList* rpl, bool isLongTermPresent, uint32_t ltLsbBitsCount, const bool isForbiddenZeroDeltaPoc, int rplIdx);
   bool xFindMatchingLTRP        ( Slice* pcSlice, uint32_t *ltrpsIndex, int ltrpPOC, bool usedFlag );
   void xCodePredWeightTable     ( Slice* pcSlice );
-  void xCodePredWeightTable     ( PicHeader *picHeader, const SPS *sps );
+  void xCodePredWeightTable     ( PicHeader *picHeader, const PPS *pps, const SPS *sps );
   void xCodeScalingList         ( const ScalingList* scalingList, uint32_t scalinListId, bool isPredictor);
 public:
   void  setBitstream            ( OutputBitstream* p )  { m_pcBitIf = p;  }
