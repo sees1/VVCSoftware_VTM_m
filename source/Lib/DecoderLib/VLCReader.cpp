@@ -1300,6 +1300,7 @@ void HLSyntaxReader::dpb_parameters(int maxSubLayersMinus1, bool subLayerInfoFla
     pcSPS->setMaxDecPicBuffering(code + 1, i);
     READ_UVLC(code, "dpb_max_num_reorder_pics[i]");
     pcSPS->setMaxNumReorderPics(code, i);
+    CHECK( pcSPS->getMaxNumReorderPics(i) >= pcSPS->getMaxDecPicBuffering(i), "The value of dpb_max_num_reorder_pics[ i ] shall be in the range of 0 to dpb_max_dec_pic_buffering_minus1[ i ], inclusive" );
     READ_UVLC(code, "dpb_max_latency_increase_plus1[i]");
     pcSPS->setMaxLatencyIncreasePlus1(code, i);
   }
@@ -1474,6 +1475,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
           pcSPS->setSubPicTreatedAsPicFlag(picIdx, uiCode);
           READ_FLAG(uiCode, "sps_loop_filter_across_subpic_enabled_flag[ i ]");
           pcSPS->setLoopFilterAcrossSubpicEnabledFlag(picIdx, uiCode);
+        }
+        else
+        {
+          pcSPS->setSubPicTreatedAsPicFlag(picIdx, 1);
+          pcSPS->setLoopFilterAcrossSubpicEnabledFlag(picIdx, 0);
         }
       }
     }
@@ -3208,7 +3214,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 
     if( (pps->getUseWP() || pps->getWPBiPred()) && pps->getWpInfoInPhFlag() )
     {
-      parsePredWeightTable(picHeader, sps);
+      parsePredWeightTable(picHeader, pps, sps);
     }
   }
   // inherit constraint values from SPS
@@ -4767,7 +4773,7 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
   CHECK(uiTotalSignalledWeightFlags>24, "Too many weight flag signalled");
 }
 
-void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
+void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const PPS *pps, const SPS *sps)
 {
   WPScalingParam *   wp;
   const ChromaFormat chFmt                     = sps->getChromaFormatIdc();
@@ -4898,7 +4904,7 @@ void HLSyntaxReader::parsePredWeightTable(PicHeader *picHeader, const SPS *sps)
 
     if (numRef == 0)
     {
-      if (picHeader->getRPL(1)->getNumRefEntries() > 0)
+      if (pps->getWPBiPred() && picHeader->getRPL(1)->getNumRefEntries() > 0)
       {
         READ_UVLC(numLxWeights, "num_l1_weights");
       }

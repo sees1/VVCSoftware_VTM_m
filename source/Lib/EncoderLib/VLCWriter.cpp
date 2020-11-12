@@ -2006,7 +2006,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 
     if ((pps->getUseWP() || pps->getWPBiPred()) && pps->getWpInfoInPhFlag())
     {
-      xCodePredWeightTable(picHeader, sps);
+      xCodePredWeightTable(picHeader, pps, sps);
     }
   }
   // inherit constraint values from SPS
@@ -2835,7 +2835,7 @@ void HLSWriter::xCodePredWeightTable( Slice* pcSlice )
   }
 }
 
-void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const SPS *sps)
+void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const PPS *pps, const SPS *sps)
 {
   WPScalingParam *   wp;
   const ChromaFormat format                      = sps->getChromaFormatIdc();
@@ -2915,7 +2915,11 @@ void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const SPS *sps)
     if (numRef == 0)
     {
       numLxWeights         = picHeader->getNumL1Weights();
-      if (picHeader->getRPL(1)->getNumRefEntries() > 0)
+      if (pps->getWPBiPred() == 0) 
+      {
+        numLxWeights = 0;
+      }
+      else if (picHeader->getRPL(1)->getNumRefEntries() > 0)
       {
         WRITE_UVLC(numLxWeights, "num_l1_weights");
       }
