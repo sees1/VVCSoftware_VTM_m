@@ -172,6 +172,30 @@ bool BitstreamExtractorApp::xCheckSliceSubpicture(InputNALUnit &nalu, int target
 }
 #endif
 
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+bool BitstreamExtractorApp::xCheckSEIFiller(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten)
+{
+  for (auto sei : SEIs)
+  {
+    if (sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
+    {
+      SEISubpicureLevelInfo *seiSLI = (SEISubpicureLevelInfo *)sei;
+      if (!seiSLI->m_cbrConstraintFlag)
+      {
+        rmAllFillerInSubpicExt = true;
+      }
+    }
+  }
+  for (auto sei : SEIs)
+  {
+    if (sei->payloadType() == SEI::FILLER_PAYLOAD)
+    {
+      return (rmAllFillerInSubpicExt ? false : lastSliceWritten);
+    }
+  }
+  return true;
+}
+#else
 bool BitstreamExtractorApp::xCheckSeiSubpicture(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten, bool isVclNalUnitRemoved)
 {
   bool isWriteSeiNalUnitToStream = true;
@@ -242,6 +266,7 @@ bool BitstreamExtractorApp::xCheckSeiSubpicture(SEIMessages SEIs, int targetSubP
 
   return isWriteSeiNalUnitToStream;
 }
+#endif
 
 void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, SubPic &subPic)
 {
@@ -479,7 +504,11 @@ bool BitstreamExtractorApp::xCheckNumSubLayers(InputNALUnit &nalu, VPS *vps)
   return retval;
 }
 
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId, VPS *vps)
+#else
 bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId)
+#endif
 {
   SEIMessages scalableNestingSEIs = getSeisByType(SEIs, SEI::SCALABLE_NESTING);
   if (scalableNestingSEIs.size())
@@ -496,12 +525,20 @@ bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit
     }
     if (std::find(sei->m_snSubpicId.begin(), sei->m_snSubpicId.end(), subpicId) != sei->m_snSubpicId.end())
     {
-      // applies to target subpicture -> extract
-      OutputNALUnit outNalu( nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId );
-      m_seiWriter.writeSEImessages(outNalu.m_Bitstream, sei->m_nestedSEIs, m_hrd, false, nalu.m_temporalId);
-      NALUnitEBSP naluWithHeader(outNalu);
-      writeAnnexBNalUnit(out, naluWithHeader, true);
-      return false;
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+      // C.7 step 7.c
+      if (sei->m_snOlsFlag || vps->getNumLayersInOls(m_targetOlsIdx) == 1)
+      {
+#endif
+        // applies to target subpicture -> extract
+        OutputNALUnit outNalu( nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId );
+        m_seiWriter.writeSEImessages(outNalu.m_Bitstream, sei->m_nestedSEIs, m_hrd, false, nalu.m_temporalId);
+        NALUnitEBSP naluWithHeader(outNalu);
+        writeAnnexBNalUnit(out, naluWithHeader, true);
+        return false;
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+      }
+#endif
     }
     else
     {
@@ -816,6 +853,20 @@ uint32_t BitstreamExtractorApp::decode()
               {
                 writeInpuNalUnitToStream &= xCheckScalableNestingSEI(seiNesting, nalu, vps);
               }
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+              // C.6 step 9.c
+              if (writeInpuNalUnitToStream && (vps->getNumLayersInOls(m_targetOlsIdx) < vps->getMaxLayers()) && !seiNesting->m_snSubpicFlag)
+              {
+                if (seiNesting->m_snOlsFlag || vps->getNumLayersInOls(m_targetOlsIdx) == 1)
+                {
+                  OutputNALUnit outNalu(nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId);
+                  m_seiWriter.writeSEImessages(outNalu.m_Bitstream, seiNesting->m_nestedSEIs, m_hrd, false, nalu.m_temporalId);
+                  NALUnitEBSP naluWithHeader(outNalu);
+                  writeAnnexBNalUnit(bitstreamFileOut, naluWithHeader, true);
+                  writeInpuNalUnitToStream = false;
+                }
+              }
+#endif
             }
             // remove unqualified timing related SEI
             if (sei->payloadType() == SEI::BUFFERING_PERIOD || (m_removeTimingSEI && sei->payloadType() == SEI::PICTURE_TIMING) || sei->payloadType() == SEI::DECODING_UNIT_INFO || sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
@@ -824,19 +875,29 @@ uint32_t BitstreamExtractorApp::decode()
               writeInpuNalUnitToStream &= !targetOlsIdxGreaterThanZero;
             }
           }
+#if !JVET_S0154_ASPECT9_AND_S0158_ASPECT4
           if (m_subPicIdx >= 0 && writeInpuNalUnitToStream)
           {
             writeInpuNalUnitToStream = xCheckSeiSubpicture(SEIs, subpicIdTarget[nalu.m_nuhLayerId], rmAllFillerInSubpicExt[nalu.m_nuhLayerId], lastSliceWritten, isVclNalUnitRemoved[nalu.m_nuhLayerId]);
           }
+#endif
           if (m_vpsId == -1)
           {
             delete vps;
           }
         }
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+        writeInpuNalUnitToStream &= xCheckSEIFiller(SEIs, subpicIdTarget[nalu.m_nuhLayerId], rmAllFillerInSubpicExt[nalu.m_nuhLayerId], lastSliceWritten);
+        if (writeInpuNalUnitToStream && isVclNalUnitRemoved[nalu.m_nuhLayerId] && m_subPicIdx >= 0)
+        {
+          writeInpuNalUnitToStream &= xCheckSEIsSubPicture(SEIs, nalu, bitstreamFileOut, subpicIdTarget[nalu.m_nuhLayerId], vps);
+        }
+#else
         if (m_subPicIdx >= 0)
         {
           writeInpuNalUnitToStream &= xCheckSEIsSubPicture(SEIs, nalu, bitstreamFileOut, subpicIdTarget[nalu.m_nuhLayerId]);
         }
+#endif
       }
 
 #if JVET_R0107_BITSTREAM_EXTACTION
@@ -846,9 +907,15 @@ uint32_t BitstreamExtractorApp::decode()
          slice = xParseSliceHeader(nalu);
       }
 #endif
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+      if (isMultiSubpicLayer[nalu.m_nuhLayerId] && writeInpuNalUnitToStream)
+      {
+        if (m_subPicIdx >= 0 && nalu.isSlice())
+#else
       if (m_subPicIdx >= 0 && isMultiSubpicLayer[nalu.m_nuhLayerId] && writeInpuNalUnitToStream)
       {
         if (nalu.isSlice())
+#endif
         {
           writeInpuNalUnitToStream = xCheckSliceSubpicture(slice, subpicIdTarget[nalu.m_nuhLayerId]);
           if (!writeInpuNalUnitToStream)

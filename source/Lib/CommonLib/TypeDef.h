@@ -54,7 +54,9 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-#define JVET_S0096_RPL_CONSTRAINT                         1// JVET-S0096 aspect 1: When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0.
+#define JVET_S0154_ASPECT9_AND_S0158_ASPECT4              1 // JVET-S0154 #9:  In the subpicture sub-bitstream extraction process, insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
+                                                            // JVET-S0158 #4c: Insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
+#define JVET_S0096_RPL_CONSTRAINT                         1 // JVET-S0096 aspect 1: When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0.
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
 #define JVET_S0219_ASPECT1                                1 // JVET-S0219 aspect1 : removal non-referred APS parameter set in the non-output layer.
 #define JVET_R0193                                        1 // JVET-R0193: signalling of the number of maximum sublayers used for inter-layer prediction for each layer
