@@ -705,10 +705,9 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
         // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to
         // Max (0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] - 1 ), with refPicVpsLayerId equal to the value of
         // the nuh_layer_id of the referenced picture.
-        bool isIRap = m_eNalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL
-                      || m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP;
         int refLayerIdx = pcRefPic->cs->vps == nullptr ? 0 : pcRefPic->cs->vps->getGeneralLayerIdx(pcRefPic->layerId);
-        CHECK((m_eNalUnitType == NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() == 0) || isIRap
+        CHECK((m_eNalUnitType == NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() == 0)
+                || m_pcPic->cs->slice->isIRAP()
                 || (m_pcPic->temporalId < m_pcPic->cs->vps->getMaxTidIlRefPicsPlus1(layerIdx, refLayerIdx)),
               "Either of the following conditions shall apply:-The picture is a GDR picture with "
               "ph_recovery_poc_cnt equal to 0 or an IRAP picture."
