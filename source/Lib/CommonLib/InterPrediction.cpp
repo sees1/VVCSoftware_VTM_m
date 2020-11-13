@@ -2410,6 +2410,24 @@ bool InterPrediction::xPredInterBlkRPR( const std::pair<int, int>& scalingRatio,
 
     int addX = isLuma( compID ) ? 0 : int( 1 - refPic->cs->sps->getHorCollocatedChromaFlag() ) * 8 * ( scalingRatio.first - SCALE_1X.first );
     int addY = isLuma( compID ) ? 0 : int( 1 - refPic->cs->sps->getVerCollocatedChromaFlag() ) * 8 * ( scalingRatio.second - SCALE_1X.second );
+    
+#if FIX_SUBPICS_W_RPR
+    int boundLeft   = 0;
+    int boundRight  = refPicWidth >> ::getComponentScaleX( compID, chFmt );
+    int boundTop    = 0;
+    int boundBottom = refPicHeight >> ::getComponentScaleY( compID, chFmt );
+    if( refPic->subPictures.size() > 1 )
+    {
+      const SubPic& curSubPic = pps.getSubPicFromPos(blk.lumaPos());
+      if( curSubPic.getTreatedAsPicFlag() )
+      {
+        boundLeft   = curSubPic.getSubPicLeft()   >> ::getComponentScaleX( compID, chFmt );
+        boundRight  = curSubPic.getSubPicRight()  >> ::getComponentScaleX( compID, chFmt );
+        boundTop    = curSubPic.getSubPicTop()    >> ::getComponentScaleY( compID, chFmt );
+        boundBottom = curSubPic.getSubPicBottom() >> ::getComponentScaleY( compID, chFmt );
+      }
+    }
+#endif
 
     x0Int = ( ( posX << ( 4 + ::getComponentScaleX( compID, chFmt ) ) ) + mv.getHor() ) * (int64_t)scalingRatio.first + addX;
     x0Int = SIGN( x0Int ) * ( ( llabs( x0Int ) + ( (long long)1 << ( 7 + ::getComponentScaleX( compID, chFmt ) ) ) ) >> ( 8 + ::getComponentScaleX( compID, chFmt ) ) ) + ( ( refPic->getScalingWindow().getWindowLeftOffset() * SPS::getWinUnitX( chFmt ) ) << ( ( posShift - ::getComponentScaleX( compID, chFmt ) ) ) );
@@ -2421,10 +2439,18 @@ bool InterPrediction::xPredInterBlkRPR( const std::pair<int, int>& scalingRatio,
     int vFilterSize = isLuma( compID ) ? NTAPS_LUMA : NTAPS_CHROMA;
 
     int yInt0 = ( (int32_t)y0Int + offY ) >> posShift;
+#if FIX_SUBPICS_W_RPR
+    yInt0 = std::min( std::max( boundTop - (NTAPS_LUMA / 2), yInt0 ), boundBottom + (NTAPS_LUMA / 2) );
+#else
     yInt0 = std::min( std::max( -(NTAPS_LUMA / 2), yInt0 ), ( refPicHeight >> ::getComponentScaleY( compID, chFmt ) ) + (NTAPS_LUMA / 2) );
+#endif
 
     int xInt0 = ( (int32_t)x0Int + offX ) >> posShift;
+#if FIX_SUBPICS_W_RPR
+    xInt0 = std::min( std::max( boundLeft - (NTAPS_LUMA / 2), xInt0 ), boundRight + (NTAPS_LUMA / 2) );
+#else
     xInt0 = std::min( std::max( -(NTAPS_LUMA / 2), xInt0 ), ( refPicWidth >> ::getComponentScaleX( compID, chFmt ) ) + (NTAPS_LUMA / 2) );
+#endif
 
     int refHeight = ((((int32_t)y0Int + (height-1) * stepY) + offY ) >> posShift) - ((((int32_t)y0Int + 0 * stepY) + offY ) >> posShift) + 1;
     refHeight = std::max<int>( 1, refHeight );
@@ -2439,7 +2465,11 @@ bool InterPrediction::xPredInterBlkRPR( const std::pair<int, int>& scalingRatio,
     {
       int posX = (int32_t)x0Int + col * stepX;
       xInt = ( posX + offX ) >> posShift;
+#if FIX_SUBPICS_W_RPR
+      xInt = std::min( std::max( boundLeft - (NTAPS_LUMA / 2), xInt ), boundRight + (NTAPS_LUMA / 2) );
+#else
       xInt = std::min( std::max( -(NTAPS_LUMA / 2), xInt ), ( refPicWidth >> ::getComponentScaleX( compID, chFmt ) ) + (NTAPS_LUMA / 2) );
+#endif
       int xFrac = ( ( posX + offX ) >> ( posShift - shiftHor ) ) & ( ( 1 << shiftHor ) - 1 );
 
       CHECK( xInt0 > xInt, "Wrong horizontal starting point" );
@@ -2455,7 +2485,11 @@ bool InterPrediction::xPredInterBlkRPR( const std::pair<int, int>& scalingRatio,
     {
       int posY = (int32_t)y0Int + row * stepY;
       yInt = ( posY + offY ) >> posShift;
+#if FIX_SUBPICS_W_RPR
+      yInt = std::min( std::max( boundTop - (NTAPS_LUMA / 2), yInt ), boundBottom + (NTAPS_LUMA / 2) );
+#else
       yInt = std::min( std::max( -(NTAPS_LUMA / 2), yInt ), ( refPicHeight >> ::getComponentScaleY( compID, chFmt ) ) + (NTAPS_LUMA / 2) );
+#endif
       int yFrac = ( ( posY + offY ) >> ( posShift - shiftVer ) ) & ( ( 1 << shiftVer ) - 1 );
 
       CHECK( yInt0 > yInt, "Wrong vertical starting point" );
