@@ -705,15 +705,25 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
         // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to
         // Max (0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] - 1 ), with refPicVpsLayerId equal to the value of
         // the nuh_layer_id of the referenced picture.
-        int refLayerIdx = pcRefPic->cs->vps == nullptr ? 0 : pcRefPic->cs->vps->getGeneralLayerIdx(pcRefPic->layerId);
-        CHECK((m_eNalUnitType == NAL_UNIT_CODED_SLICE_GDR && getPicHeader()->getRecoveryPocCnt() == 0)
-                || m_pcPic->cs->slice->isIRAP()
-                || (m_pcPic->temporalId < m_pcPic->cs->vps->getMaxTidIlRefPicsPlus1(layerIdx, refLayerIdx)),
-              "Either of the following conditions shall apply:-The picture is a GDR picture with "
-              "ph_recovery_poc_cnt equal to 0 or an IRAP picture."
-              "-The picture has TemporalId less than vps_max_tid_il_ref_pics_plus1[ currLayerIdx ][ refLayerIdx ], "
-              "where currLayerIdx and refLayerIdx are equal to "
-              "GeneralLayerIdx[ nuh_layer_id ] and GeneralLayerIdx[ refpicLayerId ], respectively. ");
+        if (rpl[refPicList]->isInterLayerRefPic(i))
+        {
+          bool cond1      = (pcRefPic->getPictureType() == NAL_UNIT_CODED_SLICE_GDR);
+          bool cond2      = (pcRefPic->slices[0]->getPicHeader()->getRecoveryPocCnt() == 0);
+          bool cond3      = (pcRefPic->cs->slice->isIRAP());
+          
+          const VPS *vps                  = pcRefPic->cs->vps;
+          const int  maxTidILRefPicsPlus1 = vps->getMaxTidIlRefPicsPlus1(layerIdx, pcRefPic->layerId);
+          bool cond4 = (pcRefPic->temporalId < maxTidILRefPicsPlus1);
+
+          CHECK((cond1 && cond2) || cond3 || cond4,
+                "Either of the following conditions shall apply for the picture referred to by each ILRP entry, when "
+                "present, in RefPicList[ 0 ] or RefPicList[ 1 ] of a slice of the current picture:-The picture is a "
+                "GDR picture with "
+                "ph_recovery_poc_cnt equal to 0 or an IRAP picture."
+                "-The picture has TemporalId less than vps_max_tid_il_ref_pics_plus1[ currLayerIdx ][ refLayerIdx ], "
+                "where currLayerIdx and refLayerIdx are equal to "
+                "GeneralLayerIdx[ nuh_layer_id ] and GeneralLayerIdx[ refpicLayerId ], respectively. ");
+        }
 #endif
       }
     }
