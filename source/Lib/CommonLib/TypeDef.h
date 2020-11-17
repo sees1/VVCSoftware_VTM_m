@@ -67,6 +67,7 @@
 
 #define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
 #define FIX_SUBPICS_W_RPR                                 1 // Fix handling of RPR with subpictures (via scaling windows with no resolution change)
+#define JVET_S0175_ASPECT5                                1 // use u(8) instead of u(4) for (ffi_)display_elemental_periods_minus1 and pt_display_elemental_periods_minus1
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages

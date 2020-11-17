@@ -982,7 +982,11 @@ void SEIReader::xParseSEIPictureTiming(SEIPictureTiming& sei, uint32_t payloadSi
       sei.m_duCommonCpbRemovalDelayFlag = 0;
     }
   }
+#if JVET_S0175_ASPECT5
+  sei_read_code( pDecodedMessageOutputStream, 8, symbol,    "pt_display_elemental_periods_minus1" );
+#else
   sei_read_uvlc( pDecodedMessageOutputStream, symbol,    "pt_display_elemental_periods_minus1" );
+#endif
   sei.m_ptDisplayElementalPeriodsMinus1 = symbol;
 }
 
@@ -1014,10 +1018,16 @@ void SEIReader::xParseSEIFrameFieldinfo(SEIFrameFieldInfo& sei, const SEIPicture
       sei_read_flag( pDecodedMessageOutputStream, symbol,  "ffi_top_field_first_flag" );
       sei.m_topFieldFirstFlag = symbol;
     }
+#if JVET_S0175_ASPECT5
+    sei_read_code( pDecodedMessageOutputStream, 8, symbol, "ffi_display_elemental_periods_minus1" );
+#else
     sei_read_uvlc( pDecodedMessageOutputStream, symbol,    "ffi_display_elemental_periods_minus1" );
+#endif
     sei.m_displayElementalPeriodsMinus1 = symbol;
     if( pt.m_ptDisplayElementalPeriodsMinus1 != sei.m_displayElementalPeriodsMinus1 )
+    {
       msg( WARNING, "Warning: ffi_display_elemental_periods_minus1 is different in picture timing and frame field information SEI messages!");
+    }
   }
   sei_read_code( pDecodedMessageOutputStream, 2, symbol,   "ffi_source_scan_type" );
   sei.m_sourceScanType = symbol;
