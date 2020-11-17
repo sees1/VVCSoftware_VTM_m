@@ -674,6 +674,11 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
   }
 
+  if (tempCS->slice->getCheckLDC())
+  {
+    m_bestBcwCost[0] = m_bestBcwCost[1] = std::numeric_limits<double>::max();
+    m_bestBcwIdx[0] = m_bestBcwIdx[1] = -1;
+  }
   do
   {
     for (int i = compBegin; i < (compBegin + numComp); i++)
@@ -3711,12 +3716,6 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
 
 
   m_pcInterSearch->setAffineModeSelected(false);
-
-  if( tempCS->slice->getCheckLDC() )
-  {
-    m_bestBcwCost[0] = m_bestBcwCost[1] = std::numeric_limits<double>::max();
-    m_bestBcwIdx[0] = m_bestBcwIdx[1] = -1;
-  }
 
   m_pcInterSearch->resetBufferedUniMotions();
   int bcwLoopNum = (tempCS->slice->isInterB() ? BCW_NUM : 1);
