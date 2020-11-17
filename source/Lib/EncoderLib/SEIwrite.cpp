@@ -479,7 +479,7 @@ void SEIWriter::xWriteSEIFrameFieldInfo(const SEIFrameFieldInfo& sei)
     {
       WRITE_FLAG( sei.m_topFieldFirstFlag ? 1 : 0,            "ffi_top_field_first_flag" );
     }
-#if JVET_S0175_ASPECT5
+#if !JVET_S0175_ASPECT5
     WRITE_UVLC( sei.m_displayElementalPeriodsMinus1,          "ffi_display_elemental_periods_minus1" );
 #else
     WRITE_CODE( sei.m_displayElementalPeriodsMinus1, 8,       "ffi_display_elemental_periods_minus1" );
