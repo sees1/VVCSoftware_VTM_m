@@ -177,7 +177,6 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
 
   SEI *sei = NULL;
   const SEIBufferingPeriod *bp = NULL;
-  const SEIPictureTiming *pt = NULL;
 
   if(nalUnitType == NAL_UNIT_PREFIX_SEI)
   {
@@ -225,8 +224,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       break;
     case SEI::FRAME_FIELD_INFO:
       sei = new SEIFrameFieldInfo;
-      pt = hrd.getPictureTimingSEI();
-      xParseSEIFrameFieldinfo((SEIFrameFieldInfo&) *sei, *pt, payloadSize, pDecodedMessageOutputStream);
+      xParseSEIFrameFieldinfo((SEIFrameFieldInfo&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
     case SEI::DEPENDENT_RAP_INDICATION:
       sei = new SEIDependentRAPIndication;
@@ -990,7 +988,7 @@ void SEIReader::xParseSEIPictureTiming(SEIPictureTiming& sei, uint32_t payloadSi
   sei.m_ptDisplayElementalPeriodsMinus1 = symbol;
 }
 
-void SEIReader::xParseSEIFrameFieldinfo(SEIFrameFieldInfo& sei, const SEIPictureTiming& pt, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
+void SEIReader::xParseSEIFrameFieldinfo(SEIFrameFieldInfo& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
 
@@ -1024,10 +1022,6 @@ void SEIReader::xParseSEIFrameFieldinfo(SEIFrameFieldInfo& sei, const SEIPicture
     sei_read_uvlc( pDecodedMessageOutputStream, symbol,    "ffi_display_elemental_periods_minus1" );
 #endif
     sei.m_displayElementalPeriodsMinus1 = symbol;
-    if( pt.m_ptDisplayElementalPeriodsMinus1 != sei.m_displayElementalPeriodsMinus1 )
-    {
-      msg( WARNING, "Warning: ffi_display_elemental_periods_minus1 is different in picture timing and frame field information SEI messages!");
-    }
   }
   sei_read_code( pDecodedMessageOutputStream, 2, symbol,   "ffi_source_scan_type" );
   sei.m_sourceScanType = symbol;

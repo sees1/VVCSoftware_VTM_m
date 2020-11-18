@@ -1976,6 +1976,23 @@ void DecLib::xParsePrefixSEImessages()
     delete m_prefixSEINALUs.front();
     m_prefixSEINALUs.pop_front();
   }
+  xCheckPrefixSEIMessages(m_SEIs);
+}
+
+void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
+{
+  SEIMessages picTimingSEIs  = getSeisByType(prefixSEIs, SEI::PICTURE_TIMING);
+  SEIMessages frameFieldSEIs = getSeisByType(prefixSEIs, SEI::FRAME_FIELD_INFO);
+
+  if (!picTimingSEIs.empty() && !frameFieldSEIs.empty())
+  {
+    SEIPictureTiming  *pt = (SEIPictureTiming*)  picTimingSEIs.front();
+    SEIFrameFieldInfo *ff = (SEIFrameFieldInfo*) frameFieldSEIs.front();
+    if( pt->m_ptDisplayElementalPeriodsMinus1 != ff->m_displayElementalPeriodsMinus1 )
+    {
+      msg( WARNING, "Warning: ffi_display_elemental_periods_minus1 is different in picture timing and frame field information SEI messages!");
+    }
+  }
 }
 
 void DecLib::xDecodePicHeader( InputNALUnit& nalu )
