@@ -715,19 +715,26 @@ void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
   WRITE_CODE(hrd->getTimeScale(), 32, "time_scale");
   WRITE_FLAG(hrd->getGeneralNalHrdParametersPresentFlag() ? 1 : 0, "general_nal_hrd_parameters_present_flag");
   WRITE_FLAG(hrd->getGeneralVclHrdParametersPresentFlag() ? 1 : 0, "general_vcl_hrd_parameters_present_flag");
-  WRITE_FLAG(hrd->getGeneralSamePicTimingInAllOlsFlag() ? 1 : 0, "general_same_pic_timing_in_all_ols_flag");
-  WRITE_FLAG(hrd->getGeneralDecodingUnitHrdParamsPresentFlag() ? 1 : 0, "general_decoding_unit_hrd_params_present_flag");
-  if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
+#if JVET_S0175_ASPECT6
+  if( hrd->getGeneralNalHrdParametersPresentFlag() || hrd->getGeneralVclHrdParametersPresentFlag() )
   {
-    WRITE_CODE(hrd->getTickDivisorMinus2(), 8, "tick_divisor_minus2");
+#endif
+    WRITE_FLAG(hrd->getGeneralSamePicTimingInAllOlsFlag() ? 1 : 0, "general_same_pic_timing_in_all_ols_flag");
+    WRITE_FLAG(hrd->getGeneralDecodingUnitHrdParamsPresentFlag() ? 1 : 0, "general_decoding_unit_hrd_params_present_flag");
+    if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
+    {
+      WRITE_CODE(hrd->getTickDivisorMinus2(), 8, "tick_divisor_minus2");
+    }
+    WRITE_CODE(hrd->getBitRateScale(), 4, "bit_rate_scale");
+    WRITE_CODE(hrd->getCpbSizeScale(), 4, "cpb_size_scale");
+    if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
+    {
+      WRITE_CODE(hrd->getCpbSizeDuScale(), 4, "cpb_size_du_scale");
+    }
+    WRITE_UVLC(hrd->getHrdCpbCntMinus1(), "hrd_cpb_cnt_minus1");
+#if JVET_S0175_ASPECT6
   }
-  WRITE_CODE(hrd->getBitRateScale(), 4, "bit_rate_scale");
-  WRITE_CODE(hrd->getCpbSizeScale(), 4, "cpb_size_scale");
-  if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
-  {
-    WRITE_CODE(hrd->getCpbSizeDuScale(), 4, "cpb_size_du_scale");
-  }
-  WRITE_UVLC(hrd->getHrdCpbCntMinus1(), "hrd_cpb_cnt_minus1");
+#endif
 }
 void HLSWriter::codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd, const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1)
 {
@@ -745,7 +752,11 @@ void HLSWriter::codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const 
     {
       WRITE_UVLC(hrd->getElementDurationInTcMinus1(), "elemental_duration_in_tc_minus1");
     }
+#if JVET_S0175_ASPECT6
+    else if ( (generalHrd->getGeneralNalHrdParametersPresentFlag() || generalHrd->getGeneralVclHrdParametersPresentFlag()) && generalHrd->getHrdCpbCntMinus1() == 0)
+#else
     else if (generalHrd->getHrdCpbCntMinus1() == 0)
+#endif
     {
       WRITE_FLAG(hrd->getLowDelayHrdFlag() ? 1 : 0, "low_delay_hrd_flag");
     }
