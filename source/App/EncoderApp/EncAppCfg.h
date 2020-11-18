@@ -696,6 +696,8 @@ protected:
   bool        m_alf;                                          ///< Adaptive Loop Filter
 #if JVET_T0064
   double      m_alfStrength;
+  bool        m_alfAllowPredefinedFilters;
+  double      m_ccalfStrength;
 #endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;

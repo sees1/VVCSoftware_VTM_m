@@ -1050,6 +1050,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseALF                                            ( m_alf );
 #if JVET_T0064
   m_cEncLib.setALFStrength                                       (m_alfStrength);
+  m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
+  m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);
 #endif
   m_cEncLib.setUseCCALF                                          ( m_ccalf );
   m_cEncLib.setCCALFQpThreshold                                  ( m_ccalfQpThreshold );
