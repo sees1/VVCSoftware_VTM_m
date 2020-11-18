@@ -1901,7 +1901,11 @@ void EncAdaptiveLoopFilter::roundFiltCoeffCCALF(int16_t *filterCoeffQuant, doubl
     int best_index = 0;
     for(int k = 0; k < CCALF_CANDS_COEFF_NR; k++)
     {
+#if JVET_T0064
+      double err = ((filterCoeff[i] * m_encCfg->getCCALFStrength()) * sign * factor - CCALF_SMALL_TAB[k]);
+#else
       double err = (filterCoeff[i] * sign * factor - CCALF_SMALL_TAB[k]);
+#endif
       err = err*err;
       if(err < best_err)
       {
@@ -2732,7 +2736,7 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
           int iBestFilterSetIdx = 0;
 #if JVET_T0064
           int firstFilterSetIdx = 0;
-          if (m_encCfg->getALFStrength() != 1.0)
+          if (!m_encCfg->getALFAllowPredefinedFilters())
           {
             firstFilterSetIdx = NUM_FIXED_FILTER_SETS;
           }
@@ -3355,6 +3359,12 @@ void EncAdaptiveLoopFilter::deriveCcAlfFilterCoeff( ComponentID compID, const Pe
 
   // Refine quanitzation
   int modified       = 1;
+#if JVET_T0064
+  if (m_encCfg->getCCALFStrength() != 1.0)
+  {
+    modified = 0;
+  }
+#endif
   double errRef      = m_alfCovarianceFrameCcAlf[compID - 1][0][filterIdx].calcErrorForCcAlfCoeffs(filterCoeffInt, size, (m_scaleBits+1));
   while (modified)
   {
