@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{jvetdoc}
+﻿\documentclass[a4paper,11pt]{jvetdoc}
 
 \usepackage{geometry}[2010/02/12]
 
@@ -2888,6 +2888,18 @@ switched at CTB level. Set to 1 to disable alternative chroma filters.
 Value shall be in the range 1..8.
 \\
 
+\Option{ALFStrength} &
+%\ShortOption{\None} &
+\Default{1.0} &
+Enables control of ALF filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma. Valid values are in the range 0.0 to 1.0. NOTE: Refinement of quantized filter coefficents is not used when ALFStrength is different from 1.0. To ensure reduced filter strength the parameter ALFAllowPredefinedFilters should also be set to false.  
+\\
+
+\Option{ALFAllowPredefinedFilters} &
+%\ShortOption{\None} &
+\Default{true} &
+Enables use of pre-defined filters for ALF.  
+\\
+
 \Option{CCALF} &
 %\ShortOption{\None} &
 \Default{true} &
@@ -2898,6 +2910,12 @@ Enables cross-component ALF.
 %\ShortOption{\None} &
 \Default{37} &
 QP threshold above which the encoder reduces cross-component ALF usage.
+\\
+
+\Option{CCALFStrength} &
+%\ShortOption{\None} &
+\Default{1.0} &
+Enables control of CCALF filter strength. The parameter scales the magnitudes of the CCALF filter coefficients. Valid values are in the range 0.0 to 1.0. NOTE: Refinement of quantized filter coefficents is not used when CCALFStrength is different from 1.0.
 \\
 
 \Option{SMVD} &
