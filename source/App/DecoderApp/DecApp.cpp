@@ -325,6 +325,17 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].open( reconFileName, true, m_outputBitDepth, m_outputBitDepth, bitDepths.recon ); // write mode
         }
       }
+      // update file bitdepth shift if recon bitdepth changed between sequences
+      for( uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++ )
+      {
+        int reconBitdepth = pcListPic->front()->cs->sps->getBitDepth((ChannelType)channelType);
+        int fileBitdepth  = m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].getFileBitdepth(channelType);
+        int bitdepthShift = m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].getBitdepthShift(channelType);
+        if( fileBitdepth + bitdepthShift != reconBitdepth )
+        {
+          m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
+        }
+      }
       // write reconstruction to file
       if( bNewPicture )
       {
