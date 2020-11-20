@@ -591,6 +591,86 @@ bool BitstreamExtractorApp::xCheckScalableNestingSEI(SEIScalableNesting *seiNest
   return nestingAppliedInTargetOlsLayerId;
 }
 
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+bool BitstreamExtractorApp::xIsTargetOlsIncludeAllVclLayers()
+{
+  std::ifstream bitstreamFileIn(m_bitstreamFileNameIn.c_str(), std::ifstream::in | std::ifstream::binary);
+  if (!bitstreamFileIn)
+  {
+    EXIT("failed to open bitstream file " << m_bitstreamFileNameIn.c_str() << " for reading");
+  }
+
+  InputByteStream bytestream(bitstreamFileIn);
+
+  bitstreamFileIn.clear();
+  bitstreamFileIn.seekg(0, std::ios::beg);
+
+  if (m_targetOlsIdx >= 0)
+  {
+    std::vector<int> layerIdInTargetOls;
+    std::vector<int> layerIdInVclNalu;
+    while (!!bitstreamFileIn)
+    {
+      AnnexBStats stats = AnnexBStats();
+      InputNALUnit nalu;
+      byteStreamNALUnit(bytestream, nalu.getBitstream().getFifo(), stats);
+
+      // call actual decoding function
+      if (nalu.getBitstream().getFifo().empty())
+      {
+        msg(WARNING, "Warning: Attempt to decode an empty NAL unit");
+      }
+      else
+      {
+        read(nalu);
+
+        if (nalu.m_nalUnitType == NAL_UNIT_VPS)
+        {
+          VPS* vps = new VPS();
+          m_hlSynaxReader.setBitstream(&nalu.getBitstream());
+          m_hlSynaxReader.parseVPS(vps);
+          int vpsId = vps->getVPSId();
+          // note: storeVPS may invalidate the vps pointer!
+          m_parameterSetManager.storeVPS(vps, nalu.getBitstream().getFifo());
+          // get VPS back
+          vps = m_parameterSetManager.getVPS(vpsId);
+          m_vpsId = vps->getVPSId();
+        }
+
+        VPS *vps = nullptr;
+        if (m_vpsId > 0)
+        {
+          vps = m_parameterSetManager.getVPS(m_vpsId);
+          layerIdInTargetOls = vps->getLayerIdsInOls(m_targetOlsIdx);
+          if (NALUnit::isVclNalUnitType(nalu.m_nalUnitType))
+          {
+            if (layerIdInVclNalu.size() == 0 || nalu.m_nuhLayerId >= layerIdInVclNalu[layerIdInVclNalu.size() - 1])
+            {
+              layerIdInVclNalu.push_back(nalu.m_nuhLayerId);
+            }
+            else
+            {
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    //When LayerIdInOls[ targetOlsIdx ] does not include all values of nuh_layer_id in all VCL NAL units in the bitstream inBitstream
+    for (int i = 0; i < layerIdInVclNalu.size(); i++)
+    {
+      bool vclLayerIncludedInTargetOls = std::find(layerIdInTargetOls.begin(), layerIdInTargetOls.end(), layerIdInVclNalu[i]) != layerIdInTargetOls.end();
+      if (!vclLayerIncludedInTargetOls)
+      {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+#endif
+
 uint32_t BitstreamExtractorApp::decode()
 {
   std::ifstream bitstreamFileIn(m_bitstreamFileNameIn.c_str(), std::ifstream::in | std::ifstream::binary);
@@ -621,6 +701,10 @@ uint32_t BitstreamExtractorApp::decode()
   bool isVclNalUnitRemoved[MAX_VPS_LAYERS] = { false };
   bool isMultiSubpicLayer[MAX_VPS_LAYERS] = { false };
   bool rmAllFillerInSubpicExt[MAX_VPS_LAYERS] = { false };
+
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+  bool targetOlsIncludeAllVclLayers = xIsTargetOlsIncludeAllVclLayers();
+#endif
 
   while (!!bitstreamFileIn)
   {
@@ -851,7 +935,7 @@ uint32_t BitstreamExtractorApp::decode()
               }
 #if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
               // C.6 step 9.c
-              if (writeInpuNalUnitToStream && (vps->getNumLayersInOls(m_targetOlsIdx) < vps->getMaxLayers()) && !seiNesting->m_snSubpicFlag)
+              if (writeInpuNalUnitToStream && !targetOlsIncludeAllVclLayers && !seiNesting->m_snSubpicFlag)
               {
                 if (seiNesting->m_snOlsFlag || vps->getNumLayersInOls(m_targetOlsIdx) == 1)
                 {
@@ -867,8 +951,7 @@ uint32_t BitstreamExtractorApp::decode()
             // remove unqualified timing related SEI
             if (sei->payloadType() == SEI::BUFFERING_PERIOD || (m_removeTimingSEI && sei->payloadType() == SEI::PICTURE_TIMING) || sei->payloadType() == SEI::DECODING_UNIT_INFO || sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
             {
-              bool targetOlsIdxGreaterThanZero = m_targetOlsIdx > 0;
-              writeInpuNalUnitToStream &= !targetOlsIdxGreaterThanZero;
+              writeInpuNalUnitToStream &= targetOlsIncludeAllVclLayers;
             }
           }
 #if !JVET_S0154_ASPECT9_AND_S0158_ASPECT4

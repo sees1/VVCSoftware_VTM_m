@@ -79,6 +79,7 @@ protected:
 #endif
   void xReadPicHeader(InputNALUnit &nalu);
 #if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+  bool xIsTargetOlsIncludeAllVclLayers();
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId, VPS *vps);
 #else
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId);
