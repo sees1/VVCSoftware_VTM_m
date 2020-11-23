@@ -424,6 +424,11 @@ uint32_t DecApp::decode()
       m_cDecLib.CheckNoOutputPriorPicFlagsInAccessUnit();
       m_cDecLib.resetAccessUnitNoOutputPriorPicFlags();
       m_cDecLib.checkLayerIdIncludedInCvss();
+#if JVET_S0176_ITEM5
+      m_cDecLib.checkSEIInAccessUnit();
+      m_cDecLib.resetAccessUnitNestedSliSeiInfo();
+      m_cDecLib.resetIsFirstAuInCvs();
+#endif
       m_cDecLib.resetAccessUnitEos();
       m_cDecLib.resetAudIrapOrGdrAuFlag();
     }
@@ -431,7 +436,9 @@ uint32_t DecApp::decode()
     {
       m_cDecLib.checkTidLayerIdInAccessUnit();
       m_cDecLib.resetAccessUnitSeiTids();
+#if !JVET_S0176_ITEM5
       m_cDecLib.checkSEIInAccessUnit();
+#endif
       m_cDecLib.resetAccessUnitSeiPayLoadTypes();
       m_cDecLib.resetAccessUnitNals();
       m_cDecLib.resetAccessUnitApsNals();

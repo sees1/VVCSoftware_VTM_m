@@ -168,6 +168,16 @@ private:
   };
   std::vector<AccessUnitPicInfo> m_accessUnitPicInfo;
   std::vector<AccessUnitPicInfo> m_firstAccessUnitPicInfo;
+#if JVET_S0176_ITEM5
+  struct AccessUnitNestedSliSeiInfo
+  {
+    bool m_nestedSliPresent;
+    uint32_t m_numOlssNestedSli;
+    uint32_t m_olsIdxNestedSLI[MAX_NUM_OLSS];
+  };
+  std::vector<AccessUnitNestedSliSeiInfo> m_accessUnitNestedSliSeiInfo;
+  int m_accessUnitSpsNumSubpic[MAX_VPS_LAYERS];
+#endif
   struct NalUnitInfo
   {
     NalUnitType     m_nalUnitType; ///< nal_unit_type
@@ -261,6 +271,11 @@ public:
   void checkLayerIdIncludedInCvss();
   void CheckNoOutputPriorPicFlagsInAccessUnit();
   void resetAccessUnitNoOutputPriorPicFlags() { m_accessUnitNoOutputPriorPicFlags.clear(); }
+#if JVET_S0176_ITEM5
+  void checkMultiSubpicNum(int olsIdx);
+  void resetAccessUnitNestedSliSeiInfo()  { m_accessUnitNestedSliSeiInfo.clear(); }
+  void resetIsFirstAuInCvs();
+#endif
   void checkSeiInPictureUnit();
   void resetPictureSeiNalus();
   bool isSliceNaluFirstInAU( bool newPicture, InputNALUnit &nalu );
