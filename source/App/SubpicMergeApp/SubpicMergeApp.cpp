@@ -535,25 +535,59 @@ void SubpicMergeApp::getTileDimensions(std::vector<int> &tileWidths, std::vector
   std::vector<int> tileX;
   std::vector<int> tileY;
 
+  // Add subpicture boundaries as tile boundaries
   for (auto &subpic : *m_subpics)
   {
-    tileX.push_back(subpic.topLeftCornerX);
-    tileY.push_back(subpic.topLeftCornerY);
+    bool addTileXForCurrentSubpic = true;
+    bool addTileYForCurrentSubpic = true;
+
+    // Check if current subpic boundary need to be added as tile boundary
+    for (auto &subpicScan : *m_subpics)
+    {
+      if (subpic.topLeftCornerX >= subpicScan.topLeftCornerX && (subpic.topLeftCornerX + subpic.width) <= (subpicScan.topLeftCornerX + subpicScan.width) && subpic.width < subpicScan.width)
+      {
+        addTileXForCurrentSubpic = false;
+      }
+      if (subpic.topLeftCornerY >= subpicScan.topLeftCornerY && (subpic.topLeftCornerY + subpic.height) <= (subpicScan.topLeftCornerY + subpicScan.height) && subpic.height < subpicScan.height)
+      {
+        addTileYForCurrentSubpic = false;
+      }
+    }
+
+    if (addTileXForCurrentSubpic)
+    {
+      tileX.push_back(subpic.topLeftCornerX);
+    }
+    if (addTileYForCurrentSubpic)
+    {
+      tileY.push_back(subpic.topLeftCornerY);
+    }
+  }
+
+  // Add tile boundaries from tiles within subpictures
+  for (auto &subpic : *m_subpics)
+  {
     const PPS &pps = *subpic.slices[0].getPPS();
     if (!pps.getNoPicPartitionFlag())
     {
-      int x = subpic.topLeftCornerX;
-      for (int i = 0; i < pps.getNumTileColumns(); i++)
+      if (pps.getNumTileColumns() > 1)
       {
-        x += pps.getTileColumnWidth(i) * pps.getCtuSize();
-        tileX.push_back(x);
+        int x = subpic.topLeftCornerX;
+        for (int i = 0; i < pps.getNumTileColumns(); i++)
+        {
+          x += pps.getTileColumnWidth(i) * pps.getCtuSize();
+          tileX.push_back(x);
+        }
       }
 
-      int y = subpic.topLeftCornerY;
-      for (int i = 0; i < pps.getNumTileRows(); i++)
+      if (pps.getNumTileRows() > 1)
       {
-        y += pps.getTileRowHeight(i) * pps.getCtuSize();
-        tileY.push_back(y);
+        int y = subpic.topLeftCornerY;
+        for (int i = 0; i < pps.getNumTileRows(); i++)
+        {
+          y += pps.getTileRowHeight(i) * pps.getCtuSize();
+          tileY.push_back(y);
+        }
       }
     }
   }
@@ -642,52 +676,82 @@ void SubpicMergeApp::generateMergedStreamPPSes(ParameterSetManager &psManager, s
     pps.setTileIdxDeltaPresentFlag(true);
     pps.initRectSlices( );
 
-    unsigned int numTileColsInPic = pps.getNumTileColumns();
-
-    unsigned int sliceIdx = 0;
+    pps.setSingleSlicePerSubPicFlag(true);
     for (auto &subpic : *m_subpics)
     {
-      unsigned int tileIdxY = 0;
-      for (unsigned int tileY = 0; tileY != subpic.topLeftCornerY && tileIdxY < tileHeights.size(); tileIdxY++)
-      {
-        tileY += tileHeights[tileIdxY];
-      }
-      CHECK(tileIdxY == tileHeights.size(), "Could not find subpicture to tile border match");
-
-      unsigned int tileIdxX = 0;
-      for (unsigned int tileX = 0; tileX != subpic.topLeftCornerX && tileIdxX < tileWidths.size(); tileIdxX++)
-      {
-        tileX += tileWidths[tileIdxX];
-      }
-      CHECK(tileIdxX == tileWidths.size(), "Could not find subpicture to tile border match")
-
       const PPS &subpicPPS = *subpic.slices[0].getPPS();
-
-      if (subpicPPS.getNumSlicesInPic() == 1)
+      if (subpicPPS.getNumSlicesInPic() > 1)
       {
-        pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getNumTileColumns());
-        pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getNumTileRows());
-        pps.setNumSlicesInTile(sliceIdx, 1);
-        unsigned int sliceTileIdx = tileIdxY * numTileColsInPic + tileIdxX;
-        pps.setSliceTileIdx(sliceIdx, sliceTileIdx);
-        pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getPicHeightInCtu());
-
-        sliceIdx++;
+        pps.setSingleSlicePerSubPicFlag(false);
+        break;
       }
-      else
+    }
+
+    if (!pps.getSingleSlicePerSubPicFlag())
+    {
+      unsigned int numTileColsInPic = pps.getNumTileColumns();
+
+      unsigned int sliceIdx = 0;
+      for (auto& subpic : *m_subpics)
       {
-        for (int subpicSliceIdx = 0; subpicSliceIdx < subpicPPS.getNumSlicesInPic(); subpicSliceIdx++, sliceIdx++)
+        unsigned int tileIdxY = 0;
+        for (unsigned int tileY = 0; tileIdxY < tileHeights.size(); tileIdxY++)
         {
-          pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getSliceWidthInTiles(subpicSliceIdx));
-          pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getSliceHeightInTiles(subpicSliceIdx));
-          pps.setNumSlicesInTile(sliceIdx, subpicPPS.getNumSlicesInTile(subpicSliceIdx));
-          unsigned int sliceTileIdxSubpic = subpicPPS.getSliceTileIdx(subpicSliceIdx);
-          unsigned int sliceTileIdx = (sliceTileIdxSubpic / subpicPPS.getNumTileColumns() + tileIdxY) * numTileColsInPic + tileIdxX + (sliceTileIdxSubpic % subpicPPS.getNumTileColumns());
+          if (tileY == subpic.topLeftCornerY || (tileY + tileHeights[tileIdxY]) == (subpic.topLeftCornerY + subpic.height) ||
+              (tileY < subpic.topLeftCornerY && (tileY + tileHeights[tileIdxY]) >(subpic.topLeftCornerY + subpic.height)))
+          {
+            break;
+          }
+          tileY += tileHeights[tileIdxY];
+        }
+        CHECK(tileIdxY == tileHeights.size(), "Could not find subpicture to tile mapping");
+
+        unsigned int tileIdxX = 0;
+        for (unsigned int tileX = 0; tileIdxX < tileWidths.size(); tileIdxX++)
+        {
+          if (tileX == subpic.topLeftCornerX || (tileX + tileWidths[tileIdxX]) == (subpic.topLeftCornerX + subpic.width) ||
+              (tileX < subpic.topLeftCornerX && (tileX + tileWidths[tileIdxX]) >(subpic.topLeftCornerX + subpic.width)))
+          {
+            break;
+          }
+          tileX += tileWidths[tileIdxX];
+        }
+        CHECK(tileIdxX == tileWidths.size(), "Could not find subpicture to tile mapping")
+
+        const PPS& subpicPPS = *subpic.slices[0].getPPS();
+
+        if (subpicPPS.getNumSlicesInPic() == 1)
+        {
+          pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getNumTileColumns());
+          pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getNumTileRows());
+          pps.setNumSlicesInTile(sliceIdx, 1);
+          unsigned int sliceTileIdx = tileIdxY * numTileColsInPic + tileIdxX;
           pps.setSliceTileIdx(sliceIdx, sliceTileIdx);
-          pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getSliceHeightInCtu(subpicSliceIdx));
+          pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getPicHeightInCtu());
+
+          sliceIdx++;
+        }
+        else
+        {
+          for (int subpicSliceIdx = 0; subpicSliceIdx < subpicPPS.getNumSlicesInPic(); subpicSliceIdx++, sliceIdx++)
+          {
+            pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getSliceWidthInTiles(subpicSliceIdx));
+            pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getSliceHeightInTiles(subpicSliceIdx));
+            pps.setNumSlicesInTile(sliceIdx, subpicPPS.getNumSlicesInTile(subpicSliceIdx));
+            unsigned int sliceTileIdxSubpic = subpicPPS.getSliceTileIdx(subpicSliceIdx);
+            unsigned int sliceTileIdx = (sliceTileIdxSubpic / subpicPPS.getNumTileColumns() + tileIdxY) * numTileColsInPic + tileIdxX + (sliceTileIdxSubpic % subpicPPS.getNumTileColumns());
+            pps.setSliceTileIdx(sliceIdx, sliceTileIdx);
+            pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getSliceHeightInCtu(subpicSliceIdx));
+          }
         }
       }
     }
+    else
+    {
+      pps.setTileIdxDeltaPresentFlag(false);
+    }
+
+    pps.initRectSliceMap(&sps);
 
     pps.setLoopFilterAcrossTilesEnabledFlag(false);
     pps.setLoopFilterAcrossSlicesEnabledFlag(false);
