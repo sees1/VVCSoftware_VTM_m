@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,13 +78,8 @@ std::vector<uint32_t> writeAnnexBAccessUnit(std::ostream& out, const AccessUnit&
   for (AccessUnit::const_iterator it = au.begin(); it != au.end(); it++)
   {
     const NALUnitEBSP& nalu = **it;
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     const bool useLongStartCode = (it == au.begin() || nalu.m_nalUnitType == NAL_UNIT_OPI || nalu.m_nalUnitType == NAL_UNIT_DCI || nalu.m_nalUnitType == NAL_UNIT_VPS || nalu.m_nalUnitType == NAL_UNIT_SPS
                                    || nalu.m_nalUnitType == NAL_UNIT_PPS || nalu.m_nalUnitType == NAL_UNIT_PREFIX_APS || nalu.m_nalUnitType == NAL_UNIT_SUFFIX_APS);
-#else
-    const bool useLongStartCode = (it == au.begin() || nalu.m_nalUnitType == NAL_UNIT_DCI || nalu.m_nalUnitType == NAL_UNIT_VPS || nalu.m_nalUnitType == NAL_UNIT_SPS
-                                   || nalu.m_nalUnitType == NAL_UNIT_PPS || nalu.m_nalUnitType == NAL_UNIT_PREFIX_APS || nalu.m_nalUnitType == NAL_UNIT_SUFFIX_APS);
-#endif
 
     const uint32_t size = writeAnnexBNalUnit(out, nalu, useLongStartCode);
 

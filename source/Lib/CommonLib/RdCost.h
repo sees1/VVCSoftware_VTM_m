@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -293,10 +293,6 @@ public:
     return length;
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  void copyState( const RdCost& other );
-#endif
-
   // for motion cost
   static uint32_t    xGetExpGolombNumberOfBits( int iVal )
   {
@@ -315,7 +311,7 @@ public:
   uint32_t           getBitsOfVectorWithPredictor( const int x, const int y, const unsigned imvShift )  { return xGetExpGolombNumberOfBits(((x << m_iCostScale) - m_mvPredictor.getHor())>>imvShift) + xGetExpGolombNumberOfBits(((y << m_iCostScale) - m_mvPredictor.getVer())>>imvShift); }
 #if WCG_EXT
          void    saveUnadjustedLambda       ();
-         void    initLumaLevelToWeightTable ();
+         void    initLumaLevelToWeightTable (int bitDepth);
   inline double  getWPSNRLumaLevelWeight    (int val) { return m_lumaLevelToWeightPLUT[val]; }
   void           initLumaLevelToWeightTableReshape();
   void           updateReshapeLumaLevelToWeightTableChromaMD (std::vector<Pel>& ILUT);
@@ -393,6 +389,10 @@ private:
   static Distortion xGetSSE_SIMD    ( const DistParam& pcDtParam );
   template<int iWidth, X86_VEXT vext>
   static Distortion xGetSSE_NxN_SIMD( const DistParam& pcDtParam );
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  template<X86_VEXT vext>
+  static Distortion xGetSSE_HBD_SIMD(const DistParam& pcDtParam);
+#endif
 
   template<X86_VEXT vext>
   static Distortion xGetSAD_SIMD    ( const DistParam& pcDtParam );
@@ -400,12 +400,23 @@ private:
   static Distortion xGetSAD_NxN_SIMD( const DistParam& pcDtParam );
   template<X86_VEXT vext>
   static Distortion xGetSAD_IBD_SIMD( const DistParam& pcDtParam );
-
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  template<X86_VEXT vext>
+  static Distortion xGetHADs_HBD_SIMD(const DistParam& pcDtParam);
+#else
   template<X86_VEXT vext>
   static Distortion xGetHADs_SIMD   ( const DistParam& pcDtParam );
+#endif
 
   template< X86_VEXT vext >
   static Distortion xGetSADwMask_SIMD( const DistParam& pcDtParam );
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  template<X86_VEXT vext>
+  static Distortion xGetSAD_HBD_SIMD(const DistParam& pcDtParam);
+
+  template< X86_VEXT vext >
+  static Distortion xGetSADwMask_HBD_SIMD(const DistParam& pcDtParam);
+#endif
 #endif
 
 public:

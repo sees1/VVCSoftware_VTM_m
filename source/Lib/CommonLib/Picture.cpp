@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -40,130 +40,6 @@
 #include "ChromaFormat.h"
 #include "CommonLib/InterpolationFilter.h"
 
-
-#if ENABLE_SPLIT_PARALLELISM
-
-int g_wppThreadId( 0 );
-#pragma omp threadprivate(g_wppThreadId)
-
-#if ENABLE_SPLIT_PARALLELISM
-int g_splitThreadId( 0 );
-#pragma omp threadprivate(g_splitThreadId)
-
-int g_splitJobId( 0 );
-#pragma omp threadprivate(g_splitJobId)
-#endif
-
-Scheduler::Scheduler() :
-#if ENABLE_SPLIT_PARALLELISM
-  m_numSplitThreads( 1 )
-#endif
-{
-}
-
-Scheduler::~Scheduler()
-{
-}
-
-#if ENABLE_SPLIT_PARALLELISM
-unsigned Scheduler::getSplitDataId( int jobId ) const
-{
-  if( m_numSplitThreads > 1 && m_hasParallelBuffer )
-  {
-    int splitJobId = jobId == CURR_THREAD_ID ? g_splitJobId : jobId;
-
-    return ( g_wppThreadId * NUM_RESERVERD_SPLIT_JOBS ) + splitJobId;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-unsigned Scheduler::getSplitPicId( int tId /*= CURR_THREAD_ID */ ) const
-{
-  if( m_numSplitThreads > 1 && m_hasParallelBuffer )
-  {
-    int threadId = tId == CURR_THREAD_ID ? g_splitThreadId : tId;
-
-    return ( g_wppThreadId * m_numSplitThreads ) + threadId;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-unsigned Scheduler::getSplitJobId() const
-{
-  if( m_numSplitThreads > 1 )
-  {
-    return g_splitJobId;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-void Scheduler::setSplitJobId( const int jobId )
-{
-  CHECK( g_splitJobId != 0 && jobId != 0, "Need to reset the jobId after usage!" );
-  g_splitJobId = jobId;
-}
-
-void Scheduler::startParallel()
-{
-  m_hasParallelBuffer = true;
-}
-
-void Scheduler::finishParallel()
-{
-  m_hasParallelBuffer = false;
-}
-
-void Scheduler::setSplitThreadId( const int tId )
-{
-  g_splitThreadId = tId == CURR_THREAD_ID ? omp_get_thread_num() : tId;
-}
-
-#endif
-
-
-
-unsigned Scheduler::getDataId() const
-{
-#if ENABLE_SPLIT_PARALLELISM
-  if( m_numSplitThreads > 1 )
-  {
-    return getSplitDataId();
-  }
-#endif
-  return 0;
-}
-
-bool Scheduler::init( const int ctuYsize, const int ctuXsize, const int numWppThreadsRunning, const int numWppExtraLines, const int numSplitThreads )
-{
-#if ENABLE_SPLIT_PARALLELISM
-  m_numSplitThreads = numSplitThreads;
-#endif
-
-  return true;
-}
-
-
-int Scheduler::getNumPicInstances() const
-{
-#if !ENABLE_SPLIT_PARALLELISM
-  return 1;
-#else
-  return ( m_numSplitThreads > 1 ? m_numSplitThreads : 1 );
-#endif
-}
-
-#endif
-
-
 // ---------------------------------------------------------------------------
 // picture methods
 // ---------------------------------------------------------------------------
@@ -186,6 +62,8 @@ Picture::Picture()
   fieldPic             = false;
   topField             = false;
   precedingDRAP        = false;
+  edrapRapId           = -1;
+  m_colourTranfParams  = NULL;
   nonReferencePictureFlag = false;
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
@@ -225,40 +103,43 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
 
 void Picture::destroy()
 {
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 0; jId < PARL_SPLIT_MAX_NUM_THREADS; jId++ )
-#endif
+  for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
   {
-    for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
-    {
-      M_BUFS(jId, t).destroy();
-    }
-    m_hashMap.clearAll();
-    if (cs)
-    {
-      cs->destroy();
-      delete cs;
-      cs = nullptr;
-    }
-
-    for (auto &ps: slices)
-    {
-      delete ps;
-    }
-    slices.clear();
-
-    for (auto &psei: SEIs)
-    {
-      delete psei;
-    }
-    SEIs.clear();
-
-    if (m_spliceIdx)
-    {
-      delete[] m_spliceIdx;
-      m_spliceIdx = NULL;
-    }
+    M_BUFS(jId, t).destroy();
   }
+  m_hashMap.clearAll();
+  if (cs)
+  {
+#if GDR_ENABLED
+    if (cs->picHeader)
+    {
+      delete cs->picHeader;
+    }
+    cs->picHeader = nullptr;
+#endif
+    cs->destroy();
+    delete cs;
+    cs = nullptr;
+  }
+
+  for (auto &ps: slices)
+  {
+    delete ps;
+  }
+  slices.clear();
+
+  for (auto &psei: SEIs)
+  {
+    delete psei;
+  }
+  SEIs.clear();
+
+  if (m_spliceIdx)
+  {
+    delete[] m_spliceIdx;
+    m_spliceIdx = NULL;
+  }
+  m_invColourTransfBuf = NULL;
 }
 
 void Picture::createTempBuffers( const unsigned _maxCUSize )
@@ -269,21 +150,8 @@ void Picture::createTempBuffers( const unsigned _maxCUSize )
   const Area a = m_ctuArea.Y();
 #endif
 
-#if ENABLE_SPLIT_PARALLELISM
-  scheduler.startParallel();
-
-  for( int jId = 0; jId < scheduler.getNumPicInstances(); jId++ )
-#endif
-  {
-    M_BUFS( jId, PIC_PREDICTION                   ).create( chromaFormat, a,   _maxCUSize );
-    M_BUFS( jId, PIC_RESIDUAL                     ).create( chromaFormat, a,   _maxCUSize );
-#if ENABLE_SPLIT_PARALLELISM
-    if (jId > 0)
-    {
-      M_BUFS(jId, PIC_RECONSTRUCTION).create(chromaFormat, Y(), _maxCUSize, margin, MEMORY_ALIGN_DEF_SIZE);
-    }
-#endif
-  }
+  M_BUFS( jId, PIC_PREDICTION                   ).create( chromaFormat, a,   _maxCUSize );
+  M_BUFS( jId, PIC_RESIDUAL                     ).create( chromaFormat, a,   _maxCUSize );
 
   if (cs)
   {
@@ -293,24 +161,11 @@ void Picture::createTempBuffers( const unsigned _maxCUSize )
 
 void Picture::destroyTempBuffers()
 {
-#if ENABLE_SPLIT_PARALLELISM
-  scheduler.finishParallel();
-
-  for( int jId = 0; jId < scheduler.getNumPicInstances(); jId++ )
-#endif
+  for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
   {
-    for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
+    if (t == PIC_RESIDUAL || t == PIC_PREDICTION)
     {
-      if (t == PIC_RESIDUAL || t == PIC_PREDICTION)
-      {
-        M_BUFS(jId, t).destroy();
-      }
-#if ENABLE_SPLIT_PARALLELISM
-      if (t == PIC_RECONSTRUCTION && jId > 0)
-      {
-        M_BUFS(jId, t).destroy();
-      }
-#endif
+      M_BUFS(0, t).destroy();
     }
   }
 
@@ -329,6 +184,8 @@ const CPelUnitBuf Picture::getOrigBuf()                     const { return M_BUF
 
        PelBuf     Picture::getOrigBuf(const ComponentID compID)       { return getBuf(compID, PIC_ORIGINAL); }
 const CPelBuf     Picture::getOrigBuf(const ComponentID compID) const { return getBuf(compID, PIC_ORIGINAL); }
+       PelBuf     Picture::getTrueOrigBuf(const ComponentID compID)       { return getBuf(compID, PIC_TRUE_ORIGINAL); }
+const CPelBuf     Picture::getTrueOrigBuf(const ComponentID compID) const { return getBuf(compID, PIC_TRUE_ORIGINAL); }
        PelUnitBuf Picture::getTrueOrigBuf()                           { return M_BUFS(0, PIC_TRUE_ORIGINAL); }
 const CPelUnitBuf Picture::getTrueOrigBuf()                     const { return M_BUFS(0, PIC_TRUE_ORIGINAL); }
        PelBuf     Picture::getTrueOrigBuf(const CompArea &blk)        { return getBuf(blk, PIC_TRUE_ORIGINAL); }
@@ -388,6 +245,9 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   cs->pps     = &pps;
   picHeader->setSPSId( sps.getSPSId() );
   picHeader->setPPSId( pps.getPPSId() );
+#if GDR_ENABLED
+  picHeader->setPic(this);
+#endif
   cs->picHeader = picHeader;
   memcpy(cs->alfApss, alfApss, sizeof(cs->alfApss));
   cs->lmcsAps = lmcsAps;
@@ -395,6 +255,8 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   cs->pcv     = pps.pcv;
   m_conformanceWindow = pps.getConformanceWindow();
   m_scalingWindow = pps.getScalingWindow();
+  mixedNaluTypesInPicFlag = pps.getMixedNaluTypesInPicFlag();
+  nonReferencePictureFlag = picHeader->getNonReferencePictureFlag();
 
   if (m_spliceIdx == NULL)
   {
@@ -424,10 +286,10 @@ void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessInd
 {
   uint16_t numElementsinsliceLosslessIndexArray = (uint16_t)sliceLosslessIndexArray.size();
   uint32_t numSlices = this->cs->pps->getNumSlicesInPic();
-  m_lossylosslessSliceArray.assign(numSlices, true); // initialize to all slices are lossless 
+  m_lossylosslessSliceArray.assign(numSlices, true); // initialize to all slices are lossless
   if (mixedLossyLossless)
   {
-    m_lossylosslessSliceArray.assign(numSlices, false); // initialize to all slices are lossless 
+    m_lossylosslessSliceArray.assign(numSlices, false); // initialize to all slices are lossless
     CHECK(numElementsinsliceLosslessIndexArray == 0 , "sliceLosslessArray is empty, must need to configure for mixed lossy/lossless");
 
     // mixed lossy/lossless slices, set only lossless slices;
@@ -436,7 +298,7 @@ void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessInd
         CHECK(sliceLosslessIndexArray[i] >= numSlices || sliceLosslessIndexArray[i] < 0, "index of lossless slice is out of slice index bound");
         m_lossylosslessSliceArray[sliceLosslessIndexArray[i]] = true;
     }
-  } 
+  }
   CHECK(m_lossylosslessSliceArray.size() < numSlices, "sliceLosslessArray size is less than number of slices");
 }
 
@@ -466,23 +328,6 @@ void Picture::clearSliceBuffer()
   }
   slices.clear();
 }
-
-#if ENABLE_SPLIT_PARALLELISM
-void Picture::finishParallelPart( const UnitArea& area )
-{
-  const UnitArea clipdArea = clipArea( area, *this );
-  const int      sourceID  = scheduler.getSplitPicId( 0 );
-  CHECK( scheduler.getSplitJobId() > 0, "Finish-CU cannot be called from within a mode- or split-parallelized block!" );
-
-  // distribute the reconstruction across all of the parallel workers
-  for( int tId = 1; tId < scheduler.getNumSplitThreads(); tId++ )
-  {
-    const int destID = scheduler.getSplitPicId( tId );
-
-    M_BUFS( destID, PIC_RECONSTRUCTION ).subBuf( clipdArea ).copyFrom( M_BUFS( sourceID, PIC_RECONSTRUCTION ).subBuf( clipdArea ) );
-  }
-}
-#endif
 
 const TFilterCoeff DownsamplingFilterSRC[8][16][12] =
 {
@@ -1237,9 +1082,6 @@ PelBuf Picture::getBuf( const CompArea &blk, const PictureType &type )
     return PelBuf();
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL || type == PIC_ORIGINAL_INPUT || type == PIC_TRUE_ORIGINAL_INPUT ) ? 0 : scheduler.getSplitPicId();
-#endif
 #if !KEEP_PRED_AND_RESI_SIGNALS
   if( type == PIC_RESIDUAL || type == PIC_PREDICTION )
   {
@@ -1261,10 +1103,6 @@ const CPelBuf Picture::getBuf( const CompArea &blk, const PictureType &type ) co
     return PelBuf();
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL ) ? 0 : scheduler.getSplitPicId();
-
-#endif
 #if !KEEP_PRED_AND_RESI_SIGNALS
   if( type == PIC_RESIDUAL || type == PIC_PREDICTION )
   {
@@ -1305,9 +1143,6 @@ const CPelUnitBuf Picture::getBuf( const UnitArea &unit, const PictureType &type
 
 Pel* Picture::getOrigin( const PictureType &type, const ComponentID compID ) const
 {
-#if ENABLE_SPLIT_PARALLELISM
-  const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL ) ? 0 : scheduler.getSplitPicId();
-#endif
   return M_BUFS( jId, type ).getOrigin( compID );
 }
 
@@ -1385,4 +1220,45 @@ void Picture::addPictureToHashMapForInter()
       delete[] bIsBlockSame[i][j];
     }
   }
+}
+void Picture::createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
+{
+  m_colourTranfParams = ctiCharacteristics;
+  m_invColourTransfBuf = ctiBuf;
+  if (firstPictureInSequence)
+  {
+    // Create and initialize the Colour Transform Processor
+    m_colourTranfParams->create(width, height, fmt, bitDepth);
+
+    //Frame level PelStorage buffer created to apply the Colour Transform
+    m_invColourTransfBuf->create(UnitArea(chromaFormat, Area(0, 0, width, height)));
+  }
+}
+
+PelUnitBuf Picture::getDisplayBuf()
+{
+  int payloadType = 0;
+  std::list<SEI*>::iterator message;
+
+  for (message = SEIs.begin(); message != SEIs.end(); ++message)
+  {
+    payloadType = (*message)->payloadType();
+    if (payloadType == SEI::COLOUR_TRANSFORM_INFO)
+    {
+      // re-init parameters
+      *m_colourTranfParams->m_pColourTransfParams = *static_cast<SEIColourTransformInfo*>(*message);
+      //m_colourTranfParams->m_pColourTransfParams = static_cast<SEIColourTransformInfo*>(*message);
+      break;
+    }
+  }
+
+  m_invColourTransfBuf->copyFrom(getRecoBuf());
+
+  if (m_colourTranfParams->m_pColourTransfParams != NULL)
+  {
+    m_colourTranfParams->generateColourTransfLUTs();
+    m_colourTranfParams->inverseColourTransform(m_invColourTransfBuf);
+  }
+
+  return *m_invColourTransfBuf;
 }

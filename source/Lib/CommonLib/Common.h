@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,6 +96,33 @@ struct Area : public Position, public Size
 
   bool contains(const Position &_pos)       const { return (_pos.x >= x) && (_pos.x < (x + width)) && (_pos.y >= y) && (_pos.y < (y + height)); }
   bool contains(const Area &_area)          const { return contains(_area.pos()) && contains(_area.bottomRight()); }
+
+#if GDR_ENABLED  
+  bool overlap(const Area &_area) const 
+  { 
+    Area thisArea = Area(pos(), size());
+
+    if (contains(_area))
+      return false;
+
+    if (_area.contains(thisArea))
+      return false;
+
+    bool topLeft  = contains(_area.topLeft());
+    bool topRight = contains(_area.topRight());
+    bool botLeft  = contains(_area.bottomLeft());
+    bool botRight = contains(_area.bottomRight());
+
+    int sum = (topLeft ? 1 : 0) + (topRight ? 1 : 0) + (botLeft ? 1 : 0) + (botRight ? 1 : 0);
+
+    if (0 < sum && sum < 4)
+    {
+      return true;
+    }
+
+    return false;
+  }
+#endif
 
   bool operator!=(const Area &other)        const { return (Size::operator!=(other)) || (Position::operator!=(other)); }
   bool operator==(const Area &other)        const { return (Size::operator==(other)) && (Position::operator==(other)); }

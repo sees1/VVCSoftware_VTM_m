@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
 #include "CommonLib/TrQuant.h"
 #include "CommonLib/InterPrediction.h"
 #include "CommonLib/IntraPrediction.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 #include "CommonLib/AdaptiveLoopFilter.h"
 #include "CommonLib/SEI.h"
 #include "CommonLib/Unit.h"
@@ -73,6 +73,7 @@ private:
   GeneralHrdParams        m_prevGeneralHrdParams;
 
   int                     m_prevGDRInSameLayerPOC[MAX_VPS_LAYERS]; ///< POC number of the latest GDR picture
+  int                     m_prevGDRInSameLayerRecoveryPOC[MAX_VPS_LAYERS]; ///< Recovery POC number of the latest GDR picture
   NalUnitType             m_associatedIRAPType[MAX_VPS_LAYERS]; ///< NAL unit type of the previous IRAP picture
   int                     m_pocCRA[MAX_VPS_LAYERS];            ///< POC number of the previous CRA picture
   int                     m_associatedIRAPDecodingOrderNumber[MAX_VPS_LAYERS]; ///< Decoding order number of the previous IRAP picture
@@ -94,7 +95,11 @@ private:
 
 
   SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices, excluding prefix SEIs...
-
+  SEIScalabilityDimensionInfo* m_sdiSEIInFirstAU;
+  SEIMultiviewAcquisitionInfo* m_maiSEIInFirstAU;
+#if JVET_W0078_MVP_SEI 
+  SEIMultiviewViewPosition*    m_mvpSEIInFirstAU;
+#endif
 
   // functional classes
   IntraPrediction         m_cIntraPred;
@@ -109,7 +114,7 @@ private:
 #if JVET_S0257_DUMP_360SEI_MESSAGE
   SeiCfgFileDump          m_seiCfgDump;
 #endif
-  LoopFilter              m_cLoopFilter;
+  DeblockingFilter        m_deblockingFilter;
   SampleAdaptiveOffset    m_cSAO;
   AdaptiveLoopFilter      m_cALF;
   Reshape                 m_cReshaper;                        ///< reshaper class
@@ -119,7 +124,7 @@ private:
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   CacheModel              m_cacheModel;
 #endif
-  bool isRandomAccessSkipPicture(int& iSkipFrame,  int& iPOCLastDisplay);
+  bool isRandomAccessSkipPicture(int& iSkipFrame, int& iPOCLastDisplay, bool mixedNaluInPicFlag, uint32_t layerId);
   Picture*                m_pcPic;
   uint32_t                m_uiSliceSegmentIdx;
   uint32_t                m_prevLayerID;
@@ -127,12 +132,16 @@ private:
   int                     m_prevPicPOC;
   int                     m_prevTid0POC;
   bool                    m_bFirstSliceInPicture;
+  bool                    m_firstPictureInSequence;
+  SEIColourTransformApply m_colourTranfParams;
+  PelStorage              m_invColourTransfBuf;
   bool                    m_firstSliceInSequence[MAX_VPS_LAYERS];
   bool                    m_firstSliceInBitstream;
   bool                    m_isFirstAuInCvs;
   bool                    m_accessUnitEos[MAX_VPS_LAYERS];
   bool                    m_prevSliceSkipped;
   int                     m_skippedPOC;
+  uint32_t                m_skippedLayerID;
   int                     m_lastPOCNoOutputPriorPics;
   bool                    m_isNoOutputPriorPics;
   bool                    m_lastNoOutputBeforeRecoveryFlag[MAX_VPS_LAYERS];    //value of variable NoOutputBeforeRecoveryFlag of the assocated CRA/GDR pic
@@ -195,14 +204,13 @@ private:
 
   std::vector<NalUnitType> m_pictureUnitNals;
   std::list<InputNALUnit*> m_pictureSeiNalus; 
+  std::list<InputNALUnit*> m_suffixApsNalus; 
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   OPI*                    m_opi;
   bool                    m_mTidExternalSet;
   bool                    m_mTidOpiSet;
   bool                    m_tOlsIdxTidExternalSet;
   bool                    m_tOlsIdxTidOpiSet;
-#endif
   VPS*                    m_vps;
   int                     m_maxDecSubPicIdx;
   int                     m_maxDecSliceAddrInSubPic;
@@ -213,6 +221,11 @@ public:
 
   DCI*                    m_dci;
   ParameterSetMap<APS>*   m_apsMapEnc;
+#if GDR_LEAK_TEST
+public:
+  int                     m_gdrPocRandomAccess;
+#endif // GDR_LEAK_TEST
+
 public:
   DecLib();
   virtual ~DecLib();
@@ -239,10 +252,8 @@ public:
   void  updateAssociatedIRAP();
   void  updatePrevGDRInSameLayer();
   void  updatePrevIRAPAndGDRSubpic();
+  bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
 
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  bool  getAudIrapOrGdrAuFlag() const       { return m_audIrapOrGdrAuFlag;  }
-#endif
   bool  getNoOutputPriorPicsFlag () const   { return m_isNoOutputPriorPics; }
   void  setNoOutputPriorPicsFlag (bool val) { m_isNoOutputPriorPics = val; }
   void  setFirstSliceInPicture (bool val)  { m_bFirstSliceInPicture = val; }
@@ -279,6 +290,7 @@ public:
   void checkSeiInPictureUnit();
   void resetPictureSeiNalus();
   bool isSliceNaluFirstInAU( bool newPicture, InputNALUnit &nalu );
+  void processSuffixApsNalus();
 
   void checkAPSInPictureUnit();
   void resetPictureUnitNals() { m_pictureUnitNals.clear(); }
@@ -295,7 +307,6 @@ public:
   bool  isNewPicture( std::ifstream *bitstreamFile, class InputByteStream *bytestream );
   bool  isNewAccessUnit( bool newPicture, std::ifstream *bitstreamFile, class InputByteStream *bytestream );
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   bool      getHTidExternalSetFlag()               const { return m_mTidExternalSet; }
   void      setHTidExternalSetFlag(bool mTidExternalSet)  { m_mTidExternalSet = mTidExternalSet; }
   bool      getHTidOpiSetFlag()               const { return m_mTidOpiSet; }
@@ -305,7 +316,8 @@ public:
   bool      getTOlsIdxOpiFlag()               const { return m_tOlsIdxTidOpiSet; }
   void      setTOlsIdxOpiFlag(bool tOlsIdxOpiSet)  { m_tOlsIdxTidOpiSet = tOlsIdxOpiSet; }
   const OPI* getOPI()                     { return m_opi; }
-#endif
+
+  bool      getMixedNaluTypesInPicFlag();
 
 protected:
   void  xUpdateRasInit(Slice* slice);
@@ -318,9 +330,7 @@ protected:
   void  xCheckParameterSetConstraints( const int layerId );
   void      xDecodePicHeader( InputNALUnit& nalu );
   bool      xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDisplay);
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   void      xDecodeOPI( InputNALUnit& nalu );
-#endif
   void      xDecodeVPS( InputNALUnit& nalu );
   void      xDecodeDCI( InputNALUnit& nalu );
   void      xDecodeSPS( InputNALUnit& nalu );
@@ -336,6 +346,8 @@ protected:
   void      xParsePrefixSEImessages();
   void      xParsePrefixSEIsForUnknownVCLNal();
   void      xCheckPrefixSEIMessages( SEIMessages& prefixSEIs );
+  void      xCheckDUISEIMessages(SEIMessages &prefixSEIs);
+
 
   void  xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType );
   void     xCheckMixedNalUnit(Slice* pcSlice, SPS *sps, InputNALUnit &nalu);

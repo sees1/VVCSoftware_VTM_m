@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ private:
   // initialization
   void xCreateLib( std::list<PelUnitBuf*>& recBufList, const int layerId );         ///< create files & encoder class
   void xInitLibCfg ();                           ///< initialize internal variables
-  void xInitLib    (bool isFieldCoding);         ///< initialize encoder class
+  void xInitLib();                               ///< initialize encoder class
   void xDestroyLib ();                           ///< destroy encoder class
 
   // file I/O

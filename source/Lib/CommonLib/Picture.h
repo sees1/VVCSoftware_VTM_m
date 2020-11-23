@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -48,51 +48,16 @@
 #include "CodingStructure.h"
 #include "Hash.h"
 #include "MCTS.h"
+#include "SEIColourTransform.h"
 #include <deque>
 
-#if ENABLE_SPLIT_PARALLELISM
-
-#define CURR_THREAD_ID -1
-
-class Scheduler
-{
-public:
-  Scheduler();
-  ~Scheduler();
-
-#if ENABLE_SPLIT_PARALLELISM
-  unsigned getSplitDataId( int jobId = CURR_THREAD_ID ) const;
-  unsigned getSplitPicId ( int tId   = CURR_THREAD_ID ) const;
-  unsigned getSplitJobId () const;
-  void     setSplitJobId ( const int jobId );
-  void     startParallel ();
-  void     finishParallel();
-  void     setSplitThreadId( const int tId = CURR_THREAD_ID );
-  unsigned getNumSplitThreads() const { return m_numSplitThreads; };
-#endif
-  unsigned getDataId     () const;
-  bool init              ( const int ctuYsize, const int ctuXsize, const int numWppThreadsRunning, const int numWppExtraLines, const int numSplitThreads );
-  int  getNumPicInstances() const;
-#if ENABLE_SPLIT_PARALLELISM
-
-  int   m_numSplitThreads;
-  bool  m_hasParallelBuffer;
-#endif
-};
-#endif
 
 class SEI;
 class AQpLayer;
 
 typedef std::list<SEI*> SEIMessages;
 
-
-
-#if ENABLE_SPLIT_PARALLELISM
-#define M_BUFS(JID,PID) m_bufs[JID][PID]
-#else
 #define M_BUFS(JID,PID) m_bufs[PID]
-#endif
 
 struct Picture : public UnitArea
 {
@@ -104,6 +69,10 @@ struct Picture : public UnitArea
 
   void createTempBuffers( const unsigned _maxCUSize );
   void destroyTempBuffers();
+  SEIColourTransformApply* m_colourTranfParams;
+  PelStorage*              m_invColourTransfBuf;
+  void              createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth);
+  PelUnitBuf        getDisplayBuf();
 
          PelBuf     getOrigBuf(const CompArea &blk);
   const CPelBuf     getOrigBuf(const CompArea &blk) const;
@@ -113,6 +82,8 @@ struct Picture : public UnitArea
   const CPelUnitBuf getOrigBuf() const;
          PelBuf     getOrigBuf(const ComponentID compID);
   const CPelBuf     getOrigBuf(const ComponentID compID) const;
+         PelBuf     getTrueOrigBuf(const ComponentID compID);
+  const CPelBuf     getTrueOrigBuf(const ComponentID compID) const;
          PelUnitBuf getTrueOrigBuf();
   const CPelUnitBuf getTrueOrigBuf() const;
         PelBuf      getTrueOrigBuf(const CompArea &blk);
@@ -160,6 +131,8 @@ struct Picture : public UnitArea
   void setPictureType(const NalUnitType val)        { m_pictureType = val;          }
   void setBorderExtension( bool bFlag)              { m_bIsBorderExtended = bFlag;}
   Pel* getOrigin( const PictureType &type, const ComponentID compID ) const;
+  int  getEdrapRapId()                        const { return edrapRapId ; }
+  void setEdrapRapId(const int val)                 { edrapRapId = val; }
 
   void setLossyQPValue(int i)                 { m_lossyQP = i; }
   int getLossyQPValue()                       const { return m_lossyQP; }
@@ -217,6 +190,7 @@ public:
   bool fieldPic;
   int  m_prevQP[MAX_NUM_CHANNEL_TYPE];
   bool precedingDRAP; // preceding a DRAP picture in decoding order
+  int  edrapRapId;
   bool nonReferencePictureFlag;
 
   int  poc;
@@ -233,13 +207,9 @@ public:
   int m_lossyQP;
   std::vector<bool> m_lossylosslessSliceArray;
   bool interLayerRefPicFlag;
+  bool mixedNaluTypesInPicFlag;
 
-
-#if ENABLE_SPLIT_PARALLELISM
-  PelStorage m_bufs[PARL_SPLIT_MAX_NUM_JOBS][NUM_PIC_TYPES];
-#else
   PelStorage m_bufs[NUM_PIC_TYPES];
-#endif
   const Picture*           unscaledPic;
 
   TComHash           m_hashMap;
@@ -275,15 +245,6 @@ public:
 #if !KEEP_PRED_AND_RESI_SIGNALS
 private:
   UnitArea m_ctuArea;
-#endif
-
-#if ENABLE_SPLIT_PARALLELISM
-public:
-  void finishParallelPart   ( const UnitArea& ctuArea );
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-public:
-  Scheduler                  scheduler;
 #endif
 
 public:

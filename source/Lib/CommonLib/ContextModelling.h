@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #ifndef __CONTEXTMODELLING__
 #define __CONTEXTMODELLING__
 
-
+#include "Rom.h"
 #include "CommonDef.h"
 #include "Contexts.h"
 #include "Slice.h"
@@ -192,6 +192,125 @@ public:
     return unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
   }
 
+  void updateRiceStat(unsigned &riceStat, TCoeff rem, int remainderFlag)
+  {
+    if (remainderFlag)
+    {
+      riceStat = (riceStat + floorLog2((uint32_t)rem) + 2) >> 1;
+    }
+    else 
+    {
+      riceStat = (riceStat + floorLog2((uint32_t)rem)) >> 1;
+    }
+  }
+  
+  unsigned templateAbsCompare(TCoeff sum)
+  {
+    int rangeIdx = 0;
+    if (sum < g_riceT[0])
+    {
+      rangeIdx = 0;
+    }
+    else if (sum < g_riceT[1])
+    {
+      rangeIdx = 1;
+    }
+    else if (sum < g_riceT[2])
+    {
+      rangeIdx = 2;
+    }
+    else if (sum < g_riceT[3])
+    {
+      rangeIdx = 3;
+    }
+    else
+    {
+      rangeIdx = 4;
+    }
+
+    return g_riceShift[rangeIdx];
+  }
+
+  unsigned templateAbsSumExt(int scanPos, const TCoeff* coeff, int baseLevel)
+  {
+    unsigned riceParam;
+    const uint32_t  posY = m_scan[scanPos].y;
+    const uint32_t  posX = m_scan[scanPos].x;
+    const TCoeff*   data = coeff + posX + posY * m_width;
+    TCoeff          sum = 0;
+    if (posX < m_width - 1)
+    {
+      sum += abs(data[1]);
+      if (posX < m_width - 2)
+      {
+        sum += abs(data[2]);
+      }
+      else
+      {
+        sum += m_histValue;
+      }
+
+      if (posY < m_height - 1)
+      {
+        sum += abs(data[m_width + 1]);
+      }
+      else
+      {
+        sum += m_histValue;
+      }
+    }
+    else
+    {
+      sum += 2 * m_histValue;
+    }
+    if (posY < m_height - 1)
+    {
+      sum += abs(data[m_width]);
+      if (posY < m_height - 2)
+      {
+        sum += abs(data[m_width << 1]);
+      }
+      else
+      {
+        sum += m_histValue;
+      }
+    }
+    else
+    {
+      sum += m_histValue;
+    }
+
+    int currentShift = templateAbsCompare(sum);
+    sum = sum >> currentShift;
+    if (baseLevel == 0)
+    {
+      riceParam = unsigned(std::min<TCoeff>(sum, 31));
+    }
+    else
+    {
+      riceParam = unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - baseLevel, 31), 0));
+    }
+
+    riceParam = g_goRiceParsCoeff[riceParam] + currentShift;
+
+    return riceParam;
+  }
+
+  unsigned (CoeffCodingContext::*deriveRiceRRC)(int scanPos, const TCoeff* coeff, int baseLevel);
+
+  unsigned deriveRice(int scanPos, const TCoeff* coeff, int baseLevel)
+  {
+    unsigned sumAbs = templateAbsSum(scanPos, coeff, baseLevel);
+    unsigned riceParam = g_goRiceParsCoeff[sumAbs];
+    return riceParam;
+  }
+  
+  unsigned deriveRiceExt(int scanPos, const TCoeff* coeff, int baseLevel)
+  {
+    unsigned riceParam = templateAbsSumExt(scanPos, coeff, baseLevel);
+    return riceParam;
+  }
+
   unsigned sigCtxIdAbsTS( int scanPos, const TCoeff* coeff )
   {
     const uint32_t  posY   = m_scan[scanPos].y;
@@ -308,7 +427,9 @@ public:
   {
 
     if (absCoeff == 0)
+    {
       return 0;
+    }
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
 
     int absCoeffMod = int(absCoeff);
@@ -334,7 +455,9 @@ public:
   {
 
     if (absCoeff == 0)
+    {
       return 0;
+    }
 
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
     pred1 = std::max(absBelow, absRight);
@@ -358,6 +481,13 @@ public:
   }
 
   int                       regBinLimit;
+
+  unsigned  getBaseLevel()                                   { return m_cctxBaseLevel; };
+  void setBaseLevel(int value)                               { m_cctxBaseLevel = value; };
+  TCoeff getHistValue()                                      { return m_histValue; };
+  void setHistValue(TCoeff value)                            { m_histValue = value; };
+  bool getUpdateHist() { return m_updateHist; };
+  void setUpdateHist(bool value) { m_updateHist = value; };
 
 private:
   // constant
@@ -413,6 +543,9 @@ private:
   int                       m_remainingContextBins;
   std::bitset<MLS_GRP_NUM>  m_sigCoeffGroupFlag;
   const bool                m_bdpcm;
+  int                       m_cctxBaseLevel; 
+  TCoeff                    m_histValue;    
+  bool                      m_updateHist;
 };
 
 
@@ -457,6 +590,13 @@ public:
   ~MergeCtx() {}
 public:
   MvField       mvFieldNeighbours [ MRG_MAX_NUM_CANDS << 1 ]; // double length for mv of both lists
+#if GDR_ENABLED 
+  // note : check if source of mv and mv itself is valid
+  bool          mvSolid           [MRG_MAX_NUM_CANDS << 1];  
+  bool          mvValid           [MRG_MAX_NUM_CANDS << 1];
+  Position      mvPos             [MRG_MAX_NUM_CANDS << 1];
+  MvpType       mvType            [MRG_MAX_NUM_CANDS << 1];
+#endif
   uint8_t       BcwIdx            [ MRG_MAX_NUM_CANDS      ];
   unsigned char interDirNeighbours[ MRG_MAX_NUM_CANDS      ];
   MergeType     mrgTypeNeighbours [ MRG_MAX_NUM_CANDS      ];
@@ -466,6 +606,10 @@ public:
   MotionBuf     subPuMvpMiBuf;
   MotionBuf     subPuMvpExtMiBuf;
   MvField mmvdBaseMv[MMVD_BASE_MV_NUM][2];
+#if GDR_ENABLED   
+  bool          mmvdSolid[MMVD_BASE_MV_NUM][2];
+  bool          mmvdValid[MMVD_BASE_MV_NUM][2];
+#endif
   void setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx);
   bool          mmvdUseAltHpelIf  [ MMVD_BASE_MV_NUM ];
   bool          useAltHpelIf      [ MRG_MAX_NUM_CANDS ];
@@ -479,6 +623,10 @@ public:
   ~AffineMergeCtx() {}
 public:
   MvField       mvFieldNeighbours[AFFINE_MRG_MAX_NUM_CANDS << 1][3]; // double length for mv of both lists
+#if GDR_ENABLED
+  bool          mvSolid[AFFINE_MRG_MAX_NUM_CANDS << 1][3];   
+  bool          mvValid[AFFINE_MRG_MAX_NUM_CANDS << 1][3];
+#endif
   unsigned char interDirNeighbours[AFFINE_MRG_MAX_NUM_CANDS];
   EAffineModel  affineType[AFFINE_MRG_MAX_NUM_CANDS];
   uint8_t       BcwIdx[AFFINE_MRG_MAX_NUM_CANDS];

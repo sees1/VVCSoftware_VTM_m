@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,11 +74,17 @@ Slice::Slice()
 , m_deblockingFilterCrBetaOffsetDiv2( 0 )
 , m_deblockingFilterCrTcOffsetDiv2  ( 0 )
 , m_depQuantEnabledFlag             ( false )
+#if JVET_W0046_RLSCP
+, m_reverseLastSigCoeffFlag         ( false )
+#endif
 , m_signDataHidingEnabledFlag       ( false )
 , m_tsResidualCodingDisabledFlag  ( false )
 , m_pendingRasInit                ( false )
 , m_bCheckLDC                     ( false )
 , m_biDirPred                    ( false )
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+, m_lmChromaCheckDisable          ( false )
+#endif
 , m_iSliceQpDelta                 ( 0 )
 , m_iDepth                        ( 0 )
 , m_pcSPS                         ( NULL )
@@ -98,11 +104,21 @@ Slice::Slice()
 , m_substreamSizes                ( )
 , m_numEntryPoints                ( 0 )
 , m_cabacInitFlag                 ( false )
- , m_sliceSubPicId               ( 0 )
+, m_sliceSubPicId                 ( 0 )
 , m_encCABACTableIdx              (I_SLICE)
 , m_iProcessingStartTime          ( 0 )
 , m_dProcessingTime               ( 0 )
+, m_tsrc_index                    ( 0 )
 {
+  for (uint32_t i = 0; i < MAX_TSRC_RICE; i++)
+  {
+    m_riceBit[i] = 0;
+  }
+
+#if JVET_W0046_RLSCP
+  m_cnt_right_bottom = 0;
+#endif
+
   for(uint32_t i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
     m_aiNumRefIdx[i] = 0;
@@ -141,9 +157,9 @@ Slice::Slice()
 
   memset(m_alfApss, 0, sizeof(m_alfApss));
   m_ccAlfFilterParam.reset();
-  resetTileGroupAlfEnabledFlag();
-  resetTileGroupCcAlCbfEnabledFlag();
-  resetTileGroupCcAlCrfEnabledFlag();
+  resetAlfEnabledFlag();
+  resetCcAlCbfEnabledFlag();
+  resetCcAlCrfEnabledFlag();
 
   m_sliceMap.initSliceMap();
 }
@@ -171,6 +187,9 @@ void Slice::initSlice()
   m_bCheckLDC = false;
 
   m_biDirPred = false;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  m_lmChromaCheckDisable = false;
+#endif
   m_symRefIdx[0] = -1;
   m_symRefIdx[1] = -1;
 
@@ -189,12 +208,20 @@ void Slice::initSlice()
   m_useLTforDRAP         = false;
   m_isDRAP               = false;
   m_latestDRAPPOC        = MAX_INT;
-  resetTileGroupAlfEnabledFlag();
+  m_edrapRapId           = 0;
+  m_enableEdrapSEI       = false;
+  m_edrapRapId           = 0;
+  m_useLTforEdrap        = false;
+  m_edrapNumRefRapPics   = 0;
+  m_edrapRefRapIds.resize(0);
+  m_latestEDRAPPOC       = MAX_INT;
+  m_latestEdrapLeadingPicDecodableFlag = false;
+  resetAlfEnabledFlag();
   m_ccAlfFilterParam.reset();
-  m_tileGroupCcAlfCbEnabledFlag = 0;
-  m_tileGroupCcAlfCrEnabledFlag = 0;
-  m_tileGroupCcAlfCbApsId = -1;
-  m_tileGroupCcAlfCrApsId = -1;
+  m_ccAlfCbEnabledFlag = 0;
+  m_ccAlfCrEnabledFlag = 0;
+  m_ccAlfCbApsId = -1;
+  m_ccAlfCrApsId = -1;
   m_nuhLayerId = 0;
 }
 
@@ -238,16 +265,16 @@ void Slice::inheritFromPicHeader( PicHeader *picHeader, const PPS *pps, const SP
   setSaoEnabledFlag(CHANNEL_TYPE_LUMA,     picHeader->getSaoEnabledFlag(CHANNEL_TYPE_LUMA));
   setSaoEnabledFlag(CHANNEL_TYPE_CHROMA,   picHeader->getSaoEnabledFlag(CHANNEL_TYPE_CHROMA));
 
-  setTileGroupAlfEnabledFlag(COMPONENT_Y,  picHeader->getAlfEnabledFlag(COMPONENT_Y));
-  setTileGroupAlfEnabledFlag(COMPONENT_Cb, picHeader->getAlfEnabledFlag(COMPONENT_Cb));
-  setTileGroupAlfEnabledFlag(COMPONENT_Cr, picHeader->getAlfEnabledFlag(COMPONENT_Cr));
-  setTileGroupNumAps(picHeader->getNumAlfAps());
-  setAlfAPSs(picHeader->getAlfAPSs());
-  setTileGroupApsIdChroma(picHeader->getAlfApsIdChroma());
-  setTileGroupCcAlfCbEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cb));
-  setTileGroupCcAlfCrEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cr));
-  setTileGroupCcAlfCbApsId(picHeader->getCcAlfCbApsId());
-  setTileGroupCcAlfCrApsId(picHeader->getCcAlfCrApsId());
+  setAlfEnabledFlag(COMPONENT_Y,  picHeader->getAlfEnabledFlag(COMPONENT_Y));
+  setAlfEnabledFlag(COMPONENT_Cb, picHeader->getAlfEnabledFlag(COMPONENT_Cb));
+  setAlfEnabledFlag(COMPONENT_Cr, picHeader->getAlfEnabledFlag(COMPONENT_Cr));
+  setNumAlfApsIdsLuma(picHeader->getNumAlfApsIdsLuma());
+  setAlfApsIdsLuma(picHeader->getAlfApsIdsLuma());
+  setAlfApsIdChroma(picHeader->getAlfApsIdChroma());
+  setCcAlfCbEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cb));
+  setCcAlfCrEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cr));
+  setCcAlfCbApsId(picHeader->getCcAlfCbApsId());
+  setCcAlfCrApsId(picHeader->getCcAlfCrApsId());
   m_ccAlfFilterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1] = picHeader->getCcAlfEnabledFlag(COMPONENT_Cb);
   m_ccAlfFilterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1] = picHeader->getCcAlfEnabledFlag(COMPONENT_Cr);
 }
@@ -490,8 +517,7 @@ void Slice::constructRefPicList(PicList& rcListPic)
       pcRefPic = xGetRefPic( rcListPic, getPOC(), refLayerId );
       pcRefPic->longTerm = true;
     }
-    else
-    if (!m_RPL1.isRefPicLongterm(ii))
+    else if (!m_RPL1.isRefPicLongterm(ii))
     {
       pcRefPic = xGetRefPic(rcListPic, getPOC() + m_RPL1.getRefPicIdentifier(ii), m_pcPic->layerId);
       pcRefPic->longTerm = false;
@@ -614,7 +640,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 
   int irapPOC = getAssociatedIRAPPOC();
 
-  const int numEntries[] = { pRPL0->getNumberOfShorttermPictures() + pRPL0->getNumberOfLongtermPictures() + pRPL0->getNumberOfInterLayerPictures(), pRPL1->getNumberOfShorttermPictures() + pRPL1->getNumberOfLongtermPictures() + pRPL1->getNumberOfInterLayerPictures() };
+  int numEntries[] = { pRPL0->getNumberOfShorttermPictures() + pRPL0->getNumberOfLongtermPictures() + pRPL0->getNumberOfInterLayerPictures(), pRPL1->getNumberOfShorttermPictures() + pRPL1->getNumberOfLongtermPictures() + pRPL1->getNumberOfInterLayerPictures() };
   const int numActiveEntries[] = { getNumRefIdx( REF_PIC_LIST_0 ), getNumRefIdx( REF_PIC_LIST_1 ) };
   const ReferencePictureList* rpl[] = { pRPL0, pRPL1 };
   const bool fieldSeqFlag = getSPS()->getFieldSeqFlag();
@@ -666,9 +692,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
         }
 
         // Generated reference picture does not have picture header
-        const bool isGeneratedRefPic = pcRefPic->slices[0]->getPicHeader() ? false : true;
-
-        const bool nonReferencePictureFlag = isGeneratedRefPic ? pcRefPic->slices[0]->getPicHeader()->getNonReferencePictureFlag() : pcRefPic->nonReferencePictureFlag;
+        const bool nonReferencePictureFlag = pcRefPic->nonReferencePictureFlag;
         CHECK( pcRefPic == m_pcPic || nonReferencePictureFlag, "The picture referred to by each entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall not be the current picture and shall have ph_non_ref_pic_flag equal to 0" );
 
         if( i < numActiveEntries[refPicList] )
@@ -685,23 +709,20 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_RADL )
           {
             CHECK( refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "RADL picture detected that violate the rule that no active entry in RefPicList[] shall precede the associated IRAP picture in decoding order" );
-#if JVET_S0084_S0110_RADL
-            // Checking this: "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or 
+            // Checking this: "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or
             // RefPicList[ 1 ] that is any of the following: A RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0
             for (int i = 0; i < pcRefPic->numSlices; i++)
             {
-              if (pcRefPic->slices[i]->getPPS()->getMixedNaluTypesInPicFlag() == 0)
+              if (!pcRefPic->mixedNaluTypesInPicFlag)
               {
                 CHECK(pcRefPic->slices[i]->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL, "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or RefPicList[ 1 ] that is a RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0");
               }
             }
-#endif
 
           }
 
           CHECK( pcRefPic->temporalId > m_pcPic->temporalId, "The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall be present in the DPB and shall have TemporalId less than or equal to that of the current picture." );
         }
-#if JVET_R0046_IRAP_ASPECT2
         // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to
         // Max (0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] - 1 ), with refPicVpsLayerId equal to the value of
         // the nuh_layer_id of the referenced picture.
@@ -710,12 +731,13 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           bool cond1      = (pcRefPic->getPictureType() == NAL_UNIT_CODED_SLICE_GDR);
           bool cond2      = (pcRefPic->slices[0]->getPicHeader()->getRecoveryPocCnt() == 0);
           bool cond3      = (pcRefPic->cs->slice->isIRAP());
-          
+
           const VPS *vps                  = pcRefPic->cs->vps;
-          const int  maxTidILRefPicsPlus1 = vps->getMaxTidIlRefPicsPlus1(layerIdx, pcRefPic->layerId);
+          const int  maxTidILRefPicsPlus1 =
+            vps->getMaxTidIlRefPicsPlus1(layerIdx, vps->getGeneralLayerIdx(pcRefPic->layerId));
           bool cond4 = (pcRefPic->temporalId < maxTidILRefPicsPlus1);
 
-          CHECK((cond1 && cond2) || cond3 || cond4,
+          CHECK(!((cond1 && cond2) || cond3 || cond4),
                 "Either of the following conditions shall apply for the picture referred to by each ILRP entry, when "
                 "present, in RefPicList[ 0 ] or RefPicList[ 1 ] of a slice of the current picture:-The picture is a "
                 "GDR picture with "
@@ -724,7 +746,6 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
                 "where currLayerIdx and refLayerIdx are equal to "
                 "GeneralLayerIdx[ nuh_layer_id ] and GeneralLayerIdx[ refpicLayerId ], respectively. ");
         }
-#endif
       }
     }
   }
@@ -901,6 +922,16 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_depQuantEnabledFlag               = pSrc->m_depQuantEnabledFlag;
   m_signDataHidingEnabledFlag         = pSrc->m_signDataHidingEnabledFlag;
   m_tsResidualCodingDisabledFlag      = pSrc->m_tsResidualCodingDisabledFlag;
+  m_tsrc_index                        = pSrc->m_tsrc_index;
+
+  for (i = 0; i < MAX_TSRC_RICE; i++)
+  {
+    m_riceBit[i] = pSrc->m_riceBit[i];
+  }
+#if JVET_W0046_RLSCP
+  m_reverseLastSigCoeffFlag = pSrc->m_reverseLastSigCoeffFlag;
+  m_cnt_right_bottom        = pSrc->m_cnt_right_bottom;
+#endif
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -916,6 +947,9 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_iSliceQpDelta        = pSrc->m_iSliceQpDelta;
 
   m_biDirPred = pSrc->m_biDirPred;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  m_lmChromaCheckDisable = pSrc->m_lmChromaCheckDisable;;
+#endif
   m_symRefIdx[0] = pSrc->m_symRefIdx[0];
   m_symRefIdx[1] = pSrc->m_symRefIdx[1];
 
@@ -935,20 +969,35 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
     }
     m_bIsUsedAsLongTerm[i][MAX_NUM_REF] = pSrc->m_bIsUsedAsLongTerm[i][MAX_NUM_REF];
   }
-  if( cpyAlmostAll ) m_iDepth = pSrc->m_iDepth;
+  if (cpyAlmostAll)
+  {
+    m_iDepth = pSrc->m_iDepth;
+  }
 
   // access channel
-  if (cpyAlmostAll) m_RPL0 = pSrc->m_RPL0;
-  if (cpyAlmostAll) m_RPL1 = pSrc->m_RPL1;
+  if (cpyAlmostAll)
+  {
+    m_RPL0 = pSrc->m_RPL0;
+  }
+  if (cpyAlmostAll)
+  {
+    m_RPL1 = pSrc->m_RPL1;
+  }
   m_iLastIDR             = pSrc->m_iLastIDR;
 
-  if( cpyAlmostAll ) m_pcPic  = pSrc->m_pcPic;
+  if (cpyAlmostAll)
+  {
+    m_pcPic = pSrc->m_pcPic;
+  }
 
   m_pcPicHeader          = pSrc->m_pcPicHeader;
   m_colFromL0Flag        = pSrc->m_colFromL0Flag;
   m_colRefIdx            = pSrc->m_colRefIdx;
 
-  if( cpyAlmostAll ) setLambdas(pSrc->getLambdas());
+  if (cpyAlmostAll)
+  {
+    setLambdas(pSrc->getLambdas());
+  }
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -988,14 +1037,17 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
 
   m_cabacInitFlag                 = pSrc->m_cabacInitFlag;
   memcpy(m_alfApss, pSrc->m_alfApss, sizeof(m_alfApss)); // this might be quite unsafe
-  memcpy( m_tileGroupAlfEnabledFlag, pSrc->m_tileGroupAlfEnabledFlag, sizeof(m_tileGroupAlfEnabledFlag));
-  m_tileGroupNumAps               = pSrc->m_tileGroupNumAps;
-  m_tileGroupLumaApsId            = pSrc->m_tileGroupLumaApsId;
-  m_tileGroupChromaApsId          = pSrc->m_tileGroupChromaApsId;
+  memcpy( m_alfEnabledFlag, pSrc->m_alfEnabledFlag, sizeof(m_alfEnabledFlag));
+  m_numAlfApsIdsLuma              = pSrc->m_numAlfApsIdsLuma;
+  m_alfApsIdsLuma                 = pSrc->m_alfApsIdsLuma;
+  m_alfApsIdChroma                = pSrc->m_alfApsIdChroma;
   m_disableSATDForRd              = pSrc->m_disableSATDForRd;
   m_isLossless = pSrc->m_isLossless;
 
-  if( cpyAlmostAll ) m_encCABACTableIdx  = pSrc->m_encCABACTableIdx;
+  if (cpyAlmostAll)
+  {
+    m_encCABACTableIdx = pSrc->m_encCABACTableIdx;
+  }
   for( int i = 0; i < NUM_REF_PIC_LIST_01; i ++ )
   {
     for (int j = 0; j < MAX_NUM_REF_PICS; j ++ )
@@ -1006,10 +1058,10 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_ccAlfFilterParam                        = pSrc->m_ccAlfFilterParam;
   m_ccAlfFilterControl[0]                   = pSrc->m_ccAlfFilterControl[0];
   m_ccAlfFilterControl[1]                   = pSrc->m_ccAlfFilterControl[1];
-  m_tileGroupCcAlfCbEnabledFlag             = pSrc->m_tileGroupCcAlfCbEnabledFlag;
-  m_tileGroupCcAlfCrEnabledFlag             = pSrc->m_tileGroupCcAlfCrEnabledFlag;
-  m_tileGroupCcAlfCbApsId                   = pSrc->m_tileGroupCcAlfCbApsId;
-  m_tileGroupCcAlfCrApsId                   = pSrc->m_tileGroupCcAlfCrApsId;
+  m_ccAlfCbEnabledFlag             = pSrc->m_ccAlfCbEnabledFlag;
+  m_ccAlfCrEnabledFlag             = pSrc->m_ccAlfCrEnabledFlag;
+  m_ccAlfCbApsId                   = pSrc->m_ccAlfCbApsId;
+  m_ccAlfCrApsId                   = pSrc->m_ccAlfCrApsId;
 }
 
 
@@ -1061,7 +1113,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
   if(this->getAssociatedIRAPPOC() > this->getPOC())
   {
     //check this only when pps_mixed_nalu_types_in_pic_flag is equal to 0
-    if (pps.getMixedNaluTypesInPicFlag() == 0)
+    if (!pps.getMixedNaluTypesInPicFlag())
     {
       // Do not check IRAP pictures since they may get a POC lower than their associated IRAP
       if (nalUnitType < NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
@@ -1075,7 +1127,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
 
   if (this->getAssociatedIRAPPOC() <= this->getPOC())
   {
-    if (pps.getMixedNaluTypesInPicFlag() == 0)
+    if (!pps.getMixedNaluTypesInPicFlag())
     {
       CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL, "When a picture is not a leading picture, it shall not be a RADL or RASL picture.");
     }
@@ -1113,41 +1165,44 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
     }
     const Slice* pcSlice = pcPic->slices[0];
 
-    if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getNoOutputOfPriorPicsFlag() && pcPic->layerId == this->m_nuhLayerId)
+    if(pcSlice->getPicHeader()) // Generated reference picture does not have picture header
     {
-      if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) && !pps.getMixedNaluTypesInPicFlag())
+      if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getNoOutputOfPriorPicsFlag() && pcPic->layerId == this->m_nuhLayerId)
       {
-        CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes an IRAP picture with nuh_layer_id "
-              "equal to layerId in decoding order shall precede the IRAP picture in output order.");
-      }
-    }
-
-    if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && pcPic->layerId == this->m_nuhLayerId)
-    {
-      if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL)
-      {
-        if (this->getAssociatedIRAPPOC() > pcSlice->getAssociatedIRAPPOC() && !pps.getMixedNaluTypesInPicFlag())
+        if ((nalUnitType == NAL_UNIT_CODED_SLICE_CRA || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) && !pps.getMixedNaluTypesInPicFlag())
         {
-          if (this->getAssociatedIRAPPOC() != pcPic->poc)
+          CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes an IRAP picture with nuh_layer_id "
+                "equal to layerId in decoding order shall precede the IRAP picture in output order.");
+        }
+      }
+
+      if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && pcPic->layerId == this->m_nuhLayerId)
+      {
+        if (nalUnitType == NAL_UNIT_CODED_SLICE_RADL)
+        {
+          if (this->getAssociatedIRAPPOC() > pcSlice->getAssociatedIRAPPOC() && !pps.getMixedNaluTypesInPicFlag())
           {
-            CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes an IRAP picture with nuh_layer_id "
-                  "equal to layerId in decoding order shall precede any RADL picture associated with the IRAP picture in output order.");
+            if (this->getAssociatedIRAPPOC() != pcPic->poc)
+            {
+              CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes an IRAP picture with nuh_layer_id "
+                    "equal to layerId in decoding order shall precede any RADL picture associated with the IRAP picture in output order.");
+            }
           }
+        }
+      }
+
+      if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getPicHeader()->getNoOutputBeforeRecoveryFlag() && pcPic->layerId == this->m_nuhLayerId
+          && nalUnitType != NAL_UNIT_CODED_SLICE_GDR && this->getPicHeader()->getRecoveryPocCnt() != -1)
+      {
+        if (this->getPOC() == this->getPicHeader()->getRecoveryPocCnt() + this->getPrevGDRInSameLayerPOC())
+        {
+          CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes a recovery point picture with "
+                "nuh_layer_id equal to layerId in decoding order shall precede the recovery point picture in output order.");
         }
       }
     }
 
-    if (pcSlice->getPicHeader()->getPicOutputFlag() == 1 && !this->getPicHeader()->getNoOutputBeforeRecoveryFlag() && pcPic->layerId == this->m_nuhLayerId
-        && nalUnitType != NAL_UNIT_CODED_SLICE_GDR && this->getPicHeader()->getRecoveryPocCnt() != -1)
-    {
-      if (this->getPOC() == this->getPicHeader()->getRecoveryPocCnt() + this->getPrevGDRInSameLayerPOC())
-      {
-        CHECK(pcPic->poc >= this->getPOC(), "Any picture, with nuh_layer_id equal to a particular value layerId, that precedes a recovery point picture with "
-              "nuh_layer_id equal to layerId in decoding order shall precede the recovery point picture in output order.");
-      }
-    }
-
-    if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) && 
+    if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) &&
       (pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL && pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL) && !pps.getMixedNaluTypesInPicFlag())
     {
       if (pcSlice->getAssociatedIRAPPOC() == this->getAssociatedIRAPPOC() && pcPic->layerId == this->m_nuhLayerId)
@@ -1254,14 +1309,18 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
       bool isBufPicOutput = false;
       int bufSubpicType = NAL_UNIT_INVALID;
       int bufSubpicPrevIRAPSubpicPOC = 0;
-      for (int i = 0; i < bufPic->numSlices; i++)
+
+      if (bufPic->slices[0]->getPicHeader() != NULL) // Generated reference picture does not have picture header
       {
-        if (bufPic->sliceSubpicIdx[i] == curSubpicIdx)
+        for (int i = 0; i < bufPic->numSlices; i++)
         {
-          isBufPicOutput = bufPic->slices[i]->getPicHeader()->getPicOutputFlag();
-          bufSubpicType = bufPic->slices[i]->getNalUnitType();
-          bufSubpicPrevIRAPSubpicPOC = bufPic->slices[i]->getPrevIRAPSubpicPOC();
-          break;
+          if (bufPic->sliceSubpicIdx[i] == curSubpicIdx)
+          {
+            isBufPicOutput = bufPic->slices[i]->getPicHeader()->getPicOutputFlag();
+            bufSubpicType = bufPic->slices[i]->getNalUnitType();
+            bufSubpicPrevIRAPSubpicPOC = bufPic->slices[i]->getPrevIRAPSubpicPOC();
+            break;
+          }
         }
       }
 
@@ -1494,7 +1553,7 @@ void Slice::applyReferencePictureListBasedMarking( PicList& rcListPic, const Ref
   int i, isReference;
   checkLeadingPictureRestrictions(rcListPic, pps);
 
-  bool isNeedToCheck = (this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL) ? false : true;
+  bool isNeedToCheck = (this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL) && !pps.getMixedNaluTypesInPicFlag() ? false : true;
 
   // mark long-term reference pictures in List0
   for( i = 0; i < pRPL0->getNumberOfShorttermPictures() + pRPL0->getNumberOfLongtermPictures() + pRPL0->getNumberOfInterLayerPictures(); i++ )
@@ -1635,7 +1694,9 @@ void Slice::applyReferencePictureListBasedMarking( PicList& rcListPic, const Ref
     Picture* pcPic = *(iterPic++);
 
     if (!pcPic->referenced)
+    {
       continue;
+    }
 
     isReference = 0;
     // loop through all pictures in the Reference Picture Set
@@ -1752,7 +1813,10 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
   int isAvailable = 0;
   int notPresentPoc = 0;
 
-  if (this->isIDRorBLA()) return 0; //Assume that all pic in the DPB will be flushed anyway so no need to check.
+  if (this->isIDRorBLA())
+  {
+    return 0;   // Assume that all pic in the DPB will be flushed anyway so no need to check.
+  }
 
   int numberOfPictures = pRPL->getNumberOfLongtermPictures() + pRPL->getNumberOfShorttermPictures() + pRPL->getNumberOfInterLayerPictures();
   //Check long term ref pics
@@ -1816,7 +1880,7 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
     {
       if (printErrors)
       {
-        msg(ERROR, "\nCurrent picture: %d Long-term reference picture with POC = %3d seems to have been removed or not correctly decoded.", this->getPOC(), notPresentPoc);
+        msg(ERROR, "Error: Current picture: %d Long-term reference picture with POC = %3d seems to have been removed or not correctly decoded.\n", this->getPOC(), notPresentPoc);
       }
       return notPresentPoc;
     }
@@ -1828,7 +1892,9 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
   for (int ii = 0; ii < numberOfPictures; ii++)
   {
     if (pRPL->isRefPicLongterm(ii))
+    {
       continue;
+    }
 
     notPresentPoc = this->getPOC() + pRPL->getRefPicIdentifier(ii);
     isAvailable = 0;
@@ -1847,7 +1913,7 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
     {
       if (printErrors)
       {
-        msg(ERROR, "\nCurrent picture: %d Short-term reference picture with POC = %3d seems to have been removed or not correctly decoded.", this->getPOC(), notPresentPoc);
+        msg(ERROR, "Error: Current picture: %d Short-term reference picture with POC = %3d seems to have been removed or not correctly decoded.\n", this->getPOC(), notPresentPoc);
       }
       return notPresentPoc;
     }
@@ -1926,7 +1992,7 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
     {
       if (printErrors)
       {
-        msg(ERROR, "\nCurrent picture: %d Long-term reference picture with POC = %3d seems to have been removed or not correctly decoded.", this->getPOC(), notPresentPoc);
+        msg(ERROR, "Error: Current picture: %d Long-term reference picture with POC = %3d seems to have been removed or not correctly decoded.\n", this->getPOC(), notPresentPoc);
       }
       *refPicIndex = ii;
       return notPresentPoc;
@@ -1939,7 +2005,9 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
   for (int ii = 0; ii < numberOfPictures; ii++)
   {
     if (pRPL->isRefPicLongterm(ii))
+    {
       continue;
+    }
 
     notPresentPoc = this->getPOC() + pRPL->getRefPicIdentifier(ii);
     isAvailable = 0;
@@ -1958,7 +2026,7 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
     {
       if (printErrors)
       {
-        msg(ERROR, "\nCurrent picture: %d Short-term reference picture with POC = %3d seems to have been removed or not correctly decoded.", this->getPOC(), notPresentPoc);
+        msg(ERROR, "Error: Current picture: %d Short-term reference picture with POC = %3d seems to have been removed or not correctly decoded.\n", this->getPOC(), notPresentPoc);
       }
       *refPicIndex = ii;
       return notPresentPoc;
@@ -1981,8 +2049,7 @@ bool Slice::isPOCInRefPicList(const ReferencePictureList *rpl, int poc )
         return true;
       }
     }
-    else
-    if (rpl->isRefPicLongterm(i))
+    else if (rpl->isRefPicLongterm(i))
     {
       if (poc == rpl->getRefPicIdentifier(i))
       {
@@ -2008,6 +2075,15 @@ bool Slice::isPocRestrictedByDRAP( int poc, bool precedingDRAPInDecodingOrder )
   }
   return ( isDRAP() && poc != getAssociatedIRAPPOC() ) ||
          ( cvsHasPreviousDRAP() && getPOC() > getLatestDRAPPOC() && (precedingDRAPInDecodingOrder || poc < getLatestDRAPPOC()) );
+}
+
+bool Slice::isPocRestrictedByEdrap( int poc )
+{
+  if (!getEnableEdrapSEI())
+  {
+    return false;
+  }
+  return getEdrapRapId() > 0 && poc != getAssociatedIRAPPOC();
 }
 
 void Slice::checkConformanceForDRAP( uint32_t temporalId )
@@ -2066,6 +2142,59 @@ void Slice::checkConformanceForDRAP( uint32_t temporalId )
                     "and output order shall not include, in the active entries of its reference picture lists, any picture "
                     "that precedes the DRAP picture in decoding order or output order, with the exception of the preceding "
                     "IRAP picture in decoding order. Problem is POC %d in RPL1", getRefPic(REF_PIC_LIST_1,i)->getPOC());
+      }
+    }
+  }
+}
+
+void Slice::checkConformanceForEDRAP( uint32_t temporalId )
+{
+  if (!(getEdrapRapId() > 0 || cvsHasPreviousEDRAP()))
+  {
+    return;
+  }
+
+  if (getEdrapRapId() > 0)
+  {
+    if (!(getNalUnitType() == NalUnitType::NAL_UNIT_CODED_SLICE_TRAIL ||
+          getNalUnitType() == NalUnitType::NAL_UNIT_CODED_SLICE_STSA))
+    {
+      msg( WARNING, "Warning, non-conforming bitstream. The EDRAP picture should be a trailing picture.\n");
+    }
+    if ( temporalId != 0)
+    {
+      msg( WARNING, "Warning, non-conforming bitstream. The EDRAP picture shall have a temporal sublayer identifier equal to 0.\n");
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_0); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_0,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in both decoding order and output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order or output order, with the exception of the referenceablePictures.\n");
+      }
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_1); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_1,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in both decoding order and output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order or output order, with the exception of the referenceablePictures.\n");
+      }
+    }
+  }
+
+  if (cvsHasPreviousEDRAP() && getPOC() > getLatestEDRAPPOC() && getLatestEdrapLeadingPicDecodableFlag())
+  {
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_0); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_0,i)->getPOC() < getLatestEDRAPPOC() && getRefPic(REF_PIC_LIST_0,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in decoding order and precedes the EDRAP picture in output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order, with the exception of the referenceablePictures. Problem is POC %d in RPL0.\n", getRefPic(REF_PIC_LIST_0,i)->getPOC());
+      }
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_1); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_1,i)->getPOC() < getLatestEDRAPPOC() && getRefPic(REF_PIC_LIST_1,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in decoding order and precedes the EDRAP picture in output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order, with the exception of the referenceablePictures. Problem is POC %d in RPL1\n", getRefPic(REF_PIC_LIST_1,i)->getPOC());
       }
     }
   }
@@ -2184,8 +2313,7 @@ unsigned Slice::getMinPictureDistance() const
   {
     minPicDist = 0;
   }
-  else
-  if( ! isIntra() )
+  else if (!isIntra())
   {
     const int currPOC  = getPOC();
     for (int refIdx = 0; refIdx < getNumRefIdx(REF_PIC_LIST_0); refIdx++)
@@ -2234,9 +2362,6 @@ VPS::VPS()
   {
     m_vpsLayerId[i] = 0;
     m_vpsIndependentLayerFlag[i] = true;
-#if !JVET_R0193
-    m_vpsMaxTidIlRefPicsPlus1[i] = 7;
-#endif
     m_generalLayerIdx[i] = 0;
     for (int j = 0; j < MAX_VPS_LAYERS; j++)
     {
@@ -2330,11 +2455,7 @@ void VPS::deriveOutputLayerSets()
 
   m_numOutputLayersInOls[0] = 1;
   m_outputLayerIdInOls[0][0] = m_vpsLayerId[0];
-#if JVET_R0193_S0141
   m_numSubLayersInLayerInOLS[0][0] = m_ptlMaxTemporalId[m_olsPtlIdx[0]] + 1;
-#else
-  m_numSubLayersInLayerInOLS[0][0] = m_vpsMaxSubLayers;
-#endif
   layerUsedAsOutputLayerFlag[0] = 1;
   for (int i = 1; i < m_maxLayers; i++)
   {
@@ -2353,7 +2474,6 @@ void VPS::deriveOutputLayerSets()
     {
       m_numOutputLayersInOls[i] = 1;
       m_outputLayerIdInOls[i][0] = m_vpsLayerId[i];
-#if JVET_R0193_S0141
       if (m_vpsEachLayerIsAnOlsFlag)
       {
         m_numSubLayersInLayerInOLS[i][0] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
@@ -2372,15 +2492,8 @@ void VPS::deriveOutputLayerSets()
               m_numSubLayersInLayerInOLS[i][k] = maxSublayerNeeded;
             }
           }
+        }
       }
-      }
-#else
-      for(int  j = 0; j < i  &&  ( m_vpsOlsModeIdc  ==  0 ); j++ )
-      {
-        m_numSubLayersInLayerInOLS[i][j] = m_vpsMaxTidIlRefPicsPlus1[i];
-      }
-      m_numSubLayersInLayerInOLS[i][i] = m_vpsMaxSubLayers;
-#endif
     }
     else if( m_vpsOlsModeIdc == 1 )
     {
@@ -2389,19 +2502,13 @@ void VPS::deriveOutputLayerSets()
       for( int j = 0; j < m_numOutputLayersInOls[i]; j++ )
       {
         m_outputLayerIdInOls[i][j] = m_vpsLayerId[j];
-#if JVET_R0193_S0141
         m_numSubLayersInLayerInOLS[i][j] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
-#else
-        m_numSubLayersInLayerInOLS[i][j] = m_vpsMaxSubLayers;
-#endif
       }
     }
     else if( m_vpsOlsModeIdc == 2 )
     {
       int j = 0;
-#if JVET_R0193
       int highestIncludedLayer = 0;
-#endif
       for( j = 0; j  <  m_maxLayers; j++ )
       {
         m_numSubLayersInLayerInOLS[i][j] = 0;
@@ -2412,17 +2519,11 @@ void VPS::deriveOutputLayerSets()
         if( m_vpsOlsOutputLayerFlag[i][k] )
         {
           layerIncludedInOlsFlag[i][k] = 1;
-#if JVET_R0193
           highestIncludedLayer = k;
-#endif
           layerUsedAsOutputLayerFlag[k] = 1;
           outputLayerIdx[i][j] = k;
           m_outputLayerIdInOls[i][j++] = m_vpsLayerId[k];
-#if JVET_R0193_S0141
           m_numSubLayersInLayerInOLS[i][k] = m_ptlMaxTemporalId[m_olsPtlIdx[i]] + 1;
-#else
-          m_numSubLayersInLayerInOLS[i][k] = m_vpsMaxSubLayers;
-#endif
         }
       }
       m_numOutputLayersInOls[i] = j;
@@ -2433,15 +2534,8 @@ void VPS::deriveOutputLayerSets()
         for( int k = 0; k < numRefLayers[idx]; k++ )
         {
           layerIncludedInOlsFlag[i][refLayerIdx[idx][k]] = 1;
-#if !JVET_R0193
-          if( m_numSubLayersInLayerInOLS[i][ refLayerIdx[idx][k] ] < m_vpsMaxTidIlRefPicsPlus1[ m_outputLayerIdInOls[i][j] ] )
-          {
-            m_numSubLayersInLayerInOLS[i][ refLayerIdx[idx][k] ] =  m_vpsMaxTidIlRefPicsPlus1[ m_outputLayerIdInOls[i][j] ];
-          }
-#endif
         }
       }
-#if JVET_R0193
       for (int k = highestIncludedLayer - 1; k >= 0; k--)
       {
         if (layerIncludedInOlsFlag[i][k] && !m_vpsOlsOutputLayerFlag[i][k])
@@ -2456,7 +2550,6 @@ void VPS::deriveOutputLayerSets()
           }
         }
       }
-#endif
     }
   }
   for (int i = 0; i < m_maxLayers; i++)
@@ -2547,7 +2640,6 @@ void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
   }
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 int VPS::deriveTargetOLSIdx(void)
 {
   int lowestIdx = 0;
@@ -2579,7 +2671,6 @@ uint32_t VPS::getMaxTidinTOls(int m_targetOlsIdx)
   return getPtlMaxTemporalId(getOlsPtlIdx(m_targetOlsIdx));
 }
 
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Picture Header
@@ -2619,9 +2710,9 @@ PicHeader::PicHeader()
 , m_profDisabledFlag                              ( 0 )
 , m_jointCbCrSignFlag                             ( 0 )
 , m_qpDelta                                       ( 0 )
-, m_numAlfAps                                     ( 0 )
-, m_alfApsId                                      ( 0 )
-, m_alfChromaApsId                                ( 0 )
+, m_numAlfApsIdsLuma                              ( 0 )
+, m_alfApsIdsLuma                                 ( 0 )
+, m_alfApsIdChroma                                ( 0 )
 , m_deblockingFilterOverrideFlag                  ( 0 )
 , m_deblockingFilterDisable                       ( 0 )
 , m_deblockingFilterBetaOffsetDiv2                ( 0 )
@@ -2661,14 +2752,14 @@ PicHeader::PicHeader()
   m_RPL1.setLtrpInSliceHeaderFlag(0);
   m_RPL1.setNumberOfInterLayerPictures( 0 );
 
-  m_alfApsId.resize(0);
+  m_alfApsIdsLuma.resize(0);
 
   resetWpScaling();
 }
 
 PicHeader::~PicHeader()
 {
-  m_alfApsId.resize(0);
+  m_alfApsIdsLuma.resize(0);
 }
 
 /**
@@ -2706,8 +2797,8 @@ void PicHeader::initPicHeader()
   m_profDisabledFlag                              = 0;
   m_jointCbCrSignFlag                             = 0;
   m_qpDelta                                       = 0;
-  m_numAlfAps                                     = 0;
-  m_alfChromaApsId                                = 0;
+  m_numAlfApsIdsLuma                              = 0;
+  m_alfApsIdChroma                                = 0;
   m_deblockingFilterOverrideFlag                  = 0;
   m_deblockingFilterDisable                       = 0;
   m_deblockingFilterBetaOffsetDiv2                = 0;
@@ -2744,7 +2835,11 @@ void PicHeader::initPicHeader()
   m_RPL1.setNumberOfLongtermPictures(0);
   m_RPL1.setLtrpInSliceHeaderFlag(0);
 
-  m_alfApsId.resize(0);
+  m_alfApsIdsLuma.resize(0);
+#if GDR_ENABLED
+  m_inGdrInterval      = false;
+  m_lastGdrIntervalPoc = -1;
+#endif
 }
 
 const WPScalingParam *PicHeader::getWpScaling(const RefPicList refPicList, const int refIdx) const
@@ -2798,9 +2893,14 @@ SPSRExt::SPSRExt()
  : m_transformSkipRotationEnabledFlag   (false)
  , m_transformSkipContextEnabledFlag    (false)
  , m_extendedPrecisionProcessingFlag    (false)
+ , m_tsrcRicePresentFlag                (false)
  , m_intraSmoothingDisabledFlag         (false)
  , m_highPrecisionOffsetsEnabledFlag    (false)
+ , m_rrcRiceExtensionEnableFlag(false)
  , m_persistentRiceAdaptationEnabledFlag(false)
+#if JVET_W0046_RLSCP
+ , m_reverseLastSigCoeffEnabledFlag     (false)
+#endif
  , m_cabacBypassAlignmentEnabledFlag    (false)
 {
 }
@@ -3112,6 +3212,7 @@ PPS::PPS()
 , m_conformanceWindowFlag            (false)
 , m_picWidthInLumaSamples(352)
 , m_picHeightInLumaSamples( 288 )
+, m_explicitScalingWindowFlag        (false)
 , m_wrapAroundEnabledFlag            (false)
 , m_picWidthMinusWrapAroundOffset    (0)
 , m_wrapAroundOffset                 (0)
@@ -3504,7 +3605,7 @@ void PPS::initSubPic(const SPS &sps)
     m_subPics[i].setSubPicWidthInCTUs(sps.getSubPicWidth(i));
     m_subPics[i].setSubPicHeightInCTUs(sps.getSubPicHeight(i));
 
-    uint32_t firstCTU = sps.getSubPicCtuTopLeftY(i) * m_picWidthInCtu + sps.getSubPicCtuTopLeftX(i); 	
+    uint32_t firstCTU = sps.getSubPicCtuTopLeftY(i) * m_picWidthInCtu + sps.getSubPicCtuTopLeftX(i);
     m_subPics[i].setFirstCTUInSubPic(firstCTU);
     uint32_t lastCTU = (sps.getSubPicCtuTopLeftY(i) + sps.getSubPicHeight(i) - 1) * m_picWidthInCtu + sps.getSubPicCtuTopLeftX(i) + sps.getSubPicWidth(i) - 1;
     m_subPics[i].setLastCTUInSubPic(lastCTU);
@@ -3551,7 +3652,7 @@ void PPS::initSubPic(const SPS &sps)
         {
           // add ctus in a slice to the subpicture it belongs to
           m_subPics[i].addCTUsToSubPic(m_sliceMap[j].getCtuAddrList());
-	  numSlicesInSubPic++;
+          numSlicesInSubPic++;
           idxLastSliceInSubpic = j;
         }
         else if (idxFirstSliceAfterSubpic == m_numSlicesInPic && idxLastSliceInSubpic != -1)
@@ -3811,42 +3912,39 @@ bool ScalingList::isNotDefaultScalingList()
   return !isAllDefault;
 }
 
-/** get scaling matrix from RefMatrixID
- * \param sizeId    size index
- * \param listId    index of input matrix
- * \param refListId index of reference matrix
- */
-int ScalingList::lengthUvlc(int uiCode)
+int ScalingList::lengthUvlc(int code)
 {
-  if (uiCode < 0) printf("Error UVLC! \n");
+  CHECK(code < 0,        "Unsigned VLC cannot be negative");
+  CHECK(code == MAX_INT, "Maximum supported UVLC code is MAX_INT-1");
 
-  int uiLength = 1;
-  int uiTemp = ++uiCode;
+  int length = 1;
+  int temp = ++code;
 
-  CHECK(!uiTemp, "Integer overflow");
 
-  while (1 != uiTemp)
+  while (1 != temp)
   {
-    uiTemp >>= 1;
-    uiLength += 2;
+    temp >>= 1;
+    length += 2;
   }
-  return (uiLength >> 1) + ((uiLength + 1) >> 1);
+  return (length >> 1) + ((length + 1) >> 1);
 }
-int ScalingList::lengthSvlc(int uiCode)
+
+int ScalingList::lengthSvlc(int code)
 {
-  uint32_t uiCode2 = uint32_t(uiCode <= 0 ? (-uiCode) << 1 : (uiCode << 1) - 1);
-  int uiLength = 1;
-  int uiTemp = ++uiCode2;
+  uint32_t code2 = uint32_t(code <= 0 ? (-code) << 1 : (code << 1) - 1);
+  int length = 1;
+  int temp = ++code2;
 
-  CHECK(!uiTemp, "Integer overflow");
+  CHECK(temp < 0, "Integer overflow constructing SVLC code");
 
-  while (1 != uiTemp)
+  while (1 != temp)
   {
-    uiTemp >>= 1;
-    uiLength += 2;
+    temp >>= 1;
+    length += 2;
   }
-  return (uiLength >> 1) + ((uiLength + 1) >> 1);
+  return (length >> 1) + ((length + 1) >> 1);
 }
+
 void ScalingList::codePredScalingList(int* scalingList, const int* scalingListPred, int scalingListDC, int scalingListPredDC, int scalingListId, int& bitsCost) //sizeId, listId is current to-be-coded matrix idx
 {
   int deltaValue = 0;
@@ -3886,6 +3984,7 @@ void ScalingList::codePredScalingList(int* scalingList, const int* scalingListPr
     bitsCost += lengthSvlc(data);
   }
 }
+
 void ScalingList::codeScalingList(int* scalingList, int scalingListDC, int scalingListId, int& bitsCost) //sizeId, listId is current to-be-coded matrix idx
 {
   int matrixSize = (scalingListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalingListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
@@ -3904,7 +4003,9 @@ void ScalingList::codeScalingList(int* scalingList, int scalingListDC, int scali
   for (int i = 0; i < coefNum; i++)
   {
     if (scalingListId >= SCALING_LIST_1D_START_64x64 && scan[i].x >= 4 && scan[i].y >= 4)
+    {
       continue;
+    }
     data = int8_t(src[scan[i].idx] - nextCoef);
     nextCoef = src[scan[i].idx];
 
@@ -3923,18 +4024,20 @@ void ScalingList::CheckBestPredScalingList(int scalingListId, int predListId, in
   int matrixSize = (scalingListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalingListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
   int predMatrixSize = (predListId < SCALING_LIST_1D_START_4x4) ? 2 : (predListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
 
-  if (matrixSize != predMatrixSize) printf("Predictor size mismatch! \n");
+  CHECK(matrixSize != predMatrixSize, "Predictor size mismatch");
 
   bitsCost = 2 + lengthUvlc(scalingListId - predListId);
   //copy-flag + predictor-mode-flag + deltaListId
   codePredScalingList(scalingList, scalingListPred, scalingListDC, scalingListPredDC, scalingListId, bitsCost);
   BitsCount = bitsCost;
 }
+
 void ScalingList::processRefMatrix(uint32_t scalinListId, uint32_t refListId)
 {
   int matrixSize = (scalinListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalinListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
   ::memcpy(getScalingListAddress(scalinListId), ((scalinListId == refListId) ? getScalingListDefaultAddress(refListId) : getScalingListAddress(refListId)), sizeof(int)*matrixSize*matrixSize);
 }
+
 void ScalingList::checkPredMode(uint32_t scalingListId)
 {
   int bestBitsCount = MAX_INT;
@@ -3949,7 +4052,9 @@ void ScalingList::checkPredMode(uint32_t scalingListId)
     int matrixSize = (scalingListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalingListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
     int predMatrixSize = (predListIdx < SCALING_LIST_1D_START_4x4) ? 2 : (predListIdx < SCALING_LIST_1D_START_8x8) ? 4 : 8;
     if (((scalingListId == SCALING_LIST_1D_START_2x2 || scalingListId == SCALING_LIST_1D_START_4x4 || scalingListId == SCALING_LIST_1D_START_8x8) && predListIdx != (int)scalingListId) || matrixSize != predMatrixSize)
+    {
       continue;
+    }
     const int* refScalingList = (scalingListId == predListIdx) ? getScalingListDefaultAddress(predListIdx) : getScalingListAddress(predListIdx);
     const int refDC = (predListIdx < SCALING_LIST_1D_START_16x16) ? refScalingList[0] : (scalingListId == predListIdx) ? 16 : getScalingListDC(predListIdx);
     if (!::memcmp(getScalingListAddress(scalingListId), refScalingList, sizeof(int)*matrixSize*matrixSize) // check value of matrix
@@ -4230,9 +4335,13 @@ uint32_t PreCalcValues::getValIdx( const Slice &slice, const ChannelType chType 
 uint32_t PreCalcValues::getMaxBtDepth( const Slice &slice, const ChannelType chType ) const
 {
   if ( slice.getPicHeader()->getSplitConsOverrideFlag() )
+  {
     return slice.getPicHeader()->getMaxMTTHierarchyDepth( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
-  return maxBtDepth[getValIdx( slice, chType )];
+  {
+    return maxBtDepth[getValIdx(slice, chType)];
+  }
 }
 
 uint32_t PreCalcValues::getMinBtSize( const Slice &slice, const ChannelType chType ) const
@@ -4243,9 +4352,13 @@ uint32_t PreCalcValues::getMinBtSize( const Slice &slice, const ChannelType chTy
 uint32_t PreCalcValues::getMaxBtSize( const Slice &slice, const ChannelType chType ) const
 {
   if (slice.getPicHeader()->getSplitConsOverrideFlag())
+  {
     return slice.getPicHeader()->getMaxBTSize( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
+  {
     return maxBtSize[getValIdx(slice, chType)];
+  }
 }
 
 uint32_t PreCalcValues::getMinTtSize( const Slice &slice, const ChannelType chType ) const
@@ -4256,16 +4369,24 @@ uint32_t PreCalcValues::getMinTtSize( const Slice &slice, const ChannelType chTy
 uint32_t PreCalcValues::getMaxTtSize( const Slice &slice, const ChannelType chType ) const
 {
   if (slice.getPicHeader()->getSplitConsOverrideFlag())
+  {
     return slice.getPicHeader()->getMaxTTSize( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
-  return maxTtSize[getValIdx( slice, chType )];
+  {
+    return maxTtSize[getValIdx(slice, chType)];
+  }
 }
 uint32_t PreCalcValues::getMinQtSize( const Slice &slice, const ChannelType chType ) const
 {
   if (slice.getPicHeader()->getSplitConsOverrideFlag())
+  {
     return slice.getPicHeader()->getMinQTSize( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
-  return minQtSize[getValIdx( slice, chType )];
+  {
+    return minQtSize[getValIdx(slice, chType)];
+  }
 }
 
 void Slice::scaleRefPicList( Picture *scaledRefPic[ ], PicHeader *picHeader, APS** apss, APS* lmcsAps, APS* scalingListAps, const bool isDecoder )
@@ -4451,64 +4572,233 @@ bool Slice::checkRPR()
 
 bool             operator == (const ConstraintInfo& op1, const ConstraintInfo& op2)
 {
-  if( op1.m_intraOnlyConstraintFlag                      != op2.m_intraOnlyConstraintFlag                        ) return false;
-  if( op1.m_maxBitDepthConstraintIdc                     != op2.m_maxBitDepthConstraintIdc                       ) return false;
-  if( op1.m_maxChromaFormatConstraintIdc                 != op2.m_maxChromaFormatConstraintIdc                   ) return false;
-  if( op1.m_onePictureOnlyConstraintFlag                 != op2.m_onePictureOnlyConstraintFlag                   ) return false;
-  if( op1.m_lowerBitRateConstraintFlag                   != op2.m_lowerBitRateConstraintFlag                     ) return false;
-  if (op1.m_allLayersIndependentConstraintFlag           != op2.m_allLayersIndependentConstraintFlag             ) return false;
-  if (op1.m_noMrlConstraintFlag                          != op2.m_noMrlConstraintFlag                            ) return false;
-  if (op1.m_noIspConstraintFlag                          != op2.m_noIspConstraintFlag                            ) return false;
-  if (op1.m_noMipConstraintFlag                          != op2.m_noMipConstraintFlag                            ) return false;
-  if (op1.m_noLfnstConstraintFlag                        != op2.m_noLfnstConstraintFlag                          ) return false;
-  if (op1.m_noMmvdConstraintFlag                         != op2.m_noMmvdConstraintFlag                           ) return false;
-  if (op1.m_noSmvdConstraintFlag                         != op2.m_noSmvdConstraintFlag                           ) return false;
-  if (op1.m_noProfConstraintFlag                         != op2.m_noProfConstraintFlag                           ) return false;
-  if (op1.m_noPaletteConstraintFlag                      != op2.m_noPaletteConstraintFlag                        ) return false;
-  if (op1.m_noActConstraintFlag                          != op2.m_noActConstraintFlag                            ) return false;
-  if (op1.m_noLmcsConstraintFlag                         != op2.m_noLmcsConstraintFlag                           ) return false;
-  if (op1.m_noExplicitScaleListConstraintFlag            != op2.m_noExplicitScaleListConstraintFlag              ) return false;
-  if (op1.m_noVirtualBoundaryConstraintFlag              != op2.m_noVirtualBoundaryConstraintFlag                ) return false;
-  if (op1.m_noChromaQpOffsetConstraintFlag               != op2.m_noChromaQpOffsetConstraintFlag                 ) return false;
-  if (op1.m_noRprConstraintFlag                          != op2.m_noRprConstraintFlag                            ) return false;
-  if (op1.m_noResChangeInClvsConstraintFlag              != op2.m_noResChangeInClvsConstraintFlag                ) return false;
-  if (op1.m_noMttConstraintFlag                          != op2.m_noMttConstraintFlag                            ) return false;
-  if( op1.m_noQtbttDualTreeIntraConstraintFlag           != op2.m_noQtbttDualTreeIntraConstraintFlag             ) return false;
-  if( op1.m_noPartitionConstraintsOverrideConstraintFlag != op2.m_noPartitionConstraintsOverrideConstraintFlag   ) return false;
-  if( op1.m_noSaoConstraintFlag                          != op2.m_noSaoConstraintFlag                            ) return false;
-  if( op1.m_noAlfConstraintFlag                          != op2.m_noAlfConstraintFlag                            ) return false;
-  if( op1.m_noCCAlfConstraintFlag                        != op2.m_noCCAlfConstraintFlag                          ) return false;
-  if (op1.m_noWeightedPredictionConstraintFlag           != op2.m_noWeightedPredictionConstraintFlag             ) return false;
-  if( op1.m_noRefWraparoundConstraintFlag                != op2.m_noRefWraparoundConstraintFlag                  ) return false;
-  if( op1.m_noTemporalMvpConstraintFlag                  != op2.m_noTemporalMvpConstraintFlag                    ) return false;
-  if( op1.m_noSbtmvpConstraintFlag                       != op2.m_noSbtmvpConstraintFlag                         ) return false;
-  if( op1.m_noAmvrConstraintFlag                         != op2.m_noAmvrConstraintFlag                           ) return false;
-  if( op1.m_noBdofConstraintFlag                         != op2.m_noBdofConstraintFlag                           ) return false;
-  if( op1.m_noDmvrConstraintFlag                         != op2.m_noDmvrConstraintFlag                           ) return false;
-  if( op1.m_noCclmConstraintFlag                         != op2.m_noCclmConstraintFlag                           ) return false;
-  if( op1.m_noMtsConstraintFlag                          != op2.m_noMtsConstraintFlag                            ) return false;
-  if( op1.m_noSbtConstraintFlag                          != op2.m_noSbtConstraintFlag                            ) return false;
-  if( op1.m_noAffineMotionConstraintFlag                 != op2.m_noAffineMotionConstraintFlag                   ) return false;
-  if( op1.m_noBcwConstraintFlag                          != op2.m_noBcwConstraintFlag                            ) return false;
-  if( op1.m_noIbcConstraintFlag                          != op2.m_noIbcConstraintFlag                            ) return false;
-  if( op1.m_noCiipConstraintFlag                         != op2.m_noCiipConstraintFlag                           ) return false;
-  if( op1.m_noLadfConstraintFlag                         != op2.m_noLadfConstraintFlag                           ) return false;
-  if( op1.m_noTransformSkipConstraintFlag                != op2.m_noTransformSkipConstraintFlag                  ) return false;
-  if( op1.m_noBDPCMConstraintFlag                        != op2.m_noBDPCMConstraintFlag                          ) return false;
-  if( op1.m_noJointCbCrConstraintFlag                    != op2.m_noJointCbCrConstraintFlag                      ) return false;
-  if( op1.m_noCuQpDeltaConstraintFlag                    != op2.m_noCuQpDeltaConstraintFlag                      ) return false;
-  if( op1.m_noDepQuantConstraintFlag                     != op2.m_noDepQuantConstraintFlag                       ) return false;
-  if( op1.m_noSignDataHidingConstraintFlag               != op2.m_noSignDataHidingConstraintFlag                 ) return false;
-  if( op1.m_noTrailConstraintFlag                        != op2.m_noTrailConstraintFlag                          ) return false;
-  if( op1.m_noStsaConstraintFlag                         != op2.m_noStsaConstraintFlag                           ) return false;
-  if( op1.m_noRaslConstraintFlag                         != op2.m_noRaslConstraintFlag                           ) return false;
-  if( op1.m_noRadlConstraintFlag                         != op2.m_noRadlConstraintFlag                           ) return false;
-  if( op1.m_noIdrConstraintFlag                          != op2.m_noIdrConstraintFlag                            ) return false;
-  if( op1.m_noCraConstraintFlag                          != op2.m_noCraConstraintFlag                            ) return false;
-  if( op1.m_noGdrConstraintFlag                          != op2.m_noGdrConstraintFlag                            ) return false;
-  if( op1.m_noApsConstraintFlag                          != op2.m_noApsConstraintFlag                            ) return false;
+  if (op1.m_intraOnlyConstraintFlag != op2.m_intraOnlyConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_maxBitDepthConstraintIdc != op2.m_maxBitDepthConstraintIdc)
+  {
+    return false;
+  }
+  if (op1.m_maxChromaFormatConstraintIdc != op2.m_maxChromaFormatConstraintIdc)
+  {
+    return false;
+  }
+  if (op1.m_onePictureOnlyConstraintFlag != op2.m_onePictureOnlyConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_lowerBitRateConstraintFlag != op2.m_lowerBitRateConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_allLayersIndependentConstraintFlag != op2.m_allLayersIndependentConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMrlConstraintFlag != op2.m_noMrlConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noIspConstraintFlag != op2.m_noIspConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMipConstraintFlag != op2.m_noMipConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noLfnstConstraintFlag != op2.m_noLfnstConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMmvdConstraintFlag != op2.m_noMmvdConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSmvdConstraintFlag != op2.m_noSmvdConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noProfConstraintFlag != op2.m_noProfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noPaletteConstraintFlag != op2.m_noPaletteConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noActConstraintFlag != op2.m_noActConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noLmcsConstraintFlag != op2.m_noLmcsConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noExplicitScaleListConstraintFlag != op2.m_noExplicitScaleListConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noVirtualBoundaryConstraintFlag != op2.m_noVirtualBoundaryConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noChromaQpOffsetConstraintFlag != op2.m_noChromaQpOffsetConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRprConstraintFlag != op2.m_noRprConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noResChangeInClvsConstraintFlag != op2.m_noResChangeInClvsConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMttConstraintFlag != op2.m_noMttConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noQtbttDualTreeIntraConstraintFlag != op2.m_noQtbttDualTreeIntraConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noPartitionConstraintsOverrideConstraintFlag != op2.m_noPartitionConstraintsOverrideConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSaoConstraintFlag != op2.m_noSaoConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noAlfConstraintFlag != op2.m_noAlfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCCAlfConstraintFlag != op2.m_noCCAlfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noWeightedPredictionConstraintFlag != op2.m_noWeightedPredictionConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRefWraparoundConstraintFlag != op2.m_noRefWraparoundConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noTemporalMvpConstraintFlag != op2.m_noTemporalMvpConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSbtmvpConstraintFlag != op2.m_noSbtmvpConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noAmvrConstraintFlag != op2.m_noAmvrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noBdofConstraintFlag != op2.m_noBdofConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noDmvrConstraintFlag != op2.m_noDmvrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCclmConstraintFlag != op2.m_noCclmConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMtsConstraintFlag != op2.m_noMtsConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSbtConstraintFlag != op2.m_noSbtConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noAffineMotionConstraintFlag != op2.m_noAffineMotionConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noBcwConstraintFlag != op2.m_noBcwConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noIbcConstraintFlag != op2.m_noIbcConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCiipConstraintFlag != op2.m_noCiipConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noLadfConstraintFlag != op2.m_noLadfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noTransformSkipConstraintFlag != op2.m_noTransformSkipConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noBDPCMConstraintFlag != op2.m_noBDPCMConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noJointCbCrConstraintFlag != op2.m_noJointCbCrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCuQpDeltaConstraintFlag != op2.m_noCuQpDeltaConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noDepQuantConstraintFlag != op2.m_noDepQuantConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSignDataHidingConstraintFlag != op2.m_noSignDataHidingConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noTrailConstraintFlag != op2.m_noTrailConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noStsaConstraintFlag != op2.m_noStsaConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRaslConstraintFlag != op2.m_noRaslConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRadlConstraintFlag != op2.m_noRadlConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noIdrConstraintFlag != op2.m_noIdrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCraConstraintFlag != op2.m_noCraConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noGdrConstraintFlag != op2.m_noGdrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noApsConstraintFlag != op2.m_noApsConstraintFlag)
+  {
+    return false;
+  }
   return true;
 }
+
 bool             operator != (const ConstraintInfo& op1, const ConstraintInfo& op2)
 {
   return !(op1 == op2);
@@ -4516,14 +4806,38 @@ bool             operator != (const ConstraintInfo& op1, const ConstraintInfo& o
 
 bool             operator == (const ProfileTierLevel& op1, const ProfileTierLevel& op2)
 {
-  if (op1.m_tierFlag        != op2.m_tierFlag) return false;
-  if (op1.m_profileIdc      != op2.m_profileIdc) return false;
-  if (op1.m_numSubProfile   != op2.m_numSubProfile) return false;
-  if (op1.m_levelIdc        != op2.m_levelIdc) return false;
-  if (op1.m_frameOnlyConstraintFlag != op2.m_frameOnlyConstraintFlag) return false;
-  if (op1.m_multiLayerEnabledFlag   != op2.m_multiLayerEnabledFlag) return false;
-  if (op1.m_constraintInfo  != op2.m_constraintInfo) return false;
-  if (op1.m_subProfileIdc   != op2.m_subProfileIdc) return false;
+  if (op1.m_tierFlag != op2.m_tierFlag)
+  {
+    return false;
+  }
+  if (op1.m_profileIdc != op2.m_profileIdc)
+  {
+    return false;
+  }
+  if (op1.m_numSubProfile != op2.m_numSubProfile)
+  {
+    return false;
+  }
+  if (op1.m_levelIdc != op2.m_levelIdc)
+  {
+    return false;
+  }
+  if (op1.m_frameOnlyConstraintFlag != op2.m_frameOnlyConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_multiLayerEnabledFlag != op2.m_multiLayerEnabledFlag)
+  {
+    return false;
+  }
+  if (op1.m_constraintInfo != op2.m_constraintInfo)
+  {
+    return false;
+  }
+  if (op1.m_subProfileIdc != op2.m_subProfileIdc)
+  {
+    return false;
+  }
 
   for (int i = 0; i < MAX_TLAYER - 1; i++)
   {
@@ -4541,6 +4855,7 @@ bool             operator == (const ProfileTierLevel& op1, const ProfileTierLeve
   }
   return true;
 }
+
 bool             operator != (const ProfileTierLevel& op1, const ProfileTierLevel& op2)
 {
   return !(op1 == op2);
@@ -4573,12 +4888,10 @@ void xTraceVPSHeader()
   DTRACE( g_trace_ctx, D_HEADER, "=========== Video Parameter Set     ===========\n" );
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void xTraceOPIHeader()
 {
   DTRACE(g_trace_ctx, D_HEADER, "=========== Operating Point Information     ===========\n");
 }
-#endif
 
 void xTraceDCIHeader()
 {

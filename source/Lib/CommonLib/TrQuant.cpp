@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -207,13 +207,6 @@ TrQuant::~TrQuant()
     m_quant = nullptr;
   }
 }
-
-#if ENABLE_SPLIT_PARALLELISM
-void TrQuant::copyState( const TrQuant& other )
-{
-  m_quant->copyState( *other.m_quant );
-}
-#endif
 
 void TrQuant::xDeQuant(const TransformUnit &tu,
                              CoeffBuf      &dstCoeff,

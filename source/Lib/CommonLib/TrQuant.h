@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,10 +114,6 @@ public:
   DepQuant* getQuant() { return m_quant; }
   void   lambdaAdjustColorTrans(bool forward) { m_quant->lambdaAdjustColorTrans(forward); }
   void   resetStore() { m_quant->resetStore(); }
-
-#if ENABLE_SPLIT_PARALLELISM
-  void    copyState( const TrQuant& other );
-#endif
 
 protected:
   TCoeff   m_tempCoeff[MAX_TB_SIZEY * MAX_TB_SIZEY];

@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,9 @@
 #include "NALwrite.h"
 #include "AnnexBwrite.h"
 #include "SubpicMergeApp.h"
+#include "SEIread.h"
+#include "SEIEncoder.h"
+#include "SEIwrite.h"
 
 
  //! \ingroup SubpicMergeApp
@@ -82,6 +85,7 @@ struct Subpicture {
   PicHeader                            picHeader;
   std::vector<Slice>                   slices;
   std::vector<OutputBitstream>         sliceData;
+  SEI                                  *decodedPictureHashSei;
 };
 
 
@@ -166,9 +170,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
 
         // NUT that indicate the start of a new picture
         case NAL_UNIT_ACCESS_UNIT_DELIMITER:
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
         case NAL_UNIT_OPI:
-#endif
         case NAL_UNIT_DCI:
         case NAL_UNIT_VPS:
         case NAL_UNIT_SPS:
@@ -177,7 +179,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
           ret = true;
           finished = true;
           break;
-        
+
         // NUT that are not the start of a new picture
         case NAL_UNIT_CODED_SLICE_TRAIL:
         case NAL_UNIT_CODED_SLICE_STSA:
@@ -191,9 +193,6 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
         case NAL_UNIT_CODED_SLICE_CRA:
         case NAL_UNIT_CODED_SLICE_GDR:
         case NAL_UNIT_RESERVED_IRAP_VCL_11:
-#if !JVET_S0163_ON_TARGETOLS_SUBLAYERS
-        case NAL_UNIT_RESERVED_IRAP_VCL_12:
-#endif
           ret = checkPictureHeaderInSliceHeaderFlag(nalu);
           finished = true;
           break;
@@ -207,7 +206,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
           ret = false;
           finished = true;
           break;
-        
+
         // NUT that might indicate the start of a new picture - keep looking
         case NAL_UNIT_PREFIX_APS:
         case NAL_UNIT_PREFIX_SEI:
@@ -222,7 +221,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
       }
     }
   }
-  
+
   // restore previous stream location - minus 3 due to the need for the annexB parser to read three extra bytes
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
   bitstreamFile->clear();
@@ -303,6 +302,27 @@ void SubpicMergeApp::parseAPS(HLSyntaxReader &hlsReader, ParameterSetManager &ps
 }
 
 /**
+  - Parse SEI message
+*/
+void SubpicMergeApp::parseSEI(SEIReader &seiReader, InputNALUnit &nalu, const VPS *vps, const SPS *sps, SEI *&decodePictureHashSei)
+{
+  SEIMessages seis;
+  HRD hrd;
+
+  seiReader.parseSEImessage(seiReader.getBitstream(), seis, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, sps, hrd, 0);
+
+  decodePictureHashSei = nullptr;
+  for (auto& s : seis)
+  {
+    if (s->payloadType() == SEI::DECODED_PICTURE_HASH)
+    {
+      decodePictureHashSei = s;
+      break;
+    }
+  }
+}
+
+/**
   - Parse picture header
 */
 void SubpicMergeApp::parsePictureHeader(HLSyntaxReader &hlsReader, PicHeader &picHeader, ParameterSetManager &psManager)
@@ -339,10 +359,12 @@ void SubpicMergeApp::parseSliceHeader(HLSyntaxReader &hlsReader, InputNALUnit &n
 /**
   - Decode NAL unit if it is parameter set or picture header, or decode slice header of VLC NAL unit
  */
-void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu)
+void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu, SEI *&decodePictureHashSei)
 {
   HLSyntaxReader hlsReader;
+  SEIReader seiReader;
   hlsReader.setBitstream(&nalu.getBitstream());
+  seiReader.setBitstream(&nalu.getBitstream());
   int apsId;
   int apsType;
 
@@ -366,7 +388,18 @@ void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu)
     break;
   case NAL_UNIT_PH:
     parsePictureHeader(hlsReader, subpic.picHeader, subpic.psManager);
-  break;
+    break;
+  case NAL_UNIT_SUFFIX_SEI:
+    parseSEI(seiReader, nalu, subpic.slices.front().getVPS(), subpic.slices.front().getSPS(), decodePictureHashSei);
+    if (decodePictureHashSei != nullptr)
+    {
+      msg( INFO, "  hash SEI");
+    }
+    else
+    {
+      msg( INFO, "  suffix SEI");
+    }
+    break;
   default:
     if (nalu.isVcl())
     {
@@ -376,11 +409,11 @@ void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu)
     }
     else if (nalu.isSei())
     {
-      msg( INFO, "  SEI");
+      msg( INFO, "  prefix SEI");
     }
     else
     {
-      msg( INFO, "  NNN");  // Any other NAL unit that is not handled above
+      msg( INFO, "  ignored NALU");  // Any other NAL unit that is not handled above
     }
     break;
   }
@@ -403,6 +436,7 @@ void SubpicMergeApp::parseSubpic(Subpicture &subpic, bool &morePictures)
   subpic.slices.clear();
   subpic.sliceData.clear();
   subpic.firstSliceInPicture = true;
+  subpic.decodedPictureHashSei = nullptr;
 
   bool eof = false;
 
@@ -431,7 +465,7 @@ void SubpicMergeApp::parseSubpic(Subpicture &subpic, bool &morePictures)
     }
 
     read(nalu);  // Convert nalu payload to RBSP and parse nalu header
-    decodeNalu(subpic, nalu);
+    decodeNalu(subpic, nalu, subpic.decodedPictureHashSei);
 
     if (nalu.isVcl())
     {
@@ -448,7 +482,7 @@ void SubpicMergeApp::generateMergedStreamVPSes(std::vector<VPS*> &vpsList)
 {
   for (auto vpsId : m_subpics->at(0).vpsIds)
   {
-    // Create new SPS based on the SPS from the first subpicture 
+    // Create new SPS based on the SPS from the first subpicture
     vpsList.push_back(new VPS(*m_subpics->at(0).psManager.getVPS(vpsId)));
     VPS &vps = *vpsList.back();
 
@@ -493,7 +527,7 @@ void SubpicMergeApp::generateMergedStreamSPSes(std::vector<SPS*> &spsList)
 
   for (auto spsId : m_subpics->at(0).spsIds)
   {
-    // Create new SPS based on the SPS from the first subpicture 
+    // Create new SPS based on the SPS from the first subpicture
     spsList.push_back(new SPS(*m_subpics->at(0).psManager.getSPS(spsId)));
     SPS &sps = *spsList.back();
 
@@ -535,25 +569,59 @@ void SubpicMergeApp::getTileDimensions(std::vector<int> &tileWidths, std::vector
   std::vector<int> tileX;
   std::vector<int> tileY;
 
+  // Add subpicture boundaries as tile boundaries
   for (auto &subpic : *m_subpics)
   {
-    tileX.push_back(subpic.topLeftCornerX);
-    tileY.push_back(subpic.topLeftCornerY);
+    bool addTileXForCurrentSubpic = true;
+    bool addTileYForCurrentSubpic = true;
+
+    // Check if current subpic boundary need to be added as tile boundary
+    for (auto &subpicScan : *m_subpics)
+    {
+      if (subpic.topLeftCornerX >= subpicScan.topLeftCornerX && (subpic.topLeftCornerX + subpic.width) <= (subpicScan.topLeftCornerX + subpicScan.width) && subpic.width < subpicScan.width)
+      {
+        addTileXForCurrentSubpic = false;
+      }
+      if (subpic.topLeftCornerY >= subpicScan.topLeftCornerY && (subpic.topLeftCornerY + subpic.height) <= (subpicScan.topLeftCornerY + subpicScan.height) && subpic.height < subpicScan.height)
+      {
+        addTileYForCurrentSubpic = false;
+      }
+    }
+
+    if (addTileXForCurrentSubpic)
+    {
+      tileX.push_back(subpic.topLeftCornerX);
+    }
+    if (addTileYForCurrentSubpic)
+    {
+      tileY.push_back(subpic.topLeftCornerY);
+    }
+  }
+
+  // Add tile boundaries from tiles within subpictures
+  for (auto &subpic : *m_subpics)
+  {
     const PPS &pps = *subpic.slices[0].getPPS();
     if (!pps.getNoPicPartitionFlag())
     {
-      int x = subpic.topLeftCornerX;
-      for (int i = 0; i < pps.getNumTileColumns(); i++)
+      if (pps.getNumTileColumns() > 1)
       {
-        x += pps.getTileColumnWidth(i) * pps.getCtuSize();
-        tileX.push_back(x);
+        int x = subpic.topLeftCornerX;
+        for (int i = 0; i < pps.getNumTileColumns(); i++)
+        {
+          x += pps.getTileColumnWidth(i) * pps.getCtuSize();
+          tileX.push_back(x);
+        }
       }
 
-      int y = subpic.topLeftCornerY;
-      for (int i = 0; i < pps.getNumTileRows(); i++)
+      if (pps.getNumTileRows() > 1)
       {
-        y += pps.getTileRowHeight(i) * pps.getCtuSize();
-        tileY.push_back(y);
+        int y = subpic.topLeftCornerY;
+        for (int i = 0; i < pps.getNumTileRows(); i++)
+        {
+          y += pps.getTileRowHeight(i) * pps.getCtuSize();
+          tileY.push_back(y);
+        }
       }
     }
   }
@@ -601,7 +669,7 @@ void SubpicMergeApp::generateMergedStreamPPSes(ParameterSetManager &psManager, s
 
   for (auto ppsId : m_subpics->at(0).ppsIds)
   {
-    // Create new PPS based on the PPS from the first subpicture 
+    // Create new PPS based on the PPS from the first subpicture
     ppsList.push_back(new PPS(*m_subpics->at(0).psManager.getPPS(ppsId)));
     PPS &pps = *ppsList.back();
     SPS &sps = *psManager.getSPS(pps.getSPSId());
@@ -642,52 +710,82 @@ void SubpicMergeApp::generateMergedStreamPPSes(ParameterSetManager &psManager, s
     pps.setTileIdxDeltaPresentFlag(true);
     pps.initRectSlices( );
 
-    unsigned int numTileColsInPic = pps.getNumTileColumns();
-
-    unsigned int sliceIdx = 0;
+    pps.setSingleSlicePerSubPicFlag(true);
     for (auto &subpic : *m_subpics)
     {
-      unsigned int tileIdxY = 0;
-      for (unsigned int tileY = 0; tileY != subpic.topLeftCornerY && tileIdxY < tileHeights.size(); tileIdxY++)
-      {
-        tileY += tileHeights[tileIdxY];
-      }
-      CHECK(tileIdxY == tileHeights.size(), "Could not find subpicture to tile border match");
-
-      unsigned int tileIdxX = 0;
-      for (unsigned int tileX = 0; tileX != subpic.topLeftCornerX && tileIdxX < tileWidths.size(); tileIdxX++)
-      {
-        tileX += tileWidths[tileIdxX];
-      }
-      CHECK(tileIdxX == tileWidths.size(), "Could not find subpicture to tile border match")
-
       const PPS &subpicPPS = *subpic.slices[0].getPPS();
-
-      if (subpicPPS.getNumSlicesInPic() == 1)
+      if (subpicPPS.getNumSlicesInPic() > 1)
       {
-        pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getNumTileColumns());
-        pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getNumTileRows());
-        pps.setNumSlicesInTile(sliceIdx, 1);
-        unsigned int sliceTileIdx = tileIdxY * numTileColsInPic + tileIdxX;
-        pps.setSliceTileIdx(sliceIdx, sliceTileIdx);
-        pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getPicHeightInCtu());
-
-        sliceIdx++;
+        pps.setSingleSlicePerSubPicFlag(false);
+        break;
       }
-      else
+    }
+
+    if (!pps.getSingleSlicePerSubPicFlag())
+    {
+      unsigned int numTileColsInPic = pps.getNumTileColumns();
+
+      unsigned int sliceIdx = 0;
+      for (auto& subpic : *m_subpics)
       {
-        for (int subpicSliceIdx = 0; subpicSliceIdx < subpicPPS.getNumSlicesInPic(); subpicSliceIdx++, sliceIdx++)
+        unsigned int tileIdxY = 0;
+        for (unsigned int tileY = 0; tileIdxY < tileHeights.size(); tileIdxY++)
         {
-          pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getSliceWidthInTiles(subpicSliceIdx));
-          pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getSliceHeightInTiles(subpicSliceIdx));
-          pps.setNumSlicesInTile(sliceIdx, subpicPPS.getNumSlicesInTile(subpicSliceIdx));
-          unsigned int sliceTileIdxSubpic = subpicPPS.getSliceTileIdx(subpicSliceIdx);
-          unsigned int sliceTileIdx = (sliceTileIdxSubpic / subpicPPS.getNumTileColumns() + tileIdxY) * numTileColsInPic + tileIdxX + (sliceTileIdxSubpic % subpicPPS.getNumTileColumns());
+          if (tileY == subpic.topLeftCornerY || (tileY + tileHeights[tileIdxY]) == (subpic.topLeftCornerY + subpic.height) ||
+              (tileY < subpic.topLeftCornerY && (tileY + tileHeights[tileIdxY]) >(subpic.topLeftCornerY + subpic.height)))
+          {
+            break;
+          }
+          tileY += tileHeights[tileIdxY];
+        }
+        CHECK(tileIdxY == tileHeights.size(), "Could not find subpicture to tile mapping");
+
+        unsigned int tileIdxX = 0;
+        for (unsigned int tileX = 0; tileIdxX < tileWidths.size(); tileIdxX++)
+        {
+          if (tileX == subpic.topLeftCornerX || (tileX + tileWidths[tileIdxX]) == (subpic.topLeftCornerX + subpic.width) ||
+              (tileX < subpic.topLeftCornerX && (tileX + tileWidths[tileIdxX]) >(subpic.topLeftCornerX + subpic.width)))
+          {
+            break;
+          }
+          tileX += tileWidths[tileIdxX];
+        }
+        CHECK(tileIdxX == tileWidths.size(), "Could not find subpicture to tile mapping")
+
+        const PPS& subpicPPS = *subpic.slices[0].getPPS();
+
+        if (subpicPPS.getNumSlicesInPic() == 1)
+        {
+          pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getNumTileColumns());
+          pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getNumTileRows());
+          pps.setNumSlicesInTile(sliceIdx, 1);
+          unsigned int sliceTileIdx = tileIdxY * numTileColsInPic + tileIdxX;
           pps.setSliceTileIdx(sliceIdx, sliceTileIdx);
-          pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getSliceHeightInCtu(subpicSliceIdx));
+          pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getPicHeightInCtu());
+
+          sliceIdx++;
+        }
+        else
+        {
+          for (int subpicSliceIdx = 0; subpicSliceIdx < subpicPPS.getNumSlicesInPic(); subpicSliceIdx++, sliceIdx++)
+          {
+            pps.setSliceWidthInTiles(sliceIdx, subpicPPS.getSliceWidthInTiles(subpicSliceIdx));
+            pps.setSliceHeightInTiles(sliceIdx, subpicPPS.getSliceHeightInTiles(subpicSliceIdx));
+            pps.setNumSlicesInTile(sliceIdx, subpicPPS.getNumSlicesInTile(subpicSliceIdx));
+            unsigned int sliceTileIdxSubpic = subpicPPS.getSliceTileIdx(subpicSliceIdx);
+            unsigned int sliceTileIdx = (sliceTileIdxSubpic / subpicPPS.getNumTileColumns() + tileIdxY) * numTileColsInPic + tileIdxX + (sliceTileIdxSubpic % subpicPPS.getNumTileColumns());
+            pps.setSliceTileIdx(sliceIdx, sliceTileIdx);
+            pps.setSliceHeightInCtu(sliceIdx, subpicPPS.getSliceHeightInCtu(subpicSliceIdx));
+          }
         }
       }
     }
+    else
+    {
+      pps.setTileIdxDeltaPresentFlag(false);
+    }
+
+    pps.initRectSliceMap(&sps);
 
     pps.setLoopFilterAcrossTilesEnabledFlag(false);
     pps.setLoopFilterAcrossSlicesEnabledFlag(false);
@@ -708,8 +806,8 @@ void SubpicMergeApp::updateSliceHeadersForMergedStream(ParameterSetManager &psMa
       // Update slice headers to use new SPSes and PPSes
       int ppsId = slice.getPPS()->getPPSId();
       int spsId = slice.getSPS()->getSPSId();
-      CHECK(!psManager.getSPS(spsId), "Invaldi SPS");
-      CHECK(!psManager.getSPS(ppsId), "Invaldi PPS");
+      CHECK(!psManager.getSPS(spsId), "Invalid SPS");
+      CHECK(!psManager.getSPS(ppsId), "Invalid PPS");
       slice.setSPS(psManager.getSPS(spsId));
       slice.setPPS(psManager.getPPS(ppsId));
 
@@ -801,7 +899,7 @@ Subpicture &SubpicMergeApp::selectSubpicForPicHeader(bool isMixedNaluPic)
   Subpicture *subpicToReturn = NULL;
   bool IRAPFound = false;
 
-  // Find first non-IRAP subpicture 
+  // Find first non-IRAP subpicture
   for (auto &subpic : *m_subpics)
   {
     if (subpic.slices[0].isIRAP())
@@ -906,9 +1004,6 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
     }
   }
 
-  // Don't copy SEI NAL units - many of them would be incorrect for merged stream
-  //copyNalUnitsToAccessUnit(accessUnit, subpic.nalus, (int)NAL_UNIT_PREFIX_SEI);
-
   updateSliceHeadersForMergedStream(psManager);
 
   // Code merged stream prefix APS NAL units
@@ -967,8 +1062,36 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
     }
   }
 
-  // Don't copy SEIs - many of them would be incorrect for merged stream
-  // copyNalUnitsToAccessUnit(accessUnit, subpic.nalus, (int)NAL_UNIT_SUFFIX_SEI);
+  // Code Decoded picture hash SEI messages within Scalable nesting SEI messages
+  uint32_t layerId = m_subpics->at(0).slices[0].getNalUnitLayerId();
+  uint32_t temporalId = m_subpics->at(0).slices[0].getTLayer();
+  int subpicId = 0;
+  for (auto& subpic : *m_subpics)
+  {
+    if (subpic.decodedPictureHashSei != nullptr)
+    {
+      SEIEncoder seiEncoder;
+      SEIWriter seiWriter;
+      SEIMessages seiMessages;
+      SEIMessages nestedSEI;
+      HRD hrd;
+      nestedSEI.push_back(subpic.decodedPictureHashSei);
+      const std::vector<uint16_t> subPicIds = { (uint16_t)subpicId };
+      std::vector<int> targetOLS;
+      std::vector<int> targetLayers = { (int)subpic.nalus[0].m_nuhLayerId };
+      SEIScalableNesting *nestingSEI = new SEIScalableNesting();
+      seiEncoder.init(0, 0, 0);
+      const uint16_t maxSubpicIdInPic =
+        subPicIds.size() == 0 ? 0 : *std::max_element(subPicIds.begin(), subPicIds.end());
+      seiEncoder.initSEIScalableNesting(nestingSEI, nestedSEI, targetOLS, targetLayers, subPicIds, maxSubpicIdInPic);
+      OutputNALUnit nalu( NAL_UNIT_SUFFIX_SEI, layerId, temporalId );
+      seiMessages.push_back(nestingSEI);
+      seiWriter.writeSEImessages(nalu.m_Bitstream, seiMessages, hrd, false, temporalId);
+      accessUnit.push_back(new NALUnitEBSP(nalu));
+    }
+    subpicId++;
+  }
+
   copyNalUnitsToAccessUnit(accessUnit, subpic0.nalus, (int)NAL_UNIT_EOS);
   copyNalUnitsToAccessUnit(accessUnit, subpic0.nalus, (int)NAL_UNIT_EOB);
 

@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,8 @@ struct MotionVector
 {
   int x, y;
   int error;
-  MotionVector() : x(0), y(0), error(INT_LEAST32_MAX) {}
+  int noise;
+  MotionVector() : x(0), y(0), error(INT_LEAST32_MAX), noise(0) {}
   void set(int vectorX, int vectorY, int errorValue) { x = vectorX; y = vectorY; error = errorValue; }
 };
 
@@ -67,21 +68,21 @@ public:
 
   void allocate(int width, int height, const T& value=T())
   {
-    m_width=width;
-    m_height=height;
-    v.resize(std::size_t(m_width*m_height), value);
+    m_width  = width;
+    m_height = height;
+    v.resize(std::size_t(m_width * m_height), value);
   }
 
   T& get(int x, int y)
   {
-    assert(x<m_width && y<m_height);
-    return v[y*m_width+x];
+    assert(x < m_width && y < m_height);
+    return v[y * m_width + x];
   }
 
   const T& get(int x, int y) const
   {
-    assert(x<m_width && y<m_height);
-    return v[y*m_width+x];
+    assert(x < m_width && y < m_height);
+    return v[y * m_width + x];
   }
 };
 
@@ -129,7 +130,7 @@ private:
   static const int m_motionVectorFactor;
   static const int m_padding;
   static const int m_interpolationFilter[16][8];
-  static const double m_refStrengths[3][2];
+  static const double m_refStrengths[3][4];
 
   // Private member variables
   int m_FrameSkip;
@@ -155,7 +156,7 @@ private:
     const Array2D<MotionVector> *previous=0, const int factor = 1, const bool doubleRes = false) const;
   void motionEstimation(Array2D<MotionVector> &mvs, const PelStorage &orgPic, const PelStorage &buffer, const PelStorage &origSubsampled2, const PelStorage &origSubsampled4) const;
 
-  void bilateralFilter(const PelStorage &orgPic, const std::deque<TemporalFilterSourcePicInfo> &srcFrameInfo, PelStorage &newOrgPic, double overallStrength) const;
+  void bilateralFilter(const PelStorage &orgPic, std::deque<TemporalFilterSourcePicInfo> &srcFrameInfo, PelStorage &newOrgPic, double overallStrength) const;
   void applyMotion(const Array2D<MotionVector> &mvs, const PelStorage &input, PelStorage &output) const;
 }; // END CLASS DEFINITION EncTemporalFilter
 
