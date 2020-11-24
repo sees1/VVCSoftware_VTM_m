@@ -541,7 +541,7 @@ void LoopFilter::xSetMaxFilterLengthPQFromTransformSizes(const DeblockEdgeDir ed
   }
   if ( edgeDir == EDGE_VER )
   {
-    for ( int cIdx = 0; cIdx < ::getNumberValidComponents(tuQ.chromaFormat); cIdx++ ) // per component
+    for ( int cIdx = firstComponent; cIdx < ::getNumberValidComponents(tuQ.chromaFormat); cIdx++ ) // per component
     {
       const ComponentID comp = ComponentID(cIdx);
       const ChannelType ch   = toChannelType(comp);
