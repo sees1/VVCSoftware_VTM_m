@@ -75,7 +75,9 @@ protected:
 #endif
   void xReadPicHeader(InputNALUnit &nalu);
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId);
+#if !JVET_T0055_ITEM2
   bool xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps);
+#endif
 
   void xSetSPSUpdated(int spsId)   { return m_updatedSPSList.push_back(spsId); }
   bool xIsSPSUpdate(int spsId)     { return (std::find(m_updatedSPSList.begin(),m_updatedSPSList.end(), spsId) != m_updatedSPSList.end()); }
