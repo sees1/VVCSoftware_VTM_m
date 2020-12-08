@@ -1806,8 +1806,8 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
         {
           for (int j = 0; j < m_uiSliceSegmentIdx; j++)
           {
-            Slice* PreSlice = m_pcPic->slices[j];
-            CHECK( (PreSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || PreSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || PreSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA), "mixed IRAP and non-IRAP NAL units in the picture when sps_video_parameter_set_id is greater than 0 and vps_max_tid_il_ref_pics_plus1[i][j] is equal to 0");
+            Slice* preSlice = m_pcPic->slices[j];
+            CHECK( (preSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || preSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || preSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA), "mixed IRAP and non-IRAP NAL units in the picture when sps_video_parameter_set_id is greater than 0 and vps_max_tid_il_ref_pics_plus1[i][j] is equal to 0");
           }
         }
 #endif
