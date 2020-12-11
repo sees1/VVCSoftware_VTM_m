@@ -233,6 +233,7 @@ public:
   int m_lossyQP;
   std::vector<bool> m_lossylosslessSliceArray;
   bool interLayerRefPicFlag;
+  bool mixedNaluTypesInPicFlag;
 
 
 #if ENABLE_SPLIT_PARALLELISM
