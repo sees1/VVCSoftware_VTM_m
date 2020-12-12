@@ -690,7 +690,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
             // RefPicList[ 1 ] that is any of the following: A RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0
             for (int i = 0; i < pcRefPic->numSlices; i++)
             {
-              if (pcRefPic->slices[i]->getPPS()->getMixedNaluTypesInPicFlag() == 0)
+              if (pcRefPic->mixedNaluTypesInPicFlag == 0)
               {
                 CHECK(pcRefPic->slices[i]->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL, "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or RefPicList[ 1 ] that is a RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0");
               }

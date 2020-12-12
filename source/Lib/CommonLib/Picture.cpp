@@ -395,6 +395,7 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   cs->pcv     = pps.pcv;
   m_conformanceWindow = pps.getConformanceWindow();
   m_scalingWindow = pps.getScalingWindow();
+  mixedNaluTypesInPicFlag = pps.getMixedNaluTypesInPicFlag();
 
   if (m_spliceIdx == NULL)
   {
