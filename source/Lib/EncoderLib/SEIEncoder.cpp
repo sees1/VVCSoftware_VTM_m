@@ -561,33 +561,24 @@ static void readTokenValueAndValidate(T            &returnedValue, /// value ret
 }
 
 #if JVET_T0053_ANNOTATED_REGIONS_SEI
-// Bool version does not have maximum and minimum values.
-static void readTokenValueAndValidate(bool         &returnedValue, /// value returned
-                                      bool         &failed,        /// used and updated
-                                      std::istream &is,            /// stream to read token from
-                                      const char  *pToken)        /// token string
-{
-  readTokenValue(returnedValue, failed, is, pToken);
-}
-
 void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed)
 {
-  readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_cancelFlag, failed, fic, "SEIArCancelFlag");
+  readTokenValue(seiAnnoRegion->m_hdr.m_cancelFlag, failed, fic, "SEIArCancelFlag");
   if (!seiAnnoRegion->m_hdr.m_cancelFlag)
   {
-    readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_notOptimizedForViewingFlag, failed, fic, "SEIArNotOptForViewingFlag");
-    readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_trueMotionFlag, failed, fic, "SEIArTrueMotionFlag");
-    readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_occludedObjectFlag, failed, fic, "SEIArOccludedObjsFlag");
-    readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_partialObjectFlagPresentFlag, failed, fic, "SEIArPartialObjsFlagPresentFlag");
-    readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_objectLabelPresentFlag, failed, fic, "SEIArObjLabelPresentFlag");
-    readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag, failed, fic, "SEIArObjConfInfoPresentFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_notOptimizedForViewingFlag, failed, fic, "SEIArNotOptForViewingFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_trueMotionFlag, failed, fic, "SEIArTrueMotionFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_occludedObjectFlag, failed, fic, "SEIArOccludedObjsFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_partialObjectFlagPresentFlag, failed, fic, "SEIArPartialObjsFlagPresentFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_objectLabelPresentFlag, failed, fic, "SEIArObjLabelPresentFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag, failed, fic, "SEIArObjConfInfoPresentFlag");
     if (seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag)
     {
       readTokenValueAndValidate<uint32_t>(seiAnnoRegion->m_hdr.m_objectConfidenceLength, failed, fic, "SEIArObjDetConfLength", uint32_t(0), uint32_t(255));
     }
     if (seiAnnoRegion->m_hdr.m_objectLabelPresentFlag)
     {
-      readTokenValueAndValidate(seiAnnoRegion->m_hdr.m_objectLabelLanguagePresentFlag, failed, fic, "SEIArObjLabelLangPresentFlag");
+      readTokenValue(seiAnnoRegion->m_hdr.m_objectLabelLanguagePresentFlag, failed, fic, "SEIArObjLabelLangPresentFlag");
       if (seiAnnoRegion->m_hdr.m_objectLabelLanguagePresentFlag)
       {
         readTokenValue(seiAnnoRegion->m_hdr.m_annotatedRegionsObjectLabelLang, failed, fic, "SEIArLabelLanguage");
@@ -600,7 +591,7 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
         SEIAnnotatedRegions::AnnotatedRegionLabel &ar=it->second;
         readTokenValueAndValidate(it->first, failed, fic, "SEIArLabelIdc[c]", uint32_t(0), uint32_t(255));
         bool cancelFlag;
-        readTokenValueAndValidate(cancelFlag, failed, fic, "SEIArLabelCancelFlag[c]");
+        readTokenValue(cancelFlag, failed, fic, "SEIArLabelCancelFlag[c]");
         ar.labelValid=!cancelFlag;
         if (ar.labelValid)
         {
@@ -616,19 +607,19 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
     {
       SEIAnnotatedRegions::AnnotatedRegionObject &ar = it->second;
       readTokenValueAndValidate(it->first, failed, fic, "SEIArObjIdx[c]", uint32_t(0), uint32_t(255));
-      readTokenValueAndValidate(ar.objectCancelFlag, failed, fic, "SEIArObjCancelFlag[c]");
+      readTokenValue(ar.objectCancelFlag, failed, fic, "SEIArObjCancelFlag[c]");
       ar.objectLabelValid=false;
       ar.boundingBoxValid=false;
       if (!ar.objectCancelFlag)
       {
         if (seiAnnoRegion->m_hdr.m_objectLabelPresentFlag)
         {
-          readTokenValueAndValidate(ar.objectLabelValid, failed, fic, "SEIArObjLabelUpdateFlag[c]");
+          readTokenValue(ar.objectLabelValid, failed, fic, "SEIArObjLabelUpdateFlag[c]");
           if (ar.objectLabelValid)
           {
             readTokenValueAndValidate<uint32_t>(ar.objLabelIdx, failed, fic, "SEIArObjectLabelIdc[c]", uint32_t(0), uint32_t(255));
           }
-          readTokenValueAndValidate(ar.boundingBoxValid, failed, fic, "SEIArBoundBoxUpdateFlag[c]");
+          readTokenValue(ar.boundingBoxValid, failed, fic, "SEIArBoundBoxUpdateFlag[c]");
           if (ar.boundingBoxValid)
           {
             readTokenValueAndValidate<uint32_t>(ar.boundingBoxTop, failed, fic, "SEIArObjTop[c]", uint32_t(0), uint32_t(0x7fffffff));
@@ -637,7 +628,7 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
             readTokenValueAndValidate<uint32_t>(ar.boundingBoxHeight, failed, fic, "SEIArObjHeight[c]", uint32_t(0), uint32_t(0x7fffffff));
             if (seiAnnoRegion->m_hdr.m_partialObjectFlagPresentFlag)
             {
-              readTokenValueAndValidate(ar.partialObjectFlag, failed, fic, "SEIArObjPartUpdateFlag[c]");
+              readTokenValue(ar.partialObjectFlag, failed, fic, "SEIArObjPartUpdateFlag[c]");
             }
             if (seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag)
             {
