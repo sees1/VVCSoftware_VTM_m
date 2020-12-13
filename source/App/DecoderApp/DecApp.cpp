@@ -1014,37 +1014,37 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
 
       if (!m_arObjects.empty())
       {
-        FILE *fp_persist = fopen(m_annotatedRegionsSEIFileName.c_str(), "ab");
-        if (fp_persist == NULL)
+        FILE *fpPersist = fopen(m_annotatedRegionsSEIFileName.c_str(), "ab");
+        if (fpPersist == NULL)
         {
           std::cout << "Not able to open file for writing persist SEI messages" << std::endl;
         }
         else
         {
-          fprintf(fp_persist, "\n");
-          fprintf(fp_persist, "Number of objects = %d\n", (int)m_arObjects.size());
+          fprintf(fpPersist, "\n");
+          fprintf(fpPersist, "Number of objects = %d\n", (int)m_arObjects.size());
           for (auto it = m_arObjects.begin(); it != m_arObjects.end(); ++it)
           {
-            fprintf(fp_persist, "Object Idx = %d\n",    it->first);
-            fprintf(fp_persist, "Object Top = %d\n",    it->second.boundingBoxTop);
-            fprintf(fp_persist, "Object Left = %d\n",   it->second.boundingBoxLeft);
-            fprintf(fp_persist, "Object Width = %d\n",  it->second.boundingBoxWidth);
-            fprintf(fp_persist, "Object Height = %d\n", it->second.boundingBoxHeight);
+            fprintf(fpPersist, "Object Idx = %d\n",    it->first);
+            fprintf(fpPersist, "Object Top = %d\n",    it->second.boundingBoxTop);
+            fprintf(fpPersist, "Object Left = %d\n",   it->second.boundingBoxLeft);
+            fprintf(fpPersist, "Object Width = %d\n",  it->second.boundingBoxWidth);
+            fprintf(fpPersist, "Object Height = %d\n", it->second.boundingBoxHeight);
             if (it->second.objectLabelValid)
             {
               auto labelIt=m_arLabels.find(it->second.objLabelIdx);
-              fprintf(fp_persist, "Object Label = %s\n", labelIt!=m_arLabels.end() ? (labelIt->second.c_str()) : "<UNKNOWN>");
+              fprintf(fpPersist, "Object Label = %s\n", labelIt!=m_arLabels.end() ? (labelIt->second.c_str()) : "<UNKNOWN>");
             }
             if (m_arHeader.m_partialObjectFlagPresentFlag)
             {
-              fprintf(fp_persist, "Object Partial = %d\n", it->second.partialObjectFlag?1:0);
+              fprintf(fpPersist, "Object Partial = %d\n", it->second.partialObjectFlag?1:0);
             }
             if (m_arHeader.m_objectConfidenceInfoPresentFlag)
             {
-              fprintf(fp_persist, "Object Conf = %d\n", it->second.objectConfidence);
+              fprintf(fpPersist, "Object Conf = %d\n", it->second.objectConfidence);
             }
           }
-          fclose(fp_persist);
+          fclose(fpPersist);
         }
       }
     }
