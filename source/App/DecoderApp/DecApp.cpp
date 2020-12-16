@@ -338,7 +338,6 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].open( reconFileName, true, m_outputBitDepth, m_outputBitDepth, bitDepths.recon ); // write mode
         }
       }
-<<<<<<< HEAD
       // update file bitdepth shift if recon bitdepth changed between sequences
       for( uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++ )
       {
@@ -356,15 +355,6 @@ uint32_t DecApp::decode()
         xOutputAnnotatedRegions(pcListPic);
       }
 #endif
-||||||| merged common ancestors
-=======
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
-      if (!m_annotatedRegionsSEIFileName.empty())
-      {
-        xOutputAnnotatedRegions(pcListPic);
-      }
-#endif
->>>>>>> e820cd5f69677f2d543e8bfeda138bb2aa0f6fc4
       // write reconstruction to file
       if( bNewPicture )
       {
