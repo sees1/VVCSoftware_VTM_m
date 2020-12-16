@@ -64,6 +64,7 @@
 #define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
 #define JVET_R0266_GCI                                    1 // JVET-R0266 #5: Specify that no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag shall be equal to 0
 #define JVET_S0084_S0110_RADL                             1 // When the current picture is a RADL picture, allow RASL pictures with pps_mixed_nalu_types_in_pic_flag is equal to 1 in active entries in RefPicList[ 0 ] or RefPicList[ 1 ]
+<<<<<<< HEAD
 #define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
 #define FIX_SUBPICS_W_RPR                                 1 // Fix handling of RPR with subpictures (via scaling windows with no resolution change)
 #define JVET_S0175_ASPECT5                                1 // use u(8) instead of u(4) for (ffi_)display_elemental_periods_minus1 and pt_display_elemental_periods_minus1
@@ -72,6 +73,10 @@
 #define JVET_T0064                                        1 // JVET-T0064: control of filter strength for ALF
 #define JVET_R0264_IRAP_CONSTRAINT                        1 // when max_tid_il_ref_pic_plus1[i][j] is equal to 0, it would be prohibited to have mixtures of IRAP and non-IRAP NAL units in the picture
 #define JVET_T0053_ANNOTATED_REGIONS_SEI                  1 //Enable/disable the annotated regions SEI 
+||||||| merged common ancestors
+=======
+#define JVET_T0053_ANNOTATED_REGIONS_SEI                  1 //Enable/disable the annotated regions SEI 
+>>>>>>> e820cd5f69677f2d543e8bfeda138bb2aa0f6fc4
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages

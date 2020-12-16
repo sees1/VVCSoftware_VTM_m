@@ -678,6 +678,13 @@ public:
   SEIAnnotatedRegions() {}
   virtual ~SEIAnnotatedRegions() {}
 
+<<<<<<< HEAD
+  void copyFrom(const SEIAnnotatedRegions &seiAnnotatedRegions)
+  {
+    (*this) = seiAnnotatedRegions;
+  }
+||||||| merged common ancestors
+=======
   void copyFrom(const SEIAnnotatedRegions &seiAnnotatedRegions)
   {
     (*this) = seiAnnotatedRegions;
@@ -710,7 +717,59 @@ public:
     bool        labelValid;
     std::string label;           // only valid if bLabelValid
   };
+>>>>>>> e820cd5f69677f2d543e8bfeda138bb2aa0f6fc4
 
+<<<<<<< HEAD
+  struct AnnotatedRegionObject
+  {
+    AnnotatedRegionObject() :
+      objectCancelFlag(false),
+      objectLabelValid(false),
+      boundingBoxValid(false)
+    { }
+    bool objectCancelFlag;
+
+    bool objectLabelValid;
+    uint32_t objLabelIdx;            // only valid if bObjectLabelValid
+
+    bool boundingBoxValid;
+    uint32_t boundingBoxTop;         // only valid if bBoundingBoxValid
+    uint32_t boundingBoxLeft;
+    uint32_t boundingBoxWidth;
+    uint32_t boundingBoxHeight;
+
+    bool partialObjectFlag;        // only valid if bPartialObjectFlagValid
+    uint32_t objectConfidence;
+  };
+  struct AnnotatedRegionLabel
+  {
+    AnnotatedRegionLabel() : labelValid(false) { }
+    bool        labelValid;
+    std::string label;           // only valid if bLabelValid
+  };
+||||||| merged common ancestors
+=======
+  struct AnnotatedRegionHeader
+  {
+    AnnotatedRegionHeader() : m_cancelFlag(true), m_receivedSettingsOnce(false) { }
+    bool      m_cancelFlag;
+    bool      m_receivedSettingsOnce; // used for decoder conformance checking. Other confidence flags must be unchanged once this flag is set.
+
+    bool      m_notOptimizedForViewingFlag;
+    bool      m_trueMotionFlag;
+    bool      m_occludedObjectFlag;
+    bool      m_partialObjectFlagPresentFlag;
+    bool      m_objectLabelPresentFlag;
+    bool      m_objectConfidenceInfoPresentFlag;
+    uint32_t      m_objectConfidenceLength;         // Only valid if m_objectConfidenceInfoPresentFlag
+    bool      m_objectLabelLanguagePresentFlag; // Only valid if m_objectLabelPresentFlag
+    std::string m_annotatedRegionsObjectLabelLang;
+  };
+  typedef uint32_t AnnotatedRegionObjectIndex;
+  typedef uint32_t AnnotatedRegionLabelIndex;
+>>>>>>> e820cd5f69677f2d543e8bfeda138bb2aa0f6fc4
+
+<<<<<<< HEAD
   struct AnnotatedRegionHeader
   {
     AnnotatedRegionHeader() : m_cancelFlag(true), m_receivedSettingsOnce(false) { }
@@ -735,6 +794,14 @@ public:
   std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
 };
 #endif
+||||||| merged common ancestors
+=======
+  AnnotatedRegionHeader m_hdr;
+  std::vector<std::pair<AnnotatedRegionObjectIndex, AnnotatedRegionObject> > m_annotatedRegions;
+  std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
+};
+#endif
+>>>>>>> e820cd5f69677f2d543e8bfeda138bb2aa0f6fc4
 //! \}
 
 
