@@ -3393,6 +3393,7 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   155 & Region-wise packing                      & Table \ref{tab:sei-rwp} \\
   156 & Omni viewport                            & Table \ref{tab:sei-omni-viewport} \\  
   168 & Frame-field information                  & Table \ref{tab:sei-frame-field} \\  
+  202 & Annotated regions information            & Table \ref{tab:sei-annotated-regions} \\  
   203 & Subpicture Level Information             & Table \ref{tab:sei-subpic-level} \\  
   204 & Sample Aspect Ratio Information          & Table \ref{tab:sei-sari} \\  
 \end{SEIListTable}
@@ -4409,6 +4410,15 @@ Enables (true) or disables (false) the insertion of Frame-Field Information SEI 
 \\
 \end{OptionTableNoShorthand}
 
+\begin{OptionTableNoShorthand}{Annotated Regions SEI message encoder parameters}{tab:sei-annotated-regions}
+\Option{SEIAnnotatedRegionsFileRoot (-cri)} &
+\Default{\NotSet} &
+Specifies the prefix of input Annotated Regions file. Prefix is completed by ``_x.txt'' where x is the  POC number.
+The contents of the file are a list of the SEI message's syntax element names (in decoding order) immediately followed by a `:' and then the associated value.
+An example file can be found in cfg/sei_vui/annotated_regions/anno_reg_0.txt.
+\\
+\end{OptionTableNoShorthand}
+
 \begin{OptionTableNoShorthand}{Subpicture Level Information SEI message encoder parameters}{tab:sei-subpic-level}
 \Option{SEISubpictLevelInfoEnabled} &
 \Default{false} &
@@ -4779,6 +4789,13 @@ When a non-empty file name is specified, information regarding any decoded SEI m
 \Default{\NotSet} &
 Specifies that the colour remapping SEI message should be applied to the output video, with the output written to this file.
 If no value is specified, the SEI message is ignored and no mapping is applied.
+\\
+
+\Option{SEIAnnotatedRegionsInfoFilename} &
+%\ShortOption{\None} &
+\Default{\NotSet} &
+When a non-empty file name is specified, object information using the decoded SEI messages will be output to the indicated file.
+If no value is specified, the SEI message will not be output.
 \\
 
 \Option{OutputColourSpaceConvert} &

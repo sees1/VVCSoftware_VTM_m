@@ -879,6 +879,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setOmniViewportSEITiltCentre                         ( m_omniViewportSEITiltCentre );
   m_cEncLib.setOmniViewportSEIHorRange                           ( m_omniViewportSEIHorRange );
   m_cEncLib.setOmniViewportSEIVerRange                           ( m_omniViewportSEIVerRange );
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  m_cEncLib.setAnnotatedRegionSEIFileRoot                        (m_arSEIFileRoot);
+#endif
   m_cEncLib.setRwpSEIEnabled                                     (m_rwpSEIEnabled);
   m_cEncLib.setRwpSEIRwpCancelFlag                               (m_rwpSEIRwpCancelFlag);
   m_cEncLib.setRwpSEIRwpPersistenceFlag                          (m_rwpSEIRwpPersistenceFlag);

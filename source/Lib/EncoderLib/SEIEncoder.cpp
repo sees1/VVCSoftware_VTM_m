@@ -35,6 +35,7 @@
 #include "CommonLib/SEI.h"
 #include "EncGOP.h"
 #include "EncLib.h"
+#include <fstream>
 
 uint32_t calcMD5(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
 uint32_t calcCRC(const CPelUnitBuf& pic, PictureHash &digest, const BitDepths &bitDepths);
@@ -561,6 +562,145 @@ static void readTokenValueAndValidate(T            &returnedValue, /// value ret
     }
   }
 }
+
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed)
+{
+  readTokenValue(seiAnnoRegion->m_hdr.m_cancelFlag, failed, fic, "SEIArCancelFlag");
+  if (!seiAnnoRegion->m_hdr.m_cancelFlag)
+  {
+    readTokenValue(seiAnnoRegion->m_hdr.m_notOptimizedForViewingFlag, failed, fic, "SEIArNotOptForViewingFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_trueMotionFlag, failed, fic, "SEIArTrueMotionFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_occludedObjectFlag, failed, fic, "SEIArOccludedObjsFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_partialObjectFlagPresentFlag, failed, fic, "SEIArPartialObjsFlagPresentFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_objectLabelPresentFlag, failed, fic, "SEIArObjLabelPresentFlag");
+    readTokenValue(seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag, failed, fic, "SEIArObjConfInfoPresentFlag");
+    if (seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag)
+    {
+      readTokenValueAndValidate<uint32_t>(seiAnnoRegion->m_hdr.m_objectConfidenceLength, failed, fic, "SEIArObjDetConfLength", uint32_t(0), uint32_t(255));
+    }
+    if (seiAnnoRegion->m_hdr.m_objectLabelPresentFlag)
+    {
+      readTokenValue(seiAnnoRegion->m_hdr.m_objectLabelLanguagePresentFlag, failed, fic, "SEIArObjLabelLangPresentFlag");
+      if (seiAnnoRegion->m_hdr.m_objectLabelLanguagePresentFlag)
+      {
+        readTokenValue(seiAnnoRegion->m_hdr.m_annotatedRegionsObjectLabelLang, failed, fic, "SEIArLabelLanguage");
+      }
+      uint32_t numLabelUpdates=0;
+      readTokenValueAndValidate<uint32_t>(numLabelUpdates, failed, fic, "SEIArNumLabelUpdates", uint32_t(0), uint32_t(255));
+      seiAnnoRegion->m_annotatedLabels.resize(numLabelUpdates);
+      for (auto it=seiAnnoRegion->m_annotatedLabels.begin(); it!=seiAnnoRegion->m_annotatedLabels.end(); it++)
+      {
+        SEIAnnotatedRegions::AnnotatedRegionLabel &ar=it->second;
+        readTokenValueAndValidate(it->first, failed, fic, "SEIArLabelIdc[c]", uint32_t(0), uint32_t(255));
+        bool cancelFlag;
+        readTokenValue(cancelFlag, failed, fic, "SEIArLabelCancelFlag[c]");
+        ar.labelValid=!cancelFlag;
+        if (ar.labelValid)
+        {
+          readTokenValue(ar.label, failed, fic, "SEIArLabel[c]");
+        }
+      }
+    }
+
+    uint32_t numObjectUpdates=0;
+    readTokenValueAndValidate<uint32_t>(numObjectUpdates, failed, fic, "SEIArNumObjUpdates", uint32_t(0), uint32_t(255));
+    seiAnnoRegion->m_annotatedRegions.resize(numObjectUpdates);
+    for (auto it=seiAnnoRegion->m_annotatedRegions.begin(); it!=seiAnnoRegion->m_annotatedRegions.end(); it++)
+    {
+      SEIAnnotatedRegions::AnnotatedRegionObject &ar = it->second;
+      readTokenValueAndValidate(it->first, failed, fic, "SEIArObjIdx[c]", uint32_t(0), uint32_t(255));
+      readTokenValue(ar.objectCancelFlag, failed, fic, "SEIArObjCancelFlag[c]");
+      ar.objectLabelValid=false;
+      ar.boundingBoxValid=false;
+      if (!ar.objectCancelFlag)
+      {
+        if (seiAnnoRegion->m_hdr.m_objectLabelPresentFlag)
+        {
+          readTokenValue(ar.objectLabelValid, failed, fic, "SEIArObjLabelUpdateFlag[c]");
+          if (ar.objectLabelValid)
+          {
+            readTokenValueAndValidate<uint32_t>(ar.objLabelIdx, failed, fic, "SEIArObjectLabelIdc[c]", uint32_t(0), uint32_t(255));
+          }
+          readTokenValue(ar.boundingBoxValid, failed, fic, "SEIArBoundBoxUpdateFlag[c]");
+          if (ar.boundingBoxValid)
+          {
+            readTokenValueAndValidate<uint32_t>(ar.boundingBoxTop, failed, fic, "SEIArObjTop[c]", uint32_t(0), uint32_t(0x7fffffff));
+            readTokenValueAndValidate<uint32_t>(ar.boundingBoxLeft, failed, fic, "SEIArObjLeft[c]", uint32_t(0), uint32_t(0x7fffffff));
+            readTokenValueAndValidate<uint32_t>(ar.boundingBoxWidth, failed, fic, "SEIArObjWidth[c]", uint32_t(0), uint32_t(0x7fffffff));
+            readTokenValueAndValidate<uint32_t>(ar.boundingBoxHeight, failed, fic, "SEIArObjHeight[c]", uint32_t(0), uint32_t(0x7fffffff));
+            if (seiAnnoRegion->m_hdr.m_partialObjectFlagPresentFlag)
+            {
+              readTokenValue(ar.partialObjectFlag, failed, fic, "SEIArObjPartUpdateFlag[c]");
+            }
+            if (seiAnnoRegion->m_hdr.m_objectConfidenceInfoPresentFlag)
+            {
+              readTokenValueAndValidate<uint32_t>(ar.objectConfidence, failed, fic, "SEIArObjDetConf[c]", uint32_t(0), uint32_t(1<<seiAnnoRegion->m_hdr.m_objectConfidenceLength)-1);
+            }
+          }
+          //Compare with existing attributes to decide whether it's a static object
+          //First check whether it's an existing object (or) new object
+          auto destIt = m_pcCfg->m_arObjects.find(it->first);
+          //New object
+          if (destIt == m_pcCfg->m_arObjects.end())
+          {
+            //New object arrived, needs to be appended to the map of tracked objects
+            m_pcCfg->m_arObjects[it->first] = ar;
+          }
+          //Existing object
+          else
+          {
+            // Size remains the same
+            if(m_pcCfg->m_arObjects[it->first].boundingBoxWidth == ar.boundingBoxWidth &&
+              m_pcCfg->m_arObjects[it->first].boundingBoxHeight == ar.boundingBoxHeight)
+              {
+                if(m_pcCfg->m_arObjects[it->first].boundingBoxTop == ar.boundingBoxTop &&
+                  m_pcCfg->m_arObjects[it->first].boundingBoxLeft == ar.boundingBoxLeft)
+                  {
+                    ar.boundingBoxValid = 0;
+                  }
+              }
+          }
+        }
+      }
+    }
+  }
+}
+
+bool SEIEncoder::initSEIAnnotatedRegions(SEIAnnotatedRegions* SEIAnnoReg, int currPOC)
+{
+  assert(m_isInitialized);
+  assert(SEIAnnoReg != NULL);
+
+  // reading external Annotated Regions Information SEI message parameters from file
+  if (!m_pcCfg->getAnnotatedRegionSEIFileRoot().empty())
+  {
+    bool failed = false;
+    // building the annotated regions file name with poc num in prefix "_poc.txt"
+    std::string AnnoRegionSEIFileWithPoc(m_pcCfg->getAnnotatedRegionSEIFileRoot());
+    {
+      std::stringstream suffix;
+      suffix << "_" << currPOC << ".txt";
+      AnnoRegionSEIFileWithPoc += suffix.str();
+    }
+    std::ifstream fic(AnnoRegionSEIFileWithPoc.c_str());
+    if (!fic.good() || !fic.is_open())
+    {
+      std::cerr << "No Annotated Regions SEI parameters file " << AnnoRegionSEIFileWithPoc << " for POC " << currPOC << std::endl;
+      return false;
+    }
+    //Read annotated region SEI parameters from the cfg file
+    readAnnotatedRegionSEI(fic, SEIAnnoReg, failed);
+    if (failed)
+    {
+      std::cerr << "Error while reading Annotated Regions SEI parameters file '" << AnnoRegionSEIFileWithPoc << "'" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+  }
+  return true;
+}
+#endif
+
 
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI
 void SEIEncoder::initSEIAlternativeTransferCharacteristics(SEIAlternativeTransferCharacteristics *seiAltTransCharacteristics)

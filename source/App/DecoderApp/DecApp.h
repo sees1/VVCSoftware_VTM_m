@@ -70,6 +70,11 @@ private:
 
   bool            m_newCLVS[MAX_NUM_LAYER_IDS];   ///< used to record a new CLVSS
 
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  SEIAnnotatedRegions::AnnotatedRegionHeader                 m_arHeader; ///< AR header
+  std::map<uint32_t, SEIAnnotatedRegions::AnnotatedRegionObject> m_arObjects; ///< AR object pool
+  std::map<uint32_t, std::string>                                m_arLabels; ///< AR label pool
+#endif
 
 private:
   bool  xIsNaluWithinTargetDecLayerIdSet( const InputNALUnit* nalu ) const; ///< check whether given Nalu is within targetDecLayerIdSet
@@ -94,6 +99,9 @@ private:
   bool  isNewAccessUnit(bool newPicture, ifstream *bitstreamFile, class InputByteStream *bytestream);  ///< check if next NAL unit will be the first NAL unit from a new access unit
 
   void  writeLineToOutputLog(Picture * pcPic);
+#if JVET_T0053_ANNOTATED_REGIONS_SEI
+  void xOutputAnnotatedRegions(PicList* pcListPic);
+#endif
 
 };
 
