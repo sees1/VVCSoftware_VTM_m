@@ -2382,7 +2382,11 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
   ptls.resize(pcVPS->getNumPtls());
   for (int i = 0; i < pcVPS->getNumPtls(); i++)
   {
+#if FIX_TICKET_1442_PTL_IN_VPS
+    parseProfileTierLevel(&ptls[i], pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i));
+#else
     parseProfileTierLevel(&ptls[i], pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i) - 1);
+#endif
   }
   pcVPS->setProfileTierLevel(ptls);
   for (int i = 0; i < pcVPS->getTotalNumOLSs(); i++)
