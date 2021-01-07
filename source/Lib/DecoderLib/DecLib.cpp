@@ -804,6 +804,8 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
   }
   m_pcPic->reconstructed = true;
 
+  // process buffered suffix APS NALUs
+  processSuffixApsNalus();
 
   Slice::sortPicList( m_cListPic ); // sorting for application output
   poc                 = pcSlice->getPOC();
@@ -1200,6 +1202,19 @@ void DecLib::resetPictureSeiNalus()
   {
     delete m_pictureSeiNalus.front();
     m_pictureSeiNalus.pop_front();
+  }
+}
+
+/**
+ - Process buffered list of suffix APS NALUs
+ */
+void DecLib::processSuffixApsNalus()   
+{
+  while (!m_suffixApsNalus.empty())
+  {
+    xDecodeAPS(*m_suffixApsNalus.front());
+    delete m_suffixApsNalus.front();
+    m_suffixApsNalus.pop_front();
   }
 }
 
@@ -2904,8 +2919,11 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       return !m_bFirstSliceInPicture;
 
     case NAL_UNIT_PREFIX_APS:
-    case NAL_UNIT_SUFFIX_APS:
       xDecodeAPS(nalu);
+      return false;
+
+    case NAL_UNIT_SUFFIX_APS:
+      m_suffixApsNalus.push_back(new InputNALUnit(nalu));
       return false;
 
     case NAL_UNIT_PREFIX_SEI:

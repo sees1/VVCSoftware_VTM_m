@@ -185,6 +185,7 @@ private:
 
   std::vector<NalUnitType> m_pictureUnitNals;
   std::list<InputNALUnit*> m_pictureSeiNalus; 
+  std::list<InputNALUnit*> m_suffixApsNalus; 
 
 #if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   OPI*                    m_opi;
@@ -264,6 +265,7 @@ public:
   void checkSeiInPictureUnit();
   void resetPictureSeiNalus();
   bool isSliceNaluFirstInAU( bool newPicture, InputNALUnit &nalu );
+  void processSuffixApsNalus();
 
   void checkAPSInPictureUnit();
   void resetPictureUnitNals() { m_pictureUnitNals.clear(); }
