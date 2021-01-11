@@ -715,7 +715,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           const int  maxTidILRefPicsPlus1 = vps->getMaxTidIlRefPicsPlus1(layerIdx, pcRefPic->layerId);
           bool cond4 = (pcRefPic->temporalId < maxTidILRefPicsPlus1);
 
-          CHECK((cond1 && cond2) || cond3 || cond4,
+          CHECK(!((cond1 && cond2) || cond3 || cond4),
                 "Either of the following conditions shall apply for the picture referred to by each ILRP entry, when "
                 "present, in RefPicList[ 0 ] or RefPicList[ 1 ] of a slice of the current picture:-The picture is a "
                 "GDR picture with "
