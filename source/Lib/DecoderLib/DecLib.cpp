@@ -2876,7 +2876,15 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
 {
   bool ret;
   // ignore all NAL units of layers > 0
-  if( (nalu.m_nalUnitType != NAL_UNIT_SUFFIX_APS && nalu.m_nalUnitType != NAL_UNIT_FD) || !m_prevSliceSkipped )
+  if( (nalu.m_nalUnitType != NAL_UNIT_SUFFIX_APS       && 
+       nalu.m_nalUnitType != NAL_UNIT_EOS              &&
+       nalu.m_nalUnitType != NAL_UNIT_EOB              &&
+       nalu.m_nalUnitType != NAL_UNIT_SUFFIX_SEI       &&
+       nalu.m_nalUnitType != NAL_UNIT_FD               &&
+       nalu.m_nalUnitType != NAL_UNIT_RESERVED_NVCL_27 &&
+       nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_30   &&
+       nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_31)  || 
+       !m_prevSliceSkipped )
   {
     AccessUnitInfo auInfo;
     auInfo.m_nalUnitType = nalu.m_nalUnitType;
