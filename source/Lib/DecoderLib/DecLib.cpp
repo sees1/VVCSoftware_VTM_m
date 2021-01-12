@@ -2284,6 +2284,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     resetAccessUnitNals();
     resetAccessUnitApsNals();
     resetAccessUnitPicInfo();
+    resetPictureUnitNals();
     m_maxDecSubPicIdx = 0;
     m_maxDecSliceAddrInSubPic = -1;
     return false;
@@ -2862,6 +2863,11 @@ void DecLib::xDecodeAPS(InputNALUnit& nalu)
     m_apsMapEnc->storePS( ( apsEnc->getAPSId() << NUM_APS_TYPE_LEN ) + apsEnc->getAPSType(), apsEnc ); 
   }
 
+  if( nalu.m_nalUnitType == NAL_UNIT_SUFFIX_APS && m_prevSliceSkipped )
+  {
+    m_accessUnitApsNals.pop_back();
+  }
+
   // aps will be deleted if it was already stored (and did not changed),
   // thus, storing it must be last action.
   m_parameterSetManager.storeAPS(aps, nalu.getBitstream().getFifo());
@@ -2870,13 +2876,23 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
 {
   bool ret;
   // ignore all NAL units of layers > 0
-
-  AccessUnitInfo auInfo;
-  auInfo.m_nalUnitType = nalu.m_nalUnitType;
-  auInfo.m_nuhLayerId = nalu.m_nuhLayerId;
-  auInfo.m_temporalId = nalu.m_temporalId;
-  m_accessUnitNals.push_back(auInfo);
-  m_pictureUnitNals.push_back( nalu.m_nalUnitType );
+  if( (nalu.m_nalUnitType != NAL_UNIT_SUFFIX_APS       && 
+       nalu.m_nalUnitType != NAL_UNIT_EOS              &&
+       nalu.m_nalUnitType != NAL_UNIT_EOB              &&
+       nalu.m_nalUnitType != NAL_UNIT_SUFFIX_SEI       &&
+       nalu.m_nalUnitType != NAL_UNIT_FD               &&
+       nalu.m_nalUnitType != NAL_UNIT_RESERVED_NVCL_27 &&
+       nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_30   &&
+       nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_31)  || 
+       !m_prevSliceSkipped )
+  {
+    AccessUnitInfo auInfo;
+    auInfo.m_nalUnitType = nalu.m_nalUnitType;
+    auInfo.m_nuhLayerId = nalu.m_nuhLayerId;
+    auInfo.m_temporalId = nalu.m_temporalId;
+    m_accessUnitNals.push_back(auInfo);
+    m_pictureUnitNals.push_back( nalu.m_nalUnitType );
+  }
   switch (nalu.m_nalUnitType)
   {
     case NAL_UNIT_VPS:
@@ -2923,7 +2939,14 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       return false;
 
     case NAL_UNIT_SUFFIX_APS:
-      m_suffixApsNalus.push_back(new InputNALUnit(nalu));
+      if( m_prevSliceSkipped ) 
+      {
+        xDecodeAPS(nalu);
+      }
+      else 
+      {
+        m_suffixApsNalus.push_back(new InputNALUnit(nalu));
+      }
       return false;
 
     case NAL_UNIT_PREFIX_SEI:
