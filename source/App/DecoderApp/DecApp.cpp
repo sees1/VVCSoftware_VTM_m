@@ -142,6 +142,7 @@ uint32_t DecApp::decode()
   bool bPicSkipped = false;
 
   bool isEosPresentInPu = false;
+  bool isEosPresentInLastPu = false;
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
   bool firstSliceInAU = true;
 #endif
@@ -206,14 +207,21 @@ uint32_t DecApp::decode()
           xFlushOutput(pcListPic, nalu.m_nuhLayerId);
 #endif
         }
-        if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInPu)
+        else if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInLastPu)
         {
           // A CRA that is immediately preceded by an EOS is a CLVSS
           m_newCLVS[nalu.m_nuhLayerId] = true;
+#if !JVET_S0078_NOOUTPUTPRIORPICFLAG
+          xFlushOutput(pcListPic, nalu.m_nuhLayerId);
+#endif
         }
-        else if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && !isEosPresentInPu)
+        else if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && !isEosPresentInLastPu)
         {
           // A CRA that is not immediately precede by an EOS is not a CLVSS
+          m_newCLVS[nalu.m_nuhLayerId] = false;
+        }
+        else if(m_cDecLib.getFirstSliceInPicture() && !isEosPresentInLastPu)
+        {
           m_newCLVS[nalu.m_nuhLayerId] = false;
         }
 
@@ -398,7 +406,7 @@ uint32_t DecApp::decode()
           {
             if (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL
                 || nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP
-                || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInPu))
+                || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInLastPu))
             {
               firstPicInCVSAUThatIsNotAU0 = true;
             }
@@ -437,6 +445,7 @@ uint32_t DecApp::decode()
       m_cDecLib.checkSeiInPictureUnit();
       m_cDecLib.resetPictureSeiNalus();
       // reset the EOS present status for the next PU check
+      isEosPresentInLastPu = isEosPresentInPu;
       isEosPresentInPu = false;
     }
     if (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS)
