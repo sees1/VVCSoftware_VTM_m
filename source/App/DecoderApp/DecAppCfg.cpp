@@ -96,9 +96,7 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   ("SEINoDisplay",              m_decodedNoDisplaySEIEnabled,          true,       "Control handling of decoded no display SEI messages")
   ("TarDecLayerIdSetFile,l",    cfg_TargetDecLayerIdSetFile,           string(""), "targetDecLayerIdSet file name. The file should include white space separated LayerId values to be decoded. Omitting the option or a value of -1 in the file decodes all layers.")
   ("SEIColourRemappingInfoFilename",  m_colourRemapSEIFileName,        string(""), "Colour Remapping YUV output file name. If empty, no remapping is applied (ignore SEI message)\n")
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   ("SEIAnnotatedRegionsInfoFilename",  m_annotatedRegionsSEIFileName,   string(""), "Annotated regions output file name. If empty, no object information will be saved (ignore SEI message)\n")
-#endif
   ("OutputDecodedSEIMessagesFilename",  m_outputDecodedSEIMessagesFilename,    string(""), "When non empty, output decoded SEI messages to the indicated file. If file is '-', then output to stdout\n")
 #if JVET_S0257_DUMP_360SEI_MESSAGE
   ("360DumpFile",  m_outputDecoded360SEIMessagesFilename, string(""), "When non empty, output decoded 360 SEI messages to the indicated file.\n")
@@ -257,9 +255,7 @@ DecAppCfg::DecAppCfg()
 , m_decodedPictureHashSEIEnabled(0)
 , m_decodedNoDisplaySEIEnabled(false)
 , m_colourRemapSEIFileName()
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 , m_annotatedRegionsSEIFileName()
-#endif
 , m_targetDecLayerIdSet()
 , m_outputDecodedSEIMessagesFilename()
 #if JVET_S0257_DUMP_360SEI_MESSAGE

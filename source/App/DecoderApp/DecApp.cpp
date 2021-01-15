@@ -123,7 +123,6 @@ uint32_t DecApp::decode()
     }
   }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   // clear contents of annotated-Regions-SEI output file
   if (!m_annotatedRegionsSEIFileName.empty())
   {
@@ -134,7 +133,6 @@ uint32_t DecApp::decode()
       exit(EXIT_FAILURE);
     }
   }
-#endif
 
   // main decoder loop
   bool loopFiltered[MAX_VPS_LAYERS] = { false };
@@ -349,12 +347,10 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
         }
       }
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
       if (!m_annotatedRegionsSEIFileName.empty())
       {
         xOutputAnnotatedRegions(pcListPic);
       }
-#endif
       // write reconstruction to file
       if( bNewPicture )
       {
@@ -363,12 +359,10 @@ uint32_t DecApp::decode()
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
         if (!m_annotatedRegionsSEIFileName.empty() && bNewPicture)
         {
           xOutputAnnotatedRegions(pcListPic);
         }
-#endif
         setOutputPicturePresentInStream();
         xWriteOutput( pcListPic, nalu.m_temporalId );
         m_cDecLib.setFirstSliceInPicture (false);
@@ -454,12 +448,10 @@ uint32_t DecApp::decode()
 #endif
     }
   }
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   if (!m_annotatedRegionsSEIFileName.empty())
   {
     xOutputAnnotatedRegions(pcListPic);
   }
-#endif
   // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
   setOutputPicturePresentInStream();
   CHECK(!outputPicturePresentInBitstream, "It is required that there shall be at least one picture with PictureOutputFlag equal to 1 in the bitstream")
@@ -892,7 +884,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
   m_iPOCLastDisplay = -MAX_INT;
 }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 /** \param pcListPic list of pictures to be written to file
  */
 void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
@@ -1039,7 +1030,6 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
    iterPic++;
   }
 }
-#endif
 
 /** \param nalu Input nalu to check whether its LayerId is within targetDecLayerIdSet
  */

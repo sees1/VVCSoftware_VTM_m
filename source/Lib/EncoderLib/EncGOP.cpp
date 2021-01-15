@@ -787,7 +787,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
     seiMessages.push_back(dependentRAPIndicationSEI);
   }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   // insert one Annotated Region SEI for the picture (if the file exists)
   if (!m_pcCfg->getAnnotatedRegionSEIFileRoot().empty())
   {
@@ -803,7 +802,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
       delete seiAnnotatedRegions;
     }
   }
-#endif
 }
 
 void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t>& subpicIDs)

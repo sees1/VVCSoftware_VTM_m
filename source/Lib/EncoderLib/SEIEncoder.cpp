@@ -563,7 +563,6 @@ static void readTokenValueAndValidate(T            &returnedValue, /// value ret
   }
 }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed)
 {
   readTokenValue(seiAnnoRegion->m_hdr.m_cancelFlag, failed, fic, "SEIArCancelFlag");
@@ -699,7 +698,6 @@ bool SEIEncoder::initSEIAnnotatedRegions(SEIAnnotatedRegions* SEIAnnoReg, int cu
   }
   return true;
 }
-#endif
 
 
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI

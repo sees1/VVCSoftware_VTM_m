@@ -127,11 +127,9 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::SAMPLE_ASPECT_RATIO_INFO:
     xWriteSEISampleAspectRatioInfo(*static_cast<const SEISampleAspectRatioInfo*>(&sei));
     break;
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   case SEI::ANNOTATED_REGIONS:
     xWriteSEIAnnotatedRegions(*static_cast<const SEIAnnotatedRegions*>(&sei));
     break;
-#endif
   default:
     THROW("Trying to write unhandled SEI message");
     break;
@@ -605,7 +603,6 @@ void SEIWriter::xWriteSEIMasteringDisplayColourVolume(const SEIMasteringDisplayC
   WRITE_CODE( sei.values.minLuminance,     32,  "mdcv_min_display_mastering_luminance" );
 }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 void SEIWriter::xWriteSEIAnnotatedRegions(const SEIAnnotatedRegions &sei)
 {
   WRITE_FLAG(sei.m_hdr.m_cancelFlag, "ar_cancel_flag");
@@ -696,7 +693,6 @@ void SEIWriter::xWriteSEIAnnotatedRegions(const SEIAnnotatedRegions &sei)
     }
   }
 }
-#endif
 void SEIWriter::xWriteByteAlign()
 {
   if( m_pcBitIf->getNumberOfWrittenBits() % 8 != 0)
