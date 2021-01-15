@@ -56,7 +56,6 @@
 
 #define FIX_TICKET_1442_PTL_IN_VPS                        1 // Fix PTL signalling in VPS such that also the sublayer with the second highest TemporalID is signalled
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-#define JVET_T0065_LEVEL_6_3                              1 // JVET-T0065: Add level 6.3
 #define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
 #define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
 #define JVET_R0266_GCI                                    1 // JVET-R0266 #5: Specify that no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag shall be equal to 0
@@ -728,9 +727,7 @@ namespace Level
     LEVEL6   = 96,
     LEVEL6_1 = 99,
     LEVEL6_2 = 102,
-#if JVET_T0065_LEVEL_6_3
     LEVEL6_3 = 105,
-#endif
     LEVEL15_5 = 255,
   };
 }
