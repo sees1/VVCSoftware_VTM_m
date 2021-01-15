@@ -56,7 +56,6 @@
 
 #define FIX_TICKET_1442_PTL_IN_VPS                        1 // Fix PTL signalling in VPS such that also the sublayer with the second highest TemporalID is signalled
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-#define JVET_R0193_S0141                                  1 // JVET-S0141 item 47 : item 47: In the general sub-bitstream extraction process, specify the conditions under which an output sub-bitstream is required to be a conforming bitstream such that the value of tIdTarget is specified to be in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive (instead of 0 to 6 inclusive). (JVET-S0158 aspect 1)
 #define JVET_T0065_LEVEL_6_3                              1 // JVET-T0065: Add level 6.3
 #define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
 #define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
