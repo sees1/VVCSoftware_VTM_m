@@ -1865,12 +1865,10 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK(pps->getMixedNaluTypesInPicFlag(), "When gci_no_mixed_nalu_types_in_pic_constraint_flag equal to 1, the value of pps_mixed_nalu_types_in_pic_flag shall be equal to 0")
   }
 
-#if JVET_R0266_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoGdrConstraintFlag())
   {
     CHECK(sps->getGDREnabledFlag(), "gci_no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag for all pictures in OlsInScope shall be equal to 0");
   }
-#endif
 
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoRectSliceConstraintFlag())
   {
