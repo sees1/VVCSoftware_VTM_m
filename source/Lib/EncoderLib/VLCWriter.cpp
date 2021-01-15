@@ -1439,11 +1439,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   CHECK(cnt>=8, "More than '8' alignment bytes written");
   for (int i = 0; i < pcVPS->getNumPtls(); i++)
   {
-#if FIX_TICKET_1442_PTL_IN_VPS
     codeProfileTierLevel(&pcVPS->getProfileTierLevel(i), pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i));
-#else
-    codeProfileTierLevel(&pcVPS->getProfileTierLevel(i), pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i) - 1);
-#endif
   }
   for (int i = 0; i < totalNumOlss; i++)
   {
