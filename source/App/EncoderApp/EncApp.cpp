@@ -128,9 +128,7 @@ void EncApp::xInitLibCfg()
     }
   }
 
-#if JVET_R0193
   m_cfgVPSParameters.m_maxTidILRefPicsPlus1.resize(vps.getMaxLayers(), std::vector<uint32_t>(vps.getMaxLayers(), MAX_TLAYER));
-#endif
   for (int i = 0; i < vps.getMaxLayers(); i++)
   {
     vps.setGeneralLayerIdx( m_layerId[i], i );
@@ -155,7 +153,6 @@ void EncApp::xInitLibCfg()
             vps.setDirectRefLayerFlag(i, j, false);
           }
         }
-#if JVET_R0193
         string::size_type beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", 0);
         string::size_type endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
         int t = 0;
@@ -165,7 +162,6 @@ void EncApp::xInitLibCfg()
           beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", endStr);
           endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
         }
-#endif
       }
     }
   }

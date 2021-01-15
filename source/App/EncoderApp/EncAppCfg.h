@@ -737,9 +737,7 @@ protected:
   int         m_olsModeIdc;
   int         m_numOutputLayerSets;
   std::string m_olsOutputLayerStr[MAX_VPS_LAYERS];
-#if JVET_R0193
   std::string m_maxTidILRefPicsPlus1Str[MAX_VPS_LAYERS];
-#endif
 
   int         m_numPtlsInVps;
 
