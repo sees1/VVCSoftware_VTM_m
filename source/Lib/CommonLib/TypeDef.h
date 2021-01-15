@@ -56,7 +56,6 @@
 
 #define FIX_TICKET_1442_PTL_IN_VPS                        1 // Fix PTL signalling in VPS such that also the sublayer with the second highest TemporalID is signalled
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-#define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
 #define JVET_R0266_GCI                                    1 // JVET-R0266 #5: Specify that no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag shall be equal to 0
 #define JVET_S0084_S0110_RADL                             1 // When the current picture is a RADL picture, allow RASL pictures with pps_mixed_nalu_types_in_pic_flag is equal to 1 in active entries in RefPicList[ 0 ] or RefPicList[ 1 ]
 #define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
@@ -785,11 +784,7 @@ enum NalUnitType
   NAL_UNIT_CODED_SLICE_GDR,         // 10
 
   NAL_UNIT_RESERVED_IRAP_VCL_11,
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   NAL_UNIT_OPI,                     // 12
-#else
-  NAL_UNIT_RESERVED_IRAP_VCL_12,
-#endif
   NAL_UNIT_DCI,                     // 13
   NAL_UNIT_VPS,                     // 14
   NAL_UNIT_SPS,                     // 15

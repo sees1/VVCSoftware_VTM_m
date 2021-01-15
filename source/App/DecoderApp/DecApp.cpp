@@ -164,10 +164,8 @@ uint32_t DecApp::decode()
     }
   };
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     m_cDecLib.setHTidExternalSetFlag(m_mTidExternalSet);
     m_cDecLib.setTOlsIdxExternalFlag(m_tOlsIdxTidExternalSet);
-#endif
 
   while (!!bitstreamFile)
   {
@@ -247,7 +245,6 @@ uint32_t DecApp::decode()
             }
           }
           m_cDecLib.decode(nalu, m_iSkipFrame, m_iPOCLastDisplay, m_targetOlsIdx);
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
           if (nalu.m_nalUnitType == NAL_UNIT_OPI)
           {
             if (!m_cDecLib.getHTidExternalSetFlag() && m_cDecLib.getOPI()->getHtidInfoPresentFlag())
@@ -256,14 +253,9 @@ uint32_t DecApp::decode()
             }
             m_cDecLib.setHTidOpiSetFlag(m_cDecLib.getOPI()->getHtidInfoPresentFlag());
           }
-#endif
           if (nalu.m_nalUnitType == NAL_UNIT_VPS)
           {
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
             m_cDecLib.deriveTargetOutputLayerSet( m_cDecLib.getVPS()->m_targetOlsIdx );
-#else
-            m_cDecLib.deriveTargetOutputLayerSet( m_targetOlsIdx );
-#endif
             m_targetDecLayerIdSet = m_cDecLib.getVPS()->m_targetLayerIdSet;
             m_targetOutputLayerIdSet = m_cDecLib.getVPS()->m_targetOutputLayerIdSet;
           }
@@ -382,13 +374,8 @@ uint32_t DecApp::decode()
         m_cDecLib.setFirstSliceInPicture (false);
       }
       // write reconstruction to file -- for additional bumping as defined in C.5.2.3
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_11)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
-#else
-      if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
-        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
-#endif
       {
         setOutputPicturePresentInStream();
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
@@ -426,19 +413,11 @@ uint32_t DecApp::decode()
       }
     }
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_OPI)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
     {
       firstSliceInAU = false;
     }
-#else
-    if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
-        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
-    {
-      firstSliceInAU = false;
-    }
-#endif
 #endif
     if( bNewPicture )
     {

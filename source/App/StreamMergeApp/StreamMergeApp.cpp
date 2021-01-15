@@ -239,9 +239,7 @@ bool StreamMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
       {
       // NUT that indicate the start of a new picture
       case NAL_UNIT_ACCESS_UNIT_DELIMITER:
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       case NAL_UNIT_OPI:
-#endif
       case NAL_UNIT_DCI:
       case NAL_UNIT_VPS:
       case NAL_UNIT_SPS:
@@ -264,9 +262,6 @@ bool StreamMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
       case NAL_UNIT_CODED_SLICE_CRA:
       case NAL_UNIT_CODED_SLICE_GDR:
       case NAL_UNIT_RESERVED_IRAP_VCL_11:
-#if !JVET_S0163_ON_TARGETOLS_SUBLAYERS
-      case NAL_UNIT_RESERVED_IRAP_VCL_12:
-#endif
         ret      = checkPictureHeaderInSliceHeaderFlag(nalu);
         finished = true;
         break;

@@ -2143,7 +2143,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   xReadRbspTrailingBits();
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void HLSyntaxReader::parseOPI(OPI* opi)
 {
 #if ENABLE_TRACING
@@ -2178,7 +2177,6 @@ void HLSyntaxReader::parseOPI(OPI* opi)
   }
   xReadRbspTrailingBits();
 }
-#endif
 
 
 void HLSyntaxReader::parseDCI(DCI* dci)

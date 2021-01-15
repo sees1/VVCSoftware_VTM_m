@@ -233,9 +233,7 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   }
 
   xInitVPS( sps0 );
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   xInitOPI(m_opi);
-#endif
   xInitDCI(m_dci, sps0);
 #if ENABLE_SPLIT_PARALLELISM
   if( omp_get_dynamic() )
@@ -1146,7 +1144,6 @@ void EncLib::xInitVPS( const SPS& sps )
   m_vps->checkVPS();
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void EncLib::xInitOPI(OPI& opi)
 {
   if (m_OPIEnabled && m_vps)
@@ -1163,7 +1160,6 @@ void EncLib::xInitOPI(OPI& opi)
     }
   }
 }
-#endif
 
 void EncLib::xInitDCI(DCI& dci, const SPS& sps)
 {

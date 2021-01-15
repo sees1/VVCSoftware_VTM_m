@@ -1335,7 +1335,6 @@ void HLSWriter::codeDCI(const DCI* dci)
   xWriteRbspTrailingBits();
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void HLSWriter::codeOPI(const OPI *opi)
 {
 #if ENABLE_TRACING
@@ -1356,7 +1355,6 @@ void HLSWriter::codeOPI(const OPI *opi)
   WRITE_FLAG(0, "opi_extension_flag");
   xWriteRbspTrailingBits();
 }
-#endif
 
 void HLSWriter::codeVPS(const VPS* pcVPS)
 {

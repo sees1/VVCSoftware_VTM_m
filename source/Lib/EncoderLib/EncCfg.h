@@ -686,10 +686,8 @@ protected:
   CostMode  m_costMode;                                       ///< The cost function to use, primarily when considering lossless coding.
   bool      m_TSRCdisableLL;                                  ///< Disable TSRC for lossless
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   OPI       m_opi;
   bool      m_OPIEnabled;                                     ///< enable Operating Point Information (OPI)
-#endif
 
   DCI       m_dci;
   bool      m_DCIEnabled;                                     ///< enable Decoding Capability Information (DCI)
@@ -1799,10 +1797,8 @@ public:
   bool         getTSRCdisableLL       ()                             { return m_TSRCdisableLL;         }
   void         setTSRCdisableLL       ( bool b )                     { m_TSRCdisableLL = b;            }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   void         setOPI(OPI *p)                                        { m_opi = *p; }
   OPI*         getOPI()                                              { return &m_opi; }
-#endif
 
   void         setDCI(DCI *p)                                        { m_dci = *p; }
   DCI*         getDCI()                                              { return &m_dci; }
@@ -1815,12 +1811,10 @@ public:
   void         setHarmonizeGopFirstFieldCoupleEnabled( bool b )      { m_bHarmonizeGopFirstFieldCoupleEnabled = b; }
   bool         getHarmonizeGopFirstFieldCoupleEnabled( ) const       { return m_bHarmonizeGopFirstFieldCoupleEnabled; }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   bool         getOPIEnabled()                      { return m_OPIEnabled; }
   void         setOPIEnabled(bool i)                { m_OPIEnabled = i; }
   void         setHtidPlus1(int HTid)               { m_opi.setHtidInfoPresentFlag(true); m_opi.setOpiHtidPlus1(HTid); }
   void         setTargetOlsIdx(int TOlsIdx)         { m_opi.setOlsInfoPresentFlag(true); m_opi.setOpiOlsIdx(TOlsIdx); }
-#endif
 
   bool         getDCIEnabled()                      { return m_DCIEnabled; }
   void         setDCIEnabled(bool i)                { m_DCIEnabled = i; }

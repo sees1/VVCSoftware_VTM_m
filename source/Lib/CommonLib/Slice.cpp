@@ -2513,7 +2513,6 @@ void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
   }
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 int VPS::deriveTargetOLSIdx(void)
 {
   int lowestIdx = 0;
@@ -2545,7 +2544,6 @@ uint32_t VPS::getMaxTidinTOls(int m_targetOlsIdx)
   return getPtlMaxTemporalId(getOlsPtlIdx(m_targetOlsIdx));
 }
 
-#endif
 
 // ------------------------------------------------------------------------------------------------
 // Picture Header
@@ -4539,12 +4537,10 @@ void xTraceVPSHeader()
   DTRACE( g_trace_ctx, D_HEADER, "=========== Video Parameter Set     ===========\n" );
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void xTraceOPIHeader()
 {
   DTRACE(g_trace_ctx, D_HEADER, "=========== Operating Point Information     ===========\n");
 }
-#endif
 
 void xTraceDCIHeader()
 {

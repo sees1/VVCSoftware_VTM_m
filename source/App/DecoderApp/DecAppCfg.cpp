@@ -88,13 +88,8 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   ("OutputBitDepth,d",          m_outputBitDepth[CHANNEL_TYPE_LUMA],   0,          "bit depth of YUV output luma component (default: use 0 for native depth)")
   ("OutputBitDepthC,d",         m_outputBitDepth[CHANNEL_TYPE_CHROMA], 0,          "bit depth of YUV output chroma component (default: use luma output bit-depth)")
   ("OutputColourSpaceConvert",  outputColourSpaceConvert,              string(""), "Colour space conversion to apply to input 444 video. Permitted values are (empty string=UNCHANGED) " + getListOfColourSpaceConverts(false))
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   500,    "Maximum Temporal Layer to be decoded. -1 to decode all layers")
   ("TargetOutputLayerSet,p",    m_targetOlsIdx,                        500,    "Target output layer set index")
-#else
-  ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   -1,         "Maximum Temporal Layer to be decoded. -1 to decode all layers")
-  ("TargetOutputLayerSet,p",    m_targetOlsIdx,                          -1,       "Target output layer set index")
-#endif
   ("SEIDecodedPictureHash,-dph",m_decodedPictureHashSEIEnabled,        1,          "Control handling of decoded picture hash SEI messages\n"
                                                                                    "\t1: check hash in SEI messages if available in the bitstream\n"
                                                                                    "\t0: ignore SEI message")
@@ -228,7 +223,6 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
       msg( ERROR, "File %s could not be opened. Using all LayerIds as default.\n", cfg_TargetDecLayerIdSetFile.c_str() );
     }
   }
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   if (m_iMaxTemporalLayer != 500)
   {
     m_mTidExternalSet = true;
@@ -245,7 +239,6 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   {
     m_targetOlsIdx = -1;
   }
-#endif
   return true;
 }
 
@@ -259,10 +252,8 @@ DecAppCfg::DecAppCfg()
 , m_outputColourSpaceConvert(IPCOLOURSPACE_UNCHANGED)
 , m_targetOlsIdx(0)
 , m_iMaxTemporalLayer(-1)
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 , m_mTidExternalSet(false)
 , m_tOlsIdxTidExternalSet(false)
-#endif
 , m_decodedPictureHashSEIEnabled(0)
 , m_decodedNoDisplaySEIEnabled(false)
 , m_colourRemapSEIFileName()

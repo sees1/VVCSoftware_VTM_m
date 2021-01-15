@@ -444,13 +444,11 @@ DecLib::DecLib()
   , m_prefixSEINALUs()
   , m_debugPOC( -1 )
   , m_debugCTU( -1 )
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   , m_opi( nullptr )
   , m_mTidExternalSet(false)
   , m_mTidOpiSet(false)
   , m_tOlsIdxTidExternalSet(false)
   , m_tOlsIdxTidOpiSet(false)
-#endif
   , m_vps( nullptr )
   , m_maxDecSubPicIdx(0)
   , m_maxDecSliceAddrInSubPic(-1)
@@ -2053,9 +2051,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   for( auto& naluTemporalId : m_accessUnitNals )
   {
     if (
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       naluTemporalId.m_nalUnitType != NAL_UNIT_OPI &&
-#endif
       naluTemporalId.m_nalUnitType != NAL_UNIT_DCI
       && naluTemporalId.m_nalUnitType != NAL_UNIT_VPS
       && naluTemporalId.m_nalUnitType != NAL_UNIT_SPS
@@ -2772,7 +2768,6 @@ void DecLib::updatePrevIRAPAndGDRSubpic()
   }
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void DecLib::xDecodeOPI( InputNALUnit& nalu )
 {
   m_opi = new OPI();
@@ -2782,7 +2777,6 @@ void DecLib::xDecodeOPI( InputNALUnit& nalu )
 
   m_HLSReader.parseOPI( m_opi );
 }
-#endif
 
 void DecLib::xDecodeVPS( InputNALUnit& nalu )
 {
@@ -2898,7 +2892,6 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
   {
     case NAL_UNIT_VPS:
       xDecodeVPS( nalu );
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       if (getTOlsIdxExternalFlag())
       {
         m_vps->m_targetOlsIdx = iTargetOlsIdx;
@@ -2911,15 +2904,10 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       {
         m_vps->m_targetOlsIdx = m_vps->deriveTargetOLSIdx();
       }
-#else
-      m_vps->m_targetOlsIdx = iTargetOlsIdx;
-#endif
       return false;
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     case NAL_UNIT_OPI:
       xDecodeOPI( nalu );
       return false;
-#endif
     case NAL_UNIT_DCI:
       xDecodeDCI( nalu );
       return false;
@@ -3024,9 +3012,6 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
     }
 
     case NAL_UNIT_RESERVED_IRAP_VCL_11:
-#if !JVET_S0163_ON_TARGETOLS_SUBLAYERS
-    case NAL_UNIT_RESERVED_IRAP_VCL_12:
-#endif
       msg( NOTICE, "Note: found reserved VCL NAL unit.\n");
       xParsePrefixSEIsForUnknownVCLNal();
       return false;
@@ -3220,9 +3205,7 @@ bool DecLib::isNewPicture(std::ifstream *bitstreamFile, class InputByteStream *b
 
       // NUT that indicate the start of a new picture
       case NAL_UNIT_ACCESS_UNIT_DELIMITER:
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       case NAL_UNIT_OPI:
-#endif
       case NAL_UNIT_DCI:
       case NAL_UNIT_VPS:
       case NAL_UNIT_SPS:
@@ -3245,9 +3228,6 @@ bool DecLib::isNewPicture(std::ifstream *bitstreamFile, class InputByteStream *b
       case NAL_UNIT_CODED_SLICE_CRA:
       case NAL_UNIT_CODED_SLICE_GDR:
       case NAL_UNIT_RESERVED_IRAP_VCL_11:
-#if !JVET_S0163_ON_TARGETOLS_SUBLAYERS
-      case NAL_UNIT_RESERVED_IRAP_VCL_12:
-#endif
         ret = checkPictureHeaderInSliceHeaderFlag(nalu);
         finished = true;
         break;

@@ -76,7 +76,6 @@ EncApp::~EncApp()
 void EncApp::xInitLibCfg()
 {
   VPS& vps = *m_cEncLib.getVPS();
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   if (m_targetOlsIdx != 500)
   {
     vps.m_targetOlsIdx = m_targetOlsIdx;
@@ -85,9 +84,6 @@ void EncApp::xInitLibCfg()
   {
     vps.m_targetOlsIdx = -1;
   }
-#else
-  vps.m_targetOlsIdx = m_targetOlsIdx;
-#endif
 
   vps.setMaxLayers( m_maxLayers );
 
@@ -1080,7 +1076,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setCropOffsetBottom                                  (m_cropOffsetBottom);
   m_cEncLib.setCalculateHdrMetrics                               (m_calculateHdrMetrics);
 #endif
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   m_cEncLib.setOPIEnabled                                         ( m_OPIEnabled );
   if (m_OPIEnabled)
   {
@@ -1093,7 +1088,6 @@ void EncApp::xInitLibCfg()
       m_cEncLib.setTargetOlsIdx                                   (m_targetOlsIdx);
     }
   }
-#endif
   m_cEncLib.setGopBasedTemporalFilterEnabled(m_gopBasedTemporalFilterEnabled);
   m_cEncLib.setNumRefLayers                                       ( m_numRefLayers );
 
@@ -1439,9 +1433,7 @@ void EncApp::rateStatsAccum(const AccessUnit& au, const std::vector<uint32_t>& a
     case NAL_UNIT_CODED_SLICE_GDR:
     case NAL_UNIT_CODED_SLICE_RADL:
     case NAL_UNIT_CODED_SLICE_RASL:
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     case NAL_UNIT_OPI:
-#endif
     case NAL_UNIT_DCI:
     case NAL_UNIT_VPS:
     case NAL_UNIT_SPS:

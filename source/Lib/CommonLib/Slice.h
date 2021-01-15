@@ -923,7 +923,6 @@ public:
   }
 };
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 class OPI
 {
 private:
@@ -952,7 +951,6 @@ public:
   void setOpiHtidPlus1(uint32_t val) { m_opihtidplus1 = val; }
 
 };
-#endif
 
 class VPS
 {
@@ -1133,10 +1131,8 @@ public:
 
   void              deriveOutputLayerSets();
   void              deriveTargetOutputLayerSet( int targetOlsIdx );
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   int               deriveTargetOLSIdx();
   uint32_t          getMaxTidinTOls(int m_targetOlsIdx);
-#endif
 
   void              checkVPS();
 
@@ -3112,9 +3108,7 @@ public:
 
 #if ENABLE_TRACING
 void xTraceVPSHeader();
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void xTraceOPIHeader();
-#endif
 void xTraceDCIHeader();
 void xTraceSPSHeader();
 void xTracePPSHeader();
