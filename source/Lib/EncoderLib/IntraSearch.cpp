@@ -1084,9 +1084,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
         }
         else
         {
-          tmpValidReturn = xRecurIntraCodingLumaQT(
-            *csTemp, partitioner, uiBestPUMode.ispMod ? bestCurrentCost : MAX_DOUBLE, -1, TU_NO_ISP,
-            uiBestPUMode.ispMod, mtsCheckRangeFlag, mtsFirstCheckId, mtsLastCheckId, moreProbMTSIdxFirst);
+          tmpValidReturn = xRecurIntraCodingLumaQT(*csTemp, partitioner, mtsCheckRangeFlag, mtsFirstCheckId, mtsLastCheckId, moreProbMTSIdxFirst);
         }
       }
 
@@ -3614,13 +3612,10 @@ bool IntraSearch::xIntraCodingLumaISP(CodingStructure& cs, Partitioner& partitio
   return !earlySkipISP;
 }
 
-
-bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &partitioner, const double bestCostSoFar, const int subTuIdx, const PartSplit ispType, const bool ispIsCurrentWinner, bool mtsCheckRangeFlag, int mtsFirstCheckId, int mtsLastCheckId, bool moreProbMTSIdxFirst )
+bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &partitioner, bool mtsCheckRangeFlag, int mtsFirstCheckId, int mtsLastCheckId, bool moreProbMTSIdxFirst )
 {
-        int   subTuCounter = subTuIdx;
   const UnitArea &currArea = partitioner.currArea();
   const CodingUnit     &cu = *cs.getCU( currArea.lumaPos(), partitioner.chType );
-        bool  earlySkipISP = false;
   uint32_t currDepth       = partitioner.currTrDepth;
   const SPS &sps           = *cs.sps;
   bool bCheckFull          = true;
@@ -3629,11 +3624,8 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
   bCheckSplit              = partitioner.canSplit( TU_MAX_TR_SPLIT, cs );
   const Slice           &slice = *cs.slice;
 
-  if( cu.ispMode )
-  {
-    bCheckSplit = partitioner.canSplit( ispType, cs );
-    bCheckFull = !bCheckSplit;
-  }
+  CHECK(cu.ispMode != NOT_INTRA_SUBPARTITIONS, "Use the function xIntraCodingLumaISP for ISP cases.");
+
   uint32_t    numSig           = 0;
 
   double     dSingleCost                        = MAX_DOUBLE;
@@ -3750,8 +3742,6 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
     bool    cbfBestModeValid = false;
     bool    cbfDCT2  = true;
 
-    double bestDCT2cost = MAX_DOUBLE;
-    double threshold = m_pcEncCfg->getUseFastISP() && !cu.ispMode && ispIsCurrentWinner && nNumTransformCands > 1 ? 1 + 1.4 / sqrt( cu.lwidth() * cu.lheight() ) : 1;
     for( int modeId = firstCheckId; modeId <= ( sps.getUseLFNST() ? lastCheckId : ( nNumTransformCands - 1 ) ); modeId++ )
     {
       uint8_t transformIndex = modeId;
@@ -3776,12 +3766,6 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
             break;
           }
           if (!trModes[modeId].second)
-          {
-            continue;
-          }
-          // we compare the DCT-II cost against the best ISP cost so far (except for TS)
-          if (m_pcEncCfg->getUseFastISP() && !cu.ispMode && ispIsCurrentWinner && trModes[modeId].first != MTS_DCT2_DCT2
-              && (trModes[modeId].first != MTS_SKIP || !tsAllowed) && bestDCT2cost > bestCostSoFar * threshold)
           {
             continue;
           }
@@ -3812,10 +3796,6 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
         {
           default0Save1Load2 = 2;
         }
-      }
-      if( cu.ispMode )
-      {
-        default0Save1Load2 = 0;
       }
       if( sps.getUseLFNST() )
       {
@@ -3903,20 +3883,13 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
         }
         else
         {
-          singleTmpFracBits = xGetIntraFracBitsQT(*csFull, partitioner, true, false, subTuCounter, ispType, &cuCtx);
+          singleTmpFracBits = xGetIntraFracBitsQT(*csFull, partitioner, true, false, -1, TU_NO_ISP, &cuCtx);
           singleCostTmp = m_pcRdCost->calcRdCost(singleTmpFracBits, singleDistTmpLuma);
         }
       }
       else
       {
-        if( cu.ispMode && m_pcRdCost->calcRdCost( csFull->fracBits, csFull->dist + singleDistTmpLuma ) > bestCostSoFar )
-        {
-          earlySkipISP = true;
-        }
-        else
-        {
-          singleTmpFracBits = xGetIntraFracBitsQT( *csFull, partitioner, true, false, subTuCounter, ispType, &cuCtx );
-        }
+        singleTmpFracBits = xGetIntraFracBitsQT(*csFull, partitioner, true, false, -1, TU_NO_ISP, &cuCtx);
         if (tu.mtsIdx[COMPONENT_Y] > MTS_SKIP)
         {
           if (!cuCtx.mtsLastScanPos)
@@ -3934,10 +3907,6 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
         }
       }
 
-      if ( !cu.ispMode && nNumTransformCands > 1 && modeId == firstCheckId )
-      {
-        bestDCT2cost = singleCostTmp;
-      }
 
       if (singleCostTmp < dSingleCost)
       {
@@ -4037,53 +4006,19 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
       partitioner.splitCurrArea( TU_MAX_TR_SPLIT, cs );
     }
 
-    if( cu.ispMode )
-    {
-      partitioner.splitCurrArea( ispType, *csSplit );
-    }
     do
     {
-      bool tmpValidReturnSplit = xRecurIntraCodingLumaQT( *csSplit, partitioner, bestCostSoFar, subTuCounter, ispType, false, mtsCheckRangeFlag, mtsFirstCheckId, mtsLastCheckId );
-      subTuCounter += subTuCounter != -1 ? 1 : 0;
+      bool tmpValidReturnSplit = xRecurIntraCodingLumaQT( *csSplit, partitioner, false, mtsCheckRangeFlag, mtsFirstCheckId, mtsLastCheckId );
       if( sps.getUseLFNST() && !tmpValidReturnSplit )
       {
         splitIsSelected = false;
         break;
       }
 
-      if( !cu.ispMode )
-      {
-        csSplit->setDecomp( partitioner.currArea().Y() );
-      }
-      else if( CU::isISPFirst( cu, partitioner.currArea().Y(), COMPONENT_Y ) )
-      {
-        csSplit->setDecomp( cu.Y() );
-      }
+      csSplit->setDecomp(partitioner.currArea().Y());
+      
+      uiSplitCbfLuma |= TU::getCbfAtDepth(*csSplit->getTU(partitioner.currArea().lumaPos(), partitioner.chType, -1), COMPONENT_Y, partitioner.currTrDepth);
 
-      uiSplitCbfLuma |= TU::getCbfAtDepth( *csSplit->getTU( partitioner.currArea().lumaPos(), partitioner.chType, subTuCounter - 1 ), COMPONENT_Y, partitioner.currTrDepth );
-      if( cu.ispMode )
-      {
-        //exit condition if the accumulated cost is already larger than the best cost so far (no impact in RD performance)
-        if( csSplit->cost > bestCostSoFar )
-        {
-          earlySkipISP    = true;
-          splitIsSelected = false;
-          break;
-        }
-        else
-        {
-          //more restrictive exit condition
-          bool tuIsDividedInRows = CU::divideTuInRows( cu );
-          int nSubPartitions = tuIsDividedInRows ? cu.lheight() >> floorLog2(cu.firstTU->lheight()) : cu.lwidth() >> floorLog2(cu.firstTU->lwidth());
-          double threshold = nSubPartitions == 2 ? 0.95 : subTuCounter == 1 ? 0.83 : 0.91;
-          if( subTuCounter < nSubPartitions && csSplit->cost > bestCostSoFar*threshold )
-          {
-            earlySkipISP    = true;
-            splitIsSelected = false;
-            break;
-          }
-        }
-      }
     } while( partitioner.nextPart( *csSplit ) );
 
     partitioner.exitCurrSplit();
@@ -4108,7 +4043,7 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
       cuCtx.mtsLastScanPos = false;
 
       //----- determine rate and r-d cost -----
-      csSplit->fracBits = xGetIntraFracBitsQT( *csSplit, partitioner, true, false, cu.ispMode ? 0 : -1, ispType, &cuCtx );
+      csSplit->fracBits = xGetIntraFracBitsQT( *csSplit, partitioner, true, false, -1, TU_NO_ISP, &cuCtx );
 
       //--- update cost ---
       csSplit->cost     = m_pcRdCost->calcRdCost(csSplit->fracBits, csSplit->dist);
@@ -4125,16 +4060,8 @@ bool IntraSearch::xRecurIntraCodingLumaQT( CodingStructure &cs, Partitioner &par
       // otherwise this would've happened in useSubStructure
       cs.picture->getRecoBuf(currArea.Y()).copyFrom(cs.getRecoBuf(currArea.Y()));
       cs.picture->getPredBuf(currArea.Y()).copyFrom(cs.getPredBuf(currArea.Y()));
-
-      if( cu.ispMode && earlySkipISP )
-      {
-        cs.cost = MAX_DOUBLE;
-      }
-      else
-      {
-        cs.cost = m_pcRdCost->calcRdCost( cs.fracBits, cs.dist );
-        retVal = true;
-      }
+      cs.cost = m_pcRdCost->calcRdCost(cs.fracBits, cs.dist);
+      retVal = true;
     }
   }
   return retVal;
