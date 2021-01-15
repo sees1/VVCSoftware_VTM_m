@@ -58,7 +58,6 @@
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
 #define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
 #define FIX_SUBPICS_W_RPR                                 1 // Fix handling of RPR with subpictures (via scaling windows with no resolution change)
-#define JVET_R0264_IRAP_CONSTRAINT                        1 // when max_tid_il_ref_pic_plus1[i][j] is equal to 0, it would be prohibited to have mixtures of IRAP and non-IRAP NAL units in the picture
 #define JVET_T0053_ANNOTATED_REGIONS_SEI                  1 //Enable/disable the annotated regions SEI
 
 //########### place macros to be be kept below this line ###############
