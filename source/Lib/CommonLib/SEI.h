@@ -245,9 +245,7 @@ public:
   virtual ~SEIDecodedPictureHash() {}
 
   HashType method;
-#if FIX_TICKET_1405
   bool     singleCompFlag;
-#endif
 
   PictureHash m_pictureHash;
 };

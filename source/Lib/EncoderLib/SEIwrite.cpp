@@ -231,10 +231,8 @@ void SEIWriter::xWriteSEIDecodedPictureHash(const SEIDecodedPictureHash& sei)
   if (traceString != 0) //use of this variable is needed to avoid a compiler error with G++ 4.6.1
   {
     WRITE_CODE(sei.method, 8, "dph_sei_hash_type");
-#if FIX_TICKET_1405
     WRITE_CODE(sei.singleCompFlag, 1, "dph_sei_single_component_flag");
     WRITE_CODE(0, 7, "dph_sei_reserved_zero_7bits");
-#endif
     for(uint32_t i=0; i<uint32_t(sei.m_pictureHash.hash.size()); i++)
     {
       WRITE_CODE(sei.m_pictureHash.hash[i], 8, traceString);

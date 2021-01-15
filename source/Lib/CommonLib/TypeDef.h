@@ -55,7 +55,6 @@
 //########### place macros to be removed in next cycle below this line ###############
 
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-#define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
 #define FIX_SUBPICS_W_RPR                                 1 // Fix handling of RPR with subpictures (via scaling windows with no resolution change)
 
 //########### place macros to be be kept below this line ###############
