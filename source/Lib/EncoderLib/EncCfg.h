@@ -739,11 +739,9 @@ protected:
 #endif
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_T0064
   double      m_alfStrength;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
-#endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 #if JVET_O0756_CALCULATE_HDRMETRICS
@@ -1931,14 +1929,12 @@ public:
 #endif
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
-#if JVET_T0064
   void         setALFStrength( double s)                        { m_alfStrength = s; }
   double       getALFStrength()                                 const { return m_alfStrength; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }
   bool         getALFAllowPredefinedFilters()                   const { return m_alfAllowPredefinedFilters; }
   void         setCCALFStrength(double s)                       { m_ccalfStrength = s; }
   double       getCCALFStrength()                               const { return m_ccalfStrength; }
-#endif
   void         setUseCCALF( bool b )                                  { m_ccalf = b; }
   bool         getUseCCALF()                                    const { return m_ccalf; }
   void         setCCALFQpThreshold( int b )                           { m_ccalfQpThreshold = b; }
