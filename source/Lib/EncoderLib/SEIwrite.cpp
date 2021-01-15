@@ -458,11 +458,7 @@ void SEIWriter::xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBuf
       }
     }
   }
-#if !JVET_S0175_ASPECT5
-  WRITE_UVLC( sei.m_ptDisplayElementalPeriodsMinus1,          "pt_display_elemental_periods_minus1" );
-#else
   WRITE_CODE( sei.m_ptDisplayElementalPeriodsMinus1, 8,       "pt_display_elemental_periods_minus1" );
-#endif
 }
 
 void SEIWriter::xWriteSEIFrameFieldInfo(const SEIFrameFieldInfo& sei)
@@ -484,11 +480,7 @@ void SEIWriter::xWriteSEIFrameFieldInfo(const SEIFrameFieldInfo& sei)
     {
       WRITE_FLAG( sei.m_topFieldFirstFlag ? 1 : 0,            "ffi_top_field_first_flag" );
     }
-#if !JVET_S0175_ASPECT5
-    WRITE_UVLC( sei.m_displayElementalPeriodsMinus1,          "ffi_display_elemental_periods_minus1" );
-#else
     WRITE_CODE( sei.m_displayElementalPeriodsMinus1, 8,       "ffi_display_elemental_periods_minus1" );
-#endif
   }
   WRITE_CODE( sei.m_sourceScanType, 2,                        "ffi_source_scan_type" );
   WRITE_FLAG( sei.m_duplicateFlag ? 1 : 0,                    "ffi_duplicate_flag" );
