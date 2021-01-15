@@ -699,7 +699,6 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 
           CHECK( pcRefPic->temporalId > m_pcPic->temporalId, "The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall be present in the DPB and shall have TemporalId less than or equal to that of the current picture." );
         }
-#if JVET_R0046_IRAP_ASPECT2
         // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to
         // Max (0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] - 1 ), with refPicVpsLayerId equal to the value of
         // the nuh_layer_id of the referenced picture.
@@ -723,7 +722,6 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
                 "where currLayerIdx and refLayerIdx are equal to "
                 "GeneralLayerIdx[ nuh_layer_id ] and GeneralLayerIdx[ refpicLayerId ], respectively. ");
         }
-#endif
       }
     }
   }
