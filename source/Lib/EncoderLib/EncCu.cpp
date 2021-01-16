@@ -155,14 +155,26 @@ void EncCu::destroy()
   {
     for( unsigned h = 0; h < numHeights; h++ )
     {
-      if( m_pBestCS[w][h] ) m_pBestCS[w][h]->destroy();
-      if( m_pTempCS[w][h] ) m_pTempCS[w][h]->destroy();
+      if (m_pBestCS[w][h])
+      {
+        m_pBestCS[w][h]->destroy();
+      }
+      if (m_pTempCS[w][h])
+      {
+        m_pTempCS[w][h]->destroy();
+      }
 
       delete m_pBestCS[w][h];
       delete m_pTempCS[w][h];
 
-      if( m_pBestCS2[w][h] ) m_pBestCS2[w][h]->destroy();
-      if( m_pTempCS2[w][h] ) m_pTempCS2[w][h]->destroy();
+      if (m_pBestCS2[w][h])
+      {
+        m_pBestCS2[w][h]->destroy();
+      }
+      if (m_pTempCS2[w][h])
+      {
+        m_pTempCS2[w][h]->destroy();
+      }
 
       delete m_pBestCS2[w][h];
       delete m_pTempCS2[w][h];
@@ -209,13 +221,9 @@ void EncCu::destroy()
   }
 }
 
-
-
 EncCu::~EncCu()
 {
 }
-
-
 
 /** \param    pcEncLib      pointer of encoder class
  */
@@ -246,7 +254,6 @@ void EncCu::init( EncLib* pcEncLib, const SPS& sps PARL_PARAM( const int tId ) )
   m_pcInterSearch->setModeCtrl( m_modeCtrl );
   m_modeCtrl->setInterSearch(m_pcInterSearch);
   m_pcIntraSearch->setModeCtrl( m_modeCtrl );
-
 }
 
 // ====================================================================================================================
@@ -512,7 +519,6 @@ bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, 
 
     if( m_modeCtrl->useModeResult( encTestMode, tempCS, partitioner ) )
     {
-
       std::swap( tempCS, bestCS );
       // store temp best CI for next CU coding
       m_CurrCtx->best = m_CABACEstimator->getCtx();
@@ -524,7 +530,6 @@ bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, 
   // reset context states
   m_CABACEstimator->getCtx() = m_CurrCtx->start;
   return bestCSUpdated;
-
 }
 
 void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Partitioner& partitioner, double maxCostAllowed )
@@ -557,16 +562,16 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     }
     else
     {
-    if (isLuma(partitioner.chType))
-    {
-      compBegin = COMPONENT_Y;
-      numComp = 1;
-    }
-    else
-    {
-      compBegin = COMPONENT_Cb;
-      numComp = 2;
-    }
+      if (isLuma(partitioner.chType))
+      {
+        compBegin = COMPONENT_Y;
+        numComp   = 1;
+      }
+      else
+      {
+        compBegin = COMPONENT_Cb;
+        numComp   = 2;
+      }
     }
   }
   else
@@ -768,7 +773,9 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       xCheckRDCostMerge2Nx2N( tempCS, bestCS, partitioner, currTestMode );
       CodingUnit* cu = bestCS->getCU(partitioner.chType);
       if (cu)
-      cu->mmvdSkip = cu->skip == false ? false : cu->mmvdSkip;
+      {
+        cu->mmvdSkip = cu->skip == false ? false : cu->mmvdSkip;
+      }
     }
     else if( currTestMode.type == ETM_MERGE_GEO )
     {
@@ -1457,30 +1464,32 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
 
     if (isChromaEnabled(tempCS->pcv->chrFormat))
     {
-    partitioner.chType = CHANNEL_TYPE_CHROMA;
-    tempCS->treeType = partitioner.treeType = TREE_C;
+      partitioner.chType = CHANNEL_TYPE_CHROMA;
+      tempCS->treeType = partitioner.treeType = TREE_C;
 
-    m_CurrCtx++;
+      m_CurrCtx++;
 
-    const unsigned wIdx = gp_sizeIdxInfo->idxFrom( partitioner.currArea().lwidth() );
-    const unsigned hIdx = gp_sizeIdxInfo->idxFrom( partitioner.currArea().lheight() );
-    CodingStructure *tempCSChroma = m_pTempCS2[wIdx][hIdx];
-    CodingStructure *bestCSChroma = m_pBestCS2[wIdx][hIdx];
-    tempCS->initSubStructure( *tempCSChroma, partitioner.chType, partitioner.currArea(), false );
-    tempCS->initSubStructure( *bestCSChroma, partitioner.chType, partitioner.currArea(), false );
-    tempCS->treeType = TREE_D;
-    xCompressCU( tempCSChroma, bestCSChroma, partitioner );
+      const unsigned   wIdx         = gp_sizeIdxInfo->idxFrom(partitioner.currArea().lwidth());
+      const unsigned   hIdx         = gp_sizeIdxInfo->idxFrom(partitioner.currArea().lheight());
+      CodingStructure *tempCSChroma = m_pTempCS2[wIdx][hIdx];
+      CodingStructure *bestCSChroma = m_pBestCS2[wIdx][hIdx];
+      tempCS->initSubStructure(*tempCSChroma, partitioner.chType, partitioner.currArea(), false);
+      tempCS->initSubStructure(*bestCSChroma, partitioner.chType, partitioner.currArea(), false);
+      tempCS->treeType = TREE_D;
+      xCompressCU(tempCSChroma, bestCSChroma, partitioner);
 
-    //attach chromaCS to luma CS and update cost
-    bool keepResi = KEEP_PRED_AND_RESI_SIGNALS;
-    //bestCSChroma->treeType = tempCSChroma->treeType = TREE_C;
-    CHECK( bestCSChroma->treeType != TREE_C || tempCSChroma->treeType != TREE_C, "wrong treeType for chroma CS" );
-    tempCS->useSubStructure( *bestCSChroma, partitioner.chType, CS::getArea( *bestCSChroma, partitioner.currArea(), partitioner.chType ), KEEP_PRED_AND_RESI_SIGNALS, true, keepResi, true, true );
+      // attach chromaCS to luma CS and update cost
+      bool keepResi = KEEP_PRED_AND_RESI_SIGNALS;
+      // bestCSChroma->treeType = tempCSChroma->treeType = TREE_C;
+      CHECK(bestCSChroma->treeType != TREE_C || tempCSChroma->treeType != TREE_C, "wrong treeType for chroma CS");
+      tempCS->useSubStructure(*bestCSChroma, partitioner.chType,
+                              CS::getArea(*bestCSChroma, partitioner.currArea(), partitioner.chType),
+                              KEEP_PRED_AND_RESI_SIGNALS, true, keepResi, true, true);
 
-    //release tmp resource
-    tempCSChroma->releaseIntermediateData();
-    bestCSChroma->releaseIntermediateData();
-    //tempCS->picture->cs->releaseIntermediateData();
+      // release tmp resource
+      tempCSChroma->releaseIntermediateData();
+      bestCSChroma->releaseIntermediateData();
+      // tempCS->picture->cs->releaseIntermediateData();
       m_CurrCtx--;
     }
     tempCS->picture->cs->clearCuPuTuIdxMap( partitioner.currArea(), numCuPuTu[0], numCuPuTu[1], numCuPuTu[2], numCuPuTu + 3 );
@@ -1531,7 +1540,9 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
 
   // Check Delta QP bits for splitted structure
   if( !qgEnableChildren ) // check at deepest QG level only
-  xCheckDQP( *tempCS, partitioner, true );
+  {
+    xCheckDQP(*tempCS, partitioner, true);
+  }
 
   // If the configuration being tested exceeds the maximum number of bytes for a slice / slice-segment, then
   // a proper RD evaluation cannot be performed. Therefore, termination of the
@@ -1563,7 +1574,9 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
   xCheckBestMode( tempCS, bestCS, partitioner, encTestMode );
 
   if (isAffMVInfoSaved)
+  {
     m_pcInterSearch->addAffMVInfo(tmpMVInfo);
+  }
   if (!tempCS->slice->isIntra() && isUniMvInfoSaved)
   {
     m_pcInterSearch->addUniMvInfo(tmpUniMvInfo);
@@ -1832,7 +1845,10 @@ bool EncCu::xCheckRDCostIntra(CodingStructure *&tempCS, CodingStructure *&bestCS
             m_modeCtrl->setBestCostWithoutSplitFlags( tmpCostWithoutSplitFlags );
           }
 
-          if( !mtsFlag ) static_cast< double& >( costSize2Nx2NmtsFirstPass ) = tempCS->cost;
+          if (!mtsFlag)
+          {
+            static_cast<double &>(costSize2Nx2NmtsFirstPass) = tempCS->cost;
+          }
 
           if( sps.getUseLFNST() && !tempCS->cus.empty() )
           {
@@ -1938,7 +1954,9 @@ bool EncCu::xCheckRDCostIntra(CodingStructure *&tempCS, CodingStructure *&bestCS
     }
   } //trGrpIdx
   if(!adaptiveColorTrans)
-  m_modeCtrl->setBestNonDCT2Cost(bestNonDCT2Cost);
+  {
+    m_modeCtrl->setBestNonDCT2Cost(bestNonDCT2Cost);
+  }
   return foundZeroRootCbf;
 }
 
@@ -2087,7 +2105,10 @@ void EncCu::xCheckDQP( CodingStructure& cs, Partitioner& partitioner, bool bKeep
   if( hasResidual )
   {
     TempCtx ctxTemp( m_CtxCache );
-    if( !bKeepCtx ) ctxTemp = SubCtx( Ctx::DeltaQP, m_CABACEstimator->getCtx() );
+    if (!bKeepCtx)
+    {
+      ctxTemp = SubCtx(Ctx::DeltaQP, m_CABACEstimator->getCtx());
+    }
 
     m_CABACEstimator->resetBits();
     m_CABACEstimator->cu_qp_delta( *cuFirst, predQP, cuFirst->qp );
@@ -2095,8 +2116,10 @@ void EncCu::xCheckDQP( CodingStructure& cs, Partitioner& partitioner, bool bKeep
     cs.fracBits += m_CABACEstimator->getEstFracBits(); // dQP bits
     cs.cost      = m_pcRdCost->calcRdCost(cs.fracBits, cs.dist);
 
-
-    if( !bKeepCtx ) m_CABACEstimator->getCtx() = SubCtx( Ctx::DeltaQP, ctxTemp );
+    if (!bKeepCtx)
+    {
+      m_CABACEstimator->getCtx() = SubCtx(Ctx::DeltaQP, ctxTemp);
+    }
 
     // NOTE: reset QPs for CUs without residuals up to first coded CU
     for( const auto &cu : cs.cus )
@@ -2197,10 +2220,13 @@ void EncCu::xFillPCMBuffer( CodingUnit &cu )
         destination.copyFrom(tempOrgBuf);
       }
       else
+      {
         destination.copyFrom( source );
+      }
     }
   }
 }
+
 void EncCu::xCheckRDCostHashInter( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode )
 {
   bool isPerfectMatch = false;
@@ -2227,10 +2253,7 @@ void EncCu::xCheckRDCostHashInter( CodingStructure *&tempCS, CodingStructure *&b
 
     m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
 
-    xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0
-      , 0
-      , &equBcwCost
-    );
+    xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0, 0, &equBcwCost);
 
     if ( m_bestModeUpdated && bestCS->cost != MAX_DOUBLE )
     {
@@ -2277,9 +2300,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
     PredictionUnit pu( tempCS->area );
     pu.cu = &cu;
     pu.cs = tempCS;
-    PU::getInterMergeCandidates(pu, mergeCtx
-      , 0
-    );
+    PU::getInterMergeCandidates(pu, mergeCtx, 0);
     PU::getInterMMVDMergeCandidates(pu, mergeCtx);
     pu.regularMergeFlag = true;
   }
@@ -2289,15 +2310,15 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
     candHasNoResidual[ui] = false;
   }
 
-  bool                                        bestIsSkip = false;
-  bool                                        bestIsMMVDSkip = true;
-  PelUnitBuf                                  acMergeBuffer[MRG_MAX_NUM_CANDS];
-  PelUnitBuf                                  acMergeTmpBuffer[MRG_MAX_NUM_CANDS];
-  PelUnitBuf                                  acMergeRealBuffer[MMVD_MRG_MAX_RD_BUF_NUM];
-  PelUnitBuf *                                acMergeTempBuffer[MMVD_MRG_MAX_RD_NUM];
-  PelUnitBuf *                                singleMergeTempBuffer;
-  int                                         insertPos;
-  unsigned                                    uiNumMrgSATDCand = mergeCtx.numValidMergeCand + MMVD_ADD_NUM;
+  bool        bestIsSkip     = false;
+  bool        bestIsMMVDSkip = true;
+  PelUnitBuf  acMergeBuffer[MRG_MAX_NUM_CANDS];
+  PelUnitBuf  acMergeTmpBuffer[MRG_MAX_NUM_CANDS];
+  PelUnitBuf  acMergeRealBuffer[MMVD_MRG_MAX_RD_BUF_NUM];
+  PelUnitBuf *acMergeTempBuffer[MMVD_MRG_MAX_RD_NUM];
+  PelUnitBuf *singleMergeTempBuffer;
+  int         insertPos;
+  unsigned    uiNumMrgSATDCand = mergeCtx.numValidMergeCand + MMVD_ADD_NUM;
 
   struct ModeInfo
   {
@@ -2539,7 +2560,9 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           int baseIdx = mmvdMergeCand / MMVD_MAX_REFINE_NUM;
           int refineStep = (mmvdMergeCand - (baseIdx * MMVD_MAX_REFINE_NUM)) / 4;
           if (refineStep >= m_pcEncCfg->getMmvdDisNum())
+          {
             continue;
+          }
           mergeCtx.setMmvdMergeCandiInfo(pu, mmvdMergeCand);
 
           PU::spanMotionInfo(pu, mergeCtx);
@@ -2590,7 +2613,9 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
             pu.intraDir[0] = PLANAR_IDX;
             pu.intraDir[1] = DM_CHROMA_IDX;
             if (pu.chromaSize().width == 2)
+            {
               continue;
+            }
             uint32_t bufIdx = 0;
             m_pcIntraSearch->initIntraPatternChType(*pu.cu, pu.Cb());
             m_pcIntraSearch->predIntraAng(COMPONENT_Cb, pu.cs->getPredBuf(pu).Cb(), pu);
@@ -2723,22 +2748,24 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           m_pcIntraSearch->geneWeightedPred(COMPONENT_Y, tmpBuf, pu, m_pcIntraSearch->getPredictorPtr2(COMPONENT_Y, bufIdx));
           if (isChromaEnabled(pu.chromaFormat))
           {
-          if (pu.chromaSize().width > 2)
-          {
-          tmpBuf = tempCS->getPredBuf(pu).Cb();
-          tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cb());
-          m_pcIntraSearch->geneWeightedPred(COMPONENT_Cb, tmpBuf, pu, m_pcIntraSearch->getPredictorPtr2(COMPONENT_Cb, bufIdx));
-          tmpBuf = tempCS->getPredBuf(pu).Cr();
-          tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cr());
-          m_pcIntraSearch->geneWeightedPred(COMPONENT_Cr, tmpBuf, pu, m_pcIntraSearch->getPredictorPtr2(COMPONENT_Cr, bufIdx));
-          }
-          else
-          {
-            tmpBuf = tempCS->getPredBuf(pu).Cb();
-            tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cb());
-            tmpBuf = tempCS->getPredBuf(pu).Cr();
-            tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cr());
-          }
+            if (pu.chromaSize().width > 2)
+            {
+              tmpBuf = tempCS->getPredBuf(pu).Cb();
+              tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cb());
+              m_pcIntraSearch->geneWeightedPred(COMPONENT_Cb, tmpBuf, pu,
+                                                m_pcIntraSearch->getPredictorPtr2(COMPONENT_Cb, bufIdx));
+              tmpBuf = tempCS->getPredBuf(pu).Cr();
+              tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cr());
+              m_pcIntraSearch->geneWeightedPred(COMPONENT_Cr, tmpBuf, pu,
+                                                m_pcIntraSearch->getPredictorPtr2(COMPONENT_Cr, bufIdx));
+            }
+            else
+            {
+              tmpBuf = tempCS->getPredBuf(pu).Cb();
+              tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cb());
+              tmpBuf = tempCS->getPredBuf(pu).Cr();
+              tmpBuf.copyFrom(acMergeTmpBuffer[uiMergeCand].Cr());
+            }
           }
         }
         else
@@ -2876,7 +2903,9 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   MrgMv = new Mv[maxNumMergeCandidates];
   isSkipThisCand = new bool[maxNumMergeCandidates];
   for (int i = 0; i < maxNumMergeCandidates; i++)
+  {
     isSkipThisCand[i] = false;
+  }
   for (uint8_t mergeCand = 0; mergeCand < maxNumMergeCandidates; mergeCand++)
   {
     geoBuffer[mergeCand] = m_acMergeBuffer[mergeCand].getBuf(localUnitArea);
@@ -2979,13 +3008,17 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       unsigned int mergeCand1 = m_GeoModeTest[GeoMotionIdx].m_candIdx1;
       double tempCost = m_GeoCostList.singleDistList[0][splitDir][mergeCand0].cost + m_GeoCostList.singleDistList[1][splitDir][mergeCand1].cost;
       if (tempCost > bestWholeBlkCost)
+      {
         continue;
+      }
       tempCost = tempCost + (double)bitsCandTB * sqrtLambdaForFirstPass;
       comboList.list.push_back(GeoMergeCombo(splitDir, mergeCand0, mergeCand1, tempCost));
     }
   }
   if (comboList.list.empty())
+  {
     return;
+  }
   comboList.sortByCost();
   bool geocandHasNoResidual[GEO_MAX_TRY_WEIGHTED_SAD];
   for (int mergeCand = 0; mergeCand < GEO_MAX_TRY_WEIGHTED_SAD; mergeCand++)
@@ -3432,106 +3465,108 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     RdModeList[i] = i;
   }
 
-  //{
-    static_vector<double, MRG_MAX_NUM_CANDS>  candCostList(MRG_MAX_NUM_CANDS, MAX_DOUBLE);
-    // 1. Pass: get SATD-cost for selected candidates and reduce their count
+  static_vector<double, MRG_MAX_NUM_CANDS> candCostList(MRG_MAX_NUM_CANDS, MAX_DOUBLE);
+  // 1. Pass: get SATD-cost for selected candidates and reduce their count
+  {
+    const double sqrtLambdaForFirstPass = m_pcRdCost->getMotionLambda();
+
+    CodingUnit &cu = tempCS->addCU(CS::getArea(*tempCS, tempCS->area, (const ChannelType) partitioner.chType),
+                                   (const ChannelType) partitioner.chType);
+
+    partitioner.setCUData(cu);
+    cu.slice       = tempCS->slice;
+    cu.tileIdx     = tempCS->pps->getTileIdx(tempCS->area.lumaPos());
+    cu.skip        = false;
+    cu.predMode    = MODE_IBC;
+    cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
+    cu.qp          = encTestMode.qp;
+    cu.mmvdSkip    = false;
+    cu.geoFlag     = false;
+    DistParam       distParam;
+    const bool      bUseHadamard = !cu.slice->getDisableSATDForRD();
+    PredictionUnit &pu           = tempCS->addPU(cu, partitioner.chType);   // tempCS->addPU(cu);
+    pu.mmvdMergeFlag             = false;
+    pu.regularMergeFlag          = false;
+    Picture *     refPic         = pu.cu->slice->getPic();
+    const CPelBuf refBuf         = refPic->getRecoBuf(pu.blocks[COMPONENT_Y]);
+    const Pel *   piRefSrch      = refBuf.buf;
+    if (tempCS->slice->getLmcsEnabledFlag() && m_pcReshape->getCTUFlag())
     {
-      const double sqrtLambdaForFirstPass = m_pcRdCost->getMotionLambda( );
-
-      CodingUnit &cu = tempCS->addCU(CS::getArea(*tempCS, tempCS->area, (const ChannelType)partitioner.chType), (const ChannelType)partitioner.chType);
-
-      partitioner.setCUData(cu);
-      cu.slice = tempCS->slice;
-      cu.tileIdx = tempCS->pps->getTileIdx( tempCS->area.lumaPos() );
-      cu.skip = false;
-      cu.predMode = MODE_IBC;
-      cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
-      cu.qp = encTestMode.qp;
-      cu.mmvdSkip = false;
-      cu.geoFlag = false;
-      DistParam distParam;
-      const bool bUseHadamard = !cu.slice->getDisableSATDForRD();
-      PredictionUnit &pu = tempCS->addPU(cu, partitioner.chType); //tempCS->addPU(cu);
-      pu.mmvdMergeFlag = false;
-      pu.regularMergeFlag = false;
-      Picture* refPic = pu.cu->slice->getPic();
-      const CPelBuf refBuf = refPic->getRecoBuf(pu.blocks[COMPONENT_Y]);
-      const Pel*        piRefSrch = refBuf.buf;
-      if (tempCS->slice->getLmcsEnabledFlag() && m_pcReshape->getCTUFlag())
-      {
-        const CompArea &area = cu.blocks[COMPONENT_Y];
-        CompArea    tmpArea(COMPONENT_Y, area.chromaFormat, Position(0, 0), area.size());
-        PelBuf tmpLuma = m_tmpStorageLCU->getBuf(tmpArea);
-        tmpLuma.copyFrom(tempCS->getOrgBuf().Y());
-        tmpLuma.rspSignal(m_pcReshape->getFwdLUT());
-        m_pcRdCost->setDistParam(distParam, tmpLuma, refBuf, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y, bUseHadamard);
-      }
-      else
-      m_pcRdCost->setDistParam(distParam, tempCS->getOrgBuf().Y(), refBuf, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y, bUseHadamard);
-      int refStride = refBuf.stride;
-      const UnitArea localUnitArea(tempCS->area.chromaFormat, Area(0, 0, tempCS->area.Y().width, tempCS->area.Y().height));
-      int numValidBv = mergeCtx.numValidMergeCand;
-      for (unsigned int mergeCand = 0; mergeCand < mergeCtx.numValidMergeCand; mergeCand++)
-      {
-        mergeCtx.setMergeInfo(pu, mergeCand); // set bv info in merge mode
-        const int cuPelX = pu.Y().x;
-        const int cuPelY = pu.Y().y;
-        int roiWidth = pu.lwidth();
-        int roiHeight = pu.lheight();
-        const int picWidth = pu.cs->slice->getPPS()->getPicWidthInLumaSamples();
-        const int picHeight = pu.cs->slice->getPPS()->getPicHeightInLumaSamples();
-        const unsigned int  lcuWidth = pu.cs->slice->getSPS()->getMaxCUWidth();
-        int xPred = pu.bv.getHor();
-        int yPred = pu.bv.getVer();
-
-        if (!m_pcInterSearch->searchBv(pu, cuPelX, cuPelY, roiWidth, roiHeight, picWidth, picHeight, xPred, yPred, lcuWidth)) // not valid bv derived
-        {
-          numValidBv--;
-          continue;
-        }
-        PU::spanMotionInfo(pu, mergeCtx);
-
-        distParam.cur.buf = piRefSrch + refStride * yPred + xPred;
-
-        Distortion sad = distParam.distFunc(distParam);
-        unsigned int bitsCand = mergeCand + 1;
-        if (mergeCand == tempCS->sps->getMaxNumMergeCand() - 1)
-        {
-          bitsCand--;
-        }
-        double cost = (double)sad + (double)bitsCand * sqrtLambdaForFirstPass;
-
-        updateCandList(mergeCand, cost, RdModeList, candCostList
-         , numMrgSATDCand);
-      }
-
-      // Try to limit number of candidates using SATD-costs
-      if (numValidBv)
-      {
-        numMrgSATDCand = numValidBv;
-        for (unsigned int i = 1; i < numValidBv; i++)
-        {
-          if (candCostList[i] > MRG_FAST_RATIO*candCostList[0])
-          {
-            numMrgSATDCand = i;
-            break;
-          }
-        }
-      }
-      else
-      {
-        tempCS->dist = 0;
-        tempCS->fracBits = 0;
-        tempCS->cost = MAX_DOUBLE;
-        tempCS->costDbOffset = 0;
-        tempCS->initStructData(encTestMode.qp);
-        return;
-      }
-
-      tempCS->initStructData(encTestMode.qp);
+      const CompArea &area = cu.blocks[COMPONENT_Y];
+      CompArea        tmpArea(COMPONENT_Y, area.chromaFormat, Position(0, 0), area.size());
+      PelBuf          tmpLuma = m_tmpStorageLCU->getBuf(tmpArea);
+      tmpLuma.copyFrom(tempCS->getOrgBuf().Y());
+      tmpLuma.rspSignal(m_pcReshape->getFwdLUT());
+      m_pcRdCost->setDistParam(distParam, tmpLuma, refBuf, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y,
+                               bUseHadamard);
     }
-  //}
+    else
+    {
+      m_pcRdCost->setDistParam(distParam, tempCS->getOrgBuf().Y(), refBuf, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y, bUseHadamard);
+    }
+    int            refStride = refBuf.stride;
+    const UnitArea localUnitArea(tempCS->area.chromaFormat,
+                                 Area(0, 0, tempCS->area.Y().width, tempCS->area.Y().height));
+    int            numValidBv = mergeCtx.numValidMergeCand;
+    for (unsigned int mergeCand = 0; mergeCand < mergeCtx.numValidMergeCand; mergeCand++)
+    {
+      mergeCtx.setMergeInfo(pu, mergeCand);   // set bv info in merge mode
+      const int          cuPelX    = pu.Y().x;
+      const int          cuPelY    = pu.Y().y;
+      int                roiWidth  = pu.lwidth();
+      int                roiHeight = pu.lheight();
+      const int          picWidth  = pu.cs->slice->getPPS()->getPicWidthInLumaSamples();
+      const int          picHeight = pu.cs->slice->getPPS()->getPicHeightInLumaSamples();
+      const unsigned int lcuWidth  = pu.cs->slice->getSPS()->getMaxCUWidth();
+      int                xPred     = pu.bv.getHor();
+      int                yPred     = pu.bv.getVer();
 
+      if (!m_pcInterSearch->searchBv(pu, cuPelX, cuPelY, roiWidth, roiHeight, picWidth, picHeight, xPred, yPred,
+                                     lcuWidth))   // not valid bv derived
+      {
+        numValidBv--;
+        continue;
+      }
+      PU::spanMotionInfo(pu, mergeCtx);
+
+      distParam.cur.buf = piRefSrch + refStride * yPred + xPred;
+
+      Distortion   sad      = distParam.distFunc(distParam);
+      unsigned int bitsCand = mergeCand + 1;
+      if (mergeCand == tempCS->sps->getMaxNumMergeCand() - 1)
+      {
+        bitsCand--;
+      }
+      double cost = (double) sad + (double) bitsCand * sqrtLambdaForFirstPass;
+
+      updateCandList(mergeCand, cost, RdModeList, candCostList, numMrgSATDCand);
+    }
+
+    // Try to limit number of candidates using SATD-costs
+    if (numValidBv)
+    {
+      numMrgSATDCand = numValidBv;
+      for (unsigned int i = 1; i < numValidBv; i++)
+      {
+        if (candCostList[i] > MRG_FAST_RATIO * candCostList[0])
+        {
+          numMrgSATDCand = i;
+          break;
+        }
+      }
+    }
+    else
+    {
+      tempCS->dist         = 0;
+      tempCS->fracBits     = 0;
+      tempCS->cost         = MAX_DOUBLE;
+      tempCS->costDbOffset = 0;
+      tempCS->initStructData(encTestMode.qp);
+      return;
+    }
+
+    tempCS->initStructData(encTestMode.qp);
+  }
 
   const unsigned int iteration = 2;
   m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
@@ -3546,7 +3581,6 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
         if (!(bestIsSkip && (numResidualPass == 0)))
         {
           {
-
             // first get merge candidates
             CodingUnit &cu = tempCS->addCU(CS::getArea(*tempCS, tempCS->area, (const ChannelType)partitioner.chType), (const ChannelType)partitioner.chType);
 
@@ -3602,13 +3636,17 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
             tempCS->initStructData(encTestMode.qp);
           }
 
-            if (m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip)
+          if (m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip)
+          {
+            if (bestCS->getCU(partitioner.chType) == NULL)
             {
-              if (bestCS->getCU(partitioner.chType) == NULL)
-                bestIsSkip = 0;
-              else
+              bestIsSkip = 0;
+            }
+            else
+            {
               bestIsSkip = bestCS->getCU(partitioner.chType)->rootCbf == 0;
             }
+          }
         }
       }
     }
@@ -3626,86 +3664,82 @@ void EncCu::xCheckRDCostIBCMode(CodingStructure *&tempCS, CodingStructure *&best
     return;
   }
 
-    tempCS->initStructData(encTestMode.qp);
+  tempCS->initStructData(encTestMode.qp);
 
-    m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
+  m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
 
-    CodingUnit &cu = tempCS->addCU(CS::getArea(*tempCS, tempCS->area, partitioner.chType), partitioner.chType);
+  CodingUnit &cu = tempCS->addCU(CS::getArea(*tempCS, tempCS->area, partitioner.chType), partitioner.chType);
 
-    partitioner.setCUData(cu);
-    cu.slice = tempCS->slice;
-    cu.tileIdx = tempCS->pps->getTileIdx( tempCS->area.lumaPos() );
-    cu.skip = false;
-    cu.predMode = MODE_IBC;
-    cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
-    cu.qp = encTestMode.qp;
-    cu.imv = 0;
-    cu.sbtInfo = 0;
+  partitioner.setCUData(cu);
+  cu.slice       = tempCS->slice;
+  cu.tileIdx     = tempCS->pps->getTileIdx(tempCS->area.lumaPos());
+  cu.skip        = false;
+  cu.predMode    = MODE_IBC;
+  cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
+  cu.qp          = encTestMode.qp;
+  cu.imv         = 0;
+  cu.sbtInfo     = 0;
 
-    CU::addPUs(cu);
+  CU::addPUs(cu);
 
-    m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
+  m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
 
-    PredictionUnit& pu = *cu.firstPU;
-    cu.mmvdSkip = false;
-    pu.mmvdMergeFlag = false;
-    pu.regularMergeFlag = false;
+  PredictionUnit &pu  = *cu.firstPU;
+  cu.mmvdSkip         = false;
+  pu.mmvdMergeFlag    = false;
+  pu.regularMergeFlag = false;
 
-    pu.intraDir[0] = DC_IDX; // set intra pred for ibc block
-    pu.intraDir[1] = PLANAR_IDX; // set intra pred for ibc block
+  pu.intraDir[0] = DC_IDX;       // set intra pred for ibc block
+  pu.intraDir[1] = PLANAR_IDX;   // set intra pred for ibc block
 
-    pu.interDir = 1; // use list 0 for IBC mode
-    pu.refIdx[REF_PIC_LIST_0] = MAX_NUM_REF; // last idx in the list
-      bool bValid = m_pcInterSearch->predIBCSearch(cu, partitioner, m_ctuIbcSearchRangeX, m_ctuIbcSearchRangeY, m_ibcHashMap);
+  pu.interDir               = 1;             // use list 0 for IBC mode
+  pu.refIdx[REF_PIC_LIST_0] = MAX_NUM_REF;   // last idx in the list
+  bool bValid =
+    m_pcInterSearch->predIBCSearch(cu, partitioner, m_ctuIbcSearchRangeX, m_ctuIbcSearchRangeY, m_ibcHashMap);
 
-      if (bValid)
-      {
-        PU::spanMotionInfo(pu);
-        const bool chroma = !pu.cu->isSepTree();
-        //  MC
-        m_pcInterSearch->motionCompensation(pu, REF_PIC_LIST_0, true, chroma);
+  if (bValid)
+  {
+    PU::spanMotionInfo(pu);
+    const bool chroma = !pu.cu->isSepTree();
+    //  MC
+    m_pcInterSearch->motionCompensation(pu, REF_PIC_LIST_0, true, chroma);
 
-        {
+    m_pcInterSearch->encodeResAndCalcRdInterCU(*tempCS, partitioner, false, true, chroma);
+    if (tempCS->slice->getSPS()->getUseColorTrans())
+    {
+      bestCS->tmpColorSpaceCost       = tempCS->tmpColorSpaceCost;
+      bestCS->firstColorSpaceSelected = tempCS->firstColorSpaceSelected;
+    }
 
-          m_pcInterSearch->encodeResAndCalcRdInterCU(*tempCS, partitioner, false, true, chroma);
-          if (tempCS->slice->getSPS()->getUseColorTrans())
-          {
-            bestCS->tmpColorSpaceCost = tempCS->tmpColorSpaceCost;
-            bestCS->firstColorSpaceSelected = tempCS->firstColorSpaceSelected;
-          }
-
-          xEncodeDontSplit(*tempCS, partitioner);
+    xEncodeDontSplit(*tempCS, partitioner);
 
 #if ENABLE_QPA_SUB_CTU
-          xCheckDQP (*tempCS, partitioner);
+    xCheckDQP(*tempCS, partitioner);
 #else
-          // this if-check is redundant
-          if (tempCS->pps->getUseDQP() && partitioner.currQgEnable())
-          {
-            xCheckDQP(*tempCS, partitioner);
-          }
+    // this if-check is redundant
+    if (tempCS->pps->getUseDQP() && partitioner.currQgEnable())
+    {
+      xCheckDQP(*tempCS, partitioner);
+    }
 #endif
-          xCheckChromaQPOffset( *tempCS, partitioner );
+    xCheckChromaQPOffset(*tempCS, partitioner);
 
-          tempCS->useDbCost = m_pcEncCfg->getUseEncDbOpt();
-          if ( m_bestModeUpdated )
-          {
-            xCalDebCost( *tempCS, partitioner );
-          }
+    tempCS->useDbCost = m_pcEncCfg->getUseEncDbOpt();
+    if (m_bestModeUpdated)
+    {
+      xCalDebCost(*tempCS, partitioner);
+    }
 
-          DTRACE_MODE_COST(*tempCS, m_pcRdCost->getLambda());
-          xCheckBestMode(tempCS, bestCS, partitioner, encTestMode);
-
-        }
-
-      } // bValid
-      else
-      {
-        tempCS->dist = 0;
-        tempCS->fracBits = 0;
-        tempCS->cost = MAX_DOUBLE;
-        tempCS->costDbOffset = 0;
-      }
+    DTRACE_MODE_COST(*tempCS, m_pcRdCost->getLambda());
+    xCheckBestMode(tempCS, bestCS, partitioner, encTestMode);
+  }   // bValid
+  else
+  {
+    tempCS->dist         = 0;
+    tempCS->fracBits     = 0;
+    tempCS->cost         = MAX_DOUBLE;
+    tempCS->costDbOffset = 0;
+  }
 }
   // check ibc mode in encoder RD
   //////////////////////////////////////////////////////////////////////////////////////////////
@@ -3756,79 +3790,76 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
       }
     }
 
-  CodingUnit &cu      = tempCS->addCU( tempCS->area, partitioner.chType );
+    CodingUnit &cu = tempCS->addCU(tempCS->area, partitioner.chType);
 
-  partitioner.setCUData( cu );
-  cu.slice            = tempCS->slice;
-  cu.tileIdx          = tempCS->pps->getTileIdx( tempCS->area.lumaPos() );
-  cu.skip             = false;
-  cu.mmvdSkip = false;
-//cu.affine
-  cu.predMode         = MODE_INTER;
-  cu.chromaQpAdj      = m_cuChromaQpOffsetIdxPlus1;
-  cu.qp               = encTestMode.qp;
-  CU::addPUs( cu );
+    partitioner.setCUData(cu);
+    cu.slice    = tempCS->slice;
+    cu.tileIdx  = tempCS->pps->getTileIdx(tempCS->area.lumaPos());
+    cu.skip     = false;
+    cu.mmvdSkip = false;
+    // cu.affine
+    cu.predMode    = MODE_INTER;
+    cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
+    cu.qp          = encTestMode.qp;
+    CU::addPUs(cu);
 
-  cu.BcwIdx = g_BcwSearchOrder[bcwLoopIdx];
-  uint8_t bcwIdx = cu.BcwIdx;
-  bool  testBcw = (bcwIdx != BCW_DEFAULT);
+    cu.BcwIdx       = g_BcwSearchOrder[bcwLoopIdx];
+    uint8_t bcwIdx  = cu.BcwIdx;
+    bool    testBcw = (bcwIdx != BCW_DEFAULT);
 
-  m_pcInterSearch->predInterSearch( cu, partitioner );
+    m_pcInterSearch->predInterSearch(cu, partitioner);
 
-  bcwIdx = CU::getValidBcwIdx(cu);
-  if( testBcw && bcwIdx == BCW_DEFAULT ) // Enabled Bcw but the search results is uni.
-  {
-    tempCS->initStructData(encTestMode.qp);
-    continue;
-  }
-  CHECK(!(testBcw || (!testBcw && bcwIdx == BCW_DEFAULT)), " !( bTestBcw || (!bTestBcw && bcwIdx == BCW_DEFAULT ) )");
-
-  bool isEqualUni = false;
-  if( m_pcEncCfg->getUseBcwFast() )
-  {
-    if( cu.firstPU->interDir != 3 && testBcw == 0 )
+    bcwIdx = CU::getValidBcwIdx(cu);
+    if (testBcw && bcwIdx == BCW_DEFAULT)   // Enabled Bcw but the search results is uni.
     {
-      isEqualUni = true;
+      tempCS->initStructData(encTestMode.qp);
+      continue;
     }
-  }
+    CHECK(!(testBcw || (!testBcw && bcwIdx == BCW_DEFAULT)), " !( bTestBcw || (!bTestBcw && bcwIdx == BCW_DEFAULT ) )");
 
-  xEncodeInterResidual( tempCS, bestCS, partitioner, encTestMode, 0
-                        , 0
-                        , &equBcwCost
-  );
+    bool isEqualUni = false;
+    if (m_pcEncCfg->getUseBcwFast())
+    {
+      if (cu.firstPU->interDir != 3 && testBcw == 0)
+      {
+        isEqualUni = true;
+      }
+    }
 
-  if( g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT )
-    m_pcInterSearch->setAffineModeSelected((bestCS->cus.front()->affine && !(bestCS->cus.front()->firstPU->mergeFlag)));
+    xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0, 0, &equBcwCost);
 
-  tempCS->initStructData(encTestMode.qp);
+    if (g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT)
+    {
+      m_pcInterSearch->setAffineModeSelected(
+        (bestCS->cus.front()->affine && !(bestCS->cus.front()->firstPU->mergeFlag)));
+    }
 
-  double skipTH = MAX_DOUBLE;
-  skipTH = (m_pcEncCfg->getUseBcwFast() ? 1.05 : MAX_DOUBLE);
-  if( equBcwCost > curBestCost * skipTH )
-  {
-    break;
-  }
+    tempCS->initStructData(encTestMode.qp);
 
-  if( m_pcEncCfg->getUseBcwFast() )
-  {
-    if( isEqualUni == true && m_pcEncCfg->getIntraPeriod() == -1 )
+    double skipTH = MAX_DOUBLE;
+    skipTH        = (m_pcEncCfg->getUseBcwFast() ? 1.05 : MAX_DOUBLE);
+    if (equBcwCost > curBestCost * skipTH)
     {
       break;
     }
-  }
-  if( g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT && xIsBcwSkip(cu) && m_pcEncCfg->getUseBcwFast() )
-  {
-    break;
-  }
- }  // for( UChar bcwLoopIdx = 0; bcwLoopIdx < bcwLoopNum; bcwLoopIdx++ )
+
+    if (m_pcEncCfg->getUseBcwFast())
+    {
+      if (isEqualUni == true && m_pcEncCfg->getIntraPeriod() == -1)
+      {
+        break;
+      }
+    }
+    if (g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT && xIsBcwSkip(cu) && m_pcEncCfg->getUseBcwFast())
+    {
+      break;
+    }
+  }   // for( UChar bcwLoopIdx = 0; bcwLoopIdx < bcwLoopNum; bcwLoopIdx++ )
   if ( m_bestModeUpdated && bestCS->cost != MAX_DOUBLE )
   {
     xCalDebCost( *bestCS, partitioner );
   }
 }
-
-
-
 
 bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode, double &bestIntPelCost)
 {
@@ -3977,10 +4008,7 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
     }
   }
 
-  xEncodeInterResidual( tempCS, bestCS, partitioner, encTestModeBase, 0
-                        , 0
-                        , &equBcwCost
-  );
+  xEncodeInterResidual(tempCS, bestCS, partitioner, encTestModeBase, 0, 0, &equBcwCost);
 
   if( cu.imv == IMV_FPEL && tempCS->cost < bestIntPelCost )
   {
@@ -4257,7 +4285,9 @@ void EncCu::xEncodeInterResidual(   CodingStructure *&tempCS
         mvShift = normalShiftTab[cu->imv];
         Mv signaledmvd(pu.mvd[refList].getHor() >> mvShift, pu.mvd[refList].getVer() >> mvShift);
         if (!((signaledmvd.getHor() >= MVD_MIN) && (signaledmvd.getHor() <= MVD_MAX)) || !((signaledmvd.getVer() >= MVD_MIN) && (signaledmvd.getVer() <= MVD_MAX)))
+        {
           return;
+        }
       }
       else
       {
@@ -4266,7 +4296,9 @@ void EncCu::xEncodeInterResidual(   CodingStructure *&tempCS
           mvShift = affineShiftTab[cu->imv];
           Mv signaledmvd(pu.mvdAffi[refList][ctrlP].getHor() >> mvShift, pu.mvdAffi[refList][ctrlP].getVer() >> mvShift);
           if (!((signaledmvd.getHor() >= MVD_MIN) && (signaledmvd.getHor() <= MVD_MAX)) || !((signaledmvd.getVer() >= MVD_MIN) && (signaledmvd.getVer() <= MVD_MAX)))
+          {
             return;
+          }
         }
       }
     }
@@ -4617,11 +4649,12 @@ void EncCu::xEncodeDontSplit( CodingStructure &cs, Partitioner &partitioner )
 
   m_CABACEstimator->split_cu_mode( CU_DONT_SPLIT, cs, partitioner );
   if( partitioner.treeType == TREE_C )
+  {
     CHECK( m_CABACEstimator->getEstFracBits() != 0, "must be 0 bit" );
+  }
 
   cs.fracBits += m_CABACEstimator->getEstFracBits(); // split bits
   cs.cost      = m_pcRdCost->calcRdCost( cs.fracBits, cs.dist );
-
 }
 
 #if REUSE_CU_RESULTS
@@ -4637,9 +4670,7 @@ void EncCu::xReuseCachedResult( CodingStructure *&tempCS, CodingStructure *&best
     CodingUnit& cu = *tempCS->cus.front();
     partitioner.setCUData( cu );
 
-    if( CU::isIntra( cu )
-    || CU::isPLT(cu)
-    )
+    if (CU::isIntra(cu) || CU::isPLT(cu))
     {
       xReconIntraQT( cu );
     }
@@ -4658,42 +4689,48 @@ void EncCu::xReuseCachedResult( CodingStructure *&tempCS, CodingStructure *&best
     }
     else
     {
-    const SPS &sps = *tempCS->sps;
-    const int  numValidComponents = getNumberValidComponents( tempCS->area.chromaFormat );
+      const SPS &sps                = *tempCS->sps;
+      const int  numValidComponents = getNumberValidComponents(tempCS->area.chromaFormat);
 
-    for( int comp = 0; comp < numValidComponents; comp++ )
-    {
-      const ComponentID compID = ComponentID( comp );
-
-      if( partitioner.isSepTree( *tempCS ) && toChannelType( compID ) != partitioner.chType )
+      for (int comp = 0; comp < numValidComponents; comp++)
       {
-        continue;
-      }
+        const ComponentID compID = ComponentID(comp);
 
-      CPelBuf reco = tempCS->getRecoBuf( compID );
-      CPelBuf org  = tempCS->getOrgBuf ( compID );
+        if (partitioner.isSepTree(*tempCS) && toChannelType(compID) != partitioner.chType)
+        {
+          continue;
+        }
+
+        CPelBuf reco = tempCS->getRecoBuf(compID);
+        CPelBuf org  = tempCS->getOrgBuf(compID);
 
 #if WCG_EXT
-      if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || (
-        m_pcEncCfg->getLmcs() && (tempCS->slice->getLmcsEnabledFlag() && m_pcReshape->getCTUFlag())))
-      {
-        const CPelBuf orgLuma = tempCS->getOrgBuf(tempCS->area.blocks[COMPONENT_Y]);
-        if (compID == COMPONENT_Y && !(m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled()))
+        if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled()
+            || (m_pcEncCfg->getLmcs() && (tempCS->slice->getLmcsEnabledFlag() && m_pcReshape->getCTUFlag())))
         {
-          const CompArea &area = cu.blocks[COMPONENT_Y];
-          CompArea    tmpArea(COMPONENT_Y, area.chromaFormat, Position(0, 0), area.size());
-          PelBuf tmpRecLuma = m_tmpStorageLCU->getBuf(tmpArea);
-          tmpRecLuma.copyFrom(reco);
-          tmpRecLuma.rspSignal(m_pcReshape->getInvLUT());
-          finalDistortion += m_pcRdCost->getDistPart(org, tmpRecLuma, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE_WTD, &orgLuma);
+          const CPelBuf orgLuma = tempCS->getOrgBuf(tempCS->area.blocks[COMPONENT_Y]);
+          if (compID == COMPONENT_Y && !(m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled()))
+          {
+            const CompArea &area = cu.blocks[COMPONENT_Y];
+            CompArea        tmpArea(COMPONENT_Y, area.chromaFormat, Position(0, 0), area.size());
+            PelBuf          tmpRecLuma = m_tmpStorageLCU->getBuf(tmpArea);
+            tmpRecLuma.copyFrom(reco);
+            tmpRecLuma.rspSignal(m_pcReshape->getInvLUT());
+            finalDistortion += m_pcRdCost->getDistPart(org, tmpRecLuma, sps.getBitDepth(toChannelType(compID)), compID,
+                                                       DF_SSE_WTD, &orgLuma);
+          }
+          else
+          {
+            finalDistortion +=
+              m_pcRdCost->getDistPart(org, reco, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE_WTD, &orgLuma);
+          }
         }
         else
-        finalDistortion += m_pcRdCost->getDistPart( org, reco, sps.getBitDepth( toChannelType( compID ) ), compID, DF_SSE_WTD, &orgLuma );
-      }
-      else
 #endif
-      finalDistortion += m_pcRdCost->getDistPart( org, reco, sps.getBitDepth( toChannelType( compID ) ), compID, DF_SSE );
-    }
+        {
+          finalDistortion += m_pcRdCost->getDistPart(org, reco, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE);
+        }
+      }
     }
 
     m_CABACEstimator->getCtx() = m_CurrCtx->start;
