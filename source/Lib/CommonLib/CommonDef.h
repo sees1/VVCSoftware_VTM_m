@@ -163,19 +163,12 @@ static const int MAX_TB_LOG2_SIZEY = 6;
 static const int MIN_TB_SIZEY = 1 << MIN_TB_LOG2_SIZEY;
 static const int MAX_TB_SIZEY = 1 << MAX_TB_LOG2_SIZEY;
 
-static const int MAX_NUM_PICS_IN_SOP =                           1024;
-
-static const int MAX_NESTING_NUM_OPS =                           1024;
 static const int MAX_NESTING_NUM_LAYER =                           64;
 
-static const int MAX_VPS_NUM_HRD_PARAMETERS =                       1;
 static const int MAX_VPS_LAYERS =                                  64;
 static const int MAX_VPS_SUBLAYERS =                                7;
-static const int MAX_NUM_REF_LAYERS =                               7;
 static const int MAX_NUM_OLSS =                                   256;
 static const int MAX_VPS_OLS_MODE_IDC =                             2;
-static const int MAXIMUM_INTRA_FILTERED_WIDTH =                    16;
-static const int MAXIMUM_INTRA_FILTERED_HEIGHT =                   16;
 
 static const int MIP_MAX_WIDTH =                                   MAX_TB_SIZEY;
 static const int MIP_MAX_HEIGHT =                                  MAX_TB_SIZEY;
@@ -185,7 +178,6 @@ static const int MAX_NUM_ALF_CLASSES         =                     25;
 static const int MAX_NUM_ALF_LUMA_COEFF      =                     13;
 static const int MAX_NUM_ALF_CHROMA_COEFF    =                      7;
 static const int MAX_ALF_FILTER_LENGTH       =                      7;
-static const int MAX_NUM_ALF_COEFF           =                     MAX_ALF_FILTER_LENGTH * MAX_ALF_FILTER_LENGTH / 2 + 1;
 static const int MAX_ALF_PADDING_SIZE        =                      4;
 #define MAX_NUM_CC_ALF_FILTERS                                      4
 static constexpr int MAX_NUM_CC_ALF_CHROMA_COEFF    =               8;
@@ -195,8 +187,6 @@ static constexpr int CCALF_BITS_PER_COEFF_LEVEL     =               3;
 static const int ALF_FIXED_FILTER_NUM        =                     64;
 static const int ALF_CTB_MAX_NUM_APS         =                      8;
 static const int NUM_FIXED_FILTER_SETS       =                     16;
-static const int NUM_TOTAL_FILTER_SETS       =                     NUM_FIXED_FILTER_SETS + ALF_CTB_MAX_NUM_APS;
-
 
 static const int MAX_BDOF_APPLICATION_REGION =                     16;
 
@@ -209,7 +199,6 @@ static const int CU_DQP_EG_k =                                      0; ///< expg
 static const int SBH_THRESHOLD =                                    4; ///< value of the fixed SBH controlling threshold
 
 static const int MAX_NUM_VPS =                                     16;
-static const int MAX_NUM_DPS =                                     16;
 static const int MAX_NUM_SPS =                                     16;
 static const int MAX_NUM_PPS =                                     64;
 static const int MAX_NUM_APS =                                     32;  //Currently APS ID has 5 bits
@@ -276,9 +265,6 @@ static const int LFNST_LAST_SIG_LUMA =                              1;
 static const int LFNST_LAST_SIG_CHROMA =                            1;
 
 static const int NUM_LFNST_NUM_PER_SET =                            3;
-
-static const int LOG2_MAX_NUM_COLUMNS_MINUS1 =                      7;
-static const int LOG2_MAX_NUM_ROWS_MINUS1 =                         7;
 
 static const int CABAC_INIT_PRESENT_FLAG =                          1;
 
@@ -471,8 +457,6 @@ static const int PIC_CODE_CW_BINS =                              16;
 static const int LMCS_SEG_NUM =                                  32;
 static const int FP_PREC =                                       11;
 static const int CSCALE_FP_PREC =                                11;
-static const int  NEIG_NUM_LOG  =                                 6;
-static const int  NEIG_NUM =                      1 << NEIG_NUM_LOG;
 static const int LOG2_PALETTE_CG_SIZE =                           4;
 static const int RUN_IDX_THRE =                                   4;
 static const int MAX_CU_BLKSIZE_PLT =                            64;
