@@ -125,7 +125,10 @@ _byteStreamNALUnit(
   statBits.bits+=24; statBits.count+=3;
 #endif
 #endif
-  if(start_code_prefix_one_3bytes != 0x000001) { THROW( "Invalid code prefix" );}
+  if (start_code_prefix_one_3bytes != 0x000001)
+  {
+    THROW("Invalid code prefix");
+  }
   stats.m_numStartCodePrefixBytes += 3;
 
   /* 3. NumBytesInNALunit is set equal to the number of bytes starting with
