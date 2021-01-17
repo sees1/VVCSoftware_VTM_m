@@ -123,7 +123,6 @@ uint32_t DecApp::decode()
     }
   }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   // clear contents of annotated-Regions-SEI output file
   if (!m_annotatedRegionsSEIFileName.empty())
   {
@@ -134,7 +133,6 @@ uint32_t DecApp::decode()
       exit(EXIT_FAILURE);
     }
   }
-#endif
 
   // main decoder loop
   bool loopFiltered[MAX_VPS_LAYERS] = { false };
@@ -164,10 +162,8 @@ uint32_t DecApp::decode()
     }
   };
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     m_cDecLib.setHTidExternalSetFlag(m_mTidExternalSet);
     m_cDecLib.setTOlsIdxExternalFlag(m_tOlsIdxTidExternalSet);
-#endif
 
   while (!!bitstreamFile)
   {
@@ -247,7 +243,6 @@ uint32_t DecApp::decode()
             }
           }
           m_cDecLib.decode(nalu, m_iSkipFrame, m_iPOCLastDisplay, m_targetOlsIdx);
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
           if (nalu.m_nalUnitType == NAL_UNIT_OPI)
           {
             if (!m_cDecLib.getHTidExternalSetFlag() && m_cDecLib.getOPI()->getHtidInfoPresentFlag())
@@ -256,14 +251,9 @@ uint32_t DecApp::decode()
             }
             m_cDecLib.setHTidOpiSetFlag(m_cDecLib.getOPI()->getHtidInfoPresentFlag());
           }
-#endif
           if (nalu.m_nalUnitType == NAL_UNIT_VPS)
           {
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
             m_cDecLib.deriveTargetOutputLayerSet( m_cDecLib.getVPS()->m_targetOlsIdx );
-#else
-            m_cDecLib.deriveTargetOutputLayerSet( m_targetOlsIdx );
-#endif
             m_targetDecLayerIdSet = m_cDecLib.getVPS()->m_targetLayerIdSet;
             m_targetOutputLayerIdSet = m_cDecLib.getVPS()->m_targetOutputLayerIdSet;
           }
@@ -357,12 +347,10 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
         }
       }
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
       if (!m_annotatedRegionsSEIFileName.empty())
       {
         xOutputAnnotatedRegions(pcListPic);
       }
-#endif
       // write reconstruction to file
       if( bNewPicture )
       {
@@ -371,24 +359,17 @@ uint32_t DecApp::decode()
       }
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
         if (!m_annotatedRegionsSEIFileName.empty() && bNewPicture)
         {
           xOutputAnnotatedRegions(pcListPic);
         }
-#endif
         setOutputPicturePresentInStream();
         xWriteOutput( pcListPic, nalu.m_temporalId );
         m_cDecLib.setFirstSliceInPicture (false);
       }
       // write reconstruction to file -- for additional bumping as defined in C.5.2.3
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_11)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
-#else
-      if (!bNewPicture && ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
-        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
-#endif
       {
         setOutputPicturePresentInStream();
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
@@ -426,19 +407,11 @@ uint32_t DecApp::decode()
       }
     }
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_OPI)
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
     {
       firstSliceInAU = false;
     }
-#else
-    if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_RESERVED_IRAP_VCL_12)
-        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
-    {
-      firstSliceInAU = false;
-    }
-#endif
 #endif
     if( bNewPicture )
     {
@@ -475,12 +448,10 @@ uint32_t DecApp::decode()
 #endif
     }
   }
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   if (!m_annotatedRegionsSEIFileName.empty())
   {
     xOutputAnnotatedRegions(pcListPic);
   }
-#endif
   // May need to check again one more time as in case one the bitstream has only one picture, the first check may miss it
   setOutputPicturePresentInStream();
   CHECK(!outputPicturePresentInBitstream, "It is required that there shall be at least one picture with PictureOutputFlag equal to 1 in the bitstream")
@@ -913,7 +884,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
   m_iPOCLastDisplay = -MAX_INT;
 }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 /** \param pcListPic list of pictures to be written to file
  */
 void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
@@ -1060,7 +1030,6 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
    iterPic++;
   }
 }
-#endif
 
 /** \param nalu Input nalu to check whether its LayerId is within targetDecLayerIdSet
  */

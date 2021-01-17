@@ -54,25 +54,7 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-#define FIX_TICKET_1442_PTL_IN_VPS                        1 // Fix PTL signalling in VPS such that also the sublayer with the second highest TemporalID is signalled
-#define JVET_S0096_RPL_CONSTRAINT                         1// JVET-S0096 aspect 1: When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0.
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-#define JVET_S0219_ASPECT1                                1 // JVET-S0219 aspect1 : removal non-referred APS parameter set in the non-output layer.
-#define JVET_R0193                                        1 // JVET-R0193: signalling of the number of maximum sublayers used for inter-layer prediction for each layer
-#define JVET_R0193_S0141                                  1 // JVET-S0141 item 47 : item 47: In the general sub-bitstream extraction process, specify the conditions under which an output sub-bitstream is required to be a conforming bitstream such that the value of tIdTarget is specified to be in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive (instead of 0 to 6 inclusive). (JVET-S0158 aspect 1)
-#define JVET_T0065_LEVEL_6_3                              1 // JVET-T0065: Add level 6.3
-#define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
-#define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
-#define JVET_R0266_GCI                                    1 // JVET-R0266 #5: Specify that no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag shall be equal to 0
-#define JVET_S0084_S0110_RADL                             1 // When the current picture is a RADL picture, allow RASL pictures with pps_mixed_nalu_types_in_pic_flag is equal to 1 in active entries in RefPicList[ 0 ] or RefPicList[ 1 ]
-#define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
-#define FIX_SUBPICS_W_RPR                                 1 // Fix handling of RPR with subpictures (via scaling windows with no resolution change)
-#define JVET_S0175_ASPECT5                                1 // use u(8) instead of u(4) for (ffi_)display_elemental_periods_minus1 and pt_display_elemental_periods_minus1
-#define JVET_S0175_ASPECT6                                1 // The general_nal_hrd_params_present_flag and general_vcl_hrd_params_present_flag are allowed to both be equal to 0
-#define JVET_R0046_IRAP_ASPECT2                           1 // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to Max (0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] - 1 )
-#define JVET_T0064                                        1 // JVET-T0064: control of filter strength for ALF
-#define JVET_R0264_IRAP_CONSTRAINT                        1 // when max_tid_il_ref_pic_plus1[i][j] is equal to 0, it would be prohibited to have mixtures of IRAP and non-IRAP NAL units in the picture
-#define JVET_T0053_ANNOTATED_REGIONS_SEI                  1 //Enable/disable the annotated regions SEI
 
 //########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
@@ -732,9 +714,7 @@ namespace Level
     LEVEL6   = 96,
     LEVEL6_1 = 99,
     LEVEL6_2 = 102,
-#if JVET_T0065_LEVEL_6_3
     LEVEL6_3 = 105,
-#endif
     LEVEL15_5 = 255,
   };
 }
@@ -793,11 +773,7 @@ enum NalUnitType
   NAL_UNIT_CODED_SLICE_GDR,         // 10
 
   NAL_UNIT_RESERVED_IRAP_VCL_11,
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   NAL_UNIT_OPI,                     // 12
-#else
-  NAL_UNIT_RESERVED_IRAP_VCL_12,
-#endif
   NAL_UNIT_DCI,                     // 13
   NAL_UNIT_VPS,                     // 14
   NAL_UNIT_SPS,                     // 15

@@ -48,18 +48,11 @@ class CfgVPSParameters
 {
 public:
   CfgVPSParameters()
-#if !JVET_R0193
-  : m_maxTidILRefPicsPlus1(-1)
-#endif
   {}
 
   virtual ~CfgVPSParameters(){}
 
-#if JVET_R0193
   std::vector<std::vector<uint32_t>> m_maxTidILRefPicsPlus1;
-#else
-  int m_maxTidILRefPicsPlus1;
-#endif
 };
 
 class CfgSEISubpictureLevel

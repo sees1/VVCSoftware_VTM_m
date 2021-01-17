@@ -79,9 +79,7 @@ public:
     ALTERNATIVE_TRANSFER_CHARACTERISTICS = 147,
     AMBIENT_VIEWING_ENVIRONMENT          = 148,
     CONTENT_COLOUR_VOLUME                = 149,
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
     ANNOTATED_REGIONS                    = 202,
-#endif
   };
 
   SEI() {}
@@ -247,9 +245,7 @@ public:
   virtual ~SEIDecodedPictureHash() {}
 
   HashType method;
-#if FIX_TICKET_1405
   bool     singleCompFlag;
-#endif
 
   PictureHash m_pictureHash;
 };
@@ -670,7 +666,6 @@ public:
   std::vector<std::vector<std::vector<int>>> m_refLevelFraction;
 };
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 class SEIAnnotatedRegions : public SEI
 {
 public:
@@ -734,7 +729,6 @@ public:
   std::vector<std::pair<AnnotatedRegionObjectIndex, AnnotatedRegionObject> > m_annotatedRegions;
   std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
 };
-#endif
 //! \}
 
 

@@ -187,13 +187,11 @@ private:
   std::list<InputNALUnit*> m_pictureSeiNalus; 
   std::list<InputNALUnit*> m_suffixApsNalus; 
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   OPI*                    m_opi;
   bool                    m_mTidExternalSet;
   bool                    m_mTidOpiSet;
   bool                    m_tOlsIdxTidExternalSet;
   bool                    m_tOlsIdxTidOpiSet;
-#endif
   VPS*                    m_vps;
   int                     m_maxDecSubPicIdx;
   int                     m_maxDecSliceAddrInSubPic;
@@ -282,7 +280,6 @@ public:
   bool  isNewPicture( std::ifstream *bitstreamFile, class InputByteStream *bytestream );
   bool  isNewAccessUnit( bool newPicture, std::ifstream *bitstreamFile, class InputByteStream *bytestream );
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   bool      getHTidExternalSetFlag()               const { return m_mTidExternalSet; }
   void      setHTidExternalSetFlag(bool mTidExternalSet)  { m_mTidExternalSet = mTidExternalSet; }
   bool      getHTidOpiSetFlag()               const { return m_mTidOpiSet; }
@@ -292,7 +289,6 @@ public:
   bool      getTOlsIdxOpiFlag()               const { return m_tOlsIdxTidOpiSet; }
   void      setTOlsIdxOpiFlag(bool tOlsIdxOpiSet)  { m_tOlsIdxTidOpiSet = tOlsIdxOpiSet; }
   const OPI* getOPI()                     { return m_opi; }
-#endif
 
 protected:
   void  xUpdateRasInit(Slice* slice);
@@ -305,9 +301,7 @@ protected:
   void  xCheckParameterSetConstraints( const int layerId );
   void      xDecodePicHeader( InputNALUnit& nalu );
   bool      xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDisplay);
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   void      xDecodeOPI( InputNALUnit& nalu );
-#endif
   void      xDecodeVPS( InputNALUnit& nalu );
   void      xDecodeDCI( InputNALUnit& nalu );
   void      xDecodeSPS( InputNALUnit& nalu );

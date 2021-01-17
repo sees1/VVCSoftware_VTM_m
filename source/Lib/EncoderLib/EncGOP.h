@@ -316,9 +316,7 @@ protected:
   void xWriteTrailingSEIMessages (SEIMessages& seiMessages, AccessUnit &accessUnit, int temporalId);
   void xWriteDuSEIMessages       (SEIMessages& duInfoSeiMessages, AccessUnit &accessUnit, int temporalId, std::deque<DUData> &duData);
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   int xWriteOPI (AccessUnit &accessUnit, const OPI *opi);
-#endif
   int xWriteVPS (AccessUnit &accessUnit, const VPS *vps);
   int xWriteDCI (AccessUnit &accessUnit, const DCI *dci);
   int xWriteSPS( AccessUnit &accessUnit, const SPS *sps, const int layerId = 0 );
@@ -332,11 +330,7 @@ protected:
   void applyDeblockingFilterParameterSelection( Picture* pcPic, const uint32_t numSlices, const int gopID );
 #endif
   void xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicList& rcListPic, const ReferencePictureList *rpl0, const ReferencePictureList *rpl1 );
-#if JVET_R0193
   bool xCheckMaxTidILRefPics(int layerIdx, Picture* refPic, bool currentPicIsIRAP);
-#else
-  bool xCheckMaxTidILRefPics(Picture* refPic, bool currentPicIsIRAP);
-#endif
 };// END CLASS DEFINITION EncGOP
 
 //! \}

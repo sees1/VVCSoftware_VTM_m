@@ -444,13 +444,11 @@ DecLib::DecLib()
   , m_prefixSEINALUs()
   , m_debugPOC( -1 )
   , m_debugCTU( -1 )
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   , m_opi( nullptr )
   , m_mTidExternalSet(false)
   , m_mTidOpiSet(false)
   , m_tOlsIdxTidExternalSet(false)
   , m_tOlsIdxTidOpiSet(false)
-#endif
   , m_vps( nullptr )
   , m_maxDecSubPicIdx(0)
   , m_maxDecSliceAddrInSubPic(-1)
@@ -1824,7 +1822,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
         CHECK(curLayerChromaFormat != refLayerChromaFormat, "The chroma formats of the current layer and the reference layer are different");
         int refLayerBitDepth = m_layerBitDepth[i];
         CHECK(curLayerBitDepth != refLayerBitDepth, "The bit-depth of the current layer and the reference layer are different");
-#if JVET_R0264_IRAP_CONSTRAINT
         if (vps->getMaxTidIlRefPicsPlus1(curLayerIdx, i) == 0 && pps->getMixedNaluTypesInPicFlag() == 1)
         {
           for (int j = 0; j < m_uiSliceSegmentIdx; j++)
@@ -1833,7 +1830,6 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
             CHECK( (preSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || preSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || preSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA), "mixed IRAP and non-IRAP NAL units in the picture when sps_video_parameter_set_id is greater than 0 and vps_max_tid_il_ref_pics_plus1[i][j] is equal to 0");
           }
         }
-#endif
       }
     }
   }
@@ -1867,12 +1863,10 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
     CHECK(pps->getMixedNaluTypesInPicFlag(), "When gci_no_mixed_nalu_types_in_pic_constraint_flag equal to 1, the value of pps_mixed_nalu_types_in_pic_flag shall be equal to 0")
   }
 
-#if JVET_R0266_GCI
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoGdrConstraintFlag())
   {
     CHECK(sps->getGDREnabledFlag(), "gci_no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag for all pictures in OlsInScope shall be equal to 0");
   }
-#endif
 
   if (sps->getProfileTierLevel()->getConstraintInfo()->getNoRectSliceConstraintFlag())
   {
@@ -2053,9 +2047,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   for( auto& naluTemporalId : m_accessUnitNals )
   {
     if (
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       naluTemporalId.m_nalUnitType != NAL_UNIT_OPI &&
-#endif
       naluTemporalId.m_nalUnitType != NAL_UNIT_DCI
       && naluTemporalId.m_nalUnitType != NAL_UNIT_VPS
       && naluTemporalId.m_nalUnitType != NAL_UNIT_SPS
@@ -2772,7 +2764,6 @@ void DecLib::updatePrevIRAPAndGDRSubpic()
   }
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void DecLib::xDecodeOPI( InputNALUnit& nalu )
 {
   m_opi = new OPI();
@@ -2782,7 +2773,6 @@ void DecLib::xDecodeOPI( InputNALUnit& nalu )
 
   m_HLSReader.parseOPI( m_opi );
 }
-#endif
 
 void DecLib::xDecodeVPS( InputNALUnit& nalu )
 {
@@ -2898,7 +2888,6 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
   {
     case NAL_UNIT_VPS:
       xDecodeVPS( nalu );
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       if (getTOlsIdxExternalFlag())
       {
         m_vps->m_targetOlsIdx = iTargetOlsIdx;
@@ -2911,15 +2900,10 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       {
         m_vps->m_targetOlsIdx = m_vps->deriveTargetOLSIdx();
       }
-#else
-      m_vps->m_targetOlsIdx = iTargetOlsIdx;
-#endif
       return false;
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     case NAL_UNIT_OPI:
       xDecodeOPI( nalu );
       return false;
-#endif
     case NAL_UNIT_DCI:
       xDecodeDCI( nalu );
       return false;
@@ -3024,9 +3008,6 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
     }
 
     case NAL_UNIT_RESERVED_IRAP_VCL_11:
-#if !JVET_S0163_ON_TARGETOLS_SUBLAYERS
-    case NAL_UNIT_RESERVED_IRAP_VCL_12:
-#endif
       msg( NOTICE, "Note: found reserved VCL NAL unit.\n");
       xParsePrefixSEIsForUnknownVCLNal();
       return false;
@@ -3220,9 +3201,7 @@ bool DecLib::isNewPicture(std::ifstream *bitstreamFile, class InputByteStream *b
 
       // NUT that indicate the start of a new picture
       case NAL_UNIT_ACCESS_UNIT_DELIMITER:
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
       case NAL_UNIT_OPI:
-#endif
       case NAL_UNIT_DCI:
       case NAL_UNIT_VPS:
       case NAL_UNIT_SPS:
@@ -3245,9 +3224,6 @@ bool DecLib::isNewPicture(std::ifstream *bitstreamFile, class InputByteStream *b
       case NAL_UNIT_CODED_SLICE_CRA:
       case NAL_UNIT_CODED_SLICE_GDR:
       case NAL_UNIT_RESERVED_IRAP_VCL_11:
-#if !JVET_S0163_ON_TARGETOLS_SUBLAYERS
-      case NAL_UNIT_RESERVED_IRAP_VCL_12:
-#endif
         ret = checkPictureHeaderInSliceHeaderFlag(nalu);
         finished = true;
         break;

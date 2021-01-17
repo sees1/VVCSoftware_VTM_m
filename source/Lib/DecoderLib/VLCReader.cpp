@@ -1194,12 +1194,8 @@ void HLSyntaxReader::parseGeneralHrdParameters(GeneralHrdParams *hrd)
   READ_CODE(32, symbol, "time_scale");                       hrd->setTimeScale(symbol);
   READ_FLAG(symbol, "general_nal_hrd_parameters_present_flag");           hrd->setGeneralNalHrdParametersPresentFlag(symbol == 1 ? true : false);
   READ_FLAG(symbol, "general_vcl_hrd_parameters_present_flag");           hrd->setGeneralVclHrdParametersPresentFlag(symbol == 1 ? true : false);
-#if JVET_S0175_ASPECT6
   if(  hrd->getGeneralNalHrdParametersPresentFlag() || hrd->getGeneralVclHrdParametersPresentFlag() )
   {
-#else
-  CHECK((hrd->getGeneralNalHrdParametersPresentFlag() == 0) && (hrd->getGeneralVclHrdParametersPresentFlag() == 0), "general_nal_hrd_params_present_flag and general_vcl_hrd_params_present_flag in each general_hrd_parameters( ) syntax structure shall not be both equal to 0.");
-#endif
     READ_FLAG(symbol, "general_same_pic_timing_in_all_ols_flag");           hrd->setGeneralSamePicTimingInAllOlsFlag(symbol == 1 ? true : false);
     READ_FLAG(symbol, "general_decoding_unit_hrd_params_present_flag");     hrd->setGeneralDecodingUnitHrdParamsPresentFlag(symbol == 1 ? true : false);
     if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
@@ -1214,9 +1210,7 @@ void HLSyntaxReader::parseGeneralHrdParameters(GeneralHrdParams *hrd)
     }
     READ_UVLC(symbol, "hrd_cpb_cnt_minus1");                      hrd->setHrdCpbCntMinus1(symbol);
     CHECK(symbol > 31,"The value of hrd_cpb_cnt_minus1 shall be in the range of 0 to 31, inclusive");
-#if JVET_S0175_ASPECT6
   }
-#endif
 }
 void HLSyntaxReader::parseOlsHrdParameters(GeneralHrdParams * generalHrd, OlsHrdParams *olsHrd, uint32_t firstSubLayer, uint32_t maxNumSubLayersMinus1)
 {
@@ -1241,11 +1235,7 @@ void HLSyntaxReader::parseOlsHrdParameters(GeneralHrdParams * generalHrd, OlsHrd
     {
       READ_UVLC(symbol, "elemental_duration_in_tc_minus1");             hrd->setElementDurationInTcMinus1(symbol);
     }
-#if JVET_S0175_ASPECT6
     else if((generalHrd->getGeneralNalHrdParametersPresentFlag() || generalHrd->getGeneralVclHrdParametersPresentFlag()) && generalHrd->getHrdCpbCntMinus1() == 0)
-#else
-    else if(generalHrd->getHrdCpbCntMinus1() == 0)
-#endif
     {
       READ_FLAG(symbol, "low_delay_hrd_flag");                      hrd->setLowDelayHrdFlag(symbol == 1 ? true : false);
     }
@@ -1367,12 +1357,10 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   READ_FLAG(uiCode, "sps_gdr_enabled_flag");
   pcSPS->setGDREnabledFlag(uiCode);
 
-#if JVET_R0266_GCI
   if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoGdrConstraintFlag())
   {
     CHECK(uiCode != 0, "When gci_no_gdr_constraint_flag equal to 1 , the value of sps_gdr_enabled_flag shall be equal to 0");
   }
-#endif
 
   READ_FLAG(uiCode, "sps_ref_pic_resampling_enabled_flag");          pcSPS->setRprEnabledFlag(uiCode);
   if (pcSPS->getProfileTierLevel()->getConstraintInfo()->getNoRprConstraintFlag())
@@ -2143,7 +2131,6 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   xReadRbspTrailingBits();
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void HLSyntaxReader::parseOPI(OPI* opi)
 {
 #if ENABLE_TRACING
@@ -2178,7 +2165,6 @@ void HLSyntaxReader::parseOPI(OPI* opi)
   }
   xReadRbspTrailingBits();
 }
-#endif
 
 
 void HLSyntaxReader::parseDCI(DCI* dci)
@@ -2246,11 +2232,9 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       pcVPS->setEachLayerIsAnOlsFlag(0);
     }
   }
-#if JVET_R0193
   std::vector<std::vector<uint32_t>> maxTidilRefPicsPlus1;
   maxTidilRefPicsPlus1.resize(pcVPS->getMaxLayers(), std::vector<uint32_t>(pcVPS->getMaxLayers(), NOT_VALID));
   pcVPS->setMaxTidIlRefPicsPlus1(maxTidilRefPicsPlus1);
-#endif
   for (uint32_t i = 0; i < pcVPS->getMaxLayers(); i++)
   {
     READ_CODE(6, uiCode, "vps_layer_id");                     pcVPS->setLayerId(i, uiCode);
@@ -2261,7 +2245,6 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
       READ_FLAG(uiCode, "vps_independent_layer_flag");     pcVPS->setIndependentLayerFlag(i, uiCode);
       if (!pcVPS->getIndependentLayerFlag(i))
       {
-#if JVET_R0193
         READ_FLAG(uiCode, "max_tid_ref_present_flag[ i ]");
         bool presentFlag = uiCode;
         uint16_t sumUiCode = 0;
@@ -2285,30 +2268,6 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
           }
         }
         CHECK(sumUiCode == 0, "There has to be at least one value of j such that the value of vps_direct_dependency_flag[ i ][ j ] is equal to 1,when vps_independent_layer_flag[ i ] is equal to 0 ");
-#else
-        uint16_t sumUiCode = 0;
-        for (int j = 0, k = 0; j < i; j++)
-        {
-          READ_FLAG(uiCode, "vps_direct_dependency_flag"); pcVPS->setDirectRefLayerFlag(i, j, uiCode);
-          if( uiCode )
-          {
-            pcVPS->setInterLayerRefIdc( i, j, k );
-            pcVPS->setDirectRefLayerIdx( i, k++, j );
-            sumUiCode++;
-          }
-        }
-        CHECK(sumUiCode == 0, "There has to be at least one value of j such that the value of vps_direct_dependency_flag[ i ][ j ] is equal to 1,when vps_independent_layer_flag[ i ] is equal to 0 ");
-        READ_FLAG(uiCode, "vps_max_tid_ref_present_flag[ i ]");
-        if (uiCode)
-        {
-          READ_CODE(3, uiCode, "vps_max_tid_il_ref_pics_plus1[ i ]");
-          pcVPS->setMaxTidIlRefPicsPlus1(i, uiCode);
-        }
-        else
-        {
-          pcVPS->setMaxTidIlRefPicsPlus1(i, 7);
-        }
-#endif
       }
     }
   }
@@ -2382,11 +2341,7 @@ void HLSyntaxReader::parseVPS(VPS* pcVPS)
   ptls.resize(pcVPS->getNumPtls());
   for (int i = 0; i < pcVPS->getNumPtls(); i++)
   {
-#if FIX_TICKET_1442_PTL_IN_VPS
     parseProfileTierLevel(&ptls[i], pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i));
-#else
-    parseProfileTierLevel(&ptls[i], pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i) - 1);
-#endif
   }
   pcVPS->setProfileTierLevel(ptls);
   for (int i = 0; i < pcVPS->getTotalNumOLSs(); i++)
@@ -2951,12 +2906,10 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
           *rpl = *sps->getRPLList( listIdx )->getReferencePictureList(picHeader->getRPLIdx( listIdx ));
         }
       }
-#if JVET_S0096_RPL_CONSTRAINT
       if (picHeader->getPicInterSliceAllowedFlag() && listIdx == 0)
       {
           CHECK(picHeader->getRPL(0)->getNumRefEntries() <= 0, "When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0");
       }
-#endif
       // POC MSB cycle signalling for LTRP
       for (int i = 0; i < rpl->getNumberOfLongtermPictures() + rpl->getNumberOfShorttermPictures(); i++)
       {

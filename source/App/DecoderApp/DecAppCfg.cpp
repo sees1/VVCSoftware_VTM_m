@@ -88,22 +88,15 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   ("OutputBitDepth,d",          m_outputBitDepth[CHANNEL_TYPE_LUMA],   0,          "bit depth of YUV output luma component (default: use 0 for native depth)")
   ("OutputBitDepthC,d",         m_outputBitDepth[CHANNEL_TYPE_CHROMA], 0,          "bit depth of YUV output chroma component (default: use luma output bit-depth)")
   ("OutputColourSpaceConvert",  outputColourSpaceConvert,              string(""), "Colour space conversion to apply to input 444 video. Permitted values are (empty string=UNCHANGED) " + getListOfColourSpaceConverts(false))
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   500,    "Maximum Temporal Layer to be decoded. -1 to decode all layers")
   ("TargetOutputLayerSet,p",    m_targetOlsIdx,                        500,    "Target output layer set index")
-#else
-  ("MaxTemporalLayer,t",        m_iMaxTemporalLayer,                   -1,         "Maximum Temporal Layer to be decoded. -1 to decode all layers")
-  ("TargetOutputLayerSet,p",    m_targetOlsIdx,                          -1,       "Target output layer set index")
-#endif
   ("SEIDecodedPictureHash,-dph",m_decodedPictureHashSEIEnabled,        1,          "Control handling of decoded picture hash SEI messages\n"
                                                                                    "\t1: check hash in SEI messages if available in the bitstream\n"
                                                                                    "\t0: ignore SEI message")
   ("SEINoDisplay",              m_decodedNoDisplaySEIEnabled,          true,       "Control handling of decoded no display SEI messages")
   ("TarDecLayerIdSetFile,l",    cfg_TargetDecLayerIdSetFile,           string(""), "targetDecLayerIdSet file name. The file should include white space separated LayerId values to be decoded. Omitting the option or a value of -1 in the file decodes all layers.")
   ("SEIColourRemappingInfoFilename",  m_colourRemapSEIFileName,        string(""), "Colour Remapping YUV output file name. If empty, no remapping is applied (ignore SEI message)\n")
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   ("SEIAnnotatedRegionsInfoFilename",  m_annotatedRegionsSEIFileName,   string(""), "Annotated regions output file name. If empty, no object information will be saved (ignore SEI message)\n")
-#endif
   ("OutputDecodedSEIMessagesFilename",  m_outputDecodedSEIMessagesFilename,    string(""), "When non empty, output decoded SEI messages to the indicated file. If file is '-', then output to stdout\n")
 #if JVET_S0257_DUMP_360SEI_MESSAGE
   ("360DumpFile",  m_outputDecoded360SEIMessagesFilename, string(""), "When non empty, output decoded 360 SEI messages to the indicated file.\n")
@@ -228,7 +221,6 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
       msg( ERROR, "File %s could not be opened. Using all LayerIds as default.\n", cfg_TargetDecLayerIdSetFile.c_str() );
     }
   }
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   if (m_iMaxTemporalLayer != 500)
   {
     m_mTidExternalSet = true;
@@ -245,7 +237,6 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   {
     m_targetOlsIdx = -1;
   }
-#endif
   return true;
 }
 
@@ -259,16 +250,12 @@ DecAppCfg::DecAppCfg()
 , m_outputColourSpaceConvert(IPCOLOURSPACE_UNCHANGED)
 , m_targetOlsIdx(0)
 , m_iMaxTemporalLayer(-1)
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 , m_mTidExternalSet(false)
 , m_tOlsIdxTidExternalSet(false)
-#endif
 , m_decodedPictureHashSEIEnabled(0)
 , m_decodedNoDisplaySEIEnabled(false)
 , m_colourRemapSEIFileName()
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 , m_annotatedRegionsSEIFileName()
-#endif
 , m_targetDecLayerIdSet()
 , m_outputDecodedSEIMessagesFilename()
 #if JVET_S0257_DUMP_360SEI_MESSAGE

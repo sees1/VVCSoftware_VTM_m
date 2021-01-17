@@ -229,9 +229,7 @@ strToLevel[] =
   {"6",   Level::LEVEL6},
   {"6.1", Level::LEVEL6_1},
   {"6.2", Level::LEVEL6_2},
-#if JVET_T0065_LEVEL_6_3
   {"6.3", Level::LEVEL6_3},
-#endif
   {"15.5", Level::LEVEL15_5},
 };
 
@@ -487,16 +485,11 @@ static uint32_t getMaxTileColsByLevel( Level::Name level )
     case Level::LEVEL6:
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
-#if !JVET_T0065_LEVEL_6_3
-    default:
-#endif
       return 20;
-#if JVET_T0065_LEVEL_6_3
     case Level::LEVEL6_3:
       return 30;
     default:
       return MAX_TILE_COLS;
-#endif
   }
 }
 
@@ -522,16 +515,11 @@ static uint32_t getMaxTileRowsByLevel( Level::Name level )
     case Level::LEVEL6:
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
-#if !JVET_T0065_LEVEL_6_3
-    default:
-#endif
       return 22;
-#if JVET_T0065_LEVEL_6_3
     case Level::LEVEL6_3:
       return 33;
     default:
       return MAX_TILES / MAX_TILE_COLS;
-#endif
   }
 }
 
@@ -558,16 +546,11 @@ static uint32_t getMaxSlicesByLevel( Level::Name level )
     case Level::LEVEL6:
     case Level::LEVEL6_1:
     case Level::LEVEL6_2:
-#if !JVET_T0065_LEVEL_6_3
-    default:
-#endif
       return 600;
-#if JVET_T0065_LEVEL_6_3
     case Level::LEVEL6_3:
       return 1000;
     default:
       return MAX_SLICES;
-#endif
   }
 }
 
@@ -1327,9 +1310,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEISubpicLevelInfoRefLevels",                     cfg_sliRefLevels,                                  cfg_sliRefLevels, "List of reference levels for Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoExplicitFraction",              m_cfgSubpictureLevelInfoSEI.m_explicitFraction,    false,            "Enable sending of explicit fractions in Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoNumSubpics",                    m_cfgSubpictureLevelInfoSEI.m_numSubpictures,      1,                "Number of subpictures for Subpicture Level Information SEI messages")
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   ("SEIAnnotatedRegionsFileRoot,-ar",                 m_arSEIFileRoot,                                 string(""), "Annotated region SEI parameters root file name (wo num ext); only the file name base is to be added. Underscore and POC would be automatically addded to . E.g. \"-ar ar\" will search for files ar_0.txt, ar_1.txt, ...")
-#endif
   ("SEISubpicLevelInfoMaxSublayers",                  m_cfgSubpictureLevelInfoSEI.m_sliMaxSublayers,               1,                    "Number of sublayers for Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoSublayerInfoPresentFlag",       m_cfgSubpictureLevelInfoSEI.m_sliSublayerInfoPresentFlag,    false,                "Enable sending of level information for all sublayers in Subpicture Level Information SEI messages")
   ("SEISubpicLevelInfoRefLevelFractions",             cfg_sliFractions,                                  cfg_sliFractions, "List of subpicture level fractions for Subpicture Level Information SEI messages")
@@ -1406,11 +1387,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
   ("EnsureWppBitEqual",                               m_ensureWppBitEqual,                      false, "Ensure the results are equal to results with WPP-style parallelism, even if WPP is off")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
-#if JVET_T0064
   ("ALFStrength",                                      m_alfStrength,                             1.0, "Adaptive Loop Filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma. Valid range is 0.0 <= ALFStrength <= 1.0")
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")
   ("CCALFStrength",                                    m_ccalfStrength,                           1.0, "Cross-component Adaptive Loop Filter strength. The parameter scales the magnitudes of the CCALF filter coefficients. Valid range is 0.0 <= CCALFStrength <= 1.0")
-#endif
   ( "CCALF",                                           m_ccalf,                                  true, "Cross-component Adaptive Loop Filter" )
   ( "CCALFQpTh",                                       m_ccalfQpThreshold,                         37, "QP threshold above which encoder reduces CCALF usage")
   ( "RPR",                                            m_rprEnabledFlag,                          true, "Reference Sample Resolution" )
@@ -1420,13 +1399,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ( "SwitchPocPeriod",                                m_switchPocPeriod,                            0, "Switch POC period for RPR" )
   ( "UpscaledOutput",                                 m_upscaledOutput,                             0, "Output upscaled (2), decoded but in full resolution buffer (1) or decoded cropped (0, default) picture for RPR" )
   ( "MaxLayers",                                      m_maxLayers,                                  1, "Max number of layers" )
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   ( "EnableOperatingPointInformation",                m_OPIEnabled,                             false, "Enables writing of Operating Point Information (OPI)" )
   ( "MaxTemporalLayer",                               m_maxTemporalLayer,                         500, "Maximum temporal layer to be signalled in OPI" )
   ( "TargetOutputLayerSet",                           m_targetOlsIdx,                             500, "Target output layer set index to be signalled in OPI" )
-#else
-  ( "TargetOutputLayerSet,p",                         m_targetOlsIdx,                              -1, "Target output layer set index" )
-#endif
   ;
   opts.addOptions()
   ( "MaxSublayers",                                   m_maxSublayers,                               7, "Max number of Sublayers")
@@ -1442,11 +1417,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ( "OlsOutputLayer%d",                               m_olsOutputLayerStr, string(""), MAX_VPS_LAYERS, "Output layer index of i-th OLS")
   ( "NumPTLsInVPS",                                   m_numPtlsInVps,                               1, "Number of profile_tier_level structures in VPS" )
   ( "AvoidIntraInDepLayers",                          m_avoidIntraInDepLayer,                    true, "Replaces I pictures in dependent layers with B pictures" )
-#if JVET_R0193
   ( "MaxTidILRefPicsPlusOneLayerId%d",                m_maxTidILRefPicsPlus1Str, string(""), MAX_VPS_LAYERS, "Maximum temporal ID for inter-layer reference pictures plus 1 of i-th layer, 0 for IRAP only")
-#else
-  ( "MaxTidILRefPicsPlus1",                           m_cfgVPSParameters.m_maxTidILRefPicsPlus1,   -1, "Maximum temporal ID for inter-layer reference pictures plus 1, 0 for IRAP only" )
-#endif
     ;
 
   opts.addOptions()
@@ -2770,7 +2741,6 @@ bool EncAppCfg::xCheckParameter()
     msg( WARNING, "****************************************************************************\n");
     m_dualTree = false;
   }
-#if JVET_T0064
   if (m_alf)
   {
     xConfirmPara(m_alfStrength < 0.0, "ALFStrength is less than 0. Valid range is 0.0 <= ALFStrength <= 1.0" );
@@ -2781,7 +2751,6 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(m_ccalfStrength < 0.0, "CCALFStrength is less than 0. Valid range is 0.0 <= CCALFStrength <= 1.0");
     xConfirmPara(m_ccalfStrength > 1.0, "CCALFStrength is greater than 1. Valid range is 0.0 <= CCALFStrength <= 1.0");
   }  
-#endif
   if (m_ccalf && (m_chromaFormatIDC == CHROMA_400))
   {
     msg( WARNING, "****************************************************************************\n");

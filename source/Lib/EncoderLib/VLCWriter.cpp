@@ -715,10 +715,8 @@ void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
   WRITE_CODE(hrd->getTimeScale(), 32, "time_scale");
   WRITE_FLAG(hrd->getGeneralNalHrdParametersPresentFlag() ? 1 : 0, "general_nal_hrd_parameters_present_flag");
   WRITE_FLAG(hrd->getGeneralVclHrdParametersPresentFlag() ? 1 : 0, "general_vcl_hrd_parameters_present_flag");
-#if JVET_S0175_ASPECT6
   if( hrd->getGeneralNalHrdParametersPresentFlag() || hrd->getGeneralVclHrdParametersPresentFlag() )
   {
-#endif
     WRITE_FLAG(hrd->getGeneralSamePicTimingInAllOlsFlag() ? 1 : 0, "general_same_pic_timing_in_all_ols_flag");
     WRITE_FLAG(hrd->getGeneralDecodingUnitHrdParamsPresentFlag() ? 1 : 0, "general_decoding_unit_hrd_params_present_flag");
     if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
@@ -732,9 +730,7 @@ void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
       WRITE_CODE(hrd->getCpbSizeDuScale(), 4, "cpb_size_du_scale");
     }
     WRITE_UVLC(hrd->getHrdCpbCntMinus1(), "hrd_cpb_cnt_minus1");
-#if JVET_S0175_ASPECT6
   }
-#endif
 }
 void HLSWriter::codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd, const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1)
 {
@@ -752,11 +748,7 @@ void HLSWriter::codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const 
     {
       WRITE_UVLC(hrd->getElementDurationInTcMinus1(), "elemental_duration_in_tc_minus1");
     }
-#if JVET_S0175_ASPECT6
     else if ( (generalHrd->getGeneralNalHrdParametersPresentFlag() || generalHrd->getGeneralVclHrdParametersPresentFlag()) && generalHrd->getHrdCpbCntMinus1() == 0)
-#else
-    else if (generalHrd->getHrdCpbCntMinus1() == 0)
-#endif
     {
       WRITE_FLAG(hrd->getLowDelayHrdFlag() ? 1 : 0, "low_delay_hrd_flag");
     }
@@ -1335,7 +1327,6 @@ void HLSWriter::codeDCI(const DCI* dci)
   xWriteRbspTrailingBits();
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void HLSWriter::codeOPI(const OPI *opi)
 {
 #if ENABLE_TRACING
@@ -1356,7 +1347,6 @@ void HLSWriter::codeOPI(const OPI *opi)
   WRITE_FLAG(0, "opi_extension_flag");
   xWriteRbspTrailingBits();
 }
-#endif
 
 void HLSWriter::codeVPS(const VPS* pcVPS)
 {
@@ -1382,7 +1372,6 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       WRITE_FLAG(pcVPS->getIndependentLayerFlag(i), "vps_independent_layer_flag");
       if (!pcVPS->getIndependentLayerFlag(i))
       {
-#if JVET_R0193
         bool presentFlag = false;
         for (int j = 0; j < i; j++)
         {
@@ -1397,18 +1386,6 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
             WRITE_CODE(pcVPS->getMaxTidIlRefPicsPlus1(i, j), 3, "max_tid_il_ref_pics_plus1[ i ][ j ]");
           }
         }
-#else
-        for (int j = 0; j < i; j++)
-        {
-          WRITE_FLAG(pcVPS->getDirectRefLayerFlag(i, j), "vps_direct_dependency_flag");
-        }
-        bool presentFlag = ( pcVPS->getMaxTidIlRefPicsPlus1(i) != 7 );
-        WRITE_FLAG(presentFlag, "vps_max_tid_ref_present_flag[ i ]");
-        if (presentFlag)
-        {
-          WRITE_CODE(pcVPS->getMaxTidIlRefPicsPlus1(i), 3, "vps_max_tid_il_ref_pics_plus1[ i ]");
-        }
-#endif
       }
     }
   }
@@ -1462,11 +1439,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   CHECK(cnt>=8, "More than '8' alignment bytes written");
   for (int i = 0; i < pcVPS->getNumPtls(); i++)
   {
-#if FIX_TICKET_1442_PTL_IN_VPS
     codeProfileTierLevel(&pcVPS->getProfileTierLevel(i), pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i));
-#else
-    codeProfileTierLevel(&pcVPS->getProfileTierLevel(i), pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i) - 1);
-#endif
   }
   for (int i = 0; i < totalNumOlss; i++)
   {

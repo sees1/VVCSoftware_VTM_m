@@ -558,9 +558,7 @@ protected:
   std::vector<int>      m_omniViewportSEITiltCentre;
   std::vector<uint32_t> m_omniViewportSEIHorRange;
   std::vector<uint32_t> m_omniViewportSEIVerRange;
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
-#endif
   bool                  m_rwpSEIEnabled;
   bool                  m_rwpSEIRwpCancelFlag;
   bool                  m_rwpSEIRwpPersistenceFlag;
@@ -697,11 +695,9 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_T0064
   double      m_alfStrength;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
-#endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 
@@ -720,10 +716,8 @@ protected:
 
   int         m_maxLayers;
   int         m_targetOlsIdx;
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   bool        m_OPIEnabled;                                     ///< enable Operating Point Information (OPI)
   int         m_maxTemporalLayer;
-#endif
   int         m_layerId[MAX_VPS_LAYERS];
   int         m_layerIdx;
   int         m_maxSublayers;
@@ -737,9 +731,7 @@ protected:
   int         m_olsModeIdc;
   int         m_numOutputLayerSets;
   std::string m_olsOutputLayerStr[MAX_VPS_LAYERS];
-#if JVET_R0193
   std::string m_maxTidILRefPicsPlus1Str[MAX_VPS_LAYERS];
-#endif
 
   int         m_numPtlsInVps;
 

@@ -234,12 +234,10 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIFramePacking;
       xParseSEIFramePacking((SEIFramePacking&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
     case SEI::ANNOTATED_REGIONS:
       sei = new SEIAnnotatedRegions;
       xParseSEIAnnotatedRegions((SEIAnnotatedRegions&)*sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#endif
     case SEI::PARAMETER_SETS_INCLUSION_INDICATION:
       sei = new SEIParameterSetsInclusionIndication;
       xParseSEIParameterSetsInclusionIndication((SEIParameterSetsInclusionIndication&)*sei, payloadSize, pDecodedMessageOutputStream);
@@ -444,14 +442,12 @@ void SEIReader::xParseSEIDecodedPictureHash(SEIDecodedPictureHash& sei, uint32_t
   uint32_t val;
   sei_read_code( pDecodedMessageOutputStream, 8, val, "dph_sei_hash_type");
   sei.method = static_cast<HashType>(val); bytesRead++;
-#if FIX_TICKET_1405
   sei_read_code( pDecodedMessageOutputStream, 1, val, "dph_sei_single_component_flag");
   sei.singleCompFlag = val;
   sei_read_code( pDecodedMessageOutputStream, 7, val, "dph_sei_reserved_zero_7bits");
   bytesRead++;
   uint32_t expectedSize = ( sei.singleCompFlag ? 1 : 3 ) * (sei.method == 0 ? 16 : (sei.method == 1 ? 2 : 4));
   CHECK ((payloadSize - bytesRead) != expectedSize, "The size of the decoded picture hash does not match the expected size.");
-#endif
 
   const char *traceString="\0";
   switch (sei.method)
@@ -986,15 +982,10 @@ void SEIReader::xParseSEIPictureTiming(SEIPictureTiming& sei, uint32_t payloadSi
       sei.m_duCommonCpbRemovalDelayFlag = 0;
     }
   }
-#if JVET_S0175_ASPECT5
   sei_read_code( pDecodedMessageOutputStream, 8, symbol,    "pt_display_elemental_periods_minus1" );
-#else
-  sei_read_uvlc( pDecodedMessageOutputStream, symbol,    "pt_display_elemental_periods_minus1" );
-#endif
   sei.m_ptDisplayElementalPeriodsMinus1 = symbol;
 }
 
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
 void SEIReader::xParseSEIAnnotatedRegions(SEIAnnotatedRegions& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
@@ -1115,7 +1106,6 @@ void SEIReader::xParseSEIAnnotatedRegions(SEIAnnotatedRegions& sei, uint32_t pay
     }
   }
 }
-#endif
 void SEIReader::xParseSEIFrameFieldinfo(SEIFrameFieldInfo& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
@@ -1144,11 +1134,7 @@ void SEIReader::xParseSEIFrameFieldinfo(SEIFrameFieldInfo& sei, uint32_t payload
       sei_read_flag( pDecodedMessageOutputStream, symbol,  "ffi_top_field_first_flag" );
       sei.m_topFieldFirstFlag = symbol;
     }
-#if JVET_S0175_ASPECT5
     sei_read_code( pDecodedMessageOutputStream, 8, symbol, "ffi_display_elemental_periods_minus1" );
-#else
-    sei_read_uvlc( pDecodedMessageOutputStream, symbol,    "ffi_display_elemental_periods_minus1" );
-#endif
     sei.m_displayElementalPeriodsMinus1 = symbol;
   }
   sei_read_code( pDecodedMessageOutputStream, 2, symbol,   "ffi_source_scan_type" );

@@ -76,7 +76,6 @@ EncApp::~EncApp()
 void EncApp::xInitLibCfg()
 {
   VPS& vps = *m_cEncLib.getVPS();
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   if (m_targetOlsIdx != 500)
   {
     vps.m_targetOlsIdx = m_targetOlsIdx;
@@ -85,9 +84,6 @@ void EncApp::xInitLibCfg()
   {
     vps.m_targetOlsIdx = -1;
   }
-#else
-  vps.m_targetOlsIdx = m_targetOlsIdx;
-#endif
 
   vps.setMaxLayers( m_maxLayers );
 
@@ -128,9 +124,7 @@ void EncApp::xInitLibCfg()
     }
   }
 
-#if JVET_R0193
   m_cfgVPSParameters.m_maxTidILRefPicsPlus1.resize(vps.getMaxLayers(), std::vector<uint32_t>(vps.getMaxLayers(), MAX_TLAYER));
-#endif
   for (int i = 0; i < vps.getMaxLayers(); i++)
   {
     vps.setGeneralLayerIdx( m_layerId[i], i );
@@ -155,7 +149,6 @@ void EncApp::xInitLibCfg()
             vps.setDirectRefLayerFlag(i, j, false);
           }
         }
-#if JVET_R0193
         string::size_type beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", 0);
         string::size_type endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
         int t = 0;
@@ -165,7 +158,6 @@ void EncApp::xInitLibCfg()
           beginStr = m_maxTidILRefPicsPlus1Str[i].find_first_not_of(" ", endStr);
           endStr = m_maxTidILRefPicsPlus1Str[i].find_first_of(" ", beginStr);
         }
-#endif
       }
     }
   }
@@ -879,9 +871,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setOmniViewportSEITiltCentre                         ( m_omniViewportSEITiltCentre );
   m_cEncLib.setOmniViewportSEIHorRange                           ( m_omniViewportSEIHorRange );
   m_cEncLib.setOmniViewportSEIVerRange                           ( m_omniViewportSEIVerRange );
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   m_cEncLib.setAnnotatedRegionSEIFileRoot                        (m_arSEIFileRoot);
-#endif
   m_cEncLib.setRwpSEIEnabled                                     (m_rwpSEIEnabled);
   m_cEncLib.setRwpSEIRwpCancelFlag                               (m_rwpSEIRwpCancelFlag);
   m_cEncLib.setRwpSEIRwpPersistenceFlag                          (m_rwpSEIRwpPersistenceFlag);
@@ -1051,11 +1041,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setForceSingleSplitThread                            ( m_forceSplitSequential );
 #endif
   m_cEncLib.setUseALF                                            ( m_alf );
-#if JVET_T0064
   m_cEncLib.setALFStrength                                       (m_alfStrength);
   m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
   m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);
-#endif
   m_cEncLib.setUseCCALF                                          ( m_ccalf );
   m_cEncLib.setCCALFQpThreshold                                  ( m_ccalfQpThreshold );
   m_cEncLib.setLmcs                                              ( m_lmcsEnabled );
@@ -1084,7 +1072,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setCropOffsetBottom                                  (m_cropOffsetBottom);
   m_cEncLib.setCalculateHdrMetrics                               (m_calculateHdrMetrics);
 #endif
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   m_cEncLib.setOPIEnabled                                         ( m_OPIEnabled );
   if (m_OPIEnabled)
   {
@@ -1097,7 +1084,6 @@ void EncApp::xInitLibCfg()
       m_cEncLib.setTargetOlsIdx                                   (m_targetOlsIdx);
     }
   }
-#endif
   m_cEncLib.setGopBasedTemporalFilterEnabled(m_gopBasedTemporalFilterEnabled);
   m_cEncLib.setNumRefLayers                                       ( m_numRefLayers );
 
@@ -1443,9 +1429,7 @@ void EncApp::rateStatsAccum(const AccessUnit& au, const std::vector<uint32_t>& a
     case NAL_UNIT_CODED_SLICE_GDR:
     case NAL_UNIT_CODED_SLICE_RADL:
     case NAL_UNIT_CODED_SLICE_RASL:
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
     case NAL_UNIT_OPI:
-#endif
     case NAL_UNIT_DCI:
     case NAL_UNIT_VPS:
     case NAL_UNIT_SPS:

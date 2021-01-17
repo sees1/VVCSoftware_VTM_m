@@ -637,9 +637,7 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
-#endif
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
   bool      m_useWeightedBiPred;    //< Use of Bi-directional Weighting Prediction (B_SLICE)
@@ -686,10 +684,8 @@ protected:
   CostMode  m_costMode;                                       ///< The cost function to use, primarily when considering lossless coding.
   bool      m_TSRCdisableLL;                                  ///< Disable TSRC for lossless
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   OPI       m_opi;
   bool      m_OPIEnabled;                                     ///< enable Operating Point Information (OPI)
-#endif
 
   DCI       m_dci;
   bool      m_DCIEnabled;                                     ///< enable Decoding Capability Information (DCI)
@@ -741,11 +737,9 @@ protected:
 #endif
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_T0064
   double      m_alfStrength;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
-#endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 #if JVET_O0756_CALCULATE_HDRMETRICS
@@ -778,9 +772,7 @@ public:
 
   virtual ~EncCfg()
   {}
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   std::map<uint32_t, SEIAnnotatedRegions::AnnotatedRegionObject> m_arObjects;
-#endif
   void setProfile(Profile::Name profile) { m_profile = profile; }
   void setLevel(Level::Tier tier, Level::Name level) { m_levelTier = tier; m_level = level; }
   bool      getFrameOnlyConstraintFlag() const { return m_frameOnlyConstraintFlag; }
@@ -1562,10 +1554,8 @@ public:
   uint32_t  getOmniViewportSEIHorRange(int idx)                      { return m_omniViewportSEIHorRange[idx]; }
   void  setOmniViewportSEIVerRange(const std::vector<uint32_t>& vi)  { m_omniViewportSEIVerRange = vi; }
   uint32_t  getOmniViewportSEIVerRange(int idx)                      { return m_omniViewportSEIVerRange[idx]; }
-#if JVET_T0053_ANNOTATED_REGIONS_SEI
   void  setAnnotatedRegionSEIFileRoot(const std::string &s)          { m_arSEIFileRoot = s; m_arObjects.clear();}
   const std::string &getAnnotatedRegionSEIFileRoot() const           { return m_arSEIFileRoot; }
-#endif
   void     setRwpSEIEnabled(bool b)                                                                     { m_rwpSEIEnabled = b; }
   bool     getRwpSEIEnabled()                                                                           { return m_rwpSEIEnabled; }
   void     setRwpSEIRwpCancelFlag(bool b)                                                               { m_rwpSEIRwpCancelFlag = b; }
@@ -1799,10 +1789,8 @@ public:
   bool         getTSRCdisableLL       ()                             { return m_TSRCdisableLL;         }
   void         setTSRCdisableLL       ( bool b )                     { m_TSRCdisableLL = b;            }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   void         setOPI(OPI *p)                                        { m_opi = *p; }
   OPI*         getOPI()                                              { return &m_opi; }
-#endif
 
   void         setDCI(DCI *p)                                        { m_dci = *p; }
   DCI*         getDCI()                                              { return &m_dci; }
@@ -1815,12 +1803,10 @@ public:
   void         setHarmonizeGopFirstFieldCoupleEnabled( bool b )      { m_bHarmonizeGopFirstFieldCoupleEnabled = b; }
   bool         getHarmonizeGopFirstFieldCoupleEnabled( ) const       { return m_bHarmonizeGopFirstFieldCoupleEnabled; }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   bool         getOPIEnabled()                      { return m_OPIEnabled; }
   void         setOPIEnabled(bool i)                { m_OPIEnabled = i; }
   void         setHtidPlus1(int HTid)               { m_opi.setHtidInfoPresentFlag(true); m_opi.setOpiHtidPlus1(HTid); }
   void         setTargetOlsIdx(int TOlsIdx)         { m_opi.setOlsInfoPresentFlag(true); m_opi.setOpiOlsIdx(TOlsIdx); }
-#endif
 
   bool         getDCIEnabled()                      { return m_DCIEnabled; }
   void         setDCIEnabled(bool i)                { m_DCIEnabled = i; }
@@ -1937,14 +1923,12 @@ public:
 #endif
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
-#if JVET_T0064
   void         setALFStrength( double s)                        { m_alfStrength = s; }
   double       getALFStrength()                                 const { return m_alfStrength; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }
   bool         getALFAllowPredefinedFilters()                   const { return m_alfAllowPredefinedFilters; }
   void         setCCALFStrength(double s)                       { m_ccalfStrength = s; }
   double       getCCALFStrength()                               const { return m_ccalfStrength; }
-#endif
   void         setUseCCALF( bool b )                                  { m_ccalf = b; }
   bool         getUseCCALF()                                    const { return m_ccalf; }
   void         setCCALFQpThreshold( int b )                           { m_ccalfQpThreshold = b; }

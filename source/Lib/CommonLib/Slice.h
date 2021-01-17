@@ -923,7 +923,6 @@ public:
   }
 };
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 class OPI
 {
 private:
@@ -952,7 +951,6 @@ public:
   void setOpiHtidPlus1(uint32_t val) { m_opihtidplus1 = val; }
 
 };
-#endif
 
 class VPS
 {
@@ -967,11 +965,7 @@ private:
   uint32_t              m_vpsCfgPredDirection[MAX_VPS_SUBLAYERS];
   bool                  m_vpsIndependentLayerFlag[MAX_VPS_LAYERS];
   bool                  m_vpsDirectRefLayerFlag[MAX_VPS_LAYERS][MAX_VPS_LAYERS];
-#if JVET_R0193
   std::vector<std::vector<uint32_t>>              m_vpsMaxTidIlRefPicsPlus1;
-#else
-  uint32_t              m_vpsMaxTidIlRefPicsPlus1[MAX_VPS_LAYERS];
-#endif
   bool                  m_vpsEachLayerIsAnOlsFlag;
   uint32_t              m_vpsOlsModeIdc;
   uint32_t              m_vpsNumOutputLayerSets;
@@ -1045,7 +1039,6 @@ public:
 
   bool              getIndependentLayerFlag(uint32_t layerIdx) const { return m_vpsIndependentLayerFlag[layerIdx]; }
   void              setIndependentLayerFlag(uint32_t layerIdx, bool t) { m_vpsIndependentLayerFlag[layerIdx] = t; }
-#if JVET_R0193
   uint32_t getMaxTidIlRefPicsPlus1(const uint32_t layerIdx, const uint32_t refLayerIdx) const
   {
     CHECK(layerIdx >= m_vpsMaxTidIlRefPicsPlus1.size(), "layerIdx out of bounds");
@@ -1059,10 +1052,6 @@ public:
     m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx] = i;
   }
   void              setMaxTidIlRefPicsPlus1(std::vector<std::vector<uint32_t>> i) { m_vpsMaxTidIlRefPicsPlus1 = i; }
-#else
-  uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx]; }
-  void              setMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t i) { m_vpsMaxTidIlRefPicsPlus1[layerIdx] = i; }
-#endif
 
   bool              getDirectRefLayerFlag(uint32_t layerIdx, uint32_t refLayerIdx) const { return m_vpsDirectRefLayerFlag[layerIdx][refLayerIdx]; }
   void              setDirectRefLayerFlag(uint32_t layerIdx, uint32_t refLayerIdx, bool t) { m_vpsDirectRefLayerFlag[layerIdx][refLayerIdx] = t; }
@@ -1142,10 +1131,8 @@ public:
 
   void              deriveOutputLayerSets();
   void              deriveTargetOutputLayerSet( int targetOlsIdx );
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   int               deriveTargetOLSIdx();
   uint32_t          getMaxTidinTOls(int m_targetOlsIdx);
-#endif
 
   void              checkVPS();
 
@@ -3121,9 +3108,7 @@ public:
 
 #if ENABLE_TRACING
 void xTraceVPSHeader();
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void xTraceOPIHeader();
-#endif
 void xTraceDCIHeader();
 void xTraceSPSHeader();
 void xTracePPSHeader();
