@@ -1046,8 +1046,18 @@ public:
   bool              getIndependentLayerFlag(uint32_t layerIdx) const { return m_vpsIndependentLayerFlag[layerIdx]; }
   void              setIndependentLayerFlag(uint32_t layerIdx, bool t) { m_vpsIndependentLayerFlag[layerIdx] = t; }
 #if JVET_R0193
-  uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t refLayerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx]; }
-  void              setMaxTidIlRefPicsPlus1(uint32_t layerIdx, uint32_t refLayerIdx, uint32_t i) { m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx] = i; }
+  uint32_t getMaxTidIlRefPicsPlus1(const uint32_t layerIdx, const uint32_t refLayerIdx) const
+  {
+    CHECK(layerIdx >= m_vpsMaxTidIlRefPicsPlus1.size(), "layerIdx out of bounds");
+    CHECK(refLayerIdx >= m_vpsMaxTidIlRefPicsPlus1[layerIdx].size(), "refLayerIdx out of bounds");
+    return m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx];
+  }
+  void setMaxTidIlRefPicsPlus1(const uint32_t layerIdx, const uint32_t refLayerIdx, const uint32_t i)
+  {
+    CHECK(layerIdx >= m_vpsMaxTidIlRefPicsPlus1.size(), "layerIdx out of bounds");
+    CHECK(refLayerIdx >= m_vpsMaxTidIlRefPicsPlus1[layerIdx].size(), "refLayerIdx out of bounds");
+    m_vpsMaxTidIlRefPicsPlus1[layerIdx][refLayerIdx] = i;
+  }
   void              setMaxTidIlRefPicsPlus1(std::vector<std::vector<uint32_t>> i) { m_vpsMaxTidIlRefPicsPlus1 = i; }
 #else
   uint32_t          getMaxTidIlRefPicsPlus1(uint32_t layerIdx) const { return m_vpsMaxTidIlRefPicsPlus1[layerIdx]; }

@@ -712,7 +712,8 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           bool cond3      = (pcRefPic->cs->slice->isIRAP());
           
           const VPS *vps                  = pcRefPic->cs->vps;
-          const int  maxTidILRefPicsPlus1 = vps->getMaxTidIlRefPicsPlus1(layerIdx, pcRefPic->layerId);
+          const int  maxTidILRefPicsPlus1 =
+            vps->getMaxTidIlRefPicsPlus1(layerIdx, vps->getGeneralLayerIdx(pcRefPic->layerId));
           bool cond4 = (pcRefPic->temporalId < maxTidILRefPicsPlus1);
 
           CHECK(!((cond1 && cond2) || cond3 || cond4),
