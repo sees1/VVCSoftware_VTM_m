@@ -48,7 +48,7 @@ static const uint8_t emulation_prevention_three_byte = 3;
 
 void writeNalUnitHeader(ostream& out, OutputNALUnit& nalu)       // nal_unit_header()
 {
-OutputBitstream bsNALUHeader;
+  OutputBitstream bsNALUHeader;
   int forbiddenZero = 0;
   bsNALUHeader.write(forbiddenZero, 1);   // forbidden_zero_bit
   int nuhReservedZeroBit = 0;
