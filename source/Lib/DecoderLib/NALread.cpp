@@ -164,7 +164,8 @@ void read(InputNALUnit& nalu)
   InputBitstream &bitstream = nalu.getBitstream();
   vector<uint8_t>& nalUnitBuf=bitstream.getFifo();
   // perform anti-emulation prevention
-  convertPayloadToRBSP(nalUnitBuf, &bitstream, (nalUnitBuf[0] & 64) == 0);
+  const NalUnitType nut = (NalUnitType)(nalUnitBuf[1] >> 3);
+  convertPayloadToRBSP(nalUnitBuf, &bitstream, nut <= NAL_UNIT_RESERVED_IRAP_VCL_11);
   bitstream.resetToStart();
   readNalUnitHeader(nalu);
 }
