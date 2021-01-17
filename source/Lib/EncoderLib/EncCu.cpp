@@ -2894,14 +2894,10 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   m_pcRdCost->setDistParam(distParamWholeBlk, tempCS->getOrgBuf().Y(), m_acMergeBuffer[0].Y().buf, m_acMergeBuffer[0].Y().stride, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y);
   Distortion bestWholeBlkSad = MAX_UINT64;
   double bestWholeBlkCost = MAX_DOUBLE;
-  Distortion *sadWholeBlk;
-  sadWholeBlk = new Distortion[maxNumMergeCandidates];
-  int *pocMrg;
-  Mv *MrgMv;
-  bool *isSkipThisCand;
-  pocMrg = new int[maxNumMergeCandidates];
-  MrgMv = new Mv[maxNumMergeCandidates];
-  isSkipThisCand = new bool[maxNumMergeCandidates];
+  Distortion sadWholeBlk[GEO_MAX_NUM_UNI_CANDS];
+  int        pocMrg[GEO_MAX_NUM_UNI_CANDS];
+  Mv         MrgMv[GEO_MAX_NUM_UNI_CANDS];
+  bool       isSkipThisCand[GEO_MAX_NUM_UNI_CANDS];
   for (int i = 0; i < maxNumMergeCandidates; i++)
   {
     isSkipThisCand[i] = false;
@@ -2995,10 +2991,6 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       m_GeoCostList.insert(splitDir, 1, mergeCand, (double)sadSmall + (double)bitsCand * sqrtLambdaForFirstPass);
     }
   }
-  delete[] sadWholeBlk;
-  delete[] pocMrg;
-  delete[] MrgMv;
-  delete[] isSkipThisCand;
 
   for (int splitDir = 0; splitDir < GEO_NUM_PARTITION_MODE; splitDir++)
   {
