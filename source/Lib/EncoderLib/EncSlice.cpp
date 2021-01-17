@@ -175,7 +175,10 @@ static void filterAndCalculateAverageEnergies (const Pel* pSrc, const int  iSrcS
   hpEner = double(saAct) / double((iWidth - 2) * (iHeight - 2));
 
   // lower limit, compensate for highpass amplification
-  if (hpEner < double(1 << (uBitDepth - 4))) hpEner = double(1 << (uBitDepth - 4));
+  if (hpEner < double(1 << (uBitDepth - 4)))
+  {
+    hpEner = double(1 << (uBitDepth - 4));
+  }
 }
 
 #ifndef GLOBAL_AVERAGING
@@ -229,13 +232,19 @@ static int getGlaringColorQPOffset (Picture* const pcPic, const int ctuAddr, Sli
     }
     else avgCompValue = pcPic->getOrigBuf (pcPic->block (compID)).computeAvg();
 
-    if (chrValue > avgCompValue) chrValue = avgCompValue; // minimum of the DC offsets
+    if (chrValue > avgCompValue)
+    {
+      chrValue = avgCompValue;   // minimum of the DC offsets
+    }
   }
   CHECK (chrValue < 0, "DC offset cannot be negative!");
 
   chrValue = (int)avgLumaValue - chrValue;
 
-  if (chrValue > midLevel) return apprI3Log2 (double (chrValue * chrValue) / double (midLevel * midLevel));
+  if (chrValue > midLevel)
+  {
+    return apprI3Log2(double(chrValue * chrValue) / double(midLevel * midLevel));
+  }
 
   return 0;
 }
@@ -279,7 +288,10 @@ static int applyQPAdaptationChroma (Picture* const pcPic, Slice* const pcSlice, 
         // change mean picture QP index based on picture's average luma value (Sharp)
         if (pcEncCfg->getLumaLevelToDeltaQPMapping().mode == LUMALVL_TO_DQP_NUM_MODES)
         {
-          if (meanLuma == MAX_UINT) meanLuma = pcPic->getOrigBuf().Y().computeAvg();
+          if (meanLuma == MAX_UINT)
+          {
+            meanLuma = pcPic->getOrigBuf().Y().computeAvg();
+          }
 
           averageAdaptedLumaQP = Clip3 (0, MAX_QP, averageAdaptedLumaQP + lumaDQPOffset (meanLuma, bitDepth));
         }
@@ -453,9 +465,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   dQP = m_pcCfg->getBaseQP();
   if(eSliceType!=I_SLICE)
   {
-    {
-      dQP += m_pcCfg->getGOPEntry(iGOPid).m_QPOffset;
-    }
+    dQP += m_pcCfg->getGOPEntry(iGOPid).m_QPOffset;
   }
 
   // modify QP
@@ -726,7 +736,10 @@ double EncSlice::initializeLambda(const Slice* slice, const int GOPid, const int
       }
       else
 #endif
-      dQPFactor = 0.57 * (1.0 - Clip3(0.0, 0.5, 0.05 * double (slice->getPic()->fieldPic ? numberBFrames >> 1 : numberBFrames)));
+      {
+        dQPFactor =
+          0.57 * (1.0 - Clip3(0.0, 0.5, 0.05 * double(slice->getPic()->fieldPic ? numberBFrames >> 1 : numberBFrames)));
+      }
     }
   }
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
@@ -855,7 +868,10 @@ static bool applyQPAdaptation (Picture* const pcPic,       Slice* const pcSlice,
 #if SHARP_LUMA_DELTA_QP
           && !useSharpLumaDQP
 #endif
-          ) iQPFixed = MAX_QP;
+      )
+      {
+        iQPFixed = MAX_QP;
+      }
     }
 #if SHARP_LUMA_DELTA_QP
 
@@ -878,9 +894,11 @@ static bool applyQPAdaptation (Picture* const pcPic,       Slice* const pcSlice,
     }
 #endif
 
-    if (iQPIndex >= MAX_QP) iQPFixed = MAX_QP;
-    else
-    if (iQPFixed != iQPIndex)
+    if (iQPIndex >= MAX_QP)
+    {
+      iQPFixed = MAX_QP;
+    }
+    else if (iQPFixed != iQPIndex)
     {
       const double* oldLambdas = pcSlice->getLambdas();
       const double  corrFactor = pow (2.0, double(iQPFixed - iQPIndex) / 3.0);
@@ -921,7 +939,10 @@ static bool applyQPAdaptation (Picture* const pcPic,       Slice* const pcSlice,
 #if SHARP_LUMA_DELTA_QP
               && !useSharpLumaDQP
 #endif
-              ) iQPAdapt = MAX_QP;
+          )
+          {
+            iQPAdapt = MAX_QP;
+          }
           CHECK (meanLuma != (uint32_t)pcPic->m_iOffsetCtu[ctuRsAddr], "luma DC offsets don't match");
         }
 #if SHARP_LUMA_DELTA_QP
@@ -961,7 +982,10 @@ static bool applyQPAdaptation (Picture* const pcPic,       Slice* const pcSlice,
           uAbsDCless = uint32_t((uint64_t(uAbsDCless) * 64*64 + (blockSize >> 1)) / blockSize);
         }
 
-        if (uAbsDCless < 64*64) uAbsDCless = 64*64;  // limit to 1
+        if (uAbsDCless < 64 * 64)
+        {
+          uAbsDCless = 64 * 64;   // limit to 1
+        }
 
         // reduce QP index if CTU would be fully quantized to zero
         if (uAbsDCless < uRefScale)
@@ -1023,7 +1047,10 @@ static int applyQPAdaptationSubCtu (CodingStructure &cs, const UnitArea ctuArea,
   const int       bitDepth = cs.slice->getSPS()->getBitDepth (CHANNEL_TYPE_LUMA); // overall image bit-depth
   const int   adaptedCtuQP = pcPic ? pcPic->m_iOffsetCtu[ctuAddr] : cs.slice->getSliceQpBase();
 
-  if (!pcPic || cs.slice->getCuQpDeltaSubdiv() == 0) return adaptedCtuQP;
+  if (!pcPic || cs.slice->getCuQpDeltaSubdiv() == 0)
+  {
+    return adaptedCtuQP;
+  }
 
   for (unsigned addr = 0; addr < cs.picture->m_subCtuQP.size(); addr++)
   {
@@ -1075,7 +1102,10 @@ static int applyQPAdaptationSubCtu (CodingStructure &cs, const UnitArea ctuArea,
 #endif
       }
     }
-    if (sumAct <= 0.0) return adaptedCtuQP;
+    if (sumAct <= 0.0)
+    {
+      return adaptedCtuQP;
+    }
 
     sumAct = double(numAct) / sumAct; // 1.0 / (average CTU activity)
 
@@ -1145,13 +1175,12 @@ void EncSlice::setLosslessSlice(Picture* pcPic, bool islossless)
       int losslessQp = LOSSLESS_AND_MIXED_LOSSLESS_RD_COST_TEST_QP - ((slice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA) - 8) * 6);
       slice->setSliceQp(losslessQp); // update the slice/base QPs
 
-     slice->setTSResidualCodingDisabledFlag(m_pcCfg->getTSRCdisableLL() ? true : false);
-
+      slice->setTSResidualCodingDisabledFlag(m_pcCfg->getTSRCdisableLL() ? true : false);
     }
     else
     {
-        slice->setSliceQp(pcPic->getLossyQPValue());
-        slice->setTSResidualCodingDisabledFlag(false);
+      slice->setSliceQp(pcPic->getLossyQPValue());
+      slice->setTSResidualCodingDisabledFlag(false);
     }
   }
 }
@@ -1176,8 +1205,6 @@ void EncSlice::precompressSlice( Picture* pcPic )
   }
 
   Slice* pcSlice        = pcPic->slices[getSliceSegmentIdx()];
-
-
 
   double     dPicRdCostBest = MAX_DOUBLE;
   uint32_t       uiQpIdxBest = 0;
@@ -1239,7 +1266,6 @@ void EncSlice::calCostSliceI(Picture* pcPic) // TODO: this only analyses the fir
   const int      shift             = sps.getBitDepth(CHANNEL_TYPE_LUMA)-8;
   const int      offset            = (shift>0)?(1<<(shift-1)):0;
 
-
   for( uint32_t ctuIdx = 0; ctuIdx < pcSlice->getNumCtuInSlice(); ctuIdx++ )
   {
     uint32_t ctuRsAddr = pcSlice->getCtuAddrInSlice( ctuIdx );
@@ -1252,7 +1278,6 @@ void EncSlice::calCostSliceI(Picture* pcPic) // TODO: this only analyses the fir
 
     (m_pcRateCtrl->getRCPic()->getLCU(ctuRsAddr)).m_costIntra=(iSumHad+offset)>>shift;
     iSumHadSlice += (m_pcRateCtrl->getRCPic()->getLCU(ctuRsAddr)).m_costIntra;
-
   }
   m_pcRateCtrl->getRCPic()->setTotalIntraCost(iSumHadSlice);
 }
@@ -1330,9 +1355,7 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
     xCheckWPEnable( pcSlice );
   }
 
-
-
-    pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
+  pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
 
   CHECK( pcPic->m_prevQP[0] == std::numeric_limits<int>::max(), "Invalid previous QP" );
 
@@ -1360,7 +1383,7 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
         cw->initCtxModels (*pcSlice);
       }
 #endif
-        pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
+      pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
       if (pcSlice->getFirstCtuRsAddrInSlice() == 0)
       {
         cs.currQP[0] = cs.currQP[1] = pcSlice->getSliceQp(); // cf code above
@@ -1389,7 +1412,10 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   m_pcInterSearch->resetUniMvList();
   ::memset(g_isReusedUniMVsFilled, 0, sizeof(g_isReusedUniMVsFilled));
   encodeCtus( pcPic, bCompressEntireSlice, bFastDeltaQP, m_pcLib );
-  if (checkPLTRatio) m_pcLib->checkPltStats( pcPic );
+  if (checkPLTRatio)
+  {
+    m_pcLib->checkPltStats(pcPic);
+  }
 }
 
 void EncSlice::checkDisFracMmvd( Picture* pcPic, uint32_t startCtuTsAddr, uint32_t boundingCtuTsAddr )
@@ -1424,7 +1450,8 @@ void EncSlice::checkDisFracMmvd( Picture* pcPic, uint32_t startCtuTsAddr, uint32
   {
     pcPic->cs->picHeader->setDisFracMMVD( true );
   }
-  if (!pcPic->cs->picHeader->getDisFracMMVD()) {
+  if (!pcPic->cs->picHeader->getDisFracMMVD())
+  {
     bool useIntegerMVD = (pcPic->lwidth()*pcPic->lheight() > 1920 * 1080);
     pcPic->cs->picHeader->setDisFracMMVD( useIntegerMVD );
   }
@@ -1506,7 +1533,7 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
   prevQP[0] = prevQP[1] = pcSlice->getSliceQp();
   currQP[0] = currQP[1] = pcSlice->getSliceQp();
 
-    prevQP[0] = prevQP[1] = pcSlice->getSliceQp();
+  prevQP[0] = prevQP[1] = pcSlice->getSliceQp();
   if ( pcSlice->getSPS()->getFpelMmvdEnabledFlag() ||
       (pcSlice->getSPS()->getIBCFlag() && m_pcCuEncoder->getEncCfg()->getIBCHashSearch()))
   {
@@ -1689,9 +1716,10 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
       pcPic->mctsInfo.init( &cs, ctuRsAddr );
     }
 
-  if (pCfg->getSwitchPOC() != pcPic->poc || ctuRsAddr >= pCfg->getDebugCTU())
-    m_pcCuEncoder->compressCtu( cs, ctuArea, ctuRsAddr, prevQP, currQP );
-
+    if (pCfg->getSwitchPOC() != pcPic->poc || ctuRsAddr >= pCfg->getDebugCTU())
+    {
+      m_pcCuEncoder->compressCtu(cs, ctuArea, ctuRsAddr, prevQP, currQP);
+    }
 #if K0149_BLOCK_STATISTICS
     getAndStoreBlockStatistics(cs, ctuArea);
 #endif
@@ -1782,7 +1810,6 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
     // for last Ctu in the slice
     if (pcSlice->getPPS()->getNumSubPics() >= 2 && curSubPic.getTreatedAsPicFlag() && ctuIdx == (pcSlice->getNumCtuInSlice() - 1))
     {
-
       int subPicX = (int)curSubPic.getSubPicLeft();
       int subPicY = (int)curSubPic.getSubPicTop();
       int subPicWidth = (int)curSubPic.getSubPicWidthInLumaSample();
@@ -1926,7 +1953,6 @@ void EncSlice::encodeSlice   ( Picture* pcPic, OutputBitstream* pcSubstreams, ui
     m_encCABACTableIdx = pcSlice->getSliceType();
   }
   numBinsCoded += m_CABACWriter->getNumBins();
-
 }
 
 
