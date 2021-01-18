@@ -612,26 +612,6 @@ void DecCu::xIntraRecACTQT(CodingUnit &cu)
   }
 }
 
-/** Function for filling the PCM buffer of a CU using its reconstructed sample array
-* \param pCU   pointer to current CU
-* \param depth CU Depth
-*/
-void DecCu::xFillPCMBuffer(CodingUnit &cu)
-{
-  for( auto &currTU : CU::traverseTUs( cu ) )
-  {
-    for (const CompArea &area : currTU.blocks)
-    {
-      if( !area.valid() ) continue;;
-
-      CPelBuf source      = cu.cs->getRecoBuf(area);
-       PelBuf destination = currTU.getPcmbuf(area.compID);
-
-      destination.copyFrom(source);
-    }
-  }
-}
-
 #include "CommonLib/dtrace_buffer.h"
 
 void DecCu::xReconInter(CodingUnit &cu)

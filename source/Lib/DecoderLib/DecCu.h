@@ -81,7 +81,6 @@ protected:
   void xReconInter        ( CodingUnit&      cu );
   void xDecodeInterTexture( CodingUnit&      cu );
   void xReconIntraQT      ( CodingUnit&      cu );
-  void xFillPCMBuffer     ( CodingUnit&      cu );
 
   void xIntraRecBlk       ( TransformUnit&   tu, const ComponentID compID );
   void xIntraRecACTBlk(TransformUnit&   tu);
