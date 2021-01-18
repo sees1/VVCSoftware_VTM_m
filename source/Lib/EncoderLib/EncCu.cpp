@@ -2196,37 +2196,6 @@ void EncCu::xCheckChromaQPOffset( CodingStructure& cs, Partitioner& partitioner 
   }
 }
 
-void EncCu::xFillPCMBuffer( CodingUnit &cu )
-{
-  const ChromaFormat format        = cu.chromaFormat;
-  const uint32_t numberValidComponents = getNumberValidComponents(format);
-
-  for( auto &tu : CU::traverseTUs( cu ) )
-  {
-    for( uint32_t ch = 0; ch < numberValidComponents; ch++ )
-    {
-      const ComponentID compID = ComponentID( ch );
-
-      const CompArea &compArea = tu.blocks[ compID ];
-
-      const CPelBuf source      = tu.cs->getOrgBuf( compArea );
-             PelBuf destination = tu.getPcmbuf( compID );
-      if (tu.cs->slice->getLmcsEnabledFlag() && m_pcReshape->getCTUFlag() && compID == COMPONENT_Y)
-      {
-        CompArea    tmpArea(COMPONENT_Y, compArea.chromaFormat, Position(0, 0), compArea.size());
-        PelBuf tempOrgBuf = m_tmpStorageLCU->getBuf(tmpArea);
-        tempOrgBuf.copyFrom(source);
-        tempOrgBuf.rspSignal(m_pcReshape->getFwdLUT());
-        destination.copyFrom(tempOrgBuf);
-      }
-      else
-      {
-        destination.copyFrom( source );
-      }
-    }
-  }
-}
-
 void EncCu::xCheckRDCostHashInter( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode )
 {
   bool isPerfectMatch = false;
