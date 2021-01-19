@@ -124,6 +124,7 @@ TComHash::~TComHash()
     m_lookupTable = NULL;
   }
 }
+
 void TComHash::create(int picWidth, int picHeight)
 {
   if (m_lookupTable)
@@ -502,6 +503,7 @@ bool TComHash::isBlock2x2ColSameValue(unsigned char* p, bool includeAllComponent
 
   return true;
 }
+
 bool TComHash::isHorizontalPerfectLuma(const Pel* srcPel, int stride, int width, int height)
 {
   for (int i = 0; i < height; i++)
@@ -532,6 +534,7 @@ bool TComHash::isVerticalPerfectLuma(const Pel* srcPel, int stride, int width, i
   }
   return true;
 }
+
 bool TComHash::getBlockHashValue(const PelUnitBuf &curPicBuf, int width, int height, int xStart, int yStart, const BitDepths bitDepths, uint32_t& hashValue1, uint32_t& hashValue2)
 {
   int addValue = m_blockSizeToIndex[width][height];

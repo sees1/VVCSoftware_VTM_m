@@ -305,6 +305,7 @@ unsigned DeriveCtx::CtxAffineFlag( const CodingUnit& cu )
 
   return ctxId;
 }
+
 unsigned DeriveCtx::CtxSkipFlag( const CodingUnit& cu )
 {
   const CodingStructure *cs = cu.cs;
@@ -320,8 +321,6 @@ unsigned DeriveCtx::CtxSkipFlag( const CodingUnit& cu )
 
   return ctxId;
 }
-
-
 
 unsigned DeriveCtx::CtxPredModeFlag( const CodingUnit& cu )
 {
@@ -377,6 +376,7 @@ void MergeCtx::setMergeInfo( PredictionUnit& pu, int candIdx )
   PU::restrictBiPredMergeCandsOne(pu);
   pu.mmvdEncOptMode = 0;
 }
+
 void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
 {
   const Slice &slice = *pu.cs->slice;
@@ -447,7 +447,9 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
         }
       }
       else
-      tempMv[0] = tempMv[1].scaleMv(scale);
+      {
+        tempMv[0] = tempMv[1].scaleMv(scale);
+      }
     }
     else
     {
@@ -466,7 +468,9 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
         }
       }
       else
-      tempMv[1] = tempMv[0].scaleMv(scale);
+      {
+        tempMv[1] = tempMv[0].scaleMv(scale);
+      }
     }
 
     pu.interDir = 3;
@@ -548,7 +552,6 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     }
   }
 
-
   PU::restrictBiPredMergeCandsOne(pu);
 }
 
@@ -573,7 +576,7 @@ unsigned DeriveCtx::CtxPltCopyFlag( const unsigned prevRunType, const unsigned d
   uint8_t *ucCtxLut = (prevRunType == PLT_RUN_INDEX) ? g_paletteRunLeftLut : g_paletteRunTopLut;
   if ( dist <= RUN_IDX_THRE )
   {
-     return ucCtxLut[dist];
+    return ucCtxLut[dist];
   }
   else
   {
