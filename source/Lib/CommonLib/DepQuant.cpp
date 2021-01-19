@@ -386,9 +386,13 @@ namespace DQIntern
     scanInfo.eosbb      = ( scanInfo.insidePos == 0 );
     scanInfo.spt        = SCAN_ISCSBB;
     if(  scanInfo.insidePos == m_sbbMask && scanIdx > scanInfo.sbbSize && scanIdx < m_numCoeff - 1 )
+    {
       scanInfo.spt      = SCAN_SOCSBB;
+    }
     else if( scanInfo.eosbb && scanIdx > 0 && scanIdx < m_numCoeff - m_sbbSize )
+    {
       scanInfo.spt      = SCAN_EOCSBB;
+    }
     scanInfo.posX = m_scanId2BlkPos[scanIdx].x;
     scanInfo.posY = m_scanId2BlkPos[scanIdx].y;
     if( scanIdx )
@@ -756,7 +760,9 @@ namespace DQIntern
       if( level )
       {
         if (enableScalingLists)
+        {
           invQScale = piDequantCoef[rasterPos];//scalingfactor*levelScale
+        }
         if (shift < 0 && (enableScalingLists || scanIdx == lastScanIdx))
         {
           invQScale <<= -shift;
@@ -880,70 +886,82 @@ namespace DQIntern
       int64_t         rdCostA   = m_rdCost + pqDataA.deltaDist;
       int64_t         rdCostB   = m_rdCost + pqDataB.deltaDist;
       int64_t         rdCostZ   = m_rdCost;
-        if( m_remRegBins >= 4 )
+      if (m_remRegBins >= 4)
+      {
+        if (pqDataA.absLevel < 4)
         {
-          if( pqDataA.absLevel < 4 )
-            rdCostA += m_coeffFracBits.bits[ pqDataA.absLevel ];
-          else
-          {
-            const TCoeff value = ( pqDataA.absLevel - 4 ) >> 1;
-            rdCostA += m_coeffFracBits.bits[ pqDataA.absLevel - ( value << 1 ) ] + goRiceTab[ value < RICEMAX ? value : RICEMAX - 1 ];
-          }
-          if( pqDataB.absLevel < 4 )
-            rdCostB += m_coeffFracBits.bits[ pqDataB.absLevel ];
-          else
-          {
-            const TCoeff value = ( pqDataB.absLevel - 4 ) >> 1;
-            rdCostB += m_coeffFracBits.bits[ pqDataB.absLevel - ( value << 1 ) ] + goRiceTab[ value < RICEMAX ? value : RICEMAX - 1 ];
-          }
-          if( spt == SCAN_ISCSBB )
-          {
-            rdCostA += m_sigFracBits.intBits[ 1 ];
-            rdCostB += m_sigFracBits.intBits[ 1 ];
-            rdCostZ += m_sigFracBits.intBits[ 0 ];
-          }
-          else if( spt == SCAN_SOCSBB )
-          {
-            rdCostA += m_sbbFracBits.intBits[ 1 ] + m_sigFracBits.intBits[ 1 ];
-            rdCostB += m_sbbFracBits.intBits[ 1 ] + m_sigFracBits.intBits[ 1 ];
-            rdCostZ += m_sbbFracBits.intBits[ 1 ] + m_sigFracBits.intBits[ 0 ];
-          }
-          else if( m_numSigSbb )
-          {
-            rdCostA += m_sigFracBits.intBits[ 1 ];
-            rdCostB += m_sigFracBits.intBits[ 1 ];
-            rdCostZ += m_sigFracBits.intBits[ 0 ];
-          }
-          else
-          {
-            rdCostZ = decisionA.rdCost;
-          }
+          rdCostA += m_coeffFracBits.bits[pqDataA.absLevel];
         }
         else
         {
-          rdCostA += ( 1 << SCALE_BITS ) + goRiceTab[ pqDataA.absLevel <= m_goRiceZero ? pqDataA.absLevel - 1 : ( pqDataA.absLevel < RICEMAX ? pqDataA.absLevel : RICEMAX - 1 ) ];
-          rdCostB += ( 1 << SCALE_BITS ) + goRiceTab[ pqDataB.absLevel <= m_goRiceZero ? pqDataB.absLevel - 1 : ( pqDataB.absLevel < RICEMAX ? pqDataB.absLevel : RICEMAX - 1 ) ];
-          rdCostZ += goRiceTab[ m_goRiceZero ];
+          const TCoeff value = (pqDataA.absLevel - 4) >> 1;
+          rdCostA +=
+            m_coeffFracBits.bits[pqDataA.absLevel - (value << 1)] + goRiceTab[value < RICEMAX ? value : RICEMAX - 1];
         }
-        if( rdCostA < decisionA.rdCost )
+        if (pqDataB.absLevel < 4)
         {
-          decisionA.rdCost = rdCostA;
-          decisionA.absLevel = pqDataA.absLevel;
-          decisionA.prevId = m_stateId;
+          rdCostB += m_coeffFracBits.bits[pqDataB.absLevel];
         }
-        if( rdCostZ < decisionA.rdCost )
+        else
         {
-          decisionA.rdCost = rdCostZ;
-          decisionA.absLevel = 0;
-          decisionA.prevId = m_stateId;
+          const TCoeff value = (pqDataB.absLevel - 4) >> 1;
+          rdCostB +=
+            m_coeffFracBits.bits[pqDataB.absLevel - (value << 1)] + goRiceTab[value < RICEMAX ? value : RICEMAX - 1];
         }
-        if( rdCostB < decisionB.rdCost )
+        if (spt == SCAN_ISCSBB)
         {
-          decisionB.rdCost = rdCostB;
-          decisionB.absLevel = pqDataB.absLevel;
-          decisionB.prevId = m_stateId;
+          rdCostA += m_sigFracBits.intBits[1];
+          rdCostB += m_sigFracBits.intBits[1];
+          rdCostZ += m_sigFracBits.intBits[0];
+        }
+        else if (spt == SCAN_SOCSBB)
+        {
+          rdCostA += m_sbbFracBits.intBits[1] + m_sigFracBits.intBits[1];
+          rdCostB += m_sbbFracBits.intBits[1] + m_sigFracBits.intBits[1];
+          rdCostZ += m_sbbFracBits.intBits[1] + m_sigFracBits.intBits[0];
+        }
+        else if (m_numSigSbb)
+        {
+          rdCostA += m_sigFracBits.intBits[1];
+          rdCostB += m_sigFracBits.intBits[1];
+          rdCostZ += m_sigFracBits.intBits[0];
+        }
+        else
+        {
+          rdCostZ = decisionA.rdCost;
         }
       }
+      else
+      {
+        rdCostA +=
+          (1 << SCALE_BITS)
+          + goRiceTab[pqDataA.absLevel <= m_goRiceZero ? pqDataA.absLevel - 1
+                                                       : (pqDataA.absLevel < RICEMAX ? pqDataA.absLevel : RICEMAX - 1)];
+        rdCostB +=
+          (1 << SCALE_BITS)
+          + goRiceTab[pqDataB.absLevel <= m_goRiceZero ? pqDataB.absLevel - 1
+                                                       : (pqDataB.absLevel < RICEMAX ? pqDataB.absLevel : RICEMAX - 1)];
+        rdCostZ += goRiceTab[m_goRiceZero];
+      }
+      if (rdCostA < decisionA.rdCost)
+      {
+        decisionA.rdCost   = rdCostA;
+        decisionA.absLevel = pqDataA.absLevel;
+        decisionA.prevId   = m_stateId;
+      }
+      if (rdCostZ < decisionA.rdCost)
+      {
+        decisionA.rdCost   = rdCostZ;
+        decisionA.absLevel = 0;
+        decisionA.prevId   = m_stateId;
+      }
+      if (rdCostB < decisionB.rdCost)
+      {
+        decisionB.rdCost   = rdCostB;
+        decisionB.absLevel = pqDataB.absLevel;
+        decisionB.prevId   = m_stateId;
+      }
+    }
 
     inline void checkRdCostStart(int32_t lastOffset, const PQData &pqData, Decision &decision) const
     {
@@ -1354,10 +1372,10 @@ namespace DQIntern
     m_prevStates[3].checkRdCosts( spt, pqData[3], pqData[1], decisions[3], decisions[1]);
     if( spt==SCAN_EOCSBB )
     {
-        m_skipStates[0].checkRdCostSkipSbb( decisions[0] );
-        m_skipStates[1].checkRdCostSkipSbb( decisions[1] );
-        m_skipStates[2].checkRdCostSkipSbb( decisions[2] );
-        m_skipStates[3].checkRdCostSkipSbb( decisions[3] );
+      m_skipStates[0].checkRdCostSkipSbb(decisions[0]);
+      m_skipStates[1].checkRdCostSkipSbb(decisions[1]);
+      m_skipStates[2].checkRdCostSkipSbb(decisions[2]);
+      m_skipStates[3].checkRdCostSkipSbb(decisions[3]);
     }
 
     m_startState.checkRdCostStart( lastOffset, pqData[0], decisions[0] );
@@ -1478,7 +1496,9 @@ namespace DQIntern
     {
       if (zeroOutforThres && (tuPars.m_scanId2BlkPos[firstTestPos].x >= ((tuPars.m_width == 32 && zeroOut) ? 16 : 32)
                            || tuPars.m_scanId2BlkPos[firstTestPos].y >= ((tuPars.m_height == 32 && zeroOut) ? 16 : 32)))
+      {
         continue;
+      }
       TCoeff thresTmp = (enableScalingLists) ? TCoeff(thres / (4 * quantCoeff[tuPars.m_scanId2BlkPos[firstTestPos].idx]))
                                              : TCoeff(thres / (4 * defaultQuantisationCoefficient));
 
@@ -1522,7 +1542,9 @@ namespace DQIntern
         xDecideAndUpdate( abs( tCoeff[scanInfo.rasterPos]), scanInfo, (zeroOut && (scanInfo.posX >= effWidth || scanInfo.posY >= effHeight)), quantCoeff[scanInfo.rasterPos] );
       }
       else
+      {
         xDecideAndUpdate( abs( tCoeff[scanInfo.rasterPos]), scanInfo, (zeroOut && (scanInfo.posX >= effWidth || scanInfo.posY >= effHeight)), defaultQuantisationCoefficient );
+      }
     }
 
     //===== find best path =====
