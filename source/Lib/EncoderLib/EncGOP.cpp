@@ -59,8 +59,6 @@
 
 #include "DecoderLib/DecLib.h"
 
-#define ENCODE_SUB_SET 0
-
 using namespace std;
 
 //! \ingroup EncoderLib
@@ -777,7 +775,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
       bufferingPeriodSEI->copyTo(*bufferingPeriodSEIcopy);
       nestedSeiMessages.push_back(bufferingPeriodSEIcopy);
     }
-
   }
 
   if (m_pcEncLib->getDependentRAPIndicationSEIEnabled() && slice->isDRAP())
@@ -1081,7 +1078,9 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
         SEIDecodingUnitInfo *duInfoSEI = new SEIDecodingUnitInfo();
         duInfoSEI->m_decodingUnitIdx = i;
         for( int j = temporalId; j <= maxNumSubLayers; j++ )
+        {
           duInfoSEI->m_duSptCpbRemovalDelayIncrement[j] = pictureTimingSEI->m_duCpbRemovalDelayMinus1[i*maxNumSubLayers+j] + 1;
+        }
         duInfoSEI->m_dpbOutputDuDelayPresentFlag = false;
         duInfoSEI->m_picSptDpbOutputDuDelay = picSptDpbOutputDuDelay;
 
@@ -1151,7 +1150,9 @@ void EncGOP::xUpdateTimingSEI(SEIPictureTiming *pictureTimingSEI, std::deque<DUD
 
     int maxNumSubLayers = sps->getMaxTLayers();
     for( int j = 0; j < maxNumSubLayers - 1; j++ )
+    {
       pictureTimingSEI->m_ptSubLayerDelaysPresentFlag[j] = false;
+    }
 
     for( i = 0; i < numDU; i ++ )
     {
@@ -1191,7 +1192,10 @@ void EncGOP::xUpdateTimingSEI(SEIPictureTiming *pictureTimingSEI, std::deque<DUD
             ui64Tmp = uiPrev + 1;
             flag = 1;
           }
-          else                            ui64Tmp = maxDiff - tmp + 1;
+          else
+          {
+            ui64Tmp = maxDiff - tmp + 1;
+          }
         }
         rDuCpbRemovalDelayMinus1[ i * maxNumSubLayers + maxNumSubLayers - 1 ] = (uint32_t)ui64Tmp - uiPrev - 1;
         if( (int)rDuCpbRemovalDelayMinus1[ i * maxNumSubLayers + maxNumSubLayers - 1 ] < 0 )
@@ -1307,7 +1311,7 @@ cabac_zero_word_padding(const Slice *const pcSlice,
       return numberOfAdditionalCabacZeroWords;
     }
   }
-      return 0;
+  return 0;
 }
 
 class EfficientFieldIRAPMapping
@@ -1565,7 +1569,10 @@ void trySkipOrDecodePicture( bool& decPic, bool& encPic, const EncCfg& cfg, Pict
     }
 
     encPic |= cfg.getForceDecodeBitstream1() && !decPic;
-    if( cfg.getForceDecodeBitstream1() ) { return; }
+    if (cfg.getForceDecodeBitstream1())
+    {
+      return;
+    }
   }
 
 
@@ -1893,7 +1900,9 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
         m_pcReshaper->setCTUFlag(false);
       }
       else
+      {
         m_pcReshaper->setCTUFlag(true);
+      }
 
       m_pcReshaper->getSliceReshaperInfo().setSliceReshapeModelPresentFlag(false);
 
@@ -2222,7 +2231,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         rpcPic = *(iterPic++);
         if ( pcSlice->isDRAP() && rpcPic->getPOC() != pocCurr )
         {
-            rpcPic->precedingDRAP = true;
+          rpcPic->precedingDRAP = true;
         }
         else if ( !pcSlice->isDRAP() && rpcPic->getPOC() == pocCurr )
         {
@@ -2246,10 +2255,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL)
         )
     {
-    if (pcSlice->isStepwiseTemporalLayerSwitchingPointCandidate(rcListPic))
+      if (pcSlice->isStepwiseTemporalLayerSwitchingPointCandidate(rcListPic))
       {
         bool isSTSA=true;
-
 
         for(int ii=0;(ii<m_pcCfg->getGOPSize() && isSTSA==true);ii++)
         {
@@ -2314,7 +2322,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setNumRefIdx(REF_PIC_LIST_0, (pcSlice->isIntra()) ? 0 : pcSlice->getRPL0()->getNumberOfActivePictures());
       pcSlice->setNumRefIdx(REF_PIC_LIST_1, (!pcSlice->isInterB()) ? 0 : pcSlice->getRPL1()->getNumberOfActivePictures());
     }
-    if (m_pcCfg->getUseCompositeRef() && getPrepareLTRef()) {
+    if (m_pcCfg->getUseCompositeRef() && getPrepareLTRef())
+    {
       arrangeCompositeReference(pcSlice, rcListPic, pocCurr);
     }
     //  Set reference list
@@ -2342,7 +2351,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       if (!pcSlice->isIRAP())
       {
         int refLayer = pcSlice->getDepth();
-        if( refLayer > 9 ) refLayer = 9; // Max layer is 10
+        if (refLayer > 9)
+        {
+          refLayer = 9;   // Max layer is 10
+        }
 
         if( m_bInitAMaxBT && pcSlice->getPOC() > m_uiPrevISlicePOC )
         {
@@ -2451,7 +2463,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
     if (pcSlice->getSliceType() == B_SLICE)
     {
-
       bool bLowDelay = true;
       int  iCurrPOC  = pcSlice->getPOC();
       int iRefIdx = 0;
@@ -2481,7 +2492,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
     //-------------------------------------------------------------
     pcSlice->setRefPOCList();
-
 
     pcSlice->setList1IdxToList0Idx();
 
@@ -2708,9 +2718,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
     uint32_t uiNumSliceSegments = 1;
 
-    {
-      pcSlice->setDefaultClpRng( *pcSlice->getSPS() );
-    }
+    pcSlice->setDefaultClpRng(*pcSlice->getSPS());
 
     // Allocate some coders, now the number of tiles are known.
     const uint32_t numberOfCtusInFrame = pcPic->cs->pcv->sizeInCtus;
@@ -2970,12 +2978,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           applyDeblockingFilterParameterSelection(pcPic, uiNumSliceSegments, iGOPid);
         }
         else
+  #endif
         {
-  #endif
           applyDeblockingFilterMetric(pcPic, uiNumSliceSegments);
-  #if W0038_DB_OPT
         }
-  #endif
       }
       if (m_pcCfg->getCostMode() == COST_LOSSLESS_CODING) 
       {
@@ -3004,7 +3010,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         //assign SAO slice header
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
-
           if (pcPic->slices[s]->isLossless() && m_pcCfg->getCostMode() == COST_LOSSLESS_CODING)
           {
             pcPic->slices[s]->setSaoEnabledFlag(CHANNEL_TYPE_LUMA, false);
@@ -3015,9 +3020,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             pcPic->slices[s]->setSaoEnabledFlag(CHANNEL_TYPE_LUMA, sliceEnabled[COMPONENT_Y]);
             CHECK(!(sliceEnabled[COMPONENT_Cb] == sliceEnabled[COMPONENT_Cr]), "Unspecified error");
             pcPic->slices[s]->setSaoEnabledFlag(CHANNEL_TYPE_CHROMA, sliceEnabled[COMPONENT_Cb]);
-
-        }
-
+          }
         }
       }
 
@@ -3171,11 +3174,15 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
               pcSlice->getAlfAPSs()[apsId] = aps;
             }
             if( apsMap->getChangedFlag( psId ) )
+            {
               changedApsId = apsId;
+            }
           }
         }
         if( changedApsId >= 0 )
+        {
           m_pcALF->setApsIdStart( changedApsId );
+        }
       }
     }
 
@@ -3427,7 +3434,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         /* start slice NALunit */
         OutputNALUnit nalu( pcSlice->getNalUnitType(), m_pcEncLib->getLayerId(), pcSlice->getTLayer() );
         m_HLSWriter->setBitstream( &nalu.m_Bitstream );
-
 
         tmpBitsBeforeWriting = m_HLSWriter->getNumberOfWrittenBits();
         m_HLSWriter->codeSliceHeader( pcSlice );
@@ -3810,9 +3816,7 @@ uint64_t EncGOP::preLoopFilterPicAndCalcDist( Picture* pcPic )
 // ====================================================================================================================
 // Protected member functions
 // ====================================================================================================================
-void EncGOP::xInitGOP( int iPOCLast, int iNumPicRcvd, bool isField
-  , bool isEncodeLtRef
-)
+void EncGOP::xInitGOP(int iPOCLast, int iNumPicRcvd, bool isField, bool isEncodeLtRef)
 {
   CHECK(!( iNumPicRcvd > 0 ), "Unspecified error");
   //  Exception for the first frames
@@ -3910,7 +3914,10 @@ static inline double calcWeightedSquaredError(const CPelBuf& org,        const C
       ssErr += uint64_t(iDiff * iDiff);
     }
   }
-  if (wAct <= xAct || hAct <= yAct) return (double)ssErr;
+  if (wAct <= xAct || hAct <= yAct)
+  {
+    return (double) ssErr;
+  }
 
   for (y = yAct; y < hAct; y++)   // activity
   {
@@ -4411,7 +4418,10 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
   {
     c += 32;
   }
-  if (m_pcCfg->getDependentRAPIndicationSEIEnabled() && pcSlice->isDRAP()) c = 'D';
+  if (m_pcCfg->getDependentRAPIndicationSEIEnabled() && pcSlice->isDRAP())
+  {
+    c = 'D';
+  }
 
   if( g_verbosity >= NOTICE )
   {
@@ -4503,8 +4513,8 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
                  reinterpret_cast<uint8_t *>(&psnrL[i]) + sizeof(psnrL[i]),
                  reinterpret_cast<uint8_t *>(&xpsnrL[i]));
           }
-          msg(NOTICE, " [xPSNRL%d %16" PRIx64 "]", (int)m_pcCfg->getWhitePointDeltaE(i), xpsnrL[0]);
 
+          msg(NOTICE, " [xPSNRL%d %16" PRIx64 "]", (int) m_pcCfg->getWhitePointDeltaE(i), xpsnrL[0]);
         }
       }
     }
@@ -4601,8 +4611,10 @@ double EncGOP::xCalculateMSSSIM (const Pel* org, const int orgStride, const Pel*
   {
     for(int x=0; x<WEIGHTING_SIZE; x++)
     {
-      weights[y][x]=exp(-((y-WEIGHTING_MID_TAP)*(y-WEIGHTING_MID_TAP)+(x-WEIGHTING_MID_TAP)*(x-WEIGHTING_MID_TAP))/(WEIGHTING_MID_TAP-0.5));
-      coeffSum +=weights[y][x];
+      weights[y][x] =
+        exp(-((y - WEIGHTING_MID_TAP) * (y - WEIGHTING_MID_TAP) + (x - WEIGHTING_MID_TAP) * (x - WEIGHTING_MID_TAP))
+            / (WEIGHTING_MID_TAP - 0.5));
+      coeffSum += weights[y][x];
     }
   }
 
@@ -4757,7 +4769,6 @@ void EncGOP::xCalculateHDRMetrics( Picture* pcPic, double deltaE[hdrtoolslib::NB
 
   *deltaE = m_pcDistortionDeltaE->getDeltaE();
   *psnrL  = m_pcDistortionDeltaE->getPsnrL();
-
 }
 
 void EncGOP::copyBuftoFrame( Picture* pcPic )
@@ -4782,7 +4793,8 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
   uint16_t* vOrg = m_ppcFrameOrg[0]->m_ui16Comp[hdrtoolslib::Cr_COMP];
   uint16_t* vRec = m_ppcFrameRec[0]->m_ui16Comp[hdrtoolslib::Cr_COMP];
 
-  if(chFmt == CHROMA_444){
+  if (chFmt == CHROMA_444)
+  {
     yOrg = m_ppcFrameOrg[1]->m_ui16Comp[hdrtoolslib::Y_COMP];
     yRec = m_ppcFrameRec[1]->m_ui16Comp[hdrtoolslib::Y_COMP];
     uOrg = m_ppcFrameOrg[1]->m_ui16Comp[hdrtoolslib::Cb_COMP];
@@ -4791,14 +4803,17 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
     vRec = m_ppcFrameRec[1]->m_ui16Comp[hdrtoolslib::Cr_COMP];
   }
 
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
+  for (int i = 0; i < height; i++)
+  {
+    for (int j = 0; j < width; j++)
+    {
       yOrg[i*width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getOrigBuf(COMPONENT_Y).stride + j + cropOffsetLeft]);
       yRec[i*width + j] = static_cast<uint16_t>(pRec[(i + cropOffsetTop) * pcPic->getRecoBuf(COMPONENT_Y).stride + j + cropOffsetLeft]);
     }
   }
 
-  if (chFmt != CHROMA_444) {
+  if (chFmt != CHROMA_444)
+  {
     height >>= 1;
     width  >>= 1;
     cropOffsetLeft >>= 1;
@@ -4808,8 +4823,10 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
   pOrg = pcPic->getOrigBuf(COMPONENT_Cb).buf;
   pRec = pcPic->getRecoBuf(COMPONENT_Cb).buf;
 
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
+  for (int i = 0; i < height; i++)
+  {
+    for (int j = 0; j < width; j++)
+    {
       uOrg[i*width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getOrigBuf(COMPONENT_Cb).stride + j + cropOffsetLeft]);
       uRec[i*width + j] = static_cast<uint16_t>(pRec[(i + cropOffsetTop) * pcPic->getRecoBuf(COMPONENT_Cb).stride + j + cropOffsetLeft]);
     }
@@ -4818,8 +4835,10 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
   pOrg = pcPic->getOrigBuf(COMPONENT_Cr).buf;
   pRec = pcPic->getRecoBuf(COMPONENT_Cr).buf;
 
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
+  for (int i = 0; i < height; i++)
+  {
+    for (int j = 0; j < width; j++)
+    {
       vOrg[i*width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getOrigBuf(COMPONENT_Cr).stride + j + cropOffsetLeft]);
       vRec[i*width + j] = static_cast<uint16_t>(pRec[(i + cropOffsetTop) * pcPic->getRecoBuf(COMPONENT_Cr).stride + j + cropOffsetLeft]);
     }
