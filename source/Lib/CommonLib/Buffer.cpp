@@ -381,15 +381,15 @@ void AreaBuf<Pel>::rspSignal(std::vector<Pel>& pLUT)
 {
   Pel* dst = buf;
   Pel* src = buf;
-    for (unsigned y = 0; y < height; y++)
+  for (unsigned y = 0; y < height; y++)
+  {
+    for (unsigned x = 0; x < width; x++)
     {
-      for (unsigned x = 0; x < width; x++)
-      {
-        dst[x] = pLUT[src[x]];
-      }
-      dst += stride;
-      src += stride;
+      dst[x] = pLUT[src[x]];
     }
+    dst += stride;
+    src += stride;
+  }
 }
 
 template<>
@@ -831,57 +831,57 @@ void UnitBuf<Pel>::colorSpaceConvert(const UnitBuf<Pel> &other, const bool forwa
   CHECK(other.bufs[COMPONENT_Y].stride != other.bufs[COMPONENT_Cb].stride || other.bufs[COMPONENT_Y].stride != other.bufs[COMPONENT_Cr].stride, "unequal stride for 444 content");
   CHECK(bufs[COMPONENT_Y].width != other.bufs[COMPONENT_Y].width || bufs[COMPONENT_Y].height != other.bufs[COMPONENT_Y].height, "unequal block size")
 
-    if (forward)
+  if (forward)
+  {
+    for (int y = 0; y < height; y++)
     {
-      for (int y = 0; y < height; y++)
+      for (int x = 0; x < width; x++)
       {
-        for (int x = 0; x < width; x++)
-        {
-          r = pOrg2[x];
-          g = pOrg0[x];
-          b = pOrg1[x];
+        r = pOrg2[x];
+        g = pOrg0[x];
+        b = pOrg1[x];
 
-          co = r - b;
-          int t = b + (co >> 1);
-          cg = g - t;
-          pDst0[x] = t + (cg >> 1);
-          pDst1[x] = cg;
-          pDst2[x] = co;
-        }
-        pOrg0 += strideOrg;
-        pOrg1 += strideOrg;
-        pOrg2 += strideOrg;
-        pDst0 += strideDst;
-        pDst1 += strideDst;
-        pDst2 += strideDst;
+        co       = r - b;
+        int t    = b + (co >> 1);
+        cg       = g - t;
+        pDst0[x] = t + (cg >> 1);
+        pDst1[x] = cg;
+        pDst2[x] = co;
       }
+      pOrg0 += strideOrg;
+      pOrg1 += strideOrg;
+      pOrg2 += strideOrg;
+      pDst0 += strideDst;
+      pDst1 += strideDst;
+      pDst2 += strideDst;
     }
-    else
+  }
+  else
+  {
+    for (int y = 0; y < height; y++)
     {
-      for (int y = 0; y < height; y++)
+      for (int x = 0; x < width; x++)
       {
-        for (int x = 0; x < width; x++)
-        {
-          y0 = pOrg0[x];
-          cg = pOrg1[x];
-          co = pOrg2[x];
+        y0 = pOrg0[x];
+        cg = pOrg1[x];
+        co = pOrg2[x];
 
-          y0 = Clip3((-maxAbsclipBD - 1), maxAbsclipBD, y0);
-          cg = Clip3((-maxAbsclipBD - 1), maxAbsclipBD, cg);
-          co = Clip3((-maxAbsclipBD - 1), maxAbsclipBD, co);
+        y0 = Clip3((-maxAbsclipBD - 1), maxAbsclipBD, y0);
+        cg = Clip3((-maxAbsclipBD - 1), maxAbsclipBD, cg);
+        co = Clip3((-maxAbsclipBD - 1), maxAbsclipBD, co);
 
-          int t = y0 - (cg >> 1);
-          pDst0[x] = cg + t;
-          pDst1[x] = t - (co >> 1);
-          pDst2[x] = co + pDst1[x];
-        }
-
-        pOrg0 += strideOrg;
-        pOrg1 += strideOrg;
-        pOrg2 += strideOrg;
-        pDst0 += strideDst;
-        pDst1 += strideDst;
-        pDst2 += strideDst;
+        int t    = y0 - (cg >> 1);
+        pDst0[x] = cg + t;
+        pDst1[x] = t - (co >> 1);
+        pDst2[x] = co + pDst1[x];
       }
+
+      pOrg0 += strideOrg;
+      pOrg1 += strideOrg;
+      pOrg2 += strideOrg;
+      pDst0 += strideDst;
+      pDst1 += strideDst;
+      pDst2 += strideDst;
     }
+  }
 }
