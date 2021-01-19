@@ -449,10 +449,11 @@ void CacheModel::cacheAccess( const Pel *addr, const std::string& fileName, cons
   // check cache hit in each way
   for ( way = 0 ; way < m_numWay ; way++ )
   {
-      if ( xIsCacheHit( pos + way, cacheAddr ) ) {
-        hit = true;
-        break;
-      }
+    if (xIsCacheHit(pos + way, cacheAddr))
+    {
+      hit = true;
+      break;
+    }
   }
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE_PRINT_ACCESS_INFO
   if ( m_frameCount == JVET_J0090_MEMORY_BANDWITH_MEASURE_PRINT_FRAME )
