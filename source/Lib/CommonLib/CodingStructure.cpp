@@ -942,7 +942,10 @@ void CodingStructure::createInternals(const UnitArea& _unit, const bool isTopLay
     m_offsets[i] = 0;
   }
 
-  if( !isTopLayer ) createCoeffs(isPLTused);
+  if (!isTopLayer)
+  {
+    createCoeffs(isPLTused);
+  }
 
   unsigned _lumaAreaScaled = g_miScaling.scale( area.lumaSize() ).area();
   m_motionBuf       = new MotionInfo[_lumaAreaScaled];
@@ -1050,6 +1053,7 @@ void CodingStructure::setPrevPLT(PLTBuf predictor)
     memcpy(prevPLT.curPLT[comp], predictor.curPLT[comp], MAXPLTPREDSIZE * sizeof(Pel));
   }
 }
+
 void CodingStructure::storePrevPLT(PLTBuf& predictor)
 {
   for (int comp = 0; comp < MAX_NUM_CHANNEL_TYPE; comp++)
@@ -1240,15 +1244,36 @@ void CodingStructure::useSubStructure( const CodingStructure& subStruct, const C
   if( parent )
   {
     // copy data to picture
-    if( cpyPred )    getPredBuf   ( clippedArea ).copyFrom( subPredBuf );
-    if( cpyResi )    getResiBuf   ( clippedArea ).copyFrom( subResiBuf );
-    if( cpyReco )    getRecoBuf   ( clippedArea ).copyFrom( subRecoBuf );
-    if( cpyOrgResi ) getOrgResiBuf( clippedArea ).copyFrom( subStruct.getOrgResiBuf( clippedArea ) );
+    if (cpyPred)
+    {
+      getPredBuf(clippedArea).copyFrom(subPredBuf);
+    }
+    if (cpyResi)
+    {
+      getResiBuf(clippedArea).copyFrom(subResiBuf);
+    }
+    if (cpyReco)
+    {
+      getRecoBuf(clippedArea).copyFrom(subRecoBuf);
+    }
+    if (cpyOrgResi)
+    {
+      getOrgResiBuf(clippedArea).copyFrom(subStruct.getOrgResiBuf(clippedArea));
+    }
   }
 
-  if( cpyPred ) picture->getPredBuf( clippedArea ).copyFrom( subPredBuf );
-  if( cpyResi ) picture->getResiBuf( clippedArea ).copyFrom( subResiBuf );
-  if( cpyReco ) picture->getRecoBuf( clippedArea ).copyFrom( subRecoBuf );
+  if (cpyPred)
+  {
+    picture->getPredBuf(clippedArea).copyFrom(subPredBuf);
+  }
+  if (cpyResi)
+  {
+    picture->getResiBuf(clippedArea).copyFrom(subResiBuf);
+  }
+  if (cpyReco)
+  {
+    picture->getRecoBuf(clippedArea).copyFrom(subRecoBuf);
+  }
 
   if (!subStruct.m_isTuEnc && ((!slice->isIntra() || slice->getSPS()->getIBCFlag()) && chType != CHANNEL_TYPE_CHROMA))
   {
