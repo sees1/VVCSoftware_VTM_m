@@ -3031,7 +3031,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
-          pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Y, false);
+          pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Y, false);
         }
         m_pcALF->initCABACEstimator(m_pcEncLib->getCABACEncoder(), m_pcEncLib->getCtxCache(), pcSlice, m_pcEncLib->getApsMap());
         m_pcALF->ALFProcess(cs, pcSlice->getLambdas()
@@ -3049,30 +3049,30 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       
           if (pcPic->slices[s]->isLossless() && s && m_pcCfg->getCostMode() == COST_LOSSLESS_CODING)
           {
-            pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Y, false);
-            pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Cb, false);
-            pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Cr, false);
+            pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Y, false);
+            pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Cb, false);
+            pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Cr, false);
           }
           else
           {
-            pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Y, cs.slice->getTileGroupAlfEnabledFlag(COMPONENT_Y));
-            pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Cb, cs.slice->getTileGroupAlfEnabledFlag(COMPONENT_Cb));
-            pcPic->slices[s]->setTileGroupAlfEnabledFlag(COMPONENT_Cr, cs.slice->getTileGroupAlfEnabledFlag(COMPONENT_Cr));
+            pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Y, cs.slice->getAlfEnabledFlag(COMPONENT_Y));
+            pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Cb, cs.slice->getAlfEnabledFlag(COMPONENT_Cb));
+            pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Cr, cs.slice->getAlfEnabledFlag(COMPONENT_Cr));
 
           }
-          if (pcPic->slices[s]->getTileGroupAlfEnabledFlag(COMPONENT_Y))
+          if (pcPic->slices[s]->getAlfEnabledFlag(COMPONENT_Y))
           {
-            pcPic->slices[s]->setTileGroupNumAps(cs.slice->getTileGroupNumAps());
-            pcPic->slices[s]->setAlfAPSs(cs.slice->getTileGroupApsIdLuma());
+            pcPic->slices[s]->setNumAlfApsIdsLuma(cs.slice->getNumAlfApsIdsLuma());
+            pcPic->slices[s]->setAlfApsIdsLuma(cs.slice->getAlfApsIdsLuma());
           }
           else
           {
-            pcPic->slices[s]->setTileGroupNumAps(0);
+            pcPic->slices[s]->setNumAlfApsIdsLuma(0);
           }
           pcPic->slices[s]->setAlfAPSs(cs.slice->getAlfAPSs());
-          pcPic->slices[s]->setTileGroupApsIdChroma(cs.slice->getTileGroupApsIdChroma());
-          pcPic->slices[s]->setTileGroupCcAlfCbApsId(cs.slice->getTileGroupCcAlfCbApsId());
-          pcPic->slices[s]->setTileGroupCcAlfCrApsId(cs.slice->getTileGroupCcAlfCrApsId());
+          pcPic->slices[s]->setAlfApsIdChroma(cs.slice->getAlfApsIdChroma());
+          pcPic->slices[s]->setCcAlfCbApsId(cs.slice->getCcAlfCbApsId());
+          pcPic->slices[s]->setCcAlfCrApsId(cs.slice->getCcAlfCrApsId());
           pcPic->slices[s]->m_ccAlfFilterParam      = m_pcALF->getCcAlfFilterParam();
           pcPic->slices[s]->m_ccAlfFilterControl[0] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cb);
           pcPic->slices[s]->m_ccAlfFilterControl[1] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cr);
@@ -3103,7 +3103,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         m_pcSAO->disabledRate( *pcPic->cs, pcPic->getSAO(1), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma());
       }
-      if (pcSlice->getSPS()->getALFEnabledFlag() && (pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y) || pcSlice->getTileGroupCcAlfCbEnabledFlag() || pcSlice->getTileGroupCcAlfCrEnabledFlag()))
+      if (pcSlice->getSPS()->getALFEnabledFlag() && (pcSlice->getAlfEnabledFlag(COMPONENT_Y) || pcSlice->getCcAlfCbEnabledFlag() || pcSlice->getCcAlfCrEnabledFlag()))
       {
         // IRAP AU: reset APS map
         {
@@ -3112,7 +3112,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           {
             // We have to reset all APS on IRAP, but in not encoding case we have to keep the parsed APS of current slice
             // Get active ALF APSs from picture/slice header
-            const std::vector<int> sliceApsIdsLuma = pcSlice->getTileGroupApsIdLuma();
+            const std::vector<int> sliceApsIdsLuma = pcSlice->getAlfApsIdsLuma();
 
             m_pcALF->setApsIdStart( ALF_CTB_MAX_NUM_APS );
 
@@ -3138,10 +3138,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
                   }
                 }
                 // Chroma
-                activeAps |= aps->getAPSId() == pcSlice->getTileGroupApsIdChroma();
+                activeAps |= aps->getAPSId() == pcSlice->getAlfApsIdChroma();
                 // CC-ALF
-                activeApsCcAlf |= pcSlice->getTileGroupCcAlfCbEnabledFlag() && aps->getAPSId() == pcSlice->getTileGroupCcAlfCbApsId();
-                activeApsCcAlf |= pcSlice->getTileGroupCcAlfCrEnabledFlag() && aps->getAPSId() == pcSlice->getTileGroupCcAlfCrApsId();
+                activeApsCcAlf |= pcSlice->getCcAlfCbEnabledFlag() && aps->getAPSId() == pcSlice->getCcAlfCbApsId();
+                activeApsCcAlf |= pcSlice->getCcAlfCrEnabledFlag() && aps->getAPSId() == pcSlice->getCcAlfCrApsId();
                 if( !activeAps && !activeApsCcAlf )
                 {
                   apsMap->clearChangedFlag( psId );
@@ -3268,7 +3268,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         }
       }
 
-      if (pcSlice->getSPS()->getALFEnabledFlag() && (pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y) || pcSlice->getTileGroupCcAlfCbEnabledFlag() || pcSlice->getTileGroupCcAlfCrEnabledFlag()))
+      if (pcSlice->getSPS()->getALFEnabledFlag() && (pcSlice->getAlfEnabledFlag(COMPONENT_Y) || pcSlice->getCcAlfCbEnabledFlag() || pcSlice->getCcAlfCrEnabledFlag()))
       {
         for (int apsId = 0; apsId < ALF_CTB_MAX_NUM_APS; apsId++)
         {
@@ -3283,15 +3283,15 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             *apsMap->allocatePS((apsId << NUM_APS_TYPE_LEN) + ALF_APS) = *aps; //allocate and cpy
             m_pcALF->setApsIdStart( apsId );
           }
-          else if (pcSlice->getTileGroupCcAlfCbEnabledFlag() && !aps && apsId == pcSlice->getTileGroupCcAlfCbApsId())
+          else if (pcSlice->getCcAlfCbEnabledFlag() && !aps && apsId == pcSlice->getCcAlfCbApsId())
           {
             writeAPS = true;
-            aps = apsMap->getPS((pcSlice->getTileGroupCcAlfCbApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
+            aps = apsMap->getPS((pcSlice->getCcAlfCbApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
           }
-          else if (pcSlice->getTileGroupCcAlfCrEnabledFlag() && !aps && apsId == pcSlice->getTileGroupCcAlfCrApsId())
+          else if (pcSlice->getCcAlfCrEnabledFlag() && !aps && apsId == pcSlice->getCcAlfCrApsId())
           {
             writeAPS = true;
-            aps = apsMap->getPS((pcSlice->getTileGroupCcAlfCrApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
+            aps = apsMap->getPS((pcSlice->getCcAlfCrApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
           }
 
           if (writeAPS )
@@ -3299,7 +3299,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
             actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
             apsMap->clearChangedFlag((apsId << NUM_APS_TYPE_LEN) + ALF_APS);
-            CHECK(aps != pcSlice->getAlfAPSs()[apsId] && apsId != pcSlice->getTileGroupCcAlfCbApsId() && apsId != pcSlice->getTileGroupCcAlfCrApsId(), "Wrong APS pointer in compressGOP");
+            CHECK(aps != pcSlice->getAlfAPSs()[apsId] && apsId != pcSlice->getCcAlfCbApsId() && apsId != pcSlice->getCcAlfCrApsId(), "Wrong APS pointer in compressGOP");
           }
         }
       }
@@ -3387,16 +3387,16 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           // code ALF parameters in picture header or slice headers
           if( !m_pcCfg->getSliceLevelAlf() )
           {
-            picHeader->setAlfEnabledFlag(COMPONENT_Y,  pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y ) );
-            picHeader->setAlfEnabledFlag(COMPONENT_Cb, pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cb) );
-            picHeader->setAlfEnabledFlag(COMPONENT_Cr, pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cr) );
-            picHeader->setNumAlfAps(pcSlice->getTileGroupNumAps());
-            picHeader->setAlfAPSs(pcSlice->getTileGroupApsIdLuma());
-            picHeader->setAlfApsIdChroma(pcSlice->getTileGroupApsIdChroma());
-            picHeader->setCcAlfEnabledFlag(COMPONENT_Cb, pcSlice->getTileGroupCcAlfCbEnabledFlag());
-            picHeader->setCcAlfEnabledFlag(COMPONENT_Cr, pcSlice->getTileGroupCcAlfCrEnabledFlag());
-            picHeader->setCcAlfCbApsId(pcSlice->getTileGroupCcAlfCbApsId());
-            picHeader->setCcAlfCrApsId(pcSlice->getTileGroupCcAlfCrApsId());
+            picHeader->setAlfEnabledFlag(COMPONENT_Y,  pcSlice->getAlfEnabledFlag(COMPONENT_Y ) );
+            picHeader->setAlfEnabledFlag(COMPONENT_Cb, pcSlice->getAlfEnabledFlag(COMPONENT_Cb) );
+            picHeader->setAlfEnabledFlag(COMPONENT_Cr, pcSlice->getAlfEnabledFlag(COMPONENT_Cr) );
+            picHeader->setNumAlfApsIdsLuma(pcSlice->getNumAlfApsIdsLuma());
+            picHeader->setAlfApsIdsLuma(pcSlice->getAlfApsIdsLuma());
+            picHeader->setAlfApsIdChroma(pcSlice->getAlfApsIdChroma());
+            picHeader->setCcAlfEnabledFlag(COMPONENT_Cb, pcSlice->getCcAlfCbEnabledFlag());
+            picHeader->setCcAlfEnabledFlag(COMPONENT_Cr, pcSlice->getCcAlfCrEnabledFlag());
+            picHeader->setCcAlfCbApsId(pcSlice->getCcAlfCbApsId());
+            picHeader->setCcAlfCrApsId(pcSlice->getCcAlfCrApsId());
           }
 
           // code WP parameters in picture header or slice headers

@@ -1601,9 +1601,9 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
       WRITE_FLAG(picHeader->getAlfEnabledFlag(COMPONENT_Y), "ph_alf_enabled_flag");
       if (picHeader->getAlfEnabledFlag(COMPONENT_Y))
       {
-        WRITE_CODE(picHeader->getNumAlfAps(), 3, "ph_num_alf_aps_ids_luma");
-        const std::vector<int>&   apsId = picHeader->getAlfAPSs();
-        for (int i = 0; i < picHeader->getNumAlfAps(); i++)
+        WRITE_CODE(picHeader->getNumAlfApsIdsLuma(), 3, "ph_num_alf_aps_ids_luma");
+        const std::vector<int>&   apsId = picHeader->getAlfApsIdsLuma();
+        for (int i = 0; i < picHeader->getNumAlfApsIdsLuma(); i++)
         {
           WRITE_CODE(apsId[i], 3, "ph_alf_aps_id_luma");
         }
@@ -2186,27 +2186,27 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
 
   if (pcSlice->getSPS()->getALFEnabledFlag() && !pcSlice->getPPS()->getAlfInfoInPhFlag())
   {
-    const int alfEnabled = pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y);
+    const int alfEnabled = pcSlice->getAlfEnabledFlag(COMPONENT_Y);
     WRITE_FLAG(alfEnabled, "sh_alf_enabled_flag");
 
     if (alfEnabled)
     {
-      WRITE_CODE(pcSlice->getTileGroupNumAps(), 3, "sh_num_alf_aps_ids_luma");
-      const std::vector<int>&   apsId = pcSlice->getTileGroupApsIdLuma();
-      for (int i = 0; i < pcSlice->getTileGroupNumAps(); i++)
+      WRITE_CODE(pcSlice->getNumAlfApsIdsLuma(), 3, "sh_num_alf_aps_ids_luma");
+      const std::vector<int>&   apsId = pcSlice->getAlfApsIdsLuma();
+      for (int i = 0; i < pcSlice->getNumAlfApsIdsLuma(); i++)
       {
         WRITE_CODE(apsId[i], 3, "sh_alf_aps_id_luma[i]");
       }
 
-      const int alfChromaIdc = pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cb) + pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cr) * 2;
+      const int alfChromaIdc = pcSlice->getAlfEnabledFlag(COMPONENT_Cb) + pcSlice->getAlfEnabledFlag(COMPONENT_Cr) * 2;
       if (chromaEnabled)
       {
-        WRITE_CODE(pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cb), 1, "sh_alf_cb_enabled_flag");
-        WRITE_CODE(pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cr), 1, "sh_alf_cr_enabled_flag");
+        WRITE_CODE(pcSlice->getAlfEnabledFlag(COMPONENT_Cb), 1, "sh_alf_cb_enabled_flag");
+        WRITE_CODE(pcSlice->getAlfEnabledFlag(COMPONENT_Cr), 1, "sh_alf_cr_enabled_flag");
       }
       if (alfChromaIdc)
       {
-        WRITE_CODE(pcSlice->getTileGroupApsIdChroma(), 3, "sh_alf_aps_id_chroma");
+        WRITE_CODE(pcSlice->getAlfApsIdChroma(), 3, "sh_alf_aps_id_chroma");
       }
 
       if (pcSlice->getSPS()->getCCALFEnabledFlag())
@@ -2216,14 +2216,14 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
         if (filterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1])
         {
           // write CC ALF Cb APS ID
-          WRITE_CODE(pcSlice->getTileGroupCcAlfCbApsId(), 3, "sh_alf_cc_cb_aps_id");
+          WRITE_CODE(pcSlice->getCcAlfCbApsId(), 3, "sh_alf_cc_cb_aps_id");
         }
         // Cr
         WRITE_FLAG(filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1] ? 1 : 0, "sh_alf_cc_cr_enabled_flag");
         if (filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1])
         {
           // write CC ALF Cr APS ID
-          WRITE_CODE(pcSlice->getTileGroupCcAlfCrApsId(), 3, "sh_alf_cc_cr_aps_id");
+          WRITE_CODE(pcSlice->getCcAlfCrApsId(), 3, "sh_alf_cc_cr_aps_id");
         }
       }
     }

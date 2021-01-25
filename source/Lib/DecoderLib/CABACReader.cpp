@@ -144,7 +144,7 @@ void CABACReader::coding_tree_unit( CodingStructure& cs, const UnitArea& area, i
 
 
   sao( cs, ctuRsAddr );
-  if (cs.sps->getALFEnabledFlag() && (cs.slice->getTileGroupAlfEnabledFlag(COMPONENT_Y)))
+  if (cs.sps->getALFEnabledFlag() && (cs.slice->getAlfEnabledFlag(COMPONENT_Y)))
   {
     const PreCalcValues& pcv = *cs.pcv;
     int                 frame_width_in_ctus = pcv.widthInCtus;
@@ -161,7 +161,7 @@ void CABACReader::coding_tree_unit( CodingStructure& cs, const UnitArea& area, i
 
     for( int compIdx = 0; compIdx < MAX_NUM_COMPONENT; compIdx++ )
     {
-      if (cs.slice->getTileGroupAlfEnabledFlag((ComponentID)compIdx))
+      if (cs.slice->getAlfEnabledFlag((ComponentID)compIdx))
       {
         uint8_t* ctbAlfFlag = cs.slice->getPic()->getAlfCtuEnableFlag( compIdx );
         int ctx = 0;
@@ -177,7 +177,7 @@ void CABACReader::coding_tree_unit( CodingStructure& cs, const UnitArea& area, i
         }
         if( isChroma( (ComponentID)compIdx ) )
         {
-          int apsIdx = cs.slice->getTileGroupApsIdChroma();
+          int apsIdx = cs.slice->getAlfApsIdChroma();
           CHECK(cs.slice->getAlfAPSs()[apsIdx] == nullptr, "APS not initialized");
           const AlfParam& alfParam = cs.slice->getAlfAPSs()[apsIdx]->getAlfAPSParam();
           const int numAlts = alfParam.numAlternativesChroma;
@@ -243,7 +243,7 @@ void CABACReader::coding_tree_unit( CodingStructure& cs, const UnitArea& area, i
 void CABACReader::readAlfCtuFilterIndex(CodingStructure& cs, unsigned ctuRsAddr)
 {
   short* alfCtbFilterSetIndex = cs.slice->getPic()->getAlfCtbFilterIndex();
-  unsigned numAps = cs.slice->getTileGroupNumAps();
+  unsigned numAps = cs.slice->getNumAlfApsIdsLuma();
   unsigned numAvailableFiltSets = numAps + NUM_FIXED_FILTER_SETS;
   uint32_t filtIndex = 0;
   if (numAvailableFiltSets > NUM_FIXED_FILTER_SETS)

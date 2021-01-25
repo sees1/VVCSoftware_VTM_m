@@ -2616,7 +2616,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       {
         READ_CODE(3, uiCode, "ph_num_alf_aps_ids_luma");
         int numAps = uiCode;
-        picHeader->setNumAlfAps(numAps);
+        picHeader->setNumAlfApsIdsLuma(numAps);
 
         std::vector<int> apsId(numAps, -1);
         for (int i = 0; i < numAps; i++)
@@ -2624,7 +2624,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
           READ_CODE(3, uiCode, "ph_alf_aps_id_luma");
           apsId[i] = uiCode;
         }
-        picHeader->setAlfAPSs(apsId);
+        picHeader->setAlfApsIdsLuma(apsId);
 
         if (sps->getChromaFormatIdc() != CHROMA_400)
         {
@@ -2666,7 +2666,7 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
       }
       else
       {
-        picHeader->setNumAlfAps(0);
+        picHeader->setNumAlfApsIdsLuma(0);
       }
       picHeader->setAlfEnabledFlag(COMPONENT_Cb, alfCbEnabledFlag);
       picHeader->setAlfEnabledFlag(COMPONENT_Cr, alfCrEnabledFlag);
@@ -3371,12 +3371,12 @@ void  HLSyntaxReader::checkAlfNaluTidAndPicTid(Slice* pcSlice, PicHeader* picHea
   PPS* pps = parameterSetManager->getPPS(picHeader->getPPSId());
   int curPicTid = pcSlice->getTLayer();
   APS* aps;
-  const std::vector<int>&   apsId = picHeader->getAlfAPSs();
+  const std::vector<int>&   apsId = picHeader->getAlfApsIdsLuma();
 
   if (sps->getALFEnabledFlag() && pps->getAlfInfoInPhFlag() && picHeader->getAlfEnabledFlag(COMPONENT_Y))
   {
     //luma
-    for (int i = 0; i < picHeader->getNumAlfAps(); i++)
+    for (int i = 0; i < picHeader->getNumAlfApsIdsLuma(); i++)
     {
       aps = parameterSetManager->getAPS(apsId[i], ALF_APS);
       CHECK(aps->getTemporalId() > curPicTid, "The TemporalId of the APS NAL unit having aps_params_type equal to ALF_APS and adaptation_parameter_set_id equal to ph_alf_aps_id_luma[ i ] shall be less than or equal to the TemporalId of the picture associated with the PH.");
@@ -3632,7 +3632,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   if (sps->getALFEnabledFlag() && !pps->getAlfInfoInPhFlag())
   {
     READ_FLAG(uiCode, "sh_alf_enabled_flag");
-    pcSlice->setTileGroupAlfEnabledFlag(COMPONENT_Y, uiCode);
+    pcSlice->setAlfEnabledFlag(COMPONENT_Y, uiCode);
     int alfCbEnabledFlag = 0;
     int alfCrEnabledFlag = 0;
 
@@ -3640,7 +3640,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     {
       READ_CODE(3, uiCode, "sh_num_alf_aps_ids_luma");
       int numAps = uiCode;
-      pcSlice->setTileGroupNumAps(numAps);
+      pcSlice->setNumAlfApsIdsLuma(numAps);
       std::vector<int> apsId(numAps, -1);
       for (int i = 0; i < numAps; i++)
       {
@@ -3652,7 +3652,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       }
 
 
-      pcSlice->setAlfAPSs(apsId);
+      pcSlice->setAlfApsIdsLuma(apsId);
       if (bChroma)
       {
         READ_CODE(1, uiCode, "sh_alf_cb_enabled_flag");   alfCbEnabledFlag = uiCode;
@@ -3666,7 +3666,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       if (alfCbEnabledFlag || alfCrEnabledFlag)
       {
         READ_CODE(3, uiCode, "sh_alf_aps_id_chroma");
-        pcSlice->setTileGroupApsIdChroma(uiCode);
+        pcSlice->setAlfApsIdChroma(uiCode);
         APS* APStoCheckChroma = parameterSetManager->getAPS(uiCode, ALF_APS);
         CHECK(APStoCheckChroma == nullptr, "referenced APS not found");
         CHECK(APStoCheckChroma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_CHROMA] != 1, "bitstream conformance error, alf_chroma_filter_signal_flag shall be equal to 1");
@@ -3674,42 +3674,42 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     }
     else
     {
-      pcSlice->setTileGroupNumAps(0);
+      pcSlice->setNumAlfApsIdsLuma(0);
     }
-    pcSlice->setTileGroupAlfEnabledFlag(COMPONENT_Cb, alfCbEnabledFlag);
-    pcSlice->setTileGroupAlfEnabledFlag(COMPONENT_Cr, alfCrEnabledFlag);
+    pcSlice->setAlfEnabledFlag(COMPONENT_Cb, alfCbEnabledFlag);
+    pcSlice->setAlfEnabledFlag(COMPONENT_Cr, alfCrEnabledFlag);
 
     CcAlfFilterParam &filterParam = pcSlice->m_ccAlfFilterParam;
-    if (sps->getCCALFEnabledFlag() && pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y))
+    if (sps->getCCALFEnabledFlag() && pcSlice->getAlfEnabledFlag(COMPONENT_Y))
     {
       READ_FLAG(uiCode, "sh_alf_cc_cb_enabled_flag");
-      pcSlice->setTileGroupCcAlfCbEnabledFlag(uiCode);
+      pcSlice->setCcAlfCbEnabledFlag(uiCode);
       filterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1] = (uiCode == 1) ? true : false;
-      pcSlice->setTileGroupCcAlfCbApsId(-1);
+      pcSlice->setCcAlfCbApsId(-1);
       if (filterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1])
       {
         // parse APS ID
         READ_CODE(3, uiCode, "sh_alf_cc_cb_aps_id");
-        pcSlice->setTileGroupCcAlfCbApsId(uiCode);
+        pcSlice->setCcAlfCbApsId(uiCode);
       }
       // Cr
       READ_FLAG(uiCode, "sh_alf_cc_cr_enabled_flag");
-      pcSlice->setTileGroupCcAlfCrEnabledFlag(uiCode);
+      pcSlice->setCcAlfCrEnabledFlag(uiCode);
       filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1] = (uiCode == 1) ? true : false;
-      pcSlice->setTileGroupCcAlfCrApsId(-1);
+      pcSlice->setCcAlfCrApsId(-1);
       if (filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1])
       {
         // parse APS ID
         READ_CODE(3, uiCode, "sh_alf_cc_cr_aps_id");
-        pcSlice->setTileGroupCcAlfCrApsId(uiCode);
+        pcSlice->setCcAlfCrApsId(uiCode);
       }
     }
     else
     {
       filterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1] = false;
       filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1] = false;
-      pcSlice->setTileGroupCcAlfCbApsId(-1);
-      pcSlice->setTileGroupCcAlfCrApsId(-1);
+      pcSlice->setCcAlfCbApsId(-1);
+      pcSlice->setCcAlfCrApsId(-1);
     }
   }
   if (picHeader->getLmcsEnabledFlag() && !pcSlice->getPictureHeaderInSliceHeader())

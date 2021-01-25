@@ -98,7 +98,7 @@ Slice::Slice()
 , m_substreamSizes                ( )
 , m_numEntryPoints                ( 0 )
 , m_cabacInitFlag                 ( false )
- , m_sliceSubPicId               ( 0 )
+, m_sliceSubPicId                 ( 0 )
 , m_encCABACTableIdx              (I_SLICE)
 , m_iProcessingStartTime          ( 0 )
 , m_dProcessingTime               ( 0 )
@@ -141,9 +141,9 @@ Slice::Slice()
 
   memset(m_alfApss, 0, sizeof(m_alfApss));
   m_ccAlfFilterParam.reset();
-  resetTileGroupAlfEnabledFlag();
-  resetTileGroupCcAlCbfEnabledFlag();
-  resetTileGroupCcAlCrfEnabledFlag();
+  resetAlfEnabledFlag();
+  resetCcAlCbfEnabledFlag();
+  resetCcAlCrfEnabledFlag();
 
   m_sliceMap.initSliceMap();
 }
@@ -189,12 +189,12 @@ void Slice::initSlice()
   m_useLTforDRAP         = false;
   m_isDRAP               = false;
   m_latestDRAPPOC        = MAX_INT;
-  resetTileGroupAlfEnabledFlag();
+  resetAlfEnabledFlag();
   m_ccAlfFilterParam.reset();
-  m_tileGroupCcAlfCbEnabledFlag = 0;
-  m_tileGroupCcAlfCrEnabledFlag = 0;
-  m_tileGroupCcAlfCbApsId = -1;
-  m_tileGroupCcAlfCrApsId = -1;
+  m_ccAlfCbEnabledFlag = 0;
+  m_ccAlfCrEnabledFlag = 0;
+  m_ccAlfCbApsId = -1;
+  m_ccAlfCrApsId = -1;
   m_nuhLayerId = 0;
 }
 
@@ -238,16 +238,16 @@ void Slice::inheritFromPicHeader( PicHeader *picHeader, const PPS *pps, const SP
   setSaoEnabledFlag(CHANNEL_TYPE_LUMA,     picHeader->getSaoEnabledFlag(CHANNEL_TYPE_LUMA));
   setSaoEnabledFlag(CHANNEL_TYPE_CHROMA,   picHeader->getSaoEnabledFlag(CHANNEL_TYPE_CHROMA));
 
-  setTileGroupAlfEnabledFlag(COMPONENT_Y,  picHeader->getAlfEnabledFlag(COMPONENT_Y));
-  setTileGroupAlfEnabledFlag(COMPONENT_Cb, picHeader->getAlfEnabledFlag(COMPONENT_Cb));
-  setTileGroupAlfEnabledFlag(COMPONENT_Cr, picHeader->getAlfEnabledFlag(COMPONENT_Cr));
-  setTileGroupNumAps(picHeader->getNumAlfAps());
-  setAlfAPSs(picHeader->getAlfAPSs());
-  setTileGroupApsIdChroma(picHeader->getAlfApsIdChroma());
-  setTileGroupCcAlfCbEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cb));
-  setTileGroupCcAlfCrEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cr));
-  setTileGroupCcAlfCbApsId(picHeader->getCcAlfCbApsId());
-  setTileGroupCcAlfCrApsId(picHeader->getCcAlfCrApsId());
+  setAlfEnabledFlag(COMPONENT_Y,  picHeader->getAlfEnabledFlag(COMPONENT_Y));
+  setAlfEnabledFlag(COMPONENT_Cb, picHeader->getAlfEnabledFlag(COMPONENT_Cb));
+  setAlfEnabledFlag(COMPONENT_Cr, picHeader->getAlfEnabledFlag(COMPONENT_Cr));
+  setNumAlfApsIdsLuma(picHeader->getNumAlfApsIdsLuma());
+  setAlfApsIdsLuma(picHeader->getAlfApsIdsLuma());
+  setAlfApsIdChroma(picHeader->getAlfApsIdChroma());
+  setCcAlfCbEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cb));
+  setCcAlfCrEnabledFlag(picHeader->getCcAlfEnabledFlag(COMPONENT_Cr));
+  setCcAlfCbApsId(picHeader->getCcAlfCbApsId());
+  setCcAlfCrApsId(picHeader->getCcAlfCrApsId());
   m_ccAlfFilterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1] = picHeader->getCcAlfEnabledFlag(COMPONENT_Cb);
   m_ccAlfFilterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1] = picHeader->getCcAlfEnabledFlag(COMPONENT_Cr);
 }
@@ -985,10 +985,10 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
 
   m_cabacInitFlag                 = pSrc->m_cabacInitFlag;
   memcpy(m_alfApss, pSrc->m_alfApss, sizeof(m_alfApss)); // this might be quite unsafe
-  memcpy( m_tileGroupAlfEnabledFlag, pSrc->m_tileGroupAlfEnabledFlag, sizeof(m_tileGroupAlfEnabledFlag));
-  m_tileGroupNumAps               = pSrc->m_tileGroupNumAps;
-  m_tileGroupLumaApsId            = pSrc->m_tileGroupLumaApsId;
-  m_tileGroupChromaApsId          = pSrc->m_tileGroupChromaApsId;
+  memcpy( m_alfEnabledFlag, pSrc->m_alfEnabledFlag, sizeof(m_alfEnabledFlag));
+  m_numAlfApsIdsLuma              = pSrc->m_numAlfApsIdsLuma;
+  m_alfApsIdsLuma                 = pSrc->m_alfApsIdsLuma;
+  m_alfApsIdChroma                = pSrc->m_alfApsIdChroma;
   m_disableSATDForRd              = pSrc->m_disableSATDForRd;
   m_isLossless = pSrc->m_isLossless;
 
@@ -1003,10 +1003,10 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_ccAlfFilterParam                        = pSrc->m_ccAlfFilterParam;
   m_ccAlfFilterControl[0]                   = pSrc->m_ccAlfFilterControl[0];
   m_ccAlfFilterControl[1]                   = pSrc->m_ccAlfFilterControl[1];
-  m_tileGroupCcAlfCbEnabledFlag             = pSrc->m_tileGroupCcAlfCbEnabledFlag;
-  m_tileGroupCcAlfCrEnabledFlag             = pSrc->m_tileGroupCcAlfCrEnabledFlag;
-  m_tileGroupCcAlfCbApsId                   = pSrc->m_tileGroupCcAlfCbApsId;
-  m_tileGroupCcAlfCrApsId                   = pSrc->m_tileGroupCcAlfCrApsId;
+  m_ccAlfCbEnabledFlag             = pSrc->m_ccAlfCbEnabledFlag;
+  m_ccAlfCrEnabledFlag             = pSrc->m_ccAlfCrEnabledFlag;
+  m_ccAlfCbApsId                   = pSrc->m_ccAlfCbApsId;
+  m_ccAlfCrApsId                   = pSrc->m_ccAlfCrApsId;
 }
 
 
@@ -2579,9 +2579,9 @@ PicHeader::PicHeader()
 , m_profDisabledFlag                              ( 0 )
 , m_jointCbCrSignFlag                             ( 0 )
 , m_qpDelta                                       ( 0 )
-, m_numAlfAps                                     ( 0 )
-, m_alfApsId                                      ( 0 )
-, m_alfChromaApsId                                ( 0 )
+, m_numAlfApsIdsLuma                              ( 0 )
+, m_alfApsIdsLuma                                 ( 0 )
+, m_alfApsIdChroma                                ( 0 )
 , m_deblockingFilterOverrideFlag                  ( 0 )
 , m_deblockingFilterDisable                       ( 0 )
 , m_deblockingFilterBetaOffsetDiv2                ( 0 )
@@ -2621,14 +2621,14 @@ PicHeader::PicHeader()
   m_RPL1.setLtrpInSliceHeaderFlag(0);
   m_RPL1.setNumberOfInterLayerPictures( 0 );
 
-  m_alfApsId.resize(0);
+  m_alfApsIdsLuma.resize(0);
 
   resetWpScaling();
 }
 
 PicHeader::~PicHeader()
 {
-  m_alfApsId.resize(0);
+  m_alfApsIdsLuma.resize(0);
 }
 
 /**
@@ -2666,8 +2666,8 @@ void PicHeader::initPicHeader()
   m_profDisabledFlag                              = 0;
   m_jointCbCrSignFlag                             = 0;
   m_qpDelta                                       = 0;
-  m_numAlfAps                                     = 0;
-  m_alfChromaApsId                                = 0;
+  m_numAlfApsIdsLuma                              = 0;
+  m_alfApsIdChroma                                = 0;
   m_deblockingFilterOverrideFlag                  = 0;
   m_deblockingFilterDisable                       = 0;
   m_deblockingFilterBetaOffsetDiv2                = 0;
@@ -2704,7 +2704,7 @@ void PicHeader::initPicHeader()
   m_RPL1.setNumberOfLongtermPictures(0);
   m_RPL1.setLtrpInSliceHeaderFlag(0);
 
-  m_alfApsId.resize(0);
+  m_alfApsIdsLuma.resize(0);
 }
 
 const WPScalingParam *PicHeader::getWpScaling(const RefPicList refPicList, const int refIdx) const
