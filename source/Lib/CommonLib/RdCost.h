@@ -393,6 +393,10 @@ private:
   static Distortion xGetSSE_SIMD    ( const DistParam& pcDtParam );
   template<int iWidth, X86_VEXT vext>
   static Distortion xGetSSE_NxN_SIMD( const DistParam& pcDtParam );
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  template<X86_VEXT vext>
+  static Distortion xGetSSE_HBD_SIMD(const DistParam& pcDtParam);
+#endif
 
   template<X86_VEXT vext>
   static Distortion xGetSAD_SIMD    ( const DistParam& pcDtParam );
@@ -400,12 +404,23 @@ private:
   static Distortion xGetSAD_NxN_SIMD( const DistParam& pcDtParam );
   template<X86_VEXT vext>
   static Distortion xGetSAD_IBD_SIMD( const DistParam& pcDtParam );
-
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  template<X86_VEXT vext>
+  static Distortion xGetHADs_HBD_SIMD(const DistParam& pcDtParam);
+#else
   template<X86_VEXT vext>
   static Distortion xGetHADs_SIMD   ( const DistParam& pcDtParam );
+#endif
 
   template< X86_VEXT vext >
   static Distortion xGetSADwMask_SIMD( const DistParam& pcDtParam );
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  template<X86_VEXT vext>
+  static Distortion xGetSAD_HBD_SIMD(const DistParam& pcDtParam);
+
+  template< X86_VEXT vext >
+  static Distortion xGetSADwMask_HBD_SIMD(const DistParam& pcDtParam);
+#endif
 #endif
 
 public:
