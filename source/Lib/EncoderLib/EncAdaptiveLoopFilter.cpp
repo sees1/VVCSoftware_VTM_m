@@ -1834,7 +1834,12 @@ double EncAdaptiveLoopFilter::deriveCoeffQuant( int *filterClipp, int *filterCoe
   filterCoeffQuant[numCoeff - 1] = 0;
 
   int modified=1;
+#if JVET_U0081
+  bool isLumaFilter = numCoeff > 7 ? 1 : 0;
+  if ((isLumaFilter && m_encCfg->getALFStrengthLuma() != 1.0) || (!isLumaFilter && m_encCfg->getALFStrengthChroma() != 1.0))
+#else
   if( m_encCfg->getALFStrength() != 1.0 )
+#endif
   {
     modified = 0;
   }
@@ -1878,10 +1883,18 @@ double EncAdaptiveLoopFilter::deriveCoeffQuant( int *filterClipp, int *filterCoe
 
 void EncAdaptiveLoopFilter::roundFiltCoeff( int *filterCoeffQuant, double *filterCoeff, const int numCoeff, const int factor )
 {
+#if JVET_U0081
+  bool isLumaFilter = numCoeff > 7 ? 1 : 0;
+  double alfStrength = isLumaFilter ? m_encCfg->getALFStrengthLuma() : m_encCfg->getALFStrengthChroma();
+#endif
   for( int i = 0; i < numCoeff; i++ )
   {
     int sign = filterCoeff[i] > 0 ? 1 : -1;
+#if JVET_U0081
+    filterCoeffQuant[i] = int((filterCoeff[i] * alfStrength) * sign * factor + 0.5) * sign;
+#else
     filterCoeffQuant[i] = int((filterCoeff[i] * m_encCfg->getALFStrength()) * sign * factor + 0.5) * sign;
+#endif
   }
 }
 
@@ -2263,7 +2276,21 @@ void EncAdaptiveLoopFilter::getBlkStats(AlfCovariance* alfCovariance, const AlfF
   const int numBins = AlfNumClippingValues[channel];
   int transposeIdx = 0;
   int classIdx = 0;
-
+#if JVET_U0081
+  bool isLumaFilter = shape.numCoeff > 7 ? 1 : 0;
+  double filterStrengthTarget = isLumaFilter ? m_encCfg->getALFStrengthTargetLuma() : m_encCfg->getALFStrengthTargetChroma();
+  double filterStrengthTargetE = 1.0;
+  double filterStrengthTargetY = 1.0;
+  if (filterStrengthTarget != 0.0)
+  {
+    filterStrengthTargetY = 1 / filterStrengthTarget;
+    filterStrengthTargetE = filterStrengthTargetY * filterStrengthTargetY;
+  }
+  else
+  {
+    filterStrengthTargetY = 0.0;
+  }
+#endif
   for( int i = 0; i < area.height; i++ )
   {
     int vbDistance = ((areaDst.y + i) % vbCTUHeight) - vbPos;
@@ -2298,11 +2325,19 @@ void EncAdaptiveLoopFilter::getBlkStats(AlfCovariance* alfCovariance, const AlfF
             {
               if (m_alfWSSD)
               {
+#if JVET_U0081
+                alfCovariance[classIdx].E[b0][b1][k][l] += filterStrengthTargetE * weight * (ELocal[k][b0] * (double)ELocal[l][b1]);
+#else
                 alfCovariance[classIdx].E[b0][b1][k][l] += weight * (ELocal[k][b0] * (double)ELocal[l][b1]);
+#endif
               }
               else
               {
+#if JVET_U0081
+                alfCovariance[classIdx].E[b0][b1][k][l] += filterStrengthTargetE * ELocal[k][b0] * (double)ELocal[l][b1];
+#else
                 alfCovariance[classIdx].E[b0][b1][k][l] += ELocal[k][b0] * (double)ELocal[l][b1];
+#endif
               }
             }
           }
@@ -2311,11 +2346,19 @@ void EncAdaptiveLoopFilter::getBlkStats(AlfCovariance* alfCovariance, const AlfF
         {
           if (m_alfWSSD)
           {
+#if JVET_U0081
+            alfCovariance[classIdx].y[b][k] += filterStrengthTargetY * weight * (ELocal[k][b] * (double)yLocal);
+#else
             alfCovariance[classIdx].y[b][k] += weight * (ELocal[k][b] * (double)yLocal);
+#endif
           }
           else
           {
+#if JVET_U0081
+            alfCovariance[classIdx].y[b][k] += filterStrengthTargetY * ELocal[k][b] * (double)yLocal;
+#else
             alfCovariance[classIdx].y[b][k] += ELocal[k][b] * (double)yLocal;
+#endif
           }
         }
       }
@@ -4060,7 +4103,20 @@ void EncAdaptiveLoopFilter::getBlkStatsCcAlf(AlfCovariance &alfCovariance, const
   }
 
   Pel ELocal[MAX_NUM_CC_ALF_CHROMA_COEFF][1];
-
+#if JVET_U0081
+  double filterStrengthTarget = m_encCfg->getCCALFStrengthTarget();
+  double filterStrengthTargetE = 1.0;
+  double filterStrengthTargetY = 1.0;
+  if (filterStrengthTarget != 0.0)
+  {
+    filterStrengthTargetY = 1 / filterStrengthTarget;
+    filterStrengthTargetE = filterStrengthTargetY * filterStrengthTargetY;
+  }
+  else
+  {
+    filterStrengthTargetY = 0.0;
+  }
+#endif
   for (int i = 0; i < compArea.height; i++)
   {
     int vbDistance = ((i << getComponentScaleY(compID, m_chromaFormat)) % vbCTUHeight) - vbPos;
@@ -4089,11 +4145,19 @@ void EncAdaptiveLoopFilter::getBlkStatsCcAlf(AlfCovariance &alfCovariance, const
             {
               if (m_alfWSSD)
               {
+#if JVET_U0081
+                alfCovariance.E[b0][b1][k][l] += filterStrengthTargetE * weight * (ELocal[k][b0] * (double)ELocal[l][b1]);
+#else
                 alfCovariance.E[b0][b1][k][l] += weight * (ELocal[k][b0] * (double)ELocal[l][b1]);
+#endif
               }
               else
               {
+#if JVET_U0081
+                alfCovariance.E[b0][b1][k][l] += filterStrengthTargetE * ELocal[k][b0] * (double)ELocal[l][b1];
+#else
                 alfCovariance.E[b0][b1][k][l] += ELocal[k][b0] * (double)ELocal[l][b1];
+#endif
               }
             }
           }
@@ -4102,11 +4166,19 @@ void EncAdaptiveLoopFilter::getBlkStatsCcAlf(AlfCovariance &alfCovariance, const
         {
           if (m_alfWSSD)
           {
+#if JVET_U0081
+            alfCovariance.y[b][k] += filterStrengthTargetY * weight * (ELocal[k][b] * (double)yLocal);
+#else
             alfCovariance.y[b][k] += weight * (ELocal[k][b] * (double)yLocal);
+#endif
           }
           else
           {
+#if JVET_U0081
+            alfCovariance.y[b][k] += filterStrengthTargetY * ELocal[k][b] * (double)yLocal;
+#else
             alfCovariance.y[b][k] += ELocal[k][b] * (double)yLocal;
+#endif
           }
         }
       }

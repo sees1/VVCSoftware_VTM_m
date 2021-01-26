@@ -2888,10 +2888,28 @@ switched at CTB level. Set to 1 to disable alternative chroma filters.
 Value shall be in the range 1..8.
 \\
 
-\Option{ALFStrength} &
+\Option{ALFStrengthLuma} &
 %\ShortOption{\None} &
 \Default{1.0} &
-Enables control of ALF filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma. Valid values are in the range 0.0 to 1.0. NOTE: Refinement of quantized filter coefficents is not used when ALFStrength is different from 1.0. To ensure reduced filter strength the parameter ALFAllowPredefinedFilters should also be set to false.  
+Enables control of ALF filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid values are in the range 0.0 to 1.0. NOTE: Refinement of quantized filter coefficents is not used when ALFStrengthLuma is different from 1.0. To ensure reduced filter strength the parameter ALFAllowPredefinedFilters should also be set to false.  
+\\
+
+\Option{ALFStrengthChroma} &
+%\ShortOption{\None} &
+\Default{1.0} &
+Enables control of ALF filter strength for chroma. The parameter scales the magnitudes of the ALF filter coefficients for chroma. Valid values are in the range 0.0 to 1.0.
+\\
+
+\Option{ALFStrengthTargetLuma} &
+%\ShortOption{\None} &
+\Default{1.0} &
+Enables control of ALF filter strength target for luma filter optimization. The parameter scales the auto-correlation matrix E and the cross-correlation vector y for luma. Valid values are in the range 0.0 to 1.0.
+\\
+
+\Option{ALFStrengthTargetChroma} &
+%\ShortOption{\None} &
+\Default{1.0} &
+Enables control of ALF filter strength target for chroma filter optimization. The parameter scales the auto-correlation matrix E and the cross-correlation vector y for chroma. Valid values are in the range 0.0 to 1.0.
 \\
 
 \Option{ALFAllowPredefinedFilters} &
@@ -2916,6 +2934,12 @@ QP threshold above which the encoder reduces cross-component ALF usage.
 %\ShortOption{\None} &
 \Default{1.0} &
 Enables control of CCALF filter strength. The parameter scales the magnitudes of the CCALF filter coefficients. Valid values are in the range 0.0 to 1.0. NOTE: Refinement of quantized filter coefficents is not used when CCALFStrength is different from 1.0.
+\\
+
+\Option{CCALFStrengthTarget} &
+%\ShortOption{\None} &
+\Default{1.0} &
+Enables control of CCALF filter strength target in filter optimization. The parameter scales the auto-correlation matrix E and the cross-correlation vector y for CCALF. Valid values are in the range 0.0 to 1.0.
 \\
 
 \Option{SMVD} &

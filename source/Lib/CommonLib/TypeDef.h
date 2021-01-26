@@ -52,6 +52,8 @@
 
 // clang-format off
 
+#define JVET_U0081                                        1 // ALF filter strength target
+
 //########### place macros to be removed in next cycle below this line ###############
 
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
