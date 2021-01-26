@@ -97,6 +97,31 @@ struct Area : public Position, public Size
   bool contains(const Position &_pos)       const { return (_pos.x >= x) && (_pos.x < (x + width)) && (_pos.y >= y) && (_pos.y < (y + height)); }
   bool contains(const Area &_area)          const { return contains(_area.pos()) && contains(_area.bottomRight()); }
 
+#if GDR_ENABLED  
+  bool overlap(const Area &_area) const 
+  { 
+    Area thisArea = Area(pos(), size());
+
+    if (contains(_area))
+      return false;
+
+    if (_area.contains(thisArea))
+      return false;
+
+    bool btopLeft  = contains(_area.topLeft());
+    bool btopRight = contains(_area.topRight());
+    bool bbotLeft  = contains(_area.bottomLeft());
+    bool bbotRight = contains(_area.bottomRight());
+
+    int sum = (btopLeft ? 1 : 0) + (btopRight ? 1 : 0) + (bbotLeft ? 1 : 0) + (bbotRight ? 1 : 0);
+
+    if (0 < sum && sum < 4)
+      return true;
+
+    return false;
+  }
+#endif
+
   bool operator!=(const Area &other)        const { return (Size::operator!=(other)) || (Position::operator!=(other)); }
   bool operator==(const Area &other)        const { return (Size::operator==(other)) && (Position::operator==(other)); }
 };

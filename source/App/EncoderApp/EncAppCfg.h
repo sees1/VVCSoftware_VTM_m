@@ -218,6 +218,14 @@ protected:
   bool          m_noSubpicInfoConstraintFlag;
   // coding structure
   int       m_iIntraPeriod;                                   ///< period of I-slice (random access period)
+#if GDR_ENABLED 
+  int       m_iGdrPocStart;
+  int       m_iGdrPeriod;
+  int       m_iGdrFrequency;
+  bool      m_bStartWithGdr;
+  bool      m_bNoHashForGdr;
+  bool      m_bGdrPicOutput;
+#endif
   int       m_iDecodingRefreshType;                           ///< random access type
   int       m_iGOPSize;                                       ///< GOP size of hierarchical structure
   int       m_drapPeriod;                                     ///< period of dependent RAP pictures

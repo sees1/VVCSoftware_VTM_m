@@ -146,6 +146,11 @@ public:
 
 class HLSyntaxReader : public VLCReader
 {
+#if GDR_ENABLED
+  int m_last_gdr_poc;
+  int m_last_gdr_recovery_poc_cnt;
+#endif
+
 public:
   HLSyntaxReader();
   virtual ~HLSyntaxReader();
@@ -155,6 +160,12 @@ protected:
   void  parseRefPicList(SPS* pcSPS, ReferencePictureList* rpl, int rplIdx);
 
 public:
+#if GDR_ENABLED
+  void setLastGdrPoc(int poc) { m_last_gdr_poc = poc;  }
+  int  getLastGdrPoc()        { return m_last_gdr_poc; }
+  void setLastGdrRecoveryPocCnt(int recovery_poc_cnt) { m_last_gdr_recovery_poc_cnt = recovery_poc_cnt; }
+  int  getLastGdrRecoveryPocCnt()                     { return m_last_gdr_recovery_poc_cnt; }
+#endif
   void  setBitstream        ( InputBitstream* p )   { m_pcBitstream = p; }
   void  parseOPI            ( OPI* opi );
   void  parseVPS            ( VPS* pcVPS );

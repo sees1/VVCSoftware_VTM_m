@@ -2332,6 +2332,10 @@ private:
   bool                        m_nonReferencePictureFlag;                                //!< non-reference picture flag
   bool                        m_gdrOrIrapPicFlag;                                       //!< gdr or irap picture flag
   bool                        m_gdrPicFlag;                                             //!< gradual decoding refresh picture flag
+#if GDR_ENABLED
+  bool                        m_InGdrPeriod;
+  int                         m_LastGdrPeriodPoc;
+#endif
   uint32_t                    m_recoveryPocCnt;                                         //!< recovery POC count
   bool                        m_noOutputBeforeRecoveryFlag;                             //!< NoOutputBeforeRecoveryFlag
   bool                        m_handleCraAsCvsStartFlag;                                //!< HandleCraAsCvsStartFlag
@@ -2418,6 +2422,10 @@ public:
   bool                        getGdrOrIrapPicFlag() const                               { return m_gdrOrIrapPicFlag;                                                                   }
   void                        setGdrPicFlag( bool b )                                   { m_gdrPicFlag = b;                                                                            }
   bool                        getGdrPicFlag() const                                     { return m_gdrPicFlag;                                                                         }
+#if GDR_ENABLED
+  void                        setInGdrPeriod(bool b)                                    { m_InGdrPeriod = b;                                                                            }
+  bool                        getInGdrPeriod() const                                    { return m_InGdrPeriod;                                                                         }  
+#endif
   void                        setRecoveryPocCnt( uint32_t u )                           { m_recoveryPocCnt = u;                                                                        }
   uint32_t                    getRecoveryPocCnt() const                                 { return m_recoveryPocCnt;                                                                     }
   void                        setSPSId( uint32_t u )                                    { m_spsId = u;                                                                                 }
@@ -2657,7 +2665,11 @@ private:
   const SPS*                 m_pcSPS;
   const PPS*                 m_pcPPS;
   Picture*                   m_pcPic;
+#if GDR_ENABLED
+  PicHeader*                 m_pcPicHeader;    //!< pointer to picture header structure
+#else
   const PicHeader*           m_pcPicHeader;    //!< pointer to picture header structure
+#endif
   bool                       m_colFromL0Flag;  // collocated picture from List0 flag
 
 
@@ -2711,8 +2723,13 @@ public:
   virtual                     ~Slice();
   void                        initSlice();
   void                        inheritFromPicHeader( PicHeader *picHeader, const PPS *pps, const SPS *sps );
+#if GDR_ENABLED
+  void                        setPicHeader(PicHeader* pcPicHeader) { m_pcPicHeader = pcPicHeader; }
+  PicHeader*                  getPicHeader() const { return m_pcPicHeader; }
+#else
   void                        setPicHeader( const PicHeader* pcPicHeader )           { m_pcPicHeader = pcPicHeader;                                  }
   const PicHeader*            getPicHeader() const                                   { return m_pcPicHeader;                                         }
+#endif
   int                         getRefIdx4MVPair( RefPicList eCurRefPicList, int nCurRefIdx );
 
 
@@ -2844,6 +2861,9 @@ public:
   bool                        isIntra() const                                        { return m_eSliceType == I_SLICE;                               }
   bool                        isInterB() const                                       { return m_eSliceType == B_SLICE;                               }
   bool                        isInterP() const                                       { return m_eSliceType == P_SLICE;                               }
+#if GDR_ENABLED
+  bool                        isInterGDR() const { return (m_eSliceType == B_SLICE && m_eNalUnitType == NAL_UNIT_CODED_SLICE_GDR); }  
+#endif
 
   bool                        getEnableDRAPSEI () const                              { return m_enableDRAPSEI;                                       }
   void                        setEnableDRAPSEI ( bool b )                            { m_enableDRAPSEI = b;                                          }

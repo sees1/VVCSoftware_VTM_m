@@ -351,7 +351,13 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
     Picture *picBg = new Picture;
     picBg->create( sps0.getChromaFormatIdc(), Size( pps0.getPicWidthInLumaSamples(), pps0.getPicHeightInLumaSamples() ), sps0.getMaxCUWidth(), sps0.getMaxCUWidth() + 16, false, m_layerId, m_gopBasedTemporalFilterEnabled );
     picBg->getRecoBuf().fill(0);
+#if GDR_ENABLED
+    PicHeader *picHeader = new PicHeader();
+    xInitPicHeader(*picHeader, sps0, pps0);
+    picBg->finalInit( m_vps, sps0, pps0, picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#else
     picBg->finalInit( m_vps, sps0, pps0, &m_picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#endif
     picBg->allocateNewSlice();
     picBg->createSpliceIdx(pps0.pcv->sizeInCtus);
     m_cGOPEncoder.setPicBg(picBg);
@@ -463,7 +469,13 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
     const SPS *sps = m_spsMap.getPS( pps->getSPSId() );
 
     picCurr->M_BUFS( 0, PIC_ORIGINAL ).copyFrom( m_cGOPEncoder.getPicBg()->getRecoBuf() );
+#if GDR_ENABLED
+    PicHeader *picHeader = new PicHeader();
+    xInitPicHeader(*picHeader, *sps, *pps);
+    picCurr->finalInit( m_vps, *sps, *pps, picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#else
     picCurr->finalInit( m_vps, *sps, *pps, &m_picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#endif
     picCurr->poc = m_iPOCLast - 1;
     m_iPOCLast -= 2;
     if( getUseAdaptiveQP() )
@@ -581,8 +593,13 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
         pcPicCurr->M_BUFS( 0, PIC_FILTERED_ORIGINAL ).swap( *pcPicYuvFilteredOrg );
       }
     }
-
+#if GDR_ENABLED
+    PicHeader *picHeader = new PicHeader();
+    xInitPicHeader(*picHeader, *pSPS, *pPPS);
+    pcPicCurr->finalInit( m_vps, *pSPS, *pPPS, picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#else
     pcPicCurr->finalInit( m_vps, *pSPS, *pPPS, &m_picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#endif
 
     pcPicCurr->poc = m_iPOCLast;
 
@@ -727,7 +744,13 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* pcPicY
       const PPS *pPPS = ( ppsID < 0 ) ? m_ppsMap.getFirstPS() : m_ppsMap.getPS( ppsID );
       const SPS *pSPS = m_spsMap.getPS( pPPS->getSPSId() );
 
+#if GDR_ENABLED
+      PicHeader *picHeader = new PicHeader();
+      xInitPicHeader(*picHeader, *pSPS, *pPPS);
+      pcField->finalInit( m_vps, *pSPS, *pPPS, picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#else
       pcField->finalInit( m_vps, *pSPS, *pPPS, &m_picHeader, m_apss, m_lmcsAPS, m_scalinglistAPS );
+#endif
 
       pcField->poc = m_iPOCLast;
       pcField->reconstructed = false;
@@ -1105,6 +1128,12 @@ void EncLib::xInitSPS( SPS& sps )
   /* XXX: may be a good idea to refactor the above into a function
    * that chooses the actual compatibility based upon options */
   sps.setVPSId( m_vps->getVPSId() );
+#if GDR_ENABLED
+  sps.setGDREnabledFlag(true);
+#else
+  sps.setGDREnabledFlag(false);
+#endif
+
   sps.setMaxPicWidthInLumaSamples( m_iSourceWidth );
   sps.setMaxPicHeightInLumaSamples( m_iSourceHeight );
   if (m_resChangeInClvsEnabled)
@@ -1625,7 +1654,14 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
 
   pps.setUseWP( m_useWeightedPred );
   pps.setWPBiPred( m_useWeightedBiPred );
-  pps.setOutputFlagPresentFlag( false );
+#if GDR_ENABLED
+  if (getGdrPicOutput())
+    pps.setOutputFlagPresentFlag( true );
+  else
+    pps.setOutputFlagPresentFlag(false);
+#else
+  pps.setOutputFlagPresentFlag(false);
+#endif
 
   if ( getDeblockingFilterMetric() )
   {

@@ -88,7 +88,28 @@ struct SmallerThanComboCost
 {
   inline bool operator() (const GeoMergeCombo& first, const GeoMergeCombo& second)
   {
+#if GDR_ENABLED 
+    bool ret = true;
+    
+    ret = (first.cost < second.cost);
+    
+    if (first.cost == second.cost)
+    {
+      ret = first.splitDir < second.splitDir;
+      if (first.splitDir == second.splitDir)
+      {
+        ret = first.mergeIdx0 < second.mergeIdx0;
+        if (first.mergeIdx0 == second.mergeIdx0)
+        {
+          ret = first.mergeIdx1 < second.mergeIdx1;
+        }
+      }
+    }
+
+    return ret;
+#else
       return (first.cost < second.cost);
+#endif
   }
 };
 class GeoComboCostList

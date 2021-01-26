@@ -837,7 +837,11 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
   m_pcPic->destroyTempBuffers();
   m_pcPic->cs->destroyCoeffs();
   m_pcPic->cs->releaseIntermediateData();
+#if GDR_ENABLED
+  m_picHeader.initPicHeader();
+#else
   m_pcPic->cs->picHeader->initPicHeader();
+#endif
   m_puCounter++;
 }
 
@@ -1583,7 +1587,14 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
     //  Get a new picture buffer. This will also set up m_pcPic, and therefore give us a SPS and PPS pointer that we can use.
     m_pcPic = xGetNewPicBuffer( *sps, *pps, m_apcSlicePilot->getTLayer(), layerId );
 
+#if GDR_ENABLED
+    PicHeader *picHeader = new PicHeader;
+    *picHeader = m_picHeader;
+    m_apcSlicePilot->setPicHeader(picHeader);
+    m_pcPic->finalInit(vps, *sps, *pps, picHeader, apss, lmcsAPS, scalinglistAPS);
+#else
     m_pcPic->finalInit( vps, *sps, *pps, &m_picHeader, apss, lmcsAPS, scalinglistAPS );
+#endif
     m_pcPic->createTempBuffers( m_pcPic->cs->pps->pcv->maxCUWidth );
     m_pcPic->cs->createCoeffs((bool)m_pcPic->cs->sps->getPLTMode());
 
@@ -2769,6 +2780,26 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_cReshaper.setRecReshaped(false);
   }
 
+#if GDR_LEAK_TEST  
+  if (m_POC_RandomAccess == pcSlice->getPOC())
+  {
+    for (int e = 0; e < 2; e++)
+    {
+      for (int ridx = 0; ridx < 4; ridx++)
+      {
+        Picture *pic = pcSlice->getRefPic((RefPicList)e, ridx);
+        if (pic)
+        {
+          CodingStructure& cs = *pic->cs;
+          cs.getRecoBuf().Y().fill(0 * 4); // for 8-bit sequence
+          cs.getRecoBuf().Cb().fill(0 * 4);
+          cs.getRecoBuf().Cr().fill(0 * 4);
+          cs.getMotionBuf().memset(0);    // clear MV storage
+        }
+      }
+    }
+  }
+#endif // GDR_LEAK_TEST
   //  Decode a picture
   m_cSliceDecoder.decompressSlice( pcSlice, &( nalu.getBitstream() ), ( m_pcPic->poc == getDebugPOC() ? getDebugCTU() : -1 ) );
 

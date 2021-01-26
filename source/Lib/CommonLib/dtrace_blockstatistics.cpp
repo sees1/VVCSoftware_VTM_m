@@ -902,13 +902,21 @@ void writeAllData(const CodingStructure& cs, const UnitArea& ctuArea)
                 {
                   const uint32_t uiChFinalMode  = PU::getFinalIntraMode( pu, ChannelType( chType ) );
                   DTRACE_BLOCK_SCALAR_CHROMA(g_trace_ctx, D_BLOCK_STATISTICS_ALL, pu, GetBlockStatisticName(BlockStatistic::Chroma_IntraMode), uiChFinalMode);
+#if !GDR_ENABLED
                     assert(0);
+#endif
                 }
               }
             }
           }
         }
         break;
+#if GDR_ENABLED
+      case MODE_IBC:
+      case MODE_PLT:
+        // note: not implemented yet
+        break;
+#endif
       default:
         THROW( "Invalid prediction mode" );
         break;

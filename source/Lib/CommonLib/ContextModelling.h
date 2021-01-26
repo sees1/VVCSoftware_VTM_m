@@ -461,6 +461,13 @@ public:
   ~MergeCtx() {}
 public:
   MvField       mvFieldNeighbours [ MRG_MAX_NUM_CANDS << 1 ]; // double length for mv of both lists
+#if GDR_ENABLED 
+  // note : check if source of mv and mv itself is valid
+  bool          mvSolid           [MRG_MAX_NUM_CANDS << 1];  
+  bool          mvValid           [MRG_MAX_NUM_CANDS << 1];
+  Position      mvPos             [MRG_MAX_NUM_CANDS << 1];
+  MvpType       mvType            [MRG_MAX_NUM_CANDS << 1];
+#endif
   uint8_t       BcwIdx            [ MRG_MAX_NUM_CANDS      ];
   unsigned char interDirNeighbours[ MRG_MAX_NUM_CANDS      ];
   MergeType     mrgTypeNeighbours [ MRG_MAX_NUM_CANDS      ];
@@ -470,6 +477,10 @@ public:
   MotionBuf     subPuMvpMiBuf;
   MotionBuf     subPuMvpExtMiBuf;
   MvField mmvdBaseMv[MMVD_BASE_MV_NUM][2];
+#if GDR_ENABLED   
+  bool          mmvdSolid[MMVD_BASE_MV_NUM][2];
+  bool          mmvdValid[MMVD_BASE_MV_NUM][2];
+#endif
   void setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx);
   bool          mmvdUseAltHpelIf  [ MMVD_BASE_MV_NUM ];
   bool          useAltHpelIf      [ MRG_MAX_NUM_CANDS ];
@@ -483,6 +494,10 @@ public:
   ~AffineMergeCtx() {}
 public:
   MvField       mvFieldNeighbours[AFFINE_MRG_MAX_NUM_CANDS << 1][3]; // double length for mv of both lists
+#if GDR_ENABLED
+  bool          mvSolid[AFFINE_MRG_MAX_NUM_CANDS << 1][3];   
+  bool          mvValid[AFFINE_MRG_MAX_NUM_CANDS << 1][3];
+#endif
   unsigned char interDirNeighbours[AFFINE_MRG_MAX_NUM_CANDS];
   EAffineModel  affineType[AFFINE_MRG_MAX_NUM_CANDS];
   uint8_t       BcwIdx[AFFINE_MRG_MAX_NUM_CANDS];

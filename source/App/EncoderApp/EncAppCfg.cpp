@@ -1006,6 +1006,14 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   // Coding structure paramters
   ("IntraPeriod,-ip",                                 m_iIntraPeriod,                                      -1, "Intra period in frames, (-1: only first frame)")
+#if GDR_ENABLED
+  ("GdrPocStart",                                     m_iGdrPocStart,                                      -1, "GDR poc start")
+  ("GdrPeriod",                                       m_iGdrPeriod,                                        -1, "GDR period")
+  ("GdrFrequency",                                    m_iGdrFrequency,                                     -1, "GDR freqency")
+  ("StartWithGDR",                                    m_bStartWithGdr,                                  false, "Start bitstream with GDR")
+  ("NoHashforGDR",                                    m_bNoHashForGdr,                                   true, "No Hash for GDR")
+  ("GdrPicOutput",                                    m_bGdrPicOutput,                                  false, "Picture Output for GDR")
+#endif
   ("DecodingRefreshType,-dr",                         m_iDecodingRefreshType,                               0, "Intra refresh type (0:none 1:CRA 2:IDR 3:RecPointSEI)")
   ("GOPSize,g",                                       m_iGOPSize,                                           1, "GOP size of temporal structure")
   ("DRAPPeriod",                                      m_drapPeriod,                                         0, "DRAP period in frames (0: disable Dependent RAP indication SEI messages)")
@@ -1596,6 +1604,37 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       return false;
     }
   }
+
+#if GDR_ENABLED
+  {     
+    m_iDecodingRefreshType = 3;
+    
+    if (m_iGdrFrequency < 0)
+      m_iGdrFrequency = 2;
+
+    if (m_iGdrPocStart < 0) 
+    {
+      if (m_iIntraPeriod > 0)
+        m_iGdrPocStart = m_iIntraPeriod;
+      else
+        m_iGdrPocStart = m_iFrameRate * m_iGdrFrequency;
+    }
+
+    if (m_iGdrPeriod < 0) 
+    {
+      m_iGdrPeriod = m_iFrameRate;
+    }    
+
+    if (m_iIntraPeriod == -1) 
+    {
+      m_iFrameRate = (m_iFrameRate == 0) ? 30 : m_iFrameRate;
+      if (m_iGdrPocStart % m_iFrameRate != 0)
+        m_iIntraPeriod = -1;
+      else
+        m_iIntraPeriod = m_iFrameRate * m_iGdrFrequency;
+    }
+  }
+#endif
 
   g_verbosity = MsgLevel( m_verbosity );
 
@@ -2204,7 +2243,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 #endif
 
+#if GDR_ENABLED
+  m_virtualBoundariesEnabledFlag = 1;
+  m_virtualBoundariesPresentFlag = 0;
+#else
   m_virtualBoundariesEnabledFlag = 0;
+#endif
   if( m_numVerVirtualBoundaries > 0 || m_numHorVirtualBoundaries > 0 )
     m_virtualBoundariesEnabledFlag = 1;
 

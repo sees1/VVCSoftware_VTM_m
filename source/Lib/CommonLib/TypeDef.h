@@ -53,6 +53,13 @@
 
 #define PRINT_WPSNR 1
 
+#define GDR_ENABLED   1
+
+#if GDR_ENABLED
+#define GDR_LEAK_TEST  1
+#define GDR_ENC_TRACE  0
+#define GDR_DEC_TRACE  0
+#endif
 
 // clang-format off
 

@@ -367,6 +367,191 @@ double IntraSearch::findInterCUCost( CodingUnit &cu )
   return COST_UNKNOWN;
 }
 
+#if GDR_ENABLED
+int IntraSearch::getNumTopRecons(PredictionUnit &pu, int luma_dirMode, bool isChroma)
+{
+  int w = isChroma ? pu.Cb().width  : pu.Y().width;
+  int h = isChroma ? pu.Cb().height : pu.Y().height;
+
+  int numOfTopRecons = w; 
+
+  static const int angTable[32] = { 0,    1,    2,    3,    4,    6,     8,   10,   12,   14,   16,   18,   20,   23,   26,   29,   32,   35,   39,  45,  51,  57,  64,  73,  86, 102, 128, 171, 256, 341, 512, 1024 };
+  static const int invAngTable[32] = {
+    0,   16384, 8192, 5461, 4096, 2731, 2048, 1638, 1365, 1170, 1024, 910, 819, 712, 630, 565,
+    512, 468,   420,  364,  321,  287,  256,  224,  191,  161,  128,  96,  64,  48,  32,  16
+  };   // (512 * 32) / Angle
+
+  const int refIdx             = pu.multiRefIdx;
+  const int predModeIntra      = getModifiedWideAngle(w, h, luma_dirMode);
+  const int isModeVer          = predModeIntra >= DIA_IDX;
+  const int intraPredAngleMode = (isModeVer) ? predModeIntra - VER_IDX : -(predModeIntra - HOR_IDX);
+
+  const int absAngMode         = abs(intraPredAngleMode);
+  const int signAng            = intraPredAngleMode < 0 ? -1 : 1;
+  const int absAng             = (luma_dirMode > DC_IDX && luma_dirMode < NUM_LUMA_MODE) ? angTable[absAngMode] : 0;
+
+  const int invAngle           = invAngTable[absAngMode];
+  const int intraPredAngle     = signAng * absAng;
+
+  const int sideSize = isModeVer ? h : w;
+  const int maxScale = 2;
+
+  const int angularScale = std::min(maxScale, floorLog2(sideSize) - (floorLog2(3 * invAngle - 2) - 8));;  
+
+  bool applyPDPC;
+
+
+  // 1.0 derive PDPC  
+  applyPDPC  = (refIdx == 0) ? true : false;  
+  if (luma_dirMode > DC_IDX && luma_dirMode < NUM_LUMA_MODE) 
+  {
+    if (intraPredAngleMode < 0)
+    {
+      applyPDPC &= false;
+    }
+    else if (intraPredAngleMode > 0)
+    {
+      applyPDPC &= (angularScale >= 0);
+    }        
+  }
+
+  // 2.0 calculate number of recons
+  switch (luma_dirMode) 
+  {
+  case PLANAR_IDX:
+    numOfTopRecons = applyPDPC ? (w + 1) : (w + 1);
+    break;
+
+  case DC_IDX:
+    numOfTopRecons = applyPDPC ? (w) : (w);
+    break;
+
+  case HOR_IDX:
+    numOfTopRecons = applyPDPC ? (w) : (w);
+    break;
+
+  case VER_IDX:
+    numOfTopRecons = applyPDPC ? (w) : (w);
+    break;
+
+  default:
+    // 2..66
+    // note: There should be a way to reduce the number of top recons, in case of non PDPC
+    applyPDPC |= isChroma;
+
+    if (predModeIntra >= DIA_IDX) 
+    {
+      if (intraPredAngle < 0) 
+      {
+        numOfTopRecons = (applyPDPC) ? (w + w) : (w + 1);
+      }
+      else 
+      {
+        numOfTopRecons = (applyPDPC) ? (w + w) : (w + w);
+      }
+    }
+    else 
+    {
+      if (intraPredAngle < 0) 
+      {
+        numOfTopRecons = (applyPDPC) ? (w + w) : (w);
+      }
+      else 
+      {
+        numOfTopRecons = (applyPDPC) ? (w + w) : (w);
+      }
+    }
+    break;
+  }
+
+  return numOfTopRecons;
+}
+
+bool IntraSearch::isValidIntraPredLuma(PredictionUnit &pu, int luma_dirMode)
+{
+  bool isValid  = true;  
+  PicHeader *ph = pu.cs->picHeader;
+
+  if (ph->getInGdrPeriod()) 
+  {
+    int x = pu.Y().x;
+
+    // count num of recons on the top
+    int virX             = ph->getVirtualBoundariesPosX(0);   
+    int numOfTopRecons = getNumTopRecons(pu, luma_dirMode, false);    
+        
+    // check if recon is out of boundary
+    if (x < virX && virX < (x + numOfTopRecons)) 
+    {
+      isValid = false;
+    }    
+  }
+  
+  return isValid;
+}
+
+bool IntraSearch::isValidIntraPredChroma(PredictionUnit &pu, int luma_dirMode, int chroma_dirMode)
+{
+  bool isValid = true;
+  CodingStructure *cs = pu.cs;
+  PicHeader       *ph = cs->picHeader;
+
+  if (ph->getInGdrPeriod()) 
+  {
+    // note: chroma cordinate
+    int cbX = pu.Cb().x;
+    //int cbY = pu.Cb().y;
+    int cbW = pu.Cb().width;
+    int cbH = pu.Cb().height;
+
+    int chromaScaleX = getComponentScaleX(COMPONENT_Cb, cs->area.chromaFormat);
+    int chromaScaleY = getComponentScaleY(COMPONENT_Cb, cs->area.chromaFormat);
+
+    int lumaX = cbX << chromaScaleX;
+    // int lumaY = cbY << chromaScaleY;
+    int lumaW = cbW << chromaScaleX;
+    int lumaH = cbH << chromaScaleY;
+   
+    int numOfTopRecons = lumaW;
+    int virX           = ph->getVirtualBoundariesPosX(0);
+
+    // count num of recons on the top
+    switch (chroma_dirMode) 
+    {
+
+    case LM_CHROMA_IDX :
+      numOfTopRecons = lumaW;
+      break;
+
+    case MDLM_L_IDX :
+      numOfTopRecons = lumaW;
+      break;
+
+    // note: could reduce the actual #of 
+    case MDLM_T_IDX:
+      numOfTopRecons = (lumaW + lumaH);
+      break;
+
+    case DM_CHROMA_IDX :
+      numOfTopRecons = getNumTopRecons(pu, luma_dirMode, true) << chromaScaleX;
+      break;
+
+    default :
+      numOfTopRecons = getNumTopRecons(pu, chroma_dirMode, true) << chromaScaleX;
+      break;
+    }
+
+    // check if recon is out of boundary
+    if (lumaX < virX && virX < (lumaX + numOfTopRecons)) 
+    {
+      isValid = false;
+    }       
+  }
+  
+  return isValid;
+}
+#endif
+
 bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, const double bestCostSoFar, bool mtsCheckRangeFlag, int mtsFirstCheckId, int mtsLastCheckId, bool moreProbMTSIdxFirst, CodingStructure* bestCS)
 {
   CodingStructure       &cs            = *cu.cs;
@@ -452,6 +637,9 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
   static_vector<double, FAST_UDI_MAX_RDMODE_NUM> CandHadList;
 
   auto &pu = *cu.firstPU;
+#if GDR_ENABLED  
+  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
   bool validReturn = false;
   {
     CandHadList.clear();
@@ -586,10 +774,30 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
 
               DTRACE(g_trace_ctx, D_INTRA_COST, "IntraHAD: %u, %llu, %f (%d)\n", minSadHad, fracModeBits, cost, uiMode);
 
+#if GDR_ENABLED
+              if (isEncodeClean) 
+              {
+                if (isValidIntraPredLuma(pu, uiMode)) 
+                {
+                  updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, uiMode), cost, uiRdModeList,
+                    CandCostList, numModesForFullRD);
+                  updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, uiMode), double(minSadHad), uiHadModeList,
+                    CandHadList, numHadCand);
+                }
+              }
+              else 
+              {
+                updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, uiMode), cost, uiRdModeList,
+                  CandCostList, numModesForFullRD);
+                updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, uiMode), double(minSadHad),
+                  uiHadModeList, CandHadList, numHadCand);
+              }
+#else
               updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, uiMode), cost, uiRdModeList,
                              CandCostList, numModesForFullRD);
               updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, uiMode), double(minSadHad),
                              uiHadModeList, CandHadList, numHadCand);
+#endif
             }
             if (!sps.getUseMIP() && LFNSTSaveFlag)
             {
@@ -619,7 +827,17 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
             static_vector<ModeInfo, FAST_UDI_MAX_RDMODE_NUM> parentCandList = uiRdModeList;
 
             // Second round of SATD for extended Angular modes
+#if GDR_ENABLED
+            int nn = numModesForFullRD;
+            if (isEncodeClean) 
+            {
+              nn = std::min((int)numModesForFullRD, (int)parentCandList.size());
+            }
+
+            for (int modeIdx = 0; modeIdx < nn; modeIdx++)
+#else
             for (int modeIdx = 0; modeIdx < numModesForFullRD; modeIdx++)
+#endif
             {
               unsigned parentMode = parentCandList[modeIdx].modeId;
               if (parentMode > (DC_IDX + 1) && parentMode < (NUM_LUMA_MODE - 1))
@@ -652,10 +870,30 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
 
                     double cost = (double) minSadHad + (double) fracModeBits * sqrtLambdaForFirstPass;
 
+#if GDR_ENABLED
+                    if (isEncodeClean) 
+                    {
+                      if (isValidIntraPredLuma(pu, mode)) 
+                      {
+                        updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, mode), cost, uiRdModeList,
+                          CandCostList, numModesForFullRD);
+                        updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, mode), double(minSadHad),
+                          uiHadModeList, CandHadList, numHadCand);
+                      }
+                    }
+                    else 
+                    {
+                      updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, mode), cost, uiRdModeList,
+                        CandCostList, numModesForFullRD);
+                      updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, mode), double(minSadHad),
+                        uiHadModeList, CandHadList, numHadCand);
+                    }
+#else
                     updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, mode), cost, uiRdModeList,
                                    CandCostList, numModesForFullRD);
                     updateCandList(ModeInfo(false, false, 0, NOT_INTRA_SUBPARTITIONS, mode), double(minSadHad),
                                    uiHadModeList, CandHadList, numHadCand);
+#endif
 
                     bSatdChecked[mode] = true;
                   }
@@ -703,14 +941,41 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                   uint64_t fracModeBits = xFracModeBitsIntra(pu, mode, CHANNEL_TYPE_LUMA);
 
                   double cost = (double) minSadHad + (double) fracModeBits * sqrtLambdaForFirstPass;
+#if GDR_ENABLED
+                  if (isEncodeClean) 
+                  {
+                    if (isValidIntraPredLuma(pu, mode)) 
+                    {
+                      updateCandList(ModeInfo(false, false, multiRefIdx, NOT_INTRA_SUBPARTITIONS, mode), cost, uiRdModeList,
+                        CandCostList, numModesForFullRD);
+                      updateCandList(ModeInfo(false, false, multiRefIdx, NOT_INTRA_SUBPARTITIONS, mode), double(minSadHad),
+                        uiHadModeList, CandHadList, numHadCand);
+                    }
+                  }
+                  else 
+                  {
+                    updateCandList(ModeInfo(false, false, multiRefIdx, NOT_INTRA_SUBPARTITIONS, mode), cost, uiRdModeList,
+                      CandCostList, numModesForFullRD);
+                    updateCandList(ModeInfo(false, false, multiRefIdx, NOT_INTRA_SUBPARTITIONS, mode), double(minSadHad),
+                      uiHadModeList, CandHadList, numHadCand);
+                  }
+#else
                   updateCandList(ModeInfo(false, false, multiRefIdx, NOT_INTRA_SUBPARTITIONS, mode), cost, uiRdModeList,
                                  CandCostList, numModesForFullRD);
                   updateCandList(ModeInfo(false, false, multiRefIdx, NOT_INTRA_SUBPARTITIONS, mode), double(minSadHad),
                                  uiHadModeList, CandHadList, numHadCand);
+#endif
                 }
               }
             }
+#if GDR_ENABLED
+            if (!isEncodeClean) 
+            {
+              CHECKD(uiRdModeList.size() != numModesForFullRD, "Error: RD mode list size");
+            }
+#else
             CHECKD(uiRdModeList.size() != numModesForFullRD, "Error: RD mode list size");
+#endif
 
             if (LFNSTSaveFlag && testMip
                 && !allowLfnstWithMip(cu.firstPU->lumaSize()))   // save a different set for the next run
@@ -781,10 +1046,30 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                 DTRACE(g_trace_ctx, D_INTRA_COST, "IntraMIP: %u, %llu, %f (%d)\n", minSadHad, fracModeBits, cost,
                        uiModeFull);
 
+#if GDR_ENABLED
+                if (isEncodeClean) 
+                {
+                  if (isValidIntraPredLuma(pu, uiMode)) 
+                  {
+                    updateCandList(ModeInfo(true, isTransposed, 0, NOT_INTRA_SUBPARTITIONS, uiMode), cost, uiRdModeList,
+                      CandCostList, numModesForFullRD + 1);
+                    updateCandList(ModeInfo(true, isTransposed, 0, NOT_INTRA_SUBPARTITIONS, uiMode),
+                      0.8 * double(minSadHad), uiHadModeList, CandHadList, numHadCand);
+                  }
+                }
+                else 
+                {
+                  updateCandList(ModeInfo(true, isTransposed, 0, NOT_INTRA_SUBPARTITIONS, uiMode), cost, uiRdModeList,
+                    CandCostList, numModesForFullRD + 1);
+                  updateCandList(ModeInfo(true, isTransposed, 0, NOT_INTRA_SUBPARTITIONS, uiMode),
+                    0.8 * double(minSadHad), uiHadModeList, CandHadList, numHadCand);
+                }
+#else
                 updateCandList(ModeInfo(true, isTransposed, 0, NOT_INTRA_SUBPARTITIONS, uiMode), cost, uiRdModeList,
                                CandCostList, numModesForFullRD + 1);
                 updateCandList(ModeInfo(true, isTransposed, 0, NOT_INTRA_SUBPARTITIONS, uiMode),
                                0.8 * double(minSadHad), uiHadModeList, CandHadList, numHadCand);
+#endif
               }
 
               const double thresholdHadCost = 1.0 + 1.4 / sqrt((double) (pu.lwidth() * pu.lheight()));
@@ -828,16 +1113,38 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
               bool     mostProbableModeIncluded = false;
               ModeInfo mostProbableMode( false, false, 0, NOT_INTRA_SUBPARTITIONS, uiPreds[j] );
 
+#if GDR_ENABLED
+              int nn = numModesForFullRD;
+              if (isEncodeClean) 
+              {
+                nn = std::min((int)numModesForFullRD, (int)uiRdModeList.size());
+              }
+
+              for (int i = 0; i < nn; i++)
+#else
               for (int i = 0; i < numModesForFullRD; i++)
+#endif
               {
                 mostProbableModeIncluded |= (mostProbableMode == uiRdModeList[i]);
               }
+#if GDR_ENABLED
+              if (!isEncodeClean) 
+              {
+                if (!mostProbableModeIncluded)
+                {
+                  numModesForFullRD++;
+                  uiRdModeList.push_back(mostProbableMode);
+                  CandCostList.push_back(0);
+                }
+              }
+#else
               if (!mostProbableModeIncluded)
               {
                 numModesForFullRD++;
                 uiRdModeList.push_back(mostProbableMode);
                 CandCostList.push_back(0);
               }
+#endif
             }
             if (saveDataForISP)
             {
@@ -851,10 +1158,20 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                 {
                   mostProbableModeIncluded |= (mostProbableMode == m_ispCandListHor[i]);
                 }
+#if GDR_ENABLED
+                if (!isEncodeClean) 
+                {
+                  if (!mostProbableModeIncluded)
+                  {
+                    m_ispCandListHor.push_back(mostProbableMode);
+                  }
+                }
+#else
                 if (!mostProbableModeIncluded)
                 {
                   m_ispCandListHor.push_back(mostProbableMode);
                 }
+#endif
               }
             }
           }
@@ -899,7 +1216,14 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
         }
       }
 
+#if GDR_ENABLED
+      if (!isEncodeClean) 
+      {
+        CHECK(numModesForFullRD != uiRdModeList.size(), "Inconsistent state!");
+      }
+#else
       CHECK(numModesForFullRD != uiRdModeList.size(), "Inconsistent state!");
+#endif
 
       // after this point, don't use numModesForFullRD
 
@@ -965,12 +1289,24 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
     if ( testISP )
     {
       // we reserve positions for ISP in the common full RD list
+#if GDR_ENABLED
+      if (!isEncodeClean) 
+      {
+        const int maxNumRDModesISP = sps.getUseLFNST() ? 16 * NUM_LFNST_NUM_PER_SET : 16;
+        m_curIspLfnstIdx = 0;
+        for (int i = 0; i < maxNumRDModesISP; i++)
+        {
+          uiRdModeList.push_back(ModeInfo(false, false, 0, INTRA_SUBPARTITIONS_RESERVED, 0));
+        }
+      }
+#else
       const int maxNumRDModesISP = sps.getUseLFNST() ? 16 * NUM_LFNST_NUM_PER_SET : 16;
       m_curIspLfnstIdx = 0;
       for (int i = 0; i < maxNumRDModesISP; i++)
       {
         uiRdModeList.push_back( ModeInfo( false, false, 0, INTRA_SUBPARTITIONS_RESERVED, 0 ) );
       }
+#endif
     }
 
     //===== check modes (using r-d costs) =====
@@ -1462,7 +1798,11 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit &cu, Partitioner &partitioner
         double    dCost   = m_pcRdCost->calcRdCost( fracBits, uiDist - baseDist );
 
         //----- compare -----
+#if GDR_ENABLED
+        if (dCost < dBestCost && isValidIntraPredChroma(pu, (int)PU::getCoLocatedIntraLumaMode(pu), chromaIntraMode))
+#else
         if( dCost < dBestCost )
+#endif
         {
           if( lumaUsesISP && dCost < bestCostSoFar )
           {
