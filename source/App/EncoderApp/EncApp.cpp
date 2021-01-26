@@ -1041,9 +1041,19 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setForceSingleSplitThread                            ( m_forceSplitSequential );
 #endif
   m_cEncLib.setUseALF                                            ( m_alf );
+#if JVET_U0081
+  m_cEncLib.setALFStrengthLuma                                   (m_alfStrengthLuma);
+#else
   m_cEncLib.setALFStrength                                       (m_alfStrength);
+#endif
   m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
   m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);
+#if JVET_U0081
+  m_cEncLib.setALFStrengthChroma                                 (m_alfStrengthChroma);
+  m_cEncLib.setALFStrengthTargetLuma                             (m_alfStrengthTargetLuma);
+  m_cEncLib.setALFStrengthTargetChroma                           (m_alfStrengthTargetChroma);
+  m_cEncLib.setCCALFStrengthTarget                               (m_ccalfStrengthTarget);
+#endif
   m_cEncLib.setUseCCALF                                          ( m_ccalf );
   m_cEncLib.setCCALFQpThreshold                                  ( m_ccalfQpThreshold );
   m_cEncLib.setLmcs                                              ( m_lmcsEnabled );
