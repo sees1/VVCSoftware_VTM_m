@@ -53,6 +53,7 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_U0103_HIGH_BIT_DEPTH_SIMD                    1 // JVET-U0103: SIMD implementation for high bit depth coding
 
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
 
@@ -185,7 +186,11 @@ typedef std::pair<int, int>  TrCost;
 
 // SIMD optimizations
 #define SIMD_ENABLE                                       1
+#if JVET_U0103_HIGH_BIT_DEPTH_SIMD
+#define ENABLE_SIMD_OPT                                 SIMD_ENABLE                                         ///< SIMD optimizations, no impact on RD performance
+#else
 #define ENABLE_SIMD_OPT                                 ( SIMD_ENABLE && !RExt__HIGH_BIT_DEPTH_SUPPORT )    ///< SIMD optimizations, no impact on RD performance
+#endif
 #define ENABLE_SIMD_OPT_MCIF                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the interpolation filter, no impact on RD performance
 #define ENABLE_SIMD_OPT_BUFFER                          ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the buffer operations, no impact on RD performance
 #define ENABLE_SIMD_OPT_DIST                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the distortion calculations(SAD,SSE,HADAMARD), no impact on RD performance
