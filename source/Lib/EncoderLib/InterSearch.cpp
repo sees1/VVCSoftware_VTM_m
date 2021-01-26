@@ -4168,8 +4168,8 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
       cHevcMvField[1].setMvField( pu.mv[REF_PIC_LIST_1], pu.refIdx[REF_PIC_LIST_1] );
 
 #if GDR_ENABLED
-      bool cHevcMvFieldSolid[2];
-      bool cHevcMvFieldValid[2];
+      bool cHevcMvFieldSolid[2] = { true, true };
+      bool cHevcMvFieldValid[2] = { true, true };
 
       if (isEncodeClean)
       {
