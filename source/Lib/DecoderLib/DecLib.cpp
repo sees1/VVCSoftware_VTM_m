@@ -212,17 +212,17 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
 
                   for( int i = 0; i < pic->slices.size(); i++ )
                   {
-                    pcEncPic->slices[i]->setTileGroupNumAps(pic->slices[i]->getTileGroupNumAps());
-                    pcEncPic->slices[i]->setAlfAPSs(pic->slices[i]->getTileGroupApsIdLuma());
+                    pcEncPic->slices[i]->setNumAlfApsIdsLuma(pic->slices[i]->getNumAlfApsIdsLuma());
+                    pcEncPic->slices[i]->setAlfApsIdsLuma(pic->slices[i]->getAlfApsIdsLuma());
                     pcEncPic->slices[i]->setAlfAPSs(pic->slices[i]->getAlfAPSs());
-                    pcEncPic->slices[i]->setTileGroupApsIdChroma(pic->slices[i]->getTileGroupApsIdChroma());
-                    pcEncPic->slices[i]->setTileGroupAlfEnabledFlag(COMPONENT_Y,  pic->slices[i]->getTileGroupAlfEnabledFlag(COMPONENT_Y));
-                    pcEncPic->slices[i]->setTileGroupAlfEnabledFlag(COMPONENT_Cb, pic->slices[i]->getTileGroupAlfEnabledFlag(COMPONENT_Cb));
-                    pcEncPic->slices[i]->setTileGroupAlfEnabledFlag(COMPONENT_Cr, pic->slices[i]->getTileGroupAlfEnabledFlag(COMPONENT_Cr));
-                    pcEncPic->slices[i]->setTileGroupCcAlfCbApsId(pic->slices[i]->getTileGroupCcAlfCbApsId());
-                    pcEncPic->slices[i]->setTileGroupCcAlfCbEnabledFlag(pic->slices[i]->getTileGroupCcAlfCbEnabledFlag());
-                    pcEncPic->slices[i]->setTileGroupCcAlfCrApsId(pic->slices[i]->getTileGroupCcAlfCrApsId());
-                    pcEncPic->slices[i]->setTileGroupCcAlfCrEnabledFlag(pic->slices[i]->getTileGroupCcAlfCrEnabledFlag());
+                    pcEncPic->slices[i]->setAlfApsIdChroma(pic->slices[i]->getAlfApsIdChroma());
+                    pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Y,  pic->slices[i]->getAlfEnabledFlag(COMPONENT_Y));
+                    pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Cb, pic->slices[i]->getAlfEnabledFlag(COMPONENT_Cb));
+                    pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Cr, pic->slices[i]->getAlfEnabledFlag(COMPONENT_Cr));
+                    pcEncPic->slices[i]->setCcAlfCbApsId(pic->slices[i]->getCcAlfCbApsId());
+                    pcEncPic->slices[i]->setCcAlfCbEnabledFlag(pic->slices[i]->getCcAlfCbEnabledFlag());
+                    pcEncPic->slices[i]->setCcAlfCrApsId(pic->slices[i]->getCcAlfCrApsId());
+                    pcEncPic->slices[i]->setCcAlfCrEnabledFlag(pic->slices[i]->getCcAlfCrEnabledFlag());
                   }
                 }
 
@@ -1283,11 +1283,11 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
 {
   const SPS *sps = parameterSetManager.getSPS(picHeader->getSPSId());
   //luma APSs
-  if (pSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y))
+  if (pSlice->getAlfEnabledFlag(COMPONENT_Y))
   {
-    for (int i = 0; i < pSlice->getTileGroupApsIdLuma().size(); i++)
+    for (int i = 0; i < pSlice->getAlfApsIdsLuma().size(); i++)
     {
-      int apsId = pSlice->getTileGroupApsIdLuma()[i];
+      int apsId = pSlice->getAlfApsIdsLuma()[i];
       APS* aps = parameterSetManager.getAPS(apsId, ALF_APS);
 
       if (aps)
@@ -1307,10 +1307,10 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
       }
     }
   }
-  if (pSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cb)||pSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cr) )
+  if (pSlice->getAlfEnabledFlag(COMPONENT_Cb)||pSlice->getAlfEnabledFlag(COMPONENT_Cr) )
   {
     //chroma APS
-    int apsId = pSlice->getTileGroupApsIdChroma();
+    int apsId = pSlice->getAlfApsIdChroma();
     APS* aps = parameterSetManager.getAPS(apsId, ALF_APS);
     if (aps)
     {
@@ -1337,9 +1337,9 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
   memset( filterParam.ccAlfFilterIdxEnabled[COMPONENT_Cb - 1], false, sizeof(filterParam.ccAlfFilterIdxEnabled[COMPONENT_Cb - 1]) );
   memset( filterParam.ccAlfFilterIdxEnabled[COMPONENT_Cr - 1], false, sizeof(filterParam.ccAlfFilterIdxEnabled[COMPONENT_Cr - 1]) );
 
-  if(pSlice->getTileGroupCcAlfCbEnabledFlag())
+  if(pSlice->getCcAlfCbEnabledFlag())
   {
-    int apsId = pSlice->getTileGroupCcAlfCbApsId();
+    int apsId = pSlice->getCcAlfCbApsId();
     APS *aps = parameterSetManager.getAPS(apsId, ALF_APS);
     if(aps)
     {
@@ -1365,9 +1365,9 @@ void activateAPS(PicHeader* picHeader, Slice* pSlice, ParameterSetManager& param
     }
   }
 
-  if(pSlice->getTileGroupCcAlfCrEnabledFlag())
+  if(pSlice->getCcAlfCrEnabledFlag())
   {
-    int apsId = pSlice->getTileGroupCcAlfCrApsId();
+    int apsId = pSlice->getCcAlfCrApsId();
     APS *aps = parameterSetManager.getAPS(apsId, ALF_APS);
     if(aps)
     {
@@ -2372,7 +2372,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   if (pcSlice->getSPS()->getProfileTierLevel()->getConstraintInfo()->getNoApsConstraintFlag())
   {
-    bool flag = pcSlice->getSPS()->getCCALFEnabledFlag() || pcSlice->getPicHeader()->getNumAlfAps() || pcSlice->getPicHeader()->getAlfEnabledFlag(COMPONENT_Cb) || pcSlice->getPicHeader()->getAlfEnabledFlag(COMPONENT_Cr);
+    bool flag = pcSlice->getSPS()->getCCALFEnabledFlag() || pcSlice->getPicHeader()->getNumAlfApsIdsLuma() || pcSlice->getPicHeader()->getAlfEnabledFlag(COMPONENT_Cb) || pcSlice->getPicHeader()->getAlfEnabledFlag(COMPONENT_Cr);
     CHECK(flag, "When no_aps_constraint_flag is equal to 1, the values of ph_num_alf_aps_ids_luma, sh_num_alf_aps_ids_luma, ph_alf_cb_flag, ph_alf_cr_flag, sh_alf_cb_flag, sh_alf_cr_flag, and sps_ccalf_enabled_flag shall all be equal to 0")
   }
   if( pcSlice->getNalUnitLayerId() != pcSlice->getSPS()->getLayerId() )

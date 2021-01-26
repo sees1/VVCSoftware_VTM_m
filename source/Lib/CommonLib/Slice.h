@@ -2371,9 +2371,9 @@ private:
   int                         m_qpDelta;                                                //!< value of Qp delta
   bool                        m_saoEnabledFlag[MAX_NUM_CHANNEL_TYPE];                   //!< sao enabled flags for each channel
   bool                        m_alfEnabledFlag[MAX_NUM_COMPONENT];                      //!< alf enabled flags for each component
-  int                         m_numAlfAps;                                              //!< number of alf aps active for the picture
-  std::vector<int>            m_alfApsId;                                               //!< list of alf aps for the picture
-  int                         m_alfChromaApsId;                                         //!< chroma alf aps ID
+  int                         m_numAlfApsIdsLuma;                                       //!< number of alf aps active for the picture
+  std::vector<int>            m_alfApsIdsLuma;                                          //!< list of alf aps for the picture
+  int                         m_alfApsIdChroma;                                         //!< chroma alf aps ID
   bool m_ccalfEnabledFlag[MAX_NUM_COMPONENT];
   int  m_ccalfCbApsId;
   int  m_ccalfCrApsId;
@@ -2489,17 +2489,16 @@ public:
   bool                        getSaoEnabledFlag(ChannelType chType) const               { return m_saoEnabledFlag[chType];                                                             }
   void                        setAlfEnabledFlag(ComponentID compId, bool b)             { m_alfEnabledFlag[compId] = b;                                                                }
   bool                        getAlfEnabledFlag(ComponentID compId) const               { return m_alfEnabledFlag[compId];                                                             }
-  void                        setNumAlfAps(int i)                                       { m_numAlfAps = i;                                                                             }
-  int                         getNumAlfAps() const                                      { return m_numAlfAps;                                                                          }
-  void                        setAlfApsIdChroma(int i)                                  { m_alfChromaApsId = i;                                                                        }
-  int                         getAlfApsIdChroma() const                                 { return m_alfChromaApsId;                                                                     }
-  void setCcAlfEnabledFlag(ComponentID compId, bool b) { m_ccalfEnabledFlag[compId] = b; }
-  bool getCcAlfEnabledFlag(ComponentID compId) const { return m_ccalfEnabledFlag[compId]; }
-
-  void setCcAlfCbApsId(int i) { m_ccalfCbApsId = i; }
-  int  getCcAlfCbApsId() const { return m_ccalfCbApsId; }
-  void setCcAlfCrApsId(int i) { m_ccalfCrApsId = i; }
-  int  getCcAlfCrApsId() const { return m_ccalfCrApsId; }
+  void                        setNumAlfApsIdsLuma(int i)                                { m_numAlfApsIdsLuma = i;                                                                      }
+  int                         getNumAlfApsIdsLuma() const                               { return m_numAlfApsIdsLuma;                                                                   }
+  void                        setAlfApsIdChroma(int i)                                  { m_alfApsIdChroma = i;                                                                        }
+  int                         getAlfApsIdChroma() const                                 { return m_alfApsIdChroma;                                                                     }
+  void                        setCcAlfEnabledFlag(ComponentID compId, bool b)           { m_ccalfEnabledFlag[compId] = b; }
+  bool                        getCcAlfEnabledFlag(ComponentID compId) const             { return m_ccalfEnabledFlag[compId]; }
+  void                        setCcAlfCbApsId(int i)                                    { m_ccalfCbApsId = i; }
+  int                         getCcAlfCbApsId() const                                   { return m_ccalfCbApsId; }
+  void                        setCcAlfCrApsId(int i)                                    { m_ccalfCrApsId = i; }
+  int                         getCcAlfCrApsId() const                                   { return m_ccalfCrApsId; }
   void                        setDeblockingFilterOverrideFlag( bool b )                 { m_deblockingFilterOverrideFlag = b;                                                          }
   bool                        getDeblockingFilterOverrideFlag() const                   { return m_deblockingFilterOverrideFlag;                                                       }
   void                        setDeblockingFilterDisable( bool b )                      { m_deblockingFilterDisable= b;                                                                }
@@ -2558,14 +2557,14 @@ public:
   unsigned                    getMaxTTSize(SliceType   slicetype,
                                        ChannelType chType = CHANNEL_TYPE_LUMA) const    { return slicetype == I_SLICE ? (chType == CHANNEL_TYPE_LUMA ? m_maxTTSize[0] : m_maxTTSize[2]) : m_maxTTSize[1];                                  }
 
-  void                        setAlfAPSs(std::vector<int> apsIDs)                       { m_alfApsId.resize(m_numAlfAps);
-                                                                                          for (int i = 0; i < m_numAlfAps; i++)
+  void                        setAlfApsIdsLuma(std::vector<int> apsIDs)                 { m_alfApsIdsLuma.resize(m_numAlfApsIdsLuma);
+                                                                                          for (int i = 0; i < m_numAlfApsIdsLuma; i++)
                                                                                           {
-                                                                                            m_alfApsId[i] = apsIDs[i];
+                                                                                            m_alfApsIdsLuma[i] = apsIDs[i];
                                                                                           }
                                                                                         }
 
-  std::vector<int>            getAlfAPSs() const                                        { return m_alfApsId; }
+  std::vector<int>            getAlfApsIdsLuma() const                                  { return m_alfApsIdsLuma; }
 
   void                        setWpScaling(WPScalingParam *wp)
   {
@@ -2697,14 +2696,14 @@ private:
 
   int                        m_rpPicOrderCntVal;
   APS*                       m_alfApss[ALF_CTB_MAX_NUM_APS];
-  bool                       m_tileGroupAlfEnabledFlag[MAX_NUM_COMPONENT];
-  int                        m_tileGroupNumAps;
-  std::vector<int>           m_tileGroupLumaApsId;
-  int                        m_tileGroupChromaApsId;
-  bool                       m_tileGroupCcAlfCbEnabledFlag;
-  bool                       m_tileGroupCcAlfCrEnabledFlag;
-  int                        m_tileGroupCcAlfCbApsId;
-  int                        m_tileGroupCcAlfCrApsId;
+  bool                       m_alfEnabledFlag[MAX_NUM_COMPONENT];
+  int                        m_numAlfApsIdsLuma;
+  std::vector<int>           m_alfApsIdsLuma;
+  int                        m_alfApsIdChroma;
+  bool                       m_ccAlfCbEnabledFlag;
+  bool                       m_ccAlfCrEnabledFlag;
+  int                        m_ccAlfCbApsId;
+  int                        m_ccAlfCrApsId;
   bool                       m_disableSATDForRd;
   bool                       m_isLossless;
 public:
@@ -2971,34 +2970,34 @@ public:
   void resetProcessingTime()       { m_dProcessingTime = m_iProcessingStartTime = 0; }
   double getProcessingTime() const { return m_dProcessingTime; }
 
-  void                        resetTileGroupAlfEnabledFlag() { memset(m_tileGroupAlfEnabledFlag, 0, sizeof(m_tileGroupAlfEnabledFlag)); }
-  bool                        getTileGroupAlfEnabledFlag(ComponentID compId) const { return m_tileGroupAlfEnabledFlag[compId]; }
-  void                        setTileGroupAlfEnabledFlag(ComponentID compId, bool b) { m_tileGroupAlfEnabledFlag[compId] = b; }
-  int                         getTileGroupNumAps() const { return m_tileGroupNumAps; }
-  void                        setTileGroupNumAps(int i) { m_tileGroupNumAps = i; }
-  int                         getTileGroupApsIdChroma() const { return m_tileGroupChromaApsId; }
-  void                        setTileGroupApsIdChroma(int i) { m_tileGroupChromaApsId = i; }
-  std::vector<int32_t>        getTileGroupApsIdLuma() const { return m_tileGroupLumaApsId; }
-  void                        setAlfAPSs(std::vector<int> ApsIDs)
+  void                        resetAlfEnabledFlag() { memset(m_alfEnabledFlag, 0, sizeof(m_alfEnabledFlag)); }
+  bool                        getAlfEnabledFlag(ComponentID compId) const { return m_alfEnabledFlag[compId]; }
+  void                        setAlfEnabledFlag(ComponentID compId, bool b) { m_alfEnabledFlag[compId] = b; }
+  int                         getNumAlfApsIdsLuma() const { return m_numAlfApsIdsLuma; }
+  void                        setNumAlfApsIdsLuma(int i) { m_numAlfApsIdsLuma = i; }
+  int                         getAlfApsIdChroma() const { return m_alfApsIdChroma; }
+  void                        setAlfApsIdChroma(int i) { m_alfApsIdChroma = i; }
+  std::vector<int>            getAlfApsIdsLuma() const { return m_alfApsIdsLuma; }
+  void                        setAlfApsIdsLuma(std::vector<int> apsIDs)
   {
-    m_tileGroupLumaApsId.resize(m_tileGroupNumAps);
-    for (int i = 0; i < m_tileGroupNumAps; i++)
+    m_alfApsIdsLuma.resize(m_numAlfApsIdsLuma);
+    for (int i = 0; i < m_numAlfApsIdsLuma; i++)
     {
-      m_tileGroupLumaApsId[i] = ApsIDs[i];
+      m_alfApsIdsLuma[i] = apsIDs[i];
     }
   }
-  void resetTileGroupCcAlCbfEnabledFlag() { m_tileGroupCcAlfCbEnabledFlag = 0; }
-  void resetTileGroupCcAlCrfEnabledFlag() { m_tileGroupCcAlfCrEnabledFlag = 0; }
+  void resetCcAlCbfEnabledFlag() { m_ccAlfCbEnabledFlag = 0; }
+  void resetCcAlCrfEnabledFlag() { m_ccAlfCrEnabledFlag = 0; }
 
-  void setTileGroupCcAlfCbEnabledFlag(bool b) { m_tileGroupCcAlfCbEnabledFlag = b; }
-  void setTileGroupCcAlfCrEnabledFlag(bool b) { m_tileGroupCcAlfCrEnabledFlag = b; }
-  void setTileGroupCcAlfCbApsId(int i) { m_tileGroupCcAlfCbApsId = i; }
-  void setTileGroupCcAlfCrApsId(int i) { m_tileGroupCcAlfCrApsId = i; }
+  void setCcAlfCbEnabledFlag(bool b) { m_ccAlfCbEnabledFlag = b; }
+  void setCcAlfCrEnabledFlag(bool b) { m_ccAlfCrEnabledFlag = b; }
+  void setCcAlfCbApsId(int i) { m_ccAlfCbApsId = i; }
+  void setCcAlfCrApsId(int i) { m_ccAlfCrApsId = i; }
 
-  bool getTileGroupCcAlfCbEnabledFlag() { return m_tileGroupCcAlfCbEnabledFlag; }
-  bool getTileGroupCcAlfCrEnabledFlag() { return m_tileGroupCcAlfCrEnabledFlag; }
-  int  getTileGroupCcAlfCbApsId() { return m_tileGroupCcAlfCbApsId; }
-  int  getTileGroupCcAlfCrApsId() { return m_tileGroupCcAlfCrApsId; }
+  bool getCcAlfCbEnabledFlag() { return m_ccAlfCbEnabledFlag; }
+  bool getCcAlfCrEnabledFlag() { return m_ccAlfCrEnabledFlag; }
+  int  getCcAlfCbApsId() { return m_ccAlfCbApsId; }
+  int  getCcAlfCrApsId() { return m_ccAlfCrApsId; }
   void                        setDisableSATDForRD(bool b) { m_disableSATDForRd = b; }
   bool                        getDisableSATDForRD() { return m_disableSATDForRd; }
   void                        setLossless(bool b) { m_isLossless = b; }
