@@ -62,6 +62,7 @@
 #endif
 
 // clang-format off
+#define JVET_U0081                                        1 // ALF filter strength target
 
 #define JVET_U0081                                        1 // ALF filter strength target
 
