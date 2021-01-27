@@ -2895,13 +2895,11 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   Mv         MrgMv[GEO_MAX_NUM_UNI_CANDS];
   bool       isSkipThisCand[GEO_MAX_NUM_UNI_CANDS];
 #if GDR_ENABLED 
-  bool *MrgSolid = nullptr;
-  bool *MrgValid = nullptr;
+  bool MrgSolid[GEO_MAX_NUM_UNI_CANDS];
+  bool MrgValid[GEO_MAX_NUM_UNI_CANDS];
 
   if (isEncodeClean) 
-  {
-    MrgSolid = new bool[maxNumMergeCandidates];
-    MrgValid = new bool[maxNumMergeCandidates];
+  {   
     for (int i = 0; i < maxNumMergeCandidates; i++) 
     {
       MrgSolid[i] = true;
@@ -3235,14 +3233,6 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   {
     xCalDebCost(*bestCS, pm);
   }
-  
-#if GDR_ENABLED 
-  if (isEncodeClean) 
-  {
-    delete[] MrgSolid;
-    delete[] MrgValid;
-  }
-#endif
 }
 
 void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode )
@@ -3638,7 +3628,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
   }
 
 #if GDR_ENABLED
-  bool bGDRclean = true;
+  bool gdrClean = true;
 #endif
   {
     // first get merge candidates
@@ -3656,11 +3646,11 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     cu.geoFlag = false;
     PU::getIBCMergeCandidates(pu, mergeCtx);
 #if GDR_ENABLED
-    bGDRclean = tempCS->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA) || tempCS->picHeader->getNumVerVirtualBoundaries() == 0;    
+    gdrClean = tempCS->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA) || tempCS->picHeader->getNumVerVirtualBoundaries() == 0;
 #endif
   }
 #if GDR_ENABLED
-  const bool isEncodeClean = tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrPeriod() && bGDRclean;
+  const bool isEncodeClean = tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrPeriod() && gdrClean;
   bool *MrgSolid = nullptr;
   bool *MrgValid = nullptr;
 #endif

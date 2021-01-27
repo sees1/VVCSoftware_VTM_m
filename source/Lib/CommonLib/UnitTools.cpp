@@ -1423,10 +1423,10 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
     Position posRB = pu.Y().bottomRight().offset( -3, -3 );
     const PreCalcValues& pcv = *cs.pcv;
 #if GDR_ENABLED
-    bool posC0inCurPic_solid = true;
-    bool posC1inCurPic_solid = true;
-    bool posC0inRefPic_solid = true;
-    bool posC1inRefPic_solid = true;
+    bool posC0inCurPicSolid = true;
+    bool posC1inCurPicSolid = true;
+    bool posC0inRefPicSolid = true;
+    bool posC1inRefPicSolid = true;
 #endif
 
     Position posC0;
@@ -1464,16 +1464,16 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       {
         Mv ccMv;
 
-        posC0inCurPic_solid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
-        posC1inCurPic_solid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
-        posC0inRefPic_solid = cs.isClean(posC0, REF_PIC_LIST_0, iRefIdx);
-        posC1inRefPic_solid = cs.isClean(posC1, REF_PIC_LIST_0, iRefIdx);
+        posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
+        posC1inCurPicSolid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
+        posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_0, iRefIdx);
+        posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_0, iRefIdx);
 
         bool isMVP0exist = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_0, posC0, ccMv, iRefIdx, false);
 
         Position pos = isMVP0exist ? posC0 : posC1;
         mrgCtx.mvPos[2 * uiArrayAddr] = pos;
-        mrgCtx.mvSolid[2 * uiArrayAddr] = isMVP0exist ? (posC0inCurPic_solid && posC0inRefPic_solid) : (posC1inCurPic_solid && posC1inRefPic_solid);
+        mrgCtx.mvSolid[2 * uiArrayAddr] = isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
         mrgCtx.mvValid[2 * uiArrayAddr] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_0, iRefIdx);
       }
 #endif
@@ -1492,16 +1492,16 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
         {
           Mv ccMv;
 
-          posC0inCurPic_solid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
-          posC1inCurPic_solid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
-          posC0inRefPic_solid = cs.isClean(posC0, REF_PIC_LIST_1, iRefIdx);
-          posC1inRefPic_solid = cs.isClean(posC1, REF_PIC_LIST_1, iRefIdx);
+          posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
+          posC1inCurPicSolid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
+          posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_1, iRefIdx);
+          posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_1, iRefIdx);
 
           bool isMVP0exist = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_1, posC0, ccMv, iRefIdx, false);
 
           Position pos = isMVP0exist ? posC0 : posC1;
           mrgCtx.mvPos[2 * uiArrayAddr + 1] = pos;
-          mrgCtx.mvSolid[2 * uiArrayAddr + 1] = isMVP0exist ? (posC0inCurPic_solid && posC0inRefPic_solid) : (posC1inCurPic_solid && posC1inRefPic_solid);
+          mrgCtx.mvSolid[2 * uiArrayAddr + 1] = isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
           mrgCtx.mvValid[2 * uiArrayAddr + 1] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_1, iRefIdx);
 
         }
@@ -2288,17 +2288,17 @@ void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const in
       if (isEncodeClean) 
       {
         Mv   ccMv;
-        bool posC0inCurPic_solid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
-        bool posC1inCurPic_solid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
-        bool posC0inRefPic_solid = cs.isClean(posC0, REF_PIC_LIST_0, refIdx_Col);
-        bool posC1inRefPic_solid = cs.isClean(posC1, REF_PIC_LIST_0, refIdx_Col);
+        bool posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
+        bool posC1inCurPicSolid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
+        bool posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_0, refIdx_Col);
+        bool posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_0, refIdx_Col);
 
         bool isMVP0exist = C0Avail && getColocatedMVP(pu, eRefPicList, posC0, ccMv, refIdx_Col, false);
 
         Position pos = isMVP0exist ? posC0 : posC1;
         pInfo->mvPos[pInfo->numCand]   = pos;
         pInfo->mvType[pInfo->numCand]  = isMVP0exist ? MVP_TMVP_C0 : MVP_TMVP_C1;
-        pInfo->mvSolid[pInfo->numCand] = allCandSolidInAbove && (isMVP0exist ? (posC0inCurPic_solid && posC0inRefPic_solid) : (posC1inCurPic_solid && posC1inRefPic_solid));
+        pInfo->mvSolid[pInfo->numCand] = allCandSolidInAbove && (isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid));
         allCandSolidInAbove = allCandSolidInAbove && pInfo->mvSolid[pInfo->numCand];
       }
 #endif
@@ -2924,18 +2924,18 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
         {
           Mv ccMv;
 
-          bool posC0inCurPic_solid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
-          bool posC1inCurPic_solid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
-          bool posC0inRefPic_solid = cs.isClean(posC0, eRefPicList, refIdxCol);
-          bool posC1inRefPic_solid = cs.isClean(posC1, eRefPicList, refIdxCol);
+          bool posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
+          bool posC1inCurPicSolid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
+          bool posC0inRefPicSolid = cs.isClean(posC0, eRefPicList, refIdxCol);
+          bool posC1inRefPicSolid = cs.isClean(posC1, eRefPicList, refIdxCol);
 
           bool isMVP0exist = C0Avail && getColocatedMVP(pu, eRefPicList, posC0, ccMv, refIdxCol, false);
 
           if (isMVP0exist) 
           {
-            affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = posC0inCurPic_solid && posC0inRefPic_solid && allCandSolidInAbove;
-            affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = posC0inCurPic_solid && posC0inRefPic_solid && allCandSolidInAbove;
-            affiAMVPInfo.mvSolidLB[affiAMVPInfo.numCand] = posC0inCurPic_solid && posC0inRefPic_solid && allCandSolidInAbove;            
+            affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = posC0inCurPicSolid && posC0inRefPicSolid && allCandSolidInAbove;
+            affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = posC0inCurPicSolid && posC0inRefPicSolid && allCandSolidInAbove;
+            affiAMVPInfo.mvSolidLB[affiAMVPInfo.numCand] = posC0inCurPicSolid && posC0inRefPicSolid && allCandSolidInAbove;            
 
             affiAMVPInfo.mvPosLT[affiAMVPInfo.numCand] = posC0;
             affiAMVPInfo.mvPosRT[affiAMVPInfo.numCand] = posC0;
@@ -2949,9 +2949,9 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
           }
           else 
           {
-            affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = posC1inCurPic_solid && posC1inRefPic_solid && allCandSolidInAbove;
-            affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = posC1inCurPic_solid && posC1inRefPic_solid && allCandSolidInAbove;
-            affiAMVPInfo.mvSolidLB[affiAMVPInfo.numCand] = posC1inCurPic_solid && posC1inRefPic_solid && allCandSolidInAbove;            
+            affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = posC1inCurPicSolid && posC1inRefPicSolid && allCandSolidInAbove;
+            affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = posC1inCurPicSolid && posC1inRefPicSolid && allCandSolidInAbove;
+            affiAMVPInfo.mvSolidLB[affiAMVPInfo.numCand] = posC1inCurPicSolid && posC1inRefPicSolid && allCandSolidInAbove;            
 
             affiAMVPInfo.mvPosLT[affiAMVPInfo.numCand] = posC1;
             affiAMVPInfo.mvPosRT[affiAMVPInfo.numCand] = posC1;
@@ -3674,10 +3674,10 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
 #if GDR_ENABLED
           if (isEncodeClean) 
           {
-            bool posL0inCurPic_solid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
-            bool posL0inRefPic_solid = cs.isClean(posC0, REF_PIC_LIST_0, refIdx);
+            bool posL0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
+            bool posL0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_0, refIdx);
 
-            miSolid[3] = posL0inCurPic_solid && posL0inRefPic_solid;
+            miSolid[3] = posL0inCurPicSolid && posL0inRefPicSolid;
           }
 #endif
         }
@@ -3694,10 +3694,10 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
 #if GDR_ENABLED
             if (isEncodeClean) 
             {
-              bool posL1inCurPic_solid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
-              bool posL1inRefPic_solid = cs.isClean(posC0, REF_PIC_LIST_1, refIdx);
+              bool posL1inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
+              bool posL1inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_1, refIdx);
               
-              miSolid[3] = (mi[3].interDir & 1) ? (miSolid[3] && posL1inCurPic_solid && posL1inRefPic_solid) : (posL1inCurPic_solid && posL1inRefPic_solid);
+              miSolid[3] = (mi[3].interDir & 1) ? (miSolid[3] && posL1inCurPicSolid && posL1inRefPicSolid) : (posL1inCurPicSolid && posL1inRefPicSolid);
             }
 #endif
           }

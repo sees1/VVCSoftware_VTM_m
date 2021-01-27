@@ -1929,7 +1929,10 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
       {
         int modIP = pic->getPOC() - pic->getPOC() / m_pcCfg->getReshapeCW().rspFpsToIp * m_pcCfg->getReshapeCW().rspFpsToIp;
 #if GDR_ENABLED        
-        if (slice->isInterGDR()) modIP = 0;
+        if (slice->isInterGDR())
+        {
+          modIP = 0;
+        }
 #endif
         if (m_pcReshaper->getReshapeFlag() && m_pcCfg->getReshapeCW().updateCtrl == 2 && modIP == 0)
         {
