@@ -523,7 +523,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setIntraPeriod                                       ( m_iIntraPeriod );
 #if GDR_ENABLED  
   m_cEncLib.setGdrPeriod                                         ( m_iGdrPeriod );
-  m_cEncLib.setGdrPocStart                                       ( m_iGdrPocStart );
+  m_cEncLib.setGdrPocStart                                       ( m_gdrPocStart );
   m_cEncLib.setGdrFrequency                                      ( m_iGdrFrequency);
   m_cEncLib.setStartWithGdr                                      ( m_bStartWithGdr );
   m_cEncLib.setNoHashForGdr                                      ( m_bNoHashForGdr );

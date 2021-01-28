@@ -1007,7 +1007,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   // Coding structure paramters
   ("IntraPeriod,-ip",                                 m_iIntraPeriod,                                      -1, "Intra period in frames, (-1: only first frame)")
 #if GDR_ENABLED
-  ("GdrPocStart",                                     m_iGdrPocStart,                                      -1, "GDR poc start")
+  ("GdrPocStart",                                     m_gdrPocStart,                                      -1, "GDR poc start")
   ("GdrPeriod",                                       m_iGdrPeriod,                                        -1, "GDR period")
   ("GdrFrequency",                                    m_iGdrFrequency,                                     -1, "GDR freqency")
   ("StartWithGDR",                                    m_bStartWithGdr,                                  false, "Start bitstream with GDR")
@@ -1612,12 +1612,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     if (m_iGdrFrequency < 0)
       m_iGdrFrequency = 2;
 
-    if (m_iGdrPocStart < 0) 
+    if (m_gdrPocStart < 0) 
     {
       if (m_iIntraPeriod > 0)
-        m_iGdrPocStart = m_iIntraPeriod;
+        m_gdrPocStart = m_iIntraPeriod;
       else
-        m_iGdrPocStart = m_iFrameRate * m_iGdrFrequency;
+        m_gdrPocStart = m_iFrameRate * m_iGdrFrequency;
     }
 
     if (m_iGdrPeriod < 0) 
@@ -1628,7 +1628,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     if (m_iIntraPeriod == -1) 
     {
       m_iFrameRate = (m_iFrameRate == 0) ? 30 : m_iFrameRate;
-      if (m_iGdrPocStart % m_iFrameRate != 0)
+      if (m_gdrPocStart % m_iFrameRate != 0)
         m_iIntraPeriod = -1;
       else
         m_iIntraPeriod = m_iFrameRate * m_iGdrFrequency;

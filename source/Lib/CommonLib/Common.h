@@ -108,15 +108,17 @@ struct Area : public Position, public Size
     if (_area.contains(thisArea))
       return false;
 
-    bool btopLeft  = contains(_area.topLeft());
-    bool btopRight = contains(_area.topRight());
-    bool bbotLeft  = contains(_area.bottomLeft());
-    bool bbotRight = contains(_area.bottomRight());
+    bool topLeft  = contains(_area.topLeft());
+    bool topRight = contains(_area.topRight());
+    bool botLeft  = contains(_area.bottomLeft());
+    bool botRight = contains(_area.bottomRight());
 
-    int sum = (btopLeft ? 1 : 0) + (btopRight ? 1 : 0) + (bbotLeft ? 1 : 0) + (bbotRight ? 1 : 0);
+    int sum = (topLeft ? 1 : 0) + (topRight ? 1 : 0) + (botLeft ? 1 : 0) + (botRight ? 1 : 0);
 
     if (0 < sum && sum < 4)
+    {
       return true;
+    }
 
     return false;
   }

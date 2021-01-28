@@ -2742,8 +2742,8 @@ void PicHeader::initPicHeader()
 
   m_alfApsIdsLuma.resize(0);
 #if GDR_ENABLED
-  m_InGdrPeriod      = false;
-  m_LastGdrPeriodPoc = -1;
+  m_inGdrPeriod      = false;
+  m_lastGdrPeriodPoc = -1;
 #endif
 }
 

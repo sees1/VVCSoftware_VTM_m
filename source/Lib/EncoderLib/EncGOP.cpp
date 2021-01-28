@@ -313,7 +313,7 @@ void EncGOP::init ( EncLib* pcEncLib )
   }
 #endif
 #if GDR_ENABLED
-  m_LastGdrPeriodPoc = -1;
+  m_lastGdrPeriodPoc = -1;
 #endif
 }
 

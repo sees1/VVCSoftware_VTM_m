@@ -160,8 +160,8 @@ struct MotionInfo
   uint8_t         BcwIdx;
   Mv      bv;
 #if GDR_ENABLED
-  bool      soClean;  // source Position is clean/dirty
-  Position  soPos;    // source Position of Mv
+  bool      sourceClean;  // source Position is clean/dirty
+  Position  sourcePos;    // source Position of Mv
 #endif
 
   MotionInfo() : isInter(false), isIBCmot(false), interDir(0), useAltHpelIf(false), sliceIdx(0), refIdx{ NOT_VALID, NOT_VALID }, BcwIdx(0) { }

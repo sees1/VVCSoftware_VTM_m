@@ -605,7 +605,7 @@ void DecApp::xCreateDecLib()
   m_cDecLib.m_targetSubPicIdx = this->m_targetSubPicIdx;
   m_cDecLib.initScalingList();
 #if GDR_LEAK_TEST
-  m_cDecLib.m_POC_RandomAccess = this->m_POC_RandomAccess;
+  m_cDecLib.m_gdrPocRandomAccess = this->m_gdrPocRandomAccess;
 #endif // GDR_LEAK_TEST
 }
 

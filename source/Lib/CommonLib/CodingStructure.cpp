@@ -159,13 +159,17 @@ void CodingStructure::releaseIntermediateData()
 bool CodingStructure::containRefresh(int begX, int endX) const
 { 
   if (begX == endX)
+  {
     return false;
+  }
 
   const Area csArea      = area.Y();
   const Area refreshArea = Area(begX, area.ly(), endX - begX, std::min(slice->getPPS()->getPicHeightInLumaSamples(), area.lheight()));
 
   if (csArea.contains(refreshArea))
+  {
     return true;
+  }
   
   return false;
 }
@@ -173,13 +177,17 @@ bool CodingStructure::containRefresh(int begX, int endX) const
 bool CodingStructure::overlapRefresh(int begX, int endX) const
 {
   if (begX == endX)
+  {
     return false;
+  }
 
   const Area csArea = area.Y();
   const Area refreshArea = Area(begX, area.ly(), endX - begX, area.lheight());
 
   if (csArea.overlap(refreshArea))
+  {
     return true;
+  }
 
   return false;
 }
@@ -197,13 +205,17 @@ bool CodingStructure::overlapRefresh() const
 bool CodingStructure::withinRefresh(int begX, int endX) const
 {  
   if (begX == endX)
+  {
     return false;
+  }
 
   const Area csArea = area.Y();
   const Area refreshArea = Area(begX, area.ly(), endX - begX, area.lheight());
 
   if (refreshArea.contains(csArea))
+  {
     return true;
+  }
 
   return false;
 }
@@ -228,7 +240,9 @@ bool CodingStructure::refreshCrossTTV(int begX, int endX) const
   int sum = (overlap0 ? 1 : 0) + (overlap1 ? 1 : 0) + (overlap2 ? 1 : 0);
 
   if (0 < sum)
+  {
     return true;
+  }
 
   return false;
 }
@@ -251,7 +265,9 @@ bool CodingStructure::refreshCrossBTV(int begX, int endX) const
   int sum = (overlap0 ? 1 : 0) + (overlap1 ? 1 : 0);
 
   if (0 < sum)
+  {
     return true;
+  }
 
   return false;
 }
@@ -265,7 +281,9 @@ bool CodingStructure::overlapDirty() const
   bool insideRight = isClean(topRight, CHANNEL_TYPE_LUMA);
 
   if (insideLeft != insideRight)
+  {
     return true;
+  }
 
   return false;
 }
@@ -287,8 +305,10 @@ bool CodingStructure::dirtyCrossTTV() const
 
   bool allclean = clean0 && clean1 && clean2;
   
-  if (allclean) 
+  if (allclean)
+  {
     return false;
+  }
 
   return true;
 }
@@ -309,7 +329,9 @@ bool CodingStructure::dirtyCrossBTV() const
   bool allclean = clean0 && clean1;
 
   if (allclean)
+  {
     return false;
+  }
 
   return true;
 }
@@ -329,7 +351,9 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv) const
   const Picture* const curPic = slice->getPic();
 
   if (!curPic)
+  {
     return false;
+  }
 
   PicHeader     *curPh = curPic->cs->picHeader;
   bool isCurGdrPicture = curPh->getInGdrPeriod();
@@ -356,9 +380,13 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv) const
     const int lastPelPos = std::max(lastLumaPos, lastChromaPos);
 
     if (lastPelPos < scaledEndX)
+    {
       return true;
+    }
     else
+    {
       return false;
+    }
   }
   
   return true;
@@ -372,11 +400,21 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, const Picture* 
          pos in clean area -> true
          pos in dirty area -> false
   */  
-  if (!refPic) return false;
-  if (!refPic->cs) return false;
+  if (!refPic)
+  {
+    return false;
+  }
+
+  if (!refPic->cs)
+  {
+    return false;
+  }
 
   PicHeader *refPh = refPic->cs->picHeader;
-  if (!refPh) return false;
+  if (!refPh)
+  {
+    return false;
+  }
 
   bool isRefGdrPicture = refPh->getInGdrPeriod();
 
@@ -401,9 +439,13 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, const Picture* 
     const int lastPelPos = std::max(lastLumaPos, lastChromaPos);
 
     if (lastPelPos < scaledEndX)
+    {
       return true;
+    }
     else
+    {
       return false;
+    }
   }
   else 
   {
@@ -411,9 +453,13 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, const Picture* 
     bool isCurGdrPicture = (slice->getPicHeader()->getNumVerVirtualBoundaries() > 0);
 
     if (isCurGdrPicture)
+    {
       return false;
+    }
     else
+    {
       return true;
+    }
   }  
 }
 
@@ -426,16 +472,30 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
          pos in clean area -> true
          pos in dirty area -> false
   */  
-  if (refIdx < 0) return false;
+  if (refIdx < 0)
+  {
+    return false;
+  }
 
   const Picture* const refPic = slice->getRefPic(e, refIdx);
   const bool isExceedNumRef = (refIdx < slice->getNumRefIdx(e)) ? false : true;
-  if (!refPic || isExceedNumRef) return false;
-  if (!refPic->cs) return false;
+
+  if (!refPic || isExceedNumRef)
+  {
+    return false;
+  }
+
+  if (!refPic->cs)
+  {
+    return false;
+  }
 
   PicHeader *refPh = refPic->cs->picHeader;
 
-  if (!refPh) return false;
+  if (!refPh)
+  {
+    return false;
+  }
     
   bool isRefGdrPicture = refPh->getInGdrPeriod();
 
@@ -461,9 +521,13 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
     const int lastPelPos    = std::max(lastLumaPos, lastChromaPos);
     
     if (lastPelPos < scaledEndX)
+    {
       return true;
+    }
     else
+    {
       return false;
+    }
   }
   else 
   {
@@ -471,9 +535,13 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
     bool isCurGdrPicture = (slice->getPicHeader()->getNumVerVirtualBoundaries() > 0);
 
     if (isCurGdrPicture)
+    {
       return false;
+    }
     else
+    {
       return true;
+    }
   }
 }
 
@@ -491,11 +559,18 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
   PicHeader *refPh;
 
   if (refIdx == MAX_NUM_REF)
+  {
     refPic = slice->getPic();
+  }
   else
+  {
     refPic = slice->getRefPic(e, refIdx);
+  }
 
-  if (!refPic) return false;
+  if (!refPic)
+  {
+    return false;
+  }
 
   if (refIdx == MAX_NUM_REF) 
   {
@@ -503,12 +578,18 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
   }
   else
   {
-    if (refPic->cs) return false;
+    if (refPic->cs)
+    {
+      return false;
+    }
 
     refPh = refPic->cs->picHeader;
   }
 
-  if (!refPh) return false;
+  if (!refPh)
+  {
+    return false;
+  }
 
   bool isRefGdrPicture = refPh->getInGdrPeriod();
 
@@ -533,19 +614,27 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
     const int lastPelPos = std::max(lastLumaPos, lastChromaPos);
 
     if (lastPelPos < scaledEndX)
+    {
       return true;
+    }
     else
+    {
       return false;
+    }
   }
-  else 
+  else
   {
     // refPic is normal picture
     bool isCurGdrPicture = (slice->getPicHeader()->getNumVerVirtualBoundaries() > 0);
 
     if (isCurGdrPicture)
+    {
       return false;
+    }
     else
+    {
       return true;
+    }
   }
 }
 
@@ -561,7 +650,9 @@ bool CodingStructure::isClean(const Position &IntPos, RefPicList e, int refIdx) 
   const Picture* const refPic = slice->getRefPic(e, refIdx);
 
   if (!refPic || refIdx < 0)
+  {
     return false;
+  }
 
   PicHeader     *refPh = refPic->cs->picHeader;
   bool isRefGdrPicture = refPh->getInGdrPeriod();
@@ -573,7 +664,9 @@ bool CodingStructure::isClean(const Position &IntPos, RefPicList e, int refIdx) 
       return true;
     }
     else
+    {
       return false;
+    }
   }
   else 
   {
@@ -581,16 +674,22 @@ bool CodingStructure::isClean(const Position &IntPos, RefPicList e, int refIdx) 
     bool isCurGdrPicture = (slice->getPicHeader()->getNumVerVirtualBoundaries() > 0);
 
     if (isCurGdrPicture)
+    {
       return false;
+    }
     else
+    {
       return true;
+    }
   }
 }
 
 bool CodingStructure::isClean(const Position &IntPos, const Picture* const refPic) const
 {    
   if (!refPic)
+  {
     return false;
+  }
 
   PicHeader     *refPh = refPic->cs->picHeader;
   bool isRefGdrPicture = refPh->getInGdrPeriod();
@@ -602,7 +701,9 @@ bool CodingStructure::isClean(const Position &IntPos, const Picture* const refPi
       return true;
     }
     else
+    {
       return false;
+    }
   }
   else 
   {
@@ -610,9 +711,13 @@ bool CodingStructure::isClean(const Position &IntPos, const Picture* const refPi
     bool isCurGdrPicture = (slice->getPicHeader()->getNumVerVirtualBoundaries() > 0);
 
     if (isCurGdrPicture)
+    {
       return false;
+    }
     else
+    {
       return true;
+    }
   }
 }
 
@@ -632,9 +737,13 @@ bool CodingStructure::isClean(const int Intx, const int Inty, const ChannelType 
 
     virboundary_endx = virboundary_endx >> effChType;
     if (Intx < virboundary_endx)
+    {
       return true;
+    }
     else
+    {
       return false;
+    }
   }
 
   return true;

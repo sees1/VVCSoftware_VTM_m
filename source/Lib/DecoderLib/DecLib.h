@@ -206,7 +206,7 @@ public:
   ParameterSetMap<APS>*   m_apsMapEnc;
 #if GDR_LEAK_TEST
 public:
-  int                     m_POC_RandomAccess;
+  int                     m_gdrPocRandomAccess;
 #endif // GDR_LEAK_TEST
 
 public:

@@ -813,7 +813,9 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
     m2 = ((mm + 0) >> 3) << 3;
 
     if (dd > mm && m1 == m2)
+    {
       m1 = m1 + 8;
+    }
      
     n1 = (picWidth - m2 * gdrPeriod) / 8;    
 

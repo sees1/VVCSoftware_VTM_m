@@ -388,8 +388,8 @@ void CU::saveMotionInHMVP( const CodingUnit& cu, const bool isToBeDone )
     MotionInfo mi = pu.getMotionInfo();
 
 #if GDR_ENABLED 
-    mi.soPos = pu.lumaPos();
-    mi.soClean = pu.cs->isClean(mi.soPos, CHANNEL_TYPE_LUMA);
+    mi.sourcePos   = pu.lumaPos();
+    mi.sourceClean = pu.cs->isClean(mi.sourcePos, CHANNEL_TYPE_LUMA);
 #endif
     mi.BcwIdx = (mi.interDir == 3) ? cu.BcwIdx : BCW_DEFAULT;
 
@@ -859,14 +859,12 @@ int PU::getWideAngle( const TransformUnit &tu, const uint32_t dirMode, const Com
 bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int &mrgCandIdx,
                           const uint32_t maxNumMergeCandMin1, int &cnt, const bool isAvailableA1,
                           const MotionInfo miLeft, const bool isAvailableB1, const MotionInfo miAbove,
-#if GDR_ENABLED
                           const bool ibcFlag, const bool isGt4x4
-  , const PredictionUnit &pu
-  , bool &allCandSolidInAbove
-)
-#else
-                          const bool ibcFlag, const bool isGt4x4)
+#if GDR_ENABLED
+                         ,const PredictionUnit &pu
+                         ,bool &allCandSolidInAbove
 #endif
+)
 {
   const Slice& slice = *cs.slice;
   MotionInfo miNeighbor;
@@ -888,10 +886,10 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
   {
     miNeighbor = lut[num_avai_candInLUT - mrgIdx];
 #if GDR_ENABLED    
-    Position soPos = Position(0, 0);
+    Position sourcePos = Position(0, 0);
     if (isEncodeClean) 
     {
-      soPos = miNeighbor.soPos;
+      sourcePos = miNeighbor.sourcePos;
     }
 #endif
 
@@ -907,7 +905,7 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
       if (isEncodeClean) 
       {
         // note : cannot gaurantee the order/value in the lut if any of the lut is in dirty area
-        mrgCtx.mvPos[(cnt << 1) + 0]   = soPos;
+        mrgCtx.mvPos[(cnt << 1) + 0]   = sourcePos;
         mrgCtx.mvSolid[(cnt << 1) + 0] = allCandSolidInAbove && vbOnCtuBoundary;
         mrgCtx.mvValid[(cnt << 1) + 0] = cs.isClean(pu.Y().bottomRight(), miNeighbor.mv[0], REF_PIC_LIST_0, miNeighbor.refIdx[0]);
         allCandSolidInAbove = allCandSolidInAbove && vbOnCtuBoundary;
@@ -919,7 +917,7 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
 #if GDR_ENABLED
         if (isEncodeClean) 
         {
-          mrgCtx.mvPos[(cnt << 1) + 1]   = soPos;
+          mrgCtx.mvPos[(cnt << 1) + 1]   = sourcePos;
           mrgCtx.mvSolid[(cnt << 1) + 1] = allCandSolidInAbove && vbOnCtuBoundary;
           mrgCtx.mvValid[(cnt << 1) + 1] = cs.isClean(pu.Y().bottomRight(), miNeighbor.mv[1], REF_PIC_LIST_1, miNeighbor.refIdx[1]);
           allCandSolidInAbove = allCandSolidInAbove && vbOnCtuBoundary; 
@@ -2453,10 +2451,8 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
 #if GDR_ENABLED
 void PU::xInheritedAffineMv(const PredictionUnit &pu, const PredictionUnit* puNeighbour, RefPicList eRefPicList, Mv rcMv[3], bool rcMvSolid[3], MvpType rcMvType[3], Position rcMvPos[3])
 {
-#if GDR_ENABLED  
   const CodingStructure &cs = *pu.cs;
   const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
-#endif
 
   int posNeiX = puNeighbour->Y().pos().x;
   int posNeiY = puNeighbour->Y().pos().y;
@@ -3127,7 +3123,7 @@ void PU::addAMVPHMVPCand(const PredictionUnit &pu, const RefPicList eRefPicList,
 #if GDR_ENABLED
         if (isEncodeClean) 
         {
-          info.mvPos[info.numCand]   = neibMi.soPos;
+          info.mvPos[info.numCand]   = neibMi.sourcePos;
           info.mvType[info.numCand]  = MVP_HMVP;
           info.mvSolid[info.numCand] = allCandSolidInAbove && vbOnCtuBoundary; //  cs.isClean(neibMi.soPos, CHANNEL_TYPE_LUMA);
           allCandSolidInAbove = allCandSolidInAbove && vbOnCtuBoundary;
@@ -3717,7 +3713,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
       };
 
 #if GDR_ENABLED     
-      bool model_solid[6] = 
+      bool modelSolid[6] = 
       {
         miSolid[0] && miSolid[1] && miSolid[2],
         miSolid[0] && miSolid[1] && miSolid[3],
@@ -3741,8 +3737,8 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
         {
           for (int i = 0; i < 3; i++)  
           {
-            affMrgCtx.mvSolid[(affinNumValidCand << 1) + 0][i] = model_solid[modelIdx];
-            affMrgCtx.mvSolid[(affinNumValidCand << 1) + 1][i] = model_solid[modelIdx];
+            affMrgCtx.mvSolid[(affinNumValidCand << 1) + 0][i] = modelSolid[modelIdx];
+            affMrgCtx.mvSolid[(affinNumValidCand << 1) + 1][i] = modelSolid[modelIdx];
           }
         }
 #endif

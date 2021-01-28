@@ -303,7 +303,7 @@ protected:
   unsigned              m_subPicIdLen;
   std::vector<uint16_t> m_subPicId;
 #if GDR_ENABLED
-  unsigned  m_GdrPeriod;
+  unsigned  m_gdrPeriod;
   unsigned  m_GdrPocStart;
   int       m_GdrFrequency;
   bool      m_bStartWithGdr;
@@ -1005,14 +1005,14 @@ public:
   void      setMaxBTSizes                   ( unsigned* maxBT)   { m_uiMaxBT[0] = maxBT[0]; m_uiMaxBT[1] = maxBT[1]; m_uiMaxBT[2] = maxBT[2]; }
   void      setMaxTTSizes                   ( unsigned* maxTT)   { m_uiMaxTT[0] = maxTT[0]; m_uiMaxTT[1] = maxTT[1]; m_uiMaxTT[2] = maxTT[2]; }
 #if GDR_ENABLED
-  void      setGdrPeriod(unsigned  u)   { m_GdrPeriod   = u; }
+  void      setGdrPeriod(unsigned  u)   { m_gdrPeriod   = u; }
   void      setGdrPocStart(unsigned  u) { m_GdrPocStart = u; }
   void      setGdrFrequency(int i)      { m_GdrFrequency = i; }
   void      setStartWithGdr(bool b)     { m_bStartWithGdr = b; }
   void      setNoHashForGdr(bool b)     { m_bNoHashForGdr = b; }  
   void      setGdrPicOutput(bool b)     { m_bGdrPicOutput = b; }
 
-  unsigned  getGdrPeriod()              { return m_GdrPeriod;   }
+  unsigned  getGdrPeriod()              { return m_gdrPeriod;   }
   unsigned  getGdrPocStart()            { return m_GdrPocStart; }
   int       getGdrFrequency()           { return m_GdrFrequency; }
   bool      getStartWithGdr()           { return m_bStartWithGdr; }

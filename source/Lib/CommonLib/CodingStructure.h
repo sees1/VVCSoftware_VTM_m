@@ -112,11 +112,6 @@ public:
 
   bool refreshCrossTTV(int begX, int endX) const;
   bool refreshCrossBTV(int begX, int endX) const;
-  bool refreshCrossQT(int begX, int endX) const;  
-
-  bool refreshFitTTV(int begX, int endX) const;
-  bool refreshFitBTV(int begX, int endX) const;
-  bool refreshFitQT(int begX, int endX) const;
 
   bool overlapDirty() const;
   bool dirtyCrossTTV() const;  

@@ -281,7 +281,7 @@ void FDReader::parseFillerData(InputBitstream* bs, uint32_t &fdSize)
 HLSyntaxReader::HLSyntaxReader()
 {
 #if GDR_ENABLED
-  m_last_gdr_poc = -1;
+  m_lastGdrPoc = -1;
 #endif
 }
 

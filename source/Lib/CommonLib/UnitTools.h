@@ -158,7 +158,7 @@ namespace PU
     , const bool isGt4x4
 #if GDR_ENABLED
     , const PredictionUnit &pu
-    , bool &addMergeHMVPCand
+    , bool &allCandSolidInAbove  
 #endif
   );
   void addAMVPHMVPCand                (const PredictionUnit &pu, const RefPicList eRefPicList, const int currRefPOC, AMVPInfo &info);

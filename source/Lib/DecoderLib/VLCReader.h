@@ -147,7 +147,7 @@ public:
 class HLSyntaxReader : public VLCReader
 {
 #if GDR_ENABLED
-  int m_last_gdr_poc;
+  int m_lastGdrPoc;
   int m_last_gdr_recovery_poc_cnt;
 #endif
 
@@ -161,8 +161,8 @@ protected:
 
 public:
 #if GDR_ENABLED
-  void setLastGdrPoc(int poc) { m_last_gdr_poc = poc;  }
-  int  getLastGdrPoc()        { return m_last_gdr_poc; }
+  void setLastGdrPoc(int poc) { m_lastGdrPoc = poc;  }
+  int  getLastGdrPoc()        { return m_lastGdrPoc; }
   void setLastGdrRecoveryPocCnt(int recovery_poc_cnt) { m_last_gdr_recovery_poc_cnt = recovery_poc_cnt; }
   int  getLastGdrRecoveryPocCnt()                     { return m_last_gdr_recovery_poc_cnt; }
 #endif

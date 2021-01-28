@@ -2333,8 +2333,8 @@ private:
   bool                        m_gdrOrIrapPicFlag;                                       //!< gdr or irap picture flag
   bool                        m_gdrPicFlag;                                             //!< gradual decoding refresh picture flag
 #if GDR_ENABLED
-  bool                        m_InGdrPeriod;
-  int                         m_LastGdrPeriodPoc;
+  bool                        m_inGdrPeriod;
+  int                         m_lastGdrPeriodPoc;
 #endif
   uint32_t                    m_recoveryPocCnt;                                         //!< recovery POC count
   bool                        m_noOutputBeforeRecoveryFlag;                             //!< NoOutputBeforeRecoveryFlag
@@ -2423,8 +2423,8 @@ public:
   void                        setGdrPicFlag( bool b )                                   { m_gdrPicFlag = b;                                                                            }
   bool                        getGdrPicFlag() const                                     { return m_gdrPicFlag;                                                                         }
 #if GDR_ENABLED
-  void                        setInGdrPeriod(bool b)                                    { m_InGdrPeriod = b;                                                                            }
-  bool                        getInGdrPeriod() const                                    { return m_InGdrPeriod;                                                                         }  
+  void                        setInGdrPeriod(bool b)                                    { m_inGdrPeriod = b;                                                                            }
+  bool                        getInGdrPeriod() const                                    { return m_inGdrPeriod;                                                                         }  
 #endif
   void                        setRecoveryPocCnt( uint32_t u )                           { m_recoveryPocCnt = u;                                                                        }
   uint32_t                    getRecoveryPocCnt() const                                 { return m_recoveryPocCnt;                                                                     }
