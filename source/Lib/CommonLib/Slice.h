@@ -2665,11 +2665,7 @@ private:
   const SPS*                 m_pcSPS;
   const PPS*                 m_pcPPS;
   Picture*                   m_pcPic;
-#if GDR_ENABLED
-  PicHeader*                 m_pcPicHeader;    //!< pointer to picture header structure
-#else
   const PicHeader*           m_pcPicHeader;    //!< pointer to picture header structure
-#endif
   bool                       m_colFromL0Flag;  // collocated picture from List0 flag
 
 
@@ -2723,13 +2719,8 @@ public:
   virtual                     ~Slice();
   void                        initSlice();
   void                        inheritFromPicHeader( PicHeader *picHeader, const PPS *pps, const SPS *sps );
-#if GDR_ENABLED
-  void                        setPicHeader(PicHeader* pcPicHeader) { m_pcPicHeader = pcPicHeader; }
-  PicHeader*                  getPicHeader() const { return m_pcPicHeader; }
-#else
   void                        setPicHeader( const PicHeader* pcPicHeader )           { m_pcPicHeader = pcPicHeader;                                  }
   const PicHeader*            getPicHeader() const                                   { return m_pcPicHeader;                                         }
-#endif
   int                         getRefIdx4MVPair( RefPicList eCurRefPicList, int nCurRefIdx );
 
 
