@@ -329,6 +329,8 @@ const CPelUnitBuf Picture::getOrigBuf()                     const { return M_BUF
 
        PelBuf     Picture::getOrigBuf(const ComponentID compID)       { return getBuf(compID, PIC_ORIGINAL); }
 const CPelBuf     Picture::getOrigBuf(const ComponentID compID) const { return getBuf(compID, PIC_ORIGINAL); }
+       PelBuf     Picture::getTrueOrigBuf(const ComponentID compID)       { return getBuf(compID, PIC_TRUE_ORIGINAL); }
+const CPelBuf     Picture::getTrueOrigBuf(const ComponentID compID) const { return getBuf(compID, PIC_TRUE_ORIGINAL); }
        PelUnitBuf Picture::getTrueOrigBuf()                           { return M_BUFS(0, PIC_TRUE_ORIGINAL); }
 const CPelUnitBuf Picture::getTrueOrigBuf()                     const { return M_BUFS(0, PIC_TRUE_ORIGINAL); }
        PelBuf     Picture::getTrueOrigBuf(const CompArea &blk)        { return getBuf(blk, PIC_TRUE_ORIGINAL); }

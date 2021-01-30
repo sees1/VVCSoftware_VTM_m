@@ -4778,12 +4778,12 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
   int cropOffsetRight  = m_pcCfg->getCropOffsetRight();
   int cropOffsetBottom = m_pcCfg->getCropOffsetBottom();
 
-  int height = pcPic->getOrigBuf(COMPONENT_Y).height - cropOffsetLeft + cropOffsetRight;
-  int width = pcPic->getOrigBuf(COMPONENT_Y).width - cropOffsetTop + cropOffsetBottom;
+  int height = pcPic->getTrueOrigBuf(COMPONENT_Y).height - cropOffsetLeft + cropOffsetRight;
+  int width  = pcPic->getTrueOrigBuf(COMPONENT_Y).width - cropOffsetTop + cropOffsetBottom;
 
   ChromaFormat chFmt =  pcPic->chromaFormat;
 
-  Pel* pOrg = pcPic->getOrigBuf(COMPONENT_Y).buf;
+  Pel *pOrg = pcPic->getTrueOrigBuf(COMPONENT_Y).buf;
   Pel* pRec = pcPic->getRecoBuf(COMPONENT_Y).buf;
 
   uint16_t* yOrg = m_ppcFrameOrg[0]->m_ui16Comp[hdrtoolslib::Y_COMP];
@@ -4807,7 +4807,7 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
   {
     for (int j = 0; j < width; j++)
     {
-      yOrg[i*width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getOrigBuf(COMPONENT_Y).stride + j + cropOffsetLeft]);
+      yOrg[i * width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getTrueOrigBuf(COMPONENT_Y).stride + j + cropOffsetLeft]);
       yRec[i*width + j] = static_cast<uint16_t>(pRec[(i + cropOffsetTop) * pcPic->getRecoBuf(COMPONENT_Y).stride + j + cropOffsetLeft]);
     }
   }
@@ -4820,26 +4820,26 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
     cropOffsetTop >>= 1;
   }
 
-  pOrg = pcPic->getOrigBuf(COMPONENT_Cb).buf;
+  pOrg = pcPic->getTrueOrigBuf(COMPONENT_Cb).buf;
   pRec = pcPic->getRecoBuf(COMPONENT_Cb).buf;
 
   for (int i = 0; i < height; i++)
   {
     for (int j = 0; j < width; j++)
     {
-      uOrg[i*width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getOrigBuf(COMPONENT_Cb).stride + j + cropOffsetLeft]);
+      uOrg[i * width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getTrueOrigBuf(COMPONENT_Cb).stride + j + cropOffsetLeft]);
       uRec[i*width + j] = static_cast<uint16_t>(pRec[(i + cropOffsetTop) * pcPic->getRecoBuf(COMPONENT_Cb).stride + j + cropOffsetLeft]);
     }
   }
 
-  pOrg = pcPic->getOrigBuf(COMPONENT_Cr).buf;
+  pOrg = pcPic->getTrueOrigBuf(COMPONENT_Cr).buf;
   pRec = pcPic->getRecoBuf(COMPONENT_Cr).buf;
 
   for (int i = 0; i < height; i++)
   {
     for (int j = 0; j < width; j++)
     {
-      vOrg[i*width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getOrigBuf(COMPONENT_Cr).stride + j + cropOffsetLeft]);
+      vOrg[i * width + j] = static_cast<uint16_t>(pOrg[(i + cropOffsetTop) * pcPic->getTrueOrigBuf(COMPONENT_Cr).stride + j + cropOffsetLeft]);
       vRec[i*width + j] = static_cast<uint16_t>(pRec[(i + cropOffsetTop) * pcPic->getRecoBuf(COMPONENT_Cr).stride + j + cropOffsetLeft]);
     }
   }

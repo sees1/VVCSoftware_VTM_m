@@ -113,6 +113,8 @@ struct Picture : public UnitArea
   const CPelUnitBuf getOrigBuf() const;
          PelBuf     getOrigBuf(const ComponentID compID);
   const CPelBuf     getOrigBuf(const ComponentID compID) const;
+         PelBuf     getTrueOrigBuf(const ComponentID compID);
+  const CPelBuf     getTrueOrigBuf(const ComponentID compID) const;
          PelUnitBuf getTrueOrigBuf();
   const CPelUnitBuf getTrueOrigBuf() const;
         PelBuf      getTrueOrigBuf(const CompArea &blk);
