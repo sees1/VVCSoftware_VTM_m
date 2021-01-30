@@ -5904,17 +5904,18 @@ void InterSearch::xExtDIFUpSamplingH(CPelBuf* pattern, bool useAltHpelIf)
   int halfFilterSize = (filterSize>>1);
   const Pel *srcPtr = pattern->buf - halfFilterSize*srcStride - 1;
 
-  const ChromaFormat chFmt = m_currChromaFormat;
-
-  m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, m_filteredBlockTmp[0][0], intStride, width + 1, height + filterSize, 0 << MV_FRACTIONAL_BITS_DIFF, false, chFmt, clpRng, 0, false, useAltHpelIf);
+  m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, m_filteredBlockTmp[0][0], intStride, width + 1, height + filterSize,
+                 0 << MV_FRACTIONAL_BITS_DIFF, false, clpRng, 0, false, useAltHpelIf);
   if (!m_skipFracME)
   {
-    m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, m_filteredBlockTmp[2][0], intStride, width + 1, height + filterSize, 2 << MV_FRACTIONAL_BITS_DIFF, false, chFmt, clpRng, 0, false, useAltHpelIf);
+    m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, m_filteredBlockTmp[2][0], intStride, width + 1, height + filterSize,
+                   2 << MV_FRACTIONAL_BITS_DIFF, false, clpRng, 0, false, useAltHpelIf);
   }
 
   intPtr = m_filteredBlockTmp[0][0] + halfFilterSize * intStride + 1;
   dstPtr = m_filteredBlock[0][0][0];
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 0, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, 0, false, useAltHpelIf);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 0, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF,
+                 false, true, clpRng, 0, false, useAltHpelIf);
   if (m_skipFracME)
   {
     return;
@@ -5922,15 +5923,18 @@ void InterSearch::xExtDIFUpSamplingH(CPelBuf* pattern, bool useAltHpelIf)
 
   intPtr = m_filteredBlockTmp[0][0] + (halfFilterSize - 1) * intStride + 1;
   dstPtr = m_filteredBlock[2][0][0];
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 0, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, 0, false, useAltHpelIf);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 0, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF,
+                 false, true, clpRng, 0, false, useAltHpelIf);
 
   intPtr = m_filteredBlockTmp[2][0] + halfFilterSize * intStride;
   dstPtr = m_filteredBlock[0][2][0];
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 1, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, 0, false, useAltHpelIf);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 1, height + 0, 0 << MV_FRACTIONAL_BITS_DIFF,
+                 false, true, clpRng, 0, false, useAltHpelIf);
 
   intPtr = m_filteredBlockTmp[2][0] + (halfFilterSize - 1) * intStride;
   dstPtr = m_filteredBlock[2][2][0];
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 1, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng, 0, false, useAltHpelIf);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width + 1, height + 1, 2 << MV_FRACTIONAL_BITS_DIFF,
+                 false, true, clpRng, 0, false, useAltHpelIf);
 }
 
 
@@ -5959,8 +5963,6 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
 
   int extHeight = (halfPelRef.getVer() == 0) ? height + filterSize : height + filterSize-1;
 
-  const ChromaFormat chFmt = m_currChromaFormat;
-
   // Horizontal filter 1/4
   srcPtr = pattern->buf - halfFilterSize * srcStride - 1;
   intPtr = m_filteredBlockTmp[1][0];
@@ -5972,7 +5974,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
   {
     srcPtr += 1;
   }
-  m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, intPtr, intStride, width, extHeight, 1 << MV_FRACTIONAL_BITS_DIFF, false, chFmt, clpRng);
+  m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, intPtr, intStride, width, extHeight, 1 << MV_FRACTIONAL_BITS_DIFF,
+                 false, clpRng);
 
   // Horizontal filter 3/4
   srcPtr = pattern->buf - halfFilterSize*srcStride - 1;
@@ -5985,7 +5988,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
   {
     srcPtr += 1;
   }
-  m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, intPtr, intStride, width, extHeight, 3 << MV_FRACTIONAL_BITS_DIFF, false, chFmt, clpRng);
+  m_if.filterHor(COMPONENT_Y, srcPtr, srcStride, intPtr, intStride, width, extHeight, 3 << MV_FRACTIONAL_BITS_DIFF,
+                 false, clpRng);
 
   // Generate @ 1,1
   intPtr = m_filteredBlockTmp[1][0] + (halfFilterSize-1) * intStride;
@@ -5994,12 +5998,14 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
   {
     intPtr += intStride;
   }
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF, false,
+                 true, clpRng);
 
   // Generate @ 3,1
   intPtr = m_filteredBlockTmp[1][0] + (halfFilterSize-1) * intStride;
   dstPtr = m_filteredBlock[3][1][0];
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false,
+                 true, clpRng);
 
   if (halfPelRef.getVer() != 0)
   {
@@ -6010,7 +6016,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
     {
       intPtr += intStride;
     }
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 2 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
 
     // Generate @ 2,3
     intPtr = m_filteredBlockTmp[3][0] + (halfFilterSize - 1) * intStride;
@@ -6019,19 +6026,22 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
     {
       intPtr += intStride;
     }
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 2 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 2 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
   }
   else
   {
     // Generate @ 0,1
     intPtr = m_filteredBlockTmp[1][0] + halfFilterSize * intStride;
     dstPtr = m_filteredBlock[0][1][0];
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 0 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
 
     // Generate @ 0,3
     intPtr = m_filteredBlockTmp[3][0] + halfFilterSize * intStride;
     dstPtr = m_filteredBlock[0][3][0];
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 0 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 0 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
   }
 
   if (halfPelRef.getHor() != 0)
@@ -6047,7 +6057,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
     {
       intPtr += intStride;
     }
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
 
     // Generate @ 3,2
     intPtr = m_filteredBlockTmp[2][0] + (halfFilterSize - 1) * intStride;
@@ -6060,7 +6071,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
     {
       intPtr += intStride;
     }
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
   }
   else
   {
@@ -6071,7 +6083,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
     {
       intPtr += intStride;
     }
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
 
     // Generate @ 3,0
     intPtr = m_filteredBlockTmp[0][0] + (halfFilterSize - 1) * intStride + 1;
@@ -6080,7 +6093,8 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
     {
       intPtr += intStride;
     }
-    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+    m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF,
+                   false, true, clpRng);
   }
 
   // Generate @ 1,3
@@ -6090,12 +6104,14 @@ void InterSearch::xExtDIFUpSamplingQ( CPelBuf* pattern, Mv halfPelRef )
   {
     intPtr += intStride;
   }
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 1 << MV_FRACTIONAL_BITS_DIFF, false,
+                 true, clpRng);
 
   // Generate @ 3,3
   intPtr = m_filteredBlockTmp[3][0] + (halfFilterSize - 1) * intStride;
   dstPtr = m_filteredBlock[3][3][0];
-  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false, true, chFmt, clpRng);
+  m_if.filterVer(COMPONENT_Y, intPtr, intStride, dstPtr, dstStride, width, height, 3 << MV_FRACTIONAL_BITS_DIFF, false,
+                 true, clpRng);
 }
 
 
