@@ -1505,6 +1505,69 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_iIntraPeriod = -1;
   }
 
+#if GDR_ENABLED
+  {
+    m_iDecodingRefreshType = 3;
+    m_intraQPOffset = 0;
+    m_iGOPSize = 1;
+
+    m_GOPList[0].m_POC = 1;
+    m_GOPList[0].m_sliceType = 'B';
+    m_GOPList[0].m_QPOffset = 0;
+    m_GOPList[0].m_QPOffsetModelOffset = 0;
+    m_GOPList[0].m_QPOffsetModelScale = 0;
+    m_GOPList[0].m_CbQPoffset = 0;
+    m_GOPList[0].m_CrQPoffset = 0;
+    m_GOPList[0].m_QPFactor = 1.0;
+    m_GOPList[0].m_tcOffsetDiv2 = 0;
+    m_GOPList[0].m_betaOffsetDiv2 = 0;
+    m_GOPList[0].m_CbTcOffsetDiv2 = 0;
+    m_GOPList[0].m_CbBetaOffsetDiv2 = 0;
+    m_GOPList[0].m_CrTcOffsetDiv2 = 0;
+    m_GOPList[0].m_CrBetaOffsetDiv2 = 0;
+    m_GOPList[0].m_temporalId = 0;
+
+    m_GOPList[0].m_numRefPicsActive0 = 4;
+    m_GOPList[0].m_numRefPics0 = 4;
+    m_GOPList[0].m_deltaRefPics0[0] = 1;
+    m_GOPList[0].m_deltaRefPics0[1] = 2;
+    m_GOPList[0].m_deltaRefPics0[2] = 3;
+    m_GOPList[0].m_deltaRefPics0[3] = 4;
+
+    m_GOPList[0].m_numRefPicsActive1 = 4;
+    m_GOPList[0].m_numRefPics1 = 4;
+    m_GOPList[0].m_deltaRefPics1[0] = 1;
+    m_GOPList[0].m_deltaRefPics1[1] = 2;
+    m_GOPList[0].m_deltaRefPics1[2] = 3;
+    m_GOPList[0].m_deltaRefPics1[3] = 4;
+
+    if (m_iGdrFrequency < 0)
+      m_iGdrFrequency = 2;
+
+    if (m_gdrPocStart < 0)
+    {
+      if (m_iIntraPeriod > 0)
+        m_gdrPocStart = m_iIntraPeriod;
+      else
+        m_gdrPocStart = m_iFrameRate * m_iGdrFrequency;
+    }
+
+    if (m_iGdrPeriod < 0)
+    {
+      m_iGdrPeriod = m_iFrameRate;
+    }
+
+    if (m_iIntraPeriod == -1)
+    {
+      m_iFrameRate = (m_iFrameRate == 0) ? 30 : m_iFrameRate;
+      if (m_gdrPocStart % m_iFrameRate != 0)
+        m_iIntraPeriod = -1;
+      else
+        m_iIntraPeriod = m_iFrameRate * m_iGdrFrequency;
+    }
+  }
+#endif
+
   m_bpDeltasGOPStructure = false;
   if(m_iGOPSize == 16)
   {
@@ -1604,37 +1667,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       return false;
     }
   }
-
-#if GDR_ENABLED
-  {     
-    m_iDecodingRefreshType = 3;
-    
-    if (m_iGdrFrequency < 0)
-      m_iGdrFrequency = 2;
-
-    if (m_gdrPocStart < 0) 
-    {
-      if (m_iIntraPeriod > 0)
-        m_gdrPocStart = m_iIntraPeriod;
-      else
-        m_gdrPocStart = m_iFrameRate * m_iGdrFrequency;
-    }
-
-    if (m_iGdrPeriod < 0) 
-    {
-      m_iGdrPeriod = m_iFrameRate;
-    }    
-
-    if (m_iIntraPeriod == -1) 
-    {
-      m_iFrameRate = (m_iFrameRate == 0) ? 30 : m_iFrameRate;
-      if (m_gdrPocStart % m_iFrameRate != 0)
-        m_iIntraPeriod = -1;
-      else
-        m_iIntraPeriod = m_iFrameRate * m_iGdrFrequency;
-    }
-  }
-#endif
 
   g_verbosity = MsgLevel( m_verbosity );
 
