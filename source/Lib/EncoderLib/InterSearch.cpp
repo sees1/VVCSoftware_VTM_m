@@ -11002,7 +11002,11 @@ uint32_t InterSearch::xDetermineBestMvp( PredictionUnit& pu, Mv acMvTemp[3], int
       mvpUpdated = true;
     }
   }
+
+#if !GDR_ENABLED  
   CHECK( !mvpUpdated, "xDetermineBestMvp() error" );
+#endif
+
   return minBits;
 }
 

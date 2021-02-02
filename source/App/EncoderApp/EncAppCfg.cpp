@@ -1541,6 +1541,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_GOPList[0].m_deltaRefPics1[2] = 3;
     m_GOPList[0].m_deltaRefPics1[3] = 4;
 
+    m_BIO  = false;
+    m_DMVR = false;
+    m_SMVD = false;
+
+
     if (m_iGdrFrequency < 0)
       m_iGdrFrequency = 2;
 
