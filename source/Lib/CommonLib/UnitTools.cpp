@@ -101,48 +101,86 @@ void CS::setRefinedMotionField(CodingStructure &cs)
 
 bool CU::getRprScaling( const SPS* sps, const PPS* curPPS, Picture* refPic, int& xScale, int& yScale )
 {
+  const int subWidthC  = SPS::getWinUnitX(sps->getChromaFormatIdc());
+  const int subHeightC = SPS::getWinUnitY(sps->getChromaFormatIdc());
+
   const Window& curScalingWindow = curPPS->getScalingWindow();
-  int curPicWidth = curPPS->getPicWidthInLumaSamples()   - SPS::getWinUnitX( sps->getChromaFormatIdc() ) * (curScalingWindow.getWindowLeftOffset() + curScalingWindow.getWindowRightOffset());
-  int curPicHeight = curPPS->getPicHeightInLumaSamples() - SPS::getWinUnitY( sps->getChromaFormatIdc() ) * (curScalingWindow.getWindowTopOffset()  + curScalingWindow.getWindowBottomOffset());
+
+  const int curLeftOffset   = subWidthC * curScalingWindow.getWindowLeftOffset();
+  const int curRightOffset  = subWidthC * curScalingWindow.getWindowRightOffset();
+  const int curTopOffset    = subHeightC * curScalingWindow.getWindowTopOffset();
+  const int curBottomOffset = subHeightC * curScalingWindow.getWindowBottomOffset();
+
+  // Note: 64-bit integers are used for sizes such as to avoid possible overflows in corner cases
+  const int64_t curPicScalWinWidth  = curPPS->getPicWidthInLumaSamples() - (curLeftOffset + curRightOffset);
+  const int64_t curPicScalWinHeight = curPPS->getPicHeightInLumaSamples() - (curTopOffset + curBottomOffset);
 
   const Window& refScalingWindow = refPic->getScalingWindow();
-  int refPicWidth = refPic->getPicWidthInLumaSamples()   - SPS::getWinUnitX( sps->getChromaFormatIdc() ) * (refScalingWindow.getWindowLeftOffset() + refScalingWindow.getWindowRightOffset());
-  int refPicHeight = refPic->getPicHeightInLumaSamples() - SPS::getWinUnitY( sps->getChromaFormatIdc() ) * (refScalingWindow.getWindowTopOffset()  + refScalingWindow.getWindowBottomOffset());
 
-  xScale = ( ( refPicWidth << SCALE_RATIO_BITS ) + ( curPicWidth >> 1 ) ) / curPicWidth;
-  yScale = ( ( refPicHeight << SCALE_RATIO_BITS ) + ( curPicHeight >> 1 ) ) / curPicHeight;
+  const int refLeftOffset   = subWidthC * refScalingWindow.getWindowLeftOffset();
+  const int refRightOffset  = subWidthC * refScalingWindow.getWindowRightOffset();
+  const int refTopOffset    = subHeightC * refScalingWindow.getWindowTopOffset();
+  const int refBottomOffset = subHeightC * refScalingWindow.getWindowBottomOffset();
 
-  int curSeqMaxPicWidthY = sps->getMaxPicWidthInLumaSamples();                  // sps_pic_width_max_in_luma_samples
-  int curSeqMaxPicHeightY = sps->getMaxPicHeightInLumaSamples();                // sps_pic_height_max_in_luma_samples
-  int curPicWidthY = curPPS->getPicWidthInLumaSamples();                        // pps_pic_width_in_luma_samples
-  int curPicHeightY = curPPS->getPicHeightInLumaSamples();                      // pps_pic_height_in_luma_samples
-  int max8MinCbSizeY = std::max((int)8, (1<<sps->getLog2MinCodingBlockSize())); // Max(8, MinCbSizeY)
+  const int64_t refPicScalWinWidth  = refPic->getPicWidthInLumaSamples() - (refLeftOffset + refRightOffset);
+  const int64_t refPicScalWinHeight = refPic->getPicHeightInLumaSamples() - (refTopOffset + refBottomOffset);
 
-  CHECK((curPicWidth * curSeqMaxPicWidthY) < refPicWidth * (curPicWidthY - max8MinCbSizeY), "(curPicWidth * curSeqMaxPicWidthY) should be greater than or equal to refPicWidth * (curPicWidthY - max8MinCbSizeY))");
-  CHECK((curPicHeight * curSeqMaxPicHeightY) < refPicHeight * (curPicHeightY - max8MinCbSizeY), "(curPicHeight * curSeqMaxPicHeightY) should be greater than or equal to refPicHeight * (curPicHeightY - max8MinCbSizeY))");
+  CHECK(curPicScalWinWidth * 2 < refPicScalWinWidth,
+        "curPicScalWinWidth * 2 shall be greater than or equal to refPicScalWinWidth");
+  CHECK(curPicScalWinHeight * 2 < refPicScalWinHeight,
+        "curPicScalWinHeight * 2 shall be greater than or equal to refPicScalWinHeight");
+  CHECK(curPicScalWinWidth > refPicScalWinWidth * 8,
+        "curPicScalWinWidth shall be less than or equal to refPicScalWinWidth * 8");
+  CHECK(curPicScalWinHeight > refPicScalWinHeight * 8,
+        "curPicScalWinHeight shall be less than or equal to refPicScalWinHeight * 8");
 
-  CHECK(curPicWidth * 2 < refPicWidth, "curPicWidth * 2 shall be greater than or equal to refPicWidth");
-  CHECK(curPicHeight * 2 < refPicHeight, "curPicHeight * 2 shall be greater than or equal to refPicHeight");
-  CHECK(curPicWidth > refPicWidth * 8, "curPicWidth shall be less than or equal to refPicWidth * 8");
-  CHECK(curPicHeight > refPicHeight * 8, "curPicHeight shall be less than or equal to refPicHeight * 8");
+  xScale = (int) (((refPicScalWinWidth << SCALE_RATIO_BITS) + (curPicScalWinWidth >> 1)) / curPicScalWinWidth);
+  yScale = (int) (((refPicScalWinHeight << SCALE_RATIO_BITS) + (curPicScalWinHeight >> 1)) / curPicScalWinHeight);
 
-  int subWidthC = SPS::getWinUnitX(sps->getChromaFormatIdc());
-  int subHeightC = SPS::getWinUnitY(sps->getChromaFormatIdc());
+  const int maxPicWidth  = sps->getMaxPicWidthInLumaSamples();    // sps_pic_width_max_in_luma_samples
+  const int maxPicHeight = sps->getMaxPicHeightInLumaSamples();   // sps_pic_height_max_in_luma_samples
+  const int curPicWidth  = curPPS->getPicWidthInLumaSamples();    // pps_pic_width_in_luma_samples
+  const int curPicHeight = curPPS->getPicHeightInLumaSamples();   // pps_pic_height_in_luma_samples
 
-  CHECK(subWidthC * curScalingWindow.getWindowLeftOffset() < (-curPicWidthY) * 15, "The value of SubWidthC * pps_scaling_win_left_offset shall be greater than or equal to -pps_pic_width_in_luma_samples * 15");
-  CHECK(subWidthC * curScalingWindow.getWindowLeftOffset() >= curPicWidthY, "The value of SubWidthC * pps_scaling_win_left_offset shall be less than pps_pic_width_in_luma_samples");
-  CHECK(subWidthC * curScalingWindow.getWindowRightOffset() < (-curPicWidthY) * 15, "The value of SubWidthC * pps_scaling_win_right_offset shall be greater than or equal to -pps_pic_width_in_luma_samples * 15");
-  CHECK(subWidthC * curScalingWindow.getWindowRightOffset() >= curPicWidthY, "The value of SubWidthC * pps_scaling_win_right_offset shall be less than pps_pic_width_in_luma_samples");
+  const int picSizeIncrement = std::max((int) 8, (1 << sps->getLog2MinCodingBlockSize()));   // Max(8, MinCbSizeY)
 
-  CHECK(subHeightC * curScalingWindow.getWindowTopOffset() < (-curPicHeightY) * 15, "The value of SubHeightC * pps_scaling_win_top_offset shall be greater than or equal to -pps_pic_height_in_luma_samples * 15");
-  CHECK(subHeightC * curScalingWindow.getWindowTopOffset() >= curPicHeightY, "The value of SubHeightC * pps_scaling_win_top_offset shall be less than pps_pic_height_in_luma_samples");
-  CHECK(subHeightC * curScalingWindow.getWindowBottomOffset() < (-curPicHeightY) * 15, "The value of SubHeightC *pps_scaling_win_bottom_offset shall be greater than or equal to -pps_pic_height_in_luma_samples * 15");
-  CHECK(subHeightC * curScalingWindow.getWindowBottomOffset() >= curPicHeightY, "The value of SubHeightC *pps_scaling_win_bottom_offset shall be less than pps_pic_height_in_luma_samples");
+  CHECK((curPicScalWinWidth * maxPicWidth) < refPicScalWinWidth * (curPicWidth - picSizeIncrement),
+        "(curPicScalWinWidth * maxPicWidth) should be greater than or equal to refPicScalWinWidth * (curPicWidth - "
+        "picSizeIncrement))");
+  CHECK((curPicScalWinHeight * maxPicHeight) < refPicScalWinHeight * (curPicHeight - picSizeIncrement),
+        "(curPicScalWinHeight * maxPicHeight) should be greater than or equal to refPicScalWinHeight * (curPicHeight - "
+        "picSizeIncrement))");
 
-  CHECK(subWidthC * (curScalingWindow.getWindowLeftOffset() + curScalingWindow.getWindowRightOffset()) < (-curPicWidthY) * 15, "The value of SubWidthC * ( pps_scaling_win_left_offset + pps_scaling_win_right_offset ) shall be greater than or equal to -pps_pic_width_in_luma_samples * 15");
-  CHECK(subWidthC * (curScalingWindow.getWindowLeftOffset() + curScalingWindow.getWindowRightOffset()) >= curPicWidthY, "The value of SubWidthC * ( pps_scaling_win_left_offset + pps_scaling_win_right_offset ) shall be less than pps_pic_width_in_luma_samples");
-  CHECK(subHeightC * (curScalingWindow.getWindowTopOffset() + curScalingWindow.getWindowBottomOffset()) < (-curPicHeightY) * 15, "The value of SubHeightC * ( pps_scaling_win_top_offset + pps_scaling_win_bottom_offset ) shall be greater than or equal to -pps_pic_height_in_luma_samples * 15");
-  CHECK(subHeightC * (curScalingWindow.getWindowTopOffset() + curScalingWindow.getWindowBottomOffset()) >= curPicHeightY, "The value of SubHeightC * ( pps_scaling_win_top_offset + pps_scaling_win_bottom_offset ) shall be less than pps_pic_height_in_luma_samples");
+  CHECK(curLeftOffset < -curPicWidth * 15, "The value of SubWidthC * pps_scaling_win_left_offset shall be greater "
+                                           "than or equal to -pps_pic_width_in_luma_samples * 15");
+  CHECK(curLeftOffset >= curPicWidth,
+        "The value of SubWidthC * pps_scaling_win_left_offset shall be less than pps_pic_width_in_luma_samples");
+  CHECK(curRightOffset < -curPicWidth * 15, "The value of SubWidthC * pps_scaling_win_right_offset shall be greater "
+                                            "than or equal to -pps_pic_width_in_luma_samples * 15");
+  CHECK(curRightOffset >= curPicWidth,
+        "The value of SubWidthC * pps_scaling_win_right_offset shall be less than pps_pic_width_in_luma_samples");
+
+  CHECK(curTopOffset < -curPicHeight * 15, "The value of SubHeightC * pps_scaling_win_top_offset shall be greater "
+                                           "than or equal to -pps_pic_height_in_luma_samples * 15");
+  CHECK(curTopOffset >= curPicHeight,
+        "The value of SubHeightC * pps_scaling_win_top_offset shall be less than pps_pic_height_in_luma_samples");
+  CHECK(curBottomOffset < (-curPicHeight) * 15, "The value of SubHeightC * pps_scaling_win_bottom_offset shall be "
+                                                "greater than or equal to -pps_pic_height_in_luma_samples * 15");
+  CHECK(curBottomOffset >= curPicHeight,
+        "The value of SubHeightC * pps_scaling_win_bottom_offset shall be less than pps_pic_height_in_luma_samples");
+
+  CHECK(curLeftOffset + curRightOffset < -curPicWidth * 15,
+        "The value of SubWidthC * ( pps_scaling_win_left_offset + pps_scaling_win_right_offset ) shall be greater than "
+        "or equal to -pps_pic_width_in_luma_samples * 15");
+  CHECK(curLeftOffset + curRightOffset >= curPicWidth,
+        "The value of SubWidthC * ( pps_scaling_win_left_offset + pps_scaling_win_right_offset ) shall be less than "
+        "pps_pic_width_in_luma_samples");
+  CHECK(curTopOffset + curBottomOffset < -curPicHeight * 15,
+        "The value of SubHeightC * ( pps_scaling_win_top_offset + pps_scaling_win_bottom_offset ) shall be greater "
+        "than or equal to -pps_pic_height_in_luma_samples * 15");
+  CHECK(curTopOffset + curBottomOffset >= curPicHeight,
+        "The value of SubHeightC * ( pps_scaling_win_top_offset + pps_scaling_win_bottom_offset ) shall be less than "
+        "pps_pic_height_in_luma_samples");
 
   return refPic->isRefScaled( curPPS );
 }
