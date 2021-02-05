@@ -2022,6 +2022,19 @@ void DecLib::xDecodePicHeader( InputNALUnit& nalu )
   m_picHeader.setValid();
 }
 
+bool DecLib::getMixedNaluTypesInPicFlag()
+{
+  if (!m_picHeader.isValid())
+  {
+    return false;
+  }
+
+  PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId());
+  CHECK(pps == 0, "No PPS present");
+
+  return pps->getMixedNaluTypesInPicFlag() != 0;
+}
+
 bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDisplay )
 {
   m_apcSlicePilot->setPicHeader( &m_picHeader );

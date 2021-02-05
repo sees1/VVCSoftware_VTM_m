@@ -1491,7 +1491,7 @@ void Slice::applyReferencePictureListBasedMarking( PicList& rcListPic, const Ref
   int i, isReference;
   checkLeadingPictureRestrictions(rcListPic, pps);
 
-  bool isNeedToCheck = (this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL) ? false : true;
+  bool isNeedToCheck = (this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || this->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL) && !pps.getMixedNaluTypesInPicFlag() ? false : true;
 
   // mark long-term reference pictures in List0
   for( i = 0; i < pRPL0->getNumberOfShorttermPictures() + pRPL0->getNumberOfLongtermPictures() + pRPL0->getNumberOfInterLayerPictures(); i++ )
