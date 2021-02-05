@@ -290,6 +290,8 @@ public:
   void      setTOlsIdxOpiFlag(bool tOlsIdxOpiSet)  { m_tOlsIdxTidOpiSet = tOlsIdxOpiSet; }
   const OPI* getOPI()                     { return m_opi; }
 
+  bool      getMixedNaluTypesInPicFlag();
+
 protected:
   void  xUpdateRasInit(Slice* slice);
 

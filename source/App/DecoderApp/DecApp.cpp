@@ -198,10 +198,17 @@ uint32_t DecApp::decode()
             (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
              nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP))
         {
-          m_newCLVS[nalu.m_nuhLayerId] = true;   // An IDR picture starts a new CLVS
+          if (!m_cDecLib.getMixedNaluTypesInPicFlag())
+          {
+            m_newCLVS[nalu.m_nuhLayerId] = true;   // An IDR picture starts a new CLVS
 #if !JVET_S0078_NOOUTPUTPRIORPICFLAG
-          xFlushOutput(pcListPic, nalu.m_nuhLayerId);
+            xFlushOutput(pcListPic, nalu.m_nuhLayerId);
 #endif
+          }
+          else
+          {
+            m_newCLVS[nalu.m_nuhLayerId] = false;
+          }
         }
         else if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInLastPu)
         {
