@@ -1822,7 +1822,7 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
         CHECK(curLayerChromaFormat != refLayerChromaFormat, "The chroma formats of the current layer and the reference layer are different");
         int refLayerBitDepth = m_layerBitDepth[i];
         CHECK(curLayerBitDepth != refLayerBitDepth, "The bit-depth of the current layer and the reference layer are different");
-        if (vps->getMaxTidIlRefPicsPlus1(curLayerIdx, i) == 0 && pps->getMixedNaluTypesInPicFlag() == 1)
+        if (vps->getMaxTidIlRefPicsPlus1(curLayerIdx, i) == 0 && pps->getMixedNaluTypesInPicFlag())
         {
           for (int j = 0; j < m_uiSliceSegmentIdx; j++)
           {
@@ -2032,7 +2032,7 @@ bool DecLib::getMixedNaluTypesInPicFlag()
   PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId());
   CHECK(pps == 0, "No PPS present");
 
-  return pps->getMixedNaluTypesInPicFlag() != 0;
+  return pps->getMixedNaluTypesInPicFlag();
 }
 
 bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDisplay )
