@@ -689,7 +689,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
             // RefPicList[ 1 ] that is any of the following: A RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0
             for (int i = 0; i < pcRefPic->numSlices; i++)
             {
-              if (pcRefPic->mixedNaluTypesInPicFlag == 0)
+              if (!pcRefPic->mixedNaluTypesInPicFlag)
               {
                 CHECK(pcRefPic->slices[i]->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL, "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or RefPicList[ 1 ] that is a RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0");
               }
@@ -1058,7 +1058,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
   if(this->getAssociatedIRAPPOC() > this->getPOC())
   {
     //check this only when pps_mixed_nalu_types_in_pic_flag is equal to 0
-    if (pps.getMixedNaluTypesInPicFlag() == 0)
+    if (!pps.getMixedNaluTypesInPicFlag())
     {
       // Do not check IRAP pictures since they may get a POC lower than their associated IRAP
       if (nalUnitType < NAL_UNIT_CODED_SLICE_IDR_W_RADL ||
@@ -1072,7 +1072,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
 
   if (this->getAssociatedIRAPPOC() <= this->getPOC())
   {
-    if (pps.getMixedNaluTypesInPicFlag() == 0)
+    if (!pps.getMixedNaluTypesInPicFlag())
     {
       CHECK(nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL, "When a picture is not a leading picture, it shall not be a RADL or RASL picture.");
     }
