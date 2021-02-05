@@ -3850,10 +3850,12 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
         {
           int numBits = ceilLog2(sps->getNumRPL1());
           READ_CODE(numBits, uiCode, "ref_pic_list_idx[1]");
+          pcSlice->setRPL1idx(uiCode);
           *rpl1 = *sps->getRPLList1()->getReferencePictureList(uiCode);
         }
         else if (sps->getNumRPL(1) == 1)
         {
+          pcSlice->setRPL1idx(0);
           *rpl1 = *sps->getRPLList1()->getReferencePictureList(0);
         }
         else
