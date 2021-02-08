@@ -174,6 +174,9 @@ protected:
   bool      m_printFrameMSE;
   bool      m_printSequenceMSE;
   bool      m_printMSSSIM;
+#if PRINT_WPSNR
+  bool      m_printWPSNR;
+#endif
   bool      m_cabacZeroWordPaddingEnabled;
 
   bool      m_gciPresentFlag;
@@ -934,6 +937,11 @@ public:
 
   bool      getPrintMSSSIM                  ()         const { return m_printMSSSIM;               }
   void      setPrintMSSSIM                  (bool value)     { m_printMSSSIM = value;              }
+
+#if PRINT_WPSNR
+  bool      getPrintWPSNR                   ()         const { return m_printWPSNR;               }
+  void      setPrintWPSNR                   (bool value)     { m_printWPSNR = value;              }
+#endif
 
   bool      getCabacZeroWordPaddingEnabled()           const { return m_cabacZeroWordPaddingEnabled;  }
   void      setCabacZeroWordPaddingEnabled(bool value)       { m_cabacZeroWordPaddingEnabled = value; }
