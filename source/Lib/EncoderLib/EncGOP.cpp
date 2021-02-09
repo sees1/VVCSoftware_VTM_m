@@ -3686,7 +3686,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 #endif
 #if WCG_WPSNR
 #if PRINT_WPSNR
-  const bool    useLumaWPSNR = m_pcEncLib->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcCfg->getLmcs() && m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_PQ) || m_pcEncLib->getPrintWPSNR();
+  const bool    useLumaWPSNR = m_pcEncLib->getPrintWPSNR();
 #else
   const bool    useLumaWPSNR = m_pcEncLib->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcCfg->getLmcs() && m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_PQ);
 #endif
@@ -4050,7 +4050,7 @@ double EncGOP::xFindDistortionPlaneWPSNR(const CPelBuf& pic0, const CPelBuf& pic
   ComponentID compID, const ChromaFormat chfmt    )
 {
 #if PRINT_WPSNR
-  const bool    useLumaWPSNR = m_pcEncLib->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcCfg->getLmcs() && m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_PQ) || m_pcEncLib->getPrintWPSNR();
+  const bool    useLumaWPSNR = m_pcEncLib->getPrintWPSNR();
 #else
   const bool    useLumaWPSNR = m_pcEncLib->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcCfg->getLmcs() && m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_PQ);
 #endif
@@ -4193,7 +4193,7 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
   double msssim[MAX_NUM_COMPONENT] = {0.0};
 #if WCG_WPSNR
 #if PRINT_WPSNR
-  const bool    useLumaWPSNR = m_pcEncLib->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcCfg->getLmcs() && m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_PQ) || m_pcEncLib->getPrintWPSNR();
+  const bool    useLumaWPSNR = m_pcEncLib->getPrintWPSNR();
 #else
   const bool    useLumaWPSNR = m_pcEncLib->getLumaLevelToDeltaQPMapping().isEnabled() || (m_pcCfg->getLmcs() && m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_PQ);
 #endif
