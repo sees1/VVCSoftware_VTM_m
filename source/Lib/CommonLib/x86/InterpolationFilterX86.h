@@ -621,7 +621,7 @@ template<X86_VEXT vext, int N, bool shiftBack>
 static void simdInterpolateVerM8( const int16_t *src, int srcStride, int16_t *dst, int dstStride, int width, int height, int shift, int offset, const ClpRng& clpRng, int16_t const *coeff )
 {
 //   src -= ( N / 2 - 1 ) * srcStride;
-  const Pel *srcOrig = src;
+  const int16_t *srcOrig = src;
   int16_t *dstOrig = dst;
 
   __m128i vcoeff[N / 2], vsrc[N];
