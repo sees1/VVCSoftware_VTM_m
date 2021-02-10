@@ -1314,7 +1314,7 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
   {
     const int  qp       = std::max( qpLoop, lowestQP );
 #if REUSE_CU_RESULTS
-    const bool isReusingCu = isValid( cs, partitioner, qp );
+    const bool isReusingCu = isValid( cs, partitioner, qp ) && !cs.slice->getUseChromaQpAdj();
     cuECtx.set( IS_REUSING_CU, isReusingCu );
     if( isReusingCu )
     {

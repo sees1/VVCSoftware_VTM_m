@@ -585,6 +585,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setMaxDeltaQP                                        ( m_iMaxDeltaQP  );
   m_cEncLib.setCuQpDeltaSubdiv                                   ( m_cuQpDeltaSubdiv );
   m_cEncLib.setCuChromaQpOffsetSubdiv                            ( m_cuChromaQpOffsetSubdiv );
+  m_cEncLib.setCuChromaQpOffsetList                              ( m_cuChromaQpOffsetList );
+  m_cEncLib.setCuChromaQpOffsetEnabled                           ( m_cuChromaQpOffsetEnabled );
   m_cEncLib.setChromaCbQpOffset                                  ( m_cbQpOffset     );
   m_cEncLib.setChromaCrQpOffset                                  ( m_crQpOffset  );
   m_cEncLib.setChromaCbQpOffsetDualTree                          ( m_cbQpOffsetDualTree );

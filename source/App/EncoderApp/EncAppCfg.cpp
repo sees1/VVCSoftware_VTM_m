@@ -606,6 +606,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<int> cfg_qpOutValCr                  (MIN_QP_VALUE_FOR_16_BIT, MAX_QP, 0, MAX_NUM_QP_VALUES, zeroVector, 1);
   SMultiValueInput<int> cfg_qpInValCbCr                 (MIN_QP_VALUE_FOR_16_BIT, MAX_QP, 0, MAX_NUM_QP_VALUES, zeroVector, 1);
   SMultiValueInput<int> cfg_qpOutValCbCr                (MIN_QP_VALUE_FOR_16_BIT, MAX_QP, 0, MAX_NUM_QP_VALUES, zeroVector, 1);
+  const int cQpOffsets[] = { 6 };
+  SMultiValueInput<int> cfg_cbQpOffsetList              (-12, 12, 0, 6, cQpOffsets, 0);
+  SMultiValueInput<int> cfg_crQpOffsetList              (-12, 12, 0, 6, cQpOffsets, 0);
+  SMultiValueInput<int> cfg_cbCrQpOffsetList            (-12, 12, 0, 6, cQpOffsets, 0);
+
   const uint32_t defaultInputKneeCodes[3]  = { 600, 800, 900 };
   const uint32_t defaultOutputKneeCodes[3] = { 100, 250, 450 };
   SMultiValueInput<uint32_t> cfg_kneeSEIInputKneePointValue      (1,  999, 0, 999, defaultInputKneeCodes,  sizeof(defaultInputKneeCodes )/sizeof(uint32_t));
@@ -1039,7 +1044,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DeltaQpRD,-dqr",                                  m_uiDeltaQpRD,                                       0u, "max dQp offset for slice")
   ("MaxDeltaQP,d",                                    m_iMaxDeltaQP,                                        0, "max dQp offset for block")
   ("MaxCuDQPSubdiv,-dqd",                             m_cuQpDeltaSubdiv,                                    0, "Maximum subdiv for CU luma Qp adjustment")
-  ("MaxCuChromaQpOffsetSubdiv",                       m_cuChromaQpOffsetSubdiv,                            -1, "Maximum subdiv for CU chroma Qp adjustment - set less than 0 to disable")
+  ("MaxCuChromaQpOffsetSubdiv",                       m_cuChromaQpOffsetSubdiv,                            -1, "Maximum subdiv for CU chroma Qp adjustment")
+  ("CuChromaQpOffsetEnabled",                         m_cuChromaQpOffsetEnabled,                           -1, "Enable local chroma QP offsets (slice level flag)")
   ("FastDeltaQP",                                     m_bFastDeltaQP,                                   false, "Fast Delta QP Algorithm")
 #if SHARP_LUMA_DELTA_QP
   ("LumaLevelToDeltaQPMode",                          lumaLevelToDeltaQPMode,                              0u, "Luma based Delta QP 0(default): not used. 1: Based on CTU average, 2: Based on Max luma in CTU")
@@ -1075,6 +1081,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SliceCbQpOffsetIntraOrPeriodic",                  m_sliceChromaQpOffsetIntraOrPeriodic[0],              0, "Chroma Cb QP Offset at slice level for I slice or for periodic inter slices as defined by SliceChromaQPOffsetPeriodicity. Replaces offset in the GOP table.")
   ("SliceCrQpOffsetIntraOrPeriodic",                  m_sliceChromaQpOffsetIntraOrPeriodic[1],              0, "Chroma Cr QP Offset at slice level for I slice or for periodic inter slices as defined by SliceChromaQPOffsetPeriodicity. Replaces offset in the GOP table.")
 #endif
+  ("CbQpOffsetList",                                  cfg_cbQpOffsetList,                  cfg_cbQpOffsetList, "Chroma Cb QP offset list for local adjustment")
+  ("CrQpOffsetList",                                  cfg_crQpOffsetList,                  cfg_crQpOffsetList, "Chroma Cb QP offset list for local adjustment")
+  ("CbCrQpOffsetList",                                cfg_cbCrQpOffsetList,              cfg_cbCrQpOffsetList, "Chroma joint Cb-Cr QP offset list for local adjustment")
 
   ("AdaptiveQP,-aq",                                  m_bUseAdaptiveQP,                                 false, "QP adaptation based on a psycho-visual model")
   ("MaxQPAdaptationRange,-aqr",                       m_iQPAdaptationRange,                                 6, "QP adaptation range")
@@ -2130,6 +2139,35 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_chromaQpMappingTableParams.m_deltaQpInValMinus1[2][i] = cfg_qpInValCbCr.values[i + 1] - cfg_qpInValCbCr.values[i] - 1;
       m_chromaQpMappingTableParams.m_deltaQpOutVal[2][i] = cfg_qpInValCbCr.values[i + 1] - cfg_qpInValCbCr.values[i];
     }
+  }
+
+  /* Local chroma QP offsets configuration */
+  if (m_cuChromaQpOffsetEnabled < 0)
+  {
+    m_cuChromaQpOffsetEnabled = (m_cuChromaQpOffsetSubdiv >= 0 || cfg_cbQpOffsetList.values.size() > 0); // auto-enable if unspecified
+  }
+  if (m_cuChromaQpOffsetSubdiv < 0)
+  {
+    m_cuChromaQpOffsetSubdiv = 0; // default = 0 (CTU-level)
+  }
+  CHECK(cfg_crQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size(), "Chroma QP offset lists shall be the same size");
+  CHECK(cfg_cbCrQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size(), "Chroma QP offset lists shall be the same size");
+  /* generate default chroma QP offset lists if none provided */
+  if (cfg_cbQpOffsetList.values.size() == 0 && m_cuChromaQpOffsetEnabled)
+  {
+    for (int i=0; i < sizeof(cQpOffsets)/sizeof(int); i++)
+    {
+      cfg_cbQpOffsetList.values.push_back(cQpOffsets[i]);
+      cfg_crQpOffsetList.values.push_back(cQpOffsets[i]);
+      cfg_cbCrQpOffsetList.values.push_back(cQpOffsets[i]);
+    }
+  }
+  m_cuChromaQpOffsetList.resize(cfg_cbQpOffsetList.values.size());
+  for (int i=0; i < cfg_cbQpOffsetList.values.size(); i++)
+  {
+    m_cuChromaQpOffsetList[i].u.comp.CbOffset = cfg_cbQpOffsetList.values[i];
+    m_cuChromaQpOffsetList[i].u.comp.CrOffset = cfg_crQpOffsetList.values[i];
+    m_cuChromaQpOffsetList[i].u.comp.JointCbCrOffset = cfg_cbCrQpOffsetList.values[i];
   }
 
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
@@ -3871,7 +3909,21 @@ void EncAppCfg::xPrintParameter()
   msg( DETAILS, "MSB-extended bit depth                 : (Y:%d, C:%d)\n", m_MSBExtendedBitDepth[CHANNEL_TYPE_LUMA], m_MSBExtendedBitDepth[CHANNEL_TYPE_CHROMA] );
   msg( DETAILS, "Internal bit depth                     : (Y:%d, C:%d)\n", m_internalBitDepth[CHANNEL_TYPE_LUMA], m_internalBitDepth[CHANNEL_TYPE_CHROMA] );
   msg( DETAILS, "Intra reference smoothing              : %s\n", (m_enableIntraReferenceSmoothing           ? "Enabled" : "Disabled") );
-  msg( DETAILS, "cu_chroma_qp_offset_subdiv             : %d\n", m_cuChromaQpOffsetSubdiv);
+  if (m_cuChromaQpOffsetList.size() > 0)
+  {
+    msg( DETAILS, "Chroma QP offset list                  : (" );
+    for (int i=0; i < m_cuChromaQpOffsetList.size(); i++)
+    {
+      msg( DETAILS, "%d %d %d%s", m_cuChromaQpOffsetList[i].u.comp.CbOffset, m_cuChromaQpOffsetList[i].u.comp.CrOffset, m_cuChromaQpOffsetList[i].u.comp.JointCbCrOffset,
+        (i+1 < m_cuChromaQpOffsetList.size() ? ", " : ")\n") );
+    }
+    msg( DETAILS, "cu_chroma_qp_offset_subdiv             : %d\n", m_cuChromaQpOffsetSubdiv);
+    msg( DETAILS, "cu_chroma_qp_offset_enabled_flag       : %d\n", m_cuChromaQpOffsetEnabled);
+  }
+  else
+  {
+    msg( DETAILS, "Chroma QP offset list                  : Disabled\n" );
+  }
   msg( DETAILS, "extended_precision_processing_flag     : %s\n", (m_extendedPrecisionProcessingFlag         ? "Enabled" : "Disabled") );
   msg( DETAILS, "transform_skip_rotation_enabled_flag   : %s\n", (m_transformSkipRotationEnabledFlag        ? "Enabled" : "Disabled") );
   msg( DETAILS, "transform_skip_context_enabled_flag    : %s\n", (m_transformSkipContextEnabledFlag         ? "Enabled" : "Disabled") );

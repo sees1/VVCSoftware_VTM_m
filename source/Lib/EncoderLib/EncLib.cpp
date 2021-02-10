@@ -1609,11 +1609,15 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     pps.setUseDQP(false);
   }
 
-  if ( m_cuChromaQpOffsetSubdiv >= 0 )
+  if ( m_cuChromaQpOffsetList.size() > 0 )
   {
+    /* insert table entries from cfg parameters (NB, 0 should not be touched) */
     pps.clearChromaQpOffsetList();
-    pps.setChromaQpOffsetListEntry(1, 6, 6, 6);
-    /* todo, insert table entries from command line (NB, 0 should not be touched) */
+    for (int i=0; i < m_cuChromaQpOffsetList.size(); i++)
+    {
+      pps.setChromaQpOffsetListEntry(i + 1, m_cuChromaQpOffsetList[i].u.comp.CbOffset,
+        m_cuChromaQpOffsetList[i].u.comp.CrOffset, m_cuChromaQpOffsetList[i].u.comp.JointCbCrOffset);
+    }
   }
   else
   {
@@ -1929,17 +1933,8 @@ void EncLib::xInitPicHeader(PicHeader &picHeader, const SPS &sps, const PPS &pps
     picHeader.setCuQpDeltaSubdivInter( 0 );
   }
 
-  if( m_cuChromaQpOffsetSubdiv >= 0 )
-  {
-    picHeader.setCuChromaQpOffsetSubdivIntra(m_cuChromaQpOffsetSubdiv);
-    picHeader.setCuChromaQpOffsetSubdivInter(m_cuChromaQpOffsetSubdiv);
-  }
-  else
-  {
-    picHeader.setCuChromaQpOffsetSubdivIntra(0);
-    picHeader.setCuChromaQpOffsetSubdivInter(0);
-  }
-
+  picHeader.setCuChromaQpOffsetSubdivIntra(m_cuChromaQpOffsetSubdiv);
+  picHeader.setCuChromaQpOffsetSubdivInter(m_cuChromaQpOffsetSubdiv);
 
   // virtual boundaries
   if( sps.getVirtualBoundariesEnabledFlag() )
