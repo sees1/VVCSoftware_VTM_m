@@ -1683,10 +1683,6 @@ template<X86_VEXT vext, bool isFirst, bool isLast>
 static void simdFilterCopy_HBD(const ClpRng& clpRng, const Pel* src, int srcStride, Pel* dst, int dstStride, int width, int height, bool biMCForDMVR)
 {
   int row;
-  if (biMCForDMVR)
-  {
-    CHECK(clpRng.bd <= IF_INTERNAL_PREC_BILINEAR, "SIMD not supported");
-  }
 
   if (isFirst == isLast)
   {
@@ -1699,42 +1695,87 @@ static void simdFilterCopy_HBD(const ClpRng& clpRng, const Pel* src, int srcStri
   }
   else if (isFirst)
   {
+    if (width & 1)
+    {
+      InterpolationFilter::filterCopy<isFirst, isLast>(clpRng, src, srcStride, dst, dstStride, width, height,
+                                                       biMCForDMVR);
+      return;
+    }
+
     if (biMCForDMVR)
     {
       int shift10BitOut = (clpRng.bd - IF_INTERNAL_PREC_BILINEAR);
-      int offset = (1 << (shift10BitOut - 1));
-      for (row = 0; row < height; row++)
+      if (shift10BitOut <= 0)
       {
-        int col = 0;
-#ifdef USE_AVX2
-        if (vext >= AVX2)
+        const __m128i shift = _mm_cvtsi32_si128(-shift10BitOut);
+        for (row = 0; row < height; row++)
         {
-          __m256i mm256_offset = _mm256_set1_epi32(offset);
-          for (; col < ((width >> 3) << 3); col += 8)
+          int col = 0;
+#ifdef USE_AVX2
+          if (vext >= AVX2)
           {
-            __m256i vsrc = _mm256_lddqu_si256((__m256i *)&src[col]);
-            vsrc = _mm256_srai_epi32(_mm256_add_epi32(vsrc, mm256_offset), shift10BitOut);
-            _mm256_storeu_si256((__m256i *)&dst[col], vsrc);
+            for (; col < ((width >> 3) << 3); col += 8)
+            {
+              __m256i val = _mm256_lddqu_si256((__m256i *) &src[col]);
+              val         = _mm256_sll_epi32(val, shift);
+              _mm256_storeu_si256((__m256i *) &dst[col], val);
+            }
           }
-        }
 #endif
 
-        __m128i mm128_offset = _mm_set1_epi32(offset);
-        for (; col < ((width >> 2) << 2); col += 4)
-        {
-          __m128i vsrc = _mm_lddqu_si128((__m128i *)&src[col]);
-          vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, mm128_offset), shift10BitOut);
-          _mm_storeu_si128((__m128i *)&dst[col], vsrc);
-        }
+          for (; col < ((width >> 2) << 2); col += 4)
+          {
+            __m128i val = _mm_lddqu_si128((__m128i *) &src[col]);
+            val         = _mm_sll_epi32(val, shift);
+            _mm_storeu_si128((__m128i *) &dst[col], val);
+          }
 
-        for (; col < width; col += 2)
-        {
-          __m128i vsrc = _mm_loadl_epi64((__m128i *)&src[col]);
-          vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, mm128_offset), shift10BitOut);
-          _mm_storel_epi64((__m128i *)&dst[col], vsrc);
+          for (; col < width; col += 2)
+          {
+            __m128i val = _mm_loadl_epi64((__m128i *) &src[col]);
+            val         = _mm_sll_epi32(val, shift);
+            _mm_storel_epi64((__m128i *) &dst[col], val);
+          }
+          src += srcStride;
+          dst += dstStride;
         }
-        src += srcStride;
-        dst += dstStride;
+      }
+      else
+      {
+        int offset = (1 << (shift10BitOut - 1));
+        for (row = 0; row < height; row++)
+        {
+          int col = 0;
+#ifdef USE_AVX2
+          if (vext >= AVX2)
+          {
+            __m256i mm256_offset = _mm256_set1_epi32(offset);
+            for (; col < ((width >> 3) << 3); col += 8)
+            {
+              __m256i vsrc = _mm256_lddqu_si256((__m256i *) &src[col]);
+              vsrc         = _mm256_srai_epi32(_mm256_add_epi32(vsrc, mm256_offset), shift10BitOut);
+              _mm256_storeu_si256((__m256i *) &dst[col], vsrc);
+            }
+          }
+#endif
+
+          __m128i mm128_offset = _mm_set1_epi32(offset);
+          for (; col < ((width >> 2) << 2); col += 4)
+          {
+            __m128i vsrc = _mm_lddqu_si128((__m128i *) &src[col]);
+            vsrc         = _mm_srai_epi32(_mm_add_epi32(vsrc, mm128_offset), shift10BitOut);
+            _mm_storeu_si128((__m128i *) &dst[col], vsrc);
+          }
+
+          for (; col < width; col += 2)
+          {
+            __m128i vsrc = _mm_loadl_epi64((__m128i *) &src[col]);
+            vsrc         = _mm_srai_epi32(_mm_add_epi32(vsrc, mm128_offset), shift10BitOut);
+            _mm_storel_epi64((__m128i *) &dst[col], vsrc);
+          }
+          src += srcStride;
+          dst += dstStride;
+        }
       }
     }
     else
@@ -1777,117 +1818,82 @@ static void simdFilterCopy_HBD(const ClpRng& clpRng, const Pel* src, int srcStri
   }
   else
   {
-    if (biMCForDMVR)
+    if (width & 1)
     {
-      int shift10BitOut = (clpRng.bd - IF_INTERNAL_PREC_BILINEAR);
-      int offset = (1 << (shift10BitOut - 1));
-
-      for (row = 0; row < height; row++)
-      {
-        int col = 0;
-#ifdef USE_AVX2
-        if (vext >= AVX2)
-        {
-          __m256i mm256_offset = _mm256_set1_epi32(offset);
-          for (; col < ((width >> 3) << 3); col += 8)
-          {
-            __m256i vsrc = _mm256_lddqu_si256((__m256i *)&src[col]);
-            vsrc = _mm256_srai_epi32(_mm256_add_epi32(vsrc, mm256_offset), shift10BitOut);
-            _mm256_storeu_si256((__m256i *)&dst[col], vsrc);
-          }
-        }
-#endif
-
-        __m128i mm128_offset = _mm_set1_epi32(offset);
-        for (; col < ((width >> 2) << 2); col += 4)
-        {
-          __m128i vsrc = _mm_lddqu_si128((__m128i *)&src[col]);
-          vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, mm128_offset), shift10BitOut);
-          _mm_storeu_si128((__m128i *)&dst[col], vsrc);
-        }
-
-        for (; col < width; col += 2)
-        {
-          __m128i vsrc = _mm_loadl_epi64((__m128i *)&src[col]);
-          vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, mm128_offset), shift10BitOut);
-          _mm_storel_epi64((__m128i *)&dst[col], vsrc);
-        }
-
-        src += srcStride;
-        dst += dstStride;
-      }
+      InterpolationFilter::filterCopy<isFirst, isLast>(clpRng, src, srcStride, dst, dstStride, width, height,
+                                                       biMCForDMVR);
+      return;
     }
-    else
-    {
-      const int shift = IF_INTERNAL_FRAC_BITS(clpRng.bd);
-      for (row = 0; row < height; row++)
-      {
-        int col = 0;
-#ifdef USE_AVX2
-        if (vext >= AVX2)
-        {
-          __m256i mm256_offset = _mm256_set1_epi32(IF_INTERNAL_OFFS);
-          __m256i mm256_min = _mm256_set1_epi32(clpRng.min);
-          __m256i mm256_max = _mm256_set1_epi32(clpRng.max);
-          for (; col < ((width >> 3) << 3); col += 8)
-          {
-            __m256i vsrc = _mm256_lddqu_si256((__m256i *)&src[col]);
-            vsrc = _mm256_add_epi32(vsrc, mm256_offset);
-            if (shift <= 0)
-            {
-              vsrc = _mm256_slli_epi32(vsrc, (-shift));
-            }
-            else
-            {
-              vsrc = _mm256_srai_epi32(_mm256_add_epi32(vsrc, _mm256_set1_epi32(1 << (shift - 1))), shift);
-            }
-            vsrc = _mm256_min_epi32(mm256_max, _mm256_max_epi32(mm256_min, vsrc));
 
-            _mm256_storeu_si256((__m256i *)&dst[col], vsrc);
+    CHECK(biMCForDMVR, "isLast must be false when biMCForDMVR is true");
+    const int shift = IF_INTERNAL_FRAC_BITS(clpRng.bd);
+    for (row = 0; row < height; row++)
+    {
+      int col = 0;
+#ifdef USE_AVX2
+      if (vext >= AVX2)
+      {
+        __m256i mm256_offset = _mm256_set1_epi32(IF_INTERNAL_OFFS);
+        __m256i mm256_min    = _mm256_set1_epi32(clpRng.min);
+        __m256i mm256_max    = _mm256_set1_epi32(clpRng.max);
+        for (; col < ((width >> 3) << 3); col += 8)
+        {
+          __m256i vsrc = _mm256_lddqu_si256((__m256i *) &src[col]);
+          vsrc         = _mm256_add_epi32(vsrc, mm256_offset);
+          if (shift <= 0)
+          {
+            vsrc = _mm256_slli_epi32(vsrc, (-shift));
           }
+          else
+          {
+            vsrc = _mm256_srai_epi32(_mm256_add_epi32(vsrc, _mm256_set1_epi32(1 << (shift - 1))), shift);
+          }
+          vsrc = _mm256_min_epi32(mm256_max, _mm256_max_epi32(mm256_min, vsrc));
+
+          _mm256_storeu_si256((__m256i *) &dst[col], vsrc);
         }
+      }
 #endif
 
-        __m128i mm128_offset = _mm_set1_epi32(IF_INTERNAL_OFFS);
-        __m128i mm128_min = _mm_set1_epi32(clpRng.min);
-        __m128i mm128_max = _mm_set1_epi32(clpRng.max);
-        for (; col < ((width >> 2) << 2); col += 4)
+      __m128i mm128_offset = _mm_set1_epi32(IF_INTERNAL_OFFS);
+      __m128i mm128_min    = _mm_set1_epi32(clpRng.min);
+      __m128i mm128_max    = _mm_set1_epi32(clpRng.max);
+      for (; col < ((width >> 2) << 2); col += 4)
+      {
+        __m128i vsrc = _mm_lddqu_si128((__m128i *) &src[col]);
+        vsrc         = _mm_add_epi32(vsrc, mm128_offset);
+        if (shift <= 0)
         {
-          __m128i vsrc = _mm_lddqu_si128((__m128i *)&src[col]);
-          vsrc = _mm_add_epi32(vsrc, mm128_offset);
-          if (shift <= 0)
-          {
-            vsrc = _mm_slli_epi32(vsrc, (-shift));
-          }
-          else
-          {
-            vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, _mm_set1_epi32(1 << (shift - 1))), shift);
-          }
-          vsrc = _mm_min_epi32(mm128_max, _mm_max_epi32(mm128_min, vsrc));
-
-          _mm_storeu_si128((__m128i *)&dst[col], vsrc);
+          vsrc = _mm_slli_epi32(vsrc, (-shift));
         }
-
-        for (; col < width; col += 2)
+        else
         {
-          __m128i vsrc = _mm_loadl_epi64((__m128i *)&src[col]);
-          vsrc = _mm_add_epi32(vsrc, mm128_offset);
-          if (shift <= 0)
-          {
-            vsrc = _mm_slli_epi32(vsrc, (-shift));
-          }
-          else
-          {
-            vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, _mm_set1_epi32(1 << (shift - 1))), shift);
-          }
-          vsrc = _mm_min_epi32(mm128_max, _mm_max_epi32(mm128_min, vsrc));
-
-          _mm_storel_epi64((__m128i *)&dst[col], vsrc);
+          vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, _mm_set1_epi32(1 << (shift - 1))), shift);
         }
+        vsrc = _mm_min_epi32(mm128_max, _mm_max_epi32(mm128_min, vsrc));
 
-        src += srcStride;
-        dst += dstStride;
+        _mm_storeu_si128((__m128i *) &dst[col], vsrc);
       }
+
+      for (; col < width; col += 2)
+      {
+        __m128i vsrc = _mm_loadl_epi64((__m128i *) &src[col]);
+        vsrc         = _mm_add_epi32(vsrc, mm128_offset);
+        if (shift <= 0)
+        {
+          vsrc = _mm_slli_epi32(vsrc, (-shift));
+        }
+        else
+        {
+          vsrc = _mm_srai_epi32(_mm_add_epi32(vsrc, _mm_set1_epi32(1 << (shift - 1))), shift);
+        }
+        vsrc = _mm_min_epi32(mm128_max, _mm_max_epi32(mm128_min, vsrc));
+
+        _mm_storel_epi64((__m128i *) &dst[col], vsrc);
+      }
+
+      src += srcStride;
+      dst += dstStride;
     }
   }
 }
