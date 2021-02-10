@@ -1008,8 +1008,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("IntraPeriod,-ip",                                 m_iIntraPeriod,                                      -1, "Intra period in frames, (-1: only first frame)")
 #if GDR_ENABLED
   ("GdrPocStart",                                     m_gdrPocStart,                                      -1, "GDR poc start")
-  ("GdrPeriod",                                       m_iGdrPeriod,                                        -1, "GDR period")
-  ("GdrFrequency",                                    m_iGdrFrequency,                                     -1, "GDR freqency")
+  ("GdrPeriod",                                       m_gdrPeriod,                                        -1, "GDR period")
+  ("GdrFrequency",                                    m_gdrFrequency,                                     -1, "GDR freqency")
   ("StartWithGDR",                                    m_bStartWithGdr,                                  false, "Start bitstream with GDR")
   ("NoHashforGDR",                                    m_bNoHashForGdr,                                   true, "No Hash for GDR")
   ("GdrPicOutput",                                    m_bGdrPicOutput,                                  false, "Picture Output for GDR")
@@ -1546,20 +1546,20 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_SMVD = false;
 
 
-    if (m_iGdrFrequency < 0)
-      m_iGdrFrequency = 2;
+    if (m_gdrFrequency < 0)
+      m_gdrFrequency = 2;
 
     if (m_gdrPocStart < 0)
     {
       if (m_iIntraPeriod > 0)
         m_gdrPocStart = m_iIntraPeriod;
       else
-        m_gdrPocStart = m_iFrameRate * m_iGdrFrequency;
+        m_gdrPocStart = m_iFrameRate * m_gdrFrequency;
     }
 
-    if (m_iGdrPeriod < 0)
+    if (m_gdrPeriod < 0)
     {
-      m_iGdrPeriod = m_iFrameRate;
+      m_gdrPeriod = m_iFrameRate;
     }
 
     if (m_iIntraPeriod == -1)
@@ -1568,7 +1568,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       if (m_gdrPocStart % m_iFrameRate != 0)
         m_iIntraPeriod = -1;
       else
-        m_iIntraPeriod = m_iFrameRate * m_iGdrFrequency;
+        m_iIntraPeriod = m_iFrameRate * m_gdrFrequency;
     }
   }
 #endif

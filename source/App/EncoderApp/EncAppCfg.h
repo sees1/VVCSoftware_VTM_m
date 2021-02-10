@@ -220,8 +220,8 @@ protected:
   int       m_iIntraPeriod;                                   ///< period of I-slice (random access period)
 #if GDR_ENABLED 
   int       m_gdrPocStart;
-  int       m_iGdrPeriod;
-  int       m_iGdrFrequency;
+  int       m_gdrPeriod;
+  int       m_gdrFrequency;
   bool      m_bStartWithGdr;
   bool      m_bNoHashForGdr;
   bool      m_bGdrPicOutput;
