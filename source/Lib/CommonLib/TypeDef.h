@@ -50,6 +50,10 @@
 #include <assert.h>
 #include <cassert>
 
+
+#define PRINT_WPSNR 1
+
+
 // clang-format off
 
 #define JVET_U0081                                        1 // ALF filter strength target

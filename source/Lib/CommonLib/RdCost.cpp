@@ -2950,11 +2950,28 @@ void RdCost::saveUnadjustedLambda()
   m_DistScaleUnadjusted = m_DistScale;
 }
 
+#if PRINT_WPSNR
+void RdCost::initLumaLevelToWeightTable(int bitDepth)
+#else
 void RdCost::initLumaLevelToWeightTable()
+#endif
 {
-  for (int i = 0; i < LUMA_LEVEL_TO_DQP_LUT_MAXSIZE; i++)
+#if PRINT_WPSNR
+  int lutSize = 1 << bitDepth;
+  if (m_lumaLevelToWeightPLUT.empty())
   {
+    m_lumaLevelToWeightPLUT.resize(lutSize, 1.0);
+  }
+  for (int i = 0; i < lutSize; i++)
+#else
+  for (int i = 0; i < LUMA_LEVEL_TO_DQP_LUT_MAXSIZE; i++)
+#endif
+  {
+#if PRINT_WPSNR
+    double x = bitDepth < 10 ? i << (10 - bitDepth) : bitDepth > 10 ? i >> (bitDepth - 10) : i;
+#else
     double x = i;
+#endif
     double y;
 
     y = 0.015 * x - 1.5

@@ -315,7 +315,11 @@ public:
   uint32_t           getBitsOfVectorWithPredictor( const int x, const int y, const unsigned imvShift )  { return xGetExpGolombNumberOfBits(((x << m_iCostScale) - m_mvPredictor.getHor())>>imvShift) + xGetExpGolombNumberOfBits(((y << m_iCostScale) - m_mvPredictor.getVer())>>imvShift); }
 #if WCG_EXT
          void    saveUnadjustedLambda       ();
+#if PRINT_WPSNR
+         void    initLumaLevelToWeightTable (int bitDepth);
+#else
          void    initLumaLevelToWeightTable ();
+#endif
   inline double  getWPSNRLumaLevelWeight    (int val) { return m_lumaLevelToWeightPLUT[val]; }
   void           initLumaLevelToWeightTableReshape();
   void           updateReshapeLumaLevelToWeightTableChromaMD (std::vector<Pel>& ILUT);
