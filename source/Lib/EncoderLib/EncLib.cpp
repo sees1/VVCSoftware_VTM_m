@@ -1639,13 +1639,18 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     pps.setPicInitQPMinus26( std::min( maxDQP, std::max( minDQP, baseQp ) ));
   }
 
-  if( sps.getJointCbCrEnabledFlag() == false || getChromaFormatIdc() == CHROMA_400 || m_chromaCbCrQpOffset == 0 )
+  if (sps.getJointCbCrEnabledFlag() == false || getChromaFormatIdc() == CHROMA_400)
   {
     pps.setJointCbCrQpOffsetPresentFlag(false);
   }
   else
   {
-    pps.setJointCbCrQpOffsetPresentFlag(true);
+    bool enable = (m_chromaCbCrQpOffset != 0);
+    for (int i=0; i < m_cuChromaQpOffsetList.size(); i++)
+    {
+      enable |= (m_cuChromaQpOffsetList[i].u.comp.JointCbCrOffset != 0);
+    }
+    pps.setJointCbCrQpOffsetPresentFlag(enable);
   }
 
 #if ER_CHROMA_QP_WCG_PPS

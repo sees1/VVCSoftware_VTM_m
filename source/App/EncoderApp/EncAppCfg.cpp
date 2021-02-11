@@ -2151,7 +2151,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_cuChromaQpOffsetSubdiv = 0; // default = 0 (CTU-level)
   }
   CHECK(cfg_crQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size(), "Chroma QP offset lists shall be the same size");
-  CHECK(cfg_cbCrQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size(), "Chroma QP offset lists shall be the same size");
+  CHECK(cfg_cbCrQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size() && cfg_cbCrQpOffsetList.values.size() > 0, "Chroma QP offset list for joint CbCr shall be either the same size as Cb and Cr or empty");
   /* generate default chroma QP offset lists if none provided */
   if (cfg_cbQpOffsetList.values.size() == 0 && m_cuChromaQpOffsetEnabled)
   {
@@ -2167,7 +2167,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     m_cuChromaQpOffsetList[i].u.comp.CbOffset = cfg_cbQpOffsetList.values[i];
     m_cuChromaQpOffsetList[i].u.comp.CrOffset = cfg_crQpOffsetList.values[i];
-    m_cuChromaQpOffsetList[i].u.comp.JointCbCrOffset = cfg_cbCrQpOffsetList.values[i];
+    m_cuChromaQpOffsetList[i].u.comp.JointCbCrOffset = cfg_cbCrQpOffsetList.values.size() ? cfg_cbCrQpOffsetList.values[i] : 0;
   }
 
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
