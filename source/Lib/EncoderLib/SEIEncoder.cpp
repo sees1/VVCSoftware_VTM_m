@@ -398,7 +398,7 @@ void SEIEncoder::initSEISampleAspectRatioInfo(SEISampleAspectRatioInfo* seiSampl
 //! Note: The SEI message structures input into this function will become part of the scalable nesting SEI and will be
 //!       automatically freed, when the nesting SEI is disposed.
 //  either targetOLS or targetLayer should be active, call with empty vector for the inactive mode
-void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t> &subpictureIDs)
+void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t> &subpictureIDs, uint16_t maxSubpicIdInPic)
 {
   CHECK(!(m_isInitialized), "Scalable Nesting SEI already initialized ");
   CHECK(!(scalableNestingSEI != NULL), "No Scalable Nesting SEI object passed");
@@ -443,7 +443,7 @@ void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, 
     scalableNestingSEI->m_snSubpicFlag = 1;
     scalableNestingSEI->m_snNumSubpics = (uint32_t) subpictureIDs.size();
     scalableNestingSEI->m_snSubpicId   = subpictureIDs;
-    scalableNestingSEI->m_snSubpicIdLen = max(1, ceilLog2((*std::max_element(subpictureIDs.begin(), subpictureIDs.end())) + 1));
+    scalableNestingSEI->m_snSubpicIdLen = max(1, ceilLog2(maxSubpicIdInPic + 1));
     CHECK ( scalableNestingSEI->m_snSubpicIdLen > 15, "Subpicture ID too large. Length must be <= 15 bits");
   }
   scalableNestingSEI->m_nestedSEIs.clear();
