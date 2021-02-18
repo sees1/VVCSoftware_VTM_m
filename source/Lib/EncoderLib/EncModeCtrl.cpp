@@ -923,7 +923,7 @@ bool BestEncInfoCache::isValid( const CodingStructure& cs, const Partitioner& pa
   {
     return false;
   }
-  if( encInfo.cu.qp != qp )
+  if( encInfo.cu.qp != qp || cs.slice->getUseChromaQpAdj())
     return false;
   if( cs.picture->poc != encInfo.poc || CS::getArea( cs, cs.area, partitioner.chType ) != CS::getArea( cs, encInfo.cu, partitioner.chType ) || !isTheSameNbHood( encInfo.cu, cs, partitioner
     , encInfo.pu, (cs.picture->Y().width), (cs.picture->Y().height)
@@ -1314,7 +1314,7 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
   {
     const int  qp       = std::max( qpLoop, lowestQP );
 #if REUSE_CU_RESULTS
-    const bool isReusingCu = isValid( cs, partitioner, qp ) && !cs.slice->getUseChromaQpAdj();
+    const bool isReusingCu = isValid( cs, partitioner, qp );
     cuECtx.set( IS_REUSING_CU, isReusingCu );
     if( isReusingCu )
     {
