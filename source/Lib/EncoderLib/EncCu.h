@@ -97,7 +97,7 @@ public:
   GeoComboCostList() {};
   ~GeoComboCostList() {};
   std::vector<GeoMergeCombo> list;
-  void sortByCost() { std::sort(list.begin(), list.end(), SmallerThanComboCost()); };
+  void sortByCost() { std::stable_sort(list.begin(), list.end(), SmallerThanComboCost()); };
 };
 struct SingleGeoMergeEntry
 {
