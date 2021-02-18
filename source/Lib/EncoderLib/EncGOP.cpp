@@ -807,7 +807,7 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
   }
 }
 
-void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t>& subpicIDs)
+void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t>& subpicIDs, uint16_t maxSubpicIdInPic)
 {
   SEIMessages tmpMessages;
   while (!nestedSeiMessages.empty())
@@ -816,7 +816,7 @@ void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& ne
     nestedSeiMessages.pop_front();
     tmpMessages.push_back(sei);
     SEIScalableNesting *nestingSEI = new SEIScalableNesting();
-    m_seiEncoder.initSEIScalableNesting(nestingSEI, tmpMessages, targetOLSs, targetLayers, subpicIDs);
+    m_seiEncoder.initSEIScalableNesting(nestingSEI, tmpMessages, targetOLSs, targetLayers, subpicIDs, maxSubpicIdInPic);
     seiMessages.push_back(nestingSEI);
     tmpMessages.clear();
   }
@@ -3543,6 +3543,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       std::string subPicDigest;
       if (numSubpics > 1 && m_pcCfg->getSubpicDecodedPictureHashType() != HASHTYPE_NONE )
       {
+        std::vector<uint16_t> subPicIdsInPic;
+        xGetSubpicIdsInPic(subPicIdsInPic, pcPic->cs->sps, pps);
+        uint16_t maxSubpicIdInPic = subPicIdsInPic.size() == 0 ? 0 : *std::max_element(subPicIdsInPic.begin(), subPicIdsInPic.end());
         for (int subPicIdx = 0; subPicIdx < numSubpics; subPicIdx++)
         {
           const SubPic& subpic = pps->getSubPic(subPicIdx);
@@ -3555,7 +3558,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           const std::vector<uint16_t> subPicIds = { (uint16_t)subpic.getSubPicID() };
           std::vector<int> targetOLS;
           std::vector<int> targetLayers = {pcPic->layerId};
-          xCreateScalableNestingSEI(trailingSeiMessages, nestedSEI, targetOLS, targetLayers, subPicIds);
+          xCreateScalableNestingSEI(trailingSeiMessages, nestedSEI, targetOLS, targetLayers, subPicIds, maxSubpicIdInPic);
         }
       }
 
@@ -3608,34 +3611,13 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         const PPS* pps = pcSlice->getPPS();
 
         std::vector<uint16_t> subpicIDs;
-        if (sps->getSubPicInfoPresentFlag())
-        {
-          if(sps->getSubPicIdMappingExplicitlySignalledFlag())
-          {
-            if(sps->getSubPicIdMappingPresentFlag())
-            {
-              subpicIDs = sps->getSubPicIds();
-            }
-            else
-            {
-              subpicIDs = pps->getSubPicIds();
-            }
-          }
-          else
-          {
-            const int numSubPics = sps->getNumSubPics();
-            subpicIDs.resize(numSubPics);
-            for (int i = 0 ; i < numSubPics; i++)
-            {
-              subpicIDs[i] = (uint16_t) i;
-            }
-          }
-        }
+        xGetSubpicIdsInPic(subpicIDs, sps, pps);
+        uint16_t maxSubpicIdInPic = subpicIDs.size() == 0 ? 0 : *std::max_element(subpicIDs.begin(), subpicIDs.end());
         // Note (KJS): Using targetOLS = 0, 1 is as random as encapsulating the same SEIs in scalable nesting.
         //             This can just be seen as example regarding how to write scalable nesting, not what to write.
         std::vector<int> targetOLS = {0, 1};
         std::vector<int> targetLayers;
-        xCreateScalableNestingSEI(leadingSeiMessages, nestedSeiMessages, targetOLS, targetLayers, subpicIDs);
+        xCreateScalableNestingSEI(leadingSeiMessages, nestedSeiMessages, targetOLS, targetLayers, subpicIDs, maxSubpicIdInPic);
       }
 
       xWriteLeadingSEIMessages( leadingSeiMessages, duInfoSeiMessages, accessUnit, pcSlice->getTLayer(), pcSlice->getSPS(), duData );
@@ -3884,6 +3866,35 @@ void EncGOP::xGetBuffer( PicList&                  rcListPic,
 
   (**iterPicYuvRec) = rpcPic->getRecoBuf();
   return;
+}
+
+void EncGOP::xGetSubpicIdsInPic(std::vector<uint16_t>& subpicIDs, const SPS* sps, const PPS* pps)
+{
+  subpicIDs.clear();
+
+  if (sps->getSubPicInfoPresentFlag())
+  {
+    if(sps->getSubPicIdMappingExplicitlySignalledFlag())
+    {
+      if(sps->getSubPicIdMappingPresentFlag())
+      {
+        subpicIDs = sps->getSubPicIds();
+      }
+      else
+      {
+        subpicIDs = pps->getSubPicIds();
+      }
+    }
+    else
+    {
+      const int numSubPics = sps->getNumSubPics();
+      subpicIDs.resize(numSubPics);
+      for (int i = 0 ; i < numSubPics; i++)
+      {
+        subpicIDs[i] = (uint16_t) i;
+      }
+    }
+  }
 }
 
 #if ENABLE_QPA
