@@ -119,7 +119,7 @@ private:
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   CacheModel              m_cacheModel;
 #endif
-  bool isRandomAccessSkipPicture(int& iSkipFrame,  int& iPOCLastDisplay);
+  bool isRandomAccessSkipPicture(int& iSkipFrame,  int& iPOCLastDisplay, bool mixedNaluInPicFlag);
   Picture*                m_pcPic;
   uint32_t                m_uiSliceSegmentIdx;
   uint32_t                m_prevLayerID;

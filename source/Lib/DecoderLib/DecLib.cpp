@@ -2282,7 +2282,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   // Skip pictures due to random access
 
-  if (isRandomAccessSkipPicture(iSkipFrame, iPOCLastDisplay))
+  if (isRandomAccessSkipPicture(iSkipFrame, iPOCLastDisplay, pps->getMixedNaluTypesInPicFlag()))
   {
     m_prevSliceSkipped = true;
     m_skippedPOC = m_apcSlicePilot->getPOC();
@@ -3055,7 +3055,7 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
  *  equal to or greater than the random access point POC is attempted. For non IDR/CRA/BLA random
  *  access point there is no guarantee that the decoder will not crash.
  */
-bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay )
+bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, bool mixedNaluInPicFlag )
 {
   if (iSkipFrame)
   {
@@ -3084,7 +3084,9 @@ bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay )
     }
   }
   // skip the reordered pictures, if necessary
-  else if (m_apcSlicePilot->getPOC() < m_pocRandomAccess && (m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL))
+  else if (m_apcSlicePilot->getPOC() < m_pocRandomAccess &&
+      (m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL ||
+       mixedNaluInPicFlag))
   {
     iPOCLastDisplay++;
     return true;
