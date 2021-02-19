@@ -5838,7 +5838,7 @@ bool IntraSearch::xSortISPCandList(double bestCostSoFar, double bestNonISPCost, 
   m_ispCandListVer.clear();
 
   // we sort the normal intra modes according to their full RD costs
-  std::sort(m_regIntraRDListWithCosts.begin(), m_regIntraRDListWithCosts.end(), ModeInfoWithCost::compareModeInfoWithCost);
+  std::stable_sort(m_regIntraRDListWithCosts.begin(), m_regIntraRDListWithCosts.end(), ModeInfoWithCost::compareModeInfoWithCost);
 
   // we get the best angle from the regular intra list
   int bestNormalIntraAngle = -1;
