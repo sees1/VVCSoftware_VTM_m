@@ -1704,34 +1704,53 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   {
     WRITE_FLAG( picHeader->getVirtualBoundariesPresentFlag(), "ph_virtual_boundaries_present_flag" );
     if( picHeader->getVirtualBoundariesPresentFlag() )
-    {
-      
+    {     
 #if GDR_ENABLED
-      int n = picHeader->getNumVerVirtualBoundaries();
-      for (unsigned i = 0; i < n; i++) 
+      if (sps->getGDREnabledFlag())
       {
-        if (picHeader->getVirtualBoundariesPosX(i) == pps->getPicWidthInLumaSamples()) 
+        int n = picHeader->getNumVerVirtualBoundaries();
+        for (unsigned i = 0; i < n; i++)
         {
-          n = n - 1;
+          if (picHeader->getVirtualBoundariesPosX(i) == pps->getPicWidthInLumaSamples())
+          {
+            n = n - 1;
+          }
         }
-      }
 
-      WRITE_UVLC(n, "ph_num_ver_virtual_boundaries");
+        WRITE_UVLC(n, "ph_num_ver_virtual_boundaries");
 
-      if (pps->getPicWidthInLumaSamples() <= 8)
-      {
-        CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        if (pps->getPicWidthInLumaSamples() <= 8)
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        }
+        else
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
+        }
+
+        for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
+        {
+          if (picHeader->getVirtualBoundariesPosX(i) != pps->getPicWidthInLumaSamples())
+          {
+            WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
+            CHECK(((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
+          }
+        }
       }
       else
       {
-        CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
-      }
-
-      for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
-      {
-        if (picHeader->getVirtualBoundariesPosX(i) != pps->getPicWidthInLumaSamples())
+        WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
+        if (pps->getPicWidthInLumaSamples() <= 8)
         {
-          WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");      
+          CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        }
+        else
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
+        }
+        for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
+        {
+          WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
           CHECK(((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
         }
       }

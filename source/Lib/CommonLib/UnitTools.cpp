@@ -873,10 +873,10 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
   int num_avai_candInLUT = (int)lut.size();
 
 #if GDR_ENABLED  
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   
   bool  vbOnCtuBoundary = true;  
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     vbOnCtuBoundary = (pu.cs->picHeader->getNumVerVirtualBoundaries() == 0) || (pu.cs->picHeader->getVirtualBoundariesPosX(0) % pu.cs->sps->getMaxCUWidth() == 0);
     allCandSolidInAbove = allCandSolidInAbove && vbOnCtuBoundary;
@@ -887,7 +887,7 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
     miNeighbor = lut[num_avai_candInLUT - mrgIdx];
 #if GDR_ENABLED    
     Position sourcePos = Position(0, 0);
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       sourcePos = miNeighbor.sourcePos;
     }
@@ -902,7 +902,7 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
 
       mrgCtx.mvFieldNeighbours[cnt << 1].setMvField(miNeighbor.mv[0], miNeighbor.refIdx[0]);
 #if GDR_ENABLED      
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         // note : cannot gaurantee the order/value in the lut if any of the lut is in dirty area
         mrgCtx.mvPos[(cnt << 1) + 0]   = sourcePos;
@@ -915,7 +915,7 @@ bool PU::addMergeHMVPCand(const CodingStructure &cs, MergeCtx &mrgCtx, const int
       {
         mrgCtx.mvFieldNeighbours[(cnt << 1) + 1].setMvField(miNeighbor.mv[1], miNeighbor.refIdx[1]);
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           mrgCtx.mvPos[(cnt << 1) + 1]   = sourcePos;
           mrgCtx.mvSolid[(cnt << 1) + 1] = allCandSolidInAbove && vbOnCtuBoundary;
@@ -951,7 +951,7 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
   const CodingStructure &cs = *pu.cs;
   const uint32_t maxNumMergeCand = pu.cs->sps->getMaxNumIBCMergeCand();
 #if GDR_ENABLED  
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool  allCandSolidInAbove = true;
 #endif
 
@@ -963,7 +963,7 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
     mrgCtx.mvFieldNeighbours[ui * 2].refIdx = NOT_VALID;
     mrgCtx.mvFieldNeighbours[ui * 2 + 1].refIdx = NOT_VALID;
 #if GDR_ENABLED    
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       mrgCtx.mvSolid[(ui << 1) + 0] = true;
       mrgCtx.mvSolid[(ui << 1) + 1] = true;
@@ -997,7 +997,7 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
     // get Mv from Left
     mrgCtx.mvFieldNeighbours[cnt << 1].setMvField(miLeft.mv[0], miLeft.refIdx[0]);
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       mrgCtx.mvSolid[(cnt << 1) + 0] = cs.isClean(posLB.offset(-1, 0), pu.chType);
     }
@@ -1029,7 +1029,7 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
       // get Mv from Above
       mrgCtx.mvFieldNeighbours[cnt << 1].setMvField(miAbove.mv[0], miAbove.refIdx[0]);
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         mrgCtx.mvSolid[(cnt << 1) + 0] = cs.isClean(posRT.offset(0, -1), pu.chType);
       }
@@ -1077,7 +1077,7 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
       mrgCtx.interDirNeighbours[cnt] = 1;
 #if GDR_ENABLED
       // GDR: zero mv(0,0)
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         mrgCtx.mvSolid[cnt << 1] = true && allCandSolidInAbove;
         allCandSolidInAbove       = true && allCandSolidInAbove;
@@ -1103,7 +1103,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
   const uint32_t maxNumMergeCand = pu.cs->sps->getMaxNumMergeCand();
   CHECK (maxNumMergeCand > MRG_MAX_NUM_CANDS, "selected maximum number of merge candidate exceeds global limit");
 #if GDR_ENABLED  
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool  allCandSolidInAbove = true;
 #endif
   for (uint32_t ui = 0; ui < maxNumMergeCand; ++ui)
@@ -1114,7 +1114,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
     mrgCtx.mvFieldNeighbours[(ui << 1)    ].refIdx = NOT_VALID;
     mrgCtx.mvFieldNeighbours[(ui << 1) + 1].refIdx = NOT_VALID;
 #if GDR_ENABLED    
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       mrgCtx.mvSolid[(ui << 1) + 0] = true;
       mrgCtx.mvSolid[(ui << 1) + 1] = true;
@@ -1154,7 +1154,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
     mrgCtx.mvFieldNeighbours[cnt << 1].setMvField(miAbove.mv[0], miAbove.refIdx[0]);
 
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       Position pos = puAbove->lumaPos();
       mrgCtx.mvPos[(cnt << 1) + 0] = pos;
@@ -1166,7 +1166,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
     {
       mrgCtx.mvFieldNeighbours[(cnt << 1) + 1].setMvField(miAbove.mv[1], miAbove.refIdx[1]);
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Position pos = puAbove->lumaPos();
         mrgCtx.mvPos[(cnt << 1) + 1] = pos;
@@ -1207,7 +1207,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       // get Mv from Left
       mrgCtx.mvFieldNeighbours[cnt << 1].setMvField(miLeft.mv[0], miLeft.refIdx[0]);
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Position pos = puLeft->lumaPos();
         mrgCtx.mvPos[(cnt << 1) + 0] = pos;
@@ -1220,7 +1220,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       {
         mrgCtx.mvFieldNeighbours[(cnt << 1) + 1].setMvField(miLeft.mv[1], miLeft.refIdx[1]);
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Position pos = puLeft->lumaPos();
           mrgCtx.mvPos[(cnt << 1) + 1] = pos;
@@ -1263,7 +1263,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       mrgCtx.BcwIdx[cnt] = (mrgCtx.interDirNeighbours[cnt] == 3) ? puAboveRight->cu->BcwIdx : BCW_DEFAULT;
       mrgCtx.mvFieldNeighbours[cnt << 1].setMvField( miAboveRight.mv[0], miAboveRight.refIdx[0] );
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Position pos = puAboveRight->lumaPos();
         mrgCtx.mvPos[(cnt << 1) + 0] = pos;
@@ -1276,7 +1276,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       {
         mrgCtx.mvFieldNeighbours[( cnt << 1 ) + 1].setMvField( miAboveRight.mv[1], miAboveRight.refIdx[1] );
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Position pos = puAboveRight->lumaPos();
           mrgCtx.mvPos[(cnt << 1) + 1] = pos;
@@ -1318,7 +1318,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       // get Mv from Bottom-Left
       mrgCtx.mvFieldNeighbours[cnt << 1].setMvField( miBelowLeft.mv[0], miBelowLeft.refIdx[0] );
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Position pos = puLeftBottom->lumaPos();
         mrgCtx.mvPos[(cnt << 1) + 0] = pos;
@@ -1331,7 +1331,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       {
         mrgCtx.mvFieldNeighbours[( cnt << 1 ) + 1].setMvField( miBelowLeft.mv[1], miBelowLeft.refIdx[1] );
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Position pos = puLeftBottom->lumaPos();
           mrgCtx.mvPos[(cnt << 1) + 1] = pos;
@@ -1376,7 +1376,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
         // get Mv from Above-Left
         mrgCtx.mvFieldNeighbours[cnt << 1].setMvField( miAboveLeft.mv[0], miAboveLeft.refIdx[0] );
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Position pos = puAboveLeft->lumaPos();
           mrgCtx.mvPos[(cnt << 1) + 0] = pos;
@@ -1389,7 +1389,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
         {
           mrgCtx.mvFieldNeighbours[( cnt << 1 ) + 1].setMvField( miAboveLeft.mv[1], miAboveLeft.refIdx[1] );
 #if GDR_ENABLED
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             Position pos = puAboveLeft->lumaPos();
             mrgCtx.mvPos[(cnt << 1) + 1] = pos;
@@ -1458,7 +1458,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       dir     |= 1;
       mrgCtx.mvFieldNeighbours[2 * uiArrayAddr].setMvField(cColMv, iRefIdx);
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Mv ccMv;
 
@@ -1486,7 +1486,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
         dir     |= 2;
         mrgCtx.mvFieldNeighbours[2 * uiArrayAddr + 1].setMvField(cColMv, iRefIdx);
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Mv ccMv;
 
@@ -1594,7 +1594,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           mrgCtx.mvFieldNeighbours[cnt * 2 + refListId].setMvField( avgMv, refIdxI );
 #if GDR_ENABLED
           // GDR: Pairwise single I,J candidate
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             mv_solid = mvI_solid && mvJ_solid && allCandSolidInAbove;
 
@@ -1612,7 +1612,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           mrgCtx.mvFieldNeighbours[cnt * 2 + refListId].setMvField( singleMv, refIdxI );
 #if GDR_ENABLED
           // GDR: Pairwise single I,J candidate
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             mv_solid = mvI_solid && allCandSolidInAbove;
 
@@ -1629,7 +1629,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           mrgCtx.mvFieldNeighbours[cnt * 2 + refListId].setMvField( singleMv, refIdxJ );
 #if GDR_ENABLED
           // GDR: Pairwise single I,J candidate
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             mv_solid = mvJ_solid && allCandSolidInAbove;
 
@@ -1671,7 +1671,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
 
 #if GDR_ENABLED
     // GDR: zero mv(0,0)
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       mrgCtx.mvPos[uiArrayAddr << 1] = Position(0, 0);
       mrgCtx.mvSolid[uiArrayAddr << 1] = true && allCandSolidInAbove;
@@ -1685,7 +1685,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       mrgCtx.mvFieldNeighbours  [(uiArrayAddr << 1) + 1].setMvField(Mv(0, 0), r);
 #if GDR_ENABLED
       // GDR: zero mv(0,0)
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
 
         mrgCtx.mvPos[(uiArrayAddr << 1) + 1] = Position(0, 0);
@@ -1813,7 +1813,7 @@ void PU::getInterMMVDMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx,
 
 #if GDR_ENABLED
   const CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
 
 #if GDR_ENABLED
@@ -1837,7 +1837,7 @@ void PU::getInterMMVDMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx,
         mrgCtx.mmvdBaseMv[currBaseNum][0] = mrgCtx.mvFieldNeighbours[(k << 1)];
         mrgCtx.mmvdBaseMv[currBaseNum][1] = mrgCtx.mvFieldNeighbours[(k << 1) + 1];
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           mrgCtx.mmvdSolid[currBaseNum][0] = mrgCtx.mvSolid[(k << 1) + 0];
           mrgCtx.mmvdSolid[currBaseNum][1] = mrgCtx.mvSolid[(k << 1) + 1];
@@ -1849,7 +1849,7 @@ void PU::getInterMMVDMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx,
         mrgCtx.mmvdBaseMv[currBaseNum][0] = mrgCtx.mvFieldNeighbours[(k << 1)];
         mrgCtx.mmvdBaseMv[currBaseNum][1] = MvField(Mv(0, 0), -1);
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           mrgCtx.mmvdSolid[currBaseNum][0] = mrgCtx.mvSolid[(k << 1) + 0];
           mrgCtx.mmvdSolid[currBaseNum][1] = true;
@@ -1861,7 +1861,7 @@ void PU::getInterMMVDMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx,
         mrgCtx.mmvdBaseMv[currBaseNum][0] = MvField(Mv(0, 0), -1);
         mrgCtx.mmvdBaseMv[currBaseNum][1] = mrgCtx.mvFieldNeighbours[(k << 1) + 1];
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           mrgCtx.mmvdSolid[currBaseNum][0] = true;
           mrgCtx.mmvdSolid[currBaseNum][1] = mrgCtx.mvSolid[(k << 1) + 1];
@@ -2209,7 +2209,7 @@ void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const in
   Position posLB = pu.Y().bottomLeft();
 
 #if GDR_ENABLED
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool &allCandSolidInAbove = amvpInfo.allCandSolidInAbove;
 #endif
   {
@@ -2283,7 +2283,7 @@ void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const in
     if ( ( C0Avail && getColocatedMVP( pu, eRefPicList, posC0, cColMv, refIdx_Col, false ) ) || getColocatedMVP( pu, eRefPicList, posC1, cColMv, refIdx_Col, false ) )
     {
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Mv   ccMv;
         bool posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
@@ -2319,7 +2319,7 @@ void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const in
   while (pInfo->numCand < AMVP_MAX_NUM_CANDS)
   {
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       pInfo->mvType[pInfo->numCand] = MVP_ZERO;
       allCandSolidInAbove = pInfo->mvSolid[pInfo->numCand] = true && allCandSolidInAbove;
@@ -2342,7 +2342,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
   Position neibPos;
 
 #if GDR_ENABLED  
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   switch ( dir )
   {
@@ -2395,7 +2395,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
 
 #if GDR_ENABLED
     // note : get MV from neihgbor of neibPu (LB, RB) and save to outputAffineMv
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       xInheritedAffineMv(pu, neibPU, eRefPicListIndex, outputAffineMv, outputAffineMvSolid, outputAffineMvType, outputAffineMvPos);
     }
@@ -2413,7 +2413,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
 #if GDR_ENABLED
     bool neighClean = true;
 
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       neighClean = cs.isClean(neibPU->Y().pos(), CHANNEL_TYPE_LUMA);      
 
@@ -2432,7 +2432,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
       outputAffineMv[2].roundAffinePrecInternal2Amvr(pu.cu->imv);
       affiAMVPInfo.mvCandLB[affiAMVPInfo.numCand] = outputAffineMv[2];
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         neighClean = cs.isClean(neibPU->Y().pos(), CHANNEL_TYPE_LUMA);
 
@@ -2452,7 +2452,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
 void PU::xInheritedAffineMv(const PredictionUnit &pu, const PredictionUnit* puNeighbour, RefPicList eRefPicList, Mv rcMv[3], bool rcMvSolid[3], MvpType rcMvType[3], Position rcMvPos[3])
 {
   const CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 
   int posNeiX = puNeighbour->Y().pos().x;
   int posNeiY = puNeighbour->Y().pos().y;
@@ -2474,7 +2474,7 @@ void PU::xInheritedAffineMv(const PredictionUnit &pu, const PredictionUnit* puNe
 #if GDR_ENABLED
   bool neighClean = true;
 
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     neighClean = cs.isClean(puNeighbour->Y().pos(), CHANNEL_TYPE_LUMA);
 
@@ -2504,7 +2504,7 @@ void PU::xInheritedAffineMv(const PredictionUnit &pu, const PredictionUnit* puNe
     mvRT = puNeighbour->getMotionInfo(posRB).mv[eRefPicList];
 
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       neighClean = cs.isClean(puNeighbour->Y().pos(), CHANNEL_TYPE_LUMA);
 
@@ -2664,10 +2664,10 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
 
 #if GDR_ENABLED
   const CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool &allCandSolidInAbove = affiAMVPInfo.allCandSolidInAbove;
 
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     allCandSolidInAbove = true;
     
@@ -2725,7 +2725,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
   amvpInfo0.numCand = 0;
 
 #if GDR_ENABLED  
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     amvpInfo0.allCandSolidInAbove = true;
     for (int i = 0; i < AMVP_MAX_NUM_CANDS_MEM; i++) 
@@ -2753,7 +2753,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
   amvpInfo1.numCand = 0;
 
 #if GDR_ENABLED  
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     amvpInfo1.allCandSolidInAbove = true;
     for (int i = 0; i < AMVP_MAX_NUM_CANDS_MEM; i++) 
@@ -2777,7 +2777,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
   amvpInfo2.numCand = 0;
 
 #if GDR_ENABLED  
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     amvpInfo2.allCandSolidInAbove = true;
     for (int i = 0; i < AMVP_MAX_NUM_CANDS_MEM; i++) 
@@ -2801,7 +2801,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
   outputAffineMv[2] = amvpInfo2.mvCand[0];
 
 #if GDR_ENABLED
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     outputAffineMvSolid[0] = amvpInfo0.mvSolid[0] && allCandSolidInAbove;
     outputAffineMvSolid[1] = amvpInfo1.mvSolid[0] && allCandSolidInAbove;
@@ -2828,7 +2828,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
     affiAMVPInfo.mvCandRT[affiAMVPInfo.numCand] = outputAffineMv[1];
     affiAMVPInfo.mvCandLB[affiAMVPInfo.numCand] = outputAffineMv[2];
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = outputAffineMvSolid[0] && allCandSolidInAbove;
       affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = outputAffineMvSolid[1] && allCandSolidInAbove;
@@ -2859,7 +2859,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
         affiAMVPInfo.mvCandRT[affiAMVPInfo.numCand] = outputAffineMv[i];
         affiAMVPInfo.mvCandLB[affiAMVPInfo.numCand] = outputAffineMv[i];
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = outputAffineMvSolid[i] && allCandSolidInAbove;
           affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = outputAffineMvSolid[i] && allCandSolidInAbove;
@@ -2916,7 +2916,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
         affiAMVPInfo.mvCandRT[affiAMVPInfo.numCand] = cColMv;
         affiAMVPInfo.mvCandLB[affiAMVPInfo.numCand] = cColMv;
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Mv ccMv;
 
@@ -2974,7 +2974,7 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
         affiAMVPInfo.mvCandRT[affiAMVPInfo.numCand].setZero();
         affiAMVPInfo.mvCandLB[affiAMVPInfo.numCand].setZero();
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           affiAMVPInfo.mvSolidLT[affiAMVPInfo.numCand] = true && allCandSolidInAbove;
           affiAMVPInfo.mvSolidRT[affiAMVPInfo.numCand] = true && allCandSolidInAbove;
@@ -3011,7 +3011,7 @@ bool PU::addMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &eRefPic
         Position neibPos;
 
 #if GDR_ENABLED
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool &allCandSolidInAbove = info.allCandSolidInAbove;
 #endif  
 
@@ -3056,7 +3056,7 @@ bool PU::addMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &eRefPic
     if( neibRefIdx >= 0 && currRefPOC == cs.slice->getRefPOC( eRefPicListIndex, neibRefIdx ) )
     {
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         bool isSolid = cs.isClean(neibPos, CHANNEL_TYPE_LUMA);
 
@@ -3088,14 +3088,14 @@ void PU::addAMVPHMVPCand(const PredictionUnit &pu, const RefPicList eRefPicList,
 
 #if GDR_ENABLED
   CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));  
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));  
   bool &allCandSolidInAbove = info.allCandSolidInAbove;
 #endif
 
 
 #if GDR_ENABLED
   bool vbOnCtuBoundary = true;
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     vbOnCtuBoundary = (pu.cs->picHeader->getNumVerVirtualBoundaries() == 0) || (pu.cs->picHeader->getVirtualBoundariesPosX(0) % pu.cs->sps->getMaxCUWidth() == 0);
     allCandSolidInAbove = allCandSolidInAbove && vbOnCtuBoundary;
@@ -3121,7 +3121,7 @@ void PU::addAMVPHMVPCand(const PredictionUnit &pu, const RefPicList eRefPicList,
         pmv.roundTransPrecInternal2Amvr(pu.cu->imv);
 
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           info.mvPos[info.numCand]   = neibMi.sourcePos;
           info.mvType[info.numCand]  = MVP_HMVP;
@@ -3356,7 +3356,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
   const uint32_t maxNumAffineMergeCand = slice.getPicHeader()->getMaxNumAffineMergeCand();
   const unsigned plevel = pu.cs->sps->getLog2ParallelMergeLevelMinus2() + 2;
 #if GDR_ENABLED
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
 
   for ( int i = 0; i < maxNumAffineMergeCand; i++ )
@@ -3366,7 +3366,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
       affMrgCtx.mvFieldNeighbours[(i << 1) + 0][mvNum].setMvField( Mv(), -1 );
       affMrgCtx.mvFieldNeighbours[(i << 1) + 1][mvNum].setMvField( Mv(), -1 );
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         affMrgCtx.mvSolid[(i << 1) + 0][mvNum] = true;
         affMrgCtx.mvSolid[(i << 1) + 1][mvNum] = true;
@@ -3381,7 +3381,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
     affMrgCtx.BcwIdx[i] = BCW_DEFAULT;
   }
 #if GDR_ENABLED
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     MergeCtx &mrgCtx = *affMrgCtx.mrgCtx;
     int numMergeCand = MRG_MAX_NUM_CANDS << 1;
@@ -3430,7 +3430,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
       }
 #if GDR_ENABLED
       // check if the (puLeft) is in clean area
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         mrgCtx.mvSolid[(pos << 1) + 0] = cs.isClean(puLeft->Y().bottomRight(), CHANNEL_TYPE_LUMA);
         mrgCtx.mvSolid[(pos << 1) + 1] = cs.isClean(puLeft->Y().bottomRight(), CHANNEL_TYPE_LUMA);
@@ -3449,7 +3449,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
         affMrgCtx.mvFieldNeighbours[(affMrgCtx.numValidMergeCand << 1) + 0][mvNum].setMvField( mrgCtx.mvFieldNeighbours[(pos << 1) + 0].mv, mrgCtx.mvFieldNeighbours[(pos << 1) + 0].refIdx );
         affMrgCtx.mvFieldNeighbours[(affMrgCtx.numValidMergeCand << 1) + 1][mvNum].setMvField( mrgCtx.mvFieldNeighbours[(pos << 1) + 1].mv, mrgCtx.mvFieldNeighbours[(pos << 1) + 1].refIdx );
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           affMrgCtx.mvSolid[(affMrgCtx.numValidMergeCand << 1) + 0][mvNum] = mrgCtx.mvSolid[(pos << 1) + 0];
           affMrgCtx.mvSolid[(affMrgCtx.numValidMergeCand << 1) + 1][mvNum] = mrgCtx.mvSolid[(pos << 1) + 1];
@@ -3495,7 +3495,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
       if ( puNeigh->interDir != 2 )
       {
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           xInheritedAffineMv(pu, puNeigh, REF_PIC_LIST_0, cMv[0], cMvSolid[0], cMvType[0], cMvPos[0]);
         }
@@ -3512,7 +3512,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
         if ( puNeigh->interDir != 1 )
         {
 #if GDR_ENABLED
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             xInheritedAffineMv(pu, puNeigh, REF_PIC_LIST_1, cMv[1], cMvSolid[1], cMvType[1], cMvPos[1]);
           }
@@ -3531,7 +3531,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
         affMrgCtx.mvFieldNeighbours[(affMrgCtx.numValidMergeCand << 1) + 0][mvNum].setMvField( cMv[0][mvNum], puNeigh->refIdx[0] );
         affMrgCtx.mvFieldNeighbours[(affMrgCtx.numValidMergeCand << 1) + 1][mvNum].setMvField( cMv[1][mvNum], puNeigh->refIdx[1] );
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           affMrgCtx.mvSolid[(affMrgCtx.numValidMergeCand << 1) + 0][mvNum] = cMvSolid[0][mvNum];
           affMrgCtx.mvSolid[(affMrgCtx.numValidMergeCand << 1) + 1][mvNum] = cMvSolid[0][mvNum];
@@ -3578,7 +3578,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
           mi[0] = puNeigh->getMotionInfo( pos );
           neighBcw[0] = puNeigh->cu->BcwIdx;
 #if GDR_ENABLED
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             miSolid[0] = cs.isClean(puNeigh->Y().topRight(), CHANNEL_TYPE_LUMA);
           }
@@ -3600,7 +3600,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
           mi[1] = puNeigh->getMotionInfo( pos );
           neighBcw[1] = puNeigh->cu->BcwIdx;
 #if GDR_ENABLED
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             miSolid[1] = cs.isClean(puNeigh->Y().topRight(), CHANNEL_TYPE_LUMA);
           }
@@ -3621,7 +3621,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
           isAvailable[2] = true;
           mi[2] = puNeigh->getMotionInfo( pos );
 #if GDR_ENABLED
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             miSolid[2] = cs.isClean(puNeigh->Y().topRight(), CHANNEL_TYPE_LUMA);
           }
@@ -3668,7 +3668,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
           mi[3].interDir = 1;
           isAvailable[3] = true;
 #if GDR_ENABLED
-          if (isEncodeClean) 
+          if (isEncodeGdrClean) 
           {
             bool posL0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
             bool posL0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_0, refIdx);
@@ -3688,7 +3688,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
             mi[3].interDir |= 2;
             isAvailable[3] = true;
 #if GDR_ENABLED
-            if (isEncodeClean) 
+            if (isEncodeGdrClean) 
             {
               bool posL1inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
               bool posL1inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_1, refIdx);
@@ -3733,7 +3733,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
 #endif
         getAffineControlPointCand(pu, mi, isAvailable, model[modelIdx], ((modelIdx == 3) ? neighBcw[1] : neighBcw[0]), modelIdx, verNum[modelIdx], affMrgCtx);
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           for (int i = 0; i < 3; i++)  
           {
@@ -3765,7 +3765,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
     {
       affMrgCtx.mvFieldNeighbours[(cnt << 1) + 0][mvNum].setMvField( Mv( 0, 0 ), 0 );
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         affMrgCtx.mvSolid[(cnt << 1) + 0][mvNum] = true;
       }
@@ -3779,7 +3779,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
       {
         affMrgCtx.mvFieldNeighbours[(cnt << 1) + 1][mvNum].setMvField( Mv( 0, 0 ), 0 );
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           affMrgCtx.mvSolid[(cnt << 1) + 1][mvNum] = true;
         }
@@ -3922,7 +3922,7 @@ bool PU::getInterMergeSubPuMvpCand(const PredictionUnit &pu, MergeCtx& mrgCtx, b
 
 #if GDR_ENABLED
   const CodingStructure& cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool isSubPuSolid[2] = { true, true };
 #endif
   if ( count )
@@ -3931,7 +3931,7 @@ bool PU::getInterMergeSubPuMvpCand(const PredictionUnit &pu, MergeCtx& mrgCtx, b
     {
       cTMv = mrgCtx.mvFieldNeighbours[REF_PIC_LIST_0].mv;
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         isSubPuSolid[REF_PIC_LIST_0] = mrgCtx.mvSolid[REF_PIC_LIST_0];
       }
@@ -3941,7 +3941,7 @@ bool PU::getInterMergeSubPuMvpCand(const PredictionUnit &pu, MergeCtx& mrgCtx, b
     {
       cTMv = mrgCtx.mvFieldNeighbours[REF_PIC_LIST_1].mv;
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         isSubPuSolid[REF_PIC_LIST_1] = mrgCtx.mvSolid[REF_PIC_LIST_1];
       }
@@ -4002,7 +4002,7 @@ bool PU::getInterMergeSubPuMvpCand(const PredictionUnit &pu, MergeCtx& mrgCtx, b
         mrgCtx.mvFieldNeighbours[(count << 1) + currRefListId].setMvField(cColMv, 0);
         mrgCtx.interDirNeighbours[count] |= (1 << currRefListId);
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           mrgCtx.mvSolid[(count << 1) + currRefListId] = cs.isClean(centerPos, currRefPicList, refIdx);
         }
@@ -4061,7 +4061,7 @@ bool PU::getInterMergeSubPuMvpCand(const PredictionUnit &pu, MergeCtx& mrgCtx, b
               mi.mv[currRefListId]     = cColMv;
               found                    = true;
 #if GDR_ENABLED              
-              if (isEncodeClean) 
+              if (isEncodeGdrClean) 
               {
                 isSubPuSolid[currRefPicList] = isSubPuSolid[currRefPicList] && cs.isClean(colPos, currRefPicList, refIdx);
               }
@@ -4093,7 +4093,7 @@ bool PU::getInterMergeSubPuMvpCand(const PredictionUnit &pu, MergeCtx& mrgCtx, b
   }
 
 #if GDR_ENABLED              
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     // the final if it is solid
     mrgCtx.mvSolid[(count << 1) + 0] = mrgCtx.mvSolid[(count << 1) + 0] && isSubPuSolid[0];
@@ -4280,7 +4280,7 @@ void PU::getGeoMergeCandidates( const PredictionUnit &pu, MergeCtx& geoMrgCtx )
 
 #if GDR_ENABLED  
   CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   for (int32_t i = 0; i < GEO_MAX_NUM_UNI_CANDS; i++)
   {
@@ -4292,7 +4292,7 @@ void PU::getGeoMergeCandidates( const PredictionUnit &pu, MergeCtx& geoMrgCtx )
     geoMrgCtx.mvFieldNeighbours[(i << 1)].mv = Mv();
     geoMrgCtx.mvFieldNeighbours[(i << 1) + 1].mv = Mv();
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       geoMrgCtx.mvSolid[(i << 1) + 0] = true;
       geoMrgCtx.mvSolid[(i << 1) + 1] = true;
@@ -4315,7 +4315,7 @@ void PU::getGeoMergeCandidates( const PredictionUnit &pu, MergeCtx& geoMrgCtx )
       geoMrgCtx.mvFieldNeighbours[(geoMrgCtx.numValidMergeCand << 1) + !parity].refIdx = -1;
       geoMrgCtx.mvFieldNeighbours[(geoMrgCtx.numValidMergeCand << 1) + parity].refIdx = tmpMergeCtx.mvFieldNeighbours[(i << 1) + parity].refIdx;
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Mv  mv = tmpMergeCtx.mvFieldNeighbours[(i << 1) + parity].mv;
         int refIdx = tmpMergeCtx.mvFieldNeighbours[(i << 1) + parity].refIdx;
@@ -4343,7 +4343,7 @@ void PU::getGeoMergeCandidates( const PredictionUnit &pu, MergeCtx& geoMrgCtx )
       geoMrgCtx.mvFieldNeighbours[(geoMrgCtx.numValidMergeCand << 1) + !parity].refIdx = tmpMergeCtx.mvFieldNeighbours[(i << 1) + !parity].refIdx;
       geoMrgCtx.mvFieldNeighbours[(geoMrgCtx.numValidMergeCand << 1) + parity].refIdx = -1;
 #if GDR_ENABLED
-      if (isEncodeClean) 
+      if (isEncodeGdrClean) 
       {
         Mv  mv = tmpMergeCtx.mvFieldNeighbours[(i << 1) + !parity].mv;
         int refIdx = tmpMergeCtx.mvFieldNeighbours[(i << 1) + !parity].refIdx;

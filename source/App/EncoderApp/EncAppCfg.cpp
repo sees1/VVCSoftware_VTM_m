@@ -1007,9 +1007,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   // Coding structure paramters
   ("IntraPeriod,-ip",                                 m_iIntraPeriod,                                      -1, "Intra period in frames, (-1: only first frame)")
 #if GDR_ENABLED
-  ("GdrPocStart",                                     m_gdrPocStart,                                      -1, "GDR poc start")
-  ("GdrPeriod",                                       m_gdrPeriod,                                        -1, "GDR period")
-  ("GdrFrequency",                                    m_gdrFrequency,                                     -1, "GDR freqency")
+  ("GdrEnabled",                                      m_gdrEnabled,                                     false, "GDR enabled")
+  ("GdrPocStart",                                     m_gdrPocStart,                                       -1, "GDR poc start")
+  ("GdrPeriod",                                       m_gdrPeriod,                                         -1, "GDR period")
+  ("GdrFrequency",                                    m_gdrFrequency,                                      -1, "GDR freqency")
   ("StartWithGDR",                                    m_bStartWithGdr,                                  false, "Start bitstream with GDR")
   ("NoHashforGDR",                                    m_bNoHashForGdr,                                   true, "No Hash for GDR")
   ("GdrPicOutput",                                    m_bGdrPicOutput,                                  false, "Picture Output for GDR")
@@ -1506,6 +1507,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 
 #if GDR_ENABLED
+  if ( m_gdrEnabled )
   {
     m_iDecodingRefreshType = 3;
     m_intraQPOffset = 0;
@@ -2280,12 +2282,20 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 #endif
 
-#if GDR_ENABLED
-  m_virtualBoundariesEnabledFlag = 1;
-  m_virtualBoundariesPresentFlag = 0;
+#if GDR_ENABLED  
+  if (m_gdrEnabled)
+  {
+    m_virtualBoundariesEnabledFlag = 1;
+    m_virtualBoundariesPresentFlag = 0;
+  }
+  else
+  {
+    m_virtualBoundariesEnabledFlag = 0;
+  }
 #else
   m_virtualBoundariesEnabledFlag = 0;
 #endif
+
   if( m_numVerVirtualBoundaries > 0 || m_numHorVirtualBoundaries > 0 )
     m_virtualBoundariesEnabledFlag = 1;
 

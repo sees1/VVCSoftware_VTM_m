@@ -219,6 +219,7 @@ protected:
   // coding structure
   int       m_iIntraPeriod;                                   ///< period of I-slice (random access period)
 #if GDR_ENABLED 
+  bool      m_gdrEnabled;
   int       m_gdrPocStart;
   int       m_gdrPeriod;
   int       m_gdrFrequency;

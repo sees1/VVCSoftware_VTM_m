@@ -896,7 +896,7 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
 #if GDR_ENABLED  
   bool allOk = true;
   const CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   const int pux = pu.lx();
   const int puy = pu.ly();
 #endif
@@ -1125,7 +1125,7 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
           }
         }
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Position subPuPos = Position(pux + w + blockWidth, puy + h + blockHeight);
           Mv subPuMv = Mv(iMvScaleTmpHor, iMvScaleTmpVer);
@@ -1156,7 +1156,7 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
         iMvScaleTmpVer = curMv.ver;
 
 #if GDR_ENABLED
-        if (isEncodeClean) 
+        if (isEncodeGdrClean) 
         {
           Position subPuPos = Position(pux + (w + blockWidth) * 2, puy + (h + blockHeight) * 2);
           Mv subPuMv = Mv(iMvScaleTmpHor, iMvScaleTmpVer);

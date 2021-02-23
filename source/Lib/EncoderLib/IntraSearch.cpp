@@ -638,7 +638,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
 
   auto &pu = *cu.firstPU;
 #if GDR_ENABLED  
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   bool validReturn = false;
   {
@@ -775,7 +775,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
               DTRACE(g_trace_ctx, D_INTRA_COST, "IntraHAD: %u, %llu, %f (%d)\n", minSadHad, fracModeBits, cost, uiMode);
 
 #if GDR_ENABLED
-              if (isEncodeClean) 
+              if (isEncodeGdrClean) 
               {
                 if (isValidIntraPredLuma(pu, uiMode)) 
                 {
@@ -829,7 +829,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
             // Second round of SATD for extended Angular modes
 #if GDR_ENABLED
             int nn = numModesForFullRD;
-            if (isEncodeClean) 
+            if (isEncodeGdrClean) 
             {
               nn = std::min((int)numModesForFullRD, (int)parentCandList.size());
             }
@@ -871,7 +871,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                     double cost = (double) minSadHad + (double) fracModeBits * sqrtLambdaForFirstPass;
 
 #if GDR_ENABLED
-                    if (isEncodeClean) 
+                    if (isEncodeGdrClean) 
                     {
                       if (isValidIntraPredLuma(pu, mode)) 
                       {
@@ -942,7 +942,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
 
                   double cost = (double) minSadHad + (double) fracModeBits * sqrtLambdaForFirstPass;
 #if GDR_ENABLED
-                  if (isEncodeClean) 
+                  if (isEncodeGdrClean) 
                   {
                     if (isValidIntraPredLuma(pu, mode)) 
                     {
@@ -969,7 +969,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
               }
             }
 #if GDR_ENABLED
-            if (!isEncodeClean) 
+            if (!isEncodeGdrClean) 
             {
               CHECKD(uiRdModeList.size() != numModesForFullRD, "Error: RD mode list size");
             }
@@ -1047,7 +1047,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                        uiModeFull);
 
 #if GDR_ENABLED
-                if (isEncodeClean) 
+                if (isEncodeGdrClean) 
                 {
                   if (isValidIntraPredLuma(pu, uiMode)) 
                   {
@@ -1115,7 +1115,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
 
 #if GDR_ENABLED
               int nn = numModesForFullRD;
-              if (isEncodeClean) 
+              if (isEncodeGdrClean) 
               {
                 nn = std::min((int)numModesForFullRD, (int)uiRdModeList.size());
               }
@@ -1128,7 +1128,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                 mostProbableModeIncluded |= (mostProbableMode == uiRdModeList[i]);
               }
 #if GDR_ENABLED
-              if (!isEncodeClean) 
+              if (!isEncodeGdrClean) 
               {
                 if (!mostProbableModeIncluded)
                 {
@@ -1159,7 +1159,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
                   mostProbableModeIncluded |= (mostProbableMode == m_ispCandListHor[i]);
                 }
 #if GDR_ENABLED
-                if (!isEncodeClean) 
+                if (!isEncodeGdrClean) 
                 {
                   if (!mostProbableModeIncluded)
                   {
@@ -1217,7 +1217,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
       }
 
 #if GDR_ENABLED
-      if (!isEncodeClean) 
+      if (!isEncodeGdrClean) 
       {
         CHECK(numModesForFullRD != uiRdModeList.size(), "Inconsistent state!");
       }
@@ -1290,7 +1290,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
     {
       // we reserve positions for ISP in the common full RD list
 #if GDR_ENABLED
-      if (!isEncodeClean) 
+      if (!isEncodeGdrClean) 
       {
         const int maxNumRDModesISP = sps.getUseLFNST() ? 16 * NUM_LFNST_NUM_PER_SET : 16;
         m_curIspLfnstIdx = 0;

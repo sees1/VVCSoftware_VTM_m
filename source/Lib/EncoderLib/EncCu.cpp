@@ -2123,7 +2123,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
   const SPS &sps = *tempCS->sps;
 
 #if GDR_ENABLED  
-  bool isEncodeClean = false;
+  bool isEncodeGdrClean = false;
   CodingStructure *cs;
 #endif
   if (sps.getSbTMVPEnabledFlag())
@@ -2151,7 +2151,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
     pu.regularMergeFlag = true;
 #if GDR_ENABLED  
     cs = pu.cs;
-    isEncodeClean = cs->pcv->isEncoder && ((cs->picHeader->getInGdrPeriod() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
+    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrPeriod() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   }
   bool candHasNoResidual[MRG_MAX_NUM_CANDS + MMVD_ADD_NUM];
@@ -2320,7 +2320,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
 
 #if GDR_ENABLED
         // Non-RD cost for regular merge
-        if (isEncodeClean)
+        if (isEncodeGdrClean)
         {
           bool isSolid = true;
           bool isValid = true;
@@ -2427,7 +2427,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           double cost = (double)sadValue + (double)fracBits * sqrtLambdaForFirstPassIntra;
 #if GDR_ENABLED
           // Non-RD cost for CIIP merge
-          if (isEncodeClean)
+          if (isEncodeGdrClean)
           {
             bool isSolid = true;
             bool isValid = true;
@@ -2488,7 +2488,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
             continue;
           }
 #if GDR_ENABLED
-          if (isEncodeClean)
+          if (isEncodeGdrClean)
           {
             pu.mvSolid[REF_PIC_LIST_0] = true;
             pu.mvSolid[REF_PIC_LIST_1] = true;
@@ -2516,7 +2516,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           insertPos = -1;
 
 #if GDR_ENABLED
-          if (isEncodeClean)
+          if (isEncodeGdrClean)
           {
             bool isSolid = true;
             bool isValid = true;
@@ -2761,7 +2761,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
       }
 
 #if GDR_ENABLED
-      if (isEncodeClean)
+      if (isEncodeGdrClean)
       {
         bool isSolid = true;
         bool isValid = true;
@@ -2871,7 +2871,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   PredictionUnit &pu = tempCS->addPU(cu, pm.chType);
 #if GDR_ENABLED  
   CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   
   pu.mergeFlag = true;
@@ -2900,7 +2900,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   bool MrgSolid[GEO_MAX_NUM_UNI_CANDS];
   bool MrgValid[GEO_MAX_NUM_UNI_CANDS];
 
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {   
     for (int i = 0; i < maxNumMergeCandidates; i++) 
     {
@@ -2923,7 +2923,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     pocMrg[mergeCand] = tempCS->slice->getRefPic(MrgeRefPicList, MrgrefIdx)->getPOC();
     MrgMv[mergeCand] = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + MrgList].mv;
 #if GDR_ENABLED 
-    if (isEncodeClean)
+    if (isEncodeGdrClean)
     {
       MrgSolid[mergeCand] = mergeCtx.mvSolid[(mergeCand << 1) + MrgList];
       MrgValid[mergeCand] = mergeCtx.mvValid[(mergeCand << 1) + MrgList];
@@ -2955,7 +2955,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     sadWholeBlk[mergeCand] = distParamWholeBlk.distFunc(distParamWholeBlk);
 #if GDR_ENABLED     
     bool allOk = (sadWholeBlk[mergeCand] < bestWholeBlkSad);
-    if (isEncodeClean)
+    if (isEncodeGdrClean)
     {
       bool isSolid = mergeCtx.mvSolid[(mergeCand << 1) + MrgList];
       bool isValid = mergeCtx.mvValid[(mergeCand << 1) + MrgList];
@@ -3015,7 +3015,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     {
       int bitsCand = mergeCand + 1;
 #if GDR_ENABLED 
-      if (isEncodeClean)
+      if (isEncodeGdrClean)
       {
         double cost0, cost1;
 
@@ -3068,7 +3068,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       }
       tempCost = tempCost + (double)bitsCandTB * sqrtLambdaForFirstPass;
 #if GDR_ENABLED 
-      if (isEncodeClean)
+      if (isEncodeGdrClean)
       {
         int idx0 = mergeCand0;
         int idx1 = mergeCand1;
@@ -3122,7 +3122,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     mvBits += mergeCand1;
     double updateCost = (double)sad + (double)(bitsCandTB + mvBits) * sqrtLambdaForFirstPass;
 #if GDR_ENABLED 
-    if (isEncodeClean)
+    if (isEncodeGdrClean)
     {
       int idx0 = mergeCand0;
       int idx1 = mergeCand1;
@@ -3202,7 +3202,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       tempCS->getPredBuf().copyFrom(geoCombinations[candidateIdx]);
 
 #if GDR_ENABLED 
-      if (isEncodeClean)
+      if (isEncodeGdrClean)
       {
         int idx0 = pu.geoMergeIdx0;
         int idx1 = pu.geoMergeIdx1;
@@ -3250,7 +3250,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
   }
 #if GDR_ENABLED
   CodingStructure *cs;
-  bool isEncodeClean = false;
+  bool isEncodeGdrClean = false;
 #endif  
   m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
   const Slice &slice = *tempCS->slice;
@@ -3291,7 +3291,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
     pu.regularMergeFlag = false;
 #if GDR_ENABLED
     cs = pu.cs;
-    isEncodeClean = cs->pcv->isEncoder && ((cs->picHeader->getInGdrPeriod() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
+    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrPeriod() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
     PU::getAffineMergeCand( pu, affineMergeCtx );
 
@@ -3384,7 +3384,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
         }
 
 #if GDR_ENABLED
-        if (isEncodeClean)
+        if (isEncodeGdrClean)
         {
           Mv zero = Mv(0, 0);
           bool isValid = cs->isSubPuClean(pu, &zero);
@@ -3408,7 +3408,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
         }
         double cost = (double)uiSad + (double)uiBitsCand * sqrtLambdaForFirstPass;
 #if GDR_ENABLED
-        if (isEncodeClean)
+        if (isEncodeGdrClean)
         {
           bool isSolid0 = affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][0] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][1] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][2];
           bool isSolid1 = affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][0] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][1] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][2];
@@ -3520,7 +3520,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
       bool isSolid = true;
       bool isValid = true;
 
-      if (isEncodeClean)
+      if (isEncodeGdrClean)
       {
         if (bestIsSkip)
         {
@@ -3652,7 +3652,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
 #endif
   }
 #if GDR_ENABLED
-  const bool isEncodeClean = tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrPeriod() && gdrClean;
+  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrPeriod() && gdrClean;
   bool *MrgSolid = nullptr;
   bool *MrgValid = nullptr;
 #endif
@@ -3664,7 +3664,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
   }
 
 #if GDR_ENABLED 
-  if (isEncodeClean)
+  if (isEncodeGdrClean)
   {
     MrgSolid = new bool[MRG_MAX_NUM_CANDS];
     MrgValid = new bool[MRG_MAX_NUM_CANDS];
@@ -3758,7 +3758,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
       }
       double cost = (double) sad + (double) bitsCand * sqrtLambdaForFirstPass;
 #if GDR_ENABLED
-      if (isEncodeClean)
+      if (isEncodeGdrClean)
       {
         bool isSolid = true;
         bool isValid = true;
@@ -3863,7 +3863,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
             {
               CodingStructure &cs = *pu.cs;
 
-              if (isEncodeClean)
+              if (isEncodeGdrClean)
               {
                 if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx >= 0)
                 {
@@ -3887,7 +3887,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
             m_CABACEstimator->getCtx() = m_CurrCtx->start;
 
 #if GDR_ENABLED
-            if (isEncodeClean)
+            if (isEncodeGdrClean)
             {
               bool mvSolid = true;
               bool mvValid = true;
@@ -3959,7 +3959,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     xCalDebCost( *bestCS, partitioner );
   }
 #if GDR_ENABLED 
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {
     delete[] MrgSolid;
     delete[] MrgValid;
@@ -4118,7 +4118,7 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     bool    testBcw = (bcwIdx != BCW_DEFAULT);
 
 #if GDR_ENABLED    
-  const bool isEncodeClean = tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrPeriod() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrPeriod() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
     m_pcInterSearch->predInterSearch(cu, partitioner);
 
@@ -4141,7 +4141,7 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
 
 #if GDR_ENABLED  
     // 2.0 xCheckRDCostInter: check residual (compare with bestCS)       
-    if (isEncodeClean)
+    if (isEncodeGdrClean)
     {
       bool isClean = true;
 
@@ -4336,7 +4336,7 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
   CU::addPUs( cu );
 
 #if GDR_ENABLED    
-    const bool isEncodeClean = tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrPeriod() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
+    const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrPeriod() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   if (testAltHpelFilter)
   {
@@ -4411,7 +4411,7 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
 
 #if GDR_ENABLED  
   // 2.0 xCheckRDCostInter: check residual (compare with bestCS)        
-  if (isEncodeClean)
+  if (isEncodeGdrClean)
   {
     bool isClean = true;
 

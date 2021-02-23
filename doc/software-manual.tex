@@ -3198,6 +3198,7 @@ Specifies poc number of first GDR
 \Option{GdrPeriod} &
 %\ShortOption{\None} &
 \Default{-1} &
+<<<<<<< HEAD
 Specifies number of frames between GDR picture to the next GDR picture
 \\
 
@@ -3208,11 +3209,37 @@ Specifies number of of frames from GDR picture to the recovery point picture (no
 \\
 
 \Option{GdrNoHash} &
+=======
+Specifies GDR period (note: ph_recovery_poc_cnt will be (GDR period - 1)) 
+\\
+
+\Option{GdrFrequency} &
+%\ShortOption{\None} &
+\Default{-1} &
+Specifies the number of frames before the next GDR picture (e.g. a multiple of GDR period)
+\\
+
+\Option{StartWithGDR} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies if first picture of the bitstream should start with GDR picture 
+\\
+
+\Option{NoHashforGDR} &
+>>>>>>> JVET-U0097:Updated Software-manual, Enable/Disable GDR without recompiling
 %\ShortOption{\None} &
 \Default{true} &
 Specifies not to generate picture hash SEI for GDR/recovering pictures 
 \\
 
+<<<<<<< HEAD
+=======
+\Option{GdrPicOutput} &
+%\ShortOption{\None} &
+\Default{false} &
+Specifies if ph_pic_output_flag should be signaled  
+\\
+>>>>>>> JVET-U0097:Updated Software-manual, Enable/Disable GDR without recompiling
 \end{OptionTableNoShorthand}
 
 

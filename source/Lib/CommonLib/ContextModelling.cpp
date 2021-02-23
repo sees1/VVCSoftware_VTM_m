@@ -367,9 +367,9 @@ void MergeCtx::setMergeInfo( PredictionUnit& pu, int candIdx )
   pu.mvpNum [REF_PIC_LIST_1] = NOT_VALID;
 #if GDR_ENABLED
   CodingStructure &cs = *pu.cs;
-  const bool isEncodeClean = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 
-  if (isEncodeClean) 
+  if (isEncodeGdrClean) 
   {    
     Mv mv0 = pu.mv[REF_PIC_LIST_0];
     Mv mv1 = pu.mv[REF_PIC_LIST_1];
@@ -410,7 +410,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
 
 #if GDR_ENABLED
   const CodingStructure &cs = *pu.cs;  
-  const bool isEncodeClean  = cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
 
   tempIdx = candIdx;
@@ -503,7 +503,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.mv[REF_PIC_LIST_1] = mmvdBaseMv[fPosBaseIdx][1].mv + tempMv[1];
     pu.refIdx[REF_PIC_LIST_1] = refList1;
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       Mv mv0 = pu.mv[REF_PIC_LIST_0];
       Mv mv1 = pu.mv[REF_PIC_LIST_1];
@@ -547,7 +547,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.refIdx[REF_PIC_LIST_1] = -1;
 
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       Mv mv0 = pu.mv[REF_PIC_LIST_0];
       //Mv mv1 = pu.mv[REF_PIC_LIST_1];
@@ -590,7 +590,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.mv[REF_PIC_LIST_1] = mmvdBaseMv[fPosBaseIdx][1].mv + tempMv[1];
     pu.refIdx[REF_PIC_LIST_1] = refList1;
 #if GDR_ENABLED
-    if (isEncodeClean) 
+    if (isEncodeGdrClean) 
     {
       // Mv mv0 = pu.mv[REF_PIC_LIST_0];
       Mv mv1 = pu.mv[REF_PIC_LIST_1];

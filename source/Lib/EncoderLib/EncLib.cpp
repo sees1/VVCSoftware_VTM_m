@@ -1128,8 +1128,16 @@ void EncLib::xInitSPS( SPS& sps )
   /* XXX: may be a good idea to refactor the above into a function
    * that chooses the actual compatibility based upon options */
   sps.setVPSId( m_vps->getVPSId() );
+
 #if GDR_ENABLED
-  sps.setGDREnabledFlag(true);
+  if (m_gdrEnabled)
+  {
+    sps.setGDREnabledFlag(true);
+  }
+  else 
+  {
+    sps.setGDREnabledFlag(false);
+  }
 #else
   sps.setGDREnabledFlag(false);
 #endif
