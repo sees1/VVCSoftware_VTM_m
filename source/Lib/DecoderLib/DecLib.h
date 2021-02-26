@@ -73,6 +73,7 @@ private:
   GeneralHrdParams        m_prevGeneralHrdParams;
 
   int                     m_prevGDRInSameLayerPOC[MAX_VPS_LAYERS]; ///< POC number of the latest GDR picture
+  int                     m_prevGDRInSameLayerRecoveryPOC[MAX_VPS_LAYERS]; ///< Recovery POC number of the latest GDR picture
   NalUnitType             m_associatedIRAPType[MAX_VPS_LAYERS]; ///< NAL unit type of the previous IRAP picture
   int                     m_pocCRA[MAX_VPS_LAYERS];            ///< POC number of the previous CRA picture
   int                     m_associatedIRAPDecodingOrderNumber[MAX_VPS_LAYERS]; ///< Decoding order number of the previous IRAP picture
@@ -119,7 +120,7 @@ private:
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   CacheModel              m_cacheModel;
 #endif
-  bool isRandomAccessSkipPicture(int& iSkipFrame,  int& iPOCLastDisplay, bool mixedNaluInPicFlag);
+  bool isRandomAccessSkipPicture(int& iSkipFrame, int& iPOCLastDisplay, bool mixedNaluInPicFlag, uint32_t layerId);
   Picture*                m_pcPic;
   uint32_t                m_uiSliceSegmentIdx;
   uint32_t                m_prevLayerID;
@@ -133,6 +134,7 @@ private:
   bool                    m_accessUnitEos[MAX_VPS_LAYERS];
   bool                    m_prevSliceSkipped;
   int                     m_skippedPOC;
+  uint32_t                m_skippedLayerID;
   int                     m_lastPOCNoOutputPriorPics;
   bool                    m_isNoOutputPriorPics;
   bool                    m_lastNoOutputBeforeRecoveryFlag[MAX_VPS_LAYERS];    //value of variable NoOutputBeforeRecoveryFlag of the assocated CRA/GDR pic
@@ -228,6 +230,7 @@ public:
   void  updateAssociatedIRAP();
   void  updatePrevGDRInSameLayer();
   void  updatePrevIRAPAndGDRSubpic();
+  bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerPOC[m_pcPic->layerId] + m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
 
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
   bool  getAudIrapOrGdrAuFlag() const       { return m_audIrapOrGdrAuFlag;  }
