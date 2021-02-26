@@ -165,6 +165,9 @@ uint32_t DecApp::decode()
     m_cDecLib.setHTidExternalSetFlag(m_mTidExternalSet);
     m_cDecLib.setTOlsIdxExternalFlag(m_tOlsIdxTidExternalSet);
 
+  bool gdrRecoveryPeriod[MAX_NUM_LAYER_IDS] = { false };
+  bool prevPicSkipped = true;
+
   while (!!bitstreamFile)
   {
     InputNALUnit nalu;
@@ -249,7 +252,40 @@ uint32_t DecApp::decode()
               bPicSkipped = false;
             }
           }
+
+          int skipFrameCounter = m_iSkipFrame;
           m_cDecLib.decode(nalu, m_iSkipFrame, m_iPOCLastDisplay, m_targetOlsIdx);
+
+          if ( prevPicSkipped && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR )
+          {
+            gdrRecoveryPeriod[nalu.m_nuhLayerId] = true;
+          }
+
+          if ( skipFrameCounter == 1 && ( nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR  || nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA ))
+          {
+            skipFrameCounter--;
+          }
+
+          if ( m_iSkipFrame < skipFrameCounter  &&
+              ((nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR)))
+          {
+            if (m_cDecLib.isSliceNaluFirstInAU(true, nalu))
+            {
+              m_cDecLib.checkSeiInPictureUnit();
+              m_cDecLib.resetPictureSeiNalus();
+              m_cDecLib.checkAPSInPictureUnit();
+              m_cDecLib.resetPictureUnitNals();
+              m_cDecLib.resetAccessUnitSeiTids();
+              m_cDecLib.checkSEIInAccessUnit();
+              m_cDecLib.resetAccessUnitSeiPayLoadTypes();
+              m_cDecLib.resetAccessUnitNals();
+              m_cDecLib.resetAccessUnitApsNals();
+              m_cDecLib.resetAccessUnitPicInfo();
+            }
+            bPicSkipped = true;
+            m_iSkipFrame++;   // skipFrame count restore, the real decrement occur at the begin of next frame
+          }
+
           if (nalu.m_nalUnitType == NAL_UNIT_OPI)
           {
             if (!m_cDecLib.getHTidExternalSetFlag() && m_cDecLib.getOPI()->getHtidInfoPresentFlag())
@@ -270,6 +306,12 @@ uint32_t DecApp::decode()
           bPicSkipped = true;
         }
       }
+
+      if( nalu.isSlice() )
+      {
+        prevPicSkipped = bPicSkipped;
+      }
+
       // once an EOS NAL unit appears in the current PU, mark the variable isEosPresentInPu as true
       if (nalu.m_nalUnitType == NAL_UNIT_EOS)
       {
@@ -299,6 +341,14 @@ uint32_t DecApp::decode()
       m_cDecLib.updateAssociatedIRAP();
       m_cDecLib.updatePrevGDRInSameLayer();
       m_cDecLib.updatePrevIRAPAndGDRSubpic();
+
+      if ( gdrRecoveryPeriod[nalu.m_nuhLayerId] )
+      {
+        if ( m_cDecLib.getGDRRecoveryPocReached() )
+        {
+          gdrRecoveryPeriod[nalu.m_nuhLayerId] = false;
+        }
+      }
     }
     else if ( (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS ) &&
       m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId))
@@ -308,6 +358,19 @@ uint32_t DecApp::decode()
 
     if( pcListPic )
     {
+      if ( gdrRecoveryPeriod[nalu.m_nuhLayerId] ) // Suppress YUV and OPL output during GDR recovery
+      {
+        PicList::iterator iterPic = pcListPic->begin();
+        while (iterPic != pcListPic->end())
+        {
+          Picture *pcPic = *(iterPic++);
+          if (pcPic->layerId == nalu.m_nuhLayerId)
+          {
+            pcPic->neededForOutput = false;
+          }
+        }
+      }
+
       if( !m_reconFileName.empty() && !m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].isOpen() )
       {
         const BitDepths &bitDepths=pcListPic->front()->cs->sps->getBitDepths(); // use bit depths of first reconstructed picture.
