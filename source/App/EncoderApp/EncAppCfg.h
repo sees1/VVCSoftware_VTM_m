@@ -222,10 +222,8 @@ protected:
   bool      m_gdrEnabled;
   int       m_gdrPocStart;
   int       m_gdrPeriod;
-  int       m_gdrFrequency;
-  bool      m_bStartWithGdr;
-  bool      m_bNoHashForGdr;
-  bool      m_bGdrPicOutput;
+  int       m_gdrInterval;  
+  bool      m_bNoHashForGdr;  
 #endif
   int       m_iDecodingRefreshType;                           ///< random access type
   int       m_iGOPSize;                                       ///< GOP size of hierarchical structure

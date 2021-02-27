@@ -938,6 +938,9 @@ static bool interHadActive( const ComprCUCtx& ctx )
 
 void EncModeCtrlMTnoRQT::create( const EncCfg& cfg )
 {
+#if GDR_ENABLED
+  m_encCfg = cfg;
+#endif
   CacheBlkInfoCtrl::create();
 #if REUSE_CU_RESULTS
   BestEncInfoCache::create( cfg.getChromaFormatIdc() );
@@ -1266,10 +1269,13 @@ bool EncModeCtrlMTnoRQT::tryMode( const EncTestMode& encTestmode, const CodingSt
   ComprCUCtx& cuECtx = m_ComprCUCtxList.back();
 
   // Fast checks, partitioning depended
-#if !GDR_ENABLED 
-  if (cuECtx.isHashPerfectMatch && encTestmode.type != ETM_MERGE_SKIP && encTestmode.type != ETM_INTER_ME && encTestmode.type != ETM_AFFINE && encTestmode.type != ETM_MERGE_GEO)
+#if GDR_ENABLED 
+  if (!m_encCfg.getGdrEnabled())
   {
-    return false;
+    if (cuECtx.isHashPerfectMatch && encTestmode.type != ETM_MERGE_SKIP && encTestmode.type != ETM_INTER_ME && encTestmode.type != ETM_AFFINE && encTestmode.type != ETM_MERGE_GEO)
+    {
+      return false;
+    }
   }
 #endif
 

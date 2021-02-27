@@ -356,7 +356,7 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv) const
   }
 
   PicHeader     *curPh = curPic->cs->picHeader;
-  bool isCurGdrPicture = curPh->getInGdrPeriod();
+  bool isCurGdrPicture = curPh->getInGdrInterval();
 
   if (isCurGdrPicture)
   {
@@ -416,7 +416,7 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, const Picture* 
     return false;
   }
 
-  bool isRefGdrPicture = refPh->getInGdrPeriod();
+  bool isRefGdrPicture = refPh->getInGdrInterval();
 
   if (isRefGdrPicture)
   {
@@ -497,7 +497,7 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
     return false;
   }
     
-  bool isRefGdrPicture = refPh->getInGdrPeriod();
+  bool isRefGdrPicture = refPh->getInGdrInterval();
 
   if (isRefGdrPicture)
   {    
@@ -591,7 +591,7 @@ bool CodingStructure::isClean(const Position &IntPos, Mv FracMv, RefPicList e, i
     return false;
   }
 
-  bool isRefGdrPicture = refPh->getInGdrPeriod();
+  bool isRefGdrPicture = refPh->getInGdrInterval();
 
   if (isRefGdrPicture)
   {
@@ -655,7 +655,7 @@ bool CodingStructure::isClean(const Position &IntPos, RefPicList e, int refIdx) 
   }
 
   PicHeader     *refPh = refPic->cs->picHeader;
-  bool isRefGdrPicture = refPh->getInGdrPeriod();
+  bool isRefGdrPicture = refPh->getInGdrInterval();
 
   if (isRefGdrPicture)
   {                
@@ -692,7 +692,7 @@ bool CodingStructure::isClean(const Position &IntPos, const Picture* const refPi
   }
 
   PicHeader     *refPh = refPic->cs->picHeader;
-  bool isRefGdrPicture = refPh->getInGdrPeriod();
+  bool isRefGdrPicture = refPh->getInGdrInterval();
 
   if (isRefGdrPicture)
   {
@@ -730,7 +730,7 @@ bool CodingStructure::isClean(const int Intx, const int Inty, const ChannelType 
          pos in dirty area -> false
   */
   PicHeader     *curPh = picHeader;
-  bool isCurGdrPicture = curPh->getInGdrPeriod();
+  bool isCurGdrPicture = curPh->getInGdrInterval();
   if (isCurGdrPicture)
   {
     int virboundary_endx = curPh->getVirtualBoundariesPosX(0);

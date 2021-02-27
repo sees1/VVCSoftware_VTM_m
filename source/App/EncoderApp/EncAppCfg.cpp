@@ -1010,10 +1010,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("GdrEnabled",                                      m_gdrEnabled,                                     false, "GDR enabled")
   ("GdrPocStart",                                     m_gdrPocStart,                                       -1, "GDR poc start")
   ("GdrPeriod",                                       m_gdrPeriod,                                         -1, "GDR period")
-  ("GdrFrequency",                                    m_gdrFrequency,                                      -1, "GDR freqency")
-  ("StartWithGDR",                                    m_bStartWithGdr,                                  false, "Start bitstream with GDR")
-  ("NoHashforGDR",                                    m_bNoHashForGdr,                                   true, "No Hash for GDR")
-  ("GdrPicOutput",                                    m_bGdrPicOutput,                                  false, "Picture Output for GDR")
+  ("GdrInterval",                                     m_gdrInterval,                                      -1, "GDR freqency")  
+  ("NoHashforGDR",                                    m_bNoHashForGdr,                                   true, "No Hash for GDR")  
 #endif
   ("DecodingRefreshType,-dr",                         m_iDecodingRefreshType,                               0, "Intra refresh type (0:none 1:CRA 2:IDR 3:RecPointSEI)")
   ("GOPSize,g",                                       m_iGOPSize,                                           1, "GOP size of temporal structure")
@@ -1546,22 +1544,20 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_BIO  = false;
     m_DMVR = false;
     m_SMVD = false;
+    
+    if (m_gdrPeriod < 0)
+    {
+      m_gdrPeriod = m_iFrameRate * 2;
+    }
 
-
-    if (m_gdrFrequency < 0)
-      m_gdrFrequency = 2;
+    if (m_gdrInterval < 0)
+    {
+      m_gdrInterval = m_iFrameRate;
+    }
 
     if (m_gdrPocStart < 0)
     {
-      if (m_iIntraPeriod > 0)
-        m_gdrPocStart = m_iIntraPeriod;
-      else
-        m_gdrPocStart = m_iFrameRate * m_gdrFrequency;
-    }
-
-    if (m_gdrPeriod < 0)
-    {
-      m_gdrPeriod = m_iFrameRate;
+      m_gdrPocStart = m_gdrPeriod;
     }
 
     if (m_iIntraPeriod == -1)
@@ -1570,7 +1566,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       if (m_gdrPocStart % m_iFrameRate != 0)
         m_iIntraPeriod = -1;
       else
-        m_iIntraPeriod = m_iFrameRate * m_gdrFrequency;
+        m_iIntraPeriod = m_gdrPeriod;
     }
   }
 #endif

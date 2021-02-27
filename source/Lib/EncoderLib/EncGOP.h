@@ -184,7 +184,7 @@ private:
 
   AUWriterIf*             m_AUWriterIf;
 #if GDR_ENABLED
-  int                     m_lastGdrPeriodPoc;  
+  int                     m_lastGdrIntervalPoc;  
 #endif
 
 #if JVET_O0756_CALCULATE_HDRMETRICS
@@ -238,8 +238,8 @@ public:
   int       getLastLTRefPoc() const { return m_lastLTRefPoc; }
 
 #if GDR_ENABLED
-  void      setLastGdrPeriodPoc(int p)  { m_lastGdrPeriodPoc = p; }
-  int       getLastGdrPeriodPoc() const { return m_lastGdrPeriodPoc; }
+  void      setLastGdrIntervalPoc(int p)  { m_lastGdrIntervalPoc = p; }
+  int       getLastGdrIntervalPoc() const { return m_lastGdrIntervalPoc; }
 #endif
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 

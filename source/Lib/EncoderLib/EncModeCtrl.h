@@ -915,6 +915,9 @@ class EncModeCtrlMTnoRQT : public EncModeCtrl, public CacheBlkInfoCtrl
   };
 
   unsigned m_skipThreshold;
+#if GDR_ENABLED
+  EncCfg m_encCfg;
+#endif
 
 public:
 

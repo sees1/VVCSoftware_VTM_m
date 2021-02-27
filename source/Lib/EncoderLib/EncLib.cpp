@@ -1662,14 +1662,7 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
 
   pps.setUseWP( m_useWeightedPred );
   pps.setWPBiPred( m_useWeightedBiPred );
-#if GDR_ENABLED
-  if (getGdrPicOutput())
-    pps.setOutputFlagPresentFlag( true );
-  else
-    pps.setOutputFlagPresentFlag(false);
-#else
   pps.setOutputFlagPresentFlag(false);
-#endif
 
   if ( getDeblockingFilterMetric() )
   {

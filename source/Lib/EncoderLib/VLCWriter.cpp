@@ -1549,7 +1549,7 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
   {
     slice = picHeader->getPic()->cs->slice;
   }
-WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
+  WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
   if (picHeader->getGdrOrIrapPicFlag())
   {
@@ -1581,7 +1581,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
 #if GDR_ENC_TRACE
   printf("-gdr_pic_flag:%d\n", picHeader->getGdrPicFlag());  
   printf("-recovery_poc_cnt:%d\n", picHeader->getRecoveryPocCnt());
-  printf("-InGdrPeriod:%d\n", picHeader->getInGdrPeriod());
+  printf("-InGdrInterval:%d\n", picHeader->getInGdrInterval());
 #endif
   // PH extra bits are not written in the reference encoder
   // as these bits are reserved for future extensions

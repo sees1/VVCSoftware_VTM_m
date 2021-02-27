@@ -472,7 +472,7 @@ bool IntraSearch::isValidIntraPredLuma(PredictionUnit &pu, int luma_dirMode)
   bool isValid  = true;  
   PicHeader *ph = pu.cs->picHeader;
 
-  if (ph->getInGdrPeriod()) 
+  if (ph->getInGdrInterval()) 
   {
     int x = pu.Y().x;
 
@@ -496,7 +496,7 @@ bool IntraSearch::isValidIntraPredChroma(PredictionUnit &pu, int luma_dirMode, i
   CodingStructure *cs = pu.cs;
   PicHeader       *ph = cs->picHeader;
 
-  if (ph->getInGdrPeriod()) 
+  if (ph->getInGdrInterval()) 
   {
     // note: chroma cordinate
     int cbX = pu.Cb().x;
@@ -638,7 +638,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
 
   auto &pu = *cu.firstPU;
 #if GDR_ENABLED  
-  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   bool validReturn = false;
   {
@@ -1799,7 +1799,11 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit &cu, Partitioner &partitioner
 
         //----- compare -----
 #if GDR_ENABLED
-        if (dCost < dBestCost && isValidIntraPredChroma(pu, (int)PU::getCoLocatedIntraLumaMode(pu), chromaIntraMode))
+        bool allOk = (dCost < dBestCost);
+        if (m_pcEncCfg->getGdrEnabled())
+          allOk = allOk && dBestCost && isValidIntraPredChroma(pu, (int)PU::getCoLocatedIntraLumaMode(pu), chromaIntraMode);
+
+        if (allOk)
 #else
         if( dCost < dBestCost )
 #endif

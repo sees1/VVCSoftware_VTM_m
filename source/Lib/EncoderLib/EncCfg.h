@@ -303,13 +303,11 @@ protected:
   unsigned              m_subPicIdLen;
   std::vector<uint16_t> m_subPicId;
 #if GDR_ENABLED
-  bool      m_gdrEnabled;
-  unsigned  m_gdrPeriod;
+  bool      m_gdrEnabled;  
   unsigned  m_gdrPocStart;
-  int       m_gdrFrequency;
-  bool      m_bStartWithGdr;
-  bool      m_bNoHashForGdr;
-  bool      m_bGdrPicOutput;
+  unsigned  m_gdrPeriod;
+  int       m_gdrInterval;  
+  bool      m_bNoHashForGdr;  
 #endif
   bool      m_useSplitConsOverride;
   unsigned  m_uiMinQT[3]; //0: I slice; 1: P/B slice, 2: I slice chroma
@@ -1009,18 +1007,14 @@ public:
   void      setGdrEnabled(bool b)       { m_gdrEnabled = b;    }
   void      setGdrPeriod(unsigned  u)   { m_gdrPeriod   = u;   }
   void      setGdrPocStart(unsigned  u) { m_gdrPocStart = u;   }
-  void      setGdrFrequency(int i)      { m_gdrFrequency = i;  }
-  void      setStartWithGdr(bool b)     { m_bStartWithGdr = b; }
-  void      setNoHashForGdr(bool b)     { m_bNoHashForGdr = b; }  
-  void      setGdrPicOutput(bool b)     { m_bGdrPicOutput = b; }
+  void      setGdrInterval(int i)       { m_gdrInterval = i;   }  
+  void      setNoHashForGdr(bool b)     { m_bNoHashForGdr = b; }    
 
   bool      getGdrEnabled()             { return m_gdrEnabled;    }
   unsigned  getGdrPeriod()              { return m_gdrPeriod;     }
   unsigned  getGdrPocStart()            { return m_gdrPocStart;   }
-  int       getGdrFrequency()           { return m_gdrFrequency;  }
-  bool      getStartWithGdr()           { return m_bStartWithGdr; }
-  bool      getNoHashForGdr()           { return m_bNoHashForGdr; }
-  bool      getGdrPicOutput()           { return m_bGdrPicOutput; }
+  int       getGdrInterval()            { return m_gdrInterval;   }  
+  bool      getNoHashForGdr()           { return m_bNoHashForGdr; }  
 #endif
   void      setMaxMTTHierarchyDepth         ( unsigned uiMaxMTTHierarchyDepth, unsigned uiMaxMTTHierarchyDepthI, unsigned uiMaxMTTHierarchyDepthIChroma )
                                                              { m_uiMaxMTTHierarchyDepth = uiMaxMTTHierarchyDepth; m_uiMaxMTTHierarchyDepthI = uiMaxMTTHierarchyDepthI; m_uiMaxMTTHierarchyDepthIChroma = uiMaxMTTHierarchyDepthIChroma; }

@@ -313,7 +313,7 @@ void EncGOP::init ( EncLib* pcEncLib )
   }
 #endif
 #if GDR_ENABLED
-  m_lastGdrPeriodPoc = -1;
+  m_lastGdrIntervalPoc = -1;
 #endif
 }
 
@@ -1953,7 +1953,7 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
     picHeader->setLmcsChromaResidualScaleFlag(m_pcReshaper->getSliceReshaperInfo().getSliceReshapeChromaAdj() == 1);
 
 #if GDR_ENABLED   
-    if (picHeader->getInGdrPeriod()) 
+    if (picHeader->getInGdrInterval()) 
     {
       picHeader->setLmcsChromaResidualScaleFlag(false);
     }   
@@ -2164,7 +2164,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     }
     pcSlice->setTLayer(m_pcCfg->getGOPEntry(iGOPid).m_temporalId);
 #if GDR_ENABLED
-    if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % (m_pcCfg->getGdrPeriod() * m_pcCfg->getGdrFrequency()) == 0)) 
+    if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0)) 
     {
       pcSlice->setSliceType(B_SLICE);
     }
@@ -2949,7 +2949,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         picHeader->setLmcsEnabledFlag(true);
 #if GDR_ENABLED
-        if (picHeader->getInGdrPeriod()) 
+        if (picHeader->getInGdrInterval()) 
         {
           picHeader->setLmcsChromaResidualScaleFlag(false);
         }       
@@ -3612,7 +3612,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       std::string digestStr;
 #if GDR_ENABLED
       // note : generate hash sei only for non-gdr pictures
-      bool genHash = !(m_pcCfg->getNoHashForGdr() && pcSlice->getPicHeader()->getInGdrPeriod());
+      bool genHash = !(m_pcCfg->getNoHashForGdr() && pcSlice->getPicHeader()->getInGdrInterval());
       if (m_pcCfg->getDecodedPictureHashSEIType() != HASHTYPE_NONE && genHash)
 #else
       if (m_pcCfg->getDecodedPictureHashSEIType()!=HASHTYPE_NONE)
@@ -3658,7 +3658,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       xWriteTrailingSEIMessages(trailingSeiMessages, accessUnit, pcSlice->getTLayer());
 
 #if GDR_ENABLED
-      if (!(m_pcCfg->getNoHashForGdr() && pcSlice->getPicHeader()->getInGdrPeriod())) 
+      if (!(m_pcCfg->getNoHashForGdr() && pcSlice->getPicHeader()->getInGdrInterval())) 
       {
           printHash(m_pcCfg->getDecodedPictureHashSEIType(), digestStr);
       }
@@ -5077,18 +5077,7 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
 {
   if (pocCurr == 0)
   {
-#if GDR_ENABLED    
-    if (m_pcCfg->getStartWithGdr()) 
-    {
-      return NAL_UNIT_CODED_SLICE_GDR;
-    }
-    else 
-    {
-      return NAL_UNIT_CODED_SLICE_IDR_N_LP;
-    }
-#else
     return NAL_UNIT_CODED_SLICE_IDR_N_LP;
-#endif
   }
 
   if (m_pcCfg->getEfficientFieldIRAPEnabled() && isField && pocCurr == (m_pcCfg->getUseCompositeRef() ? 2: 1))
@@ -5101,7 +5090,7 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
   if (m_pcCfg->getDecodingRefreshType() == 3 && (pocCurr >= m_pcCfg->getGdrPocStart()))
   {    
     int m = pocCurr - m_pcCfg->getGdrPocStart();
-    int n = m_pcCfg->getGdrPeriod() * m_pcCfg->getGdrFrequency();
+    int n = m_pcCfg->getGdrPeriod();
     if (m % n == 0) 
     {
       return NAL_UNIT_CODED_SLICE_GDR;
@@ -5149,7 +5138,7 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
     }
   }
 #if GDR_ENABLED    
-  if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % (m_pcCfg->getGdrPeriod() * m_pcCfg->getGdrFrequency()) == 0))
+  if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
     return NAL_UNIT_CODED_SLICE_TRAIL;
   else
     return NAL_UNIT_CODED_SLICE_TRAIL;

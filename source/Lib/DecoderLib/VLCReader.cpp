@@ -4348,11 +4348,11 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 
   if (getLastGdrPoc() > 0 && (getLastGdrPoc() <= cur_poc) && (cur_poc < (getLastGdrPoc() + recovery_poc_cnt))) 
   {
-    picHeader->setInGdrPeriod(true);
+    picHeader->setInGdrInterval(true);
   }  
   else 
   {
-    picHeader->setInGdrPeriod(false);
+    picHeader->setInGdrInterval(false);
   }
 #endif
 
@@ -4360,7 +4360,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
   printf("-gdr_pic_flag:%d\n", picHeader->getGdrPicFlag() ? 1 : 0);
   printf("-recovery_poc_cnt:%d\n", picHeader->getRecoveryPocCnt());
 #if GDR_ENABLED
-  printf("-inGdrPeriod:%d\n", picHeader->getInGdrPeriod());
+  printf("-inGdrInterval:%d\n", picHeader->getInGdrInterval());
 #endif
 
   printf("-lmcs_enable : %d\n", picHeader->getLmcsEnabledFlag() ? 1 : 0);

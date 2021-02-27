@@ -525,10 +525,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setGdrEnabled                                        ( m_gdrEnabled );
   m_cEncLib.setGdrPeriod                                         ( m_gdrPeriod );
   m_cEncLib.setGdrPocStart                                       ( m_gdrPocStart );
-  m_cEncLib.setGdrFrequency                                      ( m_gdrFrequency);
-  m_cEncLib.setStartWithGdr                                      ( m_bStartWithGdr );
-  m_cEncLib.setNoHashForGdr                                      ( m_bNoHashForGdr );
-  m_cEncLib.setGdrPicOutput                                      ( m_bGdrPicOutput );
+  m_cEncLib.setGdrInterval                                       ( m_gdrInterval);  
+  m_cEncLib.setNoHashForGdr                                      ( m_bNoHashForGdr );  
 #endif
   m_cEncLib.setDecodingRefreshType                               ( m_iDecodingRefreshType );
   m_cEncLib.setGOPSize                                           ( m_iGOPSize );

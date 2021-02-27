@@ -556,83 +556,86 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 
   m_modeCtrl->initCULevel( partitioner, *tempCS );
 #if GDR_ENABLED 
-  bool isCurGdrPicture = slice.getPicHeader()->getInGdrPeriod();
-
-  // 1.0 applicable to inter picture only  
-  if (isCurGdrPicture)
+  if (m_pcEncCfg->getGdrEnabled())
   {
-    int gdrPocStart = m_pcEncCfg->getGdrPocStart();
-    int gdrPeriod = m_pcEncCfg->getGdrPeriod();
+    bool isCurGdrPicture = slice.getPicHeader()->getInGdrInterval();
 
-    int picWidth = slice.getPPS()->getPicWidthInLumaSamples();
-    int m1, m2, n1;
-
-    int curPoc = slice.getPOC();
-    int gdrPoc = (curPoc - gdrPocStart) % gdrPeriod;
-
-    int begGdrX = 0;
-    int endGdrX = 0;
-
-    double dd = (picWidth / (double)gdrPeriod);
-    int mm = (int)((picWidth / (double)gdrPeriod) + 0.49999);
-    m1 = ((mm + 7) >> 3) << 3;
-    m2 = ((mm + 0) >> 3) << 3;
-
-    if (dd > mm && m1 == m2)
+    // 1.0 applicable to inter picture only  
+    if (isCurGdrPicture)
     {
-      m1 = m1 + 8;
-    }
+      int gdrPocStart = m_pcEncCfg->getGdrPocStart();
+      int gdrInterval = m_pcEncCfg->getGdrInterval();
 
-    n1 = (picWidth - m2 * gdrPeriod) / 8;
+      int picWidth = slice.getPPS()->getPicWidthInLumaSamples();
+      int m1, m2, n1;
 
-    if (gdrPoc < n1)
-    {
-      begGdrX = m1 * gdrPoc;
-      endGdrX = begGdrX + m1;
-    }
-    else
-    {
-      begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
-      endGdrX = begGdrX + m2;
-      if (picWidth <= endGdrX)
+      int curPoc = slice.getPOC();
+      int gdrPoc = (curPoc - gdrPocStart) % gdrInterval;
+
+      int begGdrX = 0;
+      int endGdrX = 0;
+
+      double dd = (picWidth / (double)gdrInterval);
+      int mm = (int)((picWidth / (double)gdrInterval) + 0.49999);
+      m1 = ((mm + 7) >> 3) << 3;
+      m2 = ((mm + 0) >> 3) << 3;
+
+      if (dd > mm && m1 == m2)
       {
-        endGdrX = picWidth;
-        endGdrX = picWidth;
+        m1 = m1 + 8;
       }
-    }
 
-    bool isInRefreshArea = tempCS->withinRefresh(begGdrX, endGdrX);
+      n1 = (picWidth - m2 * gdrInterval) / 8;
 
-    if (isInRefreshArea)
-    {
-      m_modeCtrl->forceIntraMode();
-    }
-    else if (tempCS->containRefresh(begGdrX, endGdrX) || tempCS->overlapRefresh(begGdrX, endGdrX))
-    {
-      // 1.3.1 enable only vertical splits (QT, BT_V, TT_V)                  
-      m_modeCtrl->forceVerSplitOnly();
-
-      // 1.3.2 remove TT_V if it does not satisfy the condition
-      if (tempCS->refreshCrossTTV(begGdrX, endGdrX))
+      if (gdrPoc < n1)
       {
-        m_modeCtrl->forceRemoveTTV();
+        begGdrX = m1 * gdrPoc;
+        endGdrX = begGdrX + m1;
       }
-    }
+      else
+      {
+        begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
+        endGdrX = begGdrX + m2;
+        if (picWidth <= endGdrX)
+        {
+          endGdrX = picWidth;
+          endGdrX = picWidth;
+        }
+      }
 
-    if (tempCS->area.lwidth() != tempCS->area.lheight())
-    {
-      m_modeCtrl->forceRemoveQT();
-    }
+      bool isInRefreshArea = tempCS->withinRefresh(begGdrX, endGdrX);
 
-    if (!m_modeCtrl->anyPredModeLeft())
-    {
-      m_modeCtrl->forceRemoveDontSplit();
-    }
+      if (isInRefreshArea)
+      {
+        m_modeCtrl->forceIntraMode();
+      }
+      else if (tempCS->containRefresh(begGdrX, endGdrX) || tempCS->overlapRefresh(begGdrX, endGdrX))
+      {
+        // 1.3.1 enable only vertical splits (QT, BT_V, TT_V)                  
+        m_modeCtrl->forceVerSplitOnly();
 
-    if (isInRefreshArea && !m_modeCtrl->anyIntraIBCMode() && (tempCS->area.lwidth() == 4 || tempCS->area.lheight() == 4))
-    {
-      m_modeCtrl->finishCULevel(partitioner);
-      return;
+        // 1.3.2 remove TT_V if it does not satisfy the condition
+        if (tempCS->refreshCrossTTV(begGdrX, endGdrX))
+        {
+          m_modeCtrl->forceRemoveTTV();
+        }
+      }
+
+      if (tempCS->area.lwidth() != tempCS->area.lheight())
+      {
+        m_modeCtrl->forceRemoveQT();
+      }
+
+      if (!m_modeCtrl->anyPredModeLeft())
+      {
+        m_modeCtrl->forceRemoveDontSplit();
+      }
+
+      if (isInRefreshArea && !m_modeCtrl->anyIntraIBCMode() && (tempCS->area.lwidth() == 4 || tempCS->area.lheight() == 4))
+      {
+        m_modeCtrl->finishCULevel(partitioner);
+        return;
+      }
     }
   }
 #endif
@@ -2151,7 +2154,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
     pu.regularMergeFlag = true;
 #if GDR_ENABLED  
     cs = pu.cs;
-    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrPeriod() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
+    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrInterval() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   }
   bool candHasNoResidual[MRG_MAX_NUM_CANDS + MMVD_ADD_NUM];
@@ -2871,7 +2874,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   PredictionUnit &pu = tempCS->addPU(cu, pm.chType);
 #if GDR_ENABLED  
   CodingStructure &cs = *pu.cs;
-  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrPeriod() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   
   pu.mergeFlag = true;
@@ -3291,7 +3294,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
     pu.regularMergeFlag = false;
 #if GDR_ENABLED
     cs = pu.cs;
-    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrPeriod() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
+    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrInterval() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
     PU::getAffineMergeCand( pu, affineMergeCtx );
 
@@ -3652,7 +3655,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
 #endif
   }
 #if GDR_ENABLED
-  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrPeriod() && gdrClean;
+  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrInterval() && gdrClean;
   bool *MrgSolid = nullptr;
   bool *MrgValid = nullptr;
 #endif
@@ -4118,7 +4121,7 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     bool    testBcw = (bcwIdx != BCW_DEFAULT);
 
 #if GDR_ENABLED    
-  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrPeriod() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
+  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrInterval() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
     m_pcInterSearch->predInterSearch(cu, partitioner);
 
@@ -4336,7 +4339,7 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
   CU::addPUs( cu );
 
 #if GDR_ENABLED    
-    const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrPeriod() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
+    const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrInterval() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   if (testAltHpelFilter)
   {

@@ -439,7 +439,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
       {
         eSliceType = (pocLast == 0 || (pocCurr - (isField ? 1 : 0)) % (m_pcCfg->getIntraPeriod() * multipleFactor) == 0 || m_pcGOPEncoder->getGOPSize() == 0) && (!useIlRef) ? I_SLICE : eSliceType;
 #if GDR_ENABLED
-        if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % (m_pcCfg->getGdrPeriod() * m_pcCfg->getGdrFrequency()) == 0)) 
+        if (m_pcCfg->getGdrEnabled() && (pocCurr >= m_pcCfg->getGdrPocStart()) && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
         {
           eSliceType = B_SLICE;
         }
@@ -610,7 +610,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
         {
           eSliceType = (pocLast == 0 || (pocCurr - (isField ? 1 : 0)) % (m_pcCfg->getIntraPeriod() * multipleFactor) == 0 || m_pcGOPEncoder->getGOPSize() == 0) && (!useIlRef) ? I_SLICE : eSliceType;
 #if GDR_ENABLED
-          if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % (m_pcCfg->getGdrPeriod() * m_pcCfg->getGdrFrequency()) == 0)) 
+          if (m_pcCfg->getGdrEnabled() && (pocCurr >= m_pcCfg->getGdrPocStart()) && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
           {
             eSliceType = B_SLICE;
           }
@@ -718,130 +718,117 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
     m_pcCuEncoder->getIbcHashMap().init( pcPic->cs->pps->getPicWidthInLumaSamples(), pcPic->cs->pps->getPicHeightInLumaSamples() );
   }
 #if GDR_ENABLED
-  int gdrPocStart   = m_pcCuEncoder->getEncCfg()->getGdrPocStart();
-  int gdrPeriod     = m_pcCuEncoder->getEncCfg()->getGdrPeriod();
-  int gdr_frequency = m_pcCuEncoder->getEncCfg()->getGdrFrequency();
-
-  int picWidth    = rpcSlice->getPPS()->getPicWidthInLumaSamples();  
-  
-  int curPoc      = rpcSlice->getPOC();
-  int gdrPoc      = (curPoc - gdrPocStart) % gdrPeriod;  
-
-  pcPic->cs->picHeader->setGdrPicFlag(false);
-  pcPic->cs->picHeader->setRecoveryPocCnt(0);
-  pcPic->cs->picHeader->setInGdrPeriod(false);
-  
-  pcPic->cs->picHeader->setVirtualBoundariesPresentFlag(false);    
-
-  int  offset          = (curPoc < gdrPocStart) ? 0 : (((curPoc - gdrPocStart) / gdrPeriod) * gdrPeriod);
-  int  actualGdrStart  = gdrPocStart + offset;
-  int  actualGdrPeriod = min(gdrPeriod, (int)(pcPic->getPicWidthInLumaSamples() / 8));
-  int  actualGdrEndPoc = actualGdrStart + actualGdrPeriod - 1;
-
-  bool isActualGdrPeriod    = (curPoc >= gdrPocStart) && ((((curPoc - gdrPocStart) / gdrPeriod) % gdr_frequency) == 0);
-  bool isGdrPeriodOver      = (isActualGdrPeriod) && (curPoc > actualGdrEndPoc);
-  bool isGdrPic             = (actualGdrStart == curPoc);
-
-#if GDR_ENC_TRACE
-  printf("\n");
-  printf("-poc:%d actualGdrStart:%d actualGdrPeriod:%d actualGdrEndPoc:%d\n", rpcSlice->getPOC(), actualGdrStart, actualGdrPeriod, actualGdrEndPoc);
-#endif
-
-  // for first picture of the sequence (GDR picture with recovery_poc_cnt = 0)
-  if (curPoc == 0 && m_pcCfg->getStartWithGdr())
+  if (m_pcCfg->getGdrEnabled())
   {
-    pcPic->cs->picHeader->setGdrOrIrapPicFlag(true);
-    pcPic->cs->picHeader->setGdrPicFlag(true);
+    int gdrPocStart = m_pcCuEncoder->getEncCfg()->getGdrPocStart();
+    int gdrPeriod = m_pcCuEncoder->getEncCfg()->getGdrPeriod();
+    int gdrInterval = m_pcCuEncoder->getEncCfg()->getGdrInterval();
 
-    pcPic->cs->picHeader->setInGdrPeriod(true);
-    pcPic->cs->picHeader->setVirtualBoundariesPresentFlag(true);
+    int picWidth = rpcSlice->getPPS()->getPicWidthInLumaSamples();
 
-    if (m_pcCfg->getGdrPicOutput())
-      pcPic->cs->picHeader->setPicOutputFlag(true);
-    else
-      pcPic->cs->picHeader->setPicOutputFlag(false);
-    
+    int curPoc = rpcSlice->getPOC();
+    int gdrPoc = (curPoc - gdrPocStart) % gdrPeriod;
+
+    pcPic->cs->picHeader->setGdrPicFlag(false);
     pcPic->cs->picHeader->setRecoveryPocCnt(0);
-      
-    pcPic->cs->picHeader->setNumHorVirtualBoundaries(0);
-    pcPic->cs->picHeader->setNumVerVirtualBoundaries(1);
-    pcPic->cs->picHeader->setVirtualBoundariesPosX(picWidth, 0);
-  }
-  // for none gdr period pictures
-  else if ((curPoc < gdrPocStart) || !isActualGdrPeriod || isGdrPeriodOver)
-  {
-    pcPic->cs->picHeader->setInGdrPeriod(false);
+    pcPic->cs->picHeader->setInGdrInterval(false);
+
     pcPic->cs->picHeader->setVirtualBoundariesPresentFlag(false);
 
-    pcPic->cs->picHeader->setNumHorVirtualBoundaries(0);
-    pcPic->cs->picHeader->setNumVerVirtualBoundaries(0);
+    int  offset = (curPoc < gdrPocStart) ? 0 : (((curPoc - gdrPocStart) / gdrPeriod) * gdrPeriod);
+    int  actualGdrStart = gdrPocStart + offset;
+    int  actualGdrInterval = min(gdrInterval, (int)(pcPic->getPicWidthInLumaSamples() / 8));
+    int  recoveryPocCnt = actualGdrInterval - 1;
+    int  recoveryPicPoc = actualGdrStart + recoveryPocCnt;
 
-#if GDR_ENC_TRACE    
-    printf("-poc:%d no virtual boundary\n", rpcSlice->getPOC());
-#endif
-  }
-  // for gdr period pictures
-  else 
-  {             
-    pcPic->cs->picHeader->setInGdrPeriod(true);
-    pcPic->cs->picHeader->setVirtualBoundariesPresentFlag(true);
-
-    if (m_pcCfg->getGdrPicOutput())
-      pcPic->cs->picHeader->setPicOutputFlag(true);
-    else
-      pcPic->cs->picHeader->setPicOutputFlag(false);
-
-    if (isGdrPic)
-    {
-      pcPic->cs->picHeader->setGdrOrIrapPicFlag(true);
-      pcPic->cs->picHeader->setGdrPicFlag(true);
-      
-      pcPic->cs->picHeader->setRecoveryPocCnt(actualGdrPeriod);
-      m_pcGOPEncoder->setLastGdrPeriodPoc(actualGdrStart + actualGdrPeriod - 1);
-    }
-
-    pcPic->cs->picHeader->setNumHorVirtualBoundaries(0);
-    pcPic->cs->picHeader->setNumVerVirtualBoundaries(1);
-
-    int begGdrX;
-    int endGdrX;
-    int m1, m2, n1;
-
-    double dd = (picWidth / (double)gdrPeriod);
-    int mm = (int)((picWidth / (double)gdrPeriod) + 0.49999);
-    m1 = ((mm + 7) >> 3) << 3;
-    m2 = ((mm + 0) >> 3) << 3;
-
-    if (dd > mm && m1 == m2)
-    {
-      m1 = m1 + 8;
-    }
-     
-    n1 = (picWidth - m2 * gdrPeriod) / 8;    
-
-    if (gdrPoc < n1)
-    {
-      begGdrX = m1 * gdrPoc;
-      endGdrX = begGdrX + m1;
-    }
-    else
-    {
-      begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
-      endGdrX   = begGdrX + m2;
-	    if (picWidth <= begGdrX)
-	    {
-          begGdrX = picWidth;
-          endGdrX = picWidth;
-	    }
-    }
-         
-    pcPic->cs->picHeader->setVirtualBoundariesPosX(endGdrX, 0);
+    bool isInGdrInterval = (curPoc >= actualGdrStart) && (curPoc < recoveryPicPoc);
+    bool isOutGdrInterval = !isInGdrInterval;
+    bool isGdrPic = (actualGdrStart == curPoc);
 
 #if GDR_ENC_TRACE
     printf("\n");
-    printf("-poc:%d beg:%d end:%d\n", rpcSlice->getPOC(), begGdrX, endGdrX);
+    printf("-poc:%d gdrPocStart:%d actualGdrStart:%d actualGdrInterval:%d actualGdrEndPoc:%d\n", rpcSlice->getPOC(), gdrPocStart, actualGdrStart, actualGdrInterval, recoveryPicPoc - 1);
+#endif
+
+    // for none gdr period pictures
+    if ((curPoc < gdrPocStart) || isOutGdrInterval)
+    {
+      pcPic->cs->picHeader->setInGdrInterval(false);
+      pcPic->cs->picHeader->setVirtualBoundariesPresentFlag(false);
+
+      pcPic->cs->picHeader->setNumHorVirtualBoundaries(0);
+      pcPic->cs->picHeader->setNumVerVirtualBoundaries(0);
+
+#if GDR_ENC_TRACE    
+      printf("-poc:%d no virtual boundary\n", rpcSlice->getPOC());
+#endif
+    }
+    // for gdr inteval pictures
+    else
+    {
+      if (curPoc == recoveryPicPoc)
+      {
+        pcPic->cs->picHeader->setInGdrInterval(false);
+      }
+      else
+      {
+        pcPic->cs->picHeader->setInGdrInterval(true);
+      }
+
+      pcPic->cs->picHeader->setVirtualBoundariesPresentFlag(true);
+
+      if (isGdrPic)
+      {
+        pcPic->cs->picHeader->setGdrOrIrapPicFlag(true);
+        pcPic->cs->picHeader->setGdrPicFlag(true);
+
+        pcPic->cs->picHeader->setRecoveryPocCnt(recoveryPocCnt);
+        m_pcGOPEncoder->setLastGdrIntervalPoc(recoveryPicPoc - 1);
+      }
+
+      pcPic->cs->picHeader->setNumHorVirtualBoundaries(0);
+      pcPic->cs->picHeader->setNumVerVirtualBoundaries(1);
+
+      int begGdrX;
+      int endGdrX;
+      int m1, m2, n1;
+
+      double dd = (picWidth / (double)gdrInterval);
+      int mm = (int)((picWidth / (double)gdrInterval) + 0.49999);
+      m1 = ((mm + 7) >> 3) << 3;
+      m2 = ((mm + 0) >> 3) << 3;
+
+      if (dd > mm && m1 == m2)
+      {
+        m1 = m1 + 8;
+      }
+
+      n1 = (picWidth - m2 * gdrInterval) / 8;
+
+      if (gdrPoc < n1)
+      {
+        begGdrX = m1 * gdrPoc;
+        endGdrX = begGdrX + m1;
+      }
+      else
+      {
+        begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
+        endGdrX = begGdrX + m2;
+        if (picWidth <= begGdrX)
+        {
+          begGdrX = picWidth;
+          endGdrX = picWidth;
+        }
+      }
+
+      pcPic->cs->picHeader->setVirtualBoundariesPosX(endGdrX, 0);
+
+#if GDR_ENC_TRACE
+      printf("\n");
+      printf("-poc:%d beg:%d end:%d\n", rpcSlice->getPOC(), begGdrX, endGdrX);
 #endif    
-  } 
+    }
+  }
 #endif
 }
 
