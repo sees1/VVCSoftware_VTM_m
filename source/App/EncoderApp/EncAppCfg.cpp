@@ -1044,8 +1044,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DeltaQpRD,-dqr",                                  m_uiDeltaQpRD,                                       0u, "max dQp offset for slice")
   ("MaxDeltaQP,d",                                    m_iMaxDeltaQP,                                        0, "max dQp offset for block")
   ("MaxCuDQPSubdiv,-dqd",                             m_cuQpDeltaSubdiv,                                    0, "Maximum subdiv for CU luma Qp adjustment")
-  ("MaxCuChromaQpOffsetSubdiv",                       m_cuChromaQpOffsetSubdiv,                            -1, "Maximum subdiv for CU chroma Qp adjustment")
-  ("CuChromaQpOffsetEnabled",                         m_cuChromaQpOffsetEnabled,                           -1, "Enable local chroma QP offsets (slice level flag)")
+  ("MaxCuChromaQpOffsetSubdiv",                       m_cuChromaQpOffsetSubdiv,                             0, "Maximum subdiv for CU chroma Qp adjustment")
+  ("SliceCuChromaQpOffsetEnabled",                    m_cuChromaQpOffsetEnabled,                         true, "Enable local chroma QP offsets (slice level flag)")
   ("FastDeltaQP",                                     m_bFastDeltaQP,                                   false, "Fast Delta QP Algorithm")
 #if SHARP_LUMA_DELTA_QP
   ("LumaLevelToDeltaQPMode",                          lumaLevelToDeltaQPMode,                              0u, "Luma based Delta QP 0(default): not used. 1: Based on CTU average, 2: Based on Max luma in CTU")
@@ -2142,25 +2142,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 
   /* Local chroma QP offsets configuration */
-  if (m_cuChromaQpOffsetEnabled < 0)
-  {
-    m_cuChromaQpOffsetEnabled = (m_cuChromaQpOffsetSubdiv >= 0 || cfg_cbQpOffsetList.values.size() > 0); // auto-enable if unspecified
-  }
-  if (m_cuChromaQpOffsetSubdiv < 0)
-  {
-    m_cuChromaQpOffsetSubdiv = 0; // default = 0 (CTU-level)
-  }
+  CHECK(m_cuChromaQpOffsetSubdiv < 0, "MaxCuChromaQpOffsetSubdiv shall be >= 0");
   CHECK(cfg_crQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size(), "Chroma QP offset lists shall be the same size");
   CHECK(cfg_cbCrQpOffsetList.values.size() != cfg_cbQpOffsetList.values.size() && cfg_cbCrQpOffsetList.values.size() > 0, "Chroma QP offset list for joint CbCr shall be either the same size as Cb and Cr or empty");
-  /* generate default chroma QP offset lists if none provided */
-  if (cfg_cbQpOffsetList.values.size() == 0 && m_cuChromaQpOffsetEnabled)
+  if (m_cuChromaQpOffsetSubdiv > 0 && !cfg_cbQpOffsetList.values.size())
   {
-    for (int i=0; i < sizeof(cQpOffsets)/sizeof(int); i++)
-    {
-      cfg_cbQpOffsetList.values.push_back(cQpOffsets[i]);
-      cfg_crQpOffsetList.values.push_back(cQpOffsets[i]);
-      cfg_cbCrQpOffsetList.values.push_back(cQpOffsets[i]);
-    }
+    msg(WARNING, "MaxCuChromaQpOffsetSubdiv has no effect when chroma QP offset lists are empty\n");
   }
   m_cuChromaQpOffsetList.resize(cfg_cbQpOffsetList.values.size());
   for (int i=0; i < cfg_cbQpOffsetList.values.size(); i++)
@@ -3918,7 +3905,7 @@ void EncAppCfg::xPrintParameter()
         (i+1 < m_cuChromaQpOffsetList.size() ? ", " : ")\n") );
     }
     msg( DETAILS, "cu_chroma_qp_offset_subdiv             : %d\n", m_cuChromaQpOffsetSubdiv);
-    msg( DETAILS, "cu_chroma_qp_offset_enabled_flag       : %d\n", m_cuChromaQpOffsetEnabled);
+    msg( DETAILS, "cu_chroma_qp_offset_enabled_flag       : %s\n", (m_cuChromaQpOffsetEnabled ? "Enabled" : "Disabled") );
   }
   else
   {

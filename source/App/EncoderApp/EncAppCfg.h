@@ -257,7 +257,7 @@ protected:
   int       m_cuQpDeltaSubdiv;                                ///< Maximum subdiv for CU luma Qp adjustment (0:default)
   int       m_cuChromaQpOffsetSubdiv;                         ///< If negative, then do not apply chroma qp offsets.
   std::vector<ChromaQpAdj> m_cuChromaQpOffsetList;            ///< Local chroma QP offsets list (to be signalled in PPS)
-  int       m_cuChromaQpOffsetEnabled;                        ///< Enable local chroma QP offsets (slice level flag)
+  bool      m_cuChromaQpOffsetEnabled;                        ///< Enable local chroma QP offsets (slice level flag)
   bool      m_bFastDeltaQP;                                   ///< Fast Delta QP (false:default)
 
   int       m_cbQpOffset;                                     ///< Chroma Cb QP Offset (0:default)

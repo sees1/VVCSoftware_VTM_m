@@ -2327,21 +2327,21 @@ Indicates if the designated colour space of scaling matrices is equal to the ori
 \Option{MaxCuChromaQpOffsetSubdiv} &
 %\ShortOption{\None} &
 \Default{0} &
-Specifies the maximum subdiv for CU chroma QP adjustment.
+Specifies the maximum subdiv for CU chroma QP adjustment. Has no effect if CbQpOffsetList, etc. are left empty.
 \\
 
-\Option{CuChromaQpOffsetEnabled} &
+\Option{SliceCuChromaQpOffsetEnabled} &
 %\ShortOption{\None} &
-\Default{0} &
-Specifies whether CU chroma QP adjustment is enabled at slice level.
-If unspecified and either MaxCuChromaQpOffsetSubdiv or Cb/Cr/CbCrQpOffsetList are specified, is it automatically set to 1.
+\Default{true} &
+Specifies whether CU chroma QP adjustment is enabled at slice level. Has no effect if CbQpOffsetList, etc. are left empty.
 \\
 
-\Option{CbQpOffsetList, CrQpOffsetList, CbCrQpOffsetList} &
+\Option{CbQpOffsetList}%
+\Option{CrQpOffsetList}%
+\Option{CbCrQpOffsetList} &
 %\ShortOption{\None} &
-\Default{6, 6, 6} &
+\Default{\NotSet} &
 Comma-separated value lists specifying the Cb/Cr/CbCr QP offsets for each chroma QP adjustment index. Each list shall be the same length.
-If chroma QP offsets are enabled (e.g. by specifying MaxCuChromaQpOffsetSubdiv or setting CuChromaQpOffsetEnabled equal to 1) and offset lists are unspecified, they are set to default values (a single +6 value for each list), otherwise the lists are left empty.
 CbCrQpOffsetList may be omitted whereas CbQpOffsetList and CrQpOffsetList are specified, in which case it is filled with zeros.
 Note that when CbCrQpOffset and CbCrQpOffsetList values are all zero, pps_joint_cbcr_qp_offset_present_flag will be automatically set to zero.
 \\
