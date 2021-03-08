@@ -1081,7 +1081,9 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
       std::vector<int> targetLayers = { (int)subpic.nalus[0].m_nuhLayerId };
       SEIScalableNesting *nestingSEI = new SEIScalableNesting();
       seiEncoder.init(0, 0, 0);
-      seiEncoder.initSEIScalableNesting(nestingSEI, nestedSEI, targetOLS, targetLayers, subPicIds);
+      const uint16_t maxSubpicIdInPic =
+        subPicIds.size() == 0 ? 0 : *std::max_element(subPicIds.begin(), subPicIds.end());
+      seiEncoder.initSEIScalableNesting(nestingSEI, nestedSEI, targetOLS, targetLayers, subPicIds, maxSubpicIdInPic);
       OutputNALUnit nalu( NAL_UNIT_SUFFIX_SEI, layerId, temporalId );
       seiMessages.push_back(nestingSEI);
       seiWriter.writeSEImessages(nalu.m_Bitstream, seiMessages, hrd, false, temporalId);
