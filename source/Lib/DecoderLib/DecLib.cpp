@@ -2107,9 +2107,9 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_accessUnitNoOutputPriorPicFlags.push_back(m_apcSlicePilot->getNoOutputOfPriorPicsFlag());
   }
 
-  if (m_picHeader.getGdrPicFlag())
+  if (m_picHeader.getGdrPicFlag() && m_prevGDRInSameLayerPOC[nalu.m_nuhLayerId] == -MAX_INT ) // Only care about recovery POC if it is the first coded GDR picture in the layer
   {
-    m_prevGDRInSameLayerRecoveryPOC[nalu.m_nuhLayerId] = m_picHeader.getRecoveryPocCnt();
+    m_prevGDRInSameLayerRecoveryPOC[nalu.m_nuhLayerId] = m_apcSlicePilot->getPOC() + m_picHeader.getRecoveryPocCnt();
   }
 
   PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId());

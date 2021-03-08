@@ -230,7 +230,7 @@ public:
   void  updateAssociatedIRAP();
   void  updatePrevGDRInSameLayer();
   void  updatePrevIRAPAndGDRSubpic();
-  bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerPOC[m_pcPic->layerId] + m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
+  bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
 
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
   bool  getAudIrapOrGdrAuFlag() const       { return m_audIrapOrGdrAuFlag;  }
