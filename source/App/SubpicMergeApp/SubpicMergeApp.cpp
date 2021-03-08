@@ -52,6 +52,9 @@
 #include "NALwrite.h"
 #include "AnnexBwrite.h"
 #include "SubpicMergeApp.h"
+#include "SEIread.h"
+#include "SEIEncoder.h"
+#include "SEIwrite.h"
 
 
  //! \ingroup SubpicMergeApp
@@ -82,6 +85,7 @@ struct Subpicture {
   PicHeader                            picHeader;
   std::vector<Slice>                   slices;
   std::vector<OutputBitstream>         sliceData;
+  SEI                                  *decodedPictureHashSei;
 };
 
 
@@ -298,6 +302,27 @@ void SubpicMergeApp::parseAPS(HLSyntaxReader &hlsReader, ParameterSetManager &ps
 }
 
 /**
+  - Parse SEI message
+*/
+void SubpicMergeApp::parseSEI(SEIReader &seiReader, InputNALUnit &nalu, const VPS *vps, const SPS *sps, SEI *&decodePictureHashSei)
+{
+  SEIMessages seis;
+  HRD hrd;
+
+  seiReader.parseSEImessage(seiReader.getBitstream(), seis, nalu.m_nalUnitType, nalu.m_nuhLayerId, nalu.m_temporalId, vps, sps, hrd, 0);
+
+  decodePictureHashSei = nullptr;
+  for (auto& s : seis)
+  {
+    if (s->payloadType() == SEI::DECODED_PICTURE_HASH)
+    {
+      decodePictureHashSei = s;
+      break;
+    }
+  }
+}
+
+/**
   - Parse picture header
 */
 void SubpicMergeApp::parsePictureHeader(HLSyntaxReader &hlsReader, PicHeader &picHeader, ParameterSetManager &psManager)
@@ -334,10 +359,12 @@ void SubpicMergeApp::parseSliceHeader(HLSyntaxReader &hlsReader, InputNALUnit &n
 /**
   - Decode NAL unit if it is parameter set or picture header, or decode slice header of VLC NAL unit
  */
-void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu)
+void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu, SEI *&decodePictureHashSei)
 {
   HLSyntaxReader hlsReader;
+  SEIReader seiReader;
   hlsReader.setBitstream(&nalu.getBitstream());
+  seiReader.setBitstream(&nalu.getBitstream());
   int apsId;
   int apsType;
 
@@ -361,7 +388,18 @@ void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu)
     break;
   case NAL_UNIT_PH:
     parsePictureHeader(hlsReader, subpic.picHeader, subpic.psManager);
-  break;
+    break;
+  case NAL_UNIT_SUFFIX_SEI:
+    parseSEI(seiReader, nalu, subpic.slices.front().getVPS(), subpic.slices.front().getSPS(), decodePictureHashSei);
+    if (decodePictureHashSei != nullptr)
+    {
+      msg( INFO, "  hash SEI");
+    }
+    else
+    {
+      msg( INFO, "  suffix SEI");
+    }
+    break;
   default:
     if (nalu.isVcl())
     {
@@ -371,11 +409,11 @@ void SubpicMergeApp::decodeNalu(Subpicture &subpic, InputNALUnit &nalu)
     }
     else if (nalu.isSei())
     {
-      msg( INFO, "  SEI");
+      msg( INFO, "  prefix SEI");
     }
     else
     {
-      msg( INFO, "  NNN");  // Any other NAL unit that is not handled above
+      msg( INFO, "  ignored NALU");  // Any other NAL unit that is not handled above
     }
     break;
   }
@@ -398,6 +436,7 @@ void SubpicMergeApp::parseSubpic(Subpicture &subpic, bool &morePictures)
   subpic.slices.clear();
   subpic.sliceData.clear();
   subpic.firstSliceInPicture = true;
+  subpic.decodedPictureHashSei = nullptr;
 
   bool eof = false;
 
@@ -426,7 +465,7 @@ void SubpicMergeApp::parseSubpic(Subpicture &subpic, bool &morePictures)
     }
 
     read(nalu);  // Convert nalu payload to RBSP and parse nalu header
-    decodeNalu(subpic, nalu);
+    decodeNalu(subpic, nalu, subpic.decodedPictureHashSei);
 
     if (nalu.isVcl())
     {
@@ -767,8 +806,8 @@ void SubpicMergeApp::updateSliceHeadersForMergedStream(ParameterSetManager &psMa
       // Update slice headers to use new SPSes and PPSes
       int ppsId = slice.getPPS()->getPPSId();
       int spsId = slice.getSPS()->getSPSId();
-      CHECK(!psManager.getSPS(spsId), "Invaldi SPS");
-      CHECK(!psManager.getSPS(ppsId), "Invaldi PPS");
+      CHECK(!psManager.getSPS(spsId), "Invalid SPS");
+      CHECK(!psManager.getSPS(ppsId), "Invalid PPS");
       slice.setSPS(psManager.getSPS(spsId));
       slice.setPPS(psManager.getPPS(ppsId));
 
@@ -965,9 +1004,6 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
     }
   }
 
-  // Don't copy SEI NAL units - many of them would be incorrect for merged stream
-  //copyNalUnitsToAccessUnit(accessUnit, subpic.nalus, (int)NAL_UNIT_PREFIX_SEI);
-
   updateSliceHeadersForMergedStream(psManager);
 
   // Code merged stream prefix APS NAL units
@@ -1026,8 +1062,34 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
     }
   }
 
-  // Don't copy SEIs - many of them would be incorrect for merged stream
-  // copyNalUnitsToAccessUnit(accessUnit, subpic.nalus, (int)NAL_UNIT_SUFFIX_SEI);
+  // Code Decoded picture hash SEI messages within Scalable nesting SEI messages
+  uint32_t layerId = m_subpics->at(0).slices[0].getNalUnitLayerId();
+  uint32_t temporalId = m_subpics->at(0).slices[0].getTLayer();
+  int subpicId = 0;
+  for (auto& subpic : *m_subpics)
+  {
+    if (subpic.decodedPictureHashSei != nullptr)
+    {
+      SEIEncoder seiEncoder;
+      SEIWriter seiWriter;
+      SEIMessages seiMessages;
+      SEIMessages nestedSEI;
+      HRD hrd;
+      nestedSEI.push_back(subpic.decodedPictureHashSei);
+      const std::vector<uint16_t> subPicIds = { (uint16_t)subpicId };
+      std::vector<int> targetOLS;
+      std::vector<int> targetLayers = { (int)subpic.nalus[0].m_nuhLayerId };
+      SEIScalableNesting *nestingSEI = new SEIScalableNesting();
+      seiEncoder.init(0, 0, 0);
+      seiEncoder.initSEIScalableNesting(nestingSEI, nestedSEI, targetOLS, targetLayers, subPicIds);
+      OutputNALUnit nalu( NAL_UNIT_SUFFIX_SEI, layerId, temporalId );
+      seiMessages.push_back(nestingSEI);
+      seiWriter.writeSEImessages(nalu.m_Bitstream, seiMessages, hrd, false, temporalId);
+      accessUnit.push_back(new NALUnitEBSP(nalu));
+    }
+    subpicId++;
+  }
+
   copyNalUnitsToAccessUnit(accessUnit, subpic0.nalus, (int)NAL_UNIT_EOS);
   copyNalUnitsToAccessUnit(accessUnit, subpic0.nalus, (int)NAL_UNIT_EOB);
 
