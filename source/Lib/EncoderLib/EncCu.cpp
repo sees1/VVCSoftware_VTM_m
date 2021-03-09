@@ -2540,10 +2540,6 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
             {
               cost = MAX_DOUBLE;
             }
-            else
-            {
-              cost = cost;
-            }
           }
 #endif
           updateCandList(ModeInfo(mmvdMergeCand, false, true, false), cost, RdModeList, candCostList, uiNumMrgSATDCand, &insertPos);

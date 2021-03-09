@@ -4058,6 +4058,17 @@ void EncAppCfg::xPrintParameter()
 #endif
   }
 
+#if GDR_ENABLED
+  msg(DETAILS, "GDREnabled                             : %d\n", m_gdrEnabled);
+
+  if (m_gdrEnabled)
+  {
+    msg(DETAILS, "GDR Start                              : %d\n", m_gdrPocStart);
+    msg(DETAILS, "GDR Interval                           : %d\n", m_gdrInterval);
+    msg(DETAILS, "GDR Period                             : %d\n", m_gdrPeriod);
+  }
+#endif
+
   msg( DETAILS, "Max Num Merge Candidates               : %d\n", m_maxNumMergeCand );
   msg( DETAILS, "Max Num Affine Merge Candidates        : %d\n", m_maxNumAffineMergeCand );
   msg( DETAILS, "Max Num Geo Merge Candidates           : %d\n", m_maxNumGeoCand );
