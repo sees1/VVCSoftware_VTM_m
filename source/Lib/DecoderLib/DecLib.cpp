@@ -424,11 +424,11 @@ DecLib::DecLib()
   , m_prevPicPOC(MAX_INT)
   , m_prevTid0POC(0)
   , m_bFirstSliceInPicture(true)
-  , m_firstSliceInSequence{ true }
   , m_firstSliceInBitstream(true)
   , m_isFirstAuInCvs( true )
   , m_prevSliceSkipped(false)
-  , m_skippedPOC(0)
+  , m_skippedPOC(MAX_INT)
+  , m_skippedLayerID(MAX_INT)
   , m_lastPOCNoOutputPriorPics(-1)
   , m_isNoOutputPriorPics(false)
   , m_lastNoOutputBeforeRecoveryFlag{ false }
@@ -463,6 +463,8 @@ DecLib::DecLib()
   memset(m_prevEOS, false, sizeof(m_prevEOS));
   memset(m_accessUnitEos, false, sizeof(m_accessUnitEos));
   std::fill_n(m_prevGDRInSameLayerPOC, MAX_VPS_LAYERS, -MAX_INT);
+  std::fill_n(m_prevGDRInSameLayerRecoveryPOC, MAX_VPS_LAYERS, -MAX_INT);
+  std::fill_n(m_firstSliceInSequence, MAX_VPS_LAYERS, true);
   std::fill_n(m_pocCRA, MAX_VPS_LAYERS, -MAX_INT);
   for (int i = 0; i < MAX_VPS_LAYERS; i++)
   {
@@ -898,12 +900,21 @@ void DecLib::xCreateLostPicture( int iLostPoc, const int layerId )
 
 void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailablePoc, const bool longTermFlag, const int temporalId, const int layerId, const bool interLayerRefPicFlag )
 {
-  msg(INFO, "\ninserting unavailable poc : %d\n", iUnavailablePoc);
+  msg(INFO, "Note: Inserting unavailable POC : %d\n", iUnavailablePoc);
   Picture* cFillPic = xGetNewPicBuffer( *( m_parameterSetManager.getFirstSPS() ), *( m_parameterSetManager.getFirstPPS() ), 0, layerId );
 
-  CHECK(!cFillPic->slices.size(), "No slices in picture");
+  cFillPic->cs = new CodingStructure( g_globalUnitCache.cuCache, g_globalUnitCache.puCache, g_globalUnitCache.tuCache ); 
+  cFillPic->cs->sps = m_parameterSetManager.getFirstSPS();
+  cFillPic->cs->pps = m_parameterSetManager.getFirstPPS();
+  cFillPic->cs->vps = m_parameterSetManager.getVPS(0);
+  cFillPic->cs->create(cFillPic->cs->sps->getChromaFormatIdc(), Area(0, 0, cFillPic->cs->pps->getPicWidthInLumaSamples(), cFillPic->cs->pps->getPicHeightInLumaSamples()), true, (bool)(cFillPic->cs->sps->getPLTMode()));
+  cFillPic->allocateNewSlice();
 
   cFillPic->slices[0]->initSlice();
+
+  cFillPic->setDecodingOrderNumber(0);
+  cFillPic->subLayerNonReferencePictureDueToSTSA = false;
+  cFillPic->unscaledPic = cFillPic;
 
   uint32_t yFill = 1 << (m_parameterSetManager.getFirstSPS()->getBitDepth(CHANNEL_TYPE_LUMA) - 1);
   uint32_t cFill = 1 << (m_parameterSetManager.getFirstSPS()->getBitDepth(CHANNEL_TYPE_CHROMA) - 1);
@@ -916,7 +927,12 @@ void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailableP
   cFillPic->interLayerRefPicFlag = interLayerRefPicFlag;
   cFillPic->longTerm = longTermFlag;
   cFillPic->slices[0]->setPOC(iUnavailablePoc);
-  xUpdatePreviousTid0POC(cFillPic->slices[0]);
+  cFillPic->poc = iUnavailablePoc;
+  if( (cFillPic->slices[0]->getTLayer() == 0) && (cFillPic->slices[0]->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL) && (cFillPic->slices[0]->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL) )
+  { 
+    m_prevTid0POC = cFillPic->slices[0]->getPOC(); 
+  } 
+
   cFillPic->reconstructed = true;
   cFillPic->neededForOutput = false;
   // picture header is not derived for generated reference picture
@@ -955,6 +971,11 @@ void DecLib::checkLayerIdIncludedInCvss()
     for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
     {
       bool layerIdFind;
+      if ( m_firstAccessUnitPicInfo.size() == 0 )
+      {
+        msg( NOTICE, "Note: checkIncludedInFirstAu(), m_firstAccessUnitPicInfo.size() is 0.\n");
+        continue;
+      }
       for (auto picFirst = m_firstAccessUnitPicInfo.begin(); picFirst != m_firstAccessUnitPicInfo.end(); picFirst++)
       {
         layerIdFind = pic->m_nuhLayerId == picFirst->m_nuhLayerId ? true : false;
@@ -2086,6 +2107,11 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_accessUnitNoOutputPriorPicFlags.push_back(m_apcSlicePilot->getNoOutputOfPriorPicsFlag());
   }
 
+  if (m_picHeader.getGdrPicFlag() && m_prevGDRInSameLayerPOC[nalu.m_nuhLayerId] == -MAX_INT ) // Only care about recovery POC if it is the first coded GDR picture in the layer
+  {
+    m_prevGDRInSameLayerRecoveryPOC[nalu.m_nuhLayerId] = m_apcSlicePilot->getPOC() + m_picHeader.getRecoveryPocCnt();
+  }
+
   PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId());
   CHECK(pps == 0, "No PPS present");
   SPS *sps = m_parameterSetManager.getSPS(pps->getSPSId());
@@ -2282,10 +2308,12 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   // Skip pictures due to random access
 
-  if (isRandomAccessSkipPicture(iSkipFrame, iPOCLastDisplay, pps->getMixedNaluTypesInPicFlag()))
+  if (isRandomAccessSkipPicture(iSkipFrame, iPOCLastDisplay, pps->getMixedNaluTypesInPicFlag(), nalu.m_nuhLayerId))
   {
     m_prevSliceSkipped = true;
     m_skippedPOC = m_apcSlicePilot->getPOC();
+    m_skippedLayerID = nalu.m_nuhLayerId;
+
     // reset variables for bitstream conformance tests
     resetAccessUnitNals();
     resetAccessUnitApsNals();
@@ -2335,7 +2363,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       {
         if (m_apcSlicePilot->getRPL0()->isInterLayerRefPic(refPicIndex) == 0)
         {
-          xCreateUnavailablePicture( m_apcSlicePilot->getPPS(), lostPoc - 1, m_apcSlicePilot->getRPL0()->isRefPicLongterm( refPicIndex ), m_apcSlicePilot->getPic()->temporalId, m_apcSlicePilot->getPic()->layerId, m_apcSlicePilot->getRPL0()->isInterLayerRefPic( refPicIndex ) );
+          xCreateUnavailablePicture( pps, lostPoc, m_apcSlicePilot->getRPL0()->isRefPicLongterm( refPicIndex ), m_apcSlicePilot->getTLayer(), m_apcSlicePilot->getNalUnitLayerId(), m_apcSlicePilot->getRPL0()->isInterLayerRefPic( refPicIndex ) );
         }
       }
       else
@@ -2956,6 +2984,11 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
     case NAL_UNIT_SUFFIX_SEI:
       if (m_pcPic)
       {
+        if ( m_prevSliceSkipped )
+        {
+          msg( NOTICE, "Note: received suffix SEI but current picture is skipped.\n");
+          return false;
+        }
         m_pictureSeiNalus.push_back(new InputNALUnit(nalu));
         m_accessUnitSeiTids.push_back(nalu.m_temporalId);
         const SPS *sps = m_parameterSetManager.getActiveSPS();
@@ -2987,6 +3020,7 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       m_associatedIRAPType[nalu.m_nuhLayerId] = NAL_UNIT_INVALID;
       m_pocCRA[nalu.m_nuhLayerId] = -MAX_INT;
       m_prevGDRInSameLayerPOC[nalu.m_nuhLayerId] = -MAX_INT;
+      m_prevGDRInSameLayerRecoveryPOC[nalu.m_nuhLayerId] = -MAX_INT;
       std::fill_n(m_prevGDRSubpicPOC[nalu.m_nuhLayerId], MAX_NUM_SUB_PICS, -MAX_INT);
       std::fill_n(m_prevIRAPSubpicPOC[nalu.m_nuhLayerId], MAX_NUM_SUB_PICS, -MAX_INT);
       memset(m_prevIRAPSubpicDecOrderNo[nalu.m_nuhLayerId], 0, sizeof(int)*MAX_NUM_SUB_PICS);
@@ -3055,11 +3089,22 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
  *  equal to or greater than the random access point POC is attempted. For non IDR/CRA/BLA random
  *  access point there is no guarantee that the decoder will not crash.
  */
-bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, bool mixedNaluInPicFlag )
+bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, bool mixedNaluInPicFlag, uint32_t layerId )
 {
+  if( (iSkipFrame > 0) &&
+      (m_apcSlicePilot->getFirstCtuRsAddrInSlice() == 0 && layerId == 0) &&
+      (m_skippedPOC != MAX_INT) && (m_skippedLayerID != MAX_INT))
+  {
+    // When skipFrame count greater than 0, and current frame is not the first frame of sequence, decrement skipFrame count.
+    // If skipFrame count is still greater than 0, the current frame will be skipped.
+    iSkipFrame--;
+  }
+
   if (iSkipFrame)
   {
     iSkipFrame--;   // decrement the counter
+    m_maxDecSubPicIdx = 0;
+    m_maxDecSliceAddrInSubPic = -1;
     return true;
   }
   else if ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP )
@@ -3068,7 +3113,7 @@ bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, b
   }
   else if (m_pocRandomAccess == MAX_INT) // start of random access point, m_pocRandomAccess has not been set yet.
   {
-    if (m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR && m_apcSlicePilot->getPicHeader()->getRecoveryPocCnt() == 0 ) )
+    if (m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR )
     {
       // set the POC random access since we need to skip the reordered pictures in the case of CRA/CRANT/BLA/BLANT.
       m_pocRandomAccess = m_apcSlicePilot->getPOC();
@@ -3077,9 +3122,12 @@ bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, b
     {
       if(!m_warningMessageSkipPicture)
       {
-        msg( WARNING, "\nWarning: this is not a valid random access point and the data is discarded until the first CRA picture");
+        msg( WARNING, "Warning: This is not a valid random access point and the data is discarded until the first CRA or GDR picture\n");
         m_warningMessageSkipPicture = true;
       }
+      iSkipFrame--;
+      m_maxDecSubPicIdx = 0;
+      m_maxDecSliceAddrInSubPic = -1;
       return true;
     }
   }
@@ -3089,6 +3137,9 @@ bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, b
        mixedNaluInPicFlag))
   {
     iPOCLastDisplay++;
+    iSkipFrame--;
+    m_maxDecSubPicIdx = 0;
+    m_maxDecSliceAddrInSubPic = -1;
     return true;
   }
   // if we reach here, then the picture is not skipped.
