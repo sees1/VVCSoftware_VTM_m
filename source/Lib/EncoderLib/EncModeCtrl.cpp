@@ -923,7 +923,7 @@ bool BestEncInfoCache::isValid( const CodingStructure& cs, const Partitioner& pa
   {
     return false;
   }
-  if( encInfo.cu.qp != qp )
+  if( encInfo.cu.qp != qp || cs.slice->getUseChromaQpAdj())
     return false;
   if( cs.picture->poc != encInfo.poc || CS::getArea( cs, cs.area, partitioner.chType ) != CS::getArea( cs, encInfo.cu, partitioner.chType ) || !isTheSameNbHood( encInfo.cu, cs, partitioner
     , encInfo.pu, (cs.picture->Y().width), (cs.picture->Y().height)

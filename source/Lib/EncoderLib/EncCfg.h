@@ -431,7 +431,9 @@ protected:
   //====== Quality control ========
   int       m_iMaxDeltaQP;                      //  Max. absolute delta QP (1:default)
   int       m_cuQpDeltaSubdiv;                  //  Max. subdivision level for a CuDQP (0:default)
-  int       m_cuChromaQpOffsetSubdiv;           ///< If negative, then do not apply chroma qp offsets.
+  unsigned  m_cuChromaQpOffsetSubdiv;           ///< Max. subdivision level for a chroma QP adjustment (0:default)
+  bool      m_cuChromaQpOffsetEnabled;          ///< Local chroma QP offset enable flag
+  std::vector<ChromaQpAdj> m_cuChromaQpOffsetList; ///< Local chroma QP offsets list (to be signalled in PPS)
 
   int       m_chromaCbQpOffset;                 //  Chroma Cb QP Offset (0:default)
   int       m_chromaCrQpOffset;                 //  Chroma Cr Qp Offset (0:default)
@@ -1250,8 +1252,11 @@ public:
   //====== Quality control ========
   void      setMaxDeltaQP                   ( int   i )      { m_iMaxDeltaQP = i; }
   void      setCuQpDeltaSubdiv              ( int   i )      { m_cuQpDeltaSubdiv = i; }
-  int       getCuChromaQpOffsetSubdiv       ()         const { return m_cuChromaQpOffsetSubdiv;  }
-  void      setCuChromaQpOffsetSubdiv       (int value)      { m_cuChromaQpOffsetSubdiv = value; }
+  unsigned  getCuChromaQpOffsetSubdiv       ()         const { return m_cuChromaQpOffsetSubdiv;  }
+  void      setCuChromaQpOffsetSubdiv       ( unsigned value ) { m_cuChromaQpOffsetSubdiv = value; }
+  bool      getCuChromaQpOffsetEnabled      ()         const { return m_cuChromaQpOffsetEnabled;  }
+  void      setCuChromaQpOffsetEnabled      ( bool value )   { m_cuChromaQpOffsetEnabled = value; }
+  void      setCuChromaQpOffsetList         (const std::vector<ChromaQpAdj> &list) { m_cuChromaQpOffsetList = list; }
 
   void      setChromaCbQpOffset             ( int   i )      { m_chromaCbQpOffset = i; }
   void      setChromaCrQpOffset             ( int   i )      { m_chromaCrQpOffset = i; }

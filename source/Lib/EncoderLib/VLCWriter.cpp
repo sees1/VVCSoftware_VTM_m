@@ -1875,10 +1875,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     {
       WRITE_UVLC( picHeader->getCuChromaQpOffsetSubdivIntra(), "ph_cu_chroma_qp_offset_subdiv_intra_slice" );
     }
-    else
-    {
-      picHeader->setCuChromaQpOffsetSubdivIntra( 0 );
-    }
   }
 
 
@@ -1908,11 +1904,8 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     {
       WRITE_UVLC(picHeader->getCuChromaQpOffsetSubdivInter(), "ph_cu_chroma_qp_offset_subdiv_inter_slice");
     }
-    else
-    {
-      picHeader->setCuChromaQpOffsetSubdivInter(0);
-    }
-  // temporal motion vector prediction
+
+    // temporal motion vector prediction
     if (sps->getSPSTemporalMVPEnabledFlag())
     {
       WRITE_FLAG( picHeader->getEnableTMVPFlag(), "ph_temporal_mvp_enabled_flag" );

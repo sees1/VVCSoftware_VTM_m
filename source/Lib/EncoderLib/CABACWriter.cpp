@@ -2575,6 +2575,8 @@ void CABACWriter::transform_unit( const TransformUnit& tu, CUCtx& cuCtx, Partiti
       }
     }
   }
+
+  DTRACE_COND( ( isEncoding() ), g_trace_ctx, D_DQP, "x=%d, y=%d, d=%d, qpAdj=%d\n", cu.blocks[cu.chType].lumaPos().x, cu.blocks[cu.chType].lumaPos().y, cu.qtDepth, cu.chromaQpAdj );
 }
 
 void CABACWriter::cu_qp_delta( const CodingUnit& cu, int predQP, const int8_t qp )

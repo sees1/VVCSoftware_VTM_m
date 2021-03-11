@@ -626,17 +626,19 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 
   m_CurrCtx->start = m_CABACEstimator->getCtx();
 
-  m_cuChromaQpOffsetIdxPlus1 = 0;
-
   if( slice.getUseChromaQpAdj() )
   {
     // TODO M0133 : double check encoder decisions with respect to chroma QG detection and actual encode
     int lgMinCuSize = sps.getLog2MinCodingBlockSize() +
-      std::max<int>(0, floorLog2(sps.getCTUSize()) - sps.getLog2MinCodingBlockSize() - int(slice.getCuChromaQpOffsetSubdiv() / 2));
+      std::max<int>(0, floorLog2(sps.getCTUSize()) - sps.getLog2MinCodingBlockSize() - int((slice.getCuChromaQpOffsetSubdiv()+1) / 2));
     if( partitioner.currQgChromaEnable() )
     {
       m_cuChromaQpOffsetIdxPlus1 = ( ( uiLPelX >> lgMinCuSize ) + ( uiTPelY >> lgMinCuSize ) ) % ( pps.getChromaQpOffsetListLen() + 1 );
     }
+  }
+  else
+  {
+    m_cuChromaQpOffsetIdxPlus1 = 0;
   }
 
   if( !m_modeCtrl->anyMode() )
@@ -1293,6 +1295,7 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
 
   partitioner.splitCurrArea( split, *tempCS );
   bool qgEnableChildren = partitioner.currQgEnable(); // QG possible at children level
+  bool qgChromaEnableChildren = partitioner.currQgChromaEnable(); // Chroma QG possible at children level
 
   m_CurrCtx++;
 
@@ -1499,6 +1502,13 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
     partitioner.chType = CHANNEL_TYPE_LUMA;
     partitioner.treeType = TREE_D;
     partitioner.modeType = MODE_TYPE_ALL;
+  }
+  else
+  {
+    if (!qgChromaEnableChildren) // check at deepest cQG level only
+    {
+      xCheckChromaQPOffset( *tempCS, partitioner );
+    }
   }
 
   // Finally, generate split-signaling bits for RD-cost check
@@ -2156,43 +2166,47 @@ void EncCu::xCheckChromaQPOffset( CodingStructure& cs, Partitioner& partitioner 
     return;
   }
 
-  // not needed after the first coded TU in the chroma QG
+  // check cost only at cQG top-level (everything below shall not be influenced by adj coding: it occurs only once)
   if( !partitioner.currQgChromaEnable() )
   {
     return;
   }
 
-  CodingUnit& cu = *cs.getCU( partitioner.chType );
-
   // check if chroma is coded or not
-  bool hasResidual = false;
-  for( const TransformUnit &tu : CU::traverseTUs(cu) )
+  bool isCoded = false;
+  for( auto &cu : cs.cus )
   {
-    if( tu.cbf[COMPONENT_Cb] || tu.cbf[COMPONENT_Cr] )
+    SizeType channelWidth = !cu->isSepTree() ? cu->lwidth() : cu->chromaSize().width;
+    SizeType channelHeight = !cu->isSepTree() ? cu->lheight() : cu->chromaSize().height;
+
+    for( const TransformUnit &tu : CU::traverseTUs(*cu) )
     {
-      hasResidual = true;
+      if( tu.cbf[COMPONENT_Cb] || tu.cbf[COMPONENT_Cr] || channelWidth > 64 || channelHeight > 64)
+      {
+        isCoded = true;
+        break;
+      }
+    }
+    if (isCoded)
+    {
+      // estimate cost for coding cu_chroma_qp_offset
+      TempCtx ctxTempAdjFlag( m_CtxCache );
+      TempCtx ctxTempAdjIdc( m_CtxCache );
+      ctxTempAdjFlag = SubCtx( Ctx::ChromaQpAdjFlag, m_CABACEstimator->getCtx() );
+      ctxTempAdjIdc = SubCtx( Ctx::ChromaQpAdjIdc,   m_CABACEstimator->getCtx() );
+      m_CABACEstimator->resetBits();
+      m_CABACEstimator->cu_chroma_qp_offset( *cu );
+      cs.fracBits += m_CABACEstimator->getEstFracBits();
+      cs.cost      = m_pcRdCost->calcRdCost(cs.fracBits, cs.dist);
+      m_CABACEstimator->getCtx() = SubCtx( Ctx::ChromaQpAdjFlag, ctxTempAdjFlag );
+      m_CABACEstimator->getCtx() = SubCtx( Ctx::ChromaQpAdjIdc,  ctxTempAdjIdc  );
       break;
     }
-  }
-
-  if( hasResidual )
-  {
-    // estimate cost for coding cu_chroma_qp_offset
-    TempCtx ctxTempAdjFlag( m_CtxCache );
-    TempCtx ctxTempAdjIdc( m_CtxCache );
-    ctxTempAdjFlag = SubCtx( Ctx::ChromaQpAdjFlag, m_CABACEstimator->getCtx() );
-    ctxTempAdjIdc = SubCtx( Ctx::ChromaQpAdjIdc,   m_CABACEstimator->getCtx() );
-    m_CABACEstimator->resetBits();
-    m_CABACEstimator->cu_chroma_qp_offset( cu );
-    cs.fracBits += m_CABACEstimator->getEstFracBits();
-    cs.cost      = m_pcRdCost->calcRdCost(cs.fracBits, cs.dist);
-    m_CABACEstimator->getCtx() = SubCtx( Ctx::ChromaQpAdjFlag, ctxTempAdjFlag );
-    m_CABACEstimator->getCtx() = SubCtx( Ctx::ChromaQpAdjIdc,  ctxTempAdjIdc  );
-  }
-  else
-  {
-    // reset chroma QP offset to 0 if it will not be coded
-    cu.chromaQpAdj = 0;
+    else
+    {
+      // chroma QP adj is forced to 0 for leading uncoded CUs
+      cu->chromaQpAdj = 0;
+    }
   }
 }
 
@@ -2833,6 +2847,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   cu.predMode = MODE_INTER;
   cu.slice = tempCS->slice;
   cu.tileIdx = tempCS->pps->getTileIdx(tempCS->area.lumaPos());
+  cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
   cu.qp = encTestMode.qp;
   cu.affine = false;
   cu.mtsFlag = false;
@@ -3052,6 +3067,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       cu.predMode = MODE_INTER;
       cu.slice = tempCS->slice;
       cu.tileIdx = tempCS->pps->getTileIdx(tempCS->area.lumaPos());
+      cu.chromaQpAdj = m_cuChromaQpOffsetIdxPlus1;
       cu.qp = encTestMode.qp;
       cu.affine = false;
       cu.mtsFlag = false;

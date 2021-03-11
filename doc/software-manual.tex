@@ -2206,11 +2206,11 @@ Defines the periodicity for inter slices that use the slice-level chroma QP offs
 Defines the slice-level QP offset to be used for intra slices, or once every 'SliceChromaQPOffsetPeriodicity' pictures.
 \\
 
-\Option{MaxCuDQPDepth (-dqd)} &
+\Option{MaxCuDQPSubdiv (-dqd)} &
 %\ShortOption{\None} &
 \Default{0} &
-Defines maximum depth of a minimum CuDQP for sub-LCU-level delta QP.
-MaxCuDQPDepth shall be greater than or equal to SliceGranularity.
+Defines maximum CTU subdivision level defining luma Quantization Groups. A quantization group contains at most one luma QP delta (carried by the first coded TU), and all CUs inside a QG share the same luma QP predictor.
+"Sbudivision level" means how many times the number of samples of the CTU is divided by two, e.g. a binary split increases subdiv by 1 and a quad split increases subdiv by 2.
 \\
 
 \Option{RDOQ} &
@@ -2330,10 +2330,26 @@ Specifies whether scaling matrices are disabled to blocks when the colour space 
 Indicates if the designated colour space of scaling matrices is equal to the original colour space.
 \\
 
-\Option{MaxCUChromaQpAdjustmentDepth} &
+\Option{MaxCuChromaQpOffsetSubdiv} &
 %\ShortOption{\None} &
-\Default{-1} &
-Specifies the maximum depth for CU chroma QP adjustment; if negative, CU chroma QP adjustment is disabled.
+\Default{0} &
+Specifies the maximum subdiv for CU chroma QP adjustment. Has no effect if CbQpOffsetList, etc. are left empty.
+\\
+
+\Option{SliceCuChromaQpOffsetEnabled} &
+%\ShortOption{\None} &
+\Default{true} &
+Specifies whether CU chroma QP adjustment is enabled at slice level. Has no effect if CbQpOffsetList, etc. are left empty.
+\\
+
+\Option{CbQpOffsetList}%
+\Option{CrQpOffsetList}%
+\Option{CbCrQpOffsetList} &
+%\ShortOption{\None} &
+\Default{\NotSet} &
+Comma-separated value lists specifying the Cb/Cr/CbCr QP offsets for each chroma QP adjustment index. Each list shall be the same length.
+CbCrQpOffsetList may be omitted whereas CbQpOffsetList and CrQpOffsetList are specified, in which case it is filled with zeros.
+Note that when CbCrQpOffset and CbCrQpOffsetList values are all zero, pps_joint_cbcr_qp_offset_present_flag will be automatically set to zero.
 \\
 
 \end{OptionTableNoShorthand}

@@ -256,9 +256,11 @@ protected:
   std::string m_dQPFileName;                                  ///< QP offset for each slice (initialized from external file)
   int*      m_aidQP;                                          ///< array of slice QP values
   int       m_iMaxDeltaQP;                                    ///< max. |delta QP|
-  uint32_t      m_uiDeltaQpRD;                                    ///< dQP range for multi-pass slice QP optimization
+  uint32_t  m_uiDeltaQpRD;                                    ///< dQP range for multi-pass slice QP optimization
   int       m_cuQpDeltaSubdiv;                                ///< Maximum subdiv for CU luma Qp adjustment (0:default)
   int       m_cuChromaQpOffsetSubdiv;                         ///< If negative, then do not apply chroma qp offsets.
+  std::vector<ChromaQpAdj> m_cuChromaQpOffsetList;            ///< Local chroma QP offsets list (to be signalled in PPS)
+  bool      m_cuChromaQpOffsetEnabled;                        ///< Enable local chroma QP offsets (slice level flag)
   bool      m_bFastDeltaQP;                                   ///< Fast Delta QP (false:default)
 
   int       m_cbQpOffset;                                     ///< Chroma Cb QP Offset (0:default)
