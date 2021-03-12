@@ -267,6 +267,8 @@ void CacheBlkInfoCtrl::create()
   m_numWidths  = gp_sizeIdxInfo->numWidths();
   m_numHeights = gp_sizeIdxInfo->numHeights();
 
+  bool isLog2MttPartitioning = !!dynamic_cast<SizeIndexInfoLog2*>( gp_sizeIdxInfo );
+
   for( unsigned x = 0; x < numPos; x++ )
   {
     for( unsigned y = 0; y < numPos; y++ )
@@ -275,25 +277,39 @@ void CacheBlkInfoCtrl::create()
 
       for( int wIdx = 0; wIdx < gp_sizeIdxInfo->numWidths(); wIdx++ )
       {
-        if( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( wIdx ) ) && x + ( gp_sizeIdxInfo->sizeFrom( wIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) )
-        {
-          m_codedCUInfo[x][y][wIdx] = new CodedCUInfo*[gp_sizeIdxInfo->numHeights()];
-
-          for( int hIdx = 0; hIdx < gp_sizeIdxInfo->numHeights(); hIdx++ )
-          {
-            if( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( hIdx ) ) && y + ( gp_sizeIdxInfo->sizeFrom( hIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) )
-            {
-              m_codedCUInfo[x][y][wIdx][hIdx] = new CodedCUInfo;
-            }
-            else
-            {
-              m_codedCUInfo[x][y][wIdx][hIdx] = nullptr;
-            }
-          }
-        }
-        else
+        if( !( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( wIdx ) ) && x + ( gp_sizeIdxInfo->sizeFrom( wIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) ) )
         {
           m_codedCUInfo[x][y][wIdx] = nullptr;
+          continue;
+        }
+
+        const int wLog2 = floorLog2( gp_sizeIdxInfo->sizeFrom( wIdx ) );
+
+        if( isLog2MttPartitioning && ( ( x << MIN_CU_LOG2 ) & ( ( 1 << ( wLog2 - 1 ) ) - 1 ) ) != 0 )
+        {
+          m_codedCUInfo[x][y][wIdx] = nullptr;
+          continue;
+        }
+
+        m_codedCUInfo[x][y][wIdx] = new CodedCUInfo*[gp_sizeIdxInfo->numHeights()];
+
+        for( int hIdx = 0; hIdx < gp_sizeIdxInfo->numHeights(); hIdx++ )
+        {
+          if( !( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( hIdx ) ) && y + ( gp_sizeIdxInfo->sizeFrom( hIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) ) )
+          {
+            m_codedCUInfo[x][y][wIdx][hIdx] = nullptr;
+            continue;
+          }
+          
+          const int hLog2 = floorLog2( gp_sizeIdxInfo->sizeFrom( hIdx ) );
+
+          if( isLog2MttPartitioning && ( ( ( y << MIN_CU_LOG2 ) & ( ( 1 << ( hLog2 - 1 ) ) - 1 ) ) != 0 ) )
+          {
+            m_codedCUInfo[x][y][wIdx][hIdx] = nullptr;
+            continue;
+          }
+
+          m_codedCUInfo[x][y][wIdx][hIdx] = new CodedCUInfo;
         }
       }
     }
@@ -653,6 +669,8 @@ void BestEncInfoCache::create( const ChromaFormat chFmt )
   m_numWidths  = gp_sizeIdxInfo->numWidths();
   m_numHeights = gp_sizeIdxInfo->numHeights();
 
+  bool isLog2MttPartitioning = !!dynamic_cast<SizeIndexInfoLog2*>( gp_sizeIdxInfo );
+
   for( unsigned x = 0; x < numPos; x++ )
   {
     for( unsigned y = 0; y < numPos; y++ )
@@ -661,45 +679,59 @@ void BestEncInfoCache::create( const ChromaFormat chFmt )
 
       for( int wIdx = 0; wIdx < gp_sizeIdxInfo->numWidths(); wIdx++ )
       {
-        if( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( wIdx ) ) && x + ( gp_sizeIdxInfo->sizeFrom( wIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) )
-        {
-          m_bestEncInfo[x][y][wIdx] = new BestEncodingInfo*[gp_sizeIdxInfo->numHeights()];
-
-          for( int hIdx = 0; hIdx < gp_sizeIdxInfo->numHeights(); hIdx++ )
-          {
-            if( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( hIdx ) ) && y + ( gp_sizeIdxInfo->sizeFrom( hIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) )
-            {
-              m_bestEncInfo[x][y][wIdx][hIdx] = new BestEncodingInfo;
-
-              int w = gp_sizeIdxInfo->sizeFrom( wIdx );
-              int h = gp_sizeIdxInfo->sizeFrom( hIdx );
-
-              const UnitArea area( chFmt, Area( 0, 0, w, h ) );
-
-              new ( &m_bestEncInfo[x][y][wIdx][hIdx]->cu ) CodingUnit    ( area );
-              new ( &m_bestEncInfo[x][y][wIdx][hIdx]->pu ) PredictionUnit( area );
-#if REUSE_CU_RESULTS_WITH_MULTIPLE_TUS
-              m_bestEncInfo[x][y][wIdx][hIdx]->numTus = 0;
-              for( int i = 0; i < MAX_NUM_TUS; i++ )
-              {
-                new ( &m_bestEncInfo[x][y][wIdx][hIdx]->tus[i] ) TransformUnit( area );
-              }
-#else
-              new ( &m_bestEncInfo[x][y][wIdx][hIdx]->tu ) TransformUnit( area );
-#endif
-
-              m_bestEncInfo[x][y][wIdx][hIdx]->poc      = -1;
-              m_bestEncInfo[x][y][wIdx][hIdx]->testMode = EncTestMode();
-            }
-            else
-            {
-              m_bestEncInfo[x][y][wIdx][hIdx] = nullptr;
-            }
-          }
-        }
-        else
+        if( !( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( wIdx ) ) && x + ( gp_sizeIdxInfo->sizeFrom( wIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) ) )
         {
           m_bestEncInfo[x][y][wIdx] = nullptr;
+          continue;
+        }
+
+        const int wLog2 = floorLog2( gp_sizeIdxInfo->sizeFrom( wIdx ) );
+
+        if( isLog2MttPartitioning && ( ( x << MIN_CU_LOG2 ) & ( ( 1 << ( wLog2 - 1 ) ) - 1 ) ) != 0 )
+        {
+          m_bestEncInfo[x][y][wIdx] = nullptr;
+          continue;
+        }
+
+        m_bestEncInfo[x][y][wIdx] = new BestEncodingInfo*[gp_sizeIdxInfo->numHeights()];
+
+        for( int hIdx = 0; hIdx < gp_sizeIdxInfo->numHeights(); hIdx++ )
+        {
+          if( !( gp_sizeIdxInfo->isCuSize( gp_sizeIdxInfo->sizeFrom( hIdx ) ) && y + ( gp_sizeIdxInfo->sizeFrom( hIdx ) >> MIN_CU_LOG2 ) <= ( MAX_CU_SIZE >> MIN_CU_LOG2 ) ) )
+          {
+            m_bestEncInfo[x][y][wIdx][hIdx] = nullptr;
+            continue;
+          }
+          
+          const int hLog2 = floorLog2( gp_sizeIdxInfo->sizeFrom( hIdx ) );
+
+          if( isLog2MttPartitioning && ( ( ( y << MIN_CU_LOG2 ) & ( ( 1 << ( hLog2 - 1 ) ) - 1 ) ) != 0 ) )
+          {
+            m_bestEncInfo[x][y][wIdx][hIdx] = nullptr;
+            continue;
+          }
+
+          m_bestEncInfo[x][y][wIdx][hIdx] = new BestEncodingInfo;
+
+          int w = gp_sizeIdxInfo->sizeFrom( wIdx );
+          int h = gp_sizeIdxInfo->sizeFrom( hIdx );
+
+          const UnitArea area( chFmt, Area( 0, 0, w, h ) );
+
+          new ( &m_bestEncInfo[x][y][wIdx][hIdx]->cu ) CodingUnit    ( area );
+          new ( &m_bestEncInfo[x][y][wIdx][hIdx]->pu ) PredictionUnit( area );
+#if REUSE_CU_RESULTS_WITH_MULTIPLE_TUS
+          m_bestEncInfo[x][y][wIdx][hIdx]->numTus = 0;
+          for( int i = 0; i < MAX_NUM_TUS; i++ )
+          {
+            new ( &m_bestEncInfo[x][y][wIdx][hIdx]->tus[i] ) TransformUnit( area );
+          }
+#else
+          new ( &m_bestEncInfo[x][y][wIdx][hIdx]->tu ) TransformUnit( area );
+#endif
+
+          m_bestEncInfo[x][y][wIdx][hIdx]->poc      = -1;
+          m_bestEncInfo[x][y][wIdx][hIdx]->testMode = EncTestMode();
         }
       }
     }
