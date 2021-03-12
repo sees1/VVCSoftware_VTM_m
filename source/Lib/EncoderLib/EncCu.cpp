@@ -558,10 +558,10 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 #if GDR_ENABLED 
   if (m_pcEncCfg->getGdrEnabled())
   {
-    bool isCurGdrPicture = slice.getPicHeader()->getInGdrInterval();
+    bool isInGdrInterval = slice.getPicHeader()->getInGdrInterval();
 
     // 1.0 applicable to inter picture only  
-    if (isCurGdrPicture)
+    if (isInGdrInterval)
     {
       int gdrPocStart = m_pcEncCfg->getGdrPocStart();
       int gdrInterval = m_pcEncCfg->getGdrInterval();
@@ -597,8 +597,8 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
         endGdrX = begGdrX + m2;
         if (picWidth <= endGdrX)
-        {
-          endGdrX = picWidth;
+        {          
+          begGdrX = picWidth;
           endGdrX = picWidth;
         }
       }

@@ -2164,7 +2164,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     }
     pcSlice->setTLayer(m_pcCfg->getGOPEntry(iGOPid).m_temporalId);
 #if GDR_ENABLED
-    if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0)) 
+    if (m_pcCfg->getGdrEnabled() && pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
     {
       pcSlice->setSliceType(B_SLICE);
     }
@@ -3612,7 +3612,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       std::string digestStr;
 #if GDR_ENABLED
       // note : generate hash sei only for non-gdr pictures
-      bool genHash = !(m_pcCfg->getNoHashForGdr() && pcSlice->getPicHeader()->getInGdrInterval());
+      bool genHash = !(m_pcCfg->getGdrNoHash() && pcSlice->getPicHeader()->getInGdrInterval());      
       if (m_pcCfg->getDecodedPictureHashSEIType() != HASHTYPE_NONE && genHash)
 #else
       if (m_pcCfg->getDecodedPictureHashSEIType()!=HASHTYPE_NONE)
@@ -3658,7 +3658,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       xWriteTrailingSEIMessages(trailingSeiMessages, accessUnit, pcSlice->getTLayer());
 
 #if GDR_ENABLED
-      if (!(m_pcCfg->getNoHashForGdr() && pcSlice->getPicHeader()->getInGdrInterval())) 
+      if (!(m_pcCfg->getGdrNoHash() && pcSlice->getPicHeader()->getInGdrInterval())) 
       {
           printHash(m_pcCfg->getDecodedPictureHashSEIType(), digestStr);
       }
@@ -5087,7 +5087,7 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
   }
 
 #if GDR_ENABLED    
-  if (m_pcCfg->getDecodingRefreshType() == 3 && (pocCurr >= m_pcCfg->getGdrPocStart()))
+  if (m_pcCfg->getGdrEnabled() && m_pcCfg->getDecodingRefreshType() == 3 && (pocCurr >= m_pcCfg->getGdrPocStart()))
   {    
     int m = pocCurr - m_pcCfg->getGdrPocStart();
     int n = m_pcCfg->getGdrPeriod();
@@ -5138,8 +5138,8 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
     }
   }
 #if GDR_ENABLED    
-  if (pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
-    return NAL_UNIT_CODED_SLICE_TRAIL;
+  if (m_pcCfg->getGdrEnabled() && pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
+    return NAL_UNIT_CODED_SLICE_GDR;
   else
     return NAL_UNIT_CODED_SLICE_TRAIL;
 #else

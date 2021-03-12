@@ -2423,8 +2423,8 @@ public:
   void                        setGdrPicFlag( bool b )                                   { m_gdrPicFlag = b;                                                                            }
   bool                        getGdrPicFlag() const                                     { return m_gdrPicFlag;                                                                         }
 #if GDR_ENABLED
-  void                        setInGdrInterval(bool b)                                    { m_inGdrInterval = b;                                                                            }
-  bool                        getInGdrInterval() const                                    { return m_inGdrInterval;                                                                         }  
+  void                        setInGdrInterval(bool b)                                  { m_inGdrInterval = b;                                                                         }
+  bool                        getInGdrInterval() const                                  { return m_inGdrInterval;                                                                      }  
 #endif
   void                        setRecoveryPocCnt( uint32_t u )                           { m_recoveryPocCnt = u;                                                                        }
   uint32_t                    getRecoveryPocCnt() const                                 { return m_recoveryPocCnt;                                                                     }

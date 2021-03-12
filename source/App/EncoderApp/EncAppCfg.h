@@ -223,7 +223,7 @@ protected:
   int       m_gdrPocStart;
   int       m_gdrPeriod;
   int       m_gdrInterval;  
-  bool      m_bNoHashForGdr;  
+  bool      m_gdrNoHash;  
 #endif
   int       m_iDecodingRefreshType;                           ///< random access type
   int       m_iGOPSize;                                       ///< GOP size of hierarchical structure

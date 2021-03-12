@@ -909,12 +909,6 @@ void writeAllData(const CodingStructure& cs, const UnitArea& ctuArea)
           }
         }
         break;
-#if GDR_ENABLED
-      case MODE_IBC:
-      case MODE_PLT:
-        // note: not implemented yet
-        break;
-#endif
       default:
         THROW( "Invalid prediction mode" );
         break;

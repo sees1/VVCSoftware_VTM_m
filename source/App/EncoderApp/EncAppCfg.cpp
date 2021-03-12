@@ -1009,9 +1009,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 #if GDR_ENABLED
   ("GdrEnabled",                                      m_gdrEnabled,                                     false, "GDR enabled")
   ("GdrPocStart",                                     m_gdrPocStart,                                       -1, "GDR poc start")
-  ("GdrPeriod",                                       m_gdrPeriod,                                         -1, "GDR period")
-  ("GdrInterval",                                     m_gdrInterval,                                      -1, "GDR freqency")  
-  ("NoHashforGDR",                                    m_bNoHashForGdr,                                   true, "No Hash for GDR")  
+  ("GdrPeriod",                                       m_gdrPeriod,                                         -1, "Number of frames between GDR picture to the next GDR picture")
+  ("GdrInterval",                                     m_gdrInterval,                                       -1, "Number of frames from GDR picture to the recovery point picture")  
+  ("GdrNoHash",                                       m_gdrNoHash,                                       true, "Do not generate decode picture hash SEI messages for GDR and recovering pictures")  
 #endif
   ("DecodingRefreshType,-dr",                         m_iDecodingRefreshType,                               0, "Intra refresh type (0:none 1:CRA 2:IDR 3:RecPointSEI)")
   ("GOPSize,g",                                       m_iGOPSize,                                           1, "GOP size of temporal structure")
