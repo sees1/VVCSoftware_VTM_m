@@ -680,16 +680,6 @@ static inline int ceilLog2(uint32_t x)
 #define _UNIT_AREA_AT(_a,_x,_y,_w,_h)
 #endif
 
-#if ENABLE_SPLIT_PARALLELISM
-#include <omp.h>
-
-#define PARL_PARAM(DEF) , DEF
-#define PARL_PARAM0(DEF) DEF
-#else
-#define PARL_PARAM(DEF)
-#define PARL_PARAM0(DEF)
-#endif
-
 static const uint32_t CCALF_CANDS_COEFF_NR = 8;
 static const int CCALF_SMALL_TAB[CCALF_CANDS_COEFF_NR] = { 0, 1, 2, 4, 8, 16, 32, 64 };
 

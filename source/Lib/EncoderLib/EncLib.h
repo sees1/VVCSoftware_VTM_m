@@ -79,64 +79,34 @@ private:
   int                       m_layerId;
 
   // encoder search
-#if ENABLE_SPLIT_PARALLELISM
-  InterSearch              *m_cInterSearch;                       ///< encoder search class
-  IntraSearch              *m_cIntraSearch;                       ///< encoder search class
-#else
   InterSearch               m_cInterSearch;                       ///< encoder search class
   IntraSearch               m_cIntraSearch;                       ///< encoder search class
-#endif
   // coding tool
-#if ENABLE_SPLIT_PARALLELISM
-  TrQuant                  *m_cTrQuant;                           ///< transform & quantization class
-#else
   TrQuant                   m_cTrQuant;                           ///< transform & quantization class
-#endif
   LoopFilter                m_cLoopFilter;                        ///< deblocking filter class
   EncSampleAdaptiveOffset   m_cEncSAO;                            ///< sample adaptive offset class
   EncAdaptiveLoopFilter     m_cEncALF;
   HLSWriter                 m_HLSWriter;                          ///< CAVLC encoder
-#if ENABLE_SPLIT_PARALLELISM
-  CABACEncoder             *m_CABACEncoder;
-#else
   CABACEncoder              m_CABACEncoder;
-#endif
 
-#if ENABLE_SPLIT_PARALLELISM
-  EncReshape               *m_cReshaper;                        ///< reshaper class
-#else
   EncReshape                m_cReshaper;                        ///< reshaper class
-#endif
 
   // processing unit
   EncGOP                    m_cGOPEncoder;                        ///< GOP encoder
   EncSlice                  m_cSliceEncoder;                      ///< slice encoder
-#if ENABLE_SPLIT_PARALLELISM
-  EncCu                    *m_cCuEncoder;                         ///< CU encoder
-#else
   EncCu                     m_cCuEncoder;                         ///< CU encoder
-#endif
   // SPS
   ParameterSetMap<SPS>&     m_spsMap;                             ///< SPS. This is the base value. This is copied to PicSym
   ParameterSetMap<PPS>&     m_ppsMap;                             ///< PPS. This is the base value. This is copied to PicSym
   ParameterSetMap<APS>&     m_apsMap;                             ///< APS. This is the base value. This is copied to PicSym
   PicHeader                 m_picHeader;                          ///< picture header
   // RD cost computation
-#if ENABLE_SPLIT_PARALLELISM
-  RdCost                   *m_cRdCost;                            ///< RD cost computation class
-  CtxCache                 *m_CtxCache;                           ///< buffer for temporarily stored context models
-#else
   RdCost                    m_cRdCost;                            ///< RD cost computation class
   CtxCache                  m_CtxCache;                           ///< buffer for temporarily stored context models
-#endif
   // quality control
   RateCtrl                  m_cRateCtrl;                          ///< Rate control class
 
   AUWriterIf*               m_AUWriterIf;
-
-#if ENABLE_SPLIT_PARALLELISM
-  int                       m_numCuEncStacks;
-#endif
 
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   CacheModel                m_cacheModel;
@@ -195,40 +165,22 @@ public:
 
   AUWriterIf*             getAUWriterIf         ()              { return   m_AUWriterIf;           }
   PicList*                getListPic            ()              { return  &m_cListPic;             }
-#if ENABLE_SPLIT_PARALLELISM
-  InterSearch*            getInterSearch        ( int jId = 0 ) { return  &m_cInterSearch[jId];    }
-  IntraSearch*            getIntraSearch        ( int jId = 0 ) { return  &m_cIntraSearch[jId];    }
-
-  TrQuant*                getTrQuant            ( int jId = 0 ) { return  &m_cTrQuant[jId];        }
-#else
   InterSearch*            getInterSearch        ()              { return  &m_cInterSearch;         }
   IntraSearch*            getIntraSearch        ()              { return  &m_cIntraSearch;         }
 
   TrQuant*                getTrQuant            ()              { return  &m_cTrQuant;             }
-#endif
   LoopFilter*             getLoopFilter         ()              { return  &m_cLoopFilter;          }
   EncSampleAdaptiveOffset* getSAO               ()              { return  &m_cEncSAO;              }
   EncAdaptiveLoopFilter*  getALF                ()              { return  &m_cEncALF;              }
   EncGOP*                 getGOPEncoder         ()              { return  &m_cGOPEncoder;          }
   EncSlice*               getSliceEncoder       ()              { return  &m_cSliceEncoder;        }
   EncHRD*                 getHRD                ()              { return  &m_encHRD;               }
-#if ENABLE_SPLIT_PARALLELISM
-  EncCu*                  getCuEncoder          ( int jId = 0 ) { return  &m_cCuEncoder[jId];      }
-#else
   EncCu*                  getCuEncoder          ()              { return  &m_cCuEncoder;           }
-#endif
   HLSWriter*              getHLSWriter          ()              { return  &m_HLSWriter;            }
-#if ENABLE_SPLIT_PARALLELISM
-  CABACEncoder*           getCABACEncoder       ( int jId = 0 ) { return  &m_CABACEncoder[jId];    }
-
-  RdCost*                 getRdCost             ( int jId = 0 ) { return  &m_cRdCost[jId];         }
-  CtxCache*               getCtxCache           ( int jId = 0 ) { return  &m_CtxCache[jId];        }
-#else
   CABACEncoder*           getCABACEncoder       ()              { return  &m_CABACEncoder;         }
 
   RdCost*                 getRdCost             ()              { return  &m_cRdCost;              }
   CtxCache*               getCtxCache           ()              { return  &m_CtxCache;             }
-#endif
   RateCtrl*               getRateCtrl           ()              { return  &m_cRateCtrl;            }
 
 
@@ -242,16 +194,7 @@ public:
   const PPS* getPPS( int Id ) { return m_ppsMap.getPS( Id); }
   const APS*             getAPS(int Id) { return m_apsMap.getPS(Id); }
 
-#if ENABLE_SPLIT_PARALLELISM
-  void                   setNumCuEncStacks( int n )             { m_numCuEncStacks = n; }
-  int                    getNumCuEncStacks()              const { return m_numCuEncStacks; }
-#endif
-
-#if ENABLE_SPLIT_PARALLELISM
-  EncReshape*            getReshaper( int jId = 0 )             { return  &m_cReshaper[jId]; }
-#else
   EncReshape*            getReshaper()                          { return  &m_cReshaper; }
-#endif
 
   ParameterSetMap<APS>*  getApsMap() { return &m_apsMap; }
 

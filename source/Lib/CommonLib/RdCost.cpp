@@ -222,26 +222,6 @@ void RdCost::init()
   m_pairCheck    = 0;
 }
 
-
-#if ENABLE_SPLIT_PARALLELISM
-
-void RdCost::copyState( const RdCost& other )
-{
-  m_costMode      = other.m_costMode;
-  m_dLambda       = other.m_dLambda;
-  m_DistScale     = other.m_DistScale;
-  memcpy( m_distortionWeight, other.m_distortionWeight, sizeof( m_distortionWeight ) );
-  m_mvPredictor   = other.m_mvPredictor;
-  m_motionLambda  = other.m_motionLambda;
-  m_iCostScale    = other.m_iCostScale;
-  m_dLambdaMotionSAD = other.m_dLambdaMotionSAD;
-#if WCG_EXT
-  m_dLambda_unadjusted  = other.m_dLambda_unadjusted ;
-  m_DistScaleUnadjusted = other.m_DistScaleUnadjusted;
-#endif
-}
-#endif
-
 void RdCost::setDistParam( DistParam &rcDP, const CPelBuf &org, const Pel* piRefY, int iRefStride, int bitDepth, ComponentID compID, int subShiftMode, int step, bool useHadamard )
 {
   rcDP.bitDepth   = bitDepth;

@@ -115,10 +115,6 @@ public:
   void   lambdaAdjustColorTrans(bool forward) { m_quant->lambdaAdjustColorTrans(forward); }
   void   resetStore() { m_quant->resetStore(); }
 
-#if ENABLE_SPLIT_PARALLELISM
-  void    copyState( const TrQuant& other );
-#endif
-
 protected:
   TCoeff   m_tempCoeff[MAX_TB_SIZEY * MAX_TB_SIZEY];
 

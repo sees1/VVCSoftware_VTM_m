@@ -736,11 +736,6 @@ protected:
 
   CfgVPSParameters m_cfgVPSParameters;
 
-#if ENABLE_SPLIT_PARALLELISM
-  int         m_numSplitThreads;
-  bool        m_forceSingleSplitThread;
-#endif
-
   bool        m_alf;                                          ///< Adaptive Loop Filter
 #if JVET_U0081
   double      m_alfStrengthLuma;
@@ -1938,12 +1933,6 @@ public:
   void         setDebugCTU( int i )                                  { m_debugCTU = i; }
   int          getDebugCTU()                                   const { return m_debugCTU; }
 
-#if ENABLE_SPLIT_PARALLELISM
-  void         setNumSplitThreads( int n )                           { m_numSplitThreads = n; }
-  int          getNumSplitThreads()                            const { return m_numSplitThreads; }
-  void         setForceSingleSplitThread( bool b )                   { m_forceSingleSplitThread = b; }
-  int          getForceSingleSplitThread()                     const { return m_forceSingleSplitThread; }
-#endif
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
 #if JVET_U0081

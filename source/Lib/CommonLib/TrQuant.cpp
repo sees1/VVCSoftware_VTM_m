@@ -208,13 +208,6 @@ TrQuant::~TrQuant()
   }
 }
 
-#if ENABLE_SPLIT_PARALLELISM
-void TrQuant::copyState( const TrQuant& other )
-{
-  m_quant->copyState( *other.m_quant );
-}
-#endif
-
 void TrQuant::xDeQuant(const TransformUnit &tu,
                              CoeffBuf      &dstCoeff,
                        const ComponentID   &compID,

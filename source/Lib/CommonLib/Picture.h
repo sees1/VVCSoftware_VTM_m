@@ -50,49 +50,13 @@
 #include "MCTS.h"
 #include <deque>
 
-#if ENABLE_SPLIT_PARALLELISM
-
-#define CURR_THREAD_ID -1
-
-class Scheduler
-{
-public:
-  Scheduler();
-  ~Scheduler();
-
-#if ENABLE_SPLIT_PARALLELISM
-  unsigned getSplitDataId( int jobId = CURR_THREAD_ID ) const;
-  unsigned getSplitPicId ( int tId   = CURR_THREAD_ID ) const;
-  unsigned getSplitJobId () const;
-  void     setSplitJobId ( const int jobId );
-  void     startParallel ();
-  void     finishParallel();
-  void     setSplitThreadId( const int tId = CURR_THREAD_ID );
-  unsigned getNumSplitThreads() const { return m_numSplitThreads; };
-#endif
-  unsigned getDataId     () const;
-  bool init              ( const int ctuYsize, const int ctuXsize, const int numWppThreadsRunning, const int numWppExtraLines, const int numSplitThreads );
-  int  getNumPicInstances() const;
-#if ENABLE_SPLIT_PARALLELISM
-
-  int   m_numSplitThreads;
-  bool  m_hasParallelBuffer;
-#endif
-};
-#endif
 
 class SEI;
 class AQpLayer;
 
 typedef std::list<SEI*> SEIMessages;
 
-
-
-#if ENABLE_SPLIT_PARALLELISM
-#define M_BUFS(JID,PID) m_bufs[JID][PID]
-#else
 #define M_BUFS(JID,PID) m_bufs[PID]
-#endif
 
 struct Picture : public UnitArea
 {
@@ -237,12 +201,7 @@ public:
   bool interLayerRefPicFlag;
   bool mixedNaluTypesInPicFlag;
 
-
-#if ENABLE_SPLIT_PARALLELISM
-  PelStorage m_bufs[PARL_SPLIT_MAX_NUM_JOBS][NUM_PIC_TYPES];
-#else
   PelStorage m_bufs[NUM_PIC_TYPES];
-#endif
   const Picture*           unscaledPic;
 
   TComHash           m_hashMap;
@@ -278,15 +237,6 @@ public:
 #if !KEEP_PRED_AND_RESI_SIGNALS
 private:
   UnitArea m_ctuArea;
-#endif
-
-#if ENABLE_SPLIT_PARALLELISM
-public:
-  void finishParallelPart   ( const UnitArea& ctuArea );
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-public:
-  Scheduler                  scheduler;
 #endif
 
 public:

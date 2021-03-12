@@ -115,10 +115,6 @@ public:
   Pel * getWeightTable() { return m_cwLumaWeight; }
   double getCWeight() { return m_chromaWeight; }
   void adjustLmcsPivot();
-
-#if ENABLE_SPLIT_PARALLELISM
-  void copyState(const EncReshape& other);
-#endif
 };// END CLASS DEFINITION EncReshape
 
 //! \}

@@ -398,13 +398,6 @@ protected:
   bool      m_useFastMIP;
   int       m_fastLocalDualTreeMode;
 
-
-  int       m_numSplitThreads;
-  bool      m_forceSplitSequential;
-  int       m_numWppThreads;
-  int       m_numWppExtraLines;
-  bool      m_ensureWppBitEqual;
-
   int       m_log2MaxTbSize;
   // coding tools (bit-depth)
   int       m_inputBitDepth   [MAX_NUM_CHANNEL_TYPE];         ///< bit-depth of input file

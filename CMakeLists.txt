@@ -52,28 +52,14 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 # Include a utility module providing functions, macros, and settings
 include( ${CMAKE_SOURCE_DIR}/cmake/CMakeBuild/cmake/modules/BBuildEnv.cmake )
 
-# Enable multithreading
-bb_multithreading()
-
-find_package(OpenMP)
-
-if( OpenMP_FOUND )
-  set( CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
-  set( CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
-  set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}" )
-  
-  set( SET_ENABLE_SPLIT_PARALLELISM OFF CACHE BOOL "Set ENABLE_SPLIT_PARALLELISM as a compiler flag" )
-  set( ENABLE_SPLIT_PARALLELISM     OFF CACHE BOOL "If SET_ENABLE_SPLIT_PARALLELISM is on, it will be set to this value" )
-  set( SET_ENABLE_WPP_PARALLELISM   OFF CACHE BOOL "Set ENABLE_WPP_PARALLELISM as a compiler flag" )
-  set( ENABLE_WPP_PARALLELISM       OFF CACHE BOOL "If SET_ENABLE_WPP_PARALLELISM is on, it will be set to this value" )
-endif()
-
 # Enable warnings for some generators and toolsets.
 # bb_enable_warnings( gcc warnings-as-errors -Wno-sign-compare )
 # bb_enable_warnings( gcc -Wno-unused-variable )
 # bb_enable_warnings( gcc-4.8 warnings-as-errors -Wno-unused-variable )
 # for gcc 8.2:
 bb_enable_warnings( gcc warnings-as-errors -Wno-sign-compare -Wno-class-memaccess)
+
+bb_multithreading()
 
 if( XCODE )
   bb_enable_warnings( clang warnings-as-errors

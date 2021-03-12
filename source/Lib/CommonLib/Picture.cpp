@@ -40,130 +40,6 @@
 #include "ChromaFormat.h"
 #include "CommonLib/InterpolationFilter.h"
 
-
-#if ENABLE_SPLIT_PARALLELISM
-
-int g_wppThreadId( 0 );
-#pragma omp threadprivate(g_wppThreadId)
-
-#if ENABLE_SPLIT_PARALLELISM
-int g_splitThreadId( 0 );
-#pragma omp threadprivate(g_splitThreadId)
-
-int g_splitJobId( 0 );
-#pragma omp threadprivate(g_splitJobId)
-#endif
-
-Scheduler::Scheduler() :
-#if ENABLE_SPLIT_PARALLELISM
-  m_numSplitThreads( 1 )
-#endif
-{
-}
-
-Scheduler::~Scheduler()
-{
-}
-
-#if ENABLE_SPLIT_PARALLELISM
-unsigned Scheduler::getSplitDataId( int jobId ) const
-{
-  if( m_numSplitThreads > 1 && m_hasParallelBuffer )
-  {
-    int splitJobId = jobId == CURR_THREAD_ID ? g_splitJobId : jobId;
-
-    return ( g_wppThreadId * NUM_RESERVERD_SPLIT_JOBS ) + splitJobId;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-unsigned Scheduler::getSplitPicId( int tId /*= CURR_THREAD_ID */ ) const
-{
-  if( m_numSplitThreads > 1 && m_hasParallelBuffer )
-  {
-    int threadId = tId == CURR_THREAD_ID ? g_splitThreadId : tId;
-
-    return ( g_wppThreadId * m_numSplitThreads ) + threadId;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-unsigned Scheduler::getSplitJobId() const
-{
-  if( m_numSplitThreads > 1 )
-  {
-    return g_splitJobId;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-void Scheduler::setSplitJobId( const int jobId )
-{
-  CHECK( g_splitJobId != 0 && jobId != 0, "Need to reset the jobId after usage!" );
-  g_splitJobId = jobId;
-}
-
-void Scheduler::startParallel()
-{
-  m_hasParallelBuffer = true;
-}
-
-void Scheduler::finishParallel()
-{
-  m_hasParallelBuffer = false;
-}
-
-void Scheduler::setSplitThreadId( const int tId )
-{
-  g_splitThreadId = tId == CURR_THREAD_ID ? omp_get_thread_num() : tId;
-}
-
-#endif
-
-
-
-unsigned Scheduler::getDataId() const
-{
-#if ENABLE_SPLIT_PARALLELISM
-  if( m_numSplitThreads > 1 )
-  {
-    return getSplitDataId();
-  }
-#endif
-  return 0;
-}
-
-bool Scheduler::init( const int ctuYsize, const int ctuXsize, const int numWppThreadsRunning, const int numWppExtraLines, const int numSplitThreads )
-{
-#if ENABLE_SPLIT_PARALLELISM
-  m_numSplitThreads = numSplitThreads;
-#endif
-
-  return true;
-}
-
-
-int Scheduler::getNumPicInstances() const
-{
-#if !ENABLE_SPLIT_PARALLELISM
-  return 1;
-#else
-  return ( m_numSplitThreads > 1 ? m_numSplitThreads : 1 );
-#endif
-}
-
-#endif
-
-
 // ---------------------------------------------------------------------------
 // picture methods
 // ---------------------------------------------------------------------------
@@ -225,39 +101,34 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
 
 void Picture::destroy()
 {
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 0; jId < PARL_SPLIT_MAX_NUM_THREADS; jId++ )
-#endif
+  for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
   {
-    for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
-    {
-      M_BUFS(jId, t).destroy();
-    }
-    m_hashMap.clearAll();
-    if (cs)
-    {
-      cs->destroy();
-      delete cs;
-      cs = nullptr;
-    }
+    M_BUFS(jId, t).destroy();
+  }
+  m_hashMap.clearAll();
+  if (cs)
+  {
+    cs->destroy();
+    delete cs;
+    cs = nullptr;
+  }
 
-    for (auto &ps: slices)
-    {
-      delete ps;
-    }
-    slices.clear();
+  for (auto &ps: slices)
+  {
+    delete ps;
+  }
+  slices.clear();
 
-    for (auto &psei: SEIs)
-    {
-      delete psei;
-    }
-    SEIs.clear();
+  for (auto &psei: SEIs)
+  {
+    delete psei;
+  }
+  SEIs.clear();
 
-    if (m_spliceIdx)
-    {
-      delete[] m_spliceIdx;
-      m_spliceIdx = NULL;
-    }
+  if (m_spliceIdx)
+  {
+    delete[] m_spliceIdx;
+    m_spliceIdx = NULL;
   }
 }
 
@@ -269,21 +140,8 @@ void Picture::createTempBuffers( const unsigned _maxCUSize )
   const Area a = m_ctuArea.Y();
 #endif
 
-#if ENABLE_SPLIT_PARALLELISM
-  scheduler.startParallel();
-
-  for( int jId = 0; jId < scheduler.getNumPicInstances(); jId++ )
-#endif
-  {
-    M_BUFS( jId, PIC_PREDICTION                   ).create( chromaFormat, a,   _maxCUSize );
-    M_BUFS( jId, PIC_RESIDUAL                     ).create( chromaFormat, a,   _maxCUSize );
-#if ENABLE_SPLIT_PARALLELISM
-    if (jId > 0)
-    {
-      M_BUFS(jId, PIC_RECONSTRUCTION).create(chromaFormat, Y(), _maxCUSize, margin, MEMORY_ALIGN_DEF_SIZE);
-    }
-#endif
-  }
+  M_BUFS( jId, PIC_PREDICTION                   ).create( chromaFormat, a,   _maxCUSize );
+  M_BUFS( jId, PIC_RESIDUAL                     ).create( chromaFormat, a,   _maxCUSize );
 
   if (cs)
   {
@@ -293,24 +151,11 @@ void Picture::createTempBuffers( const unsigned _maxCUSize )
 
 void Picture::destroyTempBuffers()
 {
-#if ENABLE_SPLIT_PARALLELISM
-  scheduler.finishParallel();
-
-  for( int jId = 0; jId < scheduler.getNumPicInstances(); jId++ )
-#endif
+  for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
   {
-    for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
+    if (t == PIC_RESIDUAL || t == PIC_PREDICTION)
     {
-      if (t == PIC_RESIDUAL || t == PIC_PREDICTION)
-      {
-        M_BUFS(jId, t).destroy();
-      }
-#if ENABLE_SPLIT_PARALLELISM
-      if (t == PIC_RECONSTRUCTION && jId > 0)
-      {
-        M_BUFS(jId, t).destroy();
-      }
-#endif
+      M_BUFS(0, t).destroy();
     }
   }
 
@@ -469,23 +314,6 @@ void Picture::clearSliceBuffer()
   }
   slices.clear();
 }
-
-#if ENABLE_SPLIT_PARALLELISM
-void Picture::finishParallelPart( const UnitArea& area )
-{
-  const UnitArea clipdArea = clipArea( area, *this );
-  const int      sourceID  = scheduler.getSplitPicId( 0 );
-  CHECK( scheduler.getSplitJobId() > 0, "Finish-CU cannot be called from within a mode- or split-parallelized block!" );
-
-  // distribute the reconstruction across all of the parallel workers
-  for( int tId = 1; tId < scheduler.getNumSplitThreads(); tId++ )
-  {
-    const int destID = scheduler.getSplitPicId( tId );
-
-    M_BUFS( destID, PIC_RECONSTRUCTION ).subBuf( clipdArea ).copyFrom( M_BUFS( sourceID, PIC_RECONSTRUCTION ).subBuf( clipdArea ) );
-  }
-}
-#endif
 
 const TFilterCoeff DownsamplingFilterSRC[8][16][12] =
 {
@@ -1240,9 +1068,6 @@ PelBuf Picture::getBuf( const CompArea &blk, const PictureType &type )
     return PelBuf();
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL || type == PIC_ORIGINAL_INPUT || type == PIC_TRUE_ORIGINAL_INPUT ) ? 0 : scheduler.getSplitPicId();
-#endif
 #if !KEEP_PRED_AND_RESI_SIGNALS
   if( type == PIC_RESIDUAL || type == PIC_PREDICTION )
   {
@@ -1264,10 +1089,6 @@ const CPelBuf Picture::getBuf( const CompArea &blk, const PictureType &type ) co
     return PelBuf();
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL ) ? 0 : scheduler.getSplitPicId();
-
-#endif
 #if !KEEP_PRED_AND_RESI_SIGNALS
   if( type == PIC_RESIDUAL || type == PIC_PREDICTION )
   {
@@ -1308,9 +1129,6 @@ const CPelUnitBuf Picture::getBuf( const UnitArea &unit, const PictureType &type
 
 Pel* Picture::getOrigin( const PictureType &type, const ComponentID compID ) const
 {
-#if ENABLE_SPLIT_PARALLELISM
-  const int jId = ( type == PIC_ORIGINAL || type == PIC_TRUE_ORIGINAL ) ? 0 : scheduler.getSplitPicId();
-#endif
   return M_BUFS( jId, type ).getOrigin( compID );
 }
 

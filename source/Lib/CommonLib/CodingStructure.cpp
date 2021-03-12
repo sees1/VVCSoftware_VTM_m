@@ -549,10 +549,6 @@ CodingUnit& CodingStructure::addCU( const UnitArea &unit, const ChannelType chTy
   if( prevCU )
   {
     prevCU->next = cu;
-#if ENABLE_SPLIT_PARALLELISM
-
-    CHECK( prevCU->cacheId != cu->cacheId, "Inconsintent cacheId between previous and current CU" );
-#endif
   }
 
   cus.push_back( cu );
@@ -593,21 +589,12 @@ PredictionUnit& CodingStructure::addPU( const UnitArea &unit, const ChannelType 
   pu->cs     = this;
   pu->cu     = m_isTuEnc ? cus[0] : getCU( unit.blocks[chType].pos(), chType );
   pu->chType = chType;
-#if ENABLE_SPLIT_PARALLELISM
-
-  CHECK( pu->cacheId != pu->cu->cacheId, "Inconsintent cacheId between the PU and assigned CU" );
-  CHECK( pu->cu->firstPU != nullptr, "Without an RQT the firstPU should be null" );
-#endif
 
   PredictionUnit *prevPU = m_numPUs > 0 ? pus.back() : nullptr;
 
   if( prevPU && prevPU->cu == pu->cu )
   {
     prevPU->next = pu;
-#if ENABLE_SPLIT_PARALLELISM
-
-    CHECK( prevPU->cacheId != pu->cacheId, "Inconsintent cacheId between previous and current PU" );
-#endif
   }
 
   pus.push_back( pu );
@@ -654,14 +641,6 @@ TransformUnit& CodingStructure::addTU( const UnitArea &unit, const ChannelType c
   tu->cs     = this;
   tu->cu     = m_isTuEnc ? cus[0] : getCU( unit.blocks[chType].pos(), chType );
   tu->chType = chType;
-#if ENABLE_SPLIT_PARALLELISM
-
-  if( tu->cu )
-  {
-    CHECK(tu->cacheId != tu->cu->cacheId, "Inconsintent cacheId between the TU and assigned CU");
-  }
-#endif
-
 
   TransformUnit *prevTU = m_numTUs > 0 ? tus.back() : nullptr;
 
@@ -669,10 +648,6 @@ TransformUnit& CodingStructure::addTU( const UnitArea &unit, const ChannelType c
   {
     prevTU->next = tu;
     tu->prev     = prevTU;
-#if ENABLE_SPLIT_PARALLELISM
-
-    CHECK( prevTU->cacheId != tu->cacheId, "Inconsintent cacheId between previous and current TU" );
-#endif
   }
 
   tus.push_back( tu );

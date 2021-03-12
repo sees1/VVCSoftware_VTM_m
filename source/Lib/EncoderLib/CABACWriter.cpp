@@ -1757,11 +1757,7 @@ Pel CABACWriter::writePLTIndex(const CodingUnit& cu, uint32_t idx, PelBuf& palet
 void CABACWriter::prediction_unit( const PredictionUnit& pu )
 {
   CHECK( pu.cu->treeType == TREE_C, "cannot be chroma CU" );
-#if ENABLE_SPLIT_PARALLELISM
-  CHECK( pu.cacheUsed, "Processing a PU that should be in cache!" );
-  CHECK( pu.cu->cacheUsed, "Processing a CU that should be in cache!" );
 
-#endif
   if( pu.cu->skip )
   {
     CHECK( !pu.mergeFlag, "merge_flag must be true for skipped CUs" );

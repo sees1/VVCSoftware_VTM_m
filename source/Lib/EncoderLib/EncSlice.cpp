@@ -1323,14 +1323,6 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
 
   m_CABACEstimator->initCtxModels( *pcSlice );
 
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 1; jId < m_pcLib->getNumCuEncStacks(); jId++ )
-  {
-    CABACWriter* cw = m_pcLib->getCABACEncoder( jId )->getCABACEstimator( pcSlice->getSPS() );
-    cw->initCtxModels( *pcSlice );
-  }
-
-#endif
   m_pcCuEncoder->getModeCtrl()->setFastDeltaQp(bFastDeltaQP);
 
 
@@ -1376,13 +1368,6 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
                            (m_pcCfg->getBaseQP() >= 38) || (m_pcCfg->getSourceWidth() <= 512 && m_pcCfg->getSourceHeight() <= 320), m_adaptedLumaQP))
     {
       m_CABACEstimator->initCtxModels (*pcSlice);
-#if ENABLE_SPLIT_PARALLELISM
-      for (int jId = 1; jId < m_pcLib->getNumCuEncStacks(); jId++)
-      {
-        CABACWriter* cw = m_pcLib->getCABACEncoder (jId)->getCABACEstimator (pcSlice->getSPS());
-        cw->initCtxModels (*pcSlice);
-      }
-#endif
       pcPic->m_prevQP[0] = pcPic->m_prevQP[1] = pcSlice->getSliceQp();
       if (pcSlice->getFirstCtuRsAddrInSlice() == 0)
       {
@@ -1506,12 +1491,9 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
   const int iQPIndex              = pcSlice->getSliceQpBase();
 #endif
 
-#if ENABLE_SPLIT_PARALLELISM
-  const int       dataId          = 0;
-#endif
-  CABACWriter*    pCABACWriter    = pEncLib->getCABACEncoder( PARL_PARAM0( dataId ) )->getCABACEstimator( pcSlice->getSPS() );
-  TrQuant*        pTrQuant        = pEncLib->getTrQuant( PARL_PARAM0( dataId ) );
-  RdCost*         pRdCost         = pEncLib->getRdCost( PARL_PARAM0( dataId ) );
+  CABACWriter*    pCABACWriter    = pEncLib->getCABACEncoder()->getCABACEstimator( pcSlice->getSPS() );
+  TrQuant*        pTrQuant        = pEncLib->getTrQuant();
+  RdCost*         pRdCost         = pEncLib->getRdCost();
   EncCfg*         pCfg            = pEncLib;
   RateCtrl*       pRateCtrl       = pEncLib->getRateCtrl();
   pRdCost->setLosslessRDCost(pcSlice->isLossless());
@@ -1703,13 +1685,6 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
     if (pcSlice->getSPS()->getUseLmcs())
     {
       m_pcCuEncoder->setDecCuReshaperInEncCU(m_pcLib->getReshaper(), pcSlice->getSPS()->getChromaFormatIdc());
-
-#if ENABLE_SPLIT_PARALLELISM
-      for (int jId = 1; jId < m_pcLib->getNumCuEncStacks(); jId++)
-      {
-        m_pcLib->getCuEncoder(jId)->setDecCuReshaperInEncCU(m_pcLib->getReshaper(jId), pcSlice->getSPS()->getChromaFormatIdc());
-      }
-#endif
     }
     if( !cs.slice->isIntra() && pCfg->getMCTSEncConstraint() )
     {
@@ -1728,13 +1703,7 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
     pCABACWriter->coding_tree_unit( cs, ctuArea, prevQP, ctuRsAddr, true, true );
     const int numberOfWrittenBits = int( pCABACWriter->getEstFracBits() >> SCALE_BITS );
 
-#if ENABLE_SPLIT_PARALLELISM
-#pragma omp critical
-#endif
     pcSlice->setSliceBits( ( uint32_t ) ( pcSlice->getSliceBits() + numberOfWrittenBits ) );
-#if ENABLE_SPLIT_PARALLELISM
-#pragma omp critical
-#endif
 
     // Store probabilities of first CTU in line into buffer - used only if wavefront-parallel-processing is enabled.
     if( cs.pps->ctuIsTileColBd( ctuXPosInCtus ) && pEncLib->getEntropyCodingSyncEnabledFlag() )

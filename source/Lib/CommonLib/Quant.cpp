@@ -501,14 +501,6 @@ void Quant::init( uint32_t uiMaxTrSize,
   m_resetStore = true;
 }
 
-#if ENABLE_SPLIT_PARALLELISM
-void Quant::copyState( const Quant& other )
-{
-  m_dLambda = other.m_dLambda;
-  memcpy( m_lambdas, other.m_lambdas, sizeof( m_lambdas ) );
-}
-#endif
-
 /** set quantized matrix coefficient for encode
  * \param scalingList            quantized matrix address
  * \param format                 chroma format
