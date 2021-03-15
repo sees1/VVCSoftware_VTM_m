@@ -4344,9 +4344,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     setLastGdrRecoveryPocCnt(pcSlice->getPicHeader()->getRecoveryPocCnt());
   }
 
-  int recovery_poc_cnt = getLastGdrRecoveryPocCnt();
+  int recoveryPocCnt = getLastGdrRecoveryPocCnt();
 
-  if (getLastGdrPoc() > 0 && (getLastGdrPoc() <= curPoc) && (curPoc < (getLastGdrPoc() + recovery_poc_cnt))) 
+  if (getLastGdrPoc() > 0 && (getLastGdrPoc() <= curPoc) && (curPoc < (getLastGdrPoc() + recoveryPocCnt)))
   {
     picHeader->setInGdrInterval(true);
   }  

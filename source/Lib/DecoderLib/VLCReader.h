@@ -163,7 +163,7 @@ public:
 #if GDR_ENABLED
   void setLastGdrPoc(int poc) { m_lastGdrPoc = poc;  }
   int  getLastGdrPoc()        { return m_lastGdrPoc; }
-  void setLastGdrRecoveryPocCnt(int recovery_poc_cnt) { m_lastGdrRecoveryPocCnt = recovery_poc_cnt; }
+  void setLastGdrRecoveryPocCnt(int recoveryPocCnt) { m_lastGdrRecoveryPocCnt = recoveryPocCnt; }
   int  getLastGdrRecoveryPocCnt()                     { return m_lastGdrRecoveryPocCnt; }
 #endif
   void  setBitstream        ( InputBitstream* p )   { m_pcBitstream = p; }
