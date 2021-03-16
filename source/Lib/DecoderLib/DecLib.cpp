@@ -2785,7 +2785,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   {
     for (int e = 0; e < 2; e++)
     {
-      for (int ridx = 0; ridx < 4; ridx++)
+      for (int ridx = 0; ridx < pcSlice->getNumRefIdx((RefPicList)e); ridx++)
       {
         Picture *pic = pcSlice->getRefPic((RefPicList)e, ridx);
         if (pic)
