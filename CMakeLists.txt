@@ -59,8 +59,6 @@ include( ${CMAKE_SOURCE_DIR}/cmake/CMakeBuild/cmake/modules/BBuildEnv.cmake )
 # for gcc 8.2:
 bb_enable_warnings( gcc warnings-as-errors -Wno-sign-compare -Wno-class-memaccess)
 
-bb_multithreading()
-
 if( XCODE )
   bb_enable_warnings( clang warnings-as-errors
                             -Wno-deprecated-declarations

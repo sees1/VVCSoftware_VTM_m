@@ -38,7 +38,7 @@ if( CMAKE_COMPILER_IS_GNUCC AND BUILD_STATIC )
   target_compile_definitions( ${EXE_NAME} PUBLIC ENABLE_WPP_STATIC_LINK=1 )
 endif()
 
-target_link_libraries( ${EXE_NAME} CommonLib EncoderLib DecoderLib Utilities Threads::Threads ${ADDITIONAL_LIBS} )
+target_link_libraries( ${EXE_NAME} CommonLib EncoderLib DecoderLib Utilities ${ADDITIONAL_LIBS} )
 
 # lldb custom data formatters
 if( XCODE )
