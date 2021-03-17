@@ -161,10 +161,6 @@ private:
   CtxPair*              m_CurrCtx;
   CtxCache*             m_CtxCache;
 
-#if ENABLE_SPLIT_PARALLELISM
-  int                   m_dataId;
-#endif
-
   //  Data : encoder control
   int                   m_cuChromaQpOffsetIdxPlus1; // if 0, then cu_chroma_qp_offset_flag will be 0, otherwise cu_chroma_qp_offset_flag will be 1.
 
@@ -199,9 +195,6 @@ private:
 
   int                   m_ctuIbcSearchRangeX;
   int                   m_ctuIbcSearchRangeY;
-#if ENABLE_SPLIT_PARALLELISM
-  EncLib*               m_pcEncLib;
-#endif
   int                   m_bestBcwIdx[2];
   double                m_bestBcwCost[2];
   GeoMotionInfo         m_GeoModeTest[GEO_MAX_NUM_CANDS];
@@ -215,7 +208,7 @@ private:
   double                m_sbtCostSave[2];
 public:
   /// copy parameters from encoder class
-  void  init                ( EncLib* pcEncLib, const SPS& sps PARL_PARAM( const int jId = 0 ) );
+  void  init                ( EncLib* pcEncLib, const SPS& sps );
 
   void setDecCuReshaperInEncCU(EncReshape* pcReshape, ChromaFormat chromaFormatIDC) { initDecCuReshaper((Reshape*) pcReshape, chromaFormatIDC); }
   /// create internal buffers
@@ -248,10 +241,6 @@ protected:
   Distortion getDistortionDb  ( CodingStructure &cs, CPelBuf org, CPelBuf reco, ComponentID compID, const CompArea& compArea, bool afterDb );
 
   void xCompressCU            ( CodingStructure*& tempCS, CodingStructure*& bestCS, Partitioner& pm, double maxCostAllowed = MAX_DOUBLE );
-#if ENABLE_SPLIT_PARALLELISM
-  void xCompressCUParallel    ( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &pm );
-  void copyState              ( EncCu* other, Partitioner& pm, const UnitArea& currArea, const bool isDist );
-#endif
 
   bool
     xCheckBestMode         ( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &pm, const EncTestMode& encTestmode );

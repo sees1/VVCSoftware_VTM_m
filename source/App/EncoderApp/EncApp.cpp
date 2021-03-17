@@ -1041,10 +1041,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setStopAfterFFtoPOC                                  ( m_stopAfterFFtoPOC );
   m_cEncLib.setBs2ModPOCAndType                                  ( m_bs2ModPOCAndType );
   m_cEncLib.setDebugCTU                                          ( m_debugCTU );
-#if ENABLE_SPLIT_PARALLELISM
-  m_cEncLib.setNumSplitThreads                                   ( m_numSplitThreads );
-  m_cEncLib.setForceSingleSplitThread                            ( m_forceSplitSequential );
-#endif
   m_cEncLib.setUseALF                                            ( m_alf );
 #if JVET_U0081
   m_cEncLib.setALFStrengthLuma                                   (m_alfStrengthLuma);

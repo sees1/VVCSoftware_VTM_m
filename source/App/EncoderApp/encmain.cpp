@@ -102,16 +102,6 @@ int main(int argc, char* argv[])
 #if ENABLE_TRACING
   fprintf( stdout, "[ENABLE_TRACING] " );
 #endif
-#if ENABLE_SPLIT_PARALLELISM
-  fprintf( stdout, "[SPLIT_PARALLEL (%d jobs)]", PARL_SPLIT_MAX_NUM_JOBS );
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-  const char* waitPolicy = getenv( "OMP_WAIT_POLICY" );
-  const char* maxThLim   = getenv( "OMP_THREAD_LIMIT" );
-  fprintf( stdout, waitPolicy ? "[OMP: WAIT_POLICY=%s," : "[OMP: WAIT_POLICY=,", waitPolicy );
-  fprintf( stdout, maxThLim   ? "THREAD_LIMIT=%s" : "THREAD_LIMIT=", maxThLim );
-  fprintf( stdout, "]" );
-#endif
   fprintf( stdout, "\n" );
 
   std::fstream bitstream;

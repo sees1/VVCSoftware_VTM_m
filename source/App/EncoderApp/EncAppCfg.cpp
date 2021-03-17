@@ -1392,12 +1392,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("StopAfterFFtoPOC",                                m_stopAfterFFtoPOC,                       false, "If using fast forward to POC, after the POC of interest has been hit, stop further encoding.")
   ("ForceDecodeBitstream1",                           m_forceDecodeBitstream1,                  false, "force decoding of bitstream 1 - use this only if you are realy sure about what you are doing ")
   ("DecodeBitstream2ModPOCAndType",                   m_bs2ModPOCAndType,                       false, "Modify POC and NALU-type of second input bitstream, to use second BS as closing I-slice")
-  ("NumSplitThreads",                                 m_numSplitThreads,                            1, "Number of threads used to parallelize splitting")
-  ("ForceSingleSplitThread",                          m_forceSplitSequential,                   false, "Force single thread execution even if taking the parallelized path")
-  ("NumWppThreads",                                   m_numWppThreads,                              1, "Number of threads used to run WPP-style parallelization")
-  ("NumWppExtraLines",                                m_numWppExtraLines,                           0, "Number of additional wpp lines to switch when threads are blocked")
+  
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
-  ("EnsureWppBitEqual",                               m_ensureWppBitEqual,                      false, "Ensure the results are equal to results with WPP-style parallelism, even if WPP is off")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
 #if JVET_U0081
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
@@ -2587,16 +2583,6 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(m_wrapAroundOffset > m_iSourceWidth, "Wrap-around offset must not be greater than the source picture width");
     xConfirmPara( m_wrapAroundOffset % minCUSize != 0, "Wrap-around offset must be an integer multiple of the specified minimum CU size" );
   }
-
-#if ENABLE_SPLIT_PARALLELISM
-  xConfirmPara( m_numSplitThreads < 1, "Number of used threads cannot be smaller than 1" );
-  xConfirmPara( m_numSplitThreads > PARL_SPLIT_MAX_NUM_THREADS, "Number of used threads cannot be higher than the number of actual jobs" );
-#else
-  xConfirmPara( m_numSplitThreads != 1, "ENABLE_SPLIT_PARALLELISM is disabled, numSplitThreads has to be 1" );
-#endif
-
-  xConfirmPara( m_numWppThreads != 1, "ENABLE_WPP_PARALLELISM is disabled, numWppThreads has to be 1" );
-  xConfirmPara( m_ensureWppBitEqual, "ENABLE_WPP_PARALLELISM is disabled, cannot ensure being WPP bit-equal" );
 
 
 #if SHARP_LUMA_DELTA_QP && ENABLE_QPA
@@ -4122,14 +4108,6 @@ void EncAppCfg::xPrintParameter()
   msg( VERBOSE, "MaxNumAlfAlternativesChroma:%d ", m_maxNumAlfAlternativesChroma );
   if( m_MIP ) msg(VERBOSE, "FastMIP:%d ", m_useFastMIP);
   msg( VERBOSE, "FastLocalDualTree:%d ", m_fastLocalDualTreeMode );
-
-  msg( VERBOSE, "NumSplitThreads:%d ", m_numSplitThreads );
-  if( m_numSplitThreads > 1 )
-  {
-    msg( VERBOSE, "ForceSingleSplitThread:%d ", m_forceSplitSequential );
-  }
-  msg( VERBOSE, "NumWppThreads:%d+%d ", m_numWppThreads, m_numWppExtraLines );
-  msg( VERBOSE, "EnsureWppBitEqual:%d ", m_ensureWppBitEqual );
 
   if (m_resChangeInClvsEnabled)
   {

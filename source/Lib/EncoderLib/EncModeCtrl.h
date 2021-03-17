@@ -194,10 +194,6 @@ struct ComprCUCtx
     , skipSecondMTSPass
                     ( false )
     , interHad      (std::numeric_limits<Distortion>::max())
-#if ENABLE_SPLIT_PARALLELISM
-    , isLevelSplitParallel
-                    ( false )
-#endif
     , bestCostWithoutSplitFlags( MAX_DOUBLE )
     , bestCostMtsFirstPassNoIsp( MAX_DOUBLE )
     , bestCostIsp   ( MAX_DOUBLE )
@@ -245,9 +241,6 @@ struct ComprCUCtx
   double                            bestMtsSize2Nx2N1stPass;
   bool                              skipSecondMTSPass;
   Distortion                        interHad;
-#if ENABLE_SPLIT_PARALLELISM
-  bool                              isLevelSplitParallel;
-#endif
   double                            bestCostWithoutSplitFlags;
   double                            bestCostMtsFirstPassNoIsp;
   double                            bestCostIsp;
@@ -286,9 +279,6 @@ protected:
 #endif
   bool                  m_fastDeltaQP;
   static_vector<ComprCUCtx, ( MAX_CU_DEPTH << 2 )> m_ComprCUCtxList;
-#if ENABLE_SPLIT_PARALLELISM
-  int                   m_runNextInParallel;
-#endif
   InterSearch*          m_pcInterSearch;
 
   bool                  m_doPlt;
@@ -311,13 +301,6 @@ public:
 
   virtual bool useModeResult        ( const EncTestMode& encTestmode, CodingStructure*& tempCS,  Partitioner& partitioner ) = 0;
   virtual bool checkSkipOtherLfnst  ( const EncTestMode& encTestmode, CodingStructure*& tempCS,  Partitioner& partitioner ) = 0;
-#if ENABLE_SPLIT_PARALLELISM
-  virtual void copyState            ( const EncModeCtrl& other, const UnitArea& area );
-  virtual int  getNumParallelJobs   ( const CodingStructure &cs, Partitioner& partitioner )                                 const { return 1;     }
-  virtual bool isParallelSplit      ( const CodingStructure &cs, Partitioner& partitioner )                                 const { return false; }
-  virtual bool parallelJobSelector  ( const EncTestMode& encTestmode, const CodingStructure &cs, Partitioner& partitioner ) const { return true;  }
-          void setParallelSplit     ( bool val ) { m_runNextInParallel = val; }
-#endif
 
   void         init                 ( EncCfg *pCfg, RateCtrl *pRateCtrl, RdCost *pRdCost );
   bool         tryModeMaster        ( const EncTestMode& encTestmode, const CodingStructure &cs, Partitioner& partitioner );
@@ -395,13 +378,7 @@ struct SaveLoadStructSbt
 class SaveLoadEncInfoSbt
 {
 protected:
-#if ENABLE_SPLIT_PARALLELISM
-public:
-#endif
   void init( const Slice &slice );
-#if ENABLE_SPLIT_PARALLELISM
-protected:
-#endif
   void create();
   void destroy();
 
@@ -414,9 +391,6 @@ public:
   void     resetSaveloadSbt( int maxSbtSize );
   uint16_t findBestSbt( const UnitArea& area, const uint32_t curPuSse );
   bool     saveBestSbt( const UnitArea& area, const uint32_t curPuSse, const uint8_t curPuSbt, const uint8_t curPuTrs );
-#if ENABLE_SPLIT_PARALLELISM
-  void     copyState(const SaveLoadEncInfoSbt& other);
-#endif
 };
 
 static const int MAX_STORED_CU_INFO_REFS = 4;
@@ -439,12 +413,6 @@ struct CodedCUInfo
   double   bestNonDCT2Cost;
   bool     relatedCuIsValid;
   uint8_t  bestISPIntraMode;
-
-#if ENABLE_SPLIT_PARALLELISM
-
-  uint64_t
-       temporalId;
-#endif
 };
 
 class CacheBlkInfoCtrl
@@ -460,21 +428,7 @@ protected:
 
   void create   ();
   void destroy  ();
-#if ENABLE_SPLIT_PARALLELISM
-public:
-#endif
   void init     ( const Slice &slice );
-#if ENABLE_SPLIT_PARALLELISM
-private:
-  uint64_t
-       m_currTemporalId;
-public:
-  void tick     () { m_currTemporalId++; CHECK( m_currTemporalId <= 0, "Problem with integer overflow!" ); }
-  // mark the state of the blk as changed within the current temporal id
-  void copyState( const CacheBlkInfoCtrl &other, const UnitArea& area );
-protected:
-  void touch    ( const UnitArea& area );
-#endif
 
   CodedCUInfo& getBlkInfo( const UnitArea& area );
 
@@ -508,10 +462,6 @@ struct BestEncodingInfo
   EncTestMode    testMode;
 
   int            poc;
-
-#if ENABLE_SPLIT_PARALLELISM
-  int64_t        temporalId;
-#endif
 };
 
 class BestEncInfoCache
@@ -526,9 +476,6 @@ private:
   bool               *m_runType;
   CodingStructure     m_dummyCS;
   XUCache             m_dummyCache;
-#if ENABLE_SPLIT_PARALLELISM
-  int64_t m_currTemporalId;
-#endif
 
 protected:
 
@@ -537,19 +484,10 @@ protected:
 
   bool setFromCs( const CodingStructure& cs, const Partitioner& partitioner );
   bool isValid  ( const CodingStructure &cs, const Partitioner &partitioner, int qp );
-
-#if ENABLE_SPLIT_PARALLELISM
-  void touch    ( const UnitArea& area );
-#endif
 public:
 
   BestEncInfoCache() : m_slice_bencinf( nullptr ), m_dummyCS( m_dummyCache.cuCache, m_dummyCache.puCache, m_dummyCache.tuCache ) {}
   virtual ~BestEncInfoCache() {}
-
-#if ENABLE_SPLIT_PARALLELISM
-  void     copyState( const BestEncInfoCache &other, const UnitArea &area );
-  void     tick     () { m_currTemporalId++; CHECK( m_currTemporalId <= 0, "Problem with integer overflow!" ); }
-#endif
   void     init     ( const Slice &slice );
   bool     setCsFrom( CodingStructure& cs, EncTestMode& testMode, const Partitioner& partitioner ) const;
 };
@@ -602,13 +540,6 @@ public:
   virtual bool tryMode            ( const EncTestMode& encTestmode, const CodingStructure &cs, Partitioner& partitioner );
   virtual bool useModeResult      ( const EncTestMode& encTestmode, CodingStructure*& tempCS,  Partitioner& partitioner );
 
-#if ENABLE_SPLIT_PARALLELISM
-  virtual void copyState          ( const EncModeCtrl& other, const UnitArea& area );
-
-  virtual int  getNumParallelJobs ( const CodingStructure &cs, Partitioner& partitioner ) const;
-  virtual bool isParallelSplit    ( const CodingStructure &cs, Partitioner& partitioner ) const;
-  virtual bool parallelJobSelector( const EncTestMode& encTestmode, const CodingStructure &cs, Partitioner& partitioner ) const;
-#endif
   virtual bool checkSkipOtherLfnst( const EncTestMode& encTestmode, CodingStructure*& tempCS, Partitioner& partitioner );
 };
 

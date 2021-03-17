@@ -64,15 +64,6 @@ void EncModeCtrl::init( EncCfg *pCfg, RateCtrl *pRateCtrl, RdCost* pRdCost )
 
 bool EncModeCtrl::tryModeMaster( const EncTestMode& encTestmode, const CodingStructure &cs, Partitioner& partitioner )
 {
-#if ENABLE_SPLIT_PARALLELISM
-  if( m_ComprCUCtxList.back().isLevelSplitParallel )
-  {
-    if( !parallelJobSelector( encTestmode, cs, partitioner ) )
-    {
-      return false;
-    }
-  }
-#endif
   return tryMode( encTestmode, cs, partitioner );
 }
 
@@ -248,18 +239,6 @@ int EncModeCtrl::calculateLumaDQP( const CPelBuf& rcOrg )
 }
 #endif
 
-#if ENABLE_SPLIT_PARALLELISM
-void EncModeCtrl::copyState( const EncModeCtrl& other, const UnitArea& area )
-{
-  m_slice          = other.m_slice;
-  m_fastDeltaQP    = other.m_fastDeltaQP;
-  m_lumaQPOffset   = other.m_lumaQPOffset;
-  m_runNextInParallel
-                   = other.m_runNextInParallel;
-  m_ComprCUCtxList = other.m_ComprCUCtxList;
-}
-
-#endif
 void CacheBlkInfoCtrl::create()
 {
   const unsigned numPos = MAX_CU_SIZE >> MIN_CU_LOG2;
@@ -370,71 +349,7 @@ void CacheBlkInfoCtrl::init( const Slice &slice )
   }
 
   m_slice_chblk = &slice;
-#if ENABLE_SPLIT_PARALLELISM
-
-  m_currTemporalId = 0;
-#endif
 }
-#if ENABLE_SPLIT_PARALLELISM
-
-void CacheBlkInfoCtrl::touch( const UnitArea& area )
-{
-  CodedCUInfo& cuInfo = getBlkInfo( area );
-  cuInfo.temporalId = m_currTemporalId;
-}
-
-void CacheBlkInfoCtrl::copyState( const CacheBlkInfoCtrl &other, const UnitArea& area )
-{
-  m_slice_chblk = other.m_slice_chblk;
-
-  m_currTemporalId = other.m_currTemporalId;
-
-  if( m_slice_chblk->isIntra() ) return;
-
-  const int cuSizeMask = m_slice_chblk->getSPS()->getMaxCUWidth() - 1;
-
-  const int minPosX = ( area.lx() & cuSizeMask ) >> MIN_CU_LOG2;
-  const int minPosY = ( area.ly() & cuSizeMask ) >> MIN_CU_LOG2;
-  const int maxPosX = ( area.Y().bottomRight().x & cuSizeMask ) >> MIN_CU_LOG2;
-  const int maxPosY = ( area.Y().bottomRight().y & cuSizeMask ) >> MIN_CU_LOG2;
-
-  for( unsigned x = minPosX; x <= maxPosX; x++ )
-  {
-    for( unsigned y = minPosY; y <= maxPosY; y++ )
-    {
-      for( int wIdx = 0; wIdx < gp_sizeIdxInfo->numWidths(); wIdx++ )
-      {
-        const int width = gp_sizeIdxInfo->sizeFrom( wIdx );
-
-        if( m_codedCUInfo[x][y][wIdx] && width <= area.lwidth() && x + ( width >> MIN_CU_LOG2 ) <= ( maxPosX + 1 ) )
-        {
-          for( int hIdx = 0; hIdx < gp_sizeIdxInfo->numHeights(); hIdx++ )
-          {
-            const int height = gp_sizeIdxInfo->sizeFrom( hIdx );
-
-            if( gp_sizeIdxInfo->isCuSize( height ) && height <= area.lheight() && y + ( height >> MIN_CU_LOG2 ) <= ( maxPosY + 1 ) )
-            {
-              if( other.m_codedCUInfo[x][y][wIdx][hIdx]->temporalId > m_codedCUInfo[x][y][wIdx][hIdx]->temporalId )
-              {
-                *m_codedCUInfo[x][y][wIdx][hIdx] = *other.m_codedCUInfo[x][y][wIdx][hIdx];
-                m_codedCUInfo[x][y][wIdx][hIdx]->temporalId = m_currTemporalId;
-              }
-            }
-            else if( y + ( height >> MIN_CU_LOG2 ) > maxPosY + 1 )
-            {
-              break;;
-            }
-          }
-        }
-        else if( x + ( width >> MIN_CU_LOG2 ) > maxPosX + 1 )
-        {
-          break;
-        }
-      }
-    }
-  }
-}
-#endif
 
 CodedCUInfo& CacheBlkInfoCtrl::getBlkInfo( const UnitArea& area )
 {
@@ -477,10 +392,6 @@ void CacheBlkInfoCtrl::setMv( const UnitArea& area, const RefPicList refPicList,
 
   m_codedCUInfo[idx1][idx2][idx3][idx4]->saveMv [refPicList][iRefIdx] = rMv;
   m_codedCUInfo[idx1][idx2][idx3][idx4]->validMv[refPicList][iRefIdx] = true;
-#if ENABLE_SPLIT_PARALLELISM
-
-  touch( area );
-#endif
 }
 
 bool CacheBlkInfoCtrl::getMv( const UnitArea& area, const RefPicList refPicList, const int iRefIdx, Mv& rMv ) const
@@ -578,13 +489,6 @@ bool SaveLoadEncInfoSbt::saveBestSbt( const UnitArea& area, const uint32_t curPu
   pSbtSave->numPuInfoStored++;
   return true;
 }
-
-#if ENABLE_SPLIT_PARALLELISM
-void SaveLoadEncInfoSbt::copyState(const SaveLoadEncInfoSbt &other)
-{
-  m_sliceSbt = other.m_sliceSbt;
-}
-#endif
 
 void SaveLoadEncInfoSbt::resetSaveloadSbt( int maxSbtSize )
 {
@@ -884,10 +788,6 @@ void BestEncInfoCache::init( const Slice &slice )
       }
     }
   }
-#if ENABLE_SPLIT_PARALLELISM
-
-  m_currTemporalId = 0;
-#endif
 }
 
 bool BestEncInfoCache::setFromCs( const CodingStructure& cs, const Partitioner& partitioner )
@@ -1025,75 +925,6 @@ bool BestEncInfoCache::setCsFrom( CodingStructure& cs, EncTestMode& testMode, co
   return true;
 }
 
-#if ENABLE_SPLIT_PARALLELISM
-void BestEncInfoCache::copyState(const BestEncInfoCache &other, const UnitArea &area)
-{
-  m_slice_bencinf  = other.m_slice_bencinf;
-  m_currTemporalId = other.m_currTemporalId;
-
-  if( m_slice_bencinf->isIntra() ) return;
-
-  const int cuSizeMask = m_slice_bencinf->getSPS()->getMaxCUWidth() - 1;
-
-  const int minPosX = ( area.lx() & cuSizeMask ) >> MIN_CU_LOG2;
-  const int minPosY = ( area.ly() & cuSizeMask ) >> MIN_CU_LOG2;
-  const int maxPosX = ( area.Y().bottomRight().x & cuSizeMask ) >> MIN_CU_LOG2;
-  const int maxPosY = ( area.Y().bottomRight().y & cuSizeMask ) >> MIN_CU_LOG2;
-
-  for( unsigned x = minPosX; x <= maxPosX; x++ )
-  {
-    for( unsigned y = minPosY; y <= maxPosY; y++ )
-    {
-      for( int wIdx = 0; wIdx < gp_sizeIdxInfo->numWidths(); wIdx++ )
-      {
-        const int width = gp_sizeIdxInfo->sizeFrom( wIdx );
-
-        if( m_bestEncInfo[x][y][wIdx] && width <= area.lwidth() && x + ( width >> MIN_CU_LOG2 ) <= ( maxPosX + 1 ) )
-        {
-          for( int hIdx = 0; hIdx < gp_sizeIdxInfo->numHeights(); hIdx++ )
-          {
-            const int height = gp_sizeIdxInfo->sizeFrom( hIdx );
-
-            if( gp_sizeIdxInfo->isCuSize( height ) && height <= area.lheight() && y + ( height >> MIN_CU_LOG2 ) <= ( maxPosY + 1 ) )
-            {
-              if( other.m_bestEncInfo[x][y][wIdx][hIdx]->temporalId > m_bestEncInfo[x][y][wIdx][hIdx]->temporalId )
-              {
-                m_bestEncInfo[x][y][wIdx][hIdx]->cu       = other.m_bestEncInfo[x][y][wIdx][hIdx]->cu;
-                m_bestEncInfo[x][y][wIdx][hIdx]->pu       = other.m_bestEncInfo[x][y][wIdx][hIdx]->pu;
-                m_bestEncInfo[x][y][wIdx][hIdx]->numTus   = other.m_bestEncInfo[x][y][wIdx][hIdx]->numTus;
-                m_bestEncInfo[x][y][wIdx][hIdx]->poc      = other.m_bestEncInfo[x][y][wIdx][hIdx]->poc;
-                m_bestEncInfo[x][y][wIdx][hIdx]->testMode = other.m_bestEncInfo[x][y][wIdx][hIdx]->testMode;
-
-                for( int i = 0; i < m_bestEncInfo[x][y][wIdx][hIdx]->numTus; i++ )
-                  m_bestEncInfo[x][y][wIdx][hIdx]->tus[i] = other.m_bestEncInfo[x][y][wIdx][hIdx]->tus[i];
-              }
-            }
-            else if( y + ( height >> MIN_CU_LOG2 ) > maxPosY + 1 )
-            {
-              break;;
-            }
-          }
-        }
-        else if( x + ( width >> MIN_CU_LOG2 ) > maxPosX + 1 )
-        {
-          break;
-        }
-      }
-    }
-  }
-}
-
-void BestEncInfoCache::touch(const UnitArea &area)
-{
-  unsigned idx1, idx2, idx3, idx4;
-  getAreaIdx(area.Y(), *m_slice_bencinf->getPPS()->pcv, idx1, idx2, idx3, idx4);
-  BestEncodingInfo &encInfo = *m_bestEncInfo[idx1][idx2][idx3][idx4];
-
-  encInfo.temporalId = m_currTemporalId;
-}
-
-#endif
-
 #endif
 
 static bool interHadActive( const ComprCUCtx& ctx )
@@ -1134,9 +965,6 @@ void EncModeCtrlMTnoRQT::initCTUEncoding( const Slice &slice )
   CHECK( !m_ComprCUCtxList.empty(), "Mode list is not empty at the beginning of a CTU" );
 
   m_slice             = &slice;
-#if ENABLE_SPLIT_PARALLELISM
-  m_runNextInParallel      = false;
-#endif
 
   if( m_pcEncCfg->getUseE0023FastEnc() )
   {
@@ -1168,19 +996,6 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
 
   m_ComprCUCtxList.push_back( ComprCUCtx( cs, minDepth, maxDepth, NUM_EXTRA_FEATURES ) );
 
-#if ENABLE_SPLIT_PARALLELISM
-  if( m_runNextInParallel )
-  {
-    for( auto &level : m_ComprCUCtxList )
-    {
-      CHECK( level.isLevelSplitParallel, "Tring to parallelize a level within parallel execution!" );
-    }
-    CHECK( cs.picture->scheduler.getSplitJobId() == 0, "Trying to run a parallel level although jobId is 0!" );
-    m_runNextInParallel                          = false;
-    m_ComprCUCtxList.back().isLevelSplitParallel = true;
-  }
-
-#endif
   const CodingUnit* cuLeft  = cs.getCU( cs.area.blocks[partitioner.chType].pos().offset( -1, 0 ), partitioner.chType );
   const CodingUnit* cuAbove = cs.getCU( cs.area.blocks[partitioner.chType].pos().offset( 0, -1 ), partitioner.chType );
 
@@ -1778,9 +1593,6 @@ bool EncModeCtrlMTnoRQT::tryMode( const EncTestMode& encTestmode, const CodingSt
     {
       case CU_QUAD_SPLIT:
         {
-#if ENABLE_SPLIT_PARALLELISM
-          if( !cuECtx.isLevelSplitParallel )
-#endif
           if( !cuECtx.get<bool>( QT_BEFORE_BT ) && bestCU )
           {
             unsigned maxBTD        = cs.pcv->getMaxBtDepth( slice, partitioner.chType );
@@ -2003,12 +1815,7 @@ bool EncModeCtrlMTnoRQT::tryMode( const EncTestMode& encTestmode, const CodingSt
             relatedCU.relatedCuIsValid   = true;
           }
         }
-#if ENABLE_SPLIT_PARALLELISM
-#if REUSE_CU_RESULTS
-        BestEncInfoCache::touch(partitioner.currArea());
-#endif
-        CacheBlkInfoCtrl::touch(partitioner.currArea());
-#endif
+
         cuECtx.set( IS_BEST_NOSPLIT_SKIP, bestCU->skip );
       }
     }
@@ -2148,106 +1955,4 @@ bool EncModeCtrlMTnoRQT::useModeResult( const EncTestMode& encTestmode, CodingSt
     return false;
   }
 }
-
-#if ENABLE_SPLIT_PARALLELISM
-void EncModeCtrlMTnoRQT::copyState( const EncModeCtrl& other, const UnitArea& area )
-{
-  const EncModeCtrlMTnoRQT* pOther = dynamic_cast<const EncModeCtrlMTnoRQT*>( &other );
-
-  CHECK( !pOther, "Trying to copy state from a different type of controller" );
-
-  this->EncModeCtrl        ::copyState( *pOther, area );
-  this->CacheBlkInfoCtrl   ::copyState( *pOther, area );
-#if REUSE_CU_RESULTS
-  this->BestEncInfoCache   ::copyState( *pOther, area );
-#endif
-  this->SaveLoadEncInfoSbt ::copyState( *pOther );
-
-  m_skipThreshold = pOther->m_skipThreshold;
-}
-
-int EncModeCtrlMTnoRQT::getNumParallelJobs( const CodingStructure &cs, Partitioner& partitioner ) const
-{
-  int numJobs = 0;
-
-  if(      partitioner.canSplit( CU_TRIH_SPLIT, cs ) )
-  {
-    numJobs = 6;
-  }
-  else if( partitioner.canSplit( CU_TRIV_SPLIT, cs ) )
-  {
-    numJobs = 5;
-  }
-  else if( partitioner.canSplit( CU_HORZ_SPLIT, cs ) )
-  {
-    numJobs = 4;
-  }
-  else if( partitioner.canSplit( CU_VERT_SPLIT, cs ) )
-  {
-    numJobs = 3;
-  }
-  else if( partitioner.canSplit( CU_QUAD_SPLIT, cs ) )
-  {
-    numJobs = 2;
-  }
-  else if( partitioner.canSplit( CU_DONT_SPLIT, cs ) )
-  {
-    numJobs = 1;
-  }
-
-  CHECK( numJobs >= NUM_RESERVERD_SPLIT_JOBS, "More jobs specified than allowed" );
-
-  return numJobs;
-}
-
-bool EncModeCtrlMTnoRQT::isParallelSplit( const CodingStructure &cs, Partitioner& partitioner ) const
-{
-  if( partitioner.getImplicitSplit( cs ) != CU_DONT_SPLIT || cs.picture->scheduler.getSplitJobId() != 0 ) return false;
-  if( cs.pps->getUseDQP() && partitioner.currQgEnable() ) return false;
-  const int numJobs = getNumParallelJobs( cs, partitioner );
-  const int numPxl  = partitioner.currArea().Y().area();
-  const int parlAt  = m_pcEncCfg->getNumSplitThreads() <= 3 ? 1024 : 256;
-  if(  cs.slice->isIntra() && numJobs > 2 && ( numPxl == parlAt || !partitioner.canSplit( CU_QUAD_SPLIT, cs ) ) ) return true;
-  if( !cs.slice->isIntra() && numJobs > 1 && ( numPxl == parlAt || !partitioner.canSplit( CU_QUAD_SPLIT, cs ) ) ) return true;
-  return false;
-}
-
-bool EncModeCtrlMTnoRQT::parallelJobSelector( const EncTestMode& encTestmode, const CodingStructure &cs, Partitioner& partitioner ) const
-{
-  // Job descriptors
-  //  - 1: all non-split modes
-  //  - 2: QT-split
-  //  - 3: all vertical modes but TT_V
-  //  - 4: all horizontal modes but TT_H
-  //  - 5: TT_V
-  //  - 6: TT_H
-  switch( cs.picture->scheduler.getSplitJobId() )
-  {
-  case 1:
-    // be sure to execute post dont split
-    return !isModeSplit( encTestmode );
-    break;
-  case 2:
-    return encTestmode.type == ETM_SPLIT_QT;
-    break;
-  case 3:
-    return encTestmode.type == ETM_SPLIT_BT_V;
-    break;
-  case 4:
-    return encTestmode.type == ETM_SPLIT_BT_H;
-    break;
-  case 5:
-    return encTestmode.type == ETM_SPLIT_TT_V;
-    break;
-  case 6:
-    return encTestmode.type == ETM_SPLIT_TT_H;
-    break;
-  default:
-    THROW( "Unknown job-ID for parallelization of EncModeCtrlMTnoRQT: " << cs.picture->scheduler.getSplitJobId() );
-    break;
-  }
-}
-
-#endif
-
 

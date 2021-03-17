@@ -206,9 +206,6 @@ public:
 
   void setTempBuffers               (CodingStructure ****pSlitCS, CodingStructure ****pFullCS, CodingStructure **pSaveCS );
   void resetCtuRecord               ()             { m_ctuRecord.clear(); }
-#if ENABLE_SPLIT_PARALLELISM
-  void copyState                    ( const InterSearch& other );
-#endif
   void setAffineModeSelected        ( bool flag) { m_affineModeSelected = flag; }
   void resetAffineMVList() { m_affMVListIdx = 0; m_affMVListSize = 0; }
   void savePrevAffMVInfo(int idx, AffineMVInfo &tmpMVInfo, bool& isSaved)

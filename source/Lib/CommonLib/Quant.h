@@ -140,10 +140,6 @@ public:
   // de-quantization
   virtual void dequant           ( const TransformUnit &tu, CoeffBuf &dstCoeff, const ComponentID &compID, const QpParam &cQP );
 
-#if ENABLE_SPLIT_PARALLELISM
-  virtual void copyState         ( const Quant& other );
-#endif
-
 protected:
 
 #if T0196_SELECTIVE_RDOQ

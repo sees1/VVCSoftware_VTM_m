@@ -350,11 +350,7 @@ struct CodingUnit : public UnitArea
 
   TransformUnit *firstTU;
   TransformUnit *lastTU;
-#if ENABLE_SPLIT_PARALLELISM
 
-  int64_t cacheId;
-  bool    cacheUsed;
-#endif
   const uint8_t     getSbtIdx() const { assert( ( ( sbtInfo >> 0 ) & 0xf ) < NUMBER_SBT_IDX ); return ( sbtInfo >> 0 ) & 0xf; }
   const uint8_t     getSbtPos() const { return ( sbtInfo >> 4 ) & 0x3; }
   void              setSbtIdx( uint8_t idx ) { CHECK( idx >= NUMBER_SBT_IDX, "sbt_idx wrong" ); sbtInfo = ( idx << 0 ) + ( sbtInfo & 0xf0 ); }
@@ -434,12 +430,6 @@ struct PredictionUnit : public UnitArea, public IntraPredictionData, public Inte
   const MotionInfo& getMotionInfo( const Position& pos ) const;
   MotionBuf         getMotionBuf();
   CMotionBuf        getMotionBuf() const;
-
-#if ENABLE_SPLIT_PARALLELISM
-
-  int64_t cacheId;
-  bool    cacheUsed;
-#endif
 };
 
 // ---------------------------------------------------------------------------
@@ -490,11 +480,6 @@ struct TransformUnit : public UnitArea
         Pel*      getPLTIndex(const ComponentID id);
         bool*     getRunTypes(const ComponentID id);
 
-#if ENABLE_SPLIT_PARALLELISM
-  int64_t cacheId;
-  bool    cacheUsed;
-
-#endif
 private:
   TCoeff *m_coeffs[ MAX_NUM_TBLOCKS ];
   Pel    *m_pcmbuf[ MAX_NUM_TBLOCKS ];

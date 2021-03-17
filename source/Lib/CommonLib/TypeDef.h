@@ -101,17 +101,6 @@ typedef std::pair<int, int>  TrCost;
 #define JVET_O0756_CALCULATE_HDRMETRICS                   1
 #endif
 
-#ifndef ENABLE_SPLIT_PARALLELISM
-#define ENABLE_SPLIT_PARALLELISM                          0
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-#define PARL_SPLIT_MAX_NUM_JOBS                           6                             // number of parallel jobs that can be defined and need memory allocated
-#define NUM_RESERVERD_SPLIT_JOBS                        ( PARL_SPLIT_MAX_NUM_JOBS + 1 )  // number of all data structures including the merge thread (0)
-#define PARL_SPLIT_MAX_NUM_THREADS                        PARL_SPLIT_MAX_NUM_JOBS
-#define NUM_SPLIT_THREADS_IF_MSVC                         4
-
-#endif
-
 // clang-format on
 
 // ====================================================================================================================
@@ -1218,20 +1207,8 @@ template<typename T>
 class dynamic_cache
 {
   std::vector<T*> m_cache;
-#if ENABLE_SPLIT_PARALLELISM
-  int64_t         m_cacheId;
-#endif
 
 public:
-
-#if ENABLE_SPLIT_PARALLELISM
-  dynamic_cache()
-  {
-    static int cacheId = 0;
-    m_cacheId = cacheId++;
-  }
-
-#endif
   ~dynamic_cache()
   {
     deleteEntries();
@@ -1256,48 +1233,22 @@ public:
     {
       ret = m_cache.back();
       m_cache.pop_back();
-#if ENABLE_SPLIT_PARALLELISM
-      CHECK( ret->cacheId != m_cacheId, "Putting item into wrong cache!" );
-      CHECK( !ret->cacheUsed,           "Fetched an element that should've been in cache!!" );
-#endif
     }
     else
     {
       ret = new T;
     }
 
-#if ENABLE_SPLIT_PARALLELISM
-    ret->cacheId   = m_cacheId;
-    ret->cacheUsed = false;
-
-#endif
     return ret;
   }
 
   void cache( T* el )
   {
-#if ENABLE_SPLIT_PARALLELISM
-    CHECK( el->cacheId != m_cacheId, "Putting item into wrong cache!" );
-    CHECK( el->cacheUsed,            "Putting cached item back into cache!" );
-
-    el->cacheUsed = true;
-
-#endif
     m_cache.push_back( el );
   }
 
   void cache( std::vector<T*>& vel )
   {
-#if ENABLE_SPLIT_PARALLELISM
-    for( auto el : vel )
-    {
-      CHECK( el->cacheId != m_cacheId, "Putting item into wrong cache!" );
-      CHECK( el->cacheUsed,            "Putting cached item back into cache!" );
-
-      el->cacheUsed = true;
-    }
-
-#endif
     m_cache.insert( m_cache.end(), vel.begin(), vel.end() );
     vel.clear();
   }

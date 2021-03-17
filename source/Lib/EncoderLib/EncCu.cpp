@@ -227,22 +227,18 @@ EncCu::~EncCu()
 
 /** \param    pcEncLib      pointer of encoder class
  */
-void EncCu::init( EncLib* pcEncLib, const SPS& sps PARL_PARAM( const int tId ) )
+void EncCu::init( EncLib* pcEncLib, const SPS& sps )
 {
   m_pcEncCfg           = pcEncLib;
-  m_pcIntraSearch      = pcEncLib->getIntraSearch( PARL_PARAM0( tId ) );
-  m_pcInterSearch      = pcEncLib->getInterSearch( PARL_PARAM0( tId ) );
-  m_pcTrQuant          = pcEncLib->getTrQuant( PARL_PARAM0( tId ) );
-  m_pcRdCost           = pcEncLib->getRdCost ( PARL_PARAM0( tId ) );
-  m_CABACEstimator     = pcEncLib->getCABACEncoder( PARL_PARAM0( tId ) )->getCABACEstimator( &sps );
+  m_pcIntraSearch      = pcEncLib->getIntraSearch();
+  m_pcInterSearch      = pcEncLib->getInterSearch();
+  m_pcTrQuant          = pcEncLib->getTrQuant();
+  m_pcRdCost           = pcEncLib->getRdCost ();
+  m_CABACEstimator     = pcEncLib->getCABACEncoder()->getCABACEstimator( &sps );
   m_CABACEstimator->setEncCu(this);
-  m_CtxCache           = pcEncLib->getCtxCache( PARL_PARAM0( tId ) );
+  m_CtxCache           = pcEncLib->getCtxCache();
   m_pcRateCtrl         = pcEncLib->getRateCtrl();
   m_pcSliceEncoder     = pcEncLib->getSliceEncoder();
-#if ENABLE_SPLIT_PARALLELISM
-  m_pcEncLib           = pcEncLib;
-  m_dataId             = tId;
-#endif
   m_pcLoopFilter       = pcEncLib->getLoopFilter();
   m_GeoCostList.init(GEO_NUM_PARTITION_MODE, m_pcEncCfg->getMaxNumGeoCand());
   m_AFFBestSATDCost = MAX_DOUBLE;
@@ -267,39 +263,6 @@ void EncCu::compressCtu( CodingStructure& cs, const UnitArea& area, const unsign
 
   cs.slice->m_mapPltCost[0].clear();
   cs.slice->m_mapPltCost[1].clear();
-#if ENABLE_SPLIT_PARALLELISM
-  if( m_pcEncCfg->getNumSplitThreads() > 1 )
-  {
-    for( int jId = 1; jId < NUM_RESERVERD_SPLIT_JOBS; jId++ )
-    {
-      EncCu*            jobEncCu  = m_pcEncLib->getCuEncoder( cs.picture->scheduler.getSplitDataId( jId ) );
-      CacheBlkInfoCtrl* cacheCtrl = dynamic_cast< CacheBlkInfoCtrl* >( jobEncCu->m_modeCtrl );
-#if REUSE_CU_RESULTS
-      BestEncInfoCache* bestCache = dynamic_cast< BestEncInfoCache* >( jobEncCu->m_modeCtrl );
-#endif
-      SaveLoadEncInfoSbt *sbtCache = dynamic_cast< SaveLoadEncInfoSbt* >( jobEncCu->m_modeCtrl );
-      if( cacheCtrl )
-      {
-        cacheCtrl->init( *cs.slice );
-      }
-#if REUSE_CU_RESULTS
-      if (bestCache)
-      {
-        bestCache->init(*cs.slice);
-      }
-#endif
-      if (sbtCache)
-      {
-        sbtCache->init(*cs.slice);
-      }
-    }
-  }
-
-#if REUSE_CU_RESULTS
-  if( auto* cacheCtrl = dynamic_cast<BestEncInfoCache*>( m_modeCtrl ) ) { cacheCtrl->tick(); }
-#endif
-  if( auto* cacheCtrl = dynamic_cast<CacheBlkInfoCtrl*>( m_modeCtrl ) ) { cacheCtrl->tick(); }
-#endif
   // init the partitioning manager
   QTBTPartitioner partitioner;
   partitioner.initCtu(area, CH_L, *cs.slice);
@@ -535,20 +498,7 @@ bool EncCu::xCheckBestMode( CodingStructure *&tempCS, CodingStructure *&bestCS, 
 void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Partitioner& partitioner, double maxCostAllowed )
 {
   CHECK(maxCostAllowed < 0, "Wrong value of maxCostAllowed!");
-#if ENABLE_SPLIT_PARALLELISM
-  CHECK( m_dataId != tempCS->picture->scheduler.getDataId(), "Working in the wrong dataId!" );
 
-  if( m_pcEncCfg->getNumSplitThreads() != 1 && tempCS->picture->scheduler.getSplitJobId() == 0 )
-  {
-    if( m_modeCtrl->isParallelSplit( *tempCS, partitioner ) )
-    {
-      m_modeCtrl->setParallelSplit( true );
-      xCompressCUParallel( tempCS, bestCS, partitioner );
-      return;
-    }
-  }
-
-#endif
   uint32_t compBegin;
   uint32_t numComp;
   bool jointPLT = false;
@@ -610,17 +560,6 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     auto slsSbt = dynamic_cast<SaveLoadEncInfoSbt*>( m_modeCtrl );
     int maxSLSize = sps.getUseSBT() ? tempCS->slice->getSPS()->getMaxTbSize() : MTS_INTER_MAX_CU_SIZE;
     slsSbt->resetSaveloadSbt( maxSLSize );
-#if ENABLE_SPLIT_PARALLELISM
-    CHECK( tempCS->picture->scheduler.getSplitJobId() != 0, "The SBT search reset need to happen in sequential region." );
-    if (m_pcEncCfg->getNumSplitThreads() > 1)
-    {
-      for (int jId = 1; jId < NUM_RESERVERD_SPLIT_JOBS; jId++)
-      {
-        auto slsSbt = dynamic_cast<SaveLoadEncInfoSbt *>(m_pcEncLib->getCuEncoder(jId)->m_modeCtrl);
-        slsSbt->resetSaveloadSbt(maxSLSize);
-      }
-    }
-#endif
   }
   m_sbtCostSave[0] = m_sbtCostSave[1] = MAX_DOUBLE;
 
@@ -722,9 +661,6 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 #endif
       ))
     {
-#if ENABLE_SPLIT_PARALLELISM
-      CHECK( tempCS->picture->scheduler.getSplitJobId() > 0, "Changing lambda is only allowed in the master thread!" );
-#endif
       if (currTestMode.qp >= 0)
       {
         updateLambda (&slice, currTestMode.qp,
@@ -915,17 +851,6 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 
   //////////////////////////////////////////////////////////////////////////
   // Finishing CU
-#if ENABLE_SPLIT_PARALLELISM
-  if( bestCS->cus.empty() )
-  {
-    CHECK( bestCS->cost != MAX_DOUBLE, "Cost should be maximal if no encoding found" );
-    CHECK( bestCS->picture->scheduler.getSplitJobId() == 0, "Should always get a result in serial case" );
-
-    m_modeCtrl->finishCULevel( partitioner );
-    return;
-  }
-
-#endif
   if( tempCS->cost == MAX_DOUBLE && bestCS->cost == MAX_DOUBLE )
   {
     //although some coding modes were planned to be tried in RDO, no coding mode actually finished encoding due to early termination
@@ -968,13 +893,6 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     m_pcIntraSearch->saveCuAreaCostInSCIPU( Area( partitioner.currArea().lumaPos(), partitioner.currArea().lumaSize() ), bestCS->cost );
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  if( tempCS->picture->scheduler.getSplitJobId() == 0 && m_pcEncCfg->getNumSplitThreads() != 1 )
-  {
-    tempCS->picture->finishParallelPart( currCsArea );
-  }
-
-#endif
   if (bestCS->cus.size() == 1) // no partition
   {
     CHECK(bestCS->cus[0]->tileIdx != bestCS->pps->getTileIdx(bestCS->area.lumaPos()), "Wrong tile index!");
@@ -1062,164 +980,6 @@ void EncCu::updateLambda (Slice* slice, const int dQP,
   }
 }
 #endif // SHARP_LUMA_DELTA_QP || ENABLE_QPA_SUB_CTU
-
-#if ENABLE_SPLIT_PARALLELISM
-//#undef DEBUG_PARALLEL_TIMINGS
-//#define DEBUG_PARALLEL_TIMINGS 1
-void EncCu::xCompressCUParallel( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner )
-{
-  const unsigned wIdx = gp_sizeIdxInfo->idxFrom( partitioner.currArea().lwidth() );
-  const unsigned hIdx = gp_sizeIdxInfo->idxFrom( partitioner.currArea().lheight() );
-
-  Picture* picture = tempCS->picture;
-
-  int numJobs = m_modeCtrl->getNumParallelJobs( *bestCS, partitioner );
-
-  bool    jobUsed                            [NUM_RESERVERD_SPLIT_JOBS];
-  std::fill( jobUsed, jobUsed + NUM_RESERVERD_SPLIT_JOBS, false );
-
-  const UnitArea currArea = CS::getArea( *tempCS, partitioner.currArea(), partitioner.chType );
-  const bool doParallel   = !m_pcEncCfg->getForceSingleSplitThread();
-  omp_set_num_threads( m_pcEncCfg->getNumSplitThreads() );
-
-#pragma omp parallel for schedule(dynamic,1) if(doParallel)
-  for( int jId = 1; jId <= numJobs; jId++ )
-  {
-    // thread start
-    picture->scheduler.setSplitThreadId();
-    picture->scheduler.setSplitJobId( jId );
-
-    QTBTPartitioner jobPartitioner;
-    EncCu*       jobCuEnc       = m_pcEncLib->getCuEncoder( picture->scheduler.getSplitDataId( jId ) );
-    auto*        jobBlkCache    = dynamic_cast<CacheBlkInfoCtrl*>( jobCuEnc->m_modeCtrl );
-#if REUSE_CU_RESULTS
-    auto*        jobBestCache   = dynamic_cast<BestEncInfoCache*>( jobCuEnc->m_modeCtrl );
-#endif
-
-    jobPartitioner.copyState( partitioner );
-    jobCuEnc      ->copyState( this, jobPartitioner, currArea, true );
-
-    if( jobBlkCache  ) { jobBlkCache ->tick(); }
-#if REUSE_CU_RESULTS
-    if( jobBestCache ) { jobBestCache->tick(); }
-
-#endif
-    CodingStructure *&jobBest = jobCuEnc->m_pBestCS[wIdx][hIdx];
-    CodingStructure *&jobTemp = jobCuEnc->m_pTempCS[wIdx][hIdx];
-
-    jobUsed[jId] = true;
-
-    jobCuEnc->xCompressCU( jobTemp, jobBest, jobPartitioner );
-
-    picture->scheduler.setSplitJobId( 0 );
-    // thread stop
-  }
-  picture->scheduler.setSplitThreadId( 0 );
-
-  int    bestJId  = 0;
-  double bestCost = bestCS->cost;
-  for( int jId = 1; jId <= numJobs; jId++ )
-  {
-    EncCu* jobCuEnc = m_pcEncLib->getCuEncoder( picture->scheduler.getSplitDataId( jId ) );
-
-    if( jobUsed[jId] && jobCuEnc->m_pBestCS[wIdx][hIdx]->cost < bestCost )
-    {
-      bestCost = jobCuEnc->m_pBestCS[wIdx][hIdx]->cost;
-      bestJId  = jId;
-    }
-  }
-
-  if( bestJId > 0 )
-  {
-    copyState( m_pcEncLib->getCuEncoder( picture->scheduler.getSplitDataId( bestJId ) ), partitioner, currArea, false );
-    m_CurrCtx->best = m_CABACEstimator->getCtx();
-
-    tempCS = m_pTempCS[wIdx][hIdx];
-    bestCS = m_pBestCS[wIdx][hIdx];
-  }
-
-  const int      bitDepthY = tempCS->sps->getBitDepth( CH_L );
-  const UnitArea clipdArea = clipArea( currArea, *picture );
-
-  CHECK( calcCheckSum( picture->getRecoBuf( clipdArea.Y() ), bitDepthY ) != calcCheckSum( bestCS->getRecoBuf( clipdArea.Y() ), bitDepthY ), "Data copied incorrectly!" );
-
-  picture->finishParallelPart( currArea );
-
-  if( auto *blkCache = dynamic_cast<CacheBlkInfoCtrl*>( m_modeCtrl ) )
-  {
-    for( int jId = 1; jId <= numJobs; jId++ )
-    {
-      if( !jobUsed[jId] || jId == bestJId ) continue;
-
-      auto *jobBlkCache = dynamic_cast<CacheBlkInfoCtrl*>( m_pcEncLib->getCuEncoder( picture->scheduler.getSplitDataId( jId ) )->m_modeCtrl );
-      CHECK( !jobBlkCache, "If own mode controller has blk info cache capability so should all other mode controllers!" );
-      blkCache->CacheBlkInfoCtrl::copyState( *jobBlkCache, partitioner.currArea() );
-    }
-
-    blkCache->tick();
-  }
-#if REUSE_CU_RESULTS
-
-  if( auto *blkCache = dynamic_cast<BestEncInfoCache*>( m_modeCtrl ) )
-  {
-    for( int jId = 1; jId <= numJobs; jId++ )
-    {
-      if( !jobUsed[jId] || jId == bestJId ) continue;
-
-      auto *jobBlkCache = dynamic_cast<BestEncInfoCache*>( m_pcEncLib->getCuEncoder( picture->scheduler.getSplitDataId( jId ) )->m_modeCtrl );
-      CHECK( !jobBlkCache, "If own mode controller has blk info cache capability so should all other mode controllers!" );
-      blkCache->BestEncInfoCache::copyState( *jobBlkCache, partitioner.currArea() );
-    }
-
-    blkCache->tick();
-  }
-#endif
-}
-
-void EncCu::copyState( EncCu* other, Partitioner& partitioner, const UnitArea& currArea, const bool isDist )
-{
-  const unsigned wIdx = gp_sizeIdxInfo->idxFrom( partitioner.currArea().lwidth () );
-  const unsigned hIdx = gp_sizeIdxInfo->idxFrom( partitioner.currArea().lheight() );
-
-  if( isDist )
-  {
-    other->m_pBestCS[wIdx][hIdx]->initSubStructure( *m_pBestCS[wIdx][hIdx], partitioner.chType, partitioner.currArea(), false );
-    other->m_pTempCS[wIdx][hIdx]->initSubStructure( *m_pTempCS[wIdx][hIdx], partitioner.chType, partitioner.currArea(), false );
-  }
-  else
-  {
-          CodingStructure* dst =        m_pBestCS[wIdx][hIdx];
-    const CodingStructure* src = other->m_pBestCS[wIdx][hIdx];
-    bool keepResi = KEEP_PRED_AND_RESI_SIGNALS;
-    bool keepPred = true;
-
-    dst->useSubStructure( *src, partitioner.chType, currArea, keepPred, true, keepResi, keepResi, true );
-
-    dst->cost           =  src->cost;
-    dst->dist           =  src->dist;
-    dst->fracBits       =  src->fracBits;
-    dst->features       =  src->features;
-  }
-
-  if( isDist )
-  {
-    m_CurrCtx = m_CtxBuffer.data();
-  }
-
-  m_pcInterSearch->copyState( *other->m_pcInterSearch );
-  m_modeCtrl     ->copyState( *other->m_modeCtrl, partitioner.currArea() );
-  m_pcRdCost     ->copyState( *other->m_pcRdCost );
-  m_pcTrQuant    ->copyState( *other->m_pcTrQuant );
-  if( m_pcEncCfg->getLmcs() )
-  {
-    EncReshape *encReshapeThis  = dynamic_cast<EncReshape*>(       m_pcReshape);
-    EncReshape *encReshapeOther = dynamic_cast<EncReshape*>(other->m_pcReshape);
-    encReshapeThis->copyState( *encReshapeOther );
-  }
-
-  m_CABACEstimator->getCtx() = other->m_CABACEstimator->getCtx();
-}
-#endif
 
 void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode, const ModeType modeTypeParent, bool &skipInterPass )
 {

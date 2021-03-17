@@ -43,9 +43,6 @@
 #include "CommonLib/Picture.h"
 #include "CommonLib/CommonDef.h"
 #include "CommonLib/ChromaFormat.h"
-#if ENABLE_SPLIT_PARALLELISM
-#include <omp.h>
-#endif
 #include "EncLibCommon.h"
 #include "CommonLib/ProfileLevelTier.h"
 
@@ -102,28 +99,7 @@ void EncLib::create( const int layerId )
   m_iPOCLast = m_compositeRefEnabled ? -2 : -1;
   // create processing unit classes
   m_cGOPEncoder.        create( );
-#if ENABLE_SPLIT_PARALLELISM
-#if ENABLE_SPLIT_PARALLELISM
-  m_numCuEncStacks  = m_numSplitThreads == 1 ? 1 : NUM_RESERVERD_SPLIT_JOBS;
-#else
-  m_numCuEncStacks  = 1;
-#endif
-
-  m_cCuEncoder      = new EncCu              [m_numCuEncStacks];
-  m_cInterSearch    = new InterSearch        [m_numCuEncStacks];
-  m_cIntraSearch    = new IntraSearch        [m_numCuEncStacks];
-  m_cTrQuant        = new TrQuant            [m_numCuEncStacks];
-  m_CABACEncoder    = new CABACEncoder       [m_numCuEncStacks];
-  m_cRdCost         = new RdCost             [m_numCuEncStacks];
-  m_CtxCache        = new CtxCache           [m_numCuEncStacks];
-
-  for( int jId = 0; jId < m_numCuEncStacks; jId++ )
-  {
-    m_cCuEncoder[jId].         create( this );
-  }
-#else
   m_cCuEncoder.         create( this );
-#endif
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   m_cInterSearch.cacheAssign( &m_cacheModel );
 #endif
@@ -135,19 +111,9 @@ void EncLib::create( const int layerId )
     m_cLoopFilter.initEncPicYuvBuffer(m_chromaFormatIDC, Size(getSourceWidth(), getSourceHeight()), getMaxCUWidth());
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  m_cReshaper = new EncReshape[m_numCuEncStacks];
-#endif
   if (m_lmcsEnabled)
   {
-#if ENABLE_SPLIT_PARALLELISM
-    for (int jId = 0; jId < m_numCuEncStacks; jId++)
-    {
-      m_cReshaper[jId].createEnc(getSourceWidth(), getSourceHeight(), m_maxCUWidth, m_maxCUHeight, m_bitDepth[COMPONENT_Y]);
-    }
-#else
     m_cReshaper.createEnc( getSourceWidth(), getSourceHeight(), m_maxCUWidth, m_maxCUHeight, m_bitDepth[COMPONENT_Y]);
-#endif
   }
   if ( m_RCEnableRateControl )
   {
@@ -162,14 +128,7 @@ void EncLib::destroy ()
   // destroy processing unit classes
   m_cGOPEncoder.        destroy();
   m_cSliceEncoder.      destroy();
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 0; jId < m_numCuEncStacks; jId++ )
-  {
-    m_cCuEncoder[jId].destroy();
-  }
-#else
   m_cCuEncoder.         destroy();
-#endif
   if( m_alf )
   {
     m_cEncALF.destroy();
@@ -178,34 +137,9 @@ void EncLib::destroy ()
   m_cEncSAO.            destroy();
   m_cLoopFilter.        destroy();
   m_cRateCtrl.          destroy();
-#if ENABLE_SPLIT_PARALLELISM
-  for (int jId = 0; jId < m_numCuEncStacks; jId++)
-  {
-    m_cReshaper[jId].   destroy();
-  }
-#else
   m_cReshaper.          destroy();
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 0; jId < m_numCuEncStacks; jId++ )
-  {
-    m_cInterSearch[jId].   destroy();
-    m_cIntraSearch[jId].   destroy();
-  }
-#else
   m_cInterSearch.       destroy();
   m_cIntraSearch.       destroy();
-#endif
-
-#if ENABLE_SPLIT_PARALLELISM
-  delete[] m_cCuEncoder;
-  delete[] m_cInterSearch;
-  delete[] m_cIntraSearch;
-  delete[] m_cTrQuant;
-  delete[] m_CABACEncoder;
-  delete[] m_cRdCost;
-  delete[] m_CtxCache;
-#endif
 
   return;
 }
@@ -235,13 +169,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   xInitVPS( sps0 );
   xInitOPI(m_opi);
   xInitDCI(m_dci, sps0);
-#if ENABLE_SPLIT_PARALLELISM
-  if( omp_get_dynamic() )
-  {
-    omp_set_dynamic( false );
-  }
-  omp_set_nested( true );
-#endif
 
   if (getUseCompositeRef() || getDependentRAPIndicationSEIEnabled())
   {
@@ -254,14 +181,7 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
     m_cRateCtrl.initHrdParam(sps0.getGeneralHrdParameters(), sps0.getOlsHrdParameters(), m_iFrameRate, m_RCInitialCpbFullness);
   }
 #endif
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 0; jId < m_numCuEncStacks; jId++ )
-  {
-    m_cRdCost[jId].setCostMode ( m_costMode );
-  }
-#else
   m_cRdCost.setCostMode ( m_costMode );
-#endif
 
   // initialize PPS
   pps0.setPicWidthInLumaSamples( m_iSourceWidth );
@@ -373,54 +293,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   // initialize processing unit classes
   m_cGOPEncoder.  init( this );
   m_cSliceEncoder.init( this, sps0 );
-#if ENABLE_SPLIT_PARALLELISM
-  for( int jId = 0; jId < m_numCuEncStacks; jId++ )
-  {
-    // precache a few objects
-    for( int i = 0; i < 10; i++ )
-    {
-      auto x = m_CtxCache[jId].get();
-      m_CtxCache[jId].cache( x );
-    }
-
-    m_cCuEncoder[jId].init( this, sps0, jId );
-
-    // initialize transform & quantization class
-    m_cTrQuant[jId].init( jId == 0 ? nullptr : m_cTrQuant[0].getQuant(),
-                          1 << m_log2MaxTbSize,
-
-                          m_useRDOQ,
-                          m_useRDOQTS,
-#if T0196_SELECTIVE_RDOQ
-                          m_useSelectiveRDOQ,
-#endif
-                          true
-    );
-
-    // initialize encoder search class
-    CABACWriter* cabacEstimator = m_CABACEncoder[jId].getCABACEstimator( &sps0 );
-    m_cIntraSearch[jId].init( this,
-                              &m_cTrQuant[jId],
-                              &m_cRdCost[jId],
-                              cabacEstimator,
-                              getCtxCache( jId ), m_maxCUWidth, m_maxCUHeight, floorLog2(m_maxCUWidth) - m_log2MinCUSize
-                            , &m_cReshaper[jId]
-                            , sps0.getBitDepth(CHANNEL_TYPE_LUMA)
-    );
-    m_cInterSearch[jId].init( this,
-                              &m_cTrQuant[jId],
-                              m_iSearchRange,
-                              m_bipredSearchRange,
-                              m_motionEstimationSearchMethod,
-                              getUseCompositeRef(),
-                              m_maxCUWidth, m_maxCUHeight, floorLog2(m_maxCUWidth) - m_log2MinCUSize, &m_cRdCost[jId], cabacEstimator, getCtxCache( jId )
-                           , &m_cReshaper[jId]
-    );
-
-    // link temporary buffets from intra search with inter search to avoid unnecessary memory overhead
-    m_cInterSearch[jId].setTempBuffers( m_cIntraSearch[jId].getSplitCSBuf(), m_cIntraSearch[jId].getFullCSBuf(), m_cIntraSearch[jId].getSaveCSBuf() );
-  }
-#else  // ENABLE_SPLIT_PARALLELISM || ENABLE_WPP_PARALLELISM
   m_cCuEncoder.   init( this, sps0 );
 
   // initialize transform & quantization class
@@ -456,7 +328,6 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
 
   // link temporary buffets from intra search with inter search to avoid unneccessary memory overhead
   m_cInterSearch.setTempBuffers( m_cIntraSearch.getSplitCSBuf(), m_cIntraSearch.getFullCSBuf(), m_cIntraSearch.getSaveCSBuf() );
-#endif // ENABLE_SPLIT_PARALLELISM || ENABLE_WPP_PARALLELISM
 
   m_iMaxRefPicNum = 0;
 
@@ -507,26 +378,12 @@ void EncLib::xInitScalingLists( SPS &sps, APS &aps )
   {
     quant->setFlatScalingList(maxLog2TrDynamicRange, sps.getBitDepths());
     quant->setUseScalingList(false);
-#if ENABLE_SPLIT_PARALLELISM
-    for( int jId = 1; jId < m_numCuEncStacks; jId++ )
-    {
-      getTrQuant( jId )->getQuant()->setFlatScalingList( maxLog2TrDynamicRange, sps.getBitDepths() );
-      getTrQuant( jId )->getQuant()->setUseScalingList( false );
-    }
-#endif
   }
   else if(getUseScalingListId() == SCALING_LIST_DEFAULT)
   {
     aps.getScalingList().setDefaultScalingList ();
     quant->setScalingList( &( aps.getScalingList() ), maxLog2TrDynamicRange, sps.getBitDepths() );
     quant->setUseScalingList(true);
-#if ENABLE_SPLIT_PARALLELISM
-    for( int jId = 1; jId < m_numCuEncStacks; jId++ )
-    {
-      getTrQuant( jId )->getQuant()->setUseScalingList( true );
-    }
-    sps.setDisableScalingMatrixForLfnstBlks(getDisableScalingMatrixForLfnstBlks());
-#endif
   }
   else if(getUseScalingListId() == SCALING_LIST_FILE_READ)
   {
@@ -540,12 +397,6 @@ void EncLib::xInitScalingLists( SPS &sps, APS &aps )
     aps.getScalingList().setChromaScalingListPresentFlag((sps.getChromaFormatIdc()!=CHROMA_400));
     quant->setScalingList( &( aps.getScalingList() ), maxLog2TrDynamicRange, sps.getBitDepths() );
     quant->setUseScalingList(true);
-#if ENABLE_SPLIT_PARALLELISM
-    for( int jId = 1; jId < m_numCuEncStacks; jId++ )
-    {
-      getTrQuant( jId )->getQuant()->setUseScalingList( true );
-    }
-#endif
 
     sps.setDisableScalingMatrixForLfnstBlks(getDisableScalingMatrixForLfnstBlks());
   }

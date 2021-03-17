@@ -293,10 +293,6 @@ public:
     return length;
   }
 
-#if ENABLE_SPLIT_PARALLELISM
-  void copyState( const RdCost& other );
-#endif
-
   // for motion cost
   static uint32_t    xGetExpGolombNumberOfBits( int iVal )
   {
