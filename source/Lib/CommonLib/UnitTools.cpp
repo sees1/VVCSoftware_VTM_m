@@ -1501,7 +1501,6 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           mrgCtx.mvPos[2 * uiArrayAddr + 1] = pos;
           mrgCtx.mvSolid[2 * uiArrayAddr + 1] = isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
           mrgCtx.mvValid[2 * uiArrayAddr + 1] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_1, iRefIdx);
-
         }
 #endif
       }
@@ -1569,9 +1568,9 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
 
 #if GDR_ENABLED
         // GDR: Pairwise average candidate       
-        bool mvI_solid = mrgCtx.mvSolid[0 * 2 + refListId];
-        bool mvJ_solid = mrgCtx.mvSolid[1 * 2 + refListId];
-        bool mv_solid = true;
+        bool mvISolid = mrgCtx.mvSolid[0 * 2 + refListId];
+        bool mvJSolid = mrgCtx.mvSolid[1 * 2 + refListId];
+        bool mvSolid = true;
 #endif
         // both MVs are invalid, skip
         if( (refIdxI == NOT_VALID) && (refIdxJ == NOT_VALID) )
@@ -1596,12 +1595,12 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           // GDR: Pairwise single I,J candidate
           if (isEncodeGdrClean) 
           {
-            mv_solid = mvI_solid && mvJ_solid && allCandSolidInAbove;
+            mvSolid = mvISolid && mvJSolid && allCandSolidInAbove;
 
             mrgCtx.mvPos[cnt * 2 + refListId] = Position(0, 0);
-            mrgCtx.mvSolid[cnt * 2 + refListId] = mv_solid && allCandSolidInAbove;
+            mrgCtx.mvSolid[cnt * 2 + refListId] = mvSolid && allCandSolidInAbove;
             mrgCtx.mvValid[cnt * 2 + refListId] = cs.isClean(pu.Y().bottomRight(), avgMv, (RefPicList)refListId, refIdxI);
-            allCandSolidInAbove = mv_solid && allCandSolidInAbove;
+            allCandSolidInAbove = mvSolid && allCandSolidInAbove;
           }
 #endif
         }
@@ -1614,12 +1613,12 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           // GDR: Pairwise single I,J candidate
           if (isEncodeGdrClean) 
           {
-            mv_solid = mvI_solid && allCandSolidInAbove;
+            mvSolid = mvISolid && allCandSolidInAbove;
 
             mrgCtx.mvPos[cnt * 2 + refListId] = Position(0, 0);
-            mrgCtx.mvSolid[cnt * 2 + refListId] = mv_solid && allCandSolidInAbove;
+            mrgCtx.mvSolid[cnt * 2 + refListId] = mvSolid && allCandSolidInAbove;
             mrgCtx.mvValid[cnt * 2 + refListId] = cs.isClean(pu.Y().bottomRight(), singleMv, (RefPicList)refListId, refIdxI);
-            allCandSolidInAbove = mv_solid && allCandSolidInAbove;
+            allCandSolidInAbove = mvSolid && allCandSolidInAbove;
           }
 #endif
         }
@@ -1631,12 +1630,12 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
           // GDR: Pairwise single I,J candidate
           if (isEncodeGdrClean) 
           {
-            mv_solid = mvJ_solid && allCandSolidInAbove;
+            mvSolid = mvJSolid && allCandSolidInAbove;
 
             mrgCtx.mvPos[cnt * 2 + refListId] = Position(0, 0);
-            mrgCtx.mvSolid[cnt * 2 + refListId] = mv_solid && allCandSolidInAbove;
+            mrgCtx.mvSolid[cnt * 2 + refListId] = mvSolid && allCandSolidInAbove;
             mrgCtx.mvValid[cnt * 2 + refListId] = cs.isClean(pu.Y().bottomRight(), singleMv, (RefPicList)refListId, refIdxJ);
-            allCandSolidInAbove = mv_solid && allCandSolidInAbove;
+            allCandSolidInAbove = mvSolid && allCandSolidInAbove;
           }
 #endif
         }
@@ -1687,7 +1686,6 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       // GDR: zero mv(0,0)
       if (isEncodeGdrClean) 
       {
-
         mrgCtx.mvPos[(uiArrayAddr << 1) + 1] = Position(0, 0);
         mrgCtx.mvSolid[(uiArrayAddr << 1) + 1] = true && allCandSolidInAbove;
         mrgCtx.mvValid[(uiArrayAddr << 1) + 1] = cs.isClean(pu.Y().bottomRight(), Mv(0, 0), (RefPicList)REF_PIC_LIST_1, r);
@@ -2423,7 +2421,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
       affiAMVPInfo.mvTypeLT[affiAMVPInfo.numCand]  = outputAffineMvType[0];
       affiAMVPInfo.mvTypeRT[affiAMVPInfo.numCand]  = outputAffineMvType[1];
 
-      affiAMVPInfo.mvPosLT[affiAMVPInfo.numCand]   = outputAffineMvPos[0];;
+      affiAMVPInfo.mvPosLT[affiAMVPInfo.numCand]   = outputAffineMvPos[0];
       affiAMVPInfo.mvPosRT[affiAMVPInfo.numCand]   = outputAffineMvPos[1];      
     }
 #endif
@@ -4350,7 +4348,7 @@ void PU::getGeoMergeCandidates( const PredictionUnit &pu, MergeCtx& geoMrgCtx )
         RefPicList refPicList = (!parity) ? REF_PIC_LIST_1 : REF_PIC_LIST_0;
         geoMrgCtx.mvSolid[(geoMrgCtx.numValidMergeCand << 1) + !parity] = tmpMergeCtx.mvSolid[(i << 1) + !parity];
         geoMrgCtx.mvSolid[(geoMrgCtx.numValidMergeCand << 1) + parity] = true;
-        geoMrgCtx.mvValid[(geoMrgCtx.numValidMergeCand << 1) + !parity] = cs.isClean(pu.Y().bottomRight(), mv, refPicList, refIdx);;
+        geoMrgCtx.mvValid[(geoMrgCtx.numValidMergeCand << 1) + !parity] = cs.isClean(pu.Y().bottomRight(), mv, refPicList, refIdx);
         geoMrgCtx.mvValid[(geoMrgCtx.numValidMergeCand << 1) + parity] = true;
       }
 #endif

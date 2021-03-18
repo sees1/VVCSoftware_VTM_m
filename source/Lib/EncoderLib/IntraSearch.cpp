@@ -396,7 +396,7 @@ int IntraSearch::getNumTopRecons(PredictionUnit &pu, int luma_dirMode, bool isCh
   const int sideSize = isModeVer ? h : w;
   const int maxScale = 2;
 
-  const int angularScale = std::min(maxScale, floorLog2(sideSize) - (floorLog2(3 * invAngle - 2) - 8));;  
+  const int angularScale = std::min(maxScale, floorLog2(sideSize) - (floorLog2(3 * invAngle - 2) - 8));  
 
   bool applyPDPC;
 

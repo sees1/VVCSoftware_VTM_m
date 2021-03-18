@@ -6513,7 +6513,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         biPDistTemp += m_pcRdCost->getCost( xCalcAffineMVBits( pu, cMvPred[iRefList][iRefIdxTemp], cMvPred[iRefList][iRefIdxTemp] ) );
       }
       aaiMvpIdx[iRefList][iRefIdxTemp] = pu.mvpIdx[eRefPicList];
-      aaiMvpNum[iRefList][iRefIdxTemp] = pu.mvpNum[eRefPicList];;
+      aaiMvpNum[iRefList][iRefIdxTemp] = pu.mvpNum[eRefPicList];
 
 #if GDR_ENABLED      
       if (isEncodeGdrClean)
