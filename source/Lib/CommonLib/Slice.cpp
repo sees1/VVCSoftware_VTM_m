@@ -673,9 +673,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
         }
 
         // Generated reference picture does not have picture header
-        const bool isGeneratedRefPic = pcRefPic->slices[0]->getPicHeader() ? false : true;
-
-        const bool nonReferencePictureFlag = isGeneratedRefPic ? pcRefPic->nonReferencePictureFlag : pcRefPic->slices[0]->getPicHeader()->getNonReferencePictureFlag();
+        const bool nonReferencePictureFlag = pcRefPic->nonReferencePictureFlag;
         CHECK( pcRefPic == m_pcPic || nonReferencePictureFlag, "The picture referred to by each entry in RefPicList[ 0 ] or RefPicList[ 1 ] shall not be the current picture and shall have ph_non_ref_pic_flag equal to 0" );
 
         if( i < numActiveEntries[refPicList] )

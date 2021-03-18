@@ -243,6 +243,7 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   m_conformanceWindow = pps.getConformanceWindow();
   m_scalingWindow = pps.getScalingWindow();
   mixedNaluTypesInPicFlag = pps.getMixedNaluTypesInPicFlag();
+  nonReferencePictureFlag = picHeader->getNonReferencePictureFlag();
 
   if (m_spliceIdx == NULL)
   {
