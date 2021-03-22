@@ -359,7 +359,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
     rpcSlice->setSignDataHidingEnabledFlag( m_pcCfg->getSignDataHidingEnabledFlag() );
     rpcSlice->setTSResidualCodingDisabledFlag( false );
 
-    CHECK( (m_pcCfg->getDepQuantEnabledFlag() || m_pcCfg->getSignDataHidingEnabledFlag() ) 
+    CHECK( (m_pcCfg->getDepQuantEnabledFlag() || m_pcCfg->getSignDataHidingEnabledFlag() )
            && rpcSlice->getTSResidualCodingDisabledFlag() , "TSRC cannot be bypassed if either DQ or SDH are enabled at slice level.");
   }
   else
@@ -1163,7 +1163,7 @@ void EncSlice::setSearchRange( Slice* pcSlice )
   }
 }
 
-void EncSlice::setLosslessSlice(Picture* pcPic, bool islossless) 
+void EncSlice::setLosslessSlice(Picture* pcPic, bool islossless)
 {
   Slice* slice = pcPic->slices[getSliceSegmentIdx()];
   slice->setLossless(islossless);

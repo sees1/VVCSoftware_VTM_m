@@ -765,10 +765,10 @@ void SEIReader::xParseSEIBufferingPeriod(SEIBufferingPeriod& sei, uint32_t paylo
       }
     }
   }
-  if (sei.m_bpMaxSubLayers-1 > 0) 
+  if (sei.m_bpMaxSubLayers-1 > 0)
   {
     sei_read_flag(pDecodedMessageOutputStream, code, "bp_sublayer_dpb_output_offsets_present_flag");
-    sei.m_sublayerDpbOutputOffsetsPresentFlag = code; 
+    sei.m_sublayerDpbOutputOffsetsPresentFlag = code;
   }
   else
   {
@@ -1661,7 +1661,7 @@ void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEI
     {
       SEIGeneralizedCubemapProjection* sei = (SEIGeneralizedCubemapProjection*)generalizedCubemapProjectionSEIs.front();
       xDumpSEIGeneralizedCubemapProjection(*sei, sps, decoded360MessageFileName);
-      m_360SEIMessageDumped = true; 
+      m_360SEIMessageDumped = true;
     }
   }
 }

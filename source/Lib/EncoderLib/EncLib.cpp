@@ -260,7 +260,7 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
     m_noPicPartitionFlag = true;
 
     xInitPPS( pps, sps0 ); // will allocate memory for and initialize pps.pcv inside
-    
+
     if( pps.getWrapAroundEnabledFlag() )
     {
       int minCbSizeY = (1 << sps0.getLog2MinCodingBlockSize());
@@ -268,10 +268,10 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
       pps.setWrapAroundOffset                   (minCbSizeY * (pps.getPicWidthInLumaSamples() / minCbSizeY - pps.getPicWidthMinusWrapAroundOffset()));
 
     }
-    else 
+    else
     {
       pps.setPicWidthMinusWrapAroundOffset      (0);
-      pps.setWrapAroundOffset                   ( 0 );       
+      pps.setWrapAroundOffset                   ( 0 );
     }
   }
 
@@ -475,7 +475,7 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
       m_cRateCtrl.initRCGOP( m_iNumPicRcvd );
     }
 
-    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false, 
+    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false,
       snrCSC, m_printFrameMSE, m_printMSSSIM, true, 0 );
 
 #if JVET_O0756_CALCULATE_HDRMETRICS
@@ -763,7 +763,7 @@ bool EncLib::encode( const InputColourSpaceConversion snrCSC, std::list<PelUnitB
     m_iPOCLast = m_iPOCLast < 2 ? fieldNum : m_iPOCLast;
 
     // compress GOP
-    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iPOCLast < 2 ? m_iPOCLast + 1 : m_iNumPicRcvd, m_cListPic, 
+    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iPOCLast < 2 ? m_iPOCLast + 1 : m_iNumPicRcvd, m_cListPic,
       rcListPicYuvRecOut, true, isTff, snrCSC, m_printFrameMSE, m_printMSSSIM, false, m_picIdInGOP );
 #if JVET_O0756_CALCULATE_HDRMETRICS
     m_metricTime = m_cGOPEncoder.getMetricTime();
@@ -859,7 +859,7 @@ void EncLib::xGetNewPicBuffer ( std::list<PelUnitBuf*>& rcListPicYuvRecOut, Pict
       if(m_gopBasedTemporalFilterEnabled)
       {
         rpcPic->M_BUFS(0, PIC_FILTERED_ORIGINAL_INPUT).create(sps.getChromaFormatIdc(), Area(Position(), Size(pps0.getPicWidthInLumaSamples(), pps0.getPicHeightInLumaSamples())));
-      } 
+      }
     }
     if ( getUseAdaptiveQP() )
     {
@@ -916,7 +916,7 @@ void EncLib::xInitVPS( const SPS& sps )
   for( int olsIdx = 0, dpbIdx = 0; olsIdx < m_vps->m_numOutputLayersInOls.size(); olsIdx++ )
   {
     if ( m_vps->getNumLayersInOls(olsIdx) > 1 )
-    { 
+    {
       if( std::find( m_vps->m_layerIdInOls[olsIdx].begin(), m_vps->m_layerIdInOls[olsIdx].end(), m_layerId ) != m_vps->m_layerIdInOls[olsIdx].end() )
       {
         m_vps->setOlsDpbPicWidth( olsIdx, std::max<int>( sps.getMaxPicWidthInLumaSamples(), m_vps->getOlsDpbPicSize( olsIdx ).width ) );
@@ -934,7 +934,7 @@ void EncLib::xInitVPS( const SPS& sps )
   for( int i = 0; i < m_vps->m_numOutputLayersInOls.size(); i++ )
   {
     if ( m_vps->getNumLayersInOls(i) > 1 )
-    { 
+    {
       int dpbIdx = m_vps->getOlsDpbParamsIdx( i );
 
       if( m_vps->getMaxSubLayers() == 1 )
@@ -964,7 +964,7 @@ void EncLib::xInitVPS( const SPS& sps )
           decPicBuffering[tId] += m_layerDecPicBuffering[m_vps->getLayerIdInOls( i, lIdx ) * MAX_TLAYER + tId];
         }
       }
-    
+
       for( int j = ( m_vps->m_sublayerDpbParamsPresentFlag ? 0 : m_vps->m_dpbMaxTemporalId[dpbIdx] ); j <= m_vps->m_dpbMaxTemporalId[dpbIdx]; j++ )
       {
         m_vps->m_dpbParameters[dpbIdx].m_maxDecPicBuffering[j] = decPicBuffering[j] > 0 ? decPicBuffering[j] : profileLevelTierFeatures.getMaxDpbSize( m_vps->getOlsDpbPicSize( i ).width * m_vps->getOlsDpbPicSize( i ).height );
@@ -1002,7 +1002,7 @@ void EncLib::xInitOPI(OPI& opi)
     if (!opi.getOlsInfoPresentFlag())
     {
       opi.setOpiOlsIdx(m_vps->deriveTargetOLSIdx());
-      opi.setOlsInfoPresentFlag(true);    
+      opi.setOlsInfoPresentFlag(true);
     }
     if (!opi.getHtidInfoPresentFlag())
     {
@@ -1570,10 +1570,10 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     pps.setPicWidthMinusWrapAroundOffset      ((pps.getPicWidthInLumaSamples()/minCbSizeY) - (m_wrapAroundOffset / minCbSizeY));
     pps.setWrapAroundOffset                   (minCbSizeY *(pps.getPicWidthInLumaSamples() / minCbSizeY- pps.getPicWidthMinusWrapAroundOffset()));
   }
-  else 
+  else
   {
     pps.setPicWidthMinusWrapAroundOffset      ( 0 );
-    pps.setWrapAroundOffset                   ( 0 );       
+    pps.setWrapAroundOffset                   ( 0 );
   }
   CHECK( !sps.getWrapAroundEnabledFlag() && pps.getWrapAroundEnabledFlag(), "When sps_ref_wraparound_enabled_flag is equal to 0, the value of pps_ref_wraparound_enabled_flag shall be equal to 0.");
   CHECK( (((sps.getCTUSize() / minCbSizeY) + 1) > ((pps.getPicWidthInLumaSamples() / minCbSizeY) - 1)) && pps.getWrapAroundEnabledFlag(), "When the value of CtbSizeY / MinCbSizeY + 1 is greater than pps_pic_width_in_luma_samples / MinCbSizeY - 1, the value of pps_ref_wraparound_enabled_flag shall be equal to 0.");

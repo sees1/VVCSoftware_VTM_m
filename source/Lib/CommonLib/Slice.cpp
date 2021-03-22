@@ -690,7 +690,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_RADL )
           {
             CHECK( refPicDecodingOrderNumber < associatedIRAPDecodingOrderNumber, "RADL picture detected that violate the rule that no active entry in RefPicList[] shall precede the associated IRAP picture in decoding order" );
-            // Checking this: "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or 
+            // Checking this: "When the current picture is a RADL picture, there shall be no active entry in RefPicList[ 0 ] or
             // RefPicList[ 1 ] that is any of the following: A RASL picture with pps_mixed_nalu_types_in_pic_flag is equal to 0
             for (int i = 0; i < pcRefPic->numSlices; i++)
             {
@@ -712,7 +712,7 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
           bool cond1      = (pcRefPic->getPictureType() == NAL_UNIT_CODED_SLICE_GDR);
           bool cond2      = (pcRefPic->slices[0]->getPicHeader()->getRecoveryPocCnt() == 0);
           bool cond3      = (pcRefPic->cs->slice->isIRAP());
-          
+
           const VPS *vps                  = pcRefPic->cs->vps;
           const int  maxTidILRefPicsPlus1 =
             vps->getMaxTidIlRefPicsPlus1(layerIdx, vps->getGeneralLayerIdx(pcRefPic->layerId));
@@ -1152,7 +1152,7 @@ void Slice::checkLeadingPictureRestrictions(PicList& rcListPic, const PPS& pps) 
       }
     }
 
-    if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) && 
+    if ((nalUnitType == NAL_UNIT_CODED_SLICE_RASL || nalUnitType == NAL_UNIT_CODED_SLICE_RADL) &&
       (pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL && pcSlice->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL) && !pps.getMixedNaluTypesInPicFlag())
     {
       if (pcSlice->getAssociatedIRAPPOC() == this->getAssociatedIRAPPOC() && pcPic->layerId == this->m_nuhLayerId)
@@ -3476,7 +3476,7 @@ void PPS::initSubPic(const SPS &sps)
     m_subPics[i].setSubPicWidthInCTUs(sps.getSubPicWidth(i));
     m_subPics[i].setSubPicHeightInCTUs(sps.getSubPicHeight(i));
 
-    uint32_t firstCTU = sps.getSubPicCtuTopLeftY(i) * m_picWidthInCtu + sps.getSubPicCtuTopLeftX(i); 	
+    uint32_t firstCTU = sps.getSubPicCtuTopLeftY(i) * m_picWidthInCtu + sps.getSubPicCtuTopLeftX(i);
     m_subPics[i].setFirstCTUInSubPic(firstCTU);
     uint32_t lastCTU = (sps.getSubPicCtuTopLeftY(i) + sps.getSubPicHeight(i) - 1) * m_picWidthInCtu + sps.getSubPicCtuTopLeftX(i) + sps.getSubPicWidth(i) - 1;
     m_subPics[i].setLastCTUInSubPic(lastCTU);

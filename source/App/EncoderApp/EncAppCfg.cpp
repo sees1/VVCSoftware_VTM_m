@@ -1392,7 +1392,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("StopAfterFFtoPOC",                                m_stopAfterFFtoPOC,                       false, "If using fast forward to POC, after the POC of interest has been hit, stop further encoding.")
   ("ForceDecodeBitstream1",                           m_forceDecodeBitstream1,                  false, "force decoding of bitstream 1 - use this only if you are realy sure about what you are doing ")
   ("DecodeBitstream2ModPOCAndType",                   m_bs2ModPOCAndType,                       false, "Modify POC and NALU-type of second input bitstream, to use second BS as closing I-slice")
-  
+
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
 #if JVET_U0081
@@ -2471,7 +2471,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     {
       firstSliceLossless = true;
     }
-    if (firstSliceLossless) // if first slice is lossless 
+    if (firstSliceLossless) // if first slice is lossless
     m_iQP = LOSSLESS_AND_MIXED_LOSSLESS_RD_COST_TEST_QP - ( ( m_internalBitDepth[CHANNEL_TYPE_LUMA] - 8 ) * 6 );
   }
 
@@ -2779,7 +2779,7 @@ bool EncAppCfg::xCheckParameter()
   {
     xConfirmPara(m_ccalfStrength < 0.0, "CCALFStrength is less than 0. Valid range is 0.0 <= CCALFStrength <= 1.0");
     xConfirmPara(m_ccalfStrength > 1.0, "CCALFStrength is greater than 1. Valid range is 0.0 <= CCALFStrength <= 1.0");
-  }  
+  }
 #if JVET_U0081
   if (m_alf)
   {

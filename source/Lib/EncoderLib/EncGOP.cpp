@@ -1982,7 +1982,7 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
 // ====================================================================================================================
 void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
                           std::list<PelUnitBuf*>& rcListPicYuvRecOut,
-                          bool isField, bool isTff, const InputColourSpaceConversion snr_conversion, 
+                          bool isField, bool isTff, const InputColourSpaceConversion snr_conversion,
                           const bool printFrameMSE, const bool printMSSSIM, bool isEncodeLtRef, const int picIdInGOP)
 {
   // TODO: Split this function up.
@@ -2852,7 +2852,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             else
             {
               pcPic->getOrigBuf().copyFrom(pcPic->getTrueOrigBuf());
-            } 
+            }
 
             if (pcSlice->getLmcsEnabledFlag())
             {
@@ -2940,7 +2940,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         else
         {
           pcPic->getOrigBuf().copyFrom(pcPic->getTrueOrigBuf());
-        } 
+        }
       }
 
       // create SAO object based on the picture size
@@ -2986,7 +2986,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           applyDeblockingFilterMetric(pcPic, uiNumSliceSegments);
         }
       }
-      if (m_pcCfg->getCostMode() == COST_LOSSLESS_CODING) 
+      if (m_pcCfg->getCostMode() == COST_LOSSLESS_CODING)
       {
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
@@ -3047,9 +3047,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         //assign ALF slice header
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
-           //For the first slice, even if it is lossless, slice level ALF is not disabled and ALF-APS is signaled so that the later lossy slices can use APS of the first slice. 
-           //However, if the first slice is lossless, the ALF process is disabled for all of the CTUs ( m_ctuEnableFlag == 0) of that slice which is implemented in the function void EncAdaptiveLoopFilter::ALFProcess.         
-      
+           //For the first slice, even if it is lossless, slice level ALF is not disabled and ALF-APS is signaled so that the later lossy slices can use APS of the first slice.
+           //However, if the first slice is lossless, the ALF process is disabled for all of the CTUs ( m_ctuEnableFlag == 0) of that slice which is implemented in the function void EncAdaptiveLoopFilter::ALFProcess.
+
           if (pcPic->slices[s]->isLossless() && s && m_pcCfg->getCostMode() == COST_LOSSLESS_CODING)
           {
             pcPic->slices[s]->setAlfEnabledFlag(COMPONENT_Y, false);
@@ -3562,7 +3562,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       m_pcCfg->setEncodedFlag(iGOPid, true);
 
       double PSNR_Y;
-      xCalculateAddPSNRs(isField, isTff, iGOPid, pcPic, accessUnit, rcListPic, encTime, snr_conversion, 
+      xCalculateAddPSNRs(isField, isTff, iGOPid, pcPic, accessUnit, rcListPic, encTime, snr_conversion,
         printFrameMSE, printMSSSIM, &PSNR_Y, isEncodeLtRef );
 
 
@@ -3656,8 +3656,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
   CHECK( m_iNumPicCoded > 1, "Unspecified error" );
 }
 
-void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, 
-  const bool printSequenceMSE, const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, 
+void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR,
+  const bool printSequenceMSE, const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR,
   const BitDepths &bitDepths )
 {
 #if ENABLE_QPA
@@ -3698,7 +3698,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
   const bool calculateHdrMetrics = m_pcEncLib->getCalcluateHdrMetrics();
 #endif
 #if ENABLE_QPA
-  m_gcAnalyzeAll.printOut( 'a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr, 
+  m_gcAnalyzeAll.printOut( 'a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr,
     printRprPSNR, bitDepths, useWPSNR
 #if JVET_O0756_CALCULATE_HDRMETRICS
                           , calculateHdrMetrics
@@ -3712,7 +3712,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
                           );
 #endif
   msg( DETAILS, "\n\nI Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeI.printOut( 'i', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, 
+  m_gcAnalyzeI.printOut( 'i', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
     printHexPsnr, printRprPSNR, bitDepths );
 
   msg( DETAILS, "\n\nP Slices--------------------------------------------------------\n" );
@@ -3720,7 +3720,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
     printHexPsnr, printRprPSNR, bitDepths );
 
   msg( DETAILS, "\n\nB Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeB.printOut( 'b', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, 
+  m_gcAnalyzeB.printOut( 'b', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
     printHexPsnr, printRprPSNR, bitDepths );
 
 #if WCG_WPSNR
@@ -4111,12 +4111,12 @@ double EncGOP::xFindDistortionPlaneWPSNR(const CPelBuf& pic0, const CPelBuf& pic
 }
 #endif
 
-void EncGOP::xCalculateAddPSNRs( const bool isField, const bool isFieldTopFieldFirst, 
-  const int iGOPid, Picture* pcPic, const AccessUnit&accessUnit, PicList &rcListPic, 
-  const int64_t dEncTime, const InputColourSpaceConversion snr_conversion, 
+void EncGOP::xCalculateAddPSNRs( const bool isField, const bool isFieldTopFieldFirst,
+  const int iGOPid, Picture* pcPic, const AccessUnit&accessUnit, PicList &rcListPic,
+  const int64_t dEncTime, const InputColourSpaceConversion snr_conversion,
   const bool printFrameMSE, const bool printMSSSIM, double* PSNR_Y, bool isEncodeLtRef)
 {
-  xCalculateAddPSNR(pcPic, pcPic->getRecoBuf(), accessUnit, (double)dEncTime, snr_conversion, 
+  xCalculateAddPSNR(pcPic, pcPic->getRecoBuf(), accessUnit, (double)dEncTime, snr_conversion,
     printFrameMSE, printMSSSIM, PSNR_Y, isEncodeLtRef);
 
   //In case of field coding, compute the interlaced PSNR for both fields
@@ -4172,20 +4172,20 @@ void EncGOP::xCalculateAddPSNRs( const bool isField, const bool isFieldTopFieldF
 
       if ((pcPic->topField && isFieldTopFieldFirst) || (!pcPic->topField && !isFieldTopFieldFirst))
       {
-        xCalculateInterlacedAddPSNR(pcPic, correspondingFieldPic, pcPic->getRecoBuf(), 
-          correspondingFieldPic->getRecoBuf(), snr_conversion, printFrameMSE, printMSSSIM, 
+        xCalculateInterlacedAddPSNR(pcPic, correspondingFieldPic, pcPic->getRecoBuf(),
+          correspondingFieldPic->getRecoBuf(), snr_conversion, printFrameMSE, printMSSSIM,
           PSNR_Y, isEncodeLtRef);
       }
       else
       {
-        xCalculateInterlacedAddPSNR(correspondingFieldPic, pcPic, correspondingFieldPic->getRecoBuf(), 
+        xCalculateInterlacedAddPSNR(correspondingFieldPic, pcPic, correspondingFieldPic->getRecoBuf(),
           pcPic->getRecoBuf(), snr_conversion, printFrameMSE, printMSSSIM, PSNR_Y, isEncodeLtRef);
       }
     }
   }
 }
 
-void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUnit& accessUnit, 
+void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUnit& accessUnit,
   double dEncTime, const InputColourSpaceConversion conversion, const bool printFrameMSE, const bool printMSSSIM,
   double* PSNR_Y, bool isEncodeLtRef)
 {
@@ -4484,7 +4484,7 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
     if (printMSSSIM)
     {
       msg( NOTICE, " [MS-SSIM Y %1.6lf    U %1.6lf    V %1.6lf]", msssim[COMPONENT_Y], msssim[COMPONENT_Cb], msssim[COMPONENT_Cr] );
-    }  
+    }
 
     if( printFrameMSE )
     {
@@ -4606,22 +4606,22 @@ double EncGOP::xCalculateMSSSIM (const Pel* org, const int orgStride, const Pel*
 
   uint32_t maxScale;
 
-  // For low resolution videos determine number of scales 
+  // For low resolution videos determine number of scales
   if (width < 22 || height < 22)
   {
-    maxScale = 1; 
+    maxScale = 1;
   }
   else if (width < 44 || height < 44)
   {
-    maxScale = 2; 
+    maxScale = 2;
   }
   else if (width < 88 || height < 88)
   {
-    maxScale = 3; 
+    maxScale = 3;
   }
   else if (width < 176 || height < 176)
   {
-    maxScale = 4; 
+    maxScale = 4;
   }
   else
   {
@@ -4701,12 +4701,12 @@ double EncGOP::xCalculateMSSSIM (const Pel* org, const int orgStride, const Pel*
       }
     }
   }
-  
+
   // Calculate MS-SSIM:
   const uint32_t   maxValue  = (1<<bitDepth)-1;
   const double c1        = (0.01*maxValue)*(0.01*maxValue);
   const double c2        = (0.03*maxValue)*(0.03*maxValue);
-  
+
   double finalMSSSIM = 1.0;
 
   for(uint32_t scale=0; scale<maxScale; scale++)
@@ -4874,7 +4874,7 @@ void EncGOP::copyBuftoFrame( Picture* pcPic )
 
 void EncGOP::xCalculateInterlacedAddPSNR( Picture* pcPicOrgFirstField, Picture* pcPicOrgSecondField,
                                           PelUnitBuf cPicRecFirstField, PelUnitBuf cPicRecSecondField,
-                                          const InputColourSpaceConversion conversion, const bool printFrameMSE, 
+                                          const InputColourSpaceConversion conversion, const bool printFrameMSE,
                                           const bool printMSSSIM, double* PSNR_Y, bool isEncodeLtRef)
 {
   const SPS &sps = *pcPicOrgFirstField->cs->sps;
