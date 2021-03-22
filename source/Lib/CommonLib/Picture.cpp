@@ -273,10 +273,10 @@ void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessInd
 {
   uint16_t numElementsinsliceLosslessIndexArray = (uint16_t)sliceLosslessIndexArray.size();
   uint32_t numSlices = this->cs->pps->getNumSlicesInPic();
-  m_lossylosslessSliceArray.assign(numSlices, true); // initialize to all slices are lossless 
+  m_lossylosslessSliceArray.assign(numSlices, true); // initialize to all slices are lossless
   if (mixedLossyLossless)
   {
-    m_lossylosslessSliceArray.assign(numSlices, false); // initialize to all slices are lossless 
+    m_lossylosslessSliceArray.assign(numSlices, false); // initialize to all slices are lossless
     CHECK(numElementsinsliceLosslessIndexArray == 0 , "sliceLosslessArray is empty, must need to configure for mixed lossy/lossless");
 
     // mixed lossy/lossless slices, set only lossless slices;
@@ -285,7 +285,7 @@ void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessInd
         CHECK(sliceLosslessIndexArray[i] >= numSlices || sliceLosslessIndexArray[i] < 0, "index of lossless slice is out of slice index bound");
         m_lossylosslessSliceArray[sliceLosslessIndexArray[i]] = true;
     }
-  } 
+  }
   CHECK(m_lossylosslessSliceArray.size() < numSlices, "sliceLosslessArray size is less than number of slices");
 }
 

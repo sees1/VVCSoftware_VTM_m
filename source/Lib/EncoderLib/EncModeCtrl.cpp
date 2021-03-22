@@ -279,7 +279,7 @@ void CacheBlkInfoCtrl::create()
             m_codedCUInfo[x][y][wIdx][hIdx] = nullptr;
             continue;
           }
-          
+
           const int hLog2 = floorLog2( gp_sizeIdxInfo->sizeFrom( hIdx ) );
 
           if( isLog2MttPartitioning && ( ( ( y << MIN_CU_LOG2 ) & ( ( 1 << ( hLog2 - 1 ) ) - 1 ) ) != 0 ) )
@@ -606,7 +606,7 @@ void BestEncInfoCache::create( const ChromaFormat chFmt )
             m_bestEncInfo[x][y][wIdx][hIdx] = nullptr;
             continue;
           }
-          
+
           const int hLog2 = floorLog2( gp_sizeIdxInfo->sizeFrom( hIdx ) );
 
           if( isLog2MttPartitioning && ( ( ( y << MIN_CU_LOG2 ) & ( ( 1 << ( hLog2 - 1 ) ) - 1 ) ) != 0 ) )
@@ -1417,7 +1417,7 @@ bool EncModeCtrlMTnoRQT::tryMode( const EncTestMode& encTestmode, const CodingSt
   {
     if (partitioner.currArea().lumaSize().width > 64 || partitioner.currArea().lumaSize().height > 64
         || ((partitioner.currArea().lumaSize().width * partitioner.currArea().lumaSize().height <= 16) && (isLuma(partitioner.chType)) )
-        || ((partitioner.currArea().chromaSize().width * partitioner.currArea().chromaSize().height <= 16) && (!isLuma(partitioner.chType)) && partitioner.isSepTree(cs) ) 
+        || ((partitioner.currArea().chromaSize().width * partitioner.currArea().chromaSize().height <= 16) && (!isLuma(partitioner.chType)) && partitioner.isSepTree(cs) )
       || (partitioner.isLocalSepTree(cs)  && (!isLuma(partitioner.chType)) ) )
     {
       return false;

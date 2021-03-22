@@ -809,7 +809,7 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
     else if (pcSlice->getPPS()->getMixedNaluTypesInPicFlag())
     {
       bool isRaslPic = true;
-      for (int i = 0; isRaslPic && i < m_pcPic->numSlices; i++) 
+      for (int i = 0; isRaslPic && i < m_pcPic->numSlices; i++)
       {
         if (!(pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL || pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RADL))
         {
@@ -923,7 +923,7 @@ void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailableP
   msg(INFO, "Note: Inserting unavailable POC : %d\n", iUnavailablePoc);
   Picture* cFillPic = xGetNewPicBuffer( *( m_parameterSetManager.getFirstSPS() ), *( m_parameterSetManager.getFirstPPS() ), 0, layerId );
 
-  cFillPic->cs = new CodingStructure( g_globalUnitCache.cuCache, g_globalUnitCache.puCache, g_globalUnitCache.tuCache ); 
+  cFillPic->cs = new CodingStructure( g_globalUnitCache.cuCache, g_globalUnitCache.puCache, g_globalUnitCache.tuCache );
   cFillPic->cs->sps = m_parameterSetManager.getFirstSPS();
   cFillPic->cs->pps = m_parameterSetManager.getFirstPPS();
   cFillPic->cs->vps = m_parameterSetManager.getVPS(0);
@@ -949,9 +949,9 @@ void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailableP
   cFillPic->slices[0]->setPOC(iUnavailablePoc);
   cFillPic->poc = iUnavailablePoc;
   if( (cFillPic->slices[0]->getTLayer() == 0) && (cFillPic->slices[0]->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL) && (cFillPic->slices[0]->getNalUnitType() != NAL_UNIT_CODED_SLICE_RADL) )
-  { 
-    m_prevTid0POC = cFillPic->slices[0]->getPOC(); 
-  } 
+  {
+    m_prevTid0POC = cFillPic->slices[0]->getPOC();
+  }
 
   cFillPic->reconstructed = true;
   cFillPic->neededForOutput = false;
@@ -1143,7 +1143,7 @@ void DecLib::checkSEIInAccessUnit()
  - Count the number of identical SEI messages in the current picture
  */
 void DecLib::checkSeiInPictureUnit()
-{  
+{
   std::vector<std::tuple<int, uint32_t, uint8_t*>> seiList;
 
   // payload types subject to constrained SEI repetition
@@ -1155,7 +1155,7 @@ void DecLib::checkSeiInPictureUnit()
     InputBitstream bs = sei->getBitstream();
 
     do
-    {  
+    {
       int payloadType = 0;
       uint32_t val = 0;
 
@@ -1171,7 +1171,7 @@ void DecLib::checkSeiInPictureUnit()
         bs.readByte(val);
         payloadSize += val;
       } while (val==0xFF);
-    
+
       uint8_t *payload = new uint8_t[payloadSize];
       for (uint32_t i = 0; i < payloadSize; i++)
       {
@@ -1186,7 +1186,7 @@ void DecLib::checkSeiInPictureUnit()
   // count repeated messages in list
   for (uint32_t i = 0; i < seiList.size(); i++)
   {
-    int      k, count = 1;      
+    int      k, count = 1;
     int      payloadType1 = std::get<0>(seiList[i]);
     uint32_t payloadSize1 = std::get<1>(seiList[i]);
     uint8_t  *payload1    = std::get<2>(seiList[i]);
@@ -1210,7 +1210,7 @@ void DecLib::checkSeiInPictureUnit()
       int      payloadType2 = std::get<0>(seiList[j]);
       uint32_t payloadSize2 = std::get<1>(seiList[j]);
       uint8_t  *payload2    = std::get<2>(seiList[j]);
-      
+
       // check for identical SEI type, size, and payload
       if(payloadType1 == payloadType2 && payloadSize1 == payloadSize2)
       {
@@ -1219,7 +1219,7 @@ void DecLib::checkSeiInPictureUnit()
           count++;
         }
       }
-    }    
+    }
     CHECK(count > 4, "There shall be less than or equal to 4 identical sei_payload( ) syntax structures within a picture unit.");
   }
 
@@ -1235,7 +1235,7 @@ void DecLib::checkSeiInPictureUnit()
 /**
  - Reset list of SEI NAL units from the current picture
  */
-void DecLib::resetPictureSeiNalus()   
+void DecLib::resetPictureSeiNalus()
 {
   while (!m_pictureSeiNalus.empty())
   {
@@ -1247,7 +1247,7 @@ void DecLib::resetPictureSeiNalus()
 /**
  - Process buffered list of suffix APS NALUs
  */
-void DecLib::processSuffixApsNalus()   
+void DecLib::processSuffixApsNalus()
 {
   while (!m_suffixApsNalus.empty())
   {
@@ -1548,7 +1548,7 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
       //No VPS in bitstream: set defaults values of variables in VPS to the ones signalled in SPS
       m_vps->setMaxSubLayers( sps->getMaxTLayers() );
       m_vps->setLayerId( 0, sps->getLayerId() );
-      m_vps->deriveOutputLayerSets(); 
+      m_vps->deriveOutputLayerSets();
     }
     else
     {
@@ -1764,7 +1764,7 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   const SPS *sps = slice->getSPS();
   const PPS *pps = slice->getPPS();
   const VPS *vps = slice->getVPS();
-  
+
   if (sps->getVPSId() && (vps != nullptr))
   {
     if ((layerId == vps->getLayerId(0)) && m_firstSliceInSequence[layerId])
@@ -1976,7 +1976,7 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
   }
 
   if( sps->getVPSId() && vps->m_numLayersInOls[vps->m_targetOlsIdx] == 1 )
-  {    
+  {
     CHECK( !sps->getPtlDpbHrdParamsPresentFlag(), "When sps_video_parameter_set_id is greater than 0 and there is an OLS that contains only one layer with nuh_layer_id equal to the nuh_layer_id of the SPS, the value of sps_ptl_dpb_hrd_params_present_flag shall be equal to 1" );
   }
 
@@ -2377,9 +2377,9 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     int refPicIndex;
     while ((lostPoc = m_apcSlicePilot->checkThatAllRefPicsAreAvailable(m_cListPic, m_apcSlicePilot->getRPL0(), 0, true, &refPicIndex, m_apcSlicePilot->getNumRefIdx(REF_PIC_LIST_0))) > 0)
     {
-      if( !pps->getMixedNaluTypesInPicFlag() && ( 
+      if( !pps->getMixedNaluTypesInPicFlag() && (
       ( ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP ) && ( sps->getIDRRefParamListPresent() || pps->getRplInfoInPhFlag() ) ) ||
-        ( ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA ) && m_picHeader.getNoOutputBeforeRecoveryFlag() ) ) ) 
+        ( ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA ) && m_picHeader.getNoOutputBeforeRecoveryFlag() ) ) )
       {
         if (m_apcSlicePilot->getRPL0()->isInterLayerRefPic(refPicIndex) == 0)
         {
@@ -2393,7 +2393,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     }
     while ((lostPoc = m_apcSlicePilot->checkThatAllRefPicsAreAvailable(m_cListPic, m_apcSlicePilot->getRPL1(), 0, true, &refPicIndex, m_apcSlicePilot->getNumRefIdx(REF_PIC_LIST_1))) > 0)
     {
-      if( !pps->getMixedNaluTypesInPicFlag() && ( 
+      if( !pps->getMixedNaluTypesInPicFlag() && (
         ( ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_W_RADL || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP ) && ( sps->getIDRRefParamListPresent() || pps->getRplInfoInPhFlag() ) ) ||
         ( ( m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_GDR || m_apcSlicePilot->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA ) && m_picHeader.getNoOutputBeforeRecoveryFlag() ) ) )
       {
@@ -2912,7 +2912,7 @@ void DecLib::xDecodeAPS(InputNALUnit& nalu)
   {
     APS* apsEnc = new APS();
     *apsEnc = *aps;
-    m_apsMapEnc->storePS( ( apsEnc->getAPSId() << NUM_APS_TYPE_LEN ) + apsEnc->getAPSType(), apsEnc ); 
+    m_apsMapEnc->storePS( ( apsEnc->getAPSId() << NUM_APS_TYPE_LEN ) + apsEnc->getAPSType(), apsEnc );
   }
 
   if( nalu.m_nalUnitType == NAL_UNIT_SUFFIX_APS && m_prevSliceSkipped )
@@ -2928,14 +2928,14 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
 {
   bool ret;
   // ignore all NAL units of layers > 0
-  if( (nalu.m_nalUnitType != NAL_UNIT_SUFFIX_APS       && 
+  if( (nalu.m_nalUnitType != NAL_UNIT_SUFFIX_APS       &&
        nalu.m_nalUnitType != NAL_UNIT_EOS              &&
        nalu.m_nalUnitType != NAL_UNIT_EOB              &&
        nalu.m_nalUnitType != NAL_UNIT_SUFFIX_SEI       &&
        nalu.m_nalUnitType != NAL_UNIT_FD               &&
        nalu.m_nalUnitType != NAL_UNIT_RESERVED_NVCL_27 &&
        nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_30   &&
-       nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_31)  || 
+       nalu.m_nalUnitType != NAL_UNIT_UNSPECIFIED_31)  ||
        !m_prevSliceSkipped )
   {
     AccessUnitInfo auInfo;
@@ -2985,11 +2985,11 @@ bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, i
       return false;
 
     case NAL_UNIT_SUFFIX_APS:
-      if( m_prevSliceSkipped ) 
+      if( m_prevSliceSkipped )
       {
         xDecodeAPS(nalu);
       }
-      else 
+      else
       {
         m_suffixApsNalus.push_back(new InputNALUnit(nalu));
       }

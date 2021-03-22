@@ -974,7 +974,7 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
       for(auto it=annotatedRegionSEIs.begin(); it!=annotatedRegionSEIs.end(); it++)
       {
         const SEIAnnotatedRegions &seiAnnotatedRegions = *(SEIAnnotatedRegions*)(*it);
-        
+
         if (seiAnnotatedRegions.m_hdr.m_cancelFlag)
         {
           m_arObjects.clear();
@@ -1011,13 +1011,13 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
               }
             }
           }
-    
+
           // Process object updates
           for(auto srcIt=seiAnnotatedRegions.m_annotatedRegions.begin(); srcIt!=seiAnnotatedRegions.m_annotatedRegions.end(); srcIt++)
           {
             uint32_t objIdx = srcIt->first;
             const SEIAnnotatedRegions::AnnotatedRegionObject &src =srcIt->second;
-    
+
             if (src.objectCancelFlag)
             {
               m_arObjects.erase(objIdx);
@@ -1025,7 +1025,7 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
             else
             {
               auto destIt = m_arObjects.find(objIdx);
-    
+
               if (destIt == m_arObjects.end())
               {
                 //New object arrived, needs to be appended to the map of tracked objects
@@ -1034,7 +1034,7 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
               else //Existing object, modifications to be done
               {
                 SEIAnnotatedRegions::AnnotatedRegionObject &dst=destIt->second;
-    
+
                 if (seiAnnotatedRegions.m_hdr.m_objectLabelPresentFlag && src.objectLabelValid)
                 {
                   dst.objectLabelValid=true;

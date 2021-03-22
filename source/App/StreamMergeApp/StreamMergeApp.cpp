@@ -535,13 +535,13 @@ uint32_t StreamMergeApp::mergeStreams()
 
   vector<MergeLayer> *layers = new vector<MergeLayer>;
   layers->resize(m_numInputStreams);
-  
+
   // Prepare merge layers.
   for (int i = 0; i < layers->size(); i++)
   {
     MergeLayer &layer = layers->at(i);
     layer.id          = i;
-    
+
     // Open input file.
     layer.fp = new ifstream();
     layer.fp->open(m_bitstreamFileNameIn[i], ifstream::in | ifstream::binary);

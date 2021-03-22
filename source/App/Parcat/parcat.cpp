@@ -65,7 +65,7 @@ void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *para
   uint32_t  uiCode;
   PPS* pps = NULL;
   SPS* sps = NULL;
-  
+
   uint32_t uiTmp;
   READ_FLAG(uiTmp, "ph_gdr_or_irap_pic_flag");
   READ_FLAG(uiCode, "ph_non_ref_pic_flag");
@@ -329,7 +329,7 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
       skip_next_sei = true;
       idr_found = true;
     }
-    if ((idx > 1 && (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP)) 
+    if ((idx > 1 && (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP))
       || ((idx > 1 && !idr_found) && (nalu_type == NAL_UNIT_OPI || nalu_type == NAL_UNIT_DCI || nalu_type == NAL_UNIT_VPS || nalu_type == NAL_UNIT_SPS || nalu_type == NAL_UNIT_PPS || nalu_type == NAL_UNIT_PREFIX_APS || nalu_type == NAL_UNIT_SUFFIX_APS || nalu_type == NAL_UNIT_PH || nalu_type == NAL_UNIT_ACCESS_UNIT_DELIMITER || nalu_type == NAL_UNIT_PREFIX_SEI))
       || (nalu_type == NAL_UNIT_SUFFIX_SEI && skip_next_sei))
     {

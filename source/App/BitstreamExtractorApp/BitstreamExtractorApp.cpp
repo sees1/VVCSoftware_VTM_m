@@ -116,7 +116,7 @@ Slice BitstreamExtractorApp::xParseSliceHeader(InputNALUnit &nalu)
   slice.setTLayer(nalu.m_temporalId);
 
   m_hlSynaxReader.parseSliceHeader(&slice, &m_picHeader, &m_parameterSetManager, m_prevTid0Poc, m_prevPicPOC);
-  
+
   return slice;
 }
 

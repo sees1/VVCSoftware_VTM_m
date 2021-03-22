@@ -335,7 +335,7 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
       }
     }
   }
-  if (sei.m_bpMaxSubLayers-1 > 0) 
+  if (sei.m_bpMaxSubLayers-1 > 0)
   {
     WRITE_FLAG(sei.m_sublayerDpbOutputOffsetsPresentFlag, "bp_sublayer_dpb_output_offsets_present_flag");
   }

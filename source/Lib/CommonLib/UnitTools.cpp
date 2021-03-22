@@ -208,7 +208,7 @@ void CU::checkConformanceILRP(Slice *slice)
     return;
   }
 
-  //constraint 1: The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] has the same subpicture layout as the current picture 
+  //constraint 1: The picture referred to by each active entry in RefPicList[ 0 ] or RefPicList[ 1 ] has the same subpicture layout as the current picture
   bool isAllRefSameSubpicLayout = true;
   for (int refList = 0; refList < numRefList; refList++) // loop over l0 and l1
   {
@@ -826,7 +826,7 @@ uint32_t PU::getCoLocatedIntraLumaMode(const PredictionUnit &pu)
 
 int PU::getWideAngle( const TransformUnit &tu, const uint32_t dirMode, const ComponentID compID )
 {
-  //This function returns a wide angle index taking into account that the values 0 and 1 are reserved 
+  //This function returns a wide angle index taking into account that the values 0 and 1 are reserved
   //for Planar and DC respectively, as defined in the Spec. Text.
   if( dirMode < 2 )
   {

@@ -3536,7 +3536,7 @@ void InterSearch::xSetSearchRange ( const PredictionUnit& pu,
   const int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
   Mv cFPMvPred = cMvPred;
   clipMv( cFPMvPred, pu.cu->lumaPos(), pu.cu->lumaSize(), *pu.cs->sps, *pu.cs->pps );
-  
+
   Mv mvTL(cFPMvPred.getHor() - (iSrchRng << iMvShift), cFPMvPred.getVer() - (iSrchRng << iMvShift));
   Mv mvBR(cFPMvPred.getHor() + (iSrchRng << iMvShift), cFPMvPred.getVer() + (iSrchRng << iMvShift));
 

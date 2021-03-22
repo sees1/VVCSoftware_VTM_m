@@ -179,7 +179,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
           ret = true;
           finished = true;
           break;
-        
+
         // NUT that are not the start of a new picture
         case NAL_UNIT_CODED_SLICE_TRAIL:
         case NAL_UNIT_CODED_SLICE_STSA:
@@ -206,7 +206,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
           ret = false;
           finished = true;
           break;
-        
+
         // NUT that might indicate the start of a new picture - keep looking
         case NAL_UNIT_PREFIX_APS:
         case NAL_UNIT_PREFIX_SEI:
@@ -221,7 +221,7 @@ bool SubpicMergeApp::isNewPicture(std::ifstream *bitstreamFile, InputByteStream 
       }
     }
   }
-  
+
   // restore previous stream location - minus 3 due to the need for the annexB parser to read three extra bytes
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
   bitstreamFile->clear();
@@ -482,7 +482,7 @@ void SubpicMergeApp::generateMergedStreamVPSes(std::vector<VPS*> &vpsList)
 {
   for (auto vpsId : m_subpics->at(0).vpsIds)
   {
-    // Create new SPS based on the SPS from the first subpicture 
+    // Create new SPS based on the SPS from the first subpicture
     vpsList.push_back(new VPS(*m_subpics->at(0).psManager.getVPS(vpsId)));
     VPS &vps = *vpsList.back();
 
@@ -527,7 +527,7 @@ void SubpicMergeApp::generateMergedStreamSPSes(std::vector<SPS*> &spsList)
 
   for (auto spsId : m_subpics->at(0).spsIds)
   {
-    // Create new SPS based on the SPS from the first subpicture 
+    // Create new SPS based on the SPS from the first subpicture
     spsList.push_back(new SPS(*m_subpics->at(0).psManager.getSPS(spsId)));
     SPS &sps = *spsList.back();
 
@@ -669,7 +669,7 @@ void SubpicMergeApp::generateMergedStreamPPSes(ParameterSetManager &psManager, s
 
   for (auto ppsId : m_subpics->at(0).ppsIds)
   {
-    // Create new PPS based on the PPS from the first subpicture 
+    // Create new PPS based on the PPS from the first subpicture
     ppsList.push_back(new PPS(*m_subpics->at(0).psManager.getPPS(ppsId)));
     PPS &pps = *ppsList.back();
     SPS &sps = *psManager.getSPS(pps.getSPSId());
@@ -899,7 +899,7 @@ Subpicture &SubpicMergeApp::selectSubpicForPicHeader(bool isMixedNaluPic)
   Subpicture *subpicToReturn = NULL;
   bool IRAPFound = false;
 
-  // Find first non-IRAP subpicture 
+  // Find first non-IRAP subpicture
   for (auto &subpic : *m_subpics)
   {
     if (subpic.slices[0].isIRAP())
