@@ -112,7 +112,7 @@ struct AlfFilterShape
     else
     {
       filterType = ALF_NUM_OF_FILTER_TYPES;
-      CHECK( 0, "Wrong ALF filter shape" );
+      THROW("Wrong ALF filter shape");
     }
   }
 

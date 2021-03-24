@@ -430,11 +430,17 @@ void AreaBuf<T>::removeWeightHighFreq(const AreaBuf<T>& other, const bool bClip,
   if(!bClip)
   {
     if(!(width & 7))
+    {
       g_pelBufOP.removeWeightHighFreq8(dst, dstStride, src, srcStride, width, height, 16, bcwWeight);
+    }
     else if(!(width & 3))
+    {
       g_pelBufOP.removeWeightHighFreq4(dst, dstStride, src, srcStride, width, height, 16, bcwWeight);
+    }
     else
-      CHECK(true, "Not supported");
+    {
+      THROW("Not supported");
+    }
   }
   else
   {
@@ -479,11 +485,17 @@ void AreaBuf<T>::removeHighFreq( const AreaBuf<T>& other, const bool bClip, cons
   if (!bClip)
   {
     if(!(width & 7))
+    {
       g_pelBufOP.removeHighFreq8(dst, dstStride, src, srcStride, width, height);
+    }
     else if (!(width & 3))
+    {
       g_pelBufOP.removeHighFreq4(dst, dstStride, src, srcStride, width, height);
+    }
     else
-      CHECK(true, "Not supported");
+    {
+      THROW("Not supported");
+    }
   }
   else
   {

@@ -3354,7 +3354,7 @@ void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &c
 {
   if (!tu.blocks[compID].valid())
   {
-    CHECK(1, "tu does not exist");
+    THROW("tu does not exist");
   }
 
   CodingStructure     &cs = *tu.cs;

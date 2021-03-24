@@ -1140,7 +1140,7 @@ void writeAllCodedData(const CodingStructure & cs, const UnitArea & ctuArea)
           }
           default:
           {
-            CHECK(1, "Invalid prediction mode");
+            THROW("Invalid prediction mode");
             break;
           }
         }
