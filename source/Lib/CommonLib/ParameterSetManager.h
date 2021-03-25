@@ -162,7 +162,7 @@ public:
       }
       else
       {
-        CHECK( true, "Wrong APS type" );
+        THROW("Wrong APS type");
       }
     }
     else

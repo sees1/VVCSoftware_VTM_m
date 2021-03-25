@@ -224,7 +224,7 @@ void paddingSimd(Pel *dst, int stride, int width, int height, int padSize)
   }
   else
   {
-    CHECK(false, "padding size must be 1 or 2");
+    THROW("padding size must be 1 or 2");
   }
 }
 

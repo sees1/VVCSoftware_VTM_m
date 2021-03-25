@@ -2496,9 +2496,7 @@ void PU::getAffineControlPointCand(const PredictionUnit &pu, MotionInfo mi[4], b
         cMv[l][1].clipToStorageBitDepth();
         break;
 
-      default:
-        CHECK( 1, "Invalid model index!\n" );
-        break;
+      default: THROW("Invalid model index!"); break;
       }
     }
     else
@@ -3639,7 +3637,7 @@ uint8_t CU::targetSbtAllowed( uint8_t sbtIdx, uint8_t sbtAllowed )
   case SBT_HOR_HALF: val = ( ( sbtAllowed >> SBT_HOR_HALF ) & 0x1 ); break;
   case SBT_VER_QUAD: val = ( ( sbtAllowed >> SBT_VER_QUAD ) & 0x1 ); break;
   case SBT_HOR_QUAD: val = ( ( sbtAllowed >> SBT_HOR_QUAD ) & 0x1 ); break;
-  default:           CHECK( 1, "unknown SBT type" );
+  default: THROW("unknown SBT type");
   }
   return val;
 }
