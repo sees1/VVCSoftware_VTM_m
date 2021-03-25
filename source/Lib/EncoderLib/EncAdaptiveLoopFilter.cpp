@@ -1707,7 +1707,9 @@ int EncAdaptiveLoopFilter::lengthFilterCoeffs( AlfFilterShape& alfShape, const i
     {
       bitCnt += lengthUvlc( abs( FilterCoeff[ ind ][ i ] ) );
       if( abs( FilterCoeff[ ind ][ i ] ) != 0 )
+      {
         bitCnt += 1;
+      }
     }
   }
   return bitCnt;
@@ -1767,22 +1769,23 @@ double EncAdaptiveLoopFilter::getDistCoeffForce0( bool* codedVarBins, double err
   return distForce0;
 }
 
-int EncAdaptiveLoopFilter::lengthUvlc( int uiCode )
+int EncAdaptiveLoopFilter::lengthUvlc(int code)
 {
-  int uiLength = 1;
-  int uiTemp = ++uiCode;
+  CHECK(code < 0, "unsigned VLC cannot be negative");
 
-  CHECK( !uiTemp, "Integer overflow" );
+  int length = 1;
+  int temp = ++code;
 
-  while( 1 != uiTemp )
+  CHECK(!temp, "Integer overflow constructing UVLC code");
+
+  while (1 != temp)
   {
-    uiTemp >>= 1;
-    uiLength += 2;
+    temp >>= 1;
+    length += 2;
   }
-  // Take care of cases where uiLength > 32
-  return ( uiLength >> 1 ) + ( ( uiLength + 1 ) >> 1 );
+  // Take care of cases where length > 32
+  return (length >> 1) + ((length + 1) >> 1);
 }
-
 
 double EncAdaptiveLoopFilter::deriveFilterCoeffs( AlfCovariance* cov, AlfCovariance* covMerged, int clipMerged[MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_LUMA_COEFF], AlfFilterShape& alfShape, short* filterIndices, int numFilters, double errorTabForce0Coeff[MAX_NUM_ALF_CLASSES][2], AlfParam& alfParam )
 {
