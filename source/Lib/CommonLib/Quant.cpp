@@ -519,7 +519,9 @@ void Quant::setScalingList(ScalingList *scalingList, const int maxLog2TrDynamicR
     for(uint32_t list = 0; list < SCALING_LIST_NUM; list++)
     {
       if (size == SCALING_LIST_2x2 && list < 4)   // skip 2x2 luma
+      {
         continue;
+      }
       scalingListId = g_scalingListId[size][list];
       if (scalingList->getChromaScalingListPresentFlag() || scalingList->isLumaScalingList(scalingListId))
       {
@@ -540,7 +542,11 @@ void Quant::setScalingList(ScalingList *scalingList, const int maxLog2TrDynamicR
   {
     for (uint32_t sizeh = 0; sizeh <= SCALING_LIST_LAST_CODED; sizeh++) //7
     {
-      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh<SCALING_LIST_4x4) || (sizeh == SCALING_LIST_1x1 && sizew<SCALING_LIST_4x4)) continue;
+      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh < SCALING_LIST_4x4)
+          || (sizeh == SCALING_LIST_1x1 && sizew < SCALING_LIST_4x4))
+      {
+        continue;
+      }
       for (uint32_t list = 0; list < SCALING_LIST_NUM; list++) //9
       {
         int largerSide = (sizew > sizeh) ? sizew : sizeh;
@@ -571,7 +577,9 @@ void Quant::setScalingListDec(const ScalingList &scalingList)
     for(uint32_t list = 0; list < SCALING_LIST_NUM; list++)
     {
       if (size == SCALING_LIST_2x2 && list < 4)   // skip 2x2 luma
+      {
         continue;
+      }
       scalingListId = g_scalingListId[size][list];
       for(int qp = minimumQp; qp < maximumQp; qp++)
       {
@@ -585,7 +593,11 @@ void Quant::setScalingListDec(const ScalingList &scalingList)
   {
     for (uint32_t sizeh = 0; sizeh <= SCALING_LIST_LAST_CODED; sizeh++) //7
     {
-      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh<SCALING_LIST_4x4) || (sizeh == SCALING_LIST_1x1 && sizew<SCALING_LIST_4x4)) continue;
+      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh < SCALING_LIST_4x4)
+          || (sizeh == SCALING_LIST_1x1 && sizew < SCALING_LIST_4x4))
+      {
+        continue;
+      }
       for (uint32_t list = 0; list < SCALING_LIST_NUM; list++) //9
       {
         int largerSide = (sizew > sizeh) ? sizew : sizeh;
@@ -858,7 +870,9 @@ void Quant::processScalingListDec( const int *coeff, int *dequantcoeff, int invQ
     }
     int largeOne = (width > height) ? width : height;
     if (largeOne > 8)
+    {
       dequantcoeff[0] = invQuantScales * dc;
+    }
     return;
   }
   for (uint32_t j = 0; j<height; j++)
@@ -938,7 +952,10 @@ void Quant::xInitScalingList( const Quant* other )
  */
 void Quant::xDestroyScalingList()
 {
-  if( !m_isScalingListOwner ) return;
+  if (!m_isScalingListOwner)
+  {
+    return;
+  }
 
   delete[] m_quantCoef[0][0][0][0];
 }

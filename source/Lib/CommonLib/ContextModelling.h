@@ -308,7 +308,9 @@ public:
   {
 
     if (absCoeff == 0)
+    {
       return 0;
+    }
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
 
     int absCoeffMod = int(absCoeff);
@@ -334,7 +336,9 @@ public:
   {
 
     if (absCoeff == 0)
+    {
       return 0;
+    }
 
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
     pred1 = std::max(absBelow, absRight);
