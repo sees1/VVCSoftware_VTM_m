@@ -490,8 +490,7 @@ void Slice::constructRefPicList(PicList& rcListPic)
       pcRefPic = xGetRefPic( rcListPic, getPOC(), refLayerId );
       pcRefPic->longTerm = true;
     }
-    else
-    if (!m_RPL1.isRefPicLongterm(ii))
+    else if (!m_RPL1.isRefPicLongterm(ii))
     {
       pcRefPic = xGetRefPic(rcListPic, getPOC() + m_RPL1.getRefPicIdentifier(ii), m_pcPic->layerId);
       pcRefPic->longTerm = false;
@@ -937,20 +936,35 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
     }
     m_bIsUsedAsLongTerm[i][MAX_NUM_REF] = pSrc->m_bIsUsedAsLongTerm[i][MAX_NUM_REF];
   }
-  if( cpyAlmostAll ) m_iDepth = pSrc->m_iDepth;
+  if (cpyAlmostAll)
+  {
+    m_iDepth = pSrc->m_iDepth;
+  }
 
   // access channel
-  if (cpyAlmostAll) m_RPL0 = pSrc->m_RPL0;
-  if (cpyAlmostAll) m_RPL1 = pSrc->m_RPL1;
+  if (cpyAlmostAll)
+  {
+    m_RPL0 = pSrc->m_RPL0;
+  }
+  if (cpyAlmostAll)
+  {
+    m_RPL1 = pSrc->m_RPL1;
+  }
   m_iLastIDR             = pSrc->m_iLastIDR;
 
-  if( cpyAlmostAll ) m_pcPic  = pSrc->m_pcPic;
+  if (cpyAlmostAll)
+  {
+    m_pcPic = pSrc->m_pcPic;
+  }
 
   m_pcPicHeader          = pSrc->m_pcPicHeader;
   m_colFromL0Flag        = pSrc->m_colFromL0Flag;
   m_colRefIdx            = pSrc->m_colRefIdx;
 
-  if( cpyAlmostAll ) setLambdas(pSrc->getLambdas());
+  if (cpyAlmostAll)
+  {
+    setLambdas(pSrc->getLambdas());
+  }
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -997,7 +1011,10 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_disableSATDForRd              = pSrc->m_disableSATDForRd;
   m_isLossless = pSrc->m_isLossless;
 
-  if( cpyAlmostAll ) m_encCABACTableIdx  = pSrc->m_encCABACTableIdx;
+  if (cpyAlmostAll)
+  {
+    m_encCABACTableIdx = pSrc->m_encCABACTableIdx;
+  }
   for( int i = 0; i < NUM_REF_PIC_LIST_01; i ++ )
   {
     for (int j = 0; j < MAX_NUM_REF_PICS; j ++ )
@@ -1644,7 +1661,9 @@ void Slice::applyReferencePictureListBasedMarking( PicList& rcListPic, const Ref
     Picture* pcPic = *(iterPic++);
 
     if (!pcPic->referenced)
+    {
       continue;
+    }
 
     isReference = 0;
     // loop through all pictures in the Reference Picture Set
@@ -1761,7 +1780,10 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
   int isAvailable = 0;
   int notPresentPoc = 0;
 
-  if (this->isIDRorBLA()) return 0; //Assume that all pic in the DPB will be flushed anyway so no need to check.
+  if (this->isIDRorBLA())
+  {
+    return 0;   // Assume that all pic in the DPB will be flushed anyway so no need to check.
+  }
 
   int numberOfPictures = pRPL->getNumberOfLongtermPictures() + pRPL->getNumberOfShorttermPictures() + pRPL->getNumberOfInterLayerPictures();
   //Check long term ref pics
@@ -1837,7 +1859,9 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
   for (int ii = 0; ii < numberOfPictures; ii++)
   {
     if (pRPL->isRefPicLongterm(ii))
+    {
       continue;
+    }
 
     notPresentPoc = this->getPOC() + pRPL->getRefPicIdentifier(ii);
     isAvailable = 0;
@@ -1948,7 +1972,9 @@ int Slice::checkThatAllRefPicsAreAvailable(PicList& rcListPic, const ReferencePi
   for (int ii = 0; ii < numberOfPictures; ii++)
   {
     if (pRPL->isRefPicLongterm(ii))
+    {
       continue;
+    }
 
     notPresentPoc = this->getPOC() + pRPL->getRefPicIdentifier(ii);
     isAvailable = 0;
@@ -1990,8 +2016,7 @@ bool Slice::isPOCInRefPicList(const ReferencePictureList *rpl, int poc )
         return true;
       }
     }
-    else
-    if (rpl->isRefPicLongterm(i))
+    else if (rpl->isRefPicLongterm(i))
     {
       if (poc == rpl->getRefPicIdentifier(i))
       {
@@ -2193,8 +2218,7 @@ unsigned Slice::getMinPictureDistance() const
   {
     minPicDist = 0;
   }
-  else
-  if( ! isIntra() )
+  else if (!isIntra())
   {
     const int currPOC  = getPOC();
     for (int refIdx = 0; refIdx < getNumRefIdx(REF_PIC_LIST_0); refIdx++)
@@ -2373,7 +2397,7 @@ void VPS::deriveOutputLayerSets()
               m_numSubLayersInLayerInOLS[i][k] = maxSublayerNeeded;
             }
           }
-      }
+        }
       }
     }
     else if( m_vpsOlsModeIdc == 1 )
@@ -3523,7 +3547,7 @@ void PPS::initSubPic(const SPS &sps)
         {
           // add ctus in a slice to the subpicture it belongs to
           m_subPics[i].addCTUsToSubPic(m_sliceMap[j].getCtuAddrList());
-	  numSlicesInSubPic++;
+          numSlicesInSubPic++;
           idxLastSliceInSubpic = j;
         }
         else if (idxFirstSliceAfterSubpic == m_numSlicesInPic && idxLastSliceInSubpic != -1)
@@ -3790,7 +3814,7 @@ bool ScalingList::isNotDefaultScalingList()
  */
 int ScalingList::lengthUvlc(int uiCode)
 {
-  if (uiCode < 0) printf("Error UVLC! \n");
+  CHECK(uiCode < 0, "Error UVLC");
 
   int uiLength = 1;
   int uiTemp = ++uiCode;
@@ -3804,6 +3828,7 @@ int ScalingList::lengthUvlc(int uiCode)
   }
   return (uiLength >> 1) + ((uiLength + 1) >> 1);
 }
+
 int ScalingList::lengthSvlc(int uiCode)
 {
   uint32_t uiCode2 = uint32_t(uiCode <= 0 ? (-uiCode) << 1 : (uiCode << 1) - 1);
@@ -3819,6 +3844,7 @@ int ScalingList::lengthSvlc(int uiCode)
   }
   return (uiLength >> 1) + ((uiLength + 1) >> 1);
 }
+
 void ScalingList::codePredScalingList(int* scalingList, const int* scalingListPred, int scalingListDC, int scalingListPredDC, int scalingListId, int& bitsCost) //sizeId, listId is current to-be-coded matrix idx
 {
   int deltaValue = 0;
@@ -3858,6 +3884,7 @@ void ScalingList::codePredScalingList(int* scalingList, const int* scalingListPr
     bitsCost += lengthSvlc(data);
   }
 }
+
 void ScalingList::codeScalingList(int* scalingList, int scalingListDC, int scalingListId, int& bitsCost) //sizeId, listId is current to-be-coded matrix idx
 {
   int matrixSize = (scalingListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalingListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
@@ -3876,7 +3903,9 @@ void ScalingList::codeScalingList(int* scalingList, int scalingListDC, int scali
   for (int i = 0; i < coefNum; i++)
   {
     if (scalingListId >= SCALING_LIST_1D_START_64x64 && scan[i].x >= 4 && scan[i].y >= 4)
+    {
       continue;
+    }
     data = int8_t(src[scan[i].idx] - nextCoef);
     nextCoef = src[scan[i].idx];
 
@@ -3895,18 +3924,20 @@ void ScalingList::CheckBestPredScalingList(int scalingListId, int predListId, in
   int matrixSize = (scalingListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalingListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
   int predMatrixSize = (predListId < SCALING_LIST_1D_START_4x4) ? 2 : (predListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
 
-  if (matrixSize != predMatrixSize) printf("Predictor size mismatch! \n");
+  CHECK(matrixSize != predMatrixSize, "Predictor size mismatch");
 
   bitsCost = 2 + lengthUvlc(scalingListId - predListId);
   //copy-flag + predictor-mode-flag + deltaListId
   codePredScalingList(scalingList, scalingListPred, scalingListDC, scalingListPredDC, scalingListId, bitsCost);
   BitsCount = bitsCost;
 }
+
 void ScalingList::processRefMatrix(uint32_t scalinListId, uint32_t refListId)
 {
   int matrixSize = (scalinListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalinListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
   ::memcpy(getScalingListAddress(scalinListId), ((scalinListId == refListId) ? getScalingListDefaultAddress(refListId) : getScalingListAddress(refListId)), sizeof(int)*matrixSize*matrixSize);
 }
+
 void ScalingList::checkPredMode(uint32_t scalingListId)
 {
   int bestBitsCount = MAX_INT;
@@ -3921,7 +3952,9 @@ void ScalingList::checkPredMode(uint32_t scalingListId)
     int matrixSize = (scalingListId < SCALING_LIST_1D_START_4x4) ? 2 : (scalingListId < SCALING_LIST_1D_START_8x8) ? 4 : 8;
     int predMatrixSize = (predListIdx < SCALING_LIST_1D_START_4x4) ? 2 : (predListIdx < SCALING_LIST_1D_START_8x8) ? 4 : 8;
     if (((scalingListId == SCALING_LIST_1D_START_2x2 || scalingListId == SCALING_LIST_1D_START_4x4 || scalingListId == SCALING_LIST_1D_START_8x8) && predListIdx != (int)scalingListId) || matrixSize != predMatrixSize)
+    {
       continue;
+    }
     const int* refScalingList = (scalingListId == predListIdx) ? getScalingListDefaultAddress(predListIdx) : getScalingListAddress(predListIdx);
     const int refDC = (predListIdx < SCALING_LIST_1D_START_16x16) ? refScalingList[0] : (scalingListId == predListIdx) ? 16 : getScalingListDC(predListIdx);
     if (!::memcmp(getScalingListAddress(scalingListId), refScalingList, sizeof(int)*matrixSize*matrixSize) // check value of matrix
@@ -4202,9 +4235,13 @@ uint32_t PreCalcValues::getValIdx( const Slice &slice, const ChannelType chType 
 uint32_t PreCalcValues::getMaxBtDepth( const Slice &slice, const ChannelType chType ) const
 {
   if ( slice.getPicHeader()->getSplitConsOverrideFlag() )
+  {
     return slice.getPicHeader()->getMaxMTTHierarchyDepth( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
-  return maxBtDepth[getValIdx( slice, chType )];
+  {
+    return maxBtDepth[getValIdx(slice, chType)];
+  }
 }
 
 uint32_t PreCalcValues::getMinBtSize( const Slice &slice, const ChannelType chType ) const
@@ -4215,9 +4252,13 @@ uint32_t PreCalcValues::getMinBtSize( const Slice &slice, const ChannelType chTy
 uint32_t PreCalcValues::getMaxBtSize( const Slice &slice, const ChannelType chType ) const
 {
   if (slice.getPicHeader()->getSplitConsOverrideFlag())
+  {
     return slice.getPicHeader()->getMaxBTSize( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
+  {
     return maxBtSize[getValIdx(slice, chType)];
+  }
 }
 
 uint32_t PreCalcValues::getMinTtSize( const Slice &slice, const ChannelType chType ) const
@@ -4228,16 +4269,24 @@ uint32_t PreCalcValues::getMinTtSize( const Slice &slice, const ChannelType chTy
 uint32_t PreCalcValues::getMaxTtSize( const Slice &slice, const ChannelType chType ) const
 {
   if (slice.getPicHeader()->getSplitConsOverrideFlag())
+  {
     return slice.getPicHeader()->getMaxTTSize( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
-  return maxTtSize[getValIdx( slice, chType )];
+  {
+    return maxTtSize[getValIdx(slice, chType)];
+  }
 }
 uint32_t PreCalcValues::getMinQtSize( const Slice &slice, const ChannelType chType ) const
 {
   if (slice.getPicHeader()->getSplitConsOverrideFlag())
+  {
     return slice.getPicHeader()->getMinQTSize( slice.getSliceType(), ISingleTree ? CHANNEL_TYPE_LUMA : chType);
+  }
   else
-  return minQtSize[getValIdx( slice, chType )];
+  {
+    return minQtSize[getValIdx(slice, chType)];
+  }
 }
 
 void Slice::scaleRefPicList( Picture *scaledRefPic[ ], PicHeader *picHeader, APS** apss, APS* lmcsAps, APS* scalingListAps, const bool isDecoder )
@@ -4423,64 +4472,233 @@ bool Slice::checkRPR()
 
 bool             operator == (const ConstraintInfo& op1, const ConstraintInfo& op2)
 {
-  if( op1.m_intraOnlyConstraintFlag                      != op2.m_intraOnlyConstraintFlag                        ) return false;
-  if( op1.m_maxBitDepthConstraintIdc                     != op2.m_maxBitDepthConstraintIdc                       ) return false;
-  if( op1.m_maxChromaFormatConstraintIdc                 != op2.m_maxChromaFormatConstraintIdc                   ) return false;
-  if( op1.m_onePictureOnlyConstraintFlag                 != op2.m_onePictureOnlyConstraintFlag                   ) return false;
-  if( op1.m_lowerBitRateConstraintFlag                   != op2.m_lowerBitRateConstraintFlag                     ) return false;
-  if (op1.m_allLayersIndependentConstraintFlag           != op2.m_allLayersIndependentConstraintFlag             ) return false;
-  if (op1.m_noMrlConstraintFlag                          != op2.m_noMrlConstraintFlag                            ) return false;
-  if (op1.m_noIspConstraintFlag                          != op2.m_noIspConstraintFlag                            ) return false;
-  if (op1.m_noMipConstraintFlag                          != op2.m_noMipConstraintFlag                            ) return false;
-  if (op1.m_noLfnstConstraintFlag                        != op2.m_noLfnstConstraintFlag                          ) return false;
-  if (op1.m_noMmvdConstraintFlag                         != op2.m_noMmvdConstraintFlag                           ) return false;
-  if (op1.m_noSmvdConstraintFlag                         != op2.m_noSmvdConstraintFlag                           ) return false;
-  if (op1.m_noProfConstraintFlag                         != op2.m_noProfConstraintFlag                           ) return false;
-  if (op1.m_noPaletteConstraintFlag                      != op2.m_noPaletteConstraintFlag                        ) return false;
-  if (op1.m_noActConstraintFlag                          != op2.m_noActConstraintFlag                            ) return false;
-  if (op1.m_noLmcsConstraintFlag                         != op2.m_noLmcsConstraintFlag                           ) return false;
-  if (op1.m_noExplicitScaleListConstraintFlag            != op2.m_noExplicitScaleListConstraintFlag              ) return false;
-  if (op1.m_noVirtualBoundaryConstraintFlag              != op2.m_noVirtualBoundaryConstraintFlag                ) return false;
-  if (op1.m_noChromaQpOffsetConstraintFlag               != op2.m_noChromaQpOffsetConstraintFlag                 ) return false;
-  if (op1.m_noRprConstraintFlag                          != op2.m_noRprConstraintFlag                            ) return false;
-  if (op1.m_noResChangeInClvsConstraintFlag              != op2.m_noResChangeInClvsConstraintFlag                ) return false;
-  if (op1.m_noMttConstraintFlag                          != op2.m_noMttConstraintFlag                            ) return false;
-  if( op1.m_noQtbttDualTreeIntraConstraintFlag           != op2.m_noQtbttDualTreeIntraConstraintFlag             ) return false;
-  if( op1.m_noPartitionConstraintsOverrideConstraintFlag != op2.m_noPartitionConstraintsOverrideConstraintFlag   ) return false;
-  if( op1.m_noSaoConstraintFlag                          != op2.m_noSaoConstraintFlag                            ) return false;
-  if( op1.m_noAlfConstraintFlag                          != op2.m_noAlfConstraintFlag                            ) return false;
-  if( op1.m_noCCAlfConstraintFlag                        != op2.m_noCCAlfConstraintFlag                          ) return false;
-  if (op1.m_noWeightedPredictionConstraintFlag           != op2.m_noWeightedPredictionConstraintFlag             ) return false;
-  if( op1.m_noRefWraparoundConstraintFlag                != op2.m_noRefWraparoundConstraintFlag                  ) return false;
-  if( op1.m_noTemporalMvpConstraintFlag                  != op2.m_noTemporalMvpConstraintFlag                    ) return false;
-  if( op1.m_noSbtmvpConstraintFlag                       != op2.m_noSbtmvpConstraintFlag                         ) return false;
-  if( op1.m_noAmvrConstraintFlag                         != op2.m_noAmvrConstraintFlag                           ) return false;
-  if( op1.m_noBdofConstraintFlag                         != op2.m_noBdofConstraintFlag                           ) return false;
-  if( op1.m_noDmvrConstraintFlag                         != op2.m_noDmvrConstraintFlag                           ) return false;
-  if( op1.m_noCclmConstraintFlag                         != op2.m_noCclmConstraintFlag                           ) return false;
-  if( op1.m_noMtsConstraintFlag                          != op2.m_noMtsConstraintFlag                            ) return false;
-  if( op1.m_noSbtConstraintFlag                          != op2.m_noSbtConstraintFlag                            ) return false;
-  if( op1.m_noAffineMotionConstraintFlag                 != op2.m_noAffineMotionConstraintFlag                   ) return false;
-  if( op1.m_noBcwConstraintFlag                          != op2.m_noBcwConstraintFlag                            ) return false;
-  if( op1.m_noIbcConstraintFlag                          != op2.m_noIbcConstraintFlag                            ) return false;
-  if( op1.m_noCiipConstraintFlag                         != op2.m_noCiipConstraintFlag                           ) return false;
-  if( op1.m_noLadfConstraintFlag                         != op2.m_noLadfConstraintFlag                           ) return false;
-  if( op1.m_noTransformSkipConstraintFlag                != op2.m_noTransformSkipConstraintFlag                  ) return false;
-  if( op1.m_noBDPCMConstraintFlag                        != op2.m_noBDPCMConstraintFlag                          ) return false;
-  if( op1.m_noJointCbCrConstraintFlag                    != op2.m_noJointCbCrConstraintFlag                      ) return false;
-  if( op1.m_noCuQpDeltaConstraintFlag                    != op2.m_noCuQpDeltaConstraintFlag                      ) return false;
-  if( op1.m_noDepQuantConstraintFlag                     != op2.m_noDepQuantConstraintFlag                       ) return false;
-  if( op1.m_noSignDataHidingConstraintFlag               != op2.m_noSignDataHidingConstraintFlag                 ) return false;
-  if( op1.m_noTrailConstraintFlag                        != op2.m_noTrailConstraintFlag                          ) return false;
-  if( op1.m_noStsaConstraintFlag                         != op2.m_noStsaConstraintFlag                           ) return false;
-  if( op1.m_noRaslConstraintFlag                         != op2.m_noRaslConstraintFlag                           ) return false;
-  if( op1.m_noRadlConstraintFlag                         != op2.m_noRadlConstraintFlag                           ) return false;
-  if( op1.m_noIdrConstraintFlag                          != op2.m_noIdrConstraintFlag                            ) return false;
-  if( op1.m_noCraConstraintFlag                          != op2.m_noCraConstraintFlag                            ) return false;
-  if( op1.m_noGdrConstraintFlag                          != op2.m_noGdrConstraintFlag                            ) return false;
-  if( op1.m_noApsConstraintFlag                          != op2.m_noApsConstraintFlag                            ) return false;
+  if (op1.m_intraOnlyConstraintFlag != op2.m_intraOnlyConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_maxBitDepthConstraintIdc != op2.m_maxBitDepthConstraintIdc)
+  {
+    return false;
+  }
+  if (op1.m_maxChromaFormatConstraintIdc != op2.m_maxChromaFormatConstraintIdc)
+  {
+    return false;
+  }
+  if (op1.m_onePictureOnlyConstraintFlag != op2.m_onePictureOnlyConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_lowerBitRateConstraintFlag != op2.m_lowerBitRateConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_allLayersIndependentConstraintFlag != op2.m_allLayersIndependentConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMrlConstraintFlag != op2.m_noMrlConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noIspConstraintFlag != op2.m_noIspConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMipConstraintFlag != op2.m_noMipConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noLfnstConstraintFlag != op2.m_noLfnstConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMmvdConstraintFlag != op2.m_noMmvdConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSmvdConstraintFlag != op2.m_noSmvdConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noProfConstraintFlag != op2.m_noProfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noPaletteConstraintFlag != op2.m_noPaletteConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noActConstraintFlag != op2.m_noActConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noLmcsConstraintFlag != op2.m_noLmcsConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noExplicitScaleListConstraintFlag != op2.m_noExplicitScaleListConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noVirtualBoundaryConstraintFlag != op2.m_noVirtualBoundaryConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noChromaQpOffsetConstraintFlag != op2.m_noChromaQpOffsetConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRprConstraintFlag != op2.m_noRprConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noResChangeInClvsConstraintFlag != op2.m_noResChangeInClvsConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMttConstraintFlag != op2.m_noMttConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noQtbttDualTreeIntraConstraintFlag != op2.m_noQtbttDualTreeIntraConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noPartitionConstraintsOverrideConstraintFlag != op2.m_noPartitionConstraintsOverrideConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSaoConstraintFlag != op2.m_noSaoConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noAlfConstraintFlag != op2.m_noAlfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCCAlfConstraintFlag != op2.m_noCCAlfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noWeightedPredictionConstraintFlag != op2.m_noWeightedPredictionConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRefWraparoundConstraintFlag != op2.m_noRefWraparoundConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noTemporalMvpConstraintFlag != op2.m_noTemporalMvpConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSbtmvpConstraintFlag != op2.m_noSbtmvpConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noAmvrConstraintFlag != op2.m_noAmvrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noBdofConstraintFlag != op2.m_noBdofConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noDmvrConstraintFlag != op2.m_noDmvrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCclmConstraintFlag != op2.m_noCclmConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noMtsConstraintFlag != op2.m_noMtsConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSbtConstraintFlag != op2.m_noSbtConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noAffineMotionConstraintFlag != op2.m_noAffineMotionConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noBcwConstraintFlag != op2.m_noBcwConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noIbcConstraintFlag != op2.m_noIbcConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCiipConstraintFlag != op2.m_noCiipConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noLadfConstraintFlag != op2.m_noLadfConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noTransformSkipConstraintFlag != op2.m_noTransformSkipConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noBDPCMConstraintFlag != op2.m_noBDPCMConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noJointCbCrConstraintFlag != op2.m_noJointCbCrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCuQpDeltaConstraintFlag != op2.m_noCuQpDeltaConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noDepQuantConstraintFlag != op2.m_noDepQuantConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noSignDataHidingConstraintFlag != op2.m_noSignDataHidingConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noTrailConstraintFlag != op2.m_noTrailConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noStsaConstraintFlag != op2.m_noStsaConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRaslConstraintFlag != op2.m_noRaslConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noRadlConstraintFlag != op2.m_noRadlConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noIdrConstraintFlag != op2.m_noIdrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noCraConstraintFlag != op2.m_noCraConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noGdrConstraintFlag != op2.m_noGdrConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_noApsConstraintFlag != op2.m_noApsConstraintFlag)
+  {
+    return false;
+  }
   return true;
 }
+
 bool             operator != (const ConstraintInfo& op1, const ConstraintInfo& op2)
 {
   return !(op1 == op2);
@@ -4488,14 +4706,38 @@ bool             operator != (const ConstraintInfo& op1, const ConstraintInfo& o
 
 bool             operator == (const ProfileTierLevel& op1, const ProfileTierLevel& op2)
 {
-  if (op1.m_tierFlag        != op2.m_tierFlag) return false;
-  if (op1.m_profileIdc      != op2.m_profileIdc) return false;
-  if (op1.m_numSubProfile   != op2.m_numSubProfile) return false;
-  if (op1.m_levelIdc        != op2.m_levelIdc) return false;
-  if (op1.m_frameOnlyConstraintFlag != op2.m_frameOnlyConstraintFlag) return false;
-  if (op1.m_multiLayerEnabledFlag   != op2.m_multiLayerEnabledFlag) return false;
-  if (op1.m_constraintInfo  != op2.m_constraintInfo) return false;
-  if (op1.m_subProfileIdc   != op2.m_subProfileIdc) return false;
+  if (op1.m_tierFlag != op2.m_tierFlag)
+  {
+    return false;
+  }
+  if (op1.m_profileIdc != op2.m_profileIdc)
+  {
+    return false;
+  }
+  if (op1.m_numSubProfile != op2.m_numSubProfile)
+  {
+    return false;
+  }
+  if (op1.m_levelIdc != op2.m_levelIdc)
+  {
+    return false;
+  }
+  if (op1.m_frameOnlyConstraintFlag != op2.m_frameOnlyConstraintFlag)
+  {
+    return false;
+  }
+  if (op1.m_multiLayerEnabledFlag != op2.m_multiLayerEnabledFlag)
+  {
+    return false;
+  }
+  if (op1.m_constraintInfo != op2.m_constraintInfo)
+  {
+    return false;
+  }
+  if (op1.m_subProfileIdc != op2.m_subProfileIdc)
+  {
+    return false;
+  }
 
   for (int i = 0; i < MAX_TLAYER - 1; i++)
   {
@@ -4513,6 +4755,7 @@ bool             operator == (const ProfileTierLevel& op1, const ProfileTierLeve
   }
   return true;
 }
+
 bool             operator != (const ProfileTierLevel& op1, const ProfileTierLevel& op2)
 {
   return !(op1 == op2);

@@ -414,7 +414,10 @@ void  WeightPrediction::xWeightedPredictionBi(const PredictionUnit       &pu,
 
   CHECK( !pu.cs->pps->getWPBiPred(), "Weighted Bi-prediction disabled" );
 
-  if (iRefIdx0 < 0 && iRefIdx1 < 0) return;
+  if (iRefIdx0 < 0 && iRefIdx1 < 0)
+  {
+    return;
+  }
 
   getWpScaling(pu.cu->slice, iRefIdx0, iRefIdx1, pwp0, pwp1, maxNumComp);
 

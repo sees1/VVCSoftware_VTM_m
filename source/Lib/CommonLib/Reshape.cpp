@@ -68,17 +68,29 @@ void  Reshape::createDec(int bitDepth)
   m_fwdLUT.resize(m_reshapeLUTSize, 0);
   m_invLUT.resize(m_reshapeLUTSize, 0);
   if (m_binCW.empty())
+  {
     m_binCW.resize(PIC_CODE_CW_BINS, 0);
+  }
   if (m_inputPivot.empty())
+  {
     m_inputPivot.resize(PIC_CODE_CW_BINS + 1, 0);
+  }
   if (m_fwdScaleCoef.empty())
+  {
     m_fwdScaleCoef.resize(PIC_CODE_CW_BINS, 1 << FP_PREC);
+  }
   if (m_invScaleCoef.empty())
+  {
     m_invScaleCoef.resize(PIC_CODE_CW_BINS, 1 << FP_PREC);
+  }
   if (m_reshapePivot.empty())
+  {
     m_reshapePivot.resize(PIC_CODE_CW_BINS + 1, 0);
+  }
   if (m_chromaAdjHelpLUT.empty())
+  {
     m_chromaAdjHelpLUT.resize(PIC_CODE_CW_BINS, 1<<CSCALE_FP_PREC);
+  }
 }
 
 void  Reshape::destroy()
@@ -226,9 +238,13 @@ void Reshape::copySliceReshaperInfo(SliceReshapeInfo& tInfo, SliceReshapeInfo& s
   }
   tInfo.sliceReshaperEnableFlag = sInfo.sliceReshaperEnableFlag;
   if (sInfo.sliceReshaperEnableFlag)
+  {
     tInfo.enableChromaAdj = sInfo.enableChromaAdj;
+  }
   else
+  {
     tInfo.enableChromaAdj = 0;
+  }
 }
 
 /** Construct reshaper from syntax
@@ -241,11 +257,17 @@ void Reshape::constructReshaper()
   int pwlFwdBinLen = m_reshapeLUTSize / PIC_CODE_CW_BINS;
 
   for (int i = 0; i < m_sliceReshapeInfo.reshaperModelMinBinIdx; i++)
+  {
     m_binCW[i] = 0;
+  }
   for (int i = m_sliceReshapeInfo.reshaperModelMaxBinIdx + 1; i < PIC_CODE_CW_BINS; i++)
+  {
     m_binCW[i] = 0;
+  }
   for (int i = m_sliceReshapeInfo.reshaperModelMinBinIdx; i <= m_sliceReshapeInfo.reshaperModelMaxBinIdx; i++)
+  {
     m_binCW[i] = (uint16_t)(m_sliceReshapeInfo.reshaperModelBinCWDelta[i] + (int)m_initCW);
+  }
 
   for (int i = 0; i < pwlFwdLUTsize; i++)
   {
