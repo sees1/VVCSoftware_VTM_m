@@ -3809,12 +3809,12 @@ bool ScalingList::isNotDefaultScalingList()
 
 int ScalingList::lengthUvlc(int code)
 {
-  CHECK(code < 0, "unsigned VLC cannot be negative");
+  CHECK(code < 0,        "Unsigned VLC cannot be negative");
+  CHECK(code == MAX_INT, "Maximum supported UVLC code is MAX_INT-1");
 
   int length = 1;
   int temp = ++code;
 
-  CHECK(!temp, "Integer overflow constructing UVLC code");
 
   while (1 != temp)
   {
@@ -3830,7 +3830,7 @@ int ScalingList::lengthSvlc(int code)
   int length = 1;
   int temp = ++code2;
 
-  CHECK(!temp, "Integer overflow constructing SVLC code");
+  CHECK(temp < 0, "Integer overflow constructing SVLC code");
 
   while (1 != temp)
   {

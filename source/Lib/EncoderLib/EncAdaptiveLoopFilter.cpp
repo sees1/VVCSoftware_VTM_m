@@ -1771,12 +1771,11 @@ double EncAdaptiveLoopFilter::getDistCoeffForce0( bool* codedVarBins, double err
 
 int EncAdaptiveLoopFilter::lengthUvlc(int code)
 {
-  CHECK(code < 0, "unsigned VLC cannot be negative");
+  CHECK(code < 0,        "Unsigned VLC cannot be negative");
+  CHECK(code == MAX_INT, "Maximum supported UVLC code is MAX_INT-1");
 
   int length = 1;
   int temp = ++code;
-
-  CHECK(!temp, "Integer overflow constructing UVLC code");
 
   while (1 != temp)
   {
