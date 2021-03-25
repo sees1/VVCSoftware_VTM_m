@@ -3807,42 +3807,37 @@ bool ScalingList::isNotDefaultScalingList()
   return !isAllDefault;
 }
 
-/** get scaling matrix from RefMatrixID
- * \param sizeId    size index
- * \param listId    index of input matrix
- * \param refListId index of reference matrix
- */
-int ScalingList::lengthUvlc(int uiCode)
+int ScalingList::lengthUvlc(int code)
 {
-  CHECK(uiCode < 0, "Error UVLC");
+  CHECK(code < 0,        "Unsigned VLC cannot be negative");
+  CHECK(code == MAX_INT, "Maximum supported UVLC code is MAX_INT-1");
 
-  int uiLength = 1;
-  int uiTemp = ++uiCode;
+  int length = 1;
+  int temp = ++code;
 
-  CHECK(!uiTemp, "Integer overflow");
 
-  while (1 != uiTemp)
+  while (1 != temp)
   {
-    uiTemp >>= 1;
-    uiLength += 2;
+    temp >>= 1;
+    length += 2;
   }
-  return (uiLength >> 1) + ((uiLength + 1) >> 1);
+  return (length >> 1) + ((length + 1) >> 1);
 }
 
-int ScalingList::lengthSvlc(int uiCode)
+int ScalingList::lengthSvlc(int code)
 {
-  uint32_t uiCode2 = uint32_t(uiCode <= 0 ? (-uiCode) << 1 : (uiCode << 1) - 1);
-  int uiLength = 1;
-  int uiTemp = ++uiCode2;
+  uint32_t code2 = uint32_t(code <= 0 ? (-code) << 1 : (code << 1) - 1);
+  int length = 1;
+  int temp = ++code2;
 
-  CHECK(!uiTemp, "Integer overflow");
+  CHECK(temp < 0, "Integer overflow constructing SVLC code");
 
-  while (1 != uiTemp)
+  while (1 != temp)
   {
-    uiTemp >>= 1;
-    uiLength += 2;
+    temp >>= 1;
+    length += 2;
   }
-  return (uiLength >> 1) + ((uiLength + 1) >> 1);
+  return (length >> 1) + ((length + 1) >> 1);
 }
 
 void ScalingList::codePredScalingList(int* scalingList, const int* scalingListPred, int scalingListDC, int scalingListPredDC, int scalingListId, int& bitsCost) //sizeId, listId is current to-be-coded matrix idx
