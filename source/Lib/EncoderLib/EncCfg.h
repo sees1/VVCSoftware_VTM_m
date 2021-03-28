@@ -673,6 +673,68 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  // sdi sei
+  bool              m_sdiSEIEnabled;
+  int               m_sdiSEIMaxLayersMinus1;
+  bool              m_sdiSEIMultiviewInfoFlag;
+  bool              m_sdiSEIAuxiliaryInfoFlag;
+  int               m_sdiSEIViewIdLenMinus1;
+  std::vector<uint32_t>  m_sdiSEILayerId;
+  std::vector<uint32_t>  m_sdiSEIViewIdVal;
+  std::vector<uint32_t>  m_sdiSEIAuxId;
+  std::vector<uint32_t>  m_sdiSEINumAssociatedPrimaryLayersMinus1;
+  // mai sei
+  bool              m_maiSEIEnabled;
+  bool              m_maiSEIIntrinsicParamFlag;
+  bool              m_maiSEIExtrinsicParamFlag;
+  int               m_maiSEINumViewsMinus1;
+  bool              m_maiSEIIntrinsicParamsEqualFlag;
+  int               m_maiSEIPrecFocalLength;
+  int               m_maiSEIPrecPrincipalPoint;
+  int               m_maiSEIPrecSkewFactor;
+  std::vector<bool> m_maiSEISignFocalLengthX;
+  std::vector<uint32_t>  m_maiSEIExponentFocalLengthX;
+  std::vector<uint32_t>  m_maiSEIMantissaFocalLengthX;
+  std::vector<bool> m_maiSEISignFocalLengthY;
+  std::vector<uint32_t>  m_maiSEIExponentFocalLengthY;
+  std::vector<uint32_t>  m_maiSEIMantissaFocalLengthY;
+  std::vector<bool> m_maiSEISignPrincipalPointX;
+  std::vector<uint32_t>  m_maiSEIExponentPrincipalPointX;
+  std::vector<uint32_t>  m_maiSEIMantissaPrincipalPointX;
+  std::vector<bool> m_maiSEISignPrincipalPointY;
+  std::vector<uint32_t>  m_maiSEIExponentPrincipalPointY;
+  std::vector<uint32_t>  m_maiSEIMantissaPrincipalPointY;
+  std::vector<bool> m_maiSEISignSkewFactor;
+  std::vector<uint32_t>  m_maiSEIExponentSkewFactor;
+  std::vector<uint32_t>  m_maiSEIMantissaSkewFactor;
+  int               m_maiSEIPrecRotationParam;
+  int               m_maiSEIPrecTranslationParam;
+  // aci sei
+  bool      m_aciSEIEnabled;
+  bool      m_aciSEICancelFlag;
+  int       m_aciSEIUseIdc;
+  int       m_aciSEIBitDepthMinus8;
+  int       m_aciSEITransparentValue;
+  int       m_aciSEIOpaqueValue;
+  bool      m_aciSEIIncrFlag;
+  bool      m_aciSEIClipFlag;
+  bool      m_aciSEIClipTypeFlag;
+  // dri sei
+  bool      m_driSEIEnabled;
+  bool      m_driSEIZNearFlag;
+  bool      m_driSEIZFarFlag;
+  bool      m_driSEIDMinFlag;
+  bool      m_driSEIDMaxFlag;
+  double    m_driSEIZNear;
+  double    m_driSEIZFar;
+  double    m_driSEIDMin;
+  double    m_driSEIDMax;
+  int       m_driSEIDepthRepresentationType;
+  int       m_driSEIDisparityRefViewId;
+  int       m_driSEINonlinearNumMinus1;
+  std::vector<uint32_t> m_driSEINonlinearModel;
+#endif
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
@@ -1817,6 +1879,124 @@ public:
   double   getCcvSEIMaxLuminanceValue  ()                            { return m_ccvSEIMaxLuminanceValue;  }
   void     setCcvSEIAvgLuminanceValue  (double dValue)               { m_ccvSEIAvgLuminanceValue = dValue; }
   double   getCcvSEIAvgLuminanceValue  ()                            { return m_ccvSEIAvgLuminanceValue;  }
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  // scalability dimension information SEI
+  void     setSdiSEIEnabled(bool b)                                  { m_sdiSEIEnabled = b; }
+  bool     getSdiSEIEnabled() const                                  { return m_sdiSEIEnabled; }
+  void     setSdiSEIMaxLayersMinus1(int i)                           { m_sdiSEIMaxLayersMinus1 = i; }
+  int      getSdiSEIMaxLayersMinus1() const                          { return m_sdiSEIMaxLayersMinus1; }
+  void     setSdiSEIMultiviewInfoFlag(bool b)                        { m_sdiSEIMultiviewInfoFlag = b; }
+  bool     getSdiSEIMultiviewInfoFlag() const                        { return m_sdiSEIMultiviewInfoFlag; }
+  void     setSdiSEIAuxiliaryInfoFlag(bool b)                        { m_sdiSEIAuxiliaryInfoFlag = b; }
+  bool     getSdiSEIAuxiliaryInfoFlag() const                        { return m_sdiSEIAuxiliaryInfoFlag; }
+  void     setSdiSEIViewIdLenMinus1(int i)                           { m_sdiSEIViewIdLenMinus1 = i; }
+  int      getSdiSEIViewIdLenMinus1() const                          { return m_sdiSEIViewIdLenMinus1; }
+  void     setSdiSEILayerId(const std::vector<uint32_t>& sdiSEILayerId)   { m_sdiSEILayerId = sdiSEILayerId; }
+  uint32_t getSdiSEILayerId(int idx) const                           { return m_sdiSEILayerId[idx]; }
+  void     setSdiSEIViewIdVal(const std::vector<uint32_t>& sdiSEIViewIdVal)   { m_sdiSEIViewIdVal = sdiSEIViewIdVal; }
+  uint32_t getSdiSEIViewIdVal(int idx) const                         { return m_sdiSEIViewIdVal[idx]; }
+  void     setSdiSEIAuxId(const std::vector<uint32_t>& sdiSEIAuxId)       { m_sdiSEIAuxId = sdiSEIAuxId; }
+  uint32_t getSdiSEIAuxId(int idx) const                             { return m_sdiSEIAuxId[idx]; }
+  void     setSdiSEINumAssociatedPrimaryLayersMinus1(const std::vector<uint32_t>& sdiSEINumAssociatedPrimaryLayersMinus1)   { m_sdiSEINumAssociatedPrimaryLayersMinus1 = sdiSEINumAssociatedPrimaryLayersMinus1; }
+  uint32_t getSdiSEINumAssociatedPrimaryLayersMinus1(int idx) const  { return m_sdiSEINumAssociatedPrimaryLayersMinus1[idx]; }
+  // multiview acquisition information SEI
+  void     setMaiSEIEnabled(bool b)                                  { m_maiSEIEnabled = b; }
+  bool     getMaiSEIEnabled() const                                  { return m_maiSEIEnabled; }
+  void     setMaiSEIIntrinsicParamFlag(bool b)                       { m_maiSEIIntrinsicParamFlag = b; }
+  bool     getMaiSEIIntrinsicParamFlag() const                       { return m_maiSEIIntrinsicParamFlag; }
+  void     setMaiSEIExtrinsicParamFlag(bool b)                       { m_maiSEIExtrinsicParamFlag = b; }
+  bool     getMaiSEIExtrinsicParamFlag() const                       { return m_maiSEIExtrinsicParamFlag; }
+  void     setMaiSEINumViewsMinus1(int i)                            { m_maiSEINumViewsMinus1 = i; }
+  int      getMaiSEINumViewsMinus1() const                           { return m_maiSEINumViewsMinus1; }
+  void     setMaiSEIIntrinsicParamsEqualFlag(bool b)                 { m_maiSEIIntrinsicParamsEqualFlag = b; }
+  bool     getMaiSEIIntrinsicParamsEqualFlag() const                 { return m_maiSEIIntrinsicParamsEqualFlag; }
+  void     setMaiSEIPrecFocalLength(int i)                           { m_maiSEIPrecFocalLength= i; }
+  int      getMaiSEIPrecFocalLength() const                          { return m_maiSEIPrecFocalLength; }
+  void     setMaiSEIPrecPrincipalPoint(int i)                        { m_maiSEIPrecPrincipalPoint = i; }
+  int      getMaiSEIPrecPrincipalPoint() const                       { return m_maiSEIPrecPrincipalPoint; }
+  void     setMaiSEIPrecSkewFactor(int i)                            { m_maiSEIPrecSkewFactor = i; }
+  int      getMaiSEIPrecSkewFactor() const                           { return m_maiSEIPrecSkewFactor; }
+  void     setMaiSEISignFocalLengthX(const std::vector<bool>& maiSEISignFocalLengthX) { m_maiSEISignFocalLengthX = maiSEISignFocalLengthX; }
+  bool     getMaiSEISignFocalLengthX(int idx) const                  { return m_maiSEISignFocalLengthX[idx]; }
+  void     setMaiSEIExponentFocalLengthX(const std::vector<uint32_t>& maiSEIExponentFocalLengthX) { m_maiSEIExponentFocalLengthX = maiSEIExponentFocalLengthX; }
+  uint32_t      getMaiSEIExponentFocalLengthX(int idx) const              { return m_maiSEIExponentFocalLengthX[idx]; }
+  void     setMaiSEIMantissaFocalLengthX(const std::vector<uint32_t>& maiSEIMantissaFocalLengthX) { m_maiSEIMantissaFocalLengthX = maiSEIMantissaFocalLengthX; }
+  uint32_t      getMaiSEIMantissaFocalLengthX(int idx) const              { return m_maiSEIMantissaFocalLengthX[idx]; }
+  void     setMaiSEISignFocalLengthY(const std::vector<bool>& maiSEISignFocalLengthY) { m_maiSEISignFocalLengthY = maiSEISignFocalLengthY; }
+  bool     getMaiSEISignFocalLengthY(int idx) const                  { return m_maiSEISignFocalLengthY[idx]; }
+  void     setMaiSEIExponentFocalLengthY(const std::vector<uint32_t>& maiSEIExponentFocalLengthY) { m_maiSEIExponentFocalLengthY = maiSEIExponentFocalLengthY; }
+  uint32_t      getMaiSEIExponentFocalLengthY(int idx) const              { return m_maiSEIExponentFocalLengthY[idx]; }
+  void     setMaiSEIMantissaFocalLengthY(const std::vector<uint32_t>& maiSEIMantissaFocalLengthY) { m_maiSEIMantissaFocalLengthY = maiSEIMantissaFocalLengthY; }
+  uint32_t      getMaiSEIMantissaFocalLengthY(int idx) const              { return m_maiSEIMantissaFocalLengthY[idx]; }
+  void     setMaiSEISignPrincipalPointX(const std::vector<bool>& maiSEISignPrincipalPointX) { m_maiSEISignPrincipalPointX = maiSEISignPrincipalPointX; }
+  bool     getMaiSEISignPrincipalPointX(int idx) const               { return m_maiSEISignPrincipalPointX[idx]; }
+  void     setMaiSEIExponentPrincipalPointX(const std::vector<uint32_t>& maiSEIExponentPrincipalPointX) { m_maiSEIExponentPrincipalPointX = maiSEIExponentPrincipalPointX; }
+  uint32_t      getMaiSEIExponentPrincipalPointX(int idx) const           { return m_maiSEIExponentPrincipalPointX[idx]; }
+  void     setMaiSEIMantissaPrincipalPointX(const std::vector<uint32_t>& maiSEIMantissaPrincipalPointX) { m_maiSEIMantissaPrincipalPointX = maiSEIMantissaPrincipalPointX; }
+  uint32_t      getMaiSEIMantissaPrincipalPointX(int idx) const           { return m_maiSEIMantissaPrincipalPointX[idx]; }
+  void     setMaiSEISignPrincipalPointY(const std::vector<bool>& maiSEISignPrincipalPointY) { m_maiSEISignPrincipalPointY = maiSEISignPrincipalPointY; }
+  bool     getMaiSEISignPrincipalPointY(int idx) const               { return m_maiSEISignPrincipalPointY[idx]; }
+  void     setMaiSEIExponentPrincipalPointY(const std::vector<uint32_t>& maiSEIExponentPrincipalPointY) { m_maiSEIExponentPrincipalPointY = maiSEIExponentPrincipalPointY; }
+  uint32_t      getMaiSEIExponentPrincipalPointY(int idx) const           { return m_maiSEIExponentPrincipalPointY[idx]; }
+  void     setMaiSEIMantissaPrincipalPointY(const std::vector<uint32_t>& maiSEIMantissaPrincipalPointY) { m_maiSEIMantissaPrincipalPointY = maiSEIMantissaPrincipalPointY; }
+  uint32_t      getMaiSEIMantissaPrincipalPointY(int idx) const           { return m_maiSEIMantissaPrincipalPointY[idx]; }
+  void     setMaiSEISignSkewFactor(const std::vector<bool>& maiSEISignSkewFactor) { m_maiSEISignSkewFactor = maiSEISignSkewFactor; }
+  bool     getMaiSEISignSkewFactor(int idx) const                    { return m_maiSEISignSkewFactor[idx]; }
+  void     setMaiSEIExponentSkewFactor(const std::vector<uint32_t>& maiSEIExponentSkewFactor) { m_maiSEIExponentSkewFactor = maiSEIExponentSkewFactor; }
+  uint32_t      getMaiSEIExponentSkewFactor(int idx) const                { return m_maiSEIExponentSkewFactor[idx]; }
+  void     setMaiSEIMantissaSkewFactor(const std::vector<uint32_t>& maiSEIMantissaSkewFactor) { m_maiSEIMantissaSkewFactor = maiSEIMantissaSkewFactor; }
+  uint32_t      getMaiSEIMantissaSkewFactor(int idx) const                { return m_maiSEIMantissaSkewFactor[idx]; }
+  void     setMaiSEIPrecRotationParam(int i)                         { m_maiSEIPrecRotationParam = i; }
+  int      getMaiSEIPrecRotationParam() const                        { return m_maiSEIPrecRotationParam; }
+  void     setMaiSEIPrecTranslationParam(int i)                      { m_maiSEIPrecTranslationParam = i; }
+  int      getMaiSEIPrecTranslationParam() const                     { return m_maiSEIPrecTranslationParam; }
+  // alpha channel information SEI
+  void     setAciSEIEnabled(bool b)                                  { m_aciSEIEnabled = b; }
+  bool     getAciSEIEnabled() const                                  { return m_aciSEIEnabled; }
+  void     setAciSEICancelFlag(bool b)                               { m_aciSEICancelFlag = b; }
+  bool     getAciSEICancelFlag() const                               { return m_aciSEICancelFlag; }
+  void     setAciSEIUseIdc(int value)                                { m_aciSEIUseIdc = value; }
+  int      getAciSEIUseIdc() const                                   { return m_aciSEIUseIdc; }
+  void     setAciSEIBitDepthMinus8(int value)                        { m_aciSEIBitDepthMinus8 = value; }
+  int      getAciSEIBitDepthMinus8() const                           { return m_aciSEIBitDepthMinus8; }
+  void     setAciSEITransparentValue(int value)                      { m_aciSEITransparentValue = value; }
+  int      getAciSEITransparentValue() const                         { return m_aciSEITransparentValue; }
+  void     setAciSEIOpaqueValue(int value)                           { m_aciSEIOpaqueValue = value; }
+  int      getAciSEIOpaqueValue() const                              { return m_aciSEIOpaqueValue; }
+  void     setAciSEIIncrFlag(bool b)                                 { m_aciSEIIncrFlag = b; }
+  bool     getAciSEIIncrFlag() const                                 { return m_aciSEIIncrFlag; }
+  void     setAciSEIClipFlag(bool b)                                 { m_aciSEIClipFlag = b; }
+  bool     getAciSEIClipFlag() const                                 { return m_aciSEIClipFlag; }
+  void     setAciSEIClipTypeFlag(bool b)                             { m_aciSEIClipTypeFlag = b; }
+  bool     getAciSEIClipTypeFlag() const                             { return m_aciSEIClipTypeFlag; }
+  // depth representation information SEI
+  void     setDriSEIEnabled(bool b)                                  { m_driSEIEnabled = b; }
+  bool     getDriSEIEnabled() const                                  { return m_driSEIEnabled; }
+  void     setDriSEIZNearFlag(bool b)                                { m_driSEIZNearFlag = b; }
+  bool     getDriSEIZNearFlag() const                                { return m_driSEIZNearFlag; }
+  void     setDriSEIZFarFlag(bool b)                                 { m_driSEIZFarFlag = b; }
+  bool     getDriSEIZFarFlag() const                                 { return m_driSEIZFarFlag; }
+  void     setDriSEIDMinFlag(bool b)                                 { m_driSEIDMinFlag = b; }
+  bool     getDriSEIDMinFlag() const                                 { return m_driSEIDMinFlag; }
+  void     setDriSEIDMaxFlag(bool b)                                 { m_driSEIDMaxFlag = b; }
+  bool     getDriSEIDMaxFlag() const                                 { return m_driSEIDMaxFlag; }
+  void     setDriSEIZNear(double d)                                  { m_driSEIZNear = d; }
+  double   getDriSEIZNear() const                                    { return m_driSEIZNear; }
+  void     setDriSEIZFar(double d)                                   { m_driSEIZFar = d; }
+  double   getDriSEIZFar() const                                     { return m_driSEIZFar; }
+  void     setDriSEIDMin(double d)                                   { m_driSEIDMin = d; }
+  double   getDriSEIDMin() const                                     { return m_driSEIDMin; }
+  void     setDriSEIDMax(double d)                                   { m_driSEIDMax = d; }
+  double   getDriSEIDMax() const                                     { return m_driSEIDMax; }
+  void     setDriSEIDepthRepresentationType(int i)                   { m_driSEIDepthRepresentationType = i; }
+  int      getDriSEIDepthRepresentationType() const                  { return m_driSEIDepthRepresentationType; }
+  void     setDriSEIDisparityRefViewId(int i)                        { m_driSEIDisparityRefViewId = i; }
+  int      getDriSEIDisparityRefViewId() const                       { return m_driSEIDisparityRefViewId; }
+  void     setDriSEINonlinearNumMinus1(int i)                        { m_driSEINonlinearNumMinus1 = i; }
+  int      getDriSEINonlinearNumMinus1() const                       { return m_driSEINonlinearNumMinus1; }
+  void     setDriSEINonlinearModel(const std::vector<uint32_t>& driSEINonLinearModel) { m_driSEINonlinearModel = driSEINonLinearModel; }
+  uint32_t getDriSEINonlinearModel(int idx) const                                                    { return m_driSEINonlinearModel[idx]; }
+#endif
   void         setUseWP               ( bool b )                     { m_useWeightedPred   = b;    }
   void         setWPBiPred            ( bool b )                     { m_useWeightedBiPred = b;    }
   bool         getUseWP               ()                             { return m_useWeightedPred;   }

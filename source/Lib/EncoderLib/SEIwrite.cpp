@@ -116,6 +116,20 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::GENERALIZED_CUBEMAP_PROJECTION:
     xWriteSEIGeneralizedCubemapProjection(*static_cast<const SEIGeneralizedCubemapProjection*>(&sei));
     break;
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  case SEI::SCALABILITY_DIMENSION_INFO:
+    xWriteSEIScalabilityDimensionInfo(*static_cast<const SEIScalabilityDimensionInfo*>(&sei));
+    break;
+  case SEI::MULTIVIEW_ACQUISITION_INFO:
+    xWriteSEIMultiviewAcquisitionInfo(*static_cast<const SEIMultiviewAcquisitionInfo*>(&sei));
+    break;
+  case SEI::ALPHA_CHANNEL_INFO:
+    xWriteSEIAlphaChannelInfo(*static_cast<const SEIAlphaChannelInfo*>(&sei));
+    break;
+  case SEI::DEPTH_REPRESENTATION_INFO:
+    xWriteSEIDepthRepresentationInfo(*static_cast<const SEIDepthRepresentationInfo*>(&sei));
+    break;
+#endif
   case SEI::USER_DATA_REGISTERED_ITU_T_T35:
     xWriteSEIUserDataRegistered(*static_cast<const SEIUserDataRegistered*>(&sei));
     break;
@@ -872,6 +886,236 @@ void SEIWriter::xWriteSEIGeneralizedCubemapProjection(const SEIGeneralizedCubema
     }
   }
 }
+
+#if JVET_U0082_SDI_MAI_ACI_DRI
+void SEIWriter::xWriteSEIScalabilityDimensionInfo(const SEIScalabilityDimensionInfo &sei)
+{
+  WRITE_CODE(sei.m_sdiMaxLayersMinus1, 6,                           "sdi_max_layers_minus1");
+  WRITE_FLAG(sei.m_sdiMultiviewInfoFlag,                            "sdi_multiview_info_flag");
+  WRITE_FLAG(sei.m_sdiAuxiliaryInfoFlag,                            "sdi_auxiliary_info_flag");
+  if (sei.m_sdiMultiviewInfoFlag || sei.m_sdiAuxiliaryInfoFlag)
+  {
+    if (sei.m_sdiMultiviewInfoFlag)
+    {
+      WRITE_CODE(sei.m_sdiViewIdLenMinus1, 4,                              "sdi_view_id_len_minus1");
+    }
+    for (int i = 0; i <= sei.m_sdiMaxLayersMinus1; i++)
+    {
+      WRITE_CODE(sei.m_sdiLayerId[i], 6,                                         "sdi_layer_id");
+      if (sei.m_sdiMultiviewInfoFlag)
+      {
+        WRITE_CODE(sei.m_sdiViewIdVal[i], sei.m_sdiViewIdLenMinus1 + 1,       "sdi_view_id_val");
+      }
+      if (sei.m_sdiAuxiliaryInfoFlag)
+      {
+        WRITE_CODE(sei.m_sdiAuxId[i], 8,                           "sdi_aux_id");
+        if (sei.m_sdiAuxId[i] > 0)
+        {
+          WRITE_CODE(sei.m_sdiNumAssociatedPrimaryLayersMinus1[i], 6,          "sdi_num_associated_primary_layers_minus1");
+          for (int j = 0; j <= sei.m_sdiNumAssociatedPrimaryLayersMinus1[i]; j++)
+          {
+            WRITE_CODE(sei.m_sdiAssociatedPrimaryLayerIdx[i][j], 6,               "sdi_associated_primary_layer_idx");
+          }
+        }
+      }
+    }
+  }
+}
+
+void SEIWriter::xWriteSEIMultiviewAcquisitionInfo(const SEIMultiviewAcquisitionInfo& sei)
+{
+  WRITE_FLAG( ( sei.m_maiIntrinsicParamFlag ? 1 : 0 ), "intrinsic_param_flag" );
+  WRITE_FLAG( ( sei.m_maiExtrinsicParamFlag ? 1 : 0 ), "extrinsic_param_flag" );
+  WRITE_UVLC(   sei.m_maiNumViewsMinus1               , "num_views_minus1"           );
+  if( sei.m_maiIntrinsicParamFlag )
+  {
+    WRITE_FLAG( ( sei.m_maiIntrinsicParamsEqualFlag ? 1 : 0 ), "intrinsic_params_equal_flag" );
+    WRITE_UVLC(   sei.m_maiPrecFocalLength                   , "prec_focal_length"           );
+    WRITE_UVLC(   sei.m_maiPrecPrincipalPoint                , "prec_principal_point"        );
+    WRITE_UVLC(   sei.m_maiPrecSkewFactor                    , "prec_skew_factor"            );
+
+    for( int i = 0; i  <=  ( sei.m_maiIntrinsicParamsEqualFlag ? 0 : sei.m_maiNumViewsMinus1 ); i++ )
+    {
+      WRITE_FLAG( ( sei.m_maiSignFocalLengthX       [i] ? 1 : 0 ),                                         "sign_focal_length_x"        );
+      WRITE_CODE(   sei.m_maiExponentFocalLengthX   [i]          , 6                                  ,    "exponent_focal_length_x"    );
+      WRITE_CODE(   sei.m_maiMantissaFocalLengthX   [i]          , sei.getMantissaFocalLengthXLen( i ),    "mantissa_focal_length_x"    );
+      WRITE_FLAG( ( sei.m_maiSignFocalLengthY       [i] ? 1 : 0 ),                                         "sign_focal_length_y"        );
+      WRITE_CODE(   sei.m_maiExponentFocalLengthY   [i]          , 6                                  ,    "exponent_focal_length_y"    );
+      WRITE_CODE(   sei.m_maiMantissaFocalLengthY   [i]          , sei.getMantissaFocalLengthYLen( i ),    "mantissa_focal_length_y"    );
+      WRITE_FLAG( ( sei.m_maiSignPrincipalPointX    [i] ? 1 : 0 ),                                         "sign_principal_point_x"     );
+      WRITE_CODE(   sei.m_maiExponentPrincipalPointX[i]          , 6,                                      "exponent_principal_point_x" );
+      WRITE_CODE(   sei.m_maiMantissaPrincipalPointX[i]          , sei.getMantissaPrincipalPointXLen( i ), "mantissa_principal_point_x" );
+      WRITE_FLAG( ( sei.m_maiSignPrincipalPointY    [i] ? 1 : 0 ),                                         "sign_principal_point_y"     );
+      WRITE_CODE(   sei.m_maiExponentPrincipalPointY[i]          , 6,                                      "exponent_principal_point_y" );
+      WRITE_CODE(   sei.m_maiMantissaPrincipalPointY[i]          , sei.getMantissaPrincipalPointYLen( i ), "mantissa_principal_point_y" );
+      WRITE_FLAG( ( sei.m_maiSignSkewFactor         [i] ? 1 : 0 ),                                         "sign_skew_factor"           );
+      WRITE_CODE(   sei.m_maiExponentSkewFactor     [i]          , 6,                                      "exponent_skew_factor"       );
+      WRITE_CODE(   sei.m_maiMantissaSkewFactor     [i]          , sei.getMantissaSkewFactorLen( i )  ,    "mantissa_skew_factor"       );
+    }
+  }
+  if( sei.m_maiExtrinsicParamFlag )
+  {
+    WRITE_UVLC( sei.m_maiPrecRotationParam   , "prec_rotation_param"    );
+    WRITE_UVLC( sei.m_maiPrecTranslationParam, "prec_translation_param" );
+    for( int i = 0; i  <=  sei.m_maiNumViewsMinus1; i++ )
+    {
+      for( int j = 0; j  <=  2; j++ )  /* row */
+      {
+        for( int k = 0; k  <=  2; k++ )  /* column */
+        {
+          WRITE_FLAG( ( sei.m_maiSignR    [i][j][k] ? 1 : 0 ),                                "sign_r"     );
+          WRITE_CODE(   sei.m_maiExponentR[i][j][k]          , 6,                             "exponent_r" );
+          WRITE_CODE(   sei.m_maiMantissaR[i][j][k]          , sei.getMantissaRLen( i,j,k ) , "mantissa_r" );
+        }
+        WRITE_FLAG( ( sei.m_maiSignT    [i][j] ? 1 : 0 ),                          "sign_t"     );
+        WRITE_CODE(   sei.m_maiExponentT[i][j]          , 6,                       "exponent_t" );
+        WRITE_CODE(   sei.m_maiMantissaT[i][j]          , sei.getMantissaTLen( i,j ),"mantissa_t" );
+      }
+    }
+  }
+};
+
+void SEIWriter::xWriteSEIAlphaChannelInfo( const SEIAlphaChannelInfo& sei)
+{
+  WRITE_FLAG( ( sei.m_aciCancelFlag ? 1 : 0 ), "alpha_channel_cancel_flag" );
+  if( !sei.m_aciCancelFlag )
+  {
+    WRITE_CODE( sei.m_aciUseIdc, 3, "alpha_channel_use_idc" );
+    WRITE_CODE( sei.m_aciBitDepthMinus8, 3, "alpha_channel_bit_depth_minus8" );
+    WRITE_CODE( sei.m_aciTransparentValue, sei.m_aciBitDepthMinus8+9, "alpha_transparent_value" );
+    WRITE_CODE( sei.m_aciOpaqueValue, sei.m_aciBitDepthMinus8+9, "alpha_opaque_value" );
+    WRITE_FLAG( ( sei.m_aciIncrFlag ? 1 : 0 ), "alpha_channel_incr_flag" );
+    WRITE_FLAG( ( sei.m_aciClipFlag ? 1 : 0 ), "alpha_channel_clip_flag" );
+    if( sei.m_aciClipFlag )
+    {
+      WRITE_FLAG( ( sei.m_aciClipTypeFlag ? 1 : 0 ), "alpha_channel_clip_type_flag" );
+    }
+  }
+};
+
+void SEIWriter::xWriteSEIDepthRepresentationInfo( const SEIDepthRepresentationInfo& sei)
+{
+  WRITE_FLAG( ( sei.m_driZNearFlag ? 1 : 0 ), "z_near_flag" );
+  WRITE_FLAG( ( sei.m_driZFarFlag ? 1 : 0 ), "z_far_flag" );
+  WRITE_FLAG( ( sei.m_driDMinFlag ? 1 : 0 ), "d_min_flag" );
+  WRITE_FLAG( ( sei.m_driDMaxFlag ? 1 : 0 ), "d_max_flag" );
+  WRITE_UVLC( sei.m_driDepthRepresentationType, "depth_representation_type" );
+  if( sei.m_driDMinFlag || sei.m_driDMaxFlag )
+  {
+    WRITE_UVLC( sei.m_driDisparityRefViewId, "disparity_ref_view_id" );
+  }
+  if( sei.m_driZNearFlag )
+  {
+    xWriteSEIDepthRepInfoElement(sei.m_driZNear);
+  }
+  if( sei.m_driZFarFlag )
+  {
+    xWriteSEIDepthRepInfoElement(sei.m_driZFar);
+  }
+  if( sei.m_driDMinFlag )
+  {
+    xWriteSEIDepthRepInfoElement(sei.m_driDMin);
+  }
+  if( sei.m_driDMaxFlag )
+  {
+    xWriteSEIDepthRepInfoElement(sei.m_driDMax);
+  }
+
+  if (sei.m_driDepthRepresentationType == 3)
+  {
+    WRITE_UVLC( sei.m_driDepthNonlinearRepresentationNumMinus1, "depth_nonlinear_representation_num_minus1" );
+    for( int i = 1; i  <=  sei.m_driDepthNonlinearRepresentationNumMinus1 + 1; i++ )
+    {
+      WRITE_UVLC(sei.m_driDepthNonlinearRepresentationModel.at(i - 1),"depth_nonlinear_representation_model[ i ]");
+    }
+  }
+}
+
+void SEIWriter::xWriteSEIDepthRepInfoElement( double f )
+{
+  uint32_t x_sign, x_exp, x_mantissa,x_mantissa_len;
+  if (f < 0)
+  {
+    f = f * (-1);
+    x_sign = 1;
+  }
+  else
+  {
+    x_sign = 0;
+  }
+  int exponent=0;
+  if(f >= 1)
+  {
+    while(f>=2)
+    {
+      exponent++;
+      f = f/2;
+    }
+  }
+  else
+  {
+    while (f<1)
+    {
+      exponent++;
+      f = f*2;
+    }
+    exponent=-exponent;
+  }
+
+  int i;
+  f = f -1;
+  double s = 1;
+  char s_mantissa[32];
+  double thr=1.0/(4.0*(1<<30));
+
+  if (f>=thr)
+  {
+    for(i=0;i<32;i++)
+    {
+      s /= 2;
+      if(f>=s)
+      {
+        f = f-s;
+        s_mantissa[i]=1;
+
+        if (f<thr)
+          break;
+      }
+      else
+      {
+        s_mantissa[i]=0;
+      }
+    }
+
+    if (i<32)
+      x_mantissa_len=i+1;
+    else
+      x_mantissa_len=32;
+
+    x_mantissa=0;
+
+    for(i=0;i<x_mantissa_len;i++)
+    {
+      if (s_mantissa[i]==1)
+        x_mantissa += (1u)<<(x_mantissa_len-1-i) ;
+    }
+
+  }
+  else
+  {
+    x_mantissa=0;
+    x_mantissa_len=1;
+  }
+
+  assert(exponent>=-31 && exponent<= (1<<7)-32);
+  x_exp=exponent+31;
+
+  WRITE_FLAG( x_sign,                          "da_sign_flag" );
+  WRITE_CODE( x_exp, 7 ,                       "da_exponent" );
+  WRITE_CODE( x_mantissa_len-1, 5 ,            "da_mantissa_len_minus1" );
+  WRITE_CODE( x_mantissa, x_mantissa_len ,     "da_mantissa" );
+};
+#endif
 
 void SEIWriter::xWriteSEISubpictureLevelInfo(const SEISubpicureLevelInfo &sei)
 {

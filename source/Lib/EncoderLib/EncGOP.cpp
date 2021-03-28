@@ -776,6 +776,36 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIContentColourVolume(seiContentColourVolume);
     seiMessages.push_back(seiContentColourVolume);
   }
+  
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  if (m_pcCfg->getSdiSEIEnabled())
+  {
+    SEIScalabilityDimensionInfo *seiScalabilityDimensionInfo = new SEIScalabilityDimensionInfo;
+    m_seiEncoder.initSEIScalabilityDimensionInfo(seiScalabilityDimensionInfo);
+    seiMessages.push_back(seiScalabilityDimensionInfo);
+  }
+  // multiview acquisition information
+  if (m_pcCfg->getMaiSEIEnabled())
+  {
+    SEIMultiviewAcquisitionInfo *seiMultiviewAcquisitionInfo = new SEIMultiviewAcquisitionInfo;
+    m_seiEncoder.initSEIMultiviewAcquisitionInfo(seiMultiviewAcquisitionInfo);
+    seiMessages.push_back(seiMultiviewAcquisitionInfo);
+  }
+  // alpha channel information
+  if (m_pcCfg->getAciSEIEnabled())
+  {
+    SEIAlphaChannelInfo *seiAlphaChannelInfo = new SEIAlphaChannelInfo;
+    m_seiEncoder.initSEIAlphaChannelInfo(seiAlphaChannelInfo);
+    seiMessages.push_back(seiAlphaChannelInfo);
+  }
+  // depth representation information
+  if (m_pcCfg->getDriSEIEnabled())
+  {
+    SEIDepthRepresentationInfo *seiDepthRepresentationInfo = new SEIDepthRepresentationInfo;
+    m_seiEncoder.initSEIDepthRepresentationInfo(seiDepthRepresentationInfo);
+    seiMessages.push_back(seiDepthRepresentationInfo);
+  }
+#endif
 }
 
 void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice)
