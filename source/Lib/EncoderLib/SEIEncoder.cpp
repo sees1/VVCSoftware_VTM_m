@@ -492,6 +492,23 @@ void SEIEncoder::initSEIDependentRAPIndication(SEIDependentRAPIndication *seiDep
   CHECK(!(seiDependentRAPIndication!=NULL), "Unspecified error");
 }
 
+#if JVET_U0084_EDRAP
+void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
+{
+  CHECK(!(m_isInitialized), "Unspecified error");
+  CHECK(!(sei!=NULL), "Unspecified error");
+  sei->m_edrapIndicationRapIdMinus1 = 0;
+  sei->m_edrapIndicationLeadingPicturesDecodableFlag = false;
+  sei->m_edrapIndicationReservedZero12Bits = 0;
+  sei->m_edrapIndicationNumRefRapPicsMinus1 = 0;
+  sei->m_edrapIndicationRefRapId.resize(sei->m_edrapIndicationNumRefRapPicsMinus1 + 1);
+  for (int i = 0; i <= sei->m_edrapIndicationNumRefRapPicsMinus1; i++)
+  {
+    sei->m_edrapIndicationRefRapId[i] = 0;
+  }
+}
+#endif
+
 
 template <typename T>
 static void readTokenValue(T            &returnedValue, /// value returned

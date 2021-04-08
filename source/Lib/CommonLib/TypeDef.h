@@ -50,6 +50,8 @@
 #include <assert.h>
 #include <cassert>
 
+#define JVET_U0084_EDRAP                                  1 // EDRAP indication SEI message
+
 #define JVET_V0106_RRC_RICE                               1 // JVET_V0106: Extension of the RRC rice derivation for high bit depth profile (VVCv2). 
 #define JVET_V0131_CORRECT_TR_HBD                          1 // correcting the 4x4 BDST7/DCT8 transform matrices for high bit-depth coding
 // clang-format off

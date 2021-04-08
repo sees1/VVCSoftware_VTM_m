@@ -1012,6 +1012,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DecodingRefreshType,-dr",                         m_iDecodingRefreshType,                               0, "Intra refresh type (0:none 1:CRA 2:IDR 3:RecPointSEI)")
   ("GOPSize,g",                                       m_iGOPSize,                                           1, "GOP size of temporal structure")
   ("DRAPPeriod",                                      m_drapPeriod,                                         0, "DRAP period in frames (0: disable Dependent RAP indication SEI messages)")
+#if JVET_U0084_EDRAP
+  ("EDRAPPeriod",                                     m_edrapPeriod,                                        0, "EDRAP period in frames (0: disable Extended Dependent RAP indication SEI messages)")
+#endif
   ("ReWriteParamSets",                                m_rewriteParamSets,                           false, "Enable rewriting of Parameter sets before every (intra) random access point")
   ("IDRRefParamList",                                 m_idrRefParamList,                            false, "Enable indication of reference picture list syntax elements in slice headers of IDR pictures")
   // motion search options
@@ -2769,6 +2772,9 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( m_iGOPSize > 1 &&  m_iGOPSize % 2,                                          "GOP Size must be a multiple of 2, if GOP Size is greater than 1" );
   xConfirmPara( (m_iIntraPeriod > 0 && m_iIntraPeriod < m_iGOPSize) || m_iIntraPeriod == 0, "Intra period must be more than GOP size, or -1 , not 0" );
   xConfirmPara( m_drapPeriod < 0,                                                           "DRAP period must be greater or equal to 0" );
+#if JVET_U0084_EDRAP
+  xConfirmPara( m_edrapPeriod < 0,                                                          "EDRAP period must be greater or equal to 0" );
+#endif
   xConfirmPara( m_iDecodingRefreshType < 0 || m_iDecodingRefreshType > 3,                   "Decoding Refresh Type must be comprised between 0 and 3 included" );
 
   if (m_isField)
@@ -3995,6 +4001,9 @@ void EncAppCfg::xPrintParameter()
   msg( DETAILS, "Intra period                           : %d\n", m_iIntraPeriod );
   msg( DETAILS, "Decoding refresh type                  : %d\n", m_iDecodingRefreshType );
   msg( DETAILS, "DRAP period                            : %d\n", m_drapPeriod );
+#if JVET_U0084_EDRAP
+  msg( DETAILS, "EDRAP period                           : %d\n", m_edrapPeriod );
+#endif
 #if QP_SWITCHING_FOR_PARALLEL
   if (m_qpIncrementAtSourceFrame.bPresent)
   {

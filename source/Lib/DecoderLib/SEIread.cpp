@@ -230,6 +230,12 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIDependentRAPIndication;
       xParseSEIDependentRAPIndication((SEIDependentRAPIndication&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
+#if JVET_U0084_EDRAP
+    case SEI::EXTENDED_DRAP_INDICATION:
+      sei = new SEIExtendedDrapIndication;
+      xParseSEIExtendedDrapIndication((SEIExtendedDrapIndication&) *sei, payloadSize, pDecodedMessageOutputStream);
+      break;
+#endif
     case SEI::FRAME_PACKING:
       sei = new SEIFramePacking;
       xParseSEIFramePacking((SEIFramePacking&) *sei, payloadSize, pDecodedMessageOutputStream);
@@ -1638,6 +1644,24 @@ void SEIReader::xParseSEISampleAspectRatioInfo(SEISampleAspectRatioInfo& sei, ui
     }
   }
 }
+
+#if JVET_U0084_EDRAP
+void SEIReader::xParseSEIExtendedDrapIndication(SEIExtendedDrapIndication& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
+{
+  uint32_t val;
+  output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
+  sei_read_code( pDecodedMessageOutputStream, 16, val,        "edrap_rap_id_minus1"          );   sei.m_edrapIndicationRapIdMinus1         = val;
+  sei_read_flag( pDecodedMessageOutputStream,     val,        "edrap_leading_pictures_decodable_flag" );       sei.m_edrapIndicationLeadingPicturesDecodableFlag = val;
+  sei_read_code( pDecodedMessageOutputStream, 12, val,        "edrap_reserved_zero_12bits"          );   sei.m_edrapIndicationReservedZero12Bits = val;
+  sei_read_code( pDecodedMessageOutputStream, 3, val,         "edrap_num_ref_rap_pics_minus1"          );   sei.m_edrapIndicationNumRefRapPicsMinus1 = val;
+  sei.m_edrapIndicationRefRapId.resize(sei.m_edrapIndicationNumRefRapPicsMinus1 + 1);
+  for (int i = 0; i <= sei.m_edrapIndicationNumRefRapPicsMinus1; i++)
+  {
+    sei_read_code( pDecodedMessageOutputStream, 16, val,       "edrap_ref_rap_id[i]"          );
+    sei.m_edrapIndicationRefRapId[i] = val;
+  }
+}
+#endif
 
 #if JVET_S0257_DUMP_360SEI_MESSAGE
 void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps)

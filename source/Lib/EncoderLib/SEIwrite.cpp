@@ -77,6 +77,11 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::DEPENDENT_RAP_INDICATION:
     xWriteSEIDependentRAPIndication(*static_cast<const SEIDependentRAPIndication*>(&sei));
     break;
+#if JVET_U0084_EDRAP
+  case SEI::EXTENDED_DRAP_INDICATION:
+    xWriteSEIEdrapIndication(*static_cast<const SEIExtendedDrapIndication*>(&sei));
+    break;
+#endif
   case SEI::FRAME_PACKING:
     xWriteSEIFramePacking(*static_cast<const SEIFramePacking*>(&sei));
     break;
@@ -486,6 +491,20 @@ void SEIWriter::xWriteSEIDependentRAPIndication(const SEIDependentRAPIndication&
 {
   // intentionally empty
 }
+
+#if JVET_U0084_EDRAP
+void SEIWriter::xWriteSEIEdrapIndication(const SEIExtendedDrapIndication& sei)
+{
+  WRITE_CODE( sei.m_edrapIndicationRapIdMinus1, 16,        "edrap_rap_id_minsu1" );
+  WRITE_FLAG( sei.m_edrapIndicationLeadingPicturesDecodableFlag ? 1 : 0, "edrap_leading_pictures_decodable_flag" );
+  WRITE_CODE( sei.m_edrapIndicationReservedZero12Bits, 12, "edrap_reserved_zero_12bits" );
+  WRITE_CODE( sei.m_edrapIndicationNumRefRapPicsMinus1, 3, "edrap_num_ref_rap_pics_minus1" );
+  for (int i = 0; i <= sei.m_edrapIndicationNumRefRapPicsMinus1; i++)
+  {
+    WRITE_CODE( sei.m_edrapIndicationRefRapId[i], 16, "edrap_ref_rap_id[i]" );
+  }
+}
+#endif
 
 void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei)
 {

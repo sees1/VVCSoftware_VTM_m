@@ -59,6 +59,9 @@ protected:
   void xWriteSEIPictureTiming(const SEIPictureTiming& sei, const SEIBufferingPeriod& bp, const uint32_t temporalId);
   void xWriteSEIFrameFieldInfo(const SEIFrameFieldInfo& sei);
   void xWriteSEIDependentRAPIndication(const SEIDependentRAPIndication& sei);
+#if JVET_U0084_EDRAP
+  void xWriteSEIEdrapIndication(const SEIExtendedDrapIndication& sei);
+#endif
   void xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei);
   void xWriteSEIFramePacking(const SEIFramePacking& sei);
   void xWriteSEIParameterSetsInclusionIndication(const SEIParameterSetsInclusionIndication& sei);
