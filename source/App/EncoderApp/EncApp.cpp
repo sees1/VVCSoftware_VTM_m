@@ -1032,8 +1032,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setOverscanInfoPresentFlag                           ( m_overscanInfoPresentFlag );
   m_cEncLib.setOverscanAppropriateFlag                           ( m_overscanAppropriateFlag );
   m_cEncLib.setVideoFullRangeFlag                                ( m_videoFullRangeFlag );
-  m_cEncLib.setEfficientFieldIRAPEnabled                         ( m_bEfficientFieldIRAPEnabled );
-  m_cEncLib.setHarmonizeGopFirstFieldCoupleEnabled               ( m_bHarmonizeGopFirstFieldCoupleEnabled );
+  m_cEncLib.setFieldSeqFlag                                      ( m_isField );
+  m_cEncLib.setEfficientFieldIRAPEnabled                         ( m_efficientFieldIRAPEnabled );
+  m_cEncLib.setHarmonizeGopFirstFieldCoupleEnabled               ( m_harmonizeGopFirstFieldCoupleEnabled );
   m_cEncLib.setSummaryOutFilename                                ( m_summaryOutFilename );
   m_cEncLib.setSummaryPicFilenameBase                            ( m_summaryPicFilenameBase );
   m_cEncLib.setSummaryVerboseness                                ( m_summaryVerboseness );
@@ -1167,9 +1168,9 @@ void EncApp::xDestroyLib()
   m_cEncLib.destroy();
 }
 
-void EncApp::xInitLib(bool isFieldCoding)
+void EncApp::xInitLib()
 {
-  m_cEncLib.init(isFieldCoding, this );
+  m_cEncLib.init(this);
 }
 
 // ====================================================================================================================
@@ -1204,7 +1205,7 @@ void EncApp::createLib( const int layerIdx )
   xInitLibCfg();
   const int layerId = m_cEncLib.getVPS() == nullptr ? 0 : m_cEncLib.getVPS()->getLayerId( layerIdx );
   xCreateLib( m_recBufList, layerId );
-  xInitLib( m_isField );
+  xInitLib();
 
   printChromaFormat();
 

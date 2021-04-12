@@ -148,7 +148,7 @@ protected:
   void  xInitPPSforLT(PPS& pps);
   void  xInitHrdParameters(SPS &sps);                 ///< initialize HRDParameters parameters
 
-  void  xInitRPL(SPS &sps, bool isFieldCoding);           ///< initialize SPS from encoder options
+  void xInitRPL(SPS &sps);   ///< initialize SPS from encoder options
 
 public:
   EncLib( EncLibCommon* encLibCommon );
@@ -156,7 +156,7 @@ public:
 
   void      create          ( const int layerId );
   void      destroy         ();
-  void      init            ( bool isFieldCoding, AUWriterIf* auWriterIf );
+  void      init(AUWriterIf *auWriterIf);
   void      deletePicBuffer ();
 
   // -------------------------------------------------------------------------------------------------------------------

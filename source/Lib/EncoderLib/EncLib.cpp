@@ -144,7 +144,7 @@ void EncLib::destroy ()
   return;
 }
 
-void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
+void EncLib::init(AUWriterIf *auWriterIf)
 {
   m_AUWriterIf = auWriterIf;
 
@@ -198,7 +198,7 @@ void EncLib::init( bool isFieldCoding, AUWriterIf* auWriterIf )
   }
   xInitPPS(pps0, sps0);
   // initialize APS
-  xInitRPL(sps0, isFieldCoding);
+  xInitRPL(sps0);
 
   if (m_resChangeInClvsEnabled)
   {
@@ -1283,7 +1283,7 @@ void EncLib::xInitSPS( SPS& sps )
   }
   sps.setALFEnabledFlag( m_alf );
   sps.setCCALFEnabledFlag( m_ccalf );
-  sps.setFieldSeqFlag(false);
+  sps.setFieldSeqFlag(m_fieldSeqFlag);
   sps.setVuiParametersPresentFlag(getVuiParametersPresentFlag());
 
   if (sps.getVuiParametersPresentFlag())
@@ -1855,9 +1855,10 @@ void EncLib::xInitAPS(APS &aps)
   //Do nothing now
 }
 
-void EncLib::xInitRPL(SPS &sps, bool isFieldCoding)
+void EncLib::xInitRPL(SPS &sps)
 {
   ReferencePictureList*      rpl;
+  const bool                 isFieldCoding = sps.getFieldSeqFlag();
 
   int numRPLCandidates = getRPLCandidateSize(0);
   // To allocate one additional memory for RPL of POC1 (first bottom field) which is not specified in cfg file
