@@ -329,8 +329,13 @@ void SEIWriter::xWriteSEIBufferingPeriod(const SEIBufferingPeriod& sei)
       {
         for( int j = 0; j < sei.m_bpCpbCnt; j ++ )
         {
+#if FIX_BPSEI_SIGNALING
+          WRITE_CODE( sei.m_initialCpbRemovalDelay[i][j][nalOrVcl],  sei.m_initialCpbRemovalDelayLength,           "initial_cpb_removal_delay[i][j][nalOrVcl]" );
+          WRITE_CODE( sei.m_initialCpbRemovalOffset[i][j][nalOrVcl], sei.m_initialCpbRemovalDelayLength,           "initial_cpb_removal_delay_offset[i][j][nalOrVcl]" );
+#else
           WRITE_CODE( sei.m_initialCpbRemovalDelay[j][i][nalOrVcl],  sei.m_initialCpbRemovalDelayLength,           "initial_cpb_removal_delay[j][i][nalOrVcl]" );
           WRITE_CODE( sei.m_initialCpbRemovalOffset[j][i][nalOrVcl], sei.m_initialCpbRemovalDelayLength,           "initial_cpb_removal_delay_offset[j][i][nalOrVcl]" );
+#endif
         }
       }
     }

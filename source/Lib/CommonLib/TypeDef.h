@@ -50,6 +50,7 @@
 #include <assert.h>
 #include <cassert>
 
+#define FIX_BPSEI_SIGNALING                               1
 
 #define PRINT_WPSNR 1
 
