@@ -307,7 +307,7 @@ uint32_t DecApp::decode()
         }
       }
 
-      if( nalu.isSlice() )
+      if( nalu.isSlice() && nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_RASL)
       {
         prevPicSkipped = bPicSkipped;
       }
