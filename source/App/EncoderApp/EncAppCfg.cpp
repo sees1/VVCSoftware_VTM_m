@@ -1010,8 +1010,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("GdrEnabled",                                      m_gdrEnabled,                                     false, "GDR enabled")
   ("GdrPocStart",                                     m_gdrPocStart,                                       -1, "GDR poc start")
   ("GdrPeriod",                                       m_gdrPeriod,                                         -1, "Number of frames between GDR picture to the next GDR picture")
-  ("GdrInterval",                                     m_gdrInterval,                                       -1, "Number of frames from GDR picture to the recovery point picture")  
-  ("GdrNoHash",                                       m_gdrNoHash,                                       true, "Do not generate decode picture hash SEI messages for GDR and recovering pictures")  
+  ("GdrInterval",                                     m_gdrInterval,                                       -1, "Number of frames from GDR picture to the recovery point picture")
+  ("GdrNoHash",                                       m_gdrNoHash,                                       true, "Do not generate decode picture hash SEI messages for GDR and recovering pictures")
 #endif
   ("DecodingRefreshType,-dr",                         m_iDecodingRefreshType,                               0, "Intra refresh type (0:none 1:CRA 2:IDR 3:RecPointSEI)")
   ("GOPSize,g",                                       m_iGOPSize,                                           1, "GOP size of temporal structure")
@@ -1544,7 +1544,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_BIO  = false;
     m_DMVR = false;
     m_SMVD = false;
-    
+
     if (m_gdrPeriod < 0)
     {
       m_gdrPeriod = m_iFrameRate * 2;
@@ -2278,7 +2278,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 #endif
 
-#if GDR_ENABLED  
+#if GDR_ENABLED
   if (m_gdrEnabled)
   {
     m_virtualBoundariesEnabledFlag = 1;

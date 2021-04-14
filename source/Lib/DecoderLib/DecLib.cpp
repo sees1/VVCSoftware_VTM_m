@@ -2780,7 +2780,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     m_cReshaper.setRecReshaped(false);
   }
 
-#if GDR_LEAK_TEST  
+#if GDR_LEAK_TEST
   if (m_gdrPocRandomAccess == pcSlice->getPOC())
   {
     for (int e = 0; e < 2; e++)

@@ -759,7 +759,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
       pcPic->cs->picHeader->setNumHorVirtualBoundaries(0);
       pcPic->cs->picHeader->setNumVerVirtualBoundaries(0);
 
-#if GDR_ENC_TRACE    
+#if GDR_ENC_TRACE
       printf("-poc:%d no virtual boundary\n", rpcSlice->getPOC());
 #endif
     }
@@ -826,7 +826,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
 #if GDR_ENC_TRACE
       printf("\n");
       printf("-poc:%d beg:%d end:%d\n", rpcSlice->getPOC(), begGdrX, endGdrX);
-#endif    
+#endif
     }
   }
 #endif
