@@ -555,12 +555,12 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   const UnitArea currCsArea = clipArea( CS::getArea( *bestCS, bestCS->area, partitioner.chType ), *tempCS->picture );
 
   m_modeCtrl->initCULevel( partitioner, *tempCS );
-#if GDR_ENABLED 
+#if GDR_ENABLED
   if (m_pcEncCfg->getGdrEnabled())
   {
     bool isInGdrInterval = slice.getPicHeader()->getInGdrInterval();
 
-    // 1.0 applicable to inter picture only  
+    // 1.0 applicable to inter picture only
     if (isInGdrInterval)
     {
       int gdrPocStart = m_pcEncCfg->getGdrPocStart();
@@ -597,7 +597,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
         begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
         endGdrX = begGdrX + m2;
         if (picWidth <= endGdrX)
-        {          
+        {
           begGdrX = picWidth;
           endGdrX = picWidth;
         }
@@ -611,7 +611,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
       }
       else if (tempCS->containRefresh(begGdrX, endGdrX) || tempCS->overlapRefresh(begGdrX, endGdrX))
       {
-        // 1.3.1 enable only vertical splits (QT, BT_V, TT_V)                  
+        // 1.3.1 enable only vertical splits (QT, BT_V, TT_V)
         m_modeCtrl->forceVerSplitOnly();
 
         // 1.3.2 remove TT_V if it does not satisfy the condition
@@ -1448,7 +1448,7 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
     m_pcInterSearch->addAffMVInfo(tmpMVInfo);
   }
 #endif
-    
+
   if (!tempCS->slice->isIntra() && isUniMvInfoSaved)
   {
     m_pcInterSearch->addUniMvInfo(tmpUniMvInfo);
@@ -2125,7 +2125,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
   MergeCtx mergeCtx;
   const SPS &sps = *tempCS->sps;
 
-#if GDR_ENABLED  
+#if GDR_ENABLED
   bool isEncodeGdrClean = false;
   CodingStructure *cs;
 #endif
@@ -2152,7 +2152,7 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
     PU::getInterMergeCandidates(pu, mergeCtx, 0);
     PU::getInterMMVDMergeCandidates(pu, mergeCtx);
     pu.regularMergeFlag = true;
-#if GDR_ENABLED  
+#if GDR_ENABLED
     cs = pu.cs;
     isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrInterval() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
@@ -2868,11 +2868,11 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   cu.bdpcmMode = 0;
 
   PredictionUnit &pu = tempCS->addPU(cu, pm.chType);
-#if GDR_ENABLED  
+#if GDR_ENABLED
   CodingStructure &cs = *pu.cs;
   const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
-  
+
   pu.mergeFlag = true;
   pu.regularMergeFlag = false;
   PU::getGeoMergeCandidates(pu, mergeCtx);
@@ -2895,13 +2895,13 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   int        pocMrg[GEO_MAX_NUM_UNI_CANDS];
   Mv         MrgMv[GEO_MAX_NUM_UNI_CANDS];
   bool       isSkipThisCand[GEO_MAX_NUM_UNI_CANDS];
-#if GDR_ENABLED 
+#if GDR_ENABLED
   bool MrgSolid[GEO_MAX_NUM_UNI_CANDS];
   bool MrgValid[GEO_MAX_NUM_UNI_CANDS];
 
-  if (isEncodeGdrClean) 
-  {   
-    for (int i = 0; i < maxNumMergeCandidates; i++) 
+  if (isEncodeGdrClean)
+  {
+    for (int i = 0; i < maxNumMergeCandidates; i++)
     {
       MrgSolid[i] = true;
       MrgValid[i] = true;
@@ -2921,7 +2921,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     int MrgrefIdx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + MrgList].refIdx;
     pocMrg[mergeCand] = tempCS->slice->getRefPic(MrgeRefPicList, MrgrefIdx)->getPOC();
     MrgMv[mergeCand] = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + MrgList].mv;
-#if GDR_ENABLED 
+#if GDR_ENABLED
     if (isEncodeGdrClean)
     {
       MrgSolid[mergeCand] = mergeCtx.mvSolid[(mergeCand << 1) + MrgList];
@@ -2952,7 +2952,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     distParamWholeBlk.cur.buf = geoTempBuf[mergeCand].Y().buf;
     distParamWholeBlk.cur.stride = geoTempBuf[mergeCand].Y().stride;
     sadWholeBlk[mergeCand] = distParamWholeBlk.distFunc(distParamWholeBlk);
-#if GDR_ENABLED     
+#if GDR_ENABLED
     bool allOk = (sadWholeBlk[mergeCand] < bestWholeBlkSad);
     if (isEncodeGdrClean)
     {
@@ -2960,8 +2960,8 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       bool isValid = mergeCtx.mvValid[(mergeCand << 1) + MrgList];
       allOk = allOk && isSolid && isValid;
     }
-#endif    
-#if GDR_ENABLED 
+#endif
+#if GDR_ENABLED
     if (allOk)
 #else
     if (sadWholeBlk[mergeCand] < bestWholeBlkSad)
@@ -3013,7 +3013,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     for (uint8_t mergeCand = 0; mergeCand < maxNumMergeCandidates; mergeCand++)
     {
       int bitsCand = mergeCand + 1;
-#if GDR_ENABLED 
+#if GDR_ENABLED
       if (isEncodeGdrClean)
       {
         double cost0, cost1;
@@ -3066,7 +3066,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
         continue;
       }
       tempCost = tempCost + (double)bitsCandTB * sqrtLambdaForFirstPass;
-#if GDR_ENABLED 
+#if GDR_ENABLED
       if (isEncodeGdrClean)
       {
         int idx0 = mergeCand0;
@@ -3120,7 +3120,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     mvBits += mergeCand0;
     mvBits += mergeCand1;
     double updateCost = (double)sad + (double)(bitsCandTB + mvBits) * sqrtLambdaForFirstPass;
-#if GDR_ENABLED 
+#if GDR_ENABLED
     if (isEncodeGdrClean)
     {
       int idx0 = mergeCand0;
@@ -3135,7 +3135,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
         updateCost = MAX_DOUBLE;
       }
     }
-#endif    
+#endif
     comboList.list[candidateIdx].cost = updateCost;
     updateCandList(candidateIdx, updateCost, geoRdModeList, geocandCostList, geoNumMrgSATDCand);
   }
@@ -3200,7 +3200,7 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       PU::spanGeoMotionInfo(pu, mergeCtx, pu.geoSplitDir, pu.geoMergeIdx0, pu.geoMergeIdx1);
       tempCS->getPredBuf().copyFrom(geoCombinations[candidateIdx]);
 
-#if GDR_ENABLED 
+#if GDR_ENABLED
       if (isEncodeGdrClean)
       {
         int idx0 = pu.geoMergeIdx0;
@@ -3250,7 +3250,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
 #if GDR_ENABLED
   CodingStructure *cs;
   bool isEncodeGdrClean = false;
-#endif  
+#endif
   m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
   const Slice &slice = *tempCS->slice;
 
@@ -3422,7 +3422,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
             cost = MAX_DOUBLE;
           }
         }
-#endif        
+#endif
         updateCandList( uiMergeCand, cost, RdModeList, candCostList
           , uiNumMrgSATDCand );
 
@@ -3556,7 +3556,7 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
 
       if ( m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip )
       {
-#if GDR_ENABLED                
+#if GDR_ENABLED
         if (bestCS->getCU(partitioner.chType))
         {
           bestIsSkip = bestCS->getCU(partitioner.chType)->rootCbf == 0;
@@ -3662,7 +3662,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     candHasNoResidual[ui] = 0;
   }
 
-#if GDR_ENABLED 
+#if GDR_ENABLED
   if (isEncodeGdrClean)
   {
     MrgSolid = new bool[MRG_MAX_NUM_CANDS];
@@ -3957,8 +3957,8 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
   {
     xCalDebCost( *bestCS, partitioner );
   }
-#if GDR_ENABLED 
-  if (isEncodeGdrClean) 
+#if GDR_ENABLED
+  if (isEncodeGdrClean)
   {
     delete[] MrgSolid;
     delete[] MrgValid;
@@ -4116,7 +4116,7 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     uint8_t bcwIdx  = cu.BcwIdx;
     bool    testBcw = (bcwIdx != BCW_DEFAULT);
 
-#if GDR_ENABLED    
+#if GDR_ENABLED
   const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrInterval() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
     m_pcInterSearch->predInterSearch(cu, partitioner);
@@ -4138,8 +4138,8 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
       }
     }
 
-#if GDR_ENABLED  
-    // 2.0 xCheckRDCostInter: check residual (compare with bestCS)       
+#if GDR_ENABLED
+    // 2.0 xCheckRDCostInter: check residual (compare with bestCS)
     if (isEncodeGdrClean)
     {
       bool isClean = true;
@@ -4218,9 +4218,9 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     }
 #else
     xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0, 0, &equBcwCost);
-#endif    
+#endif
 
-#if GDR_ENABLED    
+#if GDR_ENABLED
   if (g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT && bestCS->cus.size() > 0)
     m_pcInterSearch->setAffineModeSelected((bestCS->cus.front()->affine && !(bestCS->cus.front()->firstPU->mergeFlag)));
 #else
@@ -4334,7 +4334,7 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
 
   CU::addPUs( cu );
 
-#if GDR_ENABLED    
+#if GDR_ENABLED
     const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrInterval() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
   if (testAltHpelFilter)
@@ -4408,8 +4408,8 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
     }
   }
 
-#if GDR_ENABLED  
-  // 2.0 xCheckRDCostInter: check residual (compare with bestCS)        
+#if GDR_ENABLED
+  // 2.0 xCheckRDCostInter: check residual (compare with bestCS)
   if (isEncodeGdrClean)
   {
     bool isClean = true;

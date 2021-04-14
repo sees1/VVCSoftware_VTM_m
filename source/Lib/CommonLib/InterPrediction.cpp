@@ -893,7 +893,7 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
   Mv mvLT =_mv[0];
   Mv mvRT =_mv[1];
   Mv mvLB =_mv[2];
-#if GDR_ENABLED  
+#if GDR_ENABLED
   bool allOk = true;
   const CodingStructure &cs = *pu.cs;
   const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
@@ -1125,7 +1125,7 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
           }
         }
 #if GDR_ENABLED
-        if (isEncodeGdrClean) 
+        if (isEncodeGdrClean)
         {
           Position subPuPos = Position(pux + w + blockWidth, puy + h + blockHeight);
           Mv subPuMv = Mv(iMvScaleTmpHor, iMvScaleTmpVer);
@@ -1156,7 +1156,7 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
         iMvScaleTmpVer = curMv.ver;
 
 #if GDR_ENABLED
-        if (isEncodeGdrClean) 
+        if (isEncodeGdrClean)
         {
           Position subPuPos = Position(pux + (w + blockWidth) * 2, puy + (h + blockHeight) * 2);
           Mv subPuMv = Mv(iMvScaleTmpHor, iMvScaleTmpVer);

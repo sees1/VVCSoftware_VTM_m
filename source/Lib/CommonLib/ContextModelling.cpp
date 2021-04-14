@@ -369,8 +369,8 @@ void MergeCtx::setMergeInfo( PredictionUnit& pu, int candIdx )
   CodingStructure &cs = *pu.cs;
   const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 
-  if (isEncodeGdrClean) 
-  {    
+  if (isEncodeGdrClean)
+  {
     Mv mv0 = pu.mv[REF_PIC_LIST_0];
     Mv mv1 = pu.mv[REF_PIC_LIST_1];
 
@@ -380,7 +380,7 @@ void MergeCtx::setMergeInfo( PredictionUnit& pu, int candIdx )
     pu.mvSolid[REF_PIC_LIST_0] = mvSolid[(candIdx << 1) + 0];
     pu.mvSolid[REF_PIC_LIST_1] = mvSolid[(candIdx << 1) + 1];
     pu.mvValid[REF_PIC_LIST_0] = cs.isClean(pu.Y().topRight(), mv0, REF_PIC_LIST_0, refIdx0);
-    pu.mvValid[REF_PIC_LIST_1] = cs.isClean(pu.Y().topRight(), mv1, REF_PIC_LIST_1, refIdx1);      
+    pu.mvValid[REF_PIC_LIST_1] = cs.isClean(pu.Y().topRight(), mv1, REF_PIC_LIST_1, refIdx1);
   }
 #endif
 
@@ -409,7 +409,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
   Mv tempMv[2];
 
 #if GDR_ENABLED
-  const CodingStructure &cs = *pu.cs;  
+  const CodingStructure &cs = *pu.cs;
   const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
 #endif
 
@@ -503,7 +503,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.mv[REF_PIC_LIST_1] = mmvdBaseMv[fPosBaseIdx][1].mv + tempMv[1];
     pu.refIdx[REF_PIC_LIST_1] = refList1;
 #if GDR_ENABLED
-    if (isEncodeGdrClean) 
+    if (isEncodeGdrClean)
     {
       Mv mv0 = pu.mv[REF_PIC_LIST_0];
       Mv mv1 = pu.mv[REF_PIC_LIST_1];
@@ -547,11 +547,11 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.refIdx[REF_PIC_LIST_1] = -1;
 
 #if GDR_ENABLED
-    if (isEncodeGdrClean) 
+    if (isEncodeGdrClean)
     {
       Mv mv0 = pu.mv[REF_PIC_LIST_0];
       //Mv mv1 = pu.mv[REF_PIC_LIST_1];
-      
+
       int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
       //int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
 
@@ -590,7 +590,7 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.mv[REF_PIC_LIST_1] = mmvdBaseMv[fPosBaseIdx][1].mv + tempMv[1];
     pu.refIdx[REF_PIC_LIST_1] = refList1;
 #if GDR_ENABLED
-    if (isEncodeGdrClean) 
+    if (isEncodeGdrClean)
     {
       // Mv mv0 = pu.mv[REF_PIC_LIST_0];
       Mv mv1 = pu.mv[REF_PIC_LIST_1];

@@ -1134,7 +1134,7 @@ void EncLib::xInitSPS( SPS& sps )
   {
     sps.setGDREnabledFlag(true);
   }
-  else 
+  else
   {
     sps.setGDREnabledFlag(false);
   }
