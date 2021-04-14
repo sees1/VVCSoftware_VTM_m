@@ -88,6 +88,9 @@ protected:
 
   int          m_upscaledOutput;                     ////< Output upscaled (2), decoded but in full resolution buffer (1) or decoded cropped (0, default) picture for RPR.
   int           m_targetSubPicIdx;                    ///< Specify which subpicture shall be write to output, using subpicture index
+#if GDR_LEAK_TEST
+  int           m_gdrPocRandomAccess;                   ///<
+#endif // GDR_LEAK_TEST
 public:
   DecAppCfg();
   virtual ~DecAppCfg();

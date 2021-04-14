@@ -3176,6 +3176,43 @@ RCInitialCpbFullness should be smaller than or equal to 1.
 \\
 \end{OptionTableNoShorthand}
 
+%%
+%% GDR parameters
+%%
+\begin{OptionTableNoShorthand}{GDR parameters}{tab:gdr}
+
+
+\Option{GdrEnabled} &
+%\ShortOption{\None} &
+\Default{false} &
+Enables or disables the use of GDR (Gradual Decoding Refresh)
+\\
+
+\Option{GdrPocStart} &
+%\ShortOption{\None} &
+\Default{-1} &
+Specifies poc number of first GDR
+\\
+
+\Option{GdrPeriod} &
+%\ShortOption{\None} &
+\Default{-1} &
+Specifies number of frames between GDR picture to the next GDR picture
+\\
+
+\Option{GdrInterval} &
+%\ShortOption{\None} &
+\Default{-1} &
+Specifies number of of frames from GDR picture to the recovery point picture (note: ph_recovery_poc_cnt will be (GDR Inteval - 1)) 
+\\
+
+\Option{GdrNoHash} &
+%\ShortOption{\None} &
+\Default{true} &
+Specifies not to generate picture hash SEI for GDR/recovering pictures 
+\\
+
+\end{OptionTableNoShorthand}
 
 
 %%

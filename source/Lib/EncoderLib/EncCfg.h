@@ -302,6 +302,13 @@ protected:
   bool                  m_subPicIdMappingInSpsFlag;
   unsigned              m_subPicIdLen;
   std::vector<uint16_t> m_subPicId;
+#if GDR_ENABLED
+  bool      m_gdrEnabled;  
+  unsigned  m_gdrPocStart;
+  unsigned  m_gdrPeriod;
+  int       m_gdrInterval;  
+  bool      m_gdrNoHash;  
+#endif
   bool      m_useSplitConsOverride;
   unsigned  m_uiMinQT[3]; //0: I slice; 1: P/B slice, 2: I slice chroma
   unsigned  m_uiMaxBT[3]; //0: I slice; 1: P/B slice, 2: I slice chroma
@@ -996,6 +1003,19 @@ public:
   void      setMinQTSizes                   ( unsigned* minQT)   { m_uiMinQT[0] = minQT[0]; m_uiMinQT[1] = minQT[1]; m_uiMinQT[2] = minQT[2]; }
   void      setMaxBTSizes                   ( unsigned* maxBT)   { m_uiMaxBT[0] = maxBT[0]; m_uiMaxBT[1] = maxBT[1]; m_uiMaxBT[2] = maxBT[2]; }
   void      setMaxTTSizes                   ( unsigned* maxTT)   { m_uiMaxTT[0] = maxTT[0]; m_uiMaxTT[1] = maxTT[1]; m_uiMaxTT[2] = maxTT[2]; }
+#if GDR_ENABLED
+  void      setGdrEnabled(bool b)       { m_gdrEnabled  = b; }
+  void      setGdrPeriod(unsigned u)    { m_gdrPeriod   = u; }
+  void      setGdrPocStart(unsigned u)  { m_gdrPocStart = u; }
+  void      setGdrInterval(int i)       { m_gdrInterval = i; }  
+  void      setGdrNoHash(bool b)        { m_gdrNoHash   = b; }    
+
+  bool      getGdrEnabled()             { return m_gdrEnabled;  }
+  unsigned  getGdrPeriod()              { return m_gdrPeriod;   }
+  unsigned  getGdrPocStart()            { return m_gdrPocStart; }
+  int       getGdrInterval()            { return m_gdrInterval; }  
+  bool      getGdrNoHash()              { return m_gdrNoHash;   }  
+#endif
   void      setMaxMTTHierarchyDepth         ( unsigned uiMaxMTTHierarchyDepth, unsigned uiMaxMTTHierarchyDepthI, unsigned uiMaxMTTHierarchyDepthIChroma )
                                                              { m_uiMaxMTTHierarchyDepth = uiMaxMTTHierarchyDepth; m_uiMaxMTTHierarchyDepthI = uiMaxMTTHierarchyDepthI; m_uiMaxMTTHierarchyDepthIChroma = uiMaxMTTHierarchyDepthIChroma; }
   unsigned  getMaxMTTHierarchyDepth         ()         const { return m_uiMaxMTTHierarchyDepth; }

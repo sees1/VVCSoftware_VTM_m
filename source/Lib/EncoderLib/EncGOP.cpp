@@ -312,6 +312,9 @@ void EncGOP::init ( EncLib* pcEncLib )
     m_pcTransferFct       = hdrtoolslib::TransferFunction::create(hdrtoolslib::TF_PQ, true, (float) maxSampleValue, 0, 0.0, 1.0, enableTFunctionLUT);
   }
 #endif
+#if GDR_ENABLED
+  m_lastGdrIntervalPoc = -1;
+#endif
 }
 
 int EncGOP::xWriteOPI (AccessUnit &accessUnit, const OPI *opi)
@@ -374,6 +377,12 @@ int EncGOP::xWriteAPS( AccessUnit &accessUnit, APS *aps, const int layerId, cons
   nalu.m_temporalId = aps->getTemporalId();
   aps->setLayerId( layerId );
   CHECK( nalu.m_temporalId < accessUnit.temporalId, "TemporalId shall be greater than or equal to the TemporalId of the layer access unit containing the NAL unit" );
+  
+#if GDR_ENC_TRACE 
+  if (aps)
+    printf("-aps ty:%d id:%d\n", aps->getAPSType(), aps->getAPSId());
+#endif
+
   m_HLSWriter->codeAPS(aps);
   accessUnit.push_back(new NALUnitEBSP(nalu));
   return (int)(accessUnit.back()->m_nalUnitData.str().size()) * 8;
@@ -1919,6 +1928,12 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
       else if (m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_SDR || m_pcCfg->getReshapeSignalType() == RESHAPE_SIGNAL_HLG)
       {
         int modIP = pic->getPOC() - pic->getPOC() / m_pcCfg->getReshapeCW().rspFpsToIp * m_pcCfg->getReshapeCW().rspFpsToIp;
+#if GDR_ENABLED        
+        if (slice->isInterGDR())
+        {
+          modIP = 0;
+        }
+#endif
         if (m_pcReshaper->getReshapeFlag() && m_pcCfg->getReshapeCW().updateCtrl == 2 && modIP == 0)
         {
           m_pcReshaper->getSliceReshaperInfo().setSliceReshapeModelPresentFlag(true);
@@ -1936,6 +1951,14 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
     picHeader->setLmcsEnabledFlag(m_pcReshaper->getSliceReshaperInfo().getUseSliceReshaper());
     slice->setLmcsEnabledFlag(m_pcReshaper->getSliceReshaperInfo().getUseSliceReshaper());
     picHeader->setLmcsChromaResidualScaleFlag(m_pcReshaper->getSliceReshaperInfo().getSliceReshapeChromaAdj() == 1);
+
+#if GDR_ENABLED   
+    if (picHeader->getInGdrInterval()) 
+    {
+      picHeader->setLmcsChromaResidualScaleFlag(false);
+    }   
+#endif
+
     if (m_pcReshaper->getSliceReshaperInfo().getSliceReshapeModelPresentFlag())
     {
       int apsId = std::min<int>( 3, m_pcEncLib->getVPS() == nullptr ? 0 : m_pcEncLib->getVPS()->getGeneralLayerIdx( m_pcEncLib->getLayerId() ) );
@@ -2140,6 +2163,18 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setSliceType(I_SLICE);
     }
     pcSlice->setTLayer(m_pcCfg->getGOPEntry(iGOPid).m_temporalId);
+#if GDR_ENABLED
+    if (m_pcCfg->getGdrEnabled() && pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
+    {
+      pcSlice->setSliceType(B_SLICE);
+    }
+
+    // note : first picture is GDR(I_SLICE)    
+    if (pocCurr == 0) 
+    {    
+      pcSlice->setSliceType(I_SLICE);
+    }
+#endif
 
     // Set the nal unit type
     pcSlice->setNalUnitType(getNalUnitType(pocCurr, m_iLastIDR, isField));
@@ -2913,6 +2948,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       if (cs.sps->getUseLmcs() && m_pcReshaper->getSliceReshaperInfo().getUseSliceReshaper())
       {
         picHeader->setLmcsEnabledFlag(true);
+#if GDR_ENABLED
+        if (picHeader->getInGdrInterval()) 
+        {
+          picHeader->setLmcsChromaResidualScaleFlag(false);
+        }       
+#endif
         int apsId = std::min<int>(3, m_pcEncLib->getVPS() == nullptr ? 0 : m_pcEncLib->getVPS()->getGeneralLayerIdx(m_pcEncLib->getLayerId()));
         picHeader->setLmcsAPSId(apsId);
 
@@ -3210,7 +3251,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       /////////////////////////////////////////////////////////////////////////////////////////////////// File writing
 
       // write various parameter sets
+#if GDR_ENABLED // Note : insert SPS/PPS at every GDR picture
+      bool writePS = m_bSeqFirst || (m_pcCfg->getReWriteParamSets() && (pcSlice->isIRAP())) || pcSlice->isInterGDR();
+#else
       bool writePS = m_bSeqFirst || (m_pcCfg->getReWriteParamSets() && (pcSlice->isIRAP()));
+#endif
       if (writePS)
       {
         m_pcEncLib->setParamSetChanged(pcSlice->getSPS()->getSPSId(), pcSlice->getPPS()->getPPSId());
@@ -3246,12 +3291,25 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
         APS* aps = apsMap->getPS((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
         bool writeAPS = aps && apsMap->getChangedFlag((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
+#if GDR_ENABLED // note : insert APS at every GDR picture
+        if (aps && apsId >= 0) 
+        {                    
+          writeAPS |= pcSlice->isInterGDR();          
+        }
+#endif
         if (writeAPS)
         {
           aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
           actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
           apsMap->clearChangedFlag((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
+#if GDR_ENABLED
+          if (!pcSlice->isInterGDR()) 
+          {
+            CHECK(aps != picHeader->getLmcsAPS(), "Wrong LMCS APS pointer in compressGOP");
+          }
+#else
           CHECK(aps != picHeader->getLmcsAPS(), "Wrong LMCS APS pointer in compressGOP");
+#endif
         }
       }
 
@@ -3262,12 +3320,25 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
         APS* aps = apsMap->getPS( ( apsId << NUM_APS_TYPE_LEN ) + SCALING_LIST_APS );
         bool writeAPS = aps && apsMap->getChangedFlag( ( apsId << NUM_APS_TYPE_LEN ) + SCALING_LIST_APS );
+#if GDR_ENABLED // note : insert APS at every GDR picture
+        if (aps && apsId >= 0) 
+        {          
+          writeAPS |= pcSlice->isInterGDR();
+        }
+#endif
         if( writeAPS )
         {
           aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
           actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
           apsMap->clearChangedFlag( ( apsId << NUM_APS_TYPE_LEN ) + SCALING_LIST_APS );
+#if GDR_ENABLED
+          if (!pcSlice->isInterGDR()) 
+          {
+            CHECK(aps != picHeader->getScalingListAPS(), "Wrong SCALING LIST APS pointer in compressGOP");
+          }
+#else
           CHECK( aps != picHeader->getScalingListAPS(), "Wrong SCALING LIST APS pointer in compressGOP" );
+#endif
         }
       }
 
@@ -3296,13 +3367,25 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             writeAPS = true;
             aps = apsMap->getPS((pcSlice->getCcAlfCrApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
           }
-
+#if GDR_ENABLED // note : insert APS at every GDR picture
+          if (aps && apsId >= 0) 
+          {            
+            writeAPS |= (pcSlice->isInterGDR());
+          } 
+#endif
           if (writeAPS )
           {
             aps->chromaPresentFlag = pcSlice->getSPS()->getChromaFormatIdc() != CHROMA_400;
             actualTotalBits += xWriteAPS( accessUnit, aps, m_pcEncLib->getLayerId(), true );
             apsMap->clearChangedFlag((apsId << NUM_APS_TYPE_LEN) + ALF_APS);
+#if GDR_ENABLED
+            if (!pcSlice->isInterGDR()) 
+            {
+              CHECK(aps != pcSlice->getAlfAPSs()[apsId] && apsId != pcSlice->getCcAlfCbApsId() && apsId != pcSlice->getCcAlfCrApsId(), "Wrong APS pointer in compressGOP");
+            }
+#else
             CHECK(aps != pcSlice->getAlfAPSs()[apsId] && apsId != pcSlice->getCcAlfCbApsId() && apsId != pcSlice->getCcAlfCrApsId(), "Wrong APS pointer in compressGOP");
+#endif
           }
         }
       }
@@ -3527,7 +3610,13 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       auto encTime = std::chrono::duration_cast<std::chrono::seconds>( elapsed ).count();
 
       std::string digestStr;
+#if GDR_ENABLED
+      // note : generate hash sei only for non-gdr pictures
+      bool genHash = !(m_pcCfg->getGdrNoHash() && pcSlice->getPicHeader()->getInGdrInterval());      
+      if (m_pcCfg->getDecodedPictureHashSEIType() != HASHTYPE_NONE && genHash)
+#else
       if (m_pcCfg->getDecodedPictureHashSEIType()!=HASHTYPE_NONE)
+#endif
       {
         SEIDecodedPictureHash *decodedPictureHashSei = new SEIDecodedPictureHash();
         PelUnitBuf recoBuf = pcPic->cs->getRecoBuf();
@@ -3568,7 +3657,14 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
       xWriteTrailingSEIMessages(trailingSeiMessages, accessUnit, pcSlice->getTLayer());
 
+#if GDR_ENABLED
+      if (!(m_pcCfg->getGdrNoHash() && pcSlice->getPicHeader()->getInGdrInterval())) 
+      {
+          printHash(m_pcCfg->getDecodedPictureHashSEIType(), digestStr);
+      }
+#else
       printHash(m_pcCfg->getDecodedPictureHashSEIType(), digestStr);
+#endif
 
       if ( m_pcCfg->getUseRateCtrl() )
       {
@@ -4990,6 +5086,18 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
     return NAL_UNIT_CODED_SLICE_TRAIL;
   }
 
+#if GDR_ENABLED    
+  if (m_pcCfg->getGdrEnabled() && m_pcCfg->getDecodingRefreshType() == 3 && (pocCurr >= m_pcCfg->getGdrPocStart()))
+  {    
+    int m = pocCurr - m_pcCfg->getGdrPocStart();
+    int n = m_pcCfg->getGdrPeriod();
+    if (m % n == 0) 
+    {
+      return NAL_UNIT_CODED_SLICE_GDR;
+    }
+  }
+#endif
+
   if (m_pcCfg->getDecodingRefreshType() != 3 && (pocCurr - isField) % (m_pcCfg->getIntraPeriod() * (m_pcCfg->getUseCompositeRef() ? 2 : 1)) == 0)
   {
     if (m_pcCfg->getDecodingRefreshType() == 1)
@@ -5029,7 +5137,14 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
       return NAL_UNIT_CODED_SLICE_RADL;
     }
   }
+#if GDR_ENABLED    
+  if (m_pcCfg->getGdrEnabled() && pocCurr >= m_pcCfg->getGdrPocStart() && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
+    return NAL_UNIT_CODED_SLICE_GDR;
+  else
+    return NAL_UNIT_CODED_SLICE_TRAIL;
+#else
   return NAL_UNIT_CODED_SLICE_TRAIL;
+#endif
 }
 
 void EncGOP::xUpdateRasInit(Slice* slice)

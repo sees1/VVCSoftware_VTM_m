@@ -183,6 +183,9 @@ private:
   bool                    m_bInitAMaxBT;
 
   AUWriterIf*             m_AUWriterIf;
+#if GDR_ENABLED
+  int                     m_lastGdrIntervalPoc;  
+#endif
 
 #if JVET_O0756_CALCULATE_HDRMETRICS
 
@@ -233,6 +236,11 @@ public:
   bool      getPrepareLTRef() { return m_isPrepareLTRef; }
   void      setLastLTRefPoc(int iLastLTRefPoc) { m_lastLTRefPoc = iLastLTRefPoc; }
   int       getLastLTRefPoc() const { return m_lastLTRefPoc; }
+
+#if GDR_ENABLED
+  void      setLastGdrIntervalPoc(int p)  { m_lastGdrIntervalPoc = p; }
+  int       getLastGdrIntervalPoc() const { return m_lastGdrIntervalPoc; }
+#endif
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 
     const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths );

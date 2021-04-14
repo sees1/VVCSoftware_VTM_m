@@ -1549,7 +1549,7 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
   {
     slice = picHeader->getPic()->cs->slice;
   }
-WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
+  WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
   if (picHeader->getGdrOrIrapPicFlag())
   {
@@ -1578,6 +1578,11 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   {
     picHeader->setRecoveryPocCnt( -1 );
   }
+#if GDR_ENC_TRACE
+  printf("-gdr_pic_flag:%d\n", picHeader->getGdrPicFlag());  
+  printf("-recovery_poc_cnt:%d\n", picHeader->getRecoveryPocCnt());
+  printf("-InGdrInterval:%d\n", picHeader->getInGdrInterval());
+#endif
   // PH extra bits are not written in the reference encoder
   // as these bits are reserved for future extensions
   // for( i = 0; i < NumExtraPhBits; i++ )
@@ -1673,6 +1678,10 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     picHeader->setLmcsEnabledFlag(false);
     picHeader->setLmcsChromaResidualScaleFlag(false);
   }
+#if GDR_ENC_TRACE    
+  printf("-pic_lmcs_enabled_flag:%d\n", picHeader->getLmcsEnabledFlag() ? 1 : 0);
+  printf("-pic_chroma_residual_scale_flag:%d\n", picHeader->getLmcsChromaResidualScaleFlag() ? 1 : 0);
+#endif
 
   // quantization scaling lists
   if( sps->getScalingListFlag() )
@@ -1695,7 +1704,57 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   {
     WRITE_FLAG( picHeader->getVirtualBoundariesPresentFlag(), "ph_virtual_boundaries_present_flag" );
     if( picHeader->getVirtualBoundariesPresentFlag() )
-    {
+    {     
+#if GDR_ENABLED
+      if (sps->getGDREnabledFlag())
+      {
+        int n = picHeader->getNumVerVirtualBoundaries();
+        for (unsigned i = 0; i < n; i++)
+        {
+          if (picHeader->getVirtualBoundariesPosX(i) == pps->getPicWidthInLumaSamples())
+          {
+            n = n - 1;
+          }
+        }
+
+        WRITE_UVLC(n, "ph_num_ver_virtual_boundaries");
+
+        if (pps->getPicWidthInLumaSamples() <= 8)
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        }
+        else
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
+        }
+
+        for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
+        {
+          if (picHeader->getVirtualBoundariesPosX(i) != pps->getPicWidthInLumaSamples())
+          {
+            WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
+            CHECK(((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
+          }
+        }
+      }
+      else
+      {
+        WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
+        if (pps->getPicWidthInLumaSamples() <= 8)
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        }
+        else
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
+        }
+        for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
+        {
+          WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
+          CHECK(((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
+        }
+      }
+#else
       WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
       if (pps->getPicWidthInLumaSamples() <= 8)
       {
@@ -1710,6 +1769,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
         WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
       }
+#endif
       WRITE_UVLC(picHeader->getNumHorVirtualBoundaries(), "ph_num_hor_virtual_boundaries");
       if (pps->getPicHeightInLumaSamples() <= 8)
       {

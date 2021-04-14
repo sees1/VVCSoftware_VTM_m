@@ -88,15 +88,17 @@ struct SmallerThanComboCost
 {
   inline bool operator() (const GeoMergeCombo& first, const GeoMergeCombo& second)
   {
-      return (first.cost < second.cost);
+    return (first.cost < second.cost);
   }
 };
+
 class GeoComboCostList
 {
 public:
   GeoComboCostList() {};
   ~GeoComboCostList() {};
-  std::vector<GeoMergeCombo> list;
+  std::vector<GeoMergeCombo> list;  
+  
   void sortByCost() { std::stable_sort(list.begin(), list.end(), SmallerThanComboCost()); };
 };
 struct SingleGeoMergeEntry

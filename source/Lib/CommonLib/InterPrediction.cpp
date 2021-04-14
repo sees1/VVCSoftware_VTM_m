@@ -878,7 +878,11 @@ bool InterPrediction::isSubblockVectorSpreadOverLimit( int a, int b, int c, int 
   return false;
 }
 
+#if GDR_ENABLED
+bool InterPrediction::xPredAffineBlk(const ComponentID &compID, const PredictionUnit &pu, const Picture *refPic, const Mv *_mv, PelUnitBuf &dstPic, const bool &bi, const ClpRng &clpRng, bool genChromaMv, const std::pair<int, int> scalingRatio)
+#else
 void InterPrediction::xPredAffineBlk(const ComponentID &compID, const PredictionUnit &pu, const Picture *refPic, const Mv *_mv, PelUnitBuf &dstPic, const bool &bi, const ClpRng &clpRng, bool genChromaMv, const std::pair<int, int> scalingRatio)
+#endif
 {
 
   JVET_J0090_SET_REF_PICTURE( refPic, compID );
@@ -889,6 +893,13 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
   Mv mvLT =_mv[0];
   Mv mvRT =_mv[1];
   Mv mvLB =_mv[2];
+#if GDR_ENABLED  
+  bool allOk = true;
+  const CodingStructure &cs = *pu.cs;
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+  const int pux = pu.lx();
+  const int puy = pu.ly();
+#endif
 
   // get affine sub-block width and height
   const int width  = pu.Y().width;
@@ -1113,6 +1124,16 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
             iMvScaleTmpVer = tmpMv.getVer();
           }
         }
+#if GDR_ENABLED
+        if (isEncodeGdrClean) 
+        {
+          Position subPuPos = Position(pux + w + blockWidth, puy + h + blockHeight);
+          Mv subPuMv = Mv(iMvScaleTmpHor, iMvScaleTmpVer);
+          bool puClean = cs.isClean(subPuPos, subPuMv, refPic);
+
+          allOk = allOk && puClean;
+        }
+#endif
       }
       else
       {
@@ -1133,6 +1154,17 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
         }
         iMvScaleTmpHor = curMv.hor;
         iMvScaleTmpVer = curMv.ver;
+
+#if GDR_ENABLED
+        if (isEncodeGdrClean) 
+        {
+          Position subPuPos = Position(pux + (w + blockWidth) * 2, puy + (h + blockHeight) * 2);
+          Mv subPuMv = Mv(iMvScaleTmpHor, iMvScaleTmpVer);
+          bool puClean = cs.isClean(subPuPos, subPuMv, refPic);
+
+          allOk = allOk && puClean;
+        }
+#endif
       }
 
       if( xPredInterBlkRPR( scalingRatio, *pu.cs->pps, CompArea( compID, chFmt, pu.blocks[compID].offset( w, h ), Size( blockWidth, blockHeight ) ), refPic, Mv( iMvScaleTmpHor, iMvScaleTmpVer ), dstBuf.buf + w + h * dstBuf.stride, dstBuf.stride, bi, wrapRef, clpRng, 2 ) )
@@ -1237,6 +1269,9 @@ void InterPrediction::xPredAffineBlk(const ComponentID &compID, const Prediction
       }
     }
   }
+#if GDR_ENABLED
+  return allOk;
+#endif
 }
 
 void InterPrediction::applyBiOptFlow(const PredictionUnit &pu, const CPelUnitBuf &yuvSrc0, const CPelUnitBuf &yuvSrc1, const int &refIdx0, const int &refIdx1, PelUnitBuf &yuvDst, const BitDepths &clipBitDepths)

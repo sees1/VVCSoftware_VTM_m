@@ -555,6 +555,91 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   const UnitArea currCsArea = clipArea( CS::getArea( *bestCS, bestCS->area, partitioner.chType ), *tempCS->picture );
 
   m_modeCtrl->initCULevel( partitioner, *tempCS );
+#if GDR_ENABLED 
+  if (m_pcEncCfg->getGdrEnabled())
+  {
+    bool isInGdrInterval = slice.getPicHeader()->getInGdrInterval();
+
+    // 1.0 applicable to inter picture only  
+    if (isInGdrInterval)
+    {
+      int gdrPocStart = m_pcEncCfg->getGdrPocStart();
+      int gdrInterval = m_pcEncCfg->getGdrInterval();
+
+      int picWidth = slice.getPPS()->getPicWidthInLumaSamples();
+      int m1, m2, n1;
+
+      int curPoc = slice.getPOC();
+      int gdrPoc = (curPoc - gdrPocStart) % gdrInterval;
+
+      int begGdrX = 0;
+      int endGdrX = 0;
+
+      double dd = (picWidth / (double)gdrInterval);
+      int mm = (int)((picWidth / (double)gdrInterval) + 0.49999);
+      m1 = ((mm + 7) >> 3) << 3;
+      m2 = ((mm + 0) >> 3) << 3;
+
+      if (dd > mm && m1 == m2)
+      {
+        m1 = m1 + 8;
+      }
+
+      n1 = (picWidth - m2 * gdrInterval) / 8;
+
+      if (gdrPoc < n1)
+      {
+        begGdrX = m1 * gdrPoc;
+        endGdrX = begGdrX + m1;
+      }
+      else
+      {
+        begGdrX = m1 * n1 + m2 * (gdrPoc - n1);
+        endGdrX = begGdrX + m2;
+        if (picWidth <= endGdrX)
+        {          
+          begGdrX = picWidth;
+          endGdrX = picWidth;
+        }
+      }
+
+      bool isInRefreshArea = tempCS->withinRefresh(begGdrX, endGdrX);
+
+      if (isInRefreshArea)
+      {
+        m_modeCtrl->forceIntraMode();
+      }
+      else if (tempCS->containRefresh(begGdrX, endGdrX) || tempCS->overlapRefresh(begGdrX, endGdrX))
+      {
+        // 1.3.1 enable only vertical splits (QT, BT_V, TT_V)                  
+        m_modeCtrl->forceVerSplitOnly();
+
+        // 1.3.2 remove TT_V if it does not satisfy the condition
+        if (tempCS->refreshCrossTTV(begGdrX, endGdrX))
+        {
+          m_modeCtrl->forceRemoveTTV();
+        }
+      }
+
+      if (tempCS->area.lwidth() != tempCS->area.lheight())
+      {
+        m_modeCtrl->forceRemoveQT();
+      }
+
+      if (!m_modeCtrl->anyPredModeLeft())
+      {
+        m_modeCtrl->forceRemoveDontSplit();
+      }
+
+      if (isInRefreshArea && !m_modeCtrl->anyIntraIBCMode() && (tempCS->area.lwidth() == 4 || tempCS->area.lheight() == 4))
+      {
+        m_modeCtrl->finishCULevel(partitioner);
+        return;
+      }
+    }
+  }
+#endif
+
   if( partitioner.currQtDepth == 0 && partitioner.currMtDepth == 0 && !tempCS->slice->isIntra() && ( sps.getUseSBT() || sps.getUseInterMTS() ) )
   {
     auto slsSbt = dynamic_cast<SaveLoadEncInfoSbt*>( m_modeCtrl );
@@ -829,7 +914,11 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
           break;
         }
       }
+#if GDR_ENABLED
+      if (bestCS->cus.size() > 0 && splitmode != bestCS->cus[0]->splitSeries)
+#else
       if (splitmode != bestCS->cus[0]->splitSeries)
+#endif
       {
         splitmode = bestCS->cus[0]->splitSeries;
         const CodingUnit&     cu = *bestCS->cus.front();
@@ -1064,7 +1153,12 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
   tempCS->getPredBuf().fill(0);
   AffineMVInfo tmpMVInfo;
   bool isAffMVInfoSaved;
+#if GDR_ENABLED
+  AffineMVInfoSolid tmpMVInfoSolid;
+  m_pcInterSearch->savePrevAffMVInfo(0, tmpMVInfo, tmpMVInfoSolid, isAffMVInfoSaved);
+#else
   m_pcInterSearch->savePrevAffMVInfo(0, tmpMVInfo, isAffMVInfoSaved);
+#endif
   BlkUniMvInfo tmpUniMvInfo;
   bool         isUniMvInfoSaved = false;
   if (!tempCS->slice->isIntra())
@@ -1343,10 +1437,18 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
   // RD check for sub partitioned coding structure.
   xCheckBestMode( tempCS, bestCS, partitioner, encTestMode );
 
+#if GDR_ENABLED
+  if (isAffMVInfoSaved)
+  {
+    m_pcInterSearch->addAffMVInfo(tmpMVInfo, tmpMVInfoSolid);
+  }
+#else
   if (isAffMVInfoSaved)
   {
     m_pcInterSearch->addAffMVInfo(tmpMVInfo);
   }
+#endif
+    
   if (!tempCS->slice->isIntra() && isUniMvInfoSaved)
   {
     m_pcInterSearch->addUniMvInfo(tmpUniMvInfo);
@@ -2023,6 +2125,10 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
   MergeCtx mergeCtx;
   const SPS &sps = *tempCS->sps;
 
+#if GDR_ENABLED  
+  bool isEncodeGdrClean = false;
+  CodingStructure *cs;
+#endif
   if (sps.getSbTMVPEnabledFlag())
   {
     Size bufSize = g_miScaling.scale( tempCS->area.lumaSize() );
@@ -2046,6 +2152,10 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
     PU::getInterMergeCandidates(pu, mergeCtx, 0);
     PU::getInterMMVDMergeCandidates(pu, mergeCtx);
     pu.regularMergeFlag = true;
+#if GDR_ENABLED  
+    cs = pu.cs;
+    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrInterval() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
   }
   bool candHasNoResidual[MRG_MAX_NUM_CANDS + MMVD_ADD_NUM];
   for (uint32_t ui = 0; ui < MRG_MAX_NUM_CANDS + MMVD_ADD_NUM; ui++)
@@ -2210,6 +2320,42 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
         uint64_t fracBits = m_pcInterSearch->xCalcPuMeBits(pu);
         double cost = (double)uiSad + (double)fracBits * sqrtLambdaForFirstPassIntra;
         insertPos = -1;
+
+#if GDR_ENABLED
+        // Non-RD cost for regular merge
+        if (isEncodeGdrClean)
+        {
+          bool isSolid = true;
+          bool isValid = true;
+
+          if (mergeCtx.mvFieldNeighbours[(uiMergeCand << 1) + 0].refIdx >= 0)
+          {
+            Mv mv = mergeCtx.mvFieldNeighbours[(uiMergeCand << 1) + 0].mv;
+            int ridx = mergeCtx.mvFieldNeighbours[(uiMergeCand << 1) + 0].refIdx;
+
+            mergeCtx.mvValid[(uiMergeCand << 1) + 0] = cs->isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_0, ridx);
+
+            isSolid = isSolid && mergeCtx.mvSolid[(uiMergeCand << 1) + 0];
+            isValid = isValid && mergeCtx.mvValid[(uiMergeCand << 1) + 0];
+          }
+
+          if (mergeCtx.mvFieldNeighbours[(uiMergeCand << 1) + 1].refIdx >= 0) \
+          {
+            Mv mv = mergeCtx.mvFieldNeighbours[(uiMergeCand << 1) + 1].mv;
+            int ridx = mergeCtx.mvFieldNeighbours[(uiMergeCand << 1) + 1].refIdx;
+
+            mergeCtx.mvValid[(uiMergeCand << 1) + 1] = cs->isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_1, ridx);
+
+            isSolid = isSolid && mergeCtx.mvSolid[(uiMergeCand << 1) + 1];
+            isValid = isValid && mergeCtx.mvValid[(uiMergeCand << 1) + 1];
+          }
+
+          if (!isValid || !isSolid)
+          {
+            cost = MAX_DOUBLE;
+          }
+        }
+#endif
         updateCandList(ModeInfo(uiMergeCand, true, false, false), cost, RdModeList, candCostList, uiNumMrgSATDCand, &insertPos);
         if (insertPos != -1)
         {
@@ -2226,7 +2372,9 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
             swap(singleMergeTempBuffer, acMergeTempBuffer[insertPos]);
           }
         }
+#if !GDR_ENABLED
         CHECK(std::min(uiMergeCand + 1, uiNumMrgSATDCand) != RdModeList.size(), "");
+#endif
       }
 
       if (isIntrainterEnabled)
@@ -2280,6 +2428,42 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           pu.regularMergeFlag = false;
           uint64_t fracBits = m_pcInterSearch->xCalcPuMeBits(pu);
           double cost = (double)sadValue + (double)fracBits * sqrtLambdaForFirstPassIntra;
+#if GDR_ENABLED
+          // Non-RD cost for CIIP merge
+          if (isEncodeGdrClean)
+          {
+            bool isSolid = true;
+            bool isValid = true;
+
+            if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx >= 0)
+            {
+              Mv mv = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].mv;
+              int ridx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx;
+
+              mergeCtx.mvValid[(mergeCand << 1) + 0] = cs->isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_0, ridx);
+
+              isSolid = isSolid && mergeCtx.mvSolid[(mergeCand << 1) + 0];
+              isValid = isValid && mergeCtx.mvValid[(mergeCand << 1) + 0];
+            }
+
+            if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx >= 0)
+            {
+              Mv mv = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].mv;
+              int ridx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx;
+
+              mergeCtx.mvValid[(mergeCand << 1) + 1] = cs->isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_1, ridx);
+
+              isSolid = isSolid && mergeCtx.mvSolid[(mergeCand << 1) + 1];
+              isValid = isValid && mergeCtx.mvValid[(mergeCand << 1) + 1];
+            }
+
+            if (!isValid || !isSolid)
+            {
+              cost = MAX_DOUBLE;
+            }
+          }
+#endif
+
           insertPos = -1;
           updateCandList(ModeInfo(mergeCand, false, false, true), cost, RdModeList, candCostList, uiNumMrgSATDCand, &insertPos);
           if (insertPos != -1)
@@ -2306,6 +2490,16 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           {
             continue;
           }
+#if GDR_ENABLED
+          if (isEncodeGdrClean)
+          {
+            pu.mvSolid[REF_PIC_LIST_0] = true;
+            pu.mvSolid[REF_PIC_LIST_1] = true;
+
+            pu.mvValid[REF_PIC_LIST_0] = true;
+            pu.mvValid[REF_PIC_LIST_1] = true;
+          }
+#endif
           mergeCtx.setMmvdMergeCandiInfo(pu, mmvdMergeCand);
 
           PU::spanMotionInfo(pu, mergeCtx);
@@ -2323,6 +2517,31 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
           uint64_t fracBits = m_pcInterSearch->xCalcPuMeBits(pu);
           double cost = (double)uiSad + (double)fracBits * sqrtLambdaForFirstPassIntra;
           insertPos = -1;
+
+#if GDR_ENABLED
+          if (isEncodeGdrClean)
+          {
+            bool isSolid = true;
+            bool isValid = true;
+
+            if (pu.refIdx[0] >= 0)
+            {
+              isSolid = isSolid && pu.mvSolid[0];
+              isValid = isValid && pu.mvValid[0];
+            }
+
+            if (pu.refIdx[1] >= 0)
+            {
+              isSolid = isSolid && pu.mvSolid[1];
+              isValid = isValid && pu.mvValid[1];
+            }
+
+            if (!isSolid || !isValid)
+            {
+              cost = MAX_DOUBLE;
+            }
+          }
+#endif
           updateCandList(ModeInfo(mmvdMergeCand, false, true, false), cost, RdModeList, candCostList, uiNumMrgSATDCand, &insertPos);
           if (insertPos != -1)
           {
@@ -2540,7 +2759,36 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
         isTestSkipMerge[uiMergeCand] = true;
       }
 
+#if GDR_ENABLED
+      if (isEncodeGdrClean)
+      {
+        bool isSolid = true;
+        bool isValid = true;
+
+        if (pu.refIdx[0] >= 0)
+        {
+          isSolid = isSolid && pu.mvSolid[0];
+          isValid = isValid && pu.mvValid[0];
+        }
+
+        if (pu.refIdx[1] >= 0)
+        {
+          isSolid = isSolid && pu.mvSolid[1];
+          isValid = isValid && pu.mvValid[1];
+        }
+
+        if (isSolid && isValid)
+        {
+          xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : NULL);
+        }
+      }
+      else
+      {
+        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : NULL);
+      }
+#else
       xEncodeInterResidual( tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : NULL );
+#endif
 
       if( m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip && !pu.ciipFlag)
       {
@@ -2620,6 +2868,11 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   cu.bdpcmMode = 0;
 
   PredictionUnit &pu = tempCS->addPU(cu, pm.chType);
+#if GDR_ENABLED  
+  CodingStructure &cs = *pu.cs;
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
+  
   pu.mergeFlag = true;
   pu.regularMergeFlag = false;
   PU::getGeoMergeCandidates(pu, mergeCtx);
@@ -2642,6 +2895,19 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
   int        pocMrg[GEO_MAX_NUM_UNI_CANDS];
   Mv         MrgMv[GEO_MAX_NUM_UNI_CANDS];
   bool       isSkipThisCand[GEO_MAX_NUM_UNI_CANDS];
+#if GDR_ENABLED 
+  bool MrgSolid[GEO_MAX_NUM_UNI_CANDS];
+  bool MrgValid[GEO_MAX_NUM_UNI_CANDS];
+
+  if (isEncodeGdrClean) 
+  {   
+    for (int i = 0; i < maxNumMergeCandidates; i++) 
+    {
+      MrgSolid[i] = true;
+      MrgValid[i] = true;
+    }
+  }
+#endif
   for (int i = 0; i < maxNumMergeCandidates; i++)
   {
     isSkipThisCand[i] = false;
@@ -2655,6 +2921,13 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     int MrgrefIdx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + MrgList].refIdx;
     pocMrg[mergeCand] = tempCS->slice->getRefPic(MrgeRefPicList, MrgrefIdx)->getPOC();
     MrgMv[mergeCand] = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + MrgList].mv;
+#if GDR_ENABLED 
+    if (isEncodeGdrClean)
+    {
+      MrgSolid[mergeCand] = mergeCtx.mvSolid[(mergeCand << 1) + MrgList];
+      MrgValid[mergeCand] = mergeCtx.mvValid[(mergeCand << 1) + MrgList];
+    }
+#endif
     if (mergeCand)
     {
       for (int i = 0; i < mergeCand; i++)
@@ -2679,7 +2952,20 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     distParamWholeBlk.cur.buf = geoTempBuf[mergeCand].Y().buf;
     distParamWholeBlk.cur.stride = geoTempBuf[mergeCand].Y().stride;
     sadWholeBlk[mergeCand] = distParamWholeBlk.distFunc(distParamWholeBlk);
+#if GDR_ENABLED     
+    bool allOk = (sadWholeBlk[mergeCand] < bestWholeBlkSad);
+    if (isEncodeGdrClean)
+    {
+      bool isSolid = mergeCtx.mvSolid[(mergeCand << 1) + MrgList];
+      bool isValid = mergeCtx.mvValid[(mergeCand << 1) + MrgList];
+      allOk = allOk && isSolid && isValid;
+    }
+#endif    
+#if GDR_ENABLED 
+    if (allOk)
+#else
     if (sadWholeBlk[mergeCand] < bestWholeBlkSad)
+#endif
     {
       bestWholeBlkSad = sadWholeBlk[mergeCand];
       int bitsCand = mergeCand + 1;
@@ -2727,12 +3013,44 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     for (uint8_t mergeCand = 0; mergeCand < maxNumMergeCandidates; mergeCand++)
     {
       int bitsCand = mergeCand + 1;
+#if GDR_ENABLED 
+      if (isEncodeGdrClean)
+      {
+        double cost0, cost1;
 
+        m_pcRdCost->setDistParam(distParam, tempCS->getOrgBuf().Y(), geoTempBuf[mergeCand].Y().buf, geoTempBuf[mergeCand].Y().stride, SADmask, maskStride, stepX, maskStride2, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y);
+        sadLarge = distParam.distFunc(distParam);
+        sadSmall = sadWholeBlk[mergeCand] - sadLarge;
+
+        if (MrgSolid[mergeCand] && MrgValid[mergeCand])
+        {
+          cost0 = (double)sadLarge + (double)bitsCand * sqrtLambdaForFirstPass;
+          cost1 = (double)sadSmall + (double)bitsCand * sqrtLambdaForFirstPass;
+        }
+        else
+        {
+          cost0 = MAX_DOUBLE;
+          cost1 = MAX_DOUBLE;
+        }
+
+        m_GeoCostList.insert(splitDir, 0, mergeCand, cost0);
+        m_GeoCostList.insert(splitDir, 1, mergeCand, cost1);
+      }
+      else
+      {
+        m_pcRdCost->setDistParam(distParam, tempCS->getOrgBuf().Y(), geoTempBuf[mergeCand].Y().buf, geoTempBuf[mergeCand].Y().stride, SADmask, maskStride, stepX, maskStride2, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y);
+        sadLarge = distParam.distFunc(distParam);
+        m_GeoCostList.insert(splitDir, 0, mergeCand, (double)sadLarge + (double)bitsCand * sqrtLambdaForFirstPass);
+        sadSmall = sadWholeBlk[mergeCand] - sadLarge;
+        m_GeoCostList.insert(splitDir, 1, mergeCand, (double)sadSmall + (double)bitsCand * sqrtLambdaForFirstPass);
+      }
+#else
       m_pcRdCost->setDistParam(distParam, tempCS->getOrgBuf().Y(), geoTempBuf[mergeCand].Y().buf, geoTempBuf[mergeCand].Y().stride, SADmask, maskStride, stepX, maskStride2, sps.getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y);
       sadLarge = distParam.distFunc(distParam);
       m_GeoCostList.insert(splitDir, 0, mergeCand, (double)sadLarge + (double)bitsCand * sqrtLambdaForFirstPass);
       sadSmall = sadWholeBlk[mergeCand] - sadLarge;
       m_GeoCostList.insert(splitDir, 1, mergeCand, (double)sadSmall + (double)bitsCand * sqrtLambdaForFirstPass);
+#endif
     }
   }
 
@@ -2748,6 +3066,22 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
         continue;
       }
       tempCost = tempCost + (double)bitsCandTB * sqrtLambdaForFirstPass;
+#if GDR_ENABLED 
+      if (isEncodeGdrClean)
+      {
+        int idx0 = mergeCand0;
+        int idx1 = mergeCand1;
+        bool isSolid0 = mergeCtx.mvSolid[(idx0 << 1) + 0] && mergeCtx.mvSolid[(idx0 << 1) + 1];
+        bool isSolid1 = mergeCtx.mvSolid[(idx1 << 1) + 0] && mergeCtx.mvSolid[(idx1 << 1) + 1];
+        bool isValid0 = mergeCtx.mvValid[(idx0 << 1) + 0] && mergeCtx.mvValid[(idx0 << 1) + 1];
+        bool isValid1 = mergeCtx.mvValid[(idx1 << 1) + 0] && mergeCtx.mvValid[(idx1 << 1) + 1];
+
+        if (!isSolid0 || !isSolid1 || !isValid0 || !isValid1)
+        {
+          tempCost = MAX_DOUBLE;
+        }
+      }
+#endif
       comboList.list.push_back(GeoMergeCombo(splitDir, mergeCand0, mergeCand1, tempCost));
     }
   }
@@ -2786,6 +3120,22 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
     mvBits += mergeCand0;
     mvBits += mergeCand1;
     double updateCost = (double)sad + (double)(bitsCandTB + mvBits) * sqrtLambdaForFirstPass;
+#if GDR_ENABLED 
+    if (isEncodeGdrClean)
+    {
+      int idx0 = mergeCand0;
+      int idx1 = mergeCand1;
+      bool isSolid0 = mergeCtx.mvSolid[(idx0 << 1) + 0] && mergeCtx.mvSolid[(idx0 << 1) + 1];
+      bool isSolid1 = mergeCtx.mvSolid[(idx1 << 1) + 0] && mergeCtx.mvSolid[(idx1 << 1) + 1];
+      bool isValid0 = mergeCtx.mvValid[(idx0 << 1) + 0] && mergeCtx.mvValid[(idx0 << 1) + 1];
+      bool isValid1 = mergeCtx.mvValid[(idx1 << 1) + 0] && mergeCtx.mvValid[(idx1 << 1) + 1];
+
+      if (!isSolid0 || !isSolid1 || !isValid0 || !isValid1)
+      {
+        updateCost = MAX_DOUBLE;
+      }
+    }
+#endif    
     comboList.list[candidateIdx].cost = updateCost;
     updateCandList(candidateIdx, updateCost, geoRdModeList, geocandCostList, geoNumMrgSATDCand);
   }
@@ -2850,7 +3200,28 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
       PU::spanGeoMotionInfo(pu, mergeCtx, pu.geoSplitDir, pu.geoMergeIdx0, pu.geoMergeIdx1);
       tempCS->getPredBuf().copyFrom(geoCombinations[candidateIdx]);
 
+#if GDR_ENABLED 
+      if (isEncodeGdrClean)
+      {
+        int idx0 = pu.geoMergeIdx0;
+        int idx1 = pu.geoMergeIdx1;
+        bool isSolid0 = mergeCtx.mvSolid[(idx0 << 1) + 0] && mergeCtx.mvSolid[(idx0 << 1) + 1];
+        bool isSolid1 = mergeCtx.mvSolid[(idx1 << 1) + 0] && mergeCtx.mvSolid[(idx1 << 1) + 1];
+        bool isValid0 = mergeCtx.mvValid[(idx0 << 1) + 0] && mergeCtx.mvValid[(idx0 << 1) + 1];
+        bool isValid1 = mergeCtx.mvValid[(idx1 << 1) + 0] && mergeCtx.mvValid[(idx1 << 1) + 1];
+
+        if (isSolid0 && isSolid1 && isValid0 && isValid1)
+        {
+          xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass, (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : NULL));
+        }
+      }
+      else
+      {
+        xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass, (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : NULL));
+      }
+#else
       xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass, (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : NULL));
+#endif
 
       if (m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip)
       {
@@ -2876,6 +3247,10 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
   {
     return;
   }
+#if GDR_ENABLED
+  CodingStructure *cs;
+  bool isEncodeGdrClean = false;
+#endif  
   m_bestModeUpdated = tempCS->useDbCost = bestCS->useDbCost = false;
   const Slice &slice = *tempCS->slice;
 
@@ -2913,6 +3288,10 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
     pu.cu = &cu;
     pu.cs = tempCS;
     pu.regularMergeFlag = false;
+#if GDR_ENABLED
+    cs = pu.cs;
+    isEncodeGdrClean = cs->sps->getGDREnabledFlag() && cs->pcv->isEncoder && ((cs->picHeader->getInGdrInterval() && cs->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs->picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
     PU::getAffineMergeCand( pu, affineMergeCtx );
 
     if ( affineMergeCtx.numValidMergeCand <= 0 )
@@ -3003,6 +3382,19 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
           PU::spanMotionInfo( pu );
         }
 
+#if GDR_ENABLED
+        if (isEncodeGdrClean)
+        {
+          Mv zero = Mv(0, 0);
+          bool isValid = cs->isSubPuClean(pu, &zero);
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][0] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][1] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][2] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][0] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][1] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][2] = isValid;
+        }
+#endif
         distParam.cur = acMergeBuffer[uiMergeCand].Y();
 
         m_pcInterSearch->motionCompensation( pu, acMergeBuffer[uiMergeCand], REF_PIC_LIST_X, true, false );
@@ -3014,6 +3406,23 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
           uiBitsCand--;
         }
         double cost = (double)uiSad + (double)uiBitsCand * sqrtLambdaForFirstPass;
+#if GDR_ENABLED
+        if (isEncodeGdrClean)
+        {
+          bool isSolid0 = affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][0] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][1] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][2];
+          bool isSolid1 = affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][0] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][1] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][2];
+          bool isValid0 = affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][0] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][1] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][2];
+          bool isValid1 = affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][0] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][1] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][2];
+
+          bool isSolid = isSolid0 && isSolid1;
+          bool isValid = isValid0 && isValid1;
+
+          if (!isSolid || !isValid)
+          {
+            cost = MAX_DOUBLE;
+          }
+        }
+#endif        
         updateCandList( uiMergeCand, cost, RdModeList, candCostList
           , uiNumMrgSATDCand );
 
@@ -3106,11 +3515,59 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
         m_pcInterSearch->motionCompensation( pu );
       }
 
+#if GDR_ENABLED
+      bool isSolid = true;
+      bool isValid = true;
+
+      if (isEncodeGdrClean)
+      {
+        if (bestIsSkip)
+        {
+          Mv zero = Mv(0, 0);
+          bool isValid = cs->isSubPuClean(pu, &zero);
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][0] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][1] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][2] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][0] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][1] = isValid;
+          affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][2] = isValid;
+        }
+
+        bool isSolid0 = affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][0] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][1] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 0][2];
+        bool isSolid1 = affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][0] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][1] && affineMergeCtx.mvSolid[(uiMergeCand << 1) + 1][2];
+        bool isValid0 = affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][0] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][1] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 0][2];
+        bool isValid1 = affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][0] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][1] && affineMergeCtx.mvValid[(uiMergeCand << 1) + 1][2];
+
+        isSolid = isSolid0 && isSolid1;
+        isValid = isValid0 && isValid1;
+
+        if (isSolid && isValid)
+        {
+          xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : NULL));
+        }
+      }
+      else
+      {
+        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : NULL));
+      }
+#else
       xEncodeInterResidual( tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, ( uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : NULL ) );
+#endif
 
       if ( m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip )
       {
-        bestIsSkip = bestCS->getCU( partitioner.chType )->rootCbf == 0;
+#if GDR_ENABLED                
+        if (bestCS->getCU(partitioner.chType))
+        {
+          bestIsSkip = bestCS->getCU(partitioner.chType)->rootCbf == 0;
+        }
+        else
+        {
+          bestIsSkip = false;
+        }
+#else
+        bestIsSkip = bestCS->getCU(partitioner.chType)->rootCbf == 0;
+#endif
       }
       tempCS->initStructData( encTestMode.qp );
     }// end loop uiMrgHADIdx
@@ -3171,6 +3628,9 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     mergeCtx.subPuMvpMiBuf = MotionBuf(m_SubPuMiBuf, bufSize);
   }
 
+#if GDR_ENABLED
+  bool gdrClean = true;
+#endif
   {
     // first get merge candidates
     CodingUnit cu(tempCS->area);
@@ -3186,13 +3646,34 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     pu.regularMergeFlag = false;
     cu.geoFlag = false;
     PU::getIBCMergeCandidates(pu, mergeCtx);
+#if GDR_ENABLED
+    gdrClean = tempCS->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA) || tempCS->picHeader->getNumVerVirtualBoundaries() == 0;
+#endif
   }
+#if GDR_ENABLED
+  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && tempCS->picHeader->getInGdrInterval() && gdrClean;
+  bool *MrgSolid = nullptr;
+  bool *MrgValid = nullptr;
+#endif
 
   int candHasNoResidual[MRG_MAX_NUM_CANDS];
   for (unsigned int ui = 0; ui < mergeCtx.numValidMergeCand; ui++)
   {
     candHasNoResidual[ui] = 0;
   }
+
+#if GDR_ENABLED 
+  if (isEncodeGdrClean)
+  {
+    MrgSolid = new bool[MRG_MAX_NUM_CANDS];
+    MrgValid = new bool[MRG_MAX_NUM_CANDS];
+    for (int i = 0; i < MRG_MAX_NUM_CANDS; i++)
+    {
+      MrgSolid[i] = false;
+      MrgValid[i] = false;
+    }
+  }
+#endif
 
   bool                                        bestIsSkip = false;
   unsigned                                    numMrgSATDCand = mergeCtx.numValidMergeCand;
@@ -3275,7 +3756,41 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
         bitsCand--;
       }
       double cost = (double) sad + (double) bitsCand * sqrtLambdaForFirstPass;
+#if GDR_ENABLED
+      if (isEncodeGdrClean)
+      {
+        bool isSolid = true;
+        bool isValid = true;
 
+        if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx >= 0)
+        {
+          Mv mv = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].mv;
+          int ridx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx;
+
+          mergeCtx.mvValid[(mergeCand << 1) + 0] = tempCS->isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_0, ridx, true);
+
+          isSolid = isSolid && mergeCtx.mvSolid[(mergeCand << 1) + 0];
+          isValid = isValid && mergeCtx.mvValid[(mergeCand << 1) + 0];
+        }
+
+        if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx >= 0)
+        {
+          Mv mv = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].mv;
+          int ridx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx;
+
+          mergeCtx.mvValid[(mergeCand << 1) + 1] = tempCS->isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_1, ridx, true);
+
+          isSolid = isSolid && mergeCtx.mvSolid[(mergeCand << 1) + 1];
+          isValid = isValid && mergeCtx.mvValid[(mergeCand << 1) + 1];
+        }
+
+        if (!isValid || !isSolid)
+        {
+          cost = MAX_DOUBLE;
+          numValidBv--;
+        }
+      }
+#endif
       updateCandList(mergeCand, cost, RdModeList, candCostList, numMrgSATDCand);
     }
 
@@ -3342,12 +3857,62 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
 
             assert(mergeCtx.mrgTypeNeighbours[mergeCand] == MRG_TYPE_IBC); //  should be IBC candidate at this round
             const bool chroma = !pu.cu->isSepTree();
+#if GDR_ENABLED
+            // redo validation again for Skip
+            {
+              CodingStructure &cs = *pu.cs;
 
+              if (isEncodeGdrClean)
+              {
+                if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx >= 0)
+                {
+                  Mv mv = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].mv;
+                  int ridx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx;
+
+                  mergeCtx.mvValid[(mergeCand << 1) + 0] = cs.isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_0, ridx, true);
+                }
+
+                if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx >= 0)
+                {
+                  Mv mv = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].mv;
+                  int ridx = mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx;
+                  mergeCtx.mvValid[(mergeCand << 1) + 1] = cs.isClean(pu.Y().bottomRight(), mv, REF_PIC_LIST_1, ridx, true);
+                }
+              }
+            }
+#endif
             //  MC
             m_pcInterSearch->motionCompensation(pu,REF_PIC_LIST_0, true, chroma);
             m_CABACEstimator->getCtx() = m_CurrCtx->start;
 
+#if GDR_ENABLED
+            if (isEncodeGdrClean)
+            {
+              bool mvSolid = true;
+              bool mvValid = true;
+              if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 0].refIdx >= 0)
+              {
+                mvSolid = mvSolid && mergeCtx.mvSolid[(mergeCand << 1) + 0];
+                mvValid = mvValid && mergeCtx.mvValid[(mergeCand << 1) + 0];
+              }
+              if (mergeCtx.mvFieldNeighbours[(mergeCand << 1) + 1].refIdx >= 0)
+              {
+                mvSolid = mvSolid && mergeCtx.mvSolid[(mergeCand << 1) + 1];
+                mvValid = mvValid && mergeCtx.mvValid[(mergeCand << 1) + 1];
+              }
+
+              if (mvSolid && mvValid)
+              {
+                m_pcInterSearch->encodeResAndCalcRdInterCU(*tempCS, partitioner, (numResidualPass != 0), true, chroma);
+              }
+            }
+            else
+            {
+              m_pcInterSearch->encodeResAndCalcRdInterCU(*tempCS, partitioner, (numResidualPass != 0), true, chroma);
+            }
+#else
             m_pcInterSearch->encodeResAndCalcRdInterCU(*tempCS, partitioner, (numResidualPass != 0), true, chroma);
+#endif
             if (tempCS->slice->getSPS()->getUseColorTrans())
             {
               bestCS->tmpColorSpaceCost = tempCS->tmpColorSpaceCost;
@@ -3392,6 +3957,13 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
   {
     xCalDebCost( *bestCS, partitioner );
   }
+#if GDR_ENABLED 
+  if (isEncodeGdrClean) 
+  {
+    delete[] MrgSolid;
+    delete[] MrgValid;
+  }
+#endif
 }
 
 void EncCu::xCheckRDCostIBCMode(CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner, const EncTestMode& encTestMode)
@@ -3544,6 +4116,9 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
     uint8_t bcwIdx  = cu.BcwIdx;
     bool    testBcw = (bcwIdx != BCW_DEFAULT);
 
+#if GDR_ENABLED    
+  const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrInterval() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
     m_pcInterSearch->predInterSearch(cu, partitioner);
 
     bcwIdx = CU::getValidBcwIdx(cu);
@@ -3563,13 +4138,98 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
       }
     }
 
-    xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0, 0, &equBcwCost);
+#if GDR_ENABLED  
+    // 2.0 xCheckRDCostInter: check residual (compare with bestCS)       
+    if (isEncodeGdrClean)
+    {
+      bool isClean = true;
 
+      if (cu.affine && cu.firstPU)
+      {
+        bool L0ok = true, L1ok = true, L3ok = true;
+
+        L0ok = L0ok && cu.firstPU->mvAffiSolid[0][0] && cu.firstPU->mvAffiSolid[0][1] && cu.firstPU->mvAffiSolid[0][2];
+        L0ok = L0ok && cu.firstPU->mvAffiValid[0][0] && cu.firstPU->mvAffiValid[0][1] && cu.firstPU->mvAffiValid[0][2];
+
+        L1ok = L1ok && cu.firstPU->mvAffiSolid[1][0] && cu.firstPU->mvAffiSolid[1][1] && cu.firstPU->mvAffiSolid[1][2];
+        L1ok = L1ok && cu.firstPU->mvAffiValid[1][0] && cu.firstPU->mvAffiValid[1][1] && cu.firstPU->mvAffiValid[1][2];
+
+        L3ok = L0ok && L1ok;
+
+        if (cu.firstPU->interDir == 1 && !L0ok)
+        {
+          isClean = false;
+        }
+        if (cu.firstPU->interDir == 2 && !L1ok)
+        {
+          isClean = false;
+        }
+        if (cu.firstPU->interDir == 3 && !L3ok)
+        {
+          isClean = false;
+        }
+      }
+      else if (cu.firstPU)
+      {
+        bool L0ok = true;
+        bool L1ok = true;
+        bool L3ok = true;
+
+        L0ok = L0ok && cu.firstPU->mvSolid[0];
+        L0ok = L0ok && cu.firstPU->mvValid[0];
+
+        L1ok = L1ok && cu.firstPU->mvSolid[1];
+        L1ok = L1ok && cu.firstPU->mvValid[1];
+
+        L3ok = L0ok && L1ok;
+
+        if (cu.firstPU->interDir == 1 && !L0ok)
+        {
+          isClean = false;
+        }
+        if (cu.firstPU->interDir == 2 && !L1ok)
+        {
+          isClean = false;
+        }
+        if (cu.firstPU->interDir == 3 && !L3ok)
+        {
+          isClean = false;
+        }
+      }
+      else
+      {
+        isClean = false;
+      }
+
+      if (isClean)
+      {
+        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0
+          , 0
+          , &equBcwCost
+        );
+      }
+    }
+    else
+    {
+      xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0
+        , 0
+        , &equBcwCost
+      );
+    }
+#else
+    xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0, 0, &equBcwCost);
+#endif    
+
+#if GDR_ENABLED    
+  if (g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT && bestCS->cus.size() > 0)
+    m_pcInterSearch->setAffineModeSelected((bestCS->cus.front()->affine && !(bestCS->cus.front()->firstPU->mergeFlag)));
+#else
     if (g_BcwSearchOrder[bcwLoopIdx] == BCW_DEFAULT)
     {
       m_pcInterSearch->setAffineModeSelected(
         (bestCS->cus.front()->affine && !(bestCS->cus.front()->firstPU->mergeFlag)));
     }
+#endif
 
     tempCS->initStructData(encTestMode.qp);
 
@@ -3674,6 +4334,9 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
 
   CU::addPUs( cu );
 
+#if GDR_ENABLED    
+    const bool isEncodeGdrClean = tempCS->sps->getGDREnabledFlag() && tempCS->pcv->isEncoder && ((tempCS->picHeader->getInGdrInterval() && tempCS->isClean(cu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (tempCS->picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
   if (testAltHpelFilter)
   {
     cu.imv = IMV_HPEL;
@@ -3745,7 +4408,79 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
     }
   }
 
+#if GDR_ENABLED  
+  // 2.0 xCheckRDCostInter: check residual (compare with bestCS)        
+  if (isEncodeGdrClean)
+  {
+    bool isClean = true;
+
+    if (cu.affine && cu.firstPU)
+    {
+      bool L0ok = true, L1ok = true, L3ok = true;
+
+      L0ok = L0ok && cu.firstPU->mvAffiSolid[0][0] && cu.firstPU->mvAffiSolid[0][1] && cu.firstPU->mvAffiSolid[0][2];
+      L0ok = L0ok && cu.firstPU->mvAffiValid[0][0] && cu.firstPU->mvAffiValid[0][1] && cu.firstPU->mvAffiValid[0][2];
+
+      L1ok = L1ok && cu.firstPU->mvAffiSolid[1][0] && cu.firstPU->mvAffiSolid[1][1] && cu.firstPU->mvAffiSolid[1][2];
+      L1ok = L1ok && cu.firstPU->mvAffiValid[1][0] && cu.firstPU->mvAffiValid[1][1] && cu.firstPU->mvAffiValid[1][2];
+
+      L3ok = L0ok && L1ok;
+
+      if (cu.firstPU->interDir == 1 && !L0ok)
+      {
+        isClean = false;
+      }
+      if (cu.firstPU->interDir == 2 && !L1ok)
+      {
+        isClean = false;
+      }
+      if (cu.firstPU->interDir == 3 && !L3ok)
+      {
+        isClean = false;
+      }
+    }
+    else if (cu.firstPU)
+    {
+      bool L0ok = cu.firstPU->mvSolid[0] && cu.firstPU->mvValid[0];
+      bool L1ok = cu.firstPU->mvSolid[1] && cu.firstPU->mvValid[1];
+      bool L3ok = L0ok && L1ok;
+
+      if (cu.firstPU->interDir == 1 && !L0ok)
+      {
+        isClean = false;
+      }
+      if (cu.firstPU->interDir == 2 && !L1ok)
+      {
+        isClean = false;
+      }
+      if (cu.firstPU->interDir == 3 && !L3ok)
+      {
+        isClean = false;
+      }
+    }
+    else
+    {
+      isClean = false;
+    }
+
+    if (isClean)
+    {
+      xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0
+        , 0
+        , &equBcwCost
+      );
+    }
+  }
+  else
+  {
+    xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, 0
+      , 0
+      , &equBcwCost
+    );
+  }
+#else
   xEncodeInterResidual(tempCS, bestCS, partitioner, encTestModeBase, 0, 0, &equBcwCost);
+#endif
 
   if( cu.imv == IMV_FPEL && tempCS->cost < bestIntPelCost )
   {

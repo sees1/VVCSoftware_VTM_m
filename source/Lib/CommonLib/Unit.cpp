@@ -557,6 +557,10 @@ void PredictionUnit::initData()
     for ( uint32_t j = 0; j < 3; j++ )
     {
       mvAffi[i][j].setZero();
+#if GDR_ENABLED
+      mvAffiSolid[i][j] = true;
+      mvAffiValid[i][j] = true;
+#endif
     }
   }
   ciipFlag = false;

@@ -2741,6 +2741,10 @@ void PicHeader::initPicHeader()
   m_RPL1.setLtrpInSliceHeaderFlag(0);
 
   m_alfApsIdsLuma.resize(0);
+#if GDR_ENABLED
+  m_inGdrInterval      = false;
+  m_lastGdrIntervalPoc = -1;
+#endif
 }
 
 const WPScalingParam *PicHeader::getWpScaling(const RefPicList refPicList, const int refIdx) const

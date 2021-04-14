@@ -280,6 +280,9 @@ void FDReader::parseFillerData(InputBitstream* bs, uint32_t &fdSize)
 
 HLSyntaxReader::HLSyntaxReader()
 {
+#if GDR_ENABLED
+  m_lastGdrPoc = -1;
+#endif
 }
 
 HLSyntaxReader::~HLSyntaxReader()
@@ -2801,6 +2804,11 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
         READ_UVLC(uiCode, "ph_virtual_boundary_pos_x_minus1[i]");        picHeader->setVirtualBoundariesPosX((uiCode + 1) << 3, i);
         CHECK(uiCode > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
       }
+#if GDR_DEC_TRACE
+      printf("\n");
+      printf("-num_ver_boundary :%d\n", picHeader->getNumVerVirtualBoundaries());
+      printf("-vir_boundary_pos :%d\n", picHeader->getVirtualBoundariesPosX(0));
+#endif
       READ_UVLC(uiCode, "ph_num_hor_virtual_boundaries");        picHeader->setNumHorVirtualBoundaries( uiCode );
       if (pps->getPicHeightInLumaSamples() <= 8)
       {
@@ -4327,6 +4335,37 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       pcSlice->addSubstreamSize(entryPointOffset [ idx ] );
     }
   }
+#if GDR_ENABLED
+  int curPoc = pcSlice->getPOC();
+
+  if (picHeader->getGdrPicFlag())
+  {
+    setLastGdrPoc(curPoc);
+    setLastGdrRecoveryPocCnt(pcSlice->getPicHeader()->getRecoveryPocCnt());
+  }
+
+  int recoveryPocCnt = getLastGdrRecoveryPocCnt();
+
+  if (getLastGdrPoc() > 0 && (getLastGdrPoc() <= curPoc) && (curPoc < (getLastGdrPoc() + recoveryPocCnt)))
+  {
+    picHeader->setInGdrInterval(true);
+  }  
+  else 
+  {
+    picHeader->setInGdrInterval(false);
+  }
+#endif
+
+#if GDR_DEC_TRACE
+  printf("-gdr_pic_flag:%d\n", picHeader->getGdrPicFlag() ? 1 : 0);
+  printf("-recovery_poc_cnt:%d\n", picHeader->getRecoveryPocCnt());
+#if GDR_ENABLED
+  printf("-inGdrInterval:%d\n", picHeader->getInGdrInterval());
+#endif
+
+  printf("-lmcs_enable : %d\n", picHeader->getLmcsEnabledFlag() ? 1 : 0);
+  printf("-lmcs_chroma : %d\n", picHeader->getLmcsChromaResidualScaleFlag() ? 1 : 0);
+#endif
   return;
 }
 

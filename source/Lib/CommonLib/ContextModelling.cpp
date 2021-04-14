@@ -365,6 +365,25 @@ void MergeCtx::setMergeInfo( PredictionUnit& pu, int candIdx )
   pu.mvpIdx [REF_PIC_LIST_1] = NOT_VALID;
   pu.mvpNum [REF_PIC_LIST_0] = NOT_VALID;
   pu.mvpNum [REF_PIC_LIST_1] = NOT_VALID;
+#if GDR_ENABLED
+  CodingStructure &cs = *pu.cs;
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+
+  if (isEncodeGdrClean) 
+  {    
+    Mv mv0 = pu.mv[REF_PIC_LIST_0];
+    Mv mv1 = pu.mv[REF_PIC_LIST_1];
+
+    int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
+    int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
+
+    pu.mvSolid[REF_PIC_LIST_0] = mvSolid[(candIdx << 1) + 0];
+    pu.mvSolid[REF_PIC_LIST_1] = mvSolid[(candIdx << 1) + 1];
+    pu.mvValid[REF_PIC_LIST_0] = cs.isClean(pu.Y().topRight(), mv0, REF_PIC_LIST_0, refIdx0);
+    pu.mvValid[REF_PIC_LIST_1] = cs.isClean(pu.Y().topRight(), mv1, REF_PIC_LIST_1, refIdx1);      
+  }
+#endif
+
   if (CU::isIBC(*pu.cu))
   {
     pu.bv = pu.mv[REF_PIC_LIST_0];
@@ -388,6 +407,11 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
   int tempIdx = 0;
   int fPosPosition = 0;
   Mv tempMv[2];
+
+#if GDR_ENABLED
+  const CodingStructure &cs = *pu.cs;  
+  const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
+#endif
 
   tempIdx = candIdx;
   fPosGroup = tempIdx / (MMVD_BASE_MV_NUM * MMVD_MAX_REFINE_NUM);
@@ -478,6 +502,25 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.refIdx[REF_PIC_LIST_0] = refList0;
     pu.mv[REF_PIC_LIST_1] = mmvdBaseMv[fPosBaseIdx][1].mv + tempMv[1];
     pu.refIdx[REF_PIC_LIST_1] = refList1;
+#if GDR_ENABLED
+    if (isEncodeGdrClean) 
+    {
+      Mv mv0 = pu.mv[REF_PIC_LIST_0];
+      Mv mv1 = pu.mv[REF_PIC_LIST_1];
+
+      int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
+      int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
+
+      mmvdValid[fPosBaseIdx][0] = cs.isClean(pu.Y().topRight(), mv0, REF_PIC_LIST_0, refIdx0);
+      mmvdValid[fPosBaseIdx][1] = cs.isClean(pu.Y().topRight(), mv1, REF_PIC_LIST_1, refIdx1);
+
+      pu.mvSolid[REF_PIC_LIST_0] = mmvdSolid[fPosBaseIdx][0];
+      pu.mvSolid[REF_PIC_LIST_1] = mmvdSolid[fPosBaseIdx][1];
+
+      pu.mvValid[REF_PIC_LIST_0] = mmvdValid[fPosBaseIdx][0];
+      pu.mvValid[REF_PIC_LIST_1] = mmvdValid[fPosBaseIdx][1];
+    }
+#endif
   }
   else if (refList0 != -1)
   {
@@ -502,6 +545,26 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.refIdx[REF_PIC_LIST_0] = refList0;
     pu.mv[REF_PIC_LIST_1] = Mv(0, 0);
     pu.refIdx[REF_PIC_LIST_1] = -1;
+
+#if GDR_ENABLED
+    if (isEncodeGdrClean) 
+    {
+      Mv mv0 = pu.mv[REF_PIC_LIST_0];
+      //Mv mv1 = pu.mv[REF_PIC_LIST_1];
+      
+      int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
+      //int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
+
+      pu.mvSolid[REF_PIC_LIST_0] = mmvdSolid[fPosBaseIdx][0];
+      pu.mvSolid[REF_PIC_LIST_1] = true;
+
+      mmvdValid[fPosBaseIdx][0] = cs.isClean(pu.Y().topRight(), mv0, REF_PIC_LIST_0, refIdx0);
+      mmvdValid[fPosBaseIdx][1] = true;
+
+      pu.mvValid[REF_PIC_LIST_0] = mmvdValid[fPosBaseIdx][0];
+      pu.mvValid[REF_PIC_LIST_1] = true;
+    }
+#endif
   }
   else if (refList1 != -1)
   {
@@ -526,6 +589,25 @@ void MergeCtx::setMmvdMergeCandiInfo(PredictionUnit& pu, int candIdx)
     pu.refIdx[REF_PIC_LIST_0] = -1;
     pu.mv[REF_PIC_LIST_1] = mmvdBaseMv[fPosBaseIdx][1].mv + tempMv[1];
     pu.refIdx[REF_PIC_LIST_1] = refList1;
+#if GDR_ENABLED
+    if (isEncodeGdrClean) 
+    {
+      // Mv mv0 = pu.mv[REF_PIC_LIST_0];
+      Mv mv1 = pu.mv[REF_PIC_LIST_1];
+
+      // int refIdx0 = pu.refIdx[REF_PIC_LIST_0];
+      int refIdx1 = pu.refIdx[REF_PIC_LIST_1];
+
+      mmvdValid[fPosBaseIdx][0] = true;
+      mmvdValid[fPosBaseIdx][1] = cs.isClean(pu.Y().topRight(), mv1, REF_PIC_LIST_1, refIdx1);
+
+      pu.mvSolid[REF_PIC_LIST_0] = true;
+      pu.mvSolid[REF_PIC_LIST_1] = mmvdSolid[fPosBaseIdx][1];
+
+      pu.mvValid[REF_PIC_LIST_0] = true;
+      pu.mvValid[REF_PIC_LIST_1] = mmvdValid[fPosBaseIdx][1];
+    }
+#endif
   }
 
   pu.mmvdMergeFlag = true;

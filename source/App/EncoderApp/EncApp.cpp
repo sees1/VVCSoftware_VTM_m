@@ -521,6 +521,13 @@ void EncApp::xInitLibCfg()
 
   //====== Coding Structure ========
   m_cEncLib.setIntraPeriod                                       ( m_iIntraPeriod );
+#if GDR_ENABLED  
+  m_cEncLib.setGdrEnabled                                        ( m_gdrEnabled );
+  m_cEncLib.setGdrPeriod                                         ( m_gdrPeriod );
+  m_cEncLib.setGdrPocStart                                       ( m_gdrPocStart );
+  m_cEncLib.setGdrInterval                                       ( m_gdrInterval);  
+  m_cEncLib.setGdrNoHash                                         ( m_gdrNoHash );  
+#endif
   m_cEncLib.setDecodingRefreshType                               ( m_iDecodingRefreshType );
   m_cEncLib.setGOPSize                                           ( m_iGOPSize );
   m_cEncLib.setDrapPeriod                                        ( m_drapPeriod );

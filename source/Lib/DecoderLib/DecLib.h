@@ -204,6 +204,11 @@ public:
 
   DCI*                    m_dci;
   ParameterSetMap<APS>*   m_apsMapEnc;
+#if GDR_LEAK_TEST
+public:
+  int                     m_gdrPocRandomAccess;
+#endif // GDR_LEAK_TEST
+
 public:
   DecLib();
   virtual ~DecLib();

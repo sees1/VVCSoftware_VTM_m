@@ -440,6 +440,11 @@ public:
   void invalidateBestRdModeFirstColorSpace();
   void setSavedRdModeIdx(int idx) { m_savedRdModeIdx = idx; }
 
+#if GDR_ENABLED
+  int  getNumTopRecons(PredictionUnit &pu, int luma_dirMode, bool isChroma);
+  bool isValidIntraPredLuma(PredictionUnit &pu, int luma_dirMode);
+  bool isValidIntraPredChroma(PredictionUnit &pu, int luma_dirMode, int chroma_dirMode);
+#endif
 protected:
 
   // -------------------------------------------------------------------------------------------------------------------
