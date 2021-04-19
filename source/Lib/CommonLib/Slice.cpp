@@ -619,13 +619,6 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
   const bool fieldSeqFlag = getSPS()->getFieldSeqFlag();
   const int layerIdx = m_pcPic->cs->vps == nullptr ? 0 : m_pcPic->cs->vps->getGeneralLayerIdx( m_pcPic->layerId );
 
-  if ( rcListPic.size() < numEntries[0] || rcListPic.size() < numEntries[1] )
-  {
-    numEntries[0] = 0;
-    numEntries[1] = 0;
-    msg( NOTICE, "Reset numEntriesL0 and numEntriesL1. E.g. receive a CRA after some skipped slices\n");
-  }
-
   for( int refPicList = 0; refPicList < 2; refPicList++ )
   {
     for( int i = 0; i < numEntries[refPicList]; i++ )
