@@ -659,7 +659,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
   while (iterPic != pcListPic->end())
   {
     Picture* pcPic = *(iterPic);
-    if(pcPic->neededForOutput && pcPic->getPOC() > m_iPOCLastDisplay)
+    if(pcPic->neededForOutput && pcPic->getPOC() >= m_iPOCLastDisplay)
     {
        numPicsNotYetDisplayed++;
       dpbFullness++;
@@ -744,7 +744,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
     {
       pcPic = *(iterPic);
 
-      if(pcPic->neededForOutput && pcPic->getPOC() > m_iPOCLastDisplay &&
+      if(pcPic->neededForOutput && pcPic->getPOC() >= m_iPOCLastDisplay &&
         (numPicsNotYetDisplayed >  maxNumReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid))
       {
         // write to file
