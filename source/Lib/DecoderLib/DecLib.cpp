@@ -690,6 +690,34 @@ void DecLib::finishPictureLight(int& poc, PicList*& rpcListPic )
   Slice*  pcSlice = m_pcPic->cs->slice;
 
   m_pcPic->neededForOutput = (pcSlice->getPicHeader()->getPicOutputFlag() ? true : false);
+
+  const VPS *vps = pcSlice->getVPS();
+  if (vps != nullptr)
+  {
+    if (!vps->getEachLayerIsAnOlsFlag())
+    {
+      const int layerId        = pcSlice->getNalUnitLayerId();
+      const int generalLayerId = vps->getGeneralLayerIdx(layerId);
+      bool      layerIsOutput  = true;
+
+      if (vps->getOlsModeIdc() == 0)
+      {
+        layerIsOutput = generalLayerId == vps->m_targetOlsIdx;
+      }
+      else if (vps->getOlsModeIdc() == 1)
+      {
+        layerIsOutput = generalLayerId <= vps->m_targetOlsIdx;
+      }
+      else if (vps->getOlsModeIdc() == 2)
+      {
+        layerIsOutput = vps->getOlsOutputLayerFlag(vps->m_targetOlsIdx, generalLayerId);
+      }
+      if (!layerIsOutput)
+      {
+        m_pcPic->neededForOutput = false;
+      }
+    }
+  }
   m_pcPic->reconstructed = true;
 
   Slice::sortPicList( m_cListPic ); // sorting for application output
@@ -817,6 +845,34 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
         }
       }
       if (isRaslPic)
+      {
+        m_pcPic->neededForOutput = false;
+      }
+    }
+  }
+
+  const VPS *vps = pcSlice->getVPS();
+  if (vps != nullptr)
+  {
+    if (!vps->getEachLayerIsAnOlsFlag())
+    {
+      const int layerId        = pcSlice->getNalUnitLayerId();
+      const int generalLayerId = vps->getGeneralLayerIdx(layerId);
+      bool      layerIsOutput  = true;
+
+      if (vps->getOlsModeIdc() == 0)
+      {
+        layerIsOutput = generalLayerId == vps->m_targetOlsIdx;
+      }
+      else if (vps->getOlsModeIdc() == 1)
+      {
+        layerIsOutput = generalLayerId <= vps->m_targetOlsIdx;
+      }
+      else if (vps->getOlsModeIdc() == 2)
+      {
+        layerIsOutput = vps->getOlsOutputLayerFlag(vps->m_targetOlsIdx, generalLayerId);
+      }
+      if (!layerIsOutput)
       {
         m_pcPic->neededForOutput = false;
       }
