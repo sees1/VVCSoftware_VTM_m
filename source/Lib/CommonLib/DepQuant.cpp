@@ -532,7 +532,7 @@ namespace DQIntern
       const unsigned      lastShift   = ( compID == COMPONENT_Y ? (log2Size+1)>>2 : Clip3<unsigned>(0,2,size>>3) );
       const unsigned      lastOffset  = ( compID == COMPONENT_Y ? ( prefixCtx[log2Size] ) : 0 );
       uint32_t            sumFBits    = 0;
-      unsigned            maxCtxId    = g_uiGroupIdx[std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, size) - 1];
+      unsigned            maxCtxId    = g_groupIdx[std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, size) - 1];
       for( unsigned ctxId = 0; ctxId < maxCtxId; ctxId++ )
       {
         const BinFracBits bits  = fracBitsAccess.getFracBitsArray( ctxSetLast( lastOffset + ( ctxId >> lastShift ) ) );
@@ -542,7 +542,7 @@ namespace DQIntern
       ctxBits  [ maxCtxId ]     = sumFBits + ( maxCtxId>3 ? ((maxCtxId-2)>>1)<<SCALE_BITS : 0 ) + bitOffset;
       for (unsigned pos = 0; pos < std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, size); pos++)
       {
-        lastBits[ pos ]         = ctxBits[ g_uiGroupIdx[ pos ] ];
+        lastBits[pos] = ctxBits[g_groupIdx[pos]];
       }
     }
   }
@@ -1139,7 +1139,7 @@ namespace DQIntern
         }
 #undef UPDATE
         int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
-        m_goRicePar = g_auiGoRiceParsCoeff[sumAll];
+        m_goRicePar = g_goRiceParsCoeff[sumAll];
       }
       else
       {
@@ -1177,8 +1177,8 @@ namespace DQIntern
         }
 #undef UPDATE
         sumAbs = std::min<TCoeff>(31, sumAbs);
-        m_goRicePar = g_auiGoRiceParsCoeff[sumAbs];
-        m_goRiceZero = g_auiGoRicePosCoeff0(m_stateId, m_goRicePar);
+        m_goRicePar  = g_goRiceParsCoeff[sumAbs];
+        m_goRiceZero = g_goRicePosCoeff0(m_stateId, m_goRicePar);
       }
     }
   }
