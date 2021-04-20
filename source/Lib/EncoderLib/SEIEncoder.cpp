@@ -94,17 +94,10 @@ void SEIEncoder::initSEIBufferingPeriod(SEIBufferingPeriod *bufferingPeriodSEI, 
   {
     for(int j=0; j < bufferingPeriodSEI->m_bpCpbCnt; j++)
     {
-#if FIX_BPSEI_SIGNALING
       bufferingPeriodSEI->m_initialCpbRemovalDelay[i][j][0] = uiInitialCpbRemovalDelay;
       bufferingPeriodSEI->m_initialCpbRemovalDelay[i][j][1] = uiInitialCpbRemovalDelay;
       bufferingPeriodSEI->m_initialCpbRemovalOffset[i][j][0] = uiInitialCpbRemovalDelay;
       bufferingPeriodSEI->m_initialCpbRemovalOffset[i][j][1] = uiInitialCpbRemovalDelay;
-#else    
-      bufferingPeriodSEI->m_initialCpbRemovalDelay[j][i][0] = uiInitialCpbRemovalDelay;
-      bufferingPeriodSEI->m_initialCpbRemovalDelay[j][i][1] = uiInitialCpbRemovalDelay;
-      bufferingPeriodSEI->m_initialCpbRemovalOffset[j][i][0] = uiInitialCpbRemovalDelay;
-      bufferingPeriodSEI->m_initialCpbRemovalOffset[j][i][1] = uiInitialCpbRemovalDelay;
-#endif
     }
   }
   // We don't set concatenation_flag here. max_initial_removal_delay_for_concatenation depends on the usage scenario.
