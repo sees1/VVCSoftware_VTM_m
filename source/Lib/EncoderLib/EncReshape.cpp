@@ -689,8 +689,8 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
         const int width = picY.width;
         const int height = picY.height;
         const int stride = picY.stride;
-        uint32_t *binCnt = new uint32_t[m_binNum];
-        memset(binCnt, 0, m_binNum * sizeof(uint32_t));
+        uint32_t binCnt[PIC_CODE_CW_BINS];
+        std::fill_n(binCnt, m_binNum, 0);
 
         initSeqStats(m_srcSeqStats);
         for (uint32_t y = 0; y < height; y++)
@@ -709,7 +709,6 @@ void EncReshape::preAnalyzerLMCS(Picture *pcPic, const uint32_t signalType, cons
         {
           m_srcSeqStats.binHist[b] = (double)binCnt[b] / (double)(m_reshapeCW.rspPicSize);
         }
-        delete[] binCnt;
 
         double avgY = 0.0;
         double varY = 0.0;
