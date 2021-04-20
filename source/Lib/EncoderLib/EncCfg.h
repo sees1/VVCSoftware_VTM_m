@@ -724,8 +724,9 @@ protected:
   bool      m_overscanAppropriateFlag;                        ///< Indicates whether conformant decoded pictures are suitable for display using overscan
   bool      m_videoFullRangeFlag;                             ///< Indicates the black level and range of luma and chroma signals
 
-  bool      m_bEfficientFieldIRAPEnabled;                     ///< enable to code fields in a specific, potentially more efficient, order.
-  bool      m_bHarmonizeGopFirstFieldCoupleEnabled;
+  bool m_fieldSeqFlag;
+  bool m_efficientFieldIRAPEnabled;   /// enable to code fields in a specific, potentially more efficient, order.
+  bool m_harmonizeGopFirstFieldCoupleEnabled;
 
   std::string m_summaryOutFilename;                           ///< filename to use for producing summary output file.
   std::string m_summaryPicFilenameBase;                       ///< Base filename to use for producing summary picture output files. The actual filenames used will have I.txt, P.txt and B.txt appended.
@@ -1835,11 +1836,14 @@ public:
   void         setUseRecalculateQPAccordingToLambda (bool b)         { m_recalculateQPAccordingToLambda = b;    }
   bool         getUseRecalculateQPAccordingToLambda ()               { return m_recalculateQPAccordingToLambda; }
 
-  void         setEfficientFieldIRAPEnabled( bool b )                { m_bEfficientFieldIRAPEnabled = b; }
-  bool         getEfficientFieldIRAPEnabled( ) const                 { return m_bEfficientFieldIRAPEnabled; }
+  void setFieldSeqFlag(const bool b) { m_fieldSeqFlag = b; }
+  bool getFieldSeqFlag() const { return m_fieldSeqFlag; }
 
-  void         setHarmonizeGopFirstFieldCoupleEnabled( bool b )      { m_bHarmonizeGopFirstFieldCoupleEnabled = b; }
-  bool         getHarmonizeGopFirstFieldCoupleEnabled( ) const       { return m_bHarmonizeGopFirstFieldCoupleEnabled; }
+  void setEfficientFieldIRAPEnabled(const bool b) { m_efficientFieldIRAPEnabled = b; }
+  bool getEfficientFieldIRAPEnabled() const { return m_efficientFieldIRAPEnabled; }
+
+  void setHarmonizeGopFirstFieldCoupleEnabled(const bool b) { m_harmonizeGopFirstFieldCoupleEnabled = b; }
+  bool getHarmonizeGopFirstFieldCoupleEnabled() const { return m_harmonizeGopFirstFieldCoupleEnabled; }
 
   bool         getOPIEnabled()                      { return m_OPIEnabled; }
   void         setOPIEnabled(bool i)                { m_OPIEnabled = i; }

@@ -105,8 +105,8 @@ protected:
 
   bool      m_isField;                                        ///< enable field coding
   bool      m_isTopFieldFirst;
-  bool      m_bEfficientFieldIRAPEnabled;                     ///< enable an efficient field IRAP structure.
-  bool      m_bHarmonizeGopFirstFieldCoupleEnabled;
+  bool      m_efficientFieldIRAPEnabled;   ///< enable an efficient field IRAP structure.
+  bool      m_harmonizeGopFirstFieldCoupleEnabled;
 
   int       m_conformanceWindowMode;
   int       m_confWinLeft;

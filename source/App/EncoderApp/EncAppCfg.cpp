@@ -787,8 +787,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   //Field coding parameters
   ("FieldCoding",                                     m_isField,                                        false, "Signals if it's a field based coding")
   ("TopFieldFirst, Tff",                              m_isTopFieldFirst,                                false, "In case of field based coding, signals whether if it's a top field first or not")
-  ("EfficientFieldIRAPEnabled",                       m_bEfficientFieldIRAPEnabled,                      true, "Enable to code fields in a specific, potentially more efficient, order.")
-  ("HarmonizeGopFirstFieldCoupleEnabled",             m_bHarmonizeGopFirstFieldCoupleEnabled,            true, "Enables harmonization of Gop first field couple")
+  ("EfficientFieldIRAPEnabled",                       m_efficientFieldIRAPEnabled,                      true, "Enable to code fields in a specific, potentially more efficient, order.")
+  ("HarmonizeGopFirstFieldCoupleEnabled",             m_harmonizeGopFirstFieldCoupleEnabled,            true, "Enables harmonization of Gop first field couple")
 
   // Profile and level
   ("Profile",                                         extendedProfile,              ExtendedProfileName::NONE, "Profile name to use for encoding. Use [multilayer_]main_10[_444][_still_picture], auto, or none")
