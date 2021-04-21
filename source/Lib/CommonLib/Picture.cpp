@@ -220,6 +220,13 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
 
   if( cs )
   {
+#if GDR_ENABLED
+    if (cs->picHeader)
+    {           
+      delete cs->picHeader;
+      cs->picHeader = nullptr;
+    }
+#endif
     cs->initStructData();
   }
   else
