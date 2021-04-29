@@ -54,7 +54,6 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
-#define PRINT_WPSNR 1
 
 #define JVET_U0081                                        1 // ALF filter strength target
 
