@@ -55,7 +55,6 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-#define JVET_U0081                                        1 // ALF filter strength target
 
 #define JVET_U0103_HIGH_BIT_DEPTH_SIMD                    1 // JVET-U0103: SIMD implementation for high bit depth coding
 

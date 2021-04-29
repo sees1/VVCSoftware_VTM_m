@@ -743,19 +743,13 @@ protected:
   CfgVPSParameters m_cfgVPSParameters;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_U0081
   double      m_alfStrengthLuma;
-#else
-  double      m_alfStrength;
-#endif
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
-#if JVET_U0081
   double      m_alfStrengthChroma;
   double      m_alfStrengthTargetLuma;
   double      m_alfStrengthTargetChroma;
   double      m_ccalfStrengthTarget;
-#endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 #if JVET_O0756_CALCULATE_HDRMETRICS
@@ -1955,18 +1949,12 @@ public:
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
-#if JVET_U0081
   void         setALFStrengthLuma(double s)                     { m_alfStrengthLuma = s; }
   double       getALFStrengthLuma()                             const { return m_alfStrengthLuma; }
-#else
-  void         setALFStrength( double s)                        { m_alfStrength = s; }
-  double       getALFStrength()                                 const { return m_alfStrength; }
-#endif
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }
   bool         getALFAllowPredefinedFilters()                   const { return m_alfAllowPredefinedFilters; }
   void         setCCALFStrength(double s)                       { m_ccalfStrength = s; }
   double       getCCALFStrength()                               const { return m_ccalfStrength; }
-#if JVET_U0081
   void         setALFStrengthChroma(double s)                  { m_alfStrengthChroma = s; }
   double       getALFStrengthChroma()                          const { return m_alfStrengthChroma; }
   void         setALFStrengthTargetLuma(double s)              { m_alfStrengthTargetLuma = s; }
@@ -1975,7 +1963,6 @@ public:
   double       getALFStrengthTargetChroma()                    const { return m_alfStrengthTargetChroma; }
   void         setCCALFStrengthTarget(double s)                { m_ccalfStrengthTarget = s; }
   double       getCCALFStrengthTarget()                        const { return m_ccalfStrengthTarget; }
-#endif
   void         setUseCCALF( bool b )                                  { m_ccalf = b; }
   bool         getUseCCALF()                                    const { return m_ccalf; }
   void         setCCALFQpThreshold( int b )                           { m_ccalfQpThreshold = b; }
