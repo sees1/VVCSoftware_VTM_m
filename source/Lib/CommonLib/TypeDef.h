@@ -51,8 +51,18 @@
 #include <cassert>
 
 
+// clang-format off
+
+//########### place macros to be removed in next cycle below this line ###############
 #define PRINT_WPSNR 1
 
+#define JVET_U0081                                        1 // ALF filter strength target
+
+#define JVET_U0103_HIGH_BIT_DEPTH_SIMD                    1 // JVET-U0103: SIMD implementation for high bit depth coding
+
+#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
+
+//########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
 #if GDR_ENABLED
@@ -61,16 +71,6 @@
 #define GDR_DEC_TRACE  0
 #endif
 
-// clang-format off
-
-#define JVET_U0081                                        1 // ALF filter strength target
-
-//########### place macros to be removed in next cycle below this line ###############
-#define JVET_U0103_HIGH_BIT_DEPTH_SIMD                    1 // JVET-U0103: SIMD implementation for high bit depth coding
-
-#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-
-//########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
