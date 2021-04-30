@@ -736,9 +736,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("PrintFrameMSE",                                   m_printFrameMSE,                                  false, "0 (default) emit only bit count and PSNRs for each frame, 1 = also emit MSE values")
   ("PrintSequenceMSE",                                m_printSequenceMSE,                               false, "0 (default) emit only bit rate and PSNRs for the whole sequence, 1 = also emit MSE values")
   ("PrintMSSSIM",                                     m_printMSSSIM,                                    false, "0 (default) do not print MS-SSIM scores, 1 = print MS-SSIM scores for each frame and for the whole sequence")
-#if PRINT_WPSNR
   ("PrintWPSNR",                                      m_printWPSNR,                                     false, "0 (default) do not print HDR-PQ based wPSNR, 1 = print HDR-PQ based wPSNR")
-#endif
   ("CabacZeroWordPaddingEnabled",                     m_cabacZeroWordPaddingEnabled,                     true, "0 do not add conforming cabac-zero-words to bit streams, 1 (default) = add cabac-zero-words as required")
   ("ChromaFormatIDC,-cf",                             tmpChromaFormat,                                      0, "ChromaFormatIDC (400|420|422|444 or set 0 (default) for same as InputChromaFormat)")
   ("ConformanceMode",                                 m_conformanceWindowMode,                              0, "Deprecated alias of ConformanceWindowMode")
@@ -1405,19 +1403,13 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
-#if JVET_U0081
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
-#else
-  ("ALFStrength",                                      m_alfStrength,                             1.0, "Adaptive Loop Filter strength. The parameter scales the magnitudes of the ALF filter coefficients for both luma and chroma. Valid range is 0.0 <= ALFStrength <= 1.0")
-#endif
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")
   ("CCALFStrength",                                    m_ccalfStrength,                           1.0, "Cross-component Adaptive Loop Filter strength. The parameter scales the magnitudes of the CCALF filter coefficients. Valid range is 0.0 <= CCALFStrength <= 1.0")
-#if JVET_U0081
   ("ALFStrengthChroma",                                m_alfStrengthChroma,                       1.0, "Adaptive Loop Filter strength for chroma. The parameter scales the magnitudes of the ALF filter coefficients for chroma. Valid range is 0.0 <= ALFStrengthChroma <= 1.0")
   ("ALFStrengthTargetLuma",                            m_alfStrengthTargetLuma,                   1.0, "Adaptive Loop Filter strength target for ALF luma filter optimization. The parameter scales the auto-correlation matrix E and the cross-correlation vector y for luma. Valid range is 0.0 <= ALFStrengthTargetLuma <= 1.0")
   ("ALFStrengthTargetChroma",                          m_alfStrengthTargetChroma,                 1.0, "Adaptive Loop Filter strength target for ALF chroma filter optimization. The parameter scales the auto-correlation matrix E and the cross-correlation vector y for chroma. Valid range is 0.0 <= ALFStrengthTargetChroma <= 1.0")
   ("CCALFStrengthTarget",                              m_ccalfStrengthTarget,                     1.0, "Cross-component Adaptive Loop Filter strength target for filter optimization. The parameter scales the auto-correlation matrix E and the cross-correlation vector y. Valid range is 0.0 <= CCALFStrengthTarget <= 1.0")
-#endif
   ( "CCALF",                                           m_ccalf,                                  true, "Cross-component Adaptive Loop Filter" )
   ( "CCALFQpTh",                                       m_ccalfQpThreshold,                         37, "QP threshold above which encoder reduces CCALF usage")
   ( "RPR",                                            m_rprEnabledFlag,                          true, "Reference Sample Resolution" )
@@ -2857,20 +2849,14 @@ bool EncAppCfg::xCheckParameter()
   }
   if (m_alf)
   {
-#if JVET_U0081
     xConfirmPara(m_alfStrengthLuma < 0.0, "ALFStrengthLuma is less than 0. Valid range is 0.0 <= ALFStrengthLuma <= 1.0");
     xConfirmPara(m_alfStrengthLuma > 1.0, "ALFStrengthLuma is greater than 1. Valid range is 0.0 <= ALFStrengthLuma <= 1.0");
-#else
-    xConfirmPara(m_alfStrength < 0.0, "ALFStrength is less than 0. Valid range is 0.0 <= ALFStrength <= 1.0" );
-    xConfirmPara(m_alfStrength > 1.0, "ALFStrength is greater than 1. Valid range is 0.0 <= ALFStrength <= 1.0" );
-#endif
   }
   if (m_ccalf)
   {
     xConfirmPara(m_ccalfStrength < 0.0, "CCALFStrength is less than 0. Valid range is 0.0 <= CCALFStrength <= 1.0");
     xConfirmPara(m_ccalfStrength > 1.0, "CCALFStrength is greater than 1. Valid range is 0.0 <= CCALFStrength <= 1.0");
   }
-#if JVET_U0081
   if (m_alf)
   {
     xConfirmPara(m_alfStrengthChroma < 0.0, "ALFStrengthChroma is less than 0. Valid range is 0.0 <= ALFStrengthChroma <= 1.0");
@@ -2885,7 +2871,6 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(m_ccalfStrengthTarget < 0.0, "CCALFStrengthTarget is less than 0. Valid range is 0.0 <= CCALFStrengthTarget <= 1.0");
     xConfirmPara(m_ccalfStrengthTarget > 1.0, "CCALFStrengthTarget is greater than 1. Valid range is 0.0 <= CCALFStrengthTarget <= 1.0");
   }
-#endif
   if (m_ccalf && (m_chromaFormatIDC == CHROMA_400))
   {
     msg( WARNING, "****************************************************************************\n");

@@ -127,9 +127,7 @@ protected:
   bool      m_printFrameMSE;
   bool      m_printSequenceMSE;
   bool      m_printMSSSIM;
-#if PRINT_WPSNR
   bool      m_printWPSNR;
-#endif
   bool      m_cabacZeroWordPaddingEnabled;
   bool      m_bClipInputVideoToRec709Range;
   bool      m_bClipOutputVideoToRec709Range;
@@ -700,19 +698,13 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_U0081
   double      m_alfStrengthLuma;
-#else
-  double      m_alfStrength;
-#endif
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
-#if JVET_U0081
   double      m_alfStrengthChroma;
   double      m_alfStrengthTargetLuma;
   double      m_alfStrengthTargetChroma;
   double      m_ccalfStrengthTarget;
-#endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 
