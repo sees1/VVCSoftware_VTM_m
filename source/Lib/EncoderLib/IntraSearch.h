@@ -364,10 +364,10 @@ private:
   int                                                m_savedRdModeIdx;
 
   static_vector<ModeInfo, FAST_UDI_MAX_RDMODE_NUM> m_savedRdModeListLFNST;
-  static_vector<ModeInfo, FAST_UDI_MAX_RDMODE_NUM> m_uiSavedHadModeListLFNST;
+  static_vector<ModeInfo, FAST_UDI_MAX_RDMODE_NUM> m_savedHadModeListLFNST;
   uint32_t                                         m_savedNumRdModesLFNST;
   static_vector<double, FAST_UDI_MAX_RDMODE_NUM>   m_savedModeCostLFNST;
-  static_vector<double,   FAST_UDI_MAX_RDMODE_NUM> m_dSavedHadListLFNST;
+  static_vector<double, FAST_UDI_MAX_RDMODE_NUM>   m_savedHadListLFNST;
 
   PelStorage      m_tmpStorageLCU;
   PelStorage      m_colorTransResiBuf;

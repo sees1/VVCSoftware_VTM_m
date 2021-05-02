@@ -805,8 +805,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
               m_savedRdModeListLFNST = rdModeList;
               m_savedModeCostLFNST   = candCostList;
               // PBINTRA fast
-              m_uiSavedHadModeListLFNST = hadModeList;
-              m_dSavedHadListLFNST      = candHadList;
+              m_savedHadModeListLFNST   = hadModeList;
+              m_savedHadListLFNST       = candHadList;
               LFNSTSaveFlag             = false;
             }
           }   // NSSTFlag
@@ -817,8 +817,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
             rdModeList        = m_savedRdModeListLFNST;
             candCostList      = m_savedModeCostLFNST;
             // PBINTRA fast
-            hadModeList = m_uiSavedHadModeListLFNST;
-            candHadList = m_dSavedHadListLFNST;
+            hadModeList = m_savedHadModeListLFNST;
+            candHadList = m_savedHadListLFNST;
           }   // !LFNSTFlag
 
           if (!(sps.getUseMIP() && LFNSTLoadFlag))
@@ -983,14 +983,14 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
               m_savedRdModeListLFNST = rdModeList;
               m_savedModeCostLFNST   = candCostList;
               // PBINTRA fast
-              m_uiSavedHadModeListLFNST = hadModeList;
-              m_dSavedHadListLFNST      = candHadList;
+              m_savedHadModeListLFNST   = hadModeList;
+              m_savedHadListLFNST       = candHadList;
               m_savedNumRdModesLFNST    = g_intraModeNumFastUseMPM2D[logWidth - MIN_CU_LOG2][logHeight - MIN_CU_LOG2];
               m_savedRdModeListLFNST.resize(m_savedNumRdModesLFNST);
               m_savedModeCostLFNST.resize(m_savedNumRdModesLFNST);
               // PBINTRA fast
-              m_uiSavedHadModeListLFNST.resize(3);
-              m_dSavedHadListLFNST.resize(3);
+              m_savedHadModeListLFNST.resize(3);
+              m_savedHadListLFNST.resize(3);
               LFNSTSaveFlag = false;
             }
             //*** Derive MIP candidates using Hadamard
@@ -1080,8 +1080,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
               m_savedRdModeListLFNST = rdModeList;
               m_savedModeCostLFNST   = candCostList;
               // PBINTRA fast
-              m_uiSavedHadModeListLFNST = hadModeList;
-              m_dSavedHadListLFNST      = candHadList;
+              m_savedHadModeListLFNST   = hadModeList;
+              m_savedHadListLFNST       = candHadList;
               LFNSTSaveFlag             = false;
             }
           }
@@ -1092,8 +1092,8 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
             rdModeList        = m_savedRdModeListLFNST;
             candCostList      = m_savedModeCostLFNST;
             // PBINTRA fast
-            hadModeList = m_uiSavedHadModeListLFNST;
-            candHadList = m_dSavedHadListLFNST;
+            hadModeList = m_savedHadModeListLFNST;
+            candHadList = m_savedHadListLFNST;
           }
 
           if (m_pcEncCfg->getFastUDIUseMPMEnabled())
