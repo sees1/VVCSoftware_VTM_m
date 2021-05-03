@@ -51,7 +51,12 @@ struct MotionVector
 {
   int x, y;
   int error;
+#if JVET_V0056_MCTF
+  int noise;
+  MotionVector() : x(0), y(0), error(INT_LEAST32_MAX), noise(0) {}
+#else
   MotionVector() : x(0), y(0), error(INT_LEAST32_MAX) {}
+#endif
   void set(int vectorX, int vectorY, int errorValue) { x = vectorX; y = vectorY; error = errorValue; }
 };
 
@@ -67,21 +72,21 @@ public:
 
   void allocate(int width, int height, const T& value=T())
   {
-    m_width=width;
-    m_height=height;
-    v.resize(std::size_t(m_width*m_height), value);
+    m_width  = width;
+    m_height = height;
+    v.resize(std::size_t(m_width * m_height), value);
   }
 
   T& get(int x, int y)
   {
-    assert(x<m_width && y<m_height);
-    return v[y*m_width+x];
+    assert(x < m_width && y < m_height);
+    return v[y * m_width + x];
   }
 
   const T& get(int x, int y) const
   {
-    assert(x<m_width && y<m_height);
-    return v[y*m_width+x];
+    assert(x < m_width && y < m_height);
+    return v[y * m_width + x];
   }
 };
 
@@ -129,7 +134,11 @@ private:
   static const int m_motionVectorFactor;
   static const int m_padding;
   static const int m_interpolationFilter[16][8];
+#if JVET_V0056_MCTF
+  static const double m_refStrengths[3][4];
+#else
   static const double m_refStrengths[3][2];
+#endif
 
   // Private member variables
   int m_FrameSkip;
@@ -155,7 +164,11 @@ private:
     const Array2D<MotionVector> *previous=0, const int factor = 1, const bool doubleRes = false) const;
   void motionEstimation(Array2D<MotionVector> &mvs, const PelStorage &orgPic, const PelStorage &buffer, const PelStorage &origSubsampled2, const PelStorage &origSubsampled4) const;
 
+#if JVET_V0056_MCTF
+  void bilateralFilter(const PelStorage &orgPic, std::deque<TemporalFilterSourcePicInfo> &srcFrameInfo, PelStorage &newOrgPic, double overallStrength) const;
+#else
   void bilateralFilter(const PelStorage &orgPic, const std::deque<TemporalFilterSourcePicInfo> &srcFrameInfo, PelStorage &newOrgPic, double overallStrength) const;
+#endif
   void applyMotion(const Array2D<MotionVector> &mvs, const PelStorage &input, PelStorage &output) const;
 }; // END CLASS DEFINITION EncTemporalFilter
 
