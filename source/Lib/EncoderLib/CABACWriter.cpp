@@ -2855,16 +2855,16 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   }
 
   unsigned CtxLast;
-  unsigned GroupIdxX = g_uiGroupIdx[ posX ];
-  unsigned GroupIdxY = g_uiGroupIdx[ posY ];
+  unsigned GroupIdxX = g_groupIdx[posX];
+  unsigned GroupIdxY = g_groupIdx[posY];
 
   unsigned maxLastPosX = cctx.maxLastPosX();
   unsigned maxLastPosY = cctx.maxLastPosY();
 
   if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
   {
-    maxLastPosX = ( tu.blocks[compID].width  == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosX;
-    maxLastPosY = ( tu.blocks[compID].height == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosY;
+    maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
+    maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;
   }
 
   for( CtxLast = 0; CtxLast < GroupIdxX; CtxLast++ )
@@ -2885,7 +2885,7 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   }
   if( GroupIdxX > 3 )
   {
-    posX -= g_uiMinInGroup[ GroupIdxX ];
+    posX -= g_minInGroup[GroupIdxX];
     for (int i = ( ( GroupIdxX - 2 ) >> 1 ) - 1 ; i >= 0; i-- )
     {
       m_BinEncoder.encodeBinEP( ( posX >> i ) & 1 );
@@ -2893,7 +2893,7 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   }
   if( GroupIdxY > 3 )
   {
-    posY -= g_uiMinInGroup[ GroupIdxY ];
+    posY -= g_minInGroup[GroupIdxY];
     for ( int i = ( ( GroupIdxY - 2 ) >> 1 ) - 1 ; i >= 0; i-- )
     {
       m_BinEncoder.encodeBinEP( ( posY >> i ) & 1 );
@@ -2994,7 +2994,7 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   for( int scanPos = firstSigPos; scanPos > firstPosMode2; scanPos-- )
   {
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
-    ricePar = g_auiGoRiceParsCoeff[sumAll];
+    ricePar           = g_goRiceParsCoeff[sumAll];
     unsigned absLevel = (unsigned) abs( coeff[ cctx.blockPos( scanPos ) ] );
     if( absLevel >= 4 )
     {
@@ -3010,8 +3010,8 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
     TCoeff    Coeff     = coeff[ cctx.blockPos( scanPos ) ];
     unsigned    absLevel  = (unsigned) abs( Coeff );
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
-    int       rice      = g_auiGoRiceParsCoeff                        [sumAll];
-    int       pos0      = g_auiGoRicePosCoeff0(state, rice);
+    int         rice      = g_goRiceParsCoeff[sumAll];
+    int         pos0      = g_goRicePosCoeff0(state, rice);
     unsigned  rem       = ( absLevel == 0 ? pos0 : absLevel <= pos0 ? absLevel-1 : absLevel );
     m_BinEncoder.encodeRemAbsEP( rem, rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
     DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, rice );

@@ -3120,8 +3120,8 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
 
   if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
   {
-    maxLastPosX = ( tu.blocks[ compID ].width  == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosX;
-    maxLastPosY = ( tu.blocks[ compID ].height == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosY;
+    maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
+    maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;
   }
 
   for( ; PosLastX < maxLastPosX; PosLastX++ )
@@ -3140,23 +3140,23 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
   }
   if( PosLastX > 3 )
   {
-    uint32_t uiTemp  = 0;
+    uint32_t temp    = 0;
     uint32_t uiCount = ( PosLastX - 2 ) >> 1;
     for ( int i = uiCount - 1; i >= 0; i-- )
     {
-      uiTemp += m_BinDecoder.decodeBinEP( ) << i;
+      temp += m_BinDecoder.decodeBinEP() << i;
     }
-    PosLastX = g_uiMinInGroup[ PosLastX ] + uiTemp;
+    PosLastX = g_minInGroup[PosLastX] + temp;
   }
   if( PosLastY > 3 )
   {
-    uint32_t uiTemp  = 0;
+    uint32_t temp    = 0;
     uint32_t uiCount = ( PosLastY - 2 ) >> 1;
     for ( int i = uiCount - 1; i >= 0; i-- )
     {
-      uiTemp += m_BinDecoder.decodeBinEP( ) << i;
+      temp += m_BinDecoder.decodeBinEP() << i;
     }
-    PosLastY = g_uiMinInGroup[ PosLastY ] + uiTemp;
+    PosLastY = g_minInGroup[PosLastY] + temp;
   }
 
   int blkPos;
@@ -3282,7 +3282,7 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   for( int scanPos = firstSigPos; scanPos > firstPosMode2; scanPos-- )
   {
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
-    ricePar = g_auiGoRiceParsCoeff[sumAll];
+    ricePar          = g_goRiceParsCoeff[sumAll];
     TCoeff& tcoeff = coeff[ cctx.blockPos( scanPos ) ];
     if( tcoeff >= 4 )
     {
@@ -3297,8 +3297,8 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   for( int scanPos = firstPosMode2; scanPos >= minSubPos; scanPos-- )
   {
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
-    int       rice      = g_auiGoRiceParsCoeff                        [sumAll];
-    int       pos0      = g_auiGoRicePosCoeff0(state, rice);
+    int       rice   = g_goRiceParsCoeff[sumAll];
+    int       pos0   = g_goRicePosCoeff0(state, rice);
     RExt__DECODER_DEBUG_BIT_STATISTICS_SET(ctype_escs);
     int       rem       = m_BinDecoder.decodeRemAbsEP( rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
     DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, rice );

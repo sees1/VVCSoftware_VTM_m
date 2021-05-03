@@ -302,18 +302,18 @@ inline double QuantRDOQ::xGetRateSigCoeffGroup( const BinFracBits& fracBitsSigCG
 */
 inline double QuantRDOQ::xGetRateLast( const int* lastBitsX, const int* lastBitsY, unsigned PosX, unsigned PosY ) const
 {
-  uint32_t    CtxX  = g_uiGroupIdx[PosX];
-  uint32_t    CtxY  = g_uiGroupIdx[PosY];
-  double  Cost  = lastBitsX[ CtxX ] + lastBitsY[ CtxY ];
-  if( CtxX > 3 )
+  uint32_t ctxX = g_groupIdx[PosX];
+  uint32_t ctxY = g_groupIdx[PosY];
+  double   cost = lastBitsX[ctxX] + lastBitsY[ctxY];
+  if (ctxX > 3)
   {
-    Cost += xGetIEPRate() * ((CtxX-2)>>1);
+    cost += xGetIEPRate() * ((ctxX - 2) >> 1);
   }
-  if( CtxY > 3 )
+  if (ctxY > 3)
   {
-    Cost += xGetIEPRate() * ((CtxY-2)>>1);
+    cost += xGetIEPRate() * ((ctxY - 2) >> 1);
   }
-  return xGetICost( Cost );
+  return xGetICost(cost);
 }
 
 
@@ -737,8 +737,8 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         if( remRegBins < 4 )
         {
           unsigned  sumAbs = cctx.templateAbsSum( iScanPos, piDstCoeff, 0 );
-          goRiceParam             = g_auiGoRiceParsCoeff   [ sumAbs ];
-          goRiceZero              = g_auiGoRicePosCoeff0(0, goRiceParam);
+          goRiceParam      = g_goRiceParsCoeff[sumAbs];
+          goRiceZero       = g_goRicePosCoeff0(0, goRiceParam);
         }
 
         const BinFracBits fracBitsPar = fracBits.getFracBitsArray( uiParCtx );
@@ -794,7 +794,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         else if( remRegBins >= 4 )
         {
           int  sumAll = cctx.templateAbsSum(iScanPos, piDstCoeff, 4);
-          goRiceParam = g_auiGoRiceParsCoeff[sumAll];
+          goRiceParam = g_goRiceParsCoeff[sumAll];
           remRegBins -= (uiLevel < 2 ? uiLevel : 3) + (iScanPos != iLastScanPos);
         }
       }
@@ -954,7 +954,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
     int bitsY = 0;
     int ctxId;
     //X-coordinate
-    for ( ctxId = 0; ctxId < g_uiGroupIdx[dim1-1]; ctxId++)
+    for (ctxId = 0; ctxId < g_groupIdx[dim1 - 1]; ctxId++)
     {
       const BinFracBits fB = fracBits.getFracBitsArray( cctx.lastXCtxId(ctxId) );
       lastBitsX[ ctxId ]   = bitsX + fB.intBits[ 0 ];
@@ -962,7 +962,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
     }
     lastBitsX[ctxId] = bitsX;
     //Y-coordinate
-    for ( ctxId = 0; ctxId < g_uiGroupIdx[dim2-1]; ctxId++)
+    for (ctxId = 0; ctxId < g_groupIdx[dim2 - 1]; ctxId++)
     {
       const BinFracBits fB = fracBits.getFracBitsArray( cctx.lastYCtxId(ctxId) );
       lastBitsY[ ctxId ]   = bitsY + fB.intBits[ 0 ];

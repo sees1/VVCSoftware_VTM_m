@@ -131,13 +131,13 @@ void VLCWriter::xWriteCode     ( uint32_t uiCode, uint32_t uiLength )
 void VLCWriter::xWriteUvlc     ( uint32_t uiCode )
 {
   uint32_t uiLength = 1;
-  uint32_t uiTemp = ++uiCode;
+  uint32_t temp     = ++uiCode;
 
-  CHECK( !uiTemp, "Integer overflow" );
+  CHECK(!temp, "Integer overflow");
 
-  while( 1 != uiTemp )
+  while (1 != temp)
   {
-    uiTemp >>= 1;
+    temp >>= 1;
     uiLength += 2;
   }
   // Take care of cases where uiLength > 32
