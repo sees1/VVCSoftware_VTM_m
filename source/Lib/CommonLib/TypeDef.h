@@ -55,7 +55,7 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-
+#define JVET_V0056_MCTF                                   1 // JVET-V0056: Changes to MCTF
 
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
 
