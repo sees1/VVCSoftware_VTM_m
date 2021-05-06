@@ -161,9 +161,10 @@ protected:
   int       m_iFrameRate;
   int       m_FrameSkip;
   uint32_t      m_temporalSubsampleRatio;
-  int       m_iSourceWidth;
-  int       m_iSourceHeight;
+  int       m_sourceWidth;
+  int       m_sourceHeight;
   Window    m_conformanceWindow;
+  int       m_sourcePadding[2];
   int       m_framesToBeEncoded;
   double    m_adLambdaModifier[ MAX_TLAYER ];
   std::vector<double> m_adIntraLambdaModifier;
@@ -277,7 +278,6 @@ protected:
   int       m_intraQPOffset;                    ///< QP offset for intra slice (integer)
   int       m_lambdaFromQPEnable;               ///< enable lambda derivation from QP
 #endif
-  int       m_aiPad[2];
 
   bool      m_AccessUnitDelimiter;               ///< add Access Unit Delimiter NAL units
   bool      m_enablePictureHeaderInSliceHeader;  ///< Enable Picture Header in Slice Header
@@ -912,8 +912,8 @@ public:
   void      setFrameRate                    ( int   i )      { m_iFrameRate = i; }
   void      setFrameSkip                    ( uint32_t  i )      { m_FrameSkip = i; }
   void      setTemporalSubsampleRatio       ( uint32_t  i )      { m_temporalSubsampleRatio = i; }
-  void      setSourceWidth                  ( int   i )      { m_iSourceWidth = i; }
-  void      setSourceHeight                 ( int   i )      { m_iSourceHeight = i; }
+  void      setSourceWidth                  ( int   i )      { m_sourceWidth = i; }
+  void      setSourceHeight                 ( int   i )      { m_sourceHeight = i; }
 
   Window   &getConformanceWindow()                           { return m_conformanceWindow; }
   void      setConformanceWindow (int confLeft, int confRight, int confTop, int confBottom ) { m_conformanceWindow.setWindow (confLeft, confRight, confTop, confBottom); }
@@ -982,7 +982,7 @@ public:
 #endif
   void      setChromaQpMappingTableParams   (const ChromaQpMappingTableParams &params) { m_chromaQpMappingTableParams = params; }
 
-  void      setPad                          ( int*  iPad                   )      { for ( int i = 0; i < 2; i++ ) m_aiPad[i] = iPad[i]; }
+  void      setSourcePadding                ( int*  padding)                { for ( int i = 0; i < 2; i++ ) m_sourcePadding[i] = padding[i]; }
 
   int       getMaxRefPicNum                 ()                              { return m_iMaxRefPicNum;           }
   void      setMaxRefPicNum                 ( int iMaxRefPicNum )           { m_iMaxRefPicNum = iMaxRefPicNum;  }
@@ -1312,8 +1312,8 @@ public:
   int       getFrameRate                    () const     { return  m_iFrameRate; }
   uint32_t      getFrameSkip                    () const     { return  m_FrameSkip; }
   uint32_t      getTemporalSubsampleRatio       () const     { return  m_temporalSubsampleRatio; }
-  int       getSourceWidth                  () const     { return  m_iSourceWidth; }
-  int       getSourceHeight                 () const     { return  m_iSourceHeight; }
+  int       getSourceWidth                  () const     { return  m_sourceWidth; }
+  int       getSourceHeight                 () const     { return  m_sourceHeight; }
   int       getFramesToBeEncoded            () const     { return  m_framesToBeEncoded; }
 
   //====== Lambda Modifiers ========
@@ -1341,7 +1341,7 @@ public:
 #else
   int       getBaseQP                       ()       { return  m_iQP; }
 #endif
-  int       getPad                          ( int i )      { CHECK(i >= 2, "Invalid index");                      return  m_aiPad[i]; }
+  int       getSourcePadding                ( int i ) { CHECK(i >= 2, "Invalid index"); return  m_sourcePadding[i]; }
 
   bool      getAccessUnitDelimiter() const  { return m_AccessUnitDelimiter; }
   void      setAccessUnitDelimiter(bool val){ m_AccessUnitDelimiter = val; }

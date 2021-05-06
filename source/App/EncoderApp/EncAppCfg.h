@@ -95,8 +95,8 @@ protected:
   int       m_iFrameRate;                                     ///< source frame-rates (Hz)
   uint32_t      m_FrameSkip;                                      ///< number of skipped frames from the beginning
   uint32_t      m_temporalSubsampleRatio;                         ///< temporal subsample ratio, 2 means code every two frames
-  int       m_iSourceWidth;                                   ///< source width in pixel
-  int       m_iSourceHeight;                                  ///< source height in pixel (when interlaced = field height)
+  int       m_sourceWidth;                                   ///< source width in pixel
+  int       m_sourceHeight;                                  ///< source height in pixel (when interlaced = field height)
 #if EXTENSION_360_VIDEO
   int       m_inputFileWidth;                                 ///< width of image in input file  (this is equivalent to sourceWidth,  if sourceWidth  is not subsequently altered due to padding)
   int       m_inputFileHeight;                                ///< height of image in input file (this is equivalent to sourceHeight, if sourceHeight is not subsequently altered due to padding)
@@ -113,8 +113,8 @@ protected:
   int       m_confWinRight;
   int       m_confWinTop;
   int       m_confWinBottom;
+  int       m_sourcePadding[2];                                       ///< number of padded pixels for width and height
   int       m_framesToBeEncoded;                              ///< number of encoded frames
-  int       m_aiPad[2];                                       ///< number of padded pixels for width and height
   bool      m_AccessUnitDelimiter;                            ///< add Access Unit Delimiter NAL units
   bool      m_enablePictureHeaderInSliceHeader;               ///< Enable Picture Header in Slice Header
   InputColourSpaceConversion m_inputColourSpaceConvert;       ///< colour space conversion to apply to input video
