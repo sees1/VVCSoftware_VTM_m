@@ -385,9 +385,6 @@ protected:
   CtxCache*       m_CtxCache;
 
   bool            m_isInitialized;
-  uint32_t        m_symbolSize;
-  uint16_t**      m_truncBinBits;
-  uint16_t*       m_escapeNumBins;
   bool            m_bestEscape;
   double*         m_indexError[MAXPLTSIZE + 1];
   uint8_t*        m_minErrorIndexMap; // store the best index in terms of distortion for each pixel
@@ -481,7 +478,6 @@ protected:
   void     deriveIndexMap         (CodingStructure& cs, Partitioner& partitioner, ComponentID compBegin, uint32_t numComp, PLTScanMode pltScanMode, double& dCost, bool* idxExist);
   bool     deriveSubblockIndexMap(CodingStructure& cs, Partitioner& partitioner, ComponentID compBegin, PLTScanMode pltScanMode, int minSubPos, int maxSubPos, const BinFracBits& fracBitsPltRunType, const BinFracBits* fracBitsPltIndexINDEX, const BinFracBits* fracBitsPltIndexCOPY, const double minCost, bool useRotate);
   double   rateDistOptPLT         (bool RunType, uint8_t RunIndex, bool prevRunType, uint8_t prevRunIndex, uint8_t aboveRunIndex, bool& prevCodedRunType, int& prevCodedRunPos, int scanPos, uint32_t width, int dist, int indexMaxValue, const BinFracBits* IndexfracBits, const BinFracBits& TypefracBits);
-  void     initTBCTable           (int bitDepth);
   uint32_t getTruncBinBits        (uint32_t symbol, uint32_t maxSymbol);
   uint32_t getEpExGolombNumBins   (uint32_t symbol, uint32_t count);
   void xGetNextISPMode                    ( ModeInfo& modeInfo, const ModeInfo* lastMode, const Size cuSize );
