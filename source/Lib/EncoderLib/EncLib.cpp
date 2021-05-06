@@ -117,7 +117,7 @@ void EncLib::create( const int layerId )
   }
   if ( m_RCEnableRateControl )
   {
-    m_cRateCtrl.init(m_framesToBeEncoded, m_RCTargetBitrate, (int)((double)m_iFrameRate / m_temporalSubsampleRatio + 0.5), m_iGOPSize, m_iSourceWidth, m_iSourceHeight,
+    m_cRateCtrl.init(m_framesToBeEncoded, m_RCTargetBitrate, (int)((double)m_iFrameRate / m_temporalSubsampleRatio + 0.5), m_iGOPSize, m_sourceWidth, m_sourceHeight,
       m_maxCUWidth, m_maxCUHeight, getBitDepth(CHANNEL_TYPE_LUMA), m_RCKeepHierarchicalBit, m_RCUseLCUSeparateModel, m_GOPList);
   }
 
@@ -184,8 +184,8 @@ void EncLib::init(AUWriterIf *auWriterIf)
   m_cRdCost.setCostMode ( m_costMode );
 
   // initialize PPS
-  pps0.setPicWidthInLumaSamples( m_iSourceWidth );
-  pps0.setPicHeightInLumaSamples( m_iSourceHeight );
+  pps0.setPicWidthInLumaSamples( m_sourceWidth );
+  pps0.setPicHeightInLumaSamples( m_sourceHeight );
   if (pps0.getPicWidthInLumaSamples() == sps0.getMaxPicWidthInLumaSamples() && pps0.getPicHeightInLumaSamples() == sps0.getMaxPicHeightInLumaSamples())
   {
     pps0.setConformanceWindow( sps0.getConformanceWindow() );
@@ -1142,12 +1142,12 @@ void EncLib::xInitSPS( SPS& sps )
   sps.setGDREnabledFlag(false);
 #endif
 
-  sps.setMaxPicWidthInLumaSamples( m_iSourceWidth );
-  sps.setMaxPicHeightInLumaSamples( m_iSourceHeight );
+  sps.setMaxPicWidthInLumaSamples( m_sourceWidth );
+  sps.setMaxPicHeightInLumaSamples( m_sourceHeight );
   if (m_resChangeInClvsEnabled)
   {
-    int maxPicWidth = std::max(m_iSourceWidth, (int)((double)m_iSourceWidth / m_scalingRatioHor + 0.5));
-    int maxPicHeight = std::max(m_iSourceHeight, (int)((double)m_iSourceHeight / m_scalingRatioVer + 0.5));
+    int maxPicWidth = std::max(m_sourceWidth, (int)((double)m_sourceWidth / m_scalingRatioHor + 0.5));
+    int maxPicHeight = std::max(m_sourceHeight, (int)((double)m_sourceHeight / m_scalingRatioVer + 0.5));
     const int minCuSize = std::max(8, 1 << m_log2MinCUSize);
     if (maxPicWidth % minCuSize)
     {
@@ -1352,7 +1352,7 @@ void EncLib::xInitSPS( SPS& sps )
     sps.setSubPicSameSizeFlag(m_subPicSameSizeFlag);
     if (m_subPicSameSizeFlag)
     {
-      uint32_t numSubpicCols = (m_iSourceWidth + m_CTUSize - 1) / m_CTUSize / m_subPicWidth[0];
+      uint32_t numSubpicCols = (m_sourceWidth + m_CTUSize - 1) / m_CTUSize / m_subPicWidth[0];
       for (unsigned int i = 0; i < m_numSubPics; i++)
       {
         sps.setSubPicCtuTopLeftX(i, (i % numSubpicCols) * m_subPicWidth[0]);
@@ -1386,8 +1386,8 @@ void EncLib::xInitSPS( SPS& sps )
     sps.setNumSubPics(1);
     sps.setSubPicCtuTopLeftX(0, 0);
     sps.setSubPicCtuTopLeftY(0, 0);
-    sps.setSubPicWidth(0, m_iSourceWidth);
-    sps.setSubPicHeight(0, m_iSourceHeight);
+    sps.setSubPicWidth(0, m_sourceWidth);
+    sps.setSubPicHeight(0, m_sourceHeight);
     sps.setSubPicTreatedAsPicFlag(0, 1);
     sps.setLoopFilterAcrossSubpicEnabledFlag(0, 0);
     sps.setSubPicIdLen(0);
