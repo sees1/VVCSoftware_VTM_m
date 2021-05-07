@@ -414,7 +414,7 @@ DecLib::DecLib()
   , m_cCuDecoder()
   , m_HLSReader()
   , m_seiReader()
-  , m_cLoopFilter()
+  , m_deblockingFilter()
   , m_cSAO()
   , m_cReshaper()
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
@@ -538,7 +538,7 @@ void DecLib::deletePicBuffer ( )
   }
   m_cALF.destroy();
   m_cSAO.destroy();
-  m_cLoopFilter.destroy();
+  m_deblockingFilter.destroy();
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   m_cacheModel.reportSequence( );
   m_cacheModel.destroy( );
@@ -642,7 +642,7 @@ void DecLib::executeLoopFilters()
       m_cSAO.setReshaper(&m_cReshaper);
   }
   // deblocking filter
-  m_cLoopFilter.loopFilterPic( cs );
+  m_deblockingFilter.deblockingFilterPic( cs );
   CS::setRefinedMotionField(cs);
   if( cs.sps->getSAOEnabledFlag() )
   {
@@ -1687,7 +1687,7 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
                    sps->getMaxCUWidth(), sps->getMaxCUHeight(),
                    maxDepth,
                    log2SaoOffsetScaleLuma, log2SaoOffsetScaleChroma );
-    m_cLoopFilter.create(maxDepth);
+    m_deblockingFilter.create(maxDepth);
     m_cIntraPred.init( sps->getChromaFormatIdc(), sps->getBitDepth( CHANNEL_TYPE_LUMA ) );
     m_cInterPred.init( &m_cRdCost, sps->getChromaFormatIdc(), sps->getMaxCUHeight() );
     if (sps->getUseLmcs())

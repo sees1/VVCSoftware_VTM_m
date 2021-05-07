@@ -402,14 +402,14 @@ protected:
   uint32_t  m_log2MaxTbSize;
 
   //====== Loop/Deblock Filter ========
-  bool      m_bLoopFilterDisable;
-  bool      m_loopFilterOffsetInPPS;
-  int       m_loopFilterBetaOffsetDiv2;
-  int       m_loopFilterTcOffsetDiv2;
-  int       m_loopFilterCbBetaOffsetDiv2;
-  int       m_loopFilterCbTcOffsetDiv2;
-  int       m_loopFilterCrBetaOffsetDiv2;
-  int       m_loopFilterCrTcOffsetDiv2;
+  bool      m_deblockingFilterDisable;
+  bool      m_deblockingFilterOffsetInPPS;
+  int       m_deblockingFilterBetaOffsetDiv2;
+  int       m_deblockingFilterTcOffsetDiv2;
+  int       m_deblockingFilterCbBetaOffsetDiv2;
+  int       m_deblockingFilterCbTcOffsetDiv2;
+  int       m_deblockingFilterCrBetaOffsetDiv2;
+  int       m_deblockingFilterCrTcOffsetDiv2;
 #if W0038_DB_OPT
   int       m_deblockingFilterMetric;
 #else
@@ -1235,14 +1235,14 @@ public:
   void      setLog2MaxTbSize                ( uint32_t  u )   { m_log2MaxTbSize = u; }
 
   //====== Loop/Deblock Filter ========
-  void      setLoopFilterDisable            ( bool  b )      { m_bLoopFilterDisable       = b; }
-  void      setLoopFilterOffsetInPPS        ( bool  b )      { m_loopFilterOffsetInPPS      = b; }
-  void      setLoopFilterBetaOffset         ( int   i )      { m_loopFilterBetaOffsetDiv2  = i; }
-  void      setLoopFilterTcOffset           ( int   i )      { m_loopFilterTcOffsetDiv2    = i; }
-  void      setLoopFilterCbBetaOffset       ( int   i )      { m_loopFilterCbBetaOffsetDiv2  = i; }
-  void      setLoopFilterCbTcOffset         ( int   i )      { m_loopFilterCbTcOffsetDiv2    = i; }
-  void      setLoopFilterCrBetaOffset       ( int   i )      { m_loopFilterCrBetaOffsetDiv2  = i; }
-  void      setLoopFilterCrTcOffset         ( int   i )      { m_loopFilterCrTcOffsetDiv2    = i; }
+  void      setDeblockingFilterDisable      ( bool  b )      { m_deblockingFilterDisable           = b; }
+  void      setDeblockingFilterOffsetInPPS  ( bool  b )      { m_deblockingFilterOffsetInPPS       = b; }
+  void      setDeblockingFilterBetaOffset   ( int   i )      { m_deblockingFilterBetaOffsetDiv2    = i; }
+  void      setDeblockingFilterTcOffset     ( int   i )      { m_deblockingFilterTcOffsetDiv2      = i; }
+  void      setDeblockingFilterCbBetaOffset ( int   i )      { m_deblockingFilterCbBetaOffsetDiv2  = i; }
+  void      setDeblockingFilterCbTcOffset   ( int   i )      { m_deblockingFilterCbTcOffsetDiv2    = i; }
+  void      setDeblockingFilterCrBetaOffset ( int   i )      { m_deblockingFilterCrBetaOffsetDiv2  = i; }
+  void      setDeblockingFilterCrTcOffset   ( int   i )      { m_deblockingFilterCrTcOffsetDiv2    = i; }
 #if W0038_DB_OPT
   void      setDeblockingFilterMetric       ( int   i )      { m_deblockingFilterMetric = i; }
 #else
@@ -1352,14 +1352,14 @@ public:
   void      setEnablePictureHeaderInSliceHeader(bool val) { m_enablePictureHeaderInSliceHeader = val; }
 
   //==== Loop/Deblock Filter ========
-  bool      getLoopFilterDisable            ()      { return  m_bLoopFilterDisable;       }
-  bool      getLoopFilterOffsetInPPS        ()      { return m_loopFilterOffsetInPPS; }
-  int       getLoopFilterBetaOffset         ()      { return m_loopFilterBetaOffsetDiv2; }
-  int       getLoopFilterTcOffset           ()      { return m_loopFilterTcOffsetDiv2; }
-  int       getLoopFilterCbBetaOffset       ()      { return m_loopFilterCbBetaOffsetDiv2; }
-  int       getLoopFilterCbTcOffset         ()      { return m_loopFilterCbTcOffsetDiv2;   }
-  int       getLoopFilterCrBetaOffset       ()      { return m_loopFilterCrBetaOffsetDiv2; }
-  int       getLoopFilterCrTcOffset         ()      { return m_loopFilterCrTcOffsetDiv2;   }
+  bool      getDeblockingFilterDisable            ()      { return m_deblockingFilterDisable;          }
+  bool      getDeblockingFilterOffsetInPPS        ()      { return m_deblockingFilterOffsetInPPS;      }
+  int       getDeblockingFilterBetaOffset         ()      { return m_deblockingFilterBetaOffsetDiv2;   }
+  int       getDeblockingFilterTcOffset           ()      { return m_deblockingFilterTcOffsetDiv2;     }
+  int       getDeblockingFilterCbBetaOffset       ()      { return m_deblockingFilterCbBetaOffsetDiv2; }
+  int       getDeblockingFilterCbTcOffset         ()      { return m_deblockingFilterCbTcOffsetDiv2;   }
+  int       getDeblockingFilterCrBetaOffset       ()      { return m_deblockingFilterCrBetaOffsetDiv2; }
+  int       getDeblockingFilterCrTcOffset         ()      { return m_deblockingFilterCrTcOffsetDiv2;   }
 #if W0038_DB_OPT
   int       getDeblockingFilterMetric       ()      { return m_deblockingFilterMetric; }
 #else

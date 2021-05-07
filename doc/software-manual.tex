@@ -453,32 +453,32 @@ range is between
 0.3 and 1.
 
 \item[]\textbf{tcOffsetDiv2}: An in-loop deblocking filter parameter for luma component, tcOffsetDiv2 
-is added to the base parameter LoopFilterTcOffset_div2 to set the final tc_offset_div2 
+is added to the base parameter DeblockingFilterTcOffset_div2 to set the final tc_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of tc_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{betaOffsetDiv2}: An in-loop deblocking filter parameter for luma component, betaOffsetDiv2 
-is added to the base parameter LoopFilterBetaOffset_div2 to set the final beta_offset_div2 
+is added to the base parameter DeblockingFilterBetaOffset_div2 to set the final beta_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of beta_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CbTcOffsetDiv2}: An in-loop deblocking filter parameter for Cb component, CbTcOffsetDiv2 
-is added to the base parameter LoopFilterCbTcOffset_div2 to set the final tc_offset_div2 
+is added to the base parameter DeblockingFilterCbTcOffset_div2 to set the final tc_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of tc_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CbBetaOffsetDiv2}: An in-loop deblocking filter parameter for Cb component, CbBetaOffsetDiv2 
-is added to the base parameter LoopFilterCbBetaOffset_div2 to set the final beta_offset_div2 
+is added to the base parameter DeblockingFilterCbBetaOffset_div2 to set the final beta_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of beta_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CrTcOffsetDiv2}: An in-loop deblocking filter parameter for Cr component, CrTcOffsetDiv2 
-is added to the base parameter LoopFilterCrTcOffset_div2 to set the final tc_offset_div2 
+is added to the base parameter DeblockingFilterCrTcOffset_div2 to set the final tc_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of tc_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CrBetaOffsetDiv2}: An in-loop deblocking filter parameter for Cr component, CrBetaOffsetDiv2 
-is added to the base parameter LoopFilterCrBetaOffset_div2 to set the final beta_offset_div2 
+is added to the base parameter DeblockingFilterCrBetaOffset_div2 to set the final beta_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of beta_offset_div2 shall be an integer number in the range $-12..12$.
 
@@ -2557,13 +2557,13 @@ Target subpic index for target output layers that containing multiple subpicture
 %% In-loop filtering parameters
 %%
 \begin{OptionTableNoShorthand}{In-loop filtering parameters}{tab:inloop-filter}
-\Option{LoopFilterDisable} &
+\Option{DeblockingFilterDisable} &
 %\ShortOption{\None} &
 \Default{false} &
 Enables or disables the in-loop deblocking filter.
 \\
 
-\Option{LoopFilterOffsetInPPS}&
+\Option{DeblockingFilterOffsetInPPS}&
 %\ShortOption{\None}&
 \Default{false}&
 If enabled, the in-loop deblocking filter control parameters are sent in PPS. 
@@ -2576,42 +2576,42 @@ In this case, the final value of the deblocking filter parameter sent for a cert
 (base parameter + GOP parameter for this picture). Intra-pictures use the base parameters values.
 \\
 
-\Option{LoopFilterTcOffset_div2}&
+\Option{DeblockingFilterTcOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter tc_offset_div2 for luma component. The final value of tc_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterBetaOffset_div2}&
+\Option{DeblockingFilterBetaOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter beta_offset_div2 for luma component. The final value of beta_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCbTcOffset_div2}&
+\Option{DeblockingFilterCbTcOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter tc_offset_div2 for Cb component. The final value of tc_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCbBetaOffset_div2}&
+\Option{DeblockingFilterCbBetaOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter beta_offset_div2 for Cb component. The final value of beta_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCrTcOffset_div2}&
+\Option{DeblockingFilterCrTcOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter tc_offset_div2 for Cr component. The final value of tc_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCrBetaOffset_div2}&
+\Option{DeblockingFilterCrBetaOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter beta_offset_div2 for Cr component. The final value of beta_offset_div2 

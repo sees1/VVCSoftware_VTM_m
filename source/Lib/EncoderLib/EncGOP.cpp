@@ -210,7 +210,7 @@ void EncGOP::init ( EncLib* pcEncLib )
   m_pcSliceEncoder       = pcEncLib->getSliceEncoder();
   m_pcListPic            = pcEncLib->getListPic();
   m_HLSWriter            = pcEncLib->getHLSWriter();
-  m_pcLoopFilter         = pcEncLib->getLoopFilter();
+  m_pcLoopFilter         = pcEncLib->getDeblockingFilter();
   m_pcSAO                = pcEncLib->getSAO();
   m_pcALF                = pcEncLib->getALF();
   m_pcRateCtrl           = pcEncLib->getRateCtrl();
@@ -3039,7 +3039,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           }
         }
       }
-      m_pcLoopFilter->loopFilterPic( cs );
+      m_pcLoopFilter->deblockingFilterPic( cs );
 
       CS::setRefinedMotionField(cs);
 
@@ -3885,7 +3885,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 uint64_t EncGOP::preLoopFilterPicAndCalcDist( Picture* pcPic )
 {
   CodingStructure& cs = *pcPic->cs;
-  m_pcLoopFilter->loopFilterPic( cs );
+  m_pcLoopFilter->deblockingFilterPic( cs );
 
   const CPelUnitBuf picOrg = pcPic->getRecoBuf();
   const CPelUnitBuf picRec = cs.getRecoBuf();
@@ -5466,7 +5466,7 @@ void EncGOP::applyDeblockingFilterMetric( Picture* pcPic, uint32_t uiNumSlices )
   int qp = pcSlice->getSliceQp();
   const int bitDepthLuma=pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA);
   int bitdepthScale = 1 << (bitDepthLuma-8);
-  int beta = LoopFilter::getBeta( qp ) * bitdepthScale;
+  int beta = DeblockingFilter::getBeta( qp ) * bitdepthScale;
   const int thr2 = (beta>>2);
   const int thr1 = 2*bitdepthScale;
   uint32_t a = 0;

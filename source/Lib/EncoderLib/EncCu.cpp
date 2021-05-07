@@ -239,7 +239,7 @@ void EncCu::init( EncLib* pcEncLib, const SPS& sps )
   m_CtxCache           = pcEncLib->getCtxCache();
   m_pcRateCtrl         = pcEncLib->getRateCtrl();
   m_pcSliceEncoder     = pcEncLib->getSliceEncoder();
-  m_pcLoopFilter       = pcEncLib->getLoopFilter();
+  m_deblockingFilter   = pcEncLib->getDeblockingFilter();
   m_GeoCostList.init(GEO_NUM_PARTITION_MODE, m_pcEncCfg->getMaxNumGeoCand());
   m_AFFBestSATDCost = MAX_DOUBLE;
 
@@ -4529,7 +4529,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     return;
   }
 
-  m_pcLoopFilter->setEnc(true);
+  m_deblockingFilter->setEnc(true);
   const ChromaFormat format = cs.area.chromaFormat;
   CodingUnit*                cu = cs.getCU(partitioner.chType);
   const Position lumaPos = cu->Y().valid() ? cu->Y().pos() : recalcPosition( format, cu->chType, CHANNEL_TYPE_LUMA, cu->blocks[cu->chType].pos() );
@@ -4562,7 +4562,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
 
     const UnitArea currCsArea = clipArea( CS::getArea( cs, cs.area, partitioner.chType ), *cs.picture );
 
-    PelStorage&          picDbBuf = m_pcLoopFilter->getDbEncPicYuvBuffer();
+    PelStorage&          picDbBuf = m_deblockingFilter->getDbEncPicYuvBuffer();
 
     //deblock neighbour pixels
     const Size     lumaSize = cu->Y().valid() ? cu->Y().size() : recalcSize( format, cu->chType, CHANNEL_TYPE_LUMA, cu->blocks[cu->chType].size() );
@@ -4608,14 +4608,14 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     //deblock
     if ( leftEdgeAvai )
     {
-      m_pcLoopFilter->resetFilterLengths();
-      m_pcLoopFilter->xDeblockCU( *cu, EDGE_VER );
+      m_deblockingFilter->resetFilterLengths();
+      m_deblockingFilter->xDeblockCU( *cu, EDGE_VER );
     }
 
     if (topEdgeAvai)
     {
-      m_pcLoopFilter->resetFilterLengths();
-      m_pcLoopFilter->xDeblockCU( *cu, EDGE_HOR );
+      m_deblockingFilter->resetFilterLengths();
+      m_deblockingFilter->xDeblockCU( *cu, EDGE_HOR );
     }
 
     //update current CU SSE
@@ -4660,7 +4660,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     cs.costDbOffset = sign * m_pcRdCost->calcRdCost( 0, distTmp );
   }
 
-  m_pcLoopFilter->setEnc( false );
+  m_deblockingFilter->setEnc( false );
 }
 
 Distortion EncCu::getDistortionDb( CodingStructure &cs, CPelBuf org, CPelBuf reco, ComponentID compID, const CompArea& compArea, bool afterDb )

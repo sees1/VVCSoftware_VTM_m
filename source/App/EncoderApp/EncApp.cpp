@@ -565,14 +565,14 @@ void EncApp::xInitLibCfg()
   //===== Slice ========
 
   //====== Loop/Deblock Filter ========
-  m_cEncLib.setLoopFilterDisable                                 ( m_bLoopFilterDisable       );
-  m_cEncLib.setLoopFilterOffsetInPPS                             ( m_loopFilterOffsetInPPS );
-  m_cEncLib.setLoopFilterBetaOffset                              ( m_loopFilterBetaOffsetDiv2  );
-  m_cEncLib.setLoopFilterTcOffset                                ( m_loopFilterTcOffsetDiv2    );
-  m_cEncLib.setLoopFilterCbBetaOffset                            ( m_loopFilterCbBetaOffsetDiv2  );
-  m_cEncLib.setLoopFilterCbTcOffset                              ( m_loopFilterCbTcOffsetDiv2    );
-  m_cEncLib.setLoopFilterCrBetaOffset                            ( m_loopFilterCrBetaOffsetDiv2  );
-  m_cEncLib.setLoopFilterCrTcOffset                              ( m_loopFilterCrTcOffsetDiv2    );
+  m_cEncLib.setDeblockingFilterDisable                           ( m_deblockingFilterDisable           );
+  m_cEncLib.setDeblockingFilterOffsetInPPS                       ( m_deblockingFilterOffsetInPPS       );
+  m_cEncLib.setDeblockingFilterBetaOffset                        ( m_deblockingFilterBetaOffsetDiv2    );
+  m_cEncLib.setDeblockingFilterTcOffset                          ( m_deblockingFilterTcOffsetDiv2      );
+  m_cEncLib.setDeblockingFilterCbBetaOffset                      ( m_deblockingFilterCbBetaOffsetDiv2  );
+  m_cEncLib.setDeblockingFilterCbTcOffset                        ( m_deblockingFilterCbTcOffsetDiv2    );
+  m_cEncLib.setDeblockingFilterCrBetaOffset                      ( m_deblockingFilterCrBetaOffsetDiv2  );
+  m_cEncLib.setDeblockingFilterCrTcOffset                        ( m_deblockingFilterCrTcOffsetDiv2    );
 #if W0038_DB_OPT
   m_cEncLib.setDeblockingFilterMetric                            ( m_deblockingFilterMetric );
 #else
