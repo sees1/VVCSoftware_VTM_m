@@ -321,7 +321,10 @@ public:
   const CPelBuf       getOrgBuf(const ComponentID &compID) const;
          PelUnitBuf   getOrgBuf();
   const CPelUnitBuf   getOrgBuf() const;
-
+#if JVET_V0095_ALF_SAO_TRUE_ORG
+         PelUnitBuf   getTrueOrgBuf();
+  const CPelUnitBuf   getTrueOrgBuf() const;
+#endif
 
   // pred buffer
          PelBuf       getPredBuf(const ComponentID &compID)       { return m_pred.get(compID); }

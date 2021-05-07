@@ -698,6 +698,9 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
+#if JVET_V0095_ALF_SAO_TRUE_ORG
+  bool        m_alfSaoTrueOrg;
+#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
