@@ -207,6 +207,15 @@ void EncSampleAdaptiveOffset::initCABACEstimator( CABACEncoder* cabacEncoder, Ct
 }
 
 
+#if JVET_V0095_ALF_SAO_TRUE_ORG
+void EncSampleAdaptiveOffset::SAOProcess( CodingStructure& cs, bool* sliceEnabled, const double* lambdas,
+#if ENABLE_QPA
+                                          const double lambdaChromaWeight,
+#endif
+                                          const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding, bool usingTrueOrg )
+{
+  PelUnitBuf org = usingTrueOrg ? cs.getTrueOrgBuf() : cs.getOrgBuf();
+#else
 void EncSampleAdaptiveOffset::SAOProcess( CodingStructure& cs, bool* sliceEnabled, const double* lambdas,
 #if ENABLE_QPA
                                           const double lambdaChromaWeight,
@@ -214,6 +223,7 @@ void EncSampleAdaptiveOffset::SAOProcess( CodingStructure& cs, bool* sliceEnable
                                           const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding )
 {
   PelUnitBuf org = cs.getOrgBuf();
+#endif
   PelUnitBuf res = cs.getRecoBuf();
   PelUnitBuf src = m_tempBuf;
   memcpy(m_lambda, lambdas, sizeof(m_lambda));
@@ -248,10 +258,15 @@ void EncSampleAdaptiveOffset::SAOProcess( CodingStructure& cs, bool* sliceEnable
 
 }
 
-
+#if JVET_V0095_ALF_SAO_TRUE_ORG
+void EncSampleAdaptiveOffset::getPreDBFStatistics( CodingStructure& cs, bool usingTrueOrg )
+{
+  PelUnitBuf org = usingTrueOrg ? cs.getTrueOrgBuf() : cs.getOrgBuf();
+#else
 void EncSampleAdaptiveOffset::getPreDBFStatistics(CodingStructure& cs)
 {
   PelUnitBuf org = cs.getOrgBuf();
+#endif
   PelUnitBuf rec = cs.getRecoBuf();
   getStatistics(m_preDBFstatData, org, rec, cs, true);
 }
