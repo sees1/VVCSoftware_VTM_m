@@ -49,7 +49,7 @@
 #include "CommonLib/TrQuant.h"
 #include "CommonLib/InterPrediction.h"
 #include "CommonLib/IntraPrediction.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 #include "CommonLib/AdaptiveLoopFilter.h"
 #include "CommonLib/SEI.h"
 #include "CommonLib/Unit.h"
@@ -110,7 +110,7 @@ private:
 #if JVET_S0257_DUMP_360SEI_MESSAGE
   SeiCfgFileDump          m_seiCfgDump;
 #endif
-  LoopFilter              m_cLoopFilter;
+  DeblockingFilter        m_deblockingFilter;
   SampleAdaptiveOffset    m_cSAO;
   AdaptiveLoopFilter      m_cALF;
   Reshape                 m_cReshaper;                        ///< reshaper class

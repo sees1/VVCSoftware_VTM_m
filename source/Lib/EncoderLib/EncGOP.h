@@ -43,7 +43,7 @@
 #include <stdlib.h>
 
 #include "CommonLib/Picture.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 #include "CommonLib/NAL.h"
 #include "EncSampleAdaptiveOffset.h"
 #include "EncAdaptiveLoopFilter.h"
@@ -137,7 +137,7 @@ private:
   PicList*                m_pcListPic;
 
   HLSWriter*              m_HLSWriter;
-  LoopFilter*             m_pcLoopFilter;
+  DeblockingFilter*             m_pcLoopFilter;
 
   SEIWriter               m_seiWriter;
 

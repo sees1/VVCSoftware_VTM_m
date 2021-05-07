@@ -104,11 +104,11 @@ void EncLib::create( const int layerId )
   m_cInterSearch.cacheAssign( &m_cacheModel );
 #endif
 
-  m_cLoopFilter.create(floorLog2(m_maxCUWidth) - MIN_CU_LOG2);
+  m_deblockingFilter.create(floorLog2(m_maxCUWidth) - MIN_CU_LOG2);
 
-  if (!m_bLoopFilterDisable && m_encDbOpt)
+  if (!m_deblockingFilterDisable && m_encDbOpt)
   {
-    m_cLoopFilter.initEncPicYuvBuffer(m_chromaFormatIDC, Size(getSourceWidth(), getSourceHeight()), getMaxCUWidth());
+    m_deblockingFilter.initEncPicYuvBuffer(m_chromaFormatIDC, Size(getSourceWidth(), getSourceHeight()), getMaxCUWidth());
   }
 
   if (m_lmcsEnabled)
@@ -135,7 +135,7 @@ void EncLib::destroy ()
   }
   m_cEncSAO.            destroyEncData();
   m_cEncSAO.            destroy();
-  m_cLoopFilter.        destroy();
+  m_deblockingFilter.   destroy();
   m_cRateCtrl.          destroy();
   m_cReshaper.          destroy();
   m_cInterSearch.       destroy();
@@ -1671,18 +1671,18 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
   }
   else
   {
-    pps.setDeblockingFilterOverrideEnabledFlag( !getLoopFilterOffsetInPPS() );
-    pps.setPPSDeblockingFilterDisabledFlag( getLoopFilterDisable() );
+    pps.setDeblockingFilterOverrideEnabledFlag( !getDeblockingFilterOffsetInPPS() );
+    pps.setPPSDeblockingFilterDisabledFlag( getDeblockingFilterDisable() );
   }
 
   if (! pps.getPPSDeblockingFilterDisabledFlag())
   {
-    pps.setDeblockingFilterBetaOffsetDiv2( getLoopFilterBetaOffset() );
-    pps.setDeblockingFilterTcOffsetDiv2( getLoopFilterTcOffset() );
-    pps.setDeblockingFilterCbBetaOffsetDiv2( getLoopFilterCbBetaOffset() );
-    pps.setDeblockingFilterCbTcOffsetDiv2( getLoopFilterCbTcOffset() );
-    pps.setDeblockingFilterCrBetaOffsetDiv2( getLoopFilterCrBetaOffset() );
-    pps.setDeblockingFilterCrTcOffsetDiv2( getLoopFilterCrTcOffset() );
+    pps.setDeblockingFilterBetaOffsetDiv2  ( getDeblockingFilterBetaOffset() );
+    pps.setDeblockingFilterTcOffsetDiv2    ( getDeblockingFilterTcOffset() );
+    pps.setDeblockingFilterCbBetaOffsetDiv2( getDeblockingFilterCbBetaOffset() );
+    pps.setDeblockingFilterCbTcOffsetDiv2  ( getDeblockingFilterCbTcOffset() );
+    pps.setDeblockingFilterCrBetaOffsetDiv2( getDeblockingFilterCrBetaOffset() );
+    pps.setDeblockingFilterCrTcOffsetDiv2  ( getDeblockingFilterCrTcOffset() );
   }
   else
   {

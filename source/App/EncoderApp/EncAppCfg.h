@@ -425,14 +425,14 @@ protected:
   bool      m_saoCtuBoundary;                                 ///< SAO parameter estimation using non-deblocked pixels for CTU bottom and right boundary areas
   bool      m_saoGreedyMergeEnc;                              ///< SAO greedy merge encoding algorithm
   // coding tools (loop filter)
-  bool      m_bLoopFilterDisable;                             ///< flag for using deblocking filter
-  bool      m_loopFilterOffsetInPPS;                         ///< offset for deblocking filter in 0 = slice header, 1 = PPS
-  int       m_loopFilterBetaOffsetDiv2;                     ///< beta offset for deblocking filter
-  int       m_loopFilterTcOffsetDiv2;                       ///< tc offset for deblocking filter
-  int       m_loopFilterCbBetaOffsetDiv2;                     ///< beta offset for Cb deblocking filter
-  int       m_loopFilterCbTcOffsetDiv2;                       ///< tc offset for Cb deblocking filter
-  int       m_loopFilterCrBetaOffsetDiv2;                     ///< beta offset for Cr deblocking filter
-  int       m_loopFilterCrTcOffsetDiv2;                       ///< tc offset for Cr deblocking filter
+  bool      m_deblockingFilterDisable;                        ///< flag for using deblocking filter
+  bool      m_deblockingFilterOffsetInPPS;                    ///< offset for deblocking filter in 0 = slice header, 1 = PPS
+  int       m_deblockingFilterBetaOffsetDiv2;                 ///< beta offset for deblocking filter
+  int       m_deblockingFilterTcOffsetDiv2;                   ///< tc offset for deblocking filter
+  int       m_deblockingFilterCbBetaOffsetDiv2;               ///< beta offset for Cb deblocking filter
+  int       m_deblockingFilterCbTcOffsetDiv2;                 ///< tc offset for Cb deblocking filter
+  int       m_deblockingFilterCrBetaOffsetDiv2;               ///< beta offset for Cr deblocking filter
+  int       m_deblockingFilterCrTcOffsetDiv2;                 ///< tc offset for Cr deblocking filter
 #if W0038_DB_OPT
   int       m_deblockingFilterMetric;                         ///< blockiness metric in encoder
 #else
