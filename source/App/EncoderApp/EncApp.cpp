@@ -856,6 +856,12 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setFramePackingArrangementSEIId                      ( m_framePackingSEIId );
   m_cEncLib.setFramePackingArrangementSEIQuincunx                ( m_framePackingSEIQuincunx );
   m_cEncLib.setFramePackingArrangementSEIInterpretation          ( m_framePackingSEIInterpretation );
+#if JVET_V0061_SEI
+  m_cEncLib.setDoSEIEnabled                                      ( m_doSEIEnabled );
+  m_cEncLib.setDoSEICancelFlag                                   ( m_doSEICancelFlag );
+  m_cEncLib.setDoSEIPersistenceFlag                              ( m_doSEIPersistenceFlag);
+  m_cEncLib.setDoSEITransformType                                ( m_doSEITransformType);
+#endif
   m_cEncLib.setParameterSetsInclusionIndicationSEIEnabled        (m_parameterSetsInclusionIndicationSEIEnabled);
   m_cEncLib.setSelfContainedClvsFlag                             (m_selfContainedClvsFlag);
   m_cEncLib.setErpSEIEnabled                                     ( m_erpSEIEnabled );
