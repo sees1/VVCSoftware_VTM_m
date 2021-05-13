@@ -2200,6 +2200,42 @@ For Cb component with BT.2020 container use 1.14; for BT.709 material and 1.04 f
 For Cr component with BT.2020 container use 1.79; for BT.709 material and 1.39 for P3 material.
 \\
 
+\Option{SmoothQPReductionEnable} &
+\Default{0} &
+Enable QP reduction for smooth blocks according to a QP reduction model:
+$Clip3(SmoothQPReductionLimit, 0, SmoothQPReductionModelScale*QP+SmoothQPReductionModelOffset)$.
+The QP reduction model is used when SAD is less than SmoothQPReductionThreshold * number of samples in block.
+Where SAD is defined as the sum of absolute differences between original luma samples and luma samples predicted by a 2nd order polynomial model.
+The model parameters are determined by a least square fit to original luma samples on a granularity of 64x64 samples.
+MaxCuDQPSubdiv is preferably set to 1 or 2 to achieve best subjective performance.
+\\
+
+\Option{SmoothQPReductionThreshold} &
+\Default{3.0} &
+Threshold parameter for smoothness.
+\\
+
+\Option{SmoothQPReductionModelScale} &
+\Default{-1.0} &
+Scale parameter of the QP reduction model.
+\\
+
+\Option{SmoothQPReductionModelOffset} &
+\Default{27.0} &
+Offset parameter of the QP reduction model.
+\\
+
+\Option{SmoothQPReductionLimit} &
+\Default{-16.0} &
+Threshold parameter for controlling amount of QP reduction by the QP reduction model.
+\\
+
+
+\Option{SmoothQPReductionPeriodicity} &
+\Default{1} &
+Periodicity parameter for application of the QP reduction model. 1: all frames, 0: only intra pictures, 2: every second frame, etc.
+\\
+
 \Option{SliceChromaQPOffsetPeriodicity} &
 \Default{0} &
 Defines the periodicity for inter slices that use the slice-level chroma QP offsets, as defined by SliceCbQpOffsetIntraOrPeriodic and SliceCrQpOffsetIntraOrPeriodic. A value of 0 disables the periodicity. It is intended to be used in low-delay configurations where an regular intra period is not defined.
