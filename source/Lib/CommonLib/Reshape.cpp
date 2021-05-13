@@ -285,6 +285,22 @@ void Reshape::constructReshaper()
       m_chromaAdjHelpLUT[i] = (int32_t)(m_initCW * (1 << FP_PREC) / ( m_binCW[i] + m_sliceReshapeInfo.chrResScalingOffset ) );
     }
   }
+
+  int sumBinCW = 0;
+  for (int i = m_sliceReshapeInfo.reshaperModelMinBinIdx; i <= m_sliceReshapeInfo.reshaperModelMaxBinIdx; i++)
+  {
+    sumBinCW += m_binCW[i];
+    if (m_binCW[i] != 0)
+    {
+      CHECK(m_binCW[i] < (m_initCW >> 3) || m_binCW[i] > ((m_initCW << 3) - 1), " lmcsCW[ i ] shall be in the range of ( OrgCW >> 3 ) to ( ( OrgCW << 3 ) - 1 if not equal to 0 ).");
+      CHECK((m_binCW[i] + m_sliceReshapeInfo.chrResScalingOffset) < (m_initCW >> 3) || (m_binCW[i] + m_sliceReshapeInfo.chrResScalingOffset) > ((m_initCW << 3) - 1),
+        "It is a requirement of bitstream conformance that, when lmcsCW[ i ] is not equal to 0, ( lmcsCW[ i ] + lmcsDeltaCrs ) shall be in the range of ( OrgCW >> 3 ) to ( ( OrgCW << 3 ) - 1 ), inclusive.");
+    }
+    CHECK((((m_reshapePivot[i] % (1 << (m_lumaBD - 5))) != 0) && ((m_reshapePivot[i] >> (m_lumaBD - 5)) == (m_reshapePivot[i + 1] >> (m_lumaBD - 5)))),
+      "It is a requirement of bitstream conformance that, for i = lmcs_min_bin_idx..LmcsMaxBinIdx, when the value of LmcsPivot[ i ] is not a multiple of 1 << ( BitDepth - 5 ), the value of(LmcsPivot[i] >> (BitDepth - 5)) shall not be equal to the value of(LmcsPivot[i + 1] >> (BitDepth - 5)).");
+  }
+  CHECK(sumBinCW > ((1 << m_lumaBD) - 1), "It is a requirement of bitstream conformance that the following condition is true: Sum_(i = 0) ^ 15 [lmcsCW[i]] <= (1 << BitDepth) - 1.");
+
   for (int lumaSample = 0; lumaSample < m_reshapeLUTSize; lumaSample++)
   {
     int idxY = lumaSample / m_initCW;
