@@ -739,6 +739,9 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 #if SHARP_LUMA_DELTA_QP
         (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled()) ||
 #endif
+#if JVET_V0078
+        (m_pcEncCfg->getSmoothQPReductionEnable()) ||
+#endif
 #if ENABLE_QPA_SUB_CTU
         (m_pcEncCfg->getUsePerceptQPA() && !m_pcEncCfg->getUseRateCtrl() && pps.getUseDQP())
 #else
@@ -1061,7 +1064,11 @@ void EncCu::updateLambda (Slice* slice, const int dQP,
   {
     m_pcRdCost->setLambda (newLambda, slice->getSPS()->getBitDepths());
 #if WCG_EXT
+#if JVET_V0078
+    if (!(m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || m_pcEncCfg->getSmoothQPReductionEnable()))
+#else
     if (!m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled())
+#endif
     {
       m_pcRdCost->saveUnadjustedLambda();
     }

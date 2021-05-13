@@ -239,6 +239,87 @@ int EncModeCtrl::calculateLumaDQP( const CPelBuf& rcOrg )
 }
 #endif
 
+#if JVET_V0078
+int EncModeCtrl::calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP)
+{
+  double avg = 0;
+  double diff = 0;
+  double thr = (double)m_pcEncCfg->getSmoothQPReductionThreshold()*rcOrg.height*rcOrg.width;
+  int qp = 0;
+  if (rcOrg.height >= 64 && rcOrg.width >= 64)
+  {
+    const int numBasis = 6;
+
+    double invb[numBasis][numBasis] = { {0.001*0.244140625000000,                         0,                         0,                        0,                        0,                        0},
+                                      {                      0,   0.001*0.013204564833946,   0.001*0.002080251479290, -0.001*0.000066039729501, -0.001*0.000165220364313,        0.000000000000000},
+                                      {                      0,   0.001*0.002080251479290,   0.001*0.013204564833946, -0.001*0.000066039729501,        0.000000000000000, -0.001*0.000165220364313},
+                                      {                      0,  -0.001*0.000066039729501,  -0.001*0.000066039729501,  0.001*0.000002096499349,        0.000000000000000,        0.000000000000000},
+                                      {                      0,  -0.001*0.000165220364313,         0.000000000000000,        0.000000000000000,  0.001*0.000002622545465,        0.000000000000000},
+                                      {                      0,         0.000000000000000,  -0.001*0.000165220364313,        0.000000000000000,        0.000000000000000,  0.001*0.000002622545465} };
+    double boffset[5] = { -31.5, -31.5, -992.25, -1333.5, -1333.5 };
+
+    int listQuadrantsX[4] = { 0, 64, 0, 64 };
+    int listQuadrantsY[4] = { 0, 0, 64, 64 };
+
+    double b1sum;
+    double b2sum;
+    double b3sum;
+    double b4sum;
+    double b5sum;
+    double b6sum;
+    int numQuadrantsX = (rcOrg.width == 128) ? 2 : 1;
+    int numQuadrantsY = (rcOrg.height == 128) ? 2 : 1;
+    //loop over quadrants
+    for (int posy = 0; posy < numQuadrantsY; posy++)
+    {
+      for (int posx = 0; posx < numQuadrantsX; posx++)
+      {
+        b2sum = 0.0;
+        b3sum = 0.0;
+        b4sum = 0.0;
+        b5sum = 0.0;
+        b6sum = 0.0;
+        avg = 0.0;
+        for (uint32_t y = 0; y < 64; y++)
+        {
+          for (uint32_t x = 0; x < 64; x++)
+          {
+            const Pel& v = rcOrg.at(x + listQuadrantsX[posx + 2 * posy], y + listQuadrantsY[posx + 2 * posy]);
+            b2sum += ((double)v)*((double)x + boffset[0]);
+            b3sum += ((double)v)*((double)y + boffset[1]);
+            b4sum += ((double)v)*((double)x*(double)y + boffset[2]);
+            b5sum += ((double)v)*((double)x*(double)x + boffset[3]);
+            b6sum += ((double)v)*((double)y*(double)y + boffset[4]);
+            avg += (double)v;
+          }
+        }
+        b1sum = avg;
+        double r[numBasis];
+        for (uint32_t b = 0; b < numBasis; b++)
+        {
+          r[b] = invb[b][0] * b1sum + invb[b][1] * b2sum + invb[b][2] * b3sum + invb[b][3] * b4sum + invb[b][4] * b5sum + invb[b][5] * b6sum;
+        }
+        // compute SAD for model
+        for (uint32_t y = 0; y < 64; y++)
+        {
+          for (uint32_t x = 0; x < 64; x++)
+          {
+            const Pel& v = rcOrg.at(x + listQuadrantsX[posx + 2 * posy], y + listQuadrantsY[posx + 2 * posy]);
+
+            diff += abs((int)v - (int)(r[0] + r[1] * ((double)x + boffset[0]) + r[2] * ((double)y + boffset[1]) + r[3] * ((double)x*(double)y + boffset[2]) + r[4] * ((double)x*(double)x + boffset[3]) + r[5] * ((double)y*(double)y + boffset[4])));
+          }
+        }
+      }
+    }
+    if (diff < thr)
+    {
+      qp = max(m_pcEncCfg->getSmoothQPReductionLimit(), min(0, (int)(m_pcEncCfg->getSmoothQPReductionModelScale()*(double)baseQP + m_pcEncCfg->getSmoothQPReductionModelOffset())));
+    }
+  }
+  return qp;
+}
+#endif
+
 void CacheBlkInfoCtrl::create()
 {
   const unsigned numPos = MAX_CU_SIZE >> MIN_CU_LOG2;
@@ -1055,6 +1136,30 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
         m_lumaQPOffset = calculateLumaDQP (cs.getOrgBuf (clipArea (cs.area.Y(), cs.picture->Y())));
       }
       baseQP = Clip3 (-cs.sps->getQpBDOffset (CHANNEL_TYPE_LUMA), MAX_QP, baseQP - m_lumaQPOffset);
+    }
+#endif
+#if JVET_V0078
+    if (m_pcEncCfg->getSmoothQPReductionEnable())
+    {
+      int smoothQPoffset = 0;
+      if (partitioner.currQgEnable())
+      {
+        // enable smooth QP reduction on selected frames
+        bool checkSmoothQP = false;
+        if (m_pcEncCfg->getSmoothQPReductionPeriodicity() != 0)
+        {
+          checkSmoothQP = ((m_pcEncCfg->getSmoothQPReductionPeriodicity() == 0) && cs.slice->isIntra()) || (m_pcEncCfg->getSmoothQPReductionPeriodicity() == 1) || ((cs.slice->getPOC() % m_pcEncCfg->getSmoothQPReductionPeriodicity()) == 0);
+        }
+        else
+        {
+          checkSmoothQP = ((m_pcEncCfg->getSmoothQPReductionPeriodicity() == 0) && cs.slice->isIntra());
+        }
+        if (checkSmoothQP)
+        {
+          smoothQPoffset = calculateLumaDQPsmooth(cs.getOrgBuf(clipArea(cs.area.Y(), cs.picture->Y())), baseQP);
+        }
+      }
+      baseQP = Clip3(-cs.sps->getQpBDOffset(CHANNEL_TYPE_LUMA), MAX_QP, baseQP + smoothQPoffset);
     }
 #endif
   }

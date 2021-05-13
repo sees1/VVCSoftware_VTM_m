@@ -285,6 +285,14 @@ protected:
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping;      ///< mapping from luma level to Delta QP.
 #endif
   SEIMasteringDisplay m_masteringDisplay;
+#if JVET_V0078
+  bool      m_smoothQPReductionEnable;
+  double    m_smoothQPReductionThreshold;
+  double    m_smoothQPReductionModelScale;
+  double    m_smoothQPReductionModelOffset;
+  int       m_smoothQPReductionLimit;
+  int       m_smoothQPReductionPeriodicity;
+#endif
 
   bool      m_bUseAdaptiveQP;                                 ///< Flag for enabling QP adaptation based on a psycho-visual model
   int       m_iQPAdaptationRange;                             ///< dQP range by QP adaptation
