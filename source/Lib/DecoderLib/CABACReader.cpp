@@ -83,6 +83,10 @@ void CABACReader::initCtxModels( Slice& slice )
     }
   }
   m_BinDecoder.reset( qp, (int)sliceType );
+#if JVET_V0106_RRC_RICE
+  m_BinDecoder.setBaseLevel(slice.getRiceBaseLevel());
+  m_BinDecoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA));
+#endif
 }
 
 
@@ -2961,6 +2965,17 @@ void CABACReader::residual_coding( TransformUnit& tu, ComponentID compID, CUCtx&
   int ctxBinSampleRatio = (compID == COMPONENT_Y) ? MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_LUMA : MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_CHROMA;
   cctx.regBinLimit = (tu.getTbAreaAfterCoefZeroOut(compID) * ctxBinSampleRatio) >> 4;
 
+#if JVET_V0106_RRC_RICE
+  int baseLevel = m_BinDecoder.getCtx().getBaseLevel();
+  cctx.setBaseLevel(baseLevel);
+  if (tu.cs->slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag())
+  {
+    cctx.setUpdateHist(1);
+    unsigned riceStats = m_BinDecoder.getCtx().getGRAdaptStats((unsigned)compID);
+    TCoeff historyValue = (TCoeff)1 << riceStats;
+    cctx.setHistValue(historyValue);
+  }
+#endif
   for (int subSetId = (cctx.scanPosLast() >> cctx.log2CGSize()); subSetId >= 0; subSetId--)
   {
     cctx.initSubblock(subSetId);
@@ -3196,6 +3211,10 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   const bool  isLast      = cctx.isLast();
   int         firstSigPos = ( isLast ? cctx.scanPosLast() : cctx.maxSubPos() );
   int         nextSigPos  = firstSigPos;
+#if JVET_V0106_RRC_RICE
+  int baseLevel = cctx.getBaseLevel();
+  bool updateHistory = cctx.getUpdateHist();
+#endif
 
   //===== decode significant_coeffgroup_flag =====
   RExt__DECODER_DEBUG_BIT_STATISTICS_SET( ctype_group );
@@ -3281,8 +3300,13 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   unsigned ricePar = 0;
   for( int scanPos = firstSigPos; scanPos > firstPosMode2; scanPos-- )
   {
+#if JVET_V0106_RRC_RICE
+    ricePar = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, baseLevel);
+#else
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
     ricePar          = g_goRiceParsCoeff[sumAll];
+#endif
+
     TCoeff& tcoeff = coeff[ cctx.blockPos( scanPos ) ];
     if( tcoeff >= 4 )
     {
@@ -3290,20 +3314,42 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
       int       rem     = m_BinDecoder.decodeRemAbsEP( ricePar, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, ricePar );
       tcoeff += (rem<<1);
+#if JVET_V0106_RRC_RICE
+      if ((updateHistory) && (rem > 0))
+      {
+        unsigned &riceStats = m_BinDecoder.getCtx().getGRAdaptStats((unsigned)(cctx.compID()));
+        cctx.updateRiceStat(riceStats, rem, 1);
+        cctx.setUpdateHist(0);
+        updateHistory = 0;
+      }
+#endif
     }
   }
 
   //===== coeff bypass ====
   for( int scanPos = firstPosMode2; scanPos >= minSubPos; scanPos-- )
   {
+#if JVET_V0106_RRC_RICE
+    int rice = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, 0);
+#else
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
     int       rice   = g_goRiceParsCoeff[sumAll];
+#endif
     int       pos0   = g_goRicePosCoeff0(state, rice);
     RExt__DECODER_DEBUG_BIT_STATISTICS_SET(ctype_escs);
     int       rem       = m_BinDecoder.decodeRemAbsEP( rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
     DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, rice );
     TCoeff    tcoeff  = ( rem == pos0 ? 0 : rem < pos0 ? rem+1 : rem );
     state = ( stateTransTable >> ((state<<2)+((tcoeff&1)<<1)) ) & 3;
+#if JVET_V0106_RRC_RICE
+    if ((updateHistory) && (rem > 0))
+    {
+      unsigned &riceStats = m_BinDecoder.getCtx().getGRAdaptStats((unsigned)(cctx.compID()));
+      cctx.updateRiceStat(riceStats, rem, 0);
+      cctx.setUpdateHist(0);
+      updateHistory = 0;
+    }
+#endif
     if( tcoeff )
     {
       int        blkPos         = cctx.blockPos( scanPos );

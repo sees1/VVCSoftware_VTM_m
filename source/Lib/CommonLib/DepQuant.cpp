@@ -38,7 +38,9 @@
 
 #include <bitset>
 
-
+#if JVET_V0106_RRC_RICE
+#include "ContextModelling.h"
+#endif
 
 
 
@@ -849,13 +851,38 @@ namespace DQIntern
     uint8_t                     m_memory[ 8 * ( MAX_TB_SIZEY * MAX_TB_SIZEY + MLS_GRP_NUM ) ];
   };
 
+#if JVET_V0106_DEP_QUANT_ENC_OPT
+#define RICEMAX 64
+#define RICE_ORDER_MAX 16
+  const int32_t g_goRiceBits[RICE_ORDER_MAX][RICEMAX] =
+#else
 #define RICEMAX 32
   const int32_t g_goRiceBits[4][RICEMAX] =
+#endif
   {
+#if JVET_V0106_DEP_QUANT_ENC_OPT
+    { 32768, 65536, 98304, 131072, 163840, 196608, 262144, 262144, 327680, 327680, 327680, 327680, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288 },
+    { 65536, 65536, 98304, 98304, 131072, 131072, 163840, 163840, 196608, 196608, 229376, 229376, 294912, 294912, 294912, 294912, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520 },
+    { 98304, 98304, 98304, 98304, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752 },
+    { 131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448 },
+    { 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144 },
+    { 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376 },
+    { 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376 },
+    { 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144 },
+    { 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912 },
+    { 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680 },
+    { 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448 },
+    { 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216 },
+    { 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984 },
+    { 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752 },
+    { 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520 },
+    { 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288 },
+#else
     { 32768,  65536,  98304, 131072, 163840, 196608, 262144, 262144, 327680, 327680, 327680, 327680, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752},
     { 65536,  65536,  98304,  98304, 131072, 131072, 163840, 163840, 196608, 196608, 229376, 229376, 294912, 294912, 294912, 294912, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984},
     { 98304,  98304,  98304,  98304, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680},
     {131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376}
+#endif
   };
 
   class State
@@ -865,7 +892,11 @@ namespace DQIntern
     State( const RateEstimator& rateEst, CommonCtx& commonCtx, const int stateId );
 
     template<uint8_t numIPos>
+#if JVET_V0106_RRC_RICE
+    inline void updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision, const int baseLevel, const bool extRiceFlag);
+#else
     inline void updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision);
+#endif
     inline void updateStateEOS(const ScanInfo &scanInfo, const State *prevStates, const State *skipStates,
                                const Decision &decision);
 
@@ -1022,6 +1053,33 @@ namespace DQIntern
     unsigned                  effHeight;
   };
 
+#if JVET_V0106_RRC_RICE
+  unsigned templateAbsCompare(TCoeff sum)
+  {
+    int rangeIdx = 0;
+    if (sum < g_riceT[0])
+    {
+      rangeIdx = 0;
+    }
+    else if (sum < g_riceT[1])
+    {
+      rangeIdx = 1;
+    }
+    else if (sum < g_riceT[2])
+    {
+      rangeIdx = 2;
+    }
+    else if (sum < g_riceT[3])
+    {
+      rangeIdx = 3;
+    }
+    else
+    {
+      rangeIdx = 4;
+    }
+    return g_riceShift[rangeIdx];
+  }
+#endif
 
   State::State( const RateEstimator& rateEst, CommonCtx& commonCtx, const int stateId )
     : m_sbbFracBits     { { 0, 0 } }
@@ -1033,7 +1091,11 @@ namespace DQIntern
   }
 
   template<uint8_t numIPos>
+#if JVET_V0106_RRC_RICE
+  inline void State::updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision, const int baseLevel, const bool extRiceFlag)
+#else
   inline void State::updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision)
+#endif
   {
     m_rdCost = decision.rdCost;
     if( decision.prevId > -2 )
@@ -1138,8 +1200,24 @@ namespace DQIntern
           UPDATE(4);
         }
 #undef UPDATE
+#if JVET_V0106_RRC_RICE 
+        if (extRiceFlag)
+        {
+          unsigned currentShift = templateAbsCompare(sumAbs);
+          sumAbs = sumAbs >> currentShift;
+          int sumAll = std::max(std::min(31, (int)sumAbs - (int)baseLevel), 0);
+          m_goRicePar = g_goRiceParsCoeff[sumAll];
+          m_goRicePar += currentShift;
+        }
+        else
+        {
+          int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
+          m_goRicePar = g_goRiceParsCoeff[sumAll];
+        }
+#else
         int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
         m_goRicePar = g_goRiceParsCoeff[sumAll];
+#endif
       }
       else
       {
@@ -1176,8 +1254,24 @@ namespace DQIntern
           UPDATE(4);
         }
 #undef UPDATE
+#if JVET_V0106_RRC_RICE 
+        if (extRiceFlag)
+        {
+          unsigned currentShift = templateAbsCompare(sumAbs);
+          sumAbs = sumAbs >> currentShift;
+          sumAbs = std::min<TCoeff>(31, sumAbs);
+          m_goRicePar = g_goRiceParsCoeff[sumAbs];
+          m_goRicePar += currentShift;
+        }
+        else
+        {
+          sumAbs = std::min<TCoeff>(31, sumAbs);
+          m_goRicePar = g_goRiceParsCoeff[sumAbs];
+        }
+#else
         sumAbs = std::min<TCoeff>(31, sumAbs);
-        m_goRicePar  = g_goRiceParsCoeff[sumAbs];
+        m_goRicePar = g_goRiceParsCoeff[sumAbs];
+#endif
         m_goRiceZero = g_goRicePosCoeff0(m_stateId, m_goRicePar);
       }
     }
@@ -1308,6 +1402,11 @@ namespace DQIntern
     void    quant   ( TransformUnit& tu, const CCoeffBuf& srcCoeff, const ComponentID compID, const QpParam& cQP, const double lambda, const Ctx& ctx, TCoeff& absSum, bool enableScalingLists, int* quantCoeff );
     void    dequant ( const TransformUnit& tu, CoeffBuf& recCoeff, const ComponentID compID, const QpParam& cQP, bool enableScalingLists, int* quantCoeff );
 
+#if JVET_V0106_RRC_RICE
+    int m_baseLevel;
+    bool m_extRiceRRCFlag;
+#endif
+
   private:
     void    xDecideAndUpdate  ( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, TCoeff quantCoeff);
     void    xDecide           ( const ScanPosType spt, const TCoeff absCoeff, const int lastOffset, Decision* decisions, bool zeroOut, TCoeff quantCoeff );
@@ -1405,6 +1504,43 @@ namespace DQIntern
       {
         switch( scanInfo.nextNbInfoSbb.num )
         {
+#if JVET_V0106_RRC_RICE
+        case 0:
+          m_currStates[0].updateState<0>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<0>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<0>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<0>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
+          break;
+        case 1:
+          m_currStates[0].updateState<1>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<1>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<1>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<1>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
+          break;
+        case 2:
+          m_currStates[0].updateState<2>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<2>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<2>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<2>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
+          break;
+        case 3:
+          m_currStates[0].updateState<3>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<3>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<3>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<3>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
+          break;
+        case 4:
+          m_currStates[0].updateState<4>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<4>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<4>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<4>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
+          break;
+        default:
+          m_currStates[0].updateState<5>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<5>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<5>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<5>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
+#else
         case 0:
           m_currStates[0].updateState<0>( scanInfo, m_prevStates, decisions[0] );
           m_currStates[1].updateState<0>( scanInfo, m_prevStates, decisions[1] );
@@ -1440,6 +1576,7 @@ namespace DQIntern
           m_currStates[1].updateState<5>( scanInfo, m_prevStates, decisions[1] );
           m_currStates[2].updateState<5>( scanInfo, m_prevStates, decisions[2] );
           m_currStates[3].updateState<5>( scanInfo, m_prevStates, decisions[3] );
+#endif
         }
       }
 
@@ -1458,6 +1595,10 @@ namespace DQIntern
     //===== reset / pre-init =====
     const TUParameters& tuPars  = *g_Rom.getTUPars( tu.blocks[compID], compID );
     m_quant.initQuantBlock    ( tu, compID, cQP, lambda );
+#if JVET_V0106_RRC_RICE
+    m_baseLevel = ctx.getBaseLevel();
+    m_extRiceRRCFlag = tu.cs->sps->getSpsRangeExtension().getRrcRiceExtensionEnableFlag();
+#endif
     TCoeff*       qCoeff      = tu.getCoeffs( compID ).buf;
     const TCoeff* tCoeff      = srcCoeff.buf;
     const int     numCoeff    = tu.blocks[compID].area();

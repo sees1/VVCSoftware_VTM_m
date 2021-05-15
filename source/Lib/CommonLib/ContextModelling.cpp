@@ -115,6 +115,21 @@ CoeffCodingContext::CoeffCodingContext(const TransformUnit &tu, ComponentID comp
     const_cast<int&>(m_lastShiftX)  = (log2sizeX + 1) >> 2;
     const_cast<int&>(m_lastShiftY)  = (log2sizeY + 1) >> 2;
   }
+
+#if JVET_V0106_RRC_RICE
+  m_cctxBaseLevel = 4; // default value for RRC rice derivation in VVCv1, is updated for extended RRC rice derivation
+  m_histValue = 0;  // default value for RRC rice derivation in VVCv1, is updated for history-based extention of RRC rice derivation
+  m_updateHist = 0;  // default value for RRC rice derivation (history update is disabled), is updated for history-based extention of RRC rice derivation
+
+  if (tu.cs->sps->getSpsRangeExtension().getRrcRiceExtensionEnableFlag())
+  {
+    deriveRiceRRC = &CoeffCodingContext::deriveRiceExt;
+  }
+  else
+  {
+    deriveRiceRRC = &CoeffCodingContext::deriveRice;
+  }
+#endif
 }
 
 void CoeffCodingContext::initSubblock( int SubsetId, bool sigGroupFlag )
