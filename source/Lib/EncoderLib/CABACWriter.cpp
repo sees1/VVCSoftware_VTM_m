@@ -61,6 +61,10 @@ void CABACWriter::initCtxModels( const Slice& slice )
     sliceType = encCABACTableIdx;
   }
   m_BinEncoder.reset( qp, (int)sliceType );
+#if JVET_V0106_RRC_RICE
+  m_BinEncoder.setBaseLevel(slice.getRiceBaseLevel());
+  m_BinEncoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA)); // provide bit depth for derivation (CE14_C method)
+#endif
 }
 
 
@@ -2706,6 +2710,17 @@ void CABACWriter::residual_coding( const TransformUnit& tu, ComponentID compID, 
   int ctxBinSampleRatio = (compID == COMPONENT_Y) ? MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_LUMA : MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_CHROMA;
   cctx.regBinLimit = (tu.getTbAreaAfterCoefZeroOut(compID) * ctxBinSampleRatio) >> 4;
 
+#if JVET_V0106_RRC_RICE
+  int baseLevel = m_BinEncoder.getCtx().getBaseLevel();
+  cctx.setBaseLevel(baseLevel);
+  if (tu.cs->slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag())
+  {
+    cctx.setUpdateHist(1);
+    unsigned riceStats = m_BinEncoder.getCtx().getGRAdaptStats((unsigned)compID);
+    TCoeff historyValue = (TCoeff)1 << riceStats;
+    cctx.setHistValue(historyValue);
+  }
+#endif
   for( int subSetId = ( cctx.scanPosLast() >> cctx.log2CGSize() ); subSetId >= 0; subSetId--)
   {
     cctx.initSubblock       ( subSetId, sigGroupFlags[subSetId] );
@@ -2908,6 +2923,10 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   const bool  isLast      = cctx.isLast();
   int         firstSigPos = ( isLast ? cctx.scanPosLast() : cctx.maxSubPos() );
   int         nextSigPos  = firstSigPos;
+#if JVET_V0106_RRC_RICE
+  int baseLevel = cctx.getBaseLevel();
+  bool updateHistory = cctx.getUpdateHist();
+#endif
 
   //===== encode significant_coeffgroup_flag =====
   if( !isLast && cctx.isNotFirst() )
@@ -2993,14 +3012,28 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   unsigned ricePar = 0;
   for( int scanPos = firstSigPos; scanPos > firstPosMode2; scanPos-- )
   {
+#if JVET_V0106_RRC_RICE
+     ricePar = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, baseLevel);
+#else
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
     ricePar           = g_goRiceParsCoeff[sumAll];
+#endif
+
     unsigned absLevel = (unsigned) abs( coeff[ cctx.blockPos( scanPos ) ] );
     if( absLevel >= 4 )
     {
       unsigned rem      = ( absLevel - 4 ) >> 1;
       m_BinEncoder.encodeRemAbsEP( rem, ricePar, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, ricePar );
+#if JVET_V0106_RRC_RICE
+      if ((updateHistory) && (rem > 0))
+      {
+        unsigned &riceStats = m_BinEncoder.getCtx().getGRAdaptStats((unsigned)(cctx.compID()));
+        cctx.updateRiceStat(riceStats, rem, 1);
+        cctx.setUpdateHist(0);
+        updateHistory = 0;
+      }
+#endif
     }
   }
 
@@ -3009,13 +3042,26 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   {
     TCoeff    Coeff     = coeff[ cctx.blockPos( scanPos ) ];
     unsigned    absLevel  = (unsigned) abs( Coeff );
+#if JVET_V0106_RRC_RICE
+    int rice = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, 0);
+#else
     int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
     int         rice      = g_goRiceParsCoeff[sumAll];
+#endif
     int         pos0      = g_goRicePosCoeff0(state, rice);
     unsigned  rem       = ( absLevel == 0 ? pos0 : absLevel <= pos0 ? absLevel-1 : absLevel );
     m_BinEncoder.encodeRemAbsEP( rem, rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
     DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, rice );
     state = ( stateTransTable >> ((state<<2)+((absLevel&1)<<1)) ) & 3;
+#if JVET_V0106_RRC_RICE
+    if ((updateHistory) && (rem > 0))
+    {
+      unsigned &riceStats = m_BinEncoder.getCtx().getGRAdaptStats((unsigned)cctx.compID());
+      cctx.updateRiceStat(riceStats, rem, 0);
+      cctx.setUpdateHist(0);
+      updateHistory = 0;
+    }
+#endif
     if( absLevel )
     {
       numNonZero++;

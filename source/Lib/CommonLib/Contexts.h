@@ -382,6 +382,16 @@ public:
     }
   }
 
+#if JVET_V0106_RRC_RICE
+  void riceStatReset(int bitDepth)
+  {
+    for (std::size_t k = 0; k < RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS; k++)
+    {
+      m_GRAdaptStats[k] = (bitDepth > 10) ? 2 * floorLog2(bitDepth - 10) : 0; 
+    }
+  }
+#endif
+
   void  loadPStates( const std::vector<uint16_t>& probStates )
   {
     switch( m_BPMType )
@@ -416,6 +426,11 @@ public:
   const unsigned&     getGRAdaptStats ( unsigned      id )      const { return m_GRAdaptStats[id]; }
   unsigned&           getGRAdaptStats ( unsigned      id )            { return m_GRAdaptStats[id]; }
 
+#if JVET_V0106_RRC_RICE
+  const unsigned           getBaseLevel()                     const { return m_baseLevel; }
+  void                setBaseLevel(int value)                         { m_baseLevel = value; }
+#endif
+
 public:
   unsigned            getBPMType      ()                        const { return m_BPMType; }
   const Ctx&          getCtx          ()                        const { return *this; }
@@ -438,6 +453,10 @@ private:
   CtxStore<BinProbModel_Std>    m_CtxStore_Std;
 protected:
   unsigned                      m_GRAdaptStats[RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS];
+#if JVET_V0106_RRC_RICE
+  int m_baseLevel;
+#endif
+
 };
 
 

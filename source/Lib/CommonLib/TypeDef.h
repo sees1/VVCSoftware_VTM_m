@@ -50,6 +50,7 @@
 #include <assert.h>
 #include <cassert>
 
+#define JVET_V0106_RRC_RICE                               1 // JVET_V0106: Extension of the RRC rice derivation for high bit depth profile (VVCv2). 
 #define JVET_V0131_CORRECT_TR_HBD                          1 // correcting the 4x4 BDST7/DCT8 transform matrices for high bit-depth coding
 // clang-format off
 
@@ -233,9 +234,13 @@ typedef std::pair<int, int>  TrCost;
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            1 ///< 0 use original 6-bit transform matrices for both forward and inverse transform, 1 (default) = use original matrices for inverse transform and high precision matrices for forward transform
+#if JVET_V0106_RRC_RICE
+#define JVET_V0106_DEP_QUANT_ENC_OPT                      1 ///< 0 use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 (default) use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
+#endif
 #else
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            0 ///< 0 (default) use original 6-bit transform matrices for both forward and inverse transform, 1 = use original matrices for inverse transform and high precision matrices for forward transform
+#define JVET_V0106_DEP_QUANT_ENC_OPT                      0 ///< 0 (default) use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 - use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
 #endif
 
 #if FULL_NBIT
