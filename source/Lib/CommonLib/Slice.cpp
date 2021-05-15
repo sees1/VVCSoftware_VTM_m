@@ -2793,6 +2793,9 @@ SPSRExt::SPSRExt()
  , m_extendedPrecisionProcessingFlag    (false)
  , m_intraSmoothingDisabledFlag         (false)
  , m_highPrecisionOffsetsEnabledFlag    (false)
+#if JVET_V0106_RRC_RICE
+ , m_rrcRiceExtensionEnableFlag(false)
+#endif
  , m_persistentRiceAdaptationEnabledFlag(false)
  , m_cabacBypassAlignmentEnabledFlag    (false)
 {

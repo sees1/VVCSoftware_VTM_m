@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{jvetdoc}
+﻿\documentclass[a4paper,11pt]{jvetdoc}
 
 \usepackage{geometry}[2010/02/12]
 
@@ -3450,6 +3450,11 @@ When true, specifies the use of the residual rotation tool. Version 1 and some V
 \Option{SingleSignificanceMapContext} &
 \Default{false} &
 When true, specifies the use of a single significance map context for transform-skipped and transquant-bypassed TUs. Version 1 and some Version 2 (RExt) profiles require this to be false.
+\\
+
+\Option{ExtendedRiceRRC} &
+\Default{false} &
+When true, specifies the that extension of the Golomb-Rice parameter derivation for RRC is used. Version 1  profiles require this to be false and some Version 2 (RExt) profiles may require this to be true.
 \\
 
 \Option{GolombRiceParameterAdaptation} &

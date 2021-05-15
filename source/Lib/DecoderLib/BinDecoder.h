@@ -61,6 +61,9 @@ public:
   void      start   ();
   void      finish  ();
   void      reset   ( int qp, int initId );
+#if JVET_V0106_RRC_RICE
+  void      riceStatReset(int bitDepth);
+#endif
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
   void      set     ( const CodingStatisticsClassType& type) { ptype = &type; }
 #endif
