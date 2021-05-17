@@ -1982,13 +1982,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     CHECK(m_bitDepthConstraint < 8 || m_bitDepthConstraint>16, "MaxBitDepthConstraint setting must be in the range 8 to 16 (inclusive)");
   }
 
-
   m_inputColourSpaceConvert = stringToInputColourSpaceConvert(inputColourSpaceConvert, true);
   m_rgbFormat = (m_inputColourSpaceConvert == IPCOLOURSPACE_RGBtoGBR && m_chromaFormatIDC == CHROMA_444) ? true : false;
 
   // Picture width and height must be multiples of 8 and minCuSize
   const int minResolutionMultiple = std::max(8, 1 << m_log2MinCuSize);
-  CHECK(((m_sourceWidth% minResolutionMultiple) || (m_sourceHeight % minResolutionMultiple)) && m_conformanceWindowMode != 1, "Picture width or height is not a multiple of 8 or minCuSize, please use ConformanceWindowMode=1!");
+
   switch (m_conformanceWindowMode)
   {
   case 0:
@@ -2058,6 +2057,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       break;
     }
   }
+  CHECK(((m_sourceWidth% minResolutionMultiple) || (m_sourceHeight % minResolutionMultiple)), "Picture width or height (after padding) is not a multiple of 8 or minCuSize, please use ConformanceWindowMode=1 for automatic adjustment or ConformanceWindowMode=2 to specify padding manually!!");
 
   if( m_conformanceWindowMode > 0 && m_subPicInfoPresentFlag )
   {
