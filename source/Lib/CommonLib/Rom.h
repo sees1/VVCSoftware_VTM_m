@@ -91,7 +91,6 @@ static const int g_transformMatrixShift[TRANSFORM_NUMBER_OF_DIRECTIONS] = {  6, 
 extern int g_riceT[4];
 extern int g_riceShift[5];
 #endif
-
 extern const uint32_t g_groupIdx[MAX_TB_SIZEY];
 extern const uint32_t g_minInGroup[LAST_SIGNIFICANT_GROUPS];
 extern const uint32_t g_goRiceParsCoeff[32];

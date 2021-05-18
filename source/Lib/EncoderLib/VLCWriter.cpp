@@ -1291,6 +1291,9 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
           WRITE_FLAG( (spsRangeExtension.getTransformSkipRotationEnabledFlag() ? 1 : 0),      "transform_skip_rotation_enabled_flag");
           WRITE_FLAG( (spsRangeExtension.getTransformSkipContextEnabledFlag() ? 1 : 0),       "transform_skip_context_enabled_flag");
           WRITE_FLAG( (spsRangeExtension.getExtendedPrecisionProcessingFlag() ? 1 : 0),       "extended_precision_processing_flag" );
+#if JVET_V0054_TSRC_RICE
+          WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                   "sps_ts_residual_coding_rice_present_in_sh_flag");
+#endif
           WRITE_FLAG( (spsRangeExtension.getIntraSmoothingDisabledFlag() ? 1 : 0),            "intra_smoothing_disabled_flag" );
           WRITE_FLAG( (spsRangeExtension.getHighPrecisionOffsetsEnabledFlag() ? 1 : 0),       "high_precision_offsets_enabled_flag" );
 #if JVET_V0106_RRC_RICE
@@ -2593,6 +2596,12 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
     WRITE_FLAG(pcSlice->getTSResidualCodingDisabledFlag() ? 1 : 0, "sh_ts_residual_coding_disabled_flag");
   }
 
+#if JVET_V0054_TSRC_RICE
+  if ((!pcSlice->getTSResidualCodingDisabledFlag()) && (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag()))
+  {
+      WRITE_CODE(pcSlice->get_tsrc_index(), 3, "sh_ts_residual_coding_rice_idx_minus1");
+  }
+#endif
 
   if(pcSlice->getPPS()->getSliceHeaderExtensionPresentFlag())
   {

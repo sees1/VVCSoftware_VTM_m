@@ -3107,11 +3107,41 @@ void CABACWriter::residual_codingTS( const TransformUnit& tu, ComponentID compID
   for( int subSetId = 0; subSetId <= ( cctx.maxNumCoeff() - 1 ) >> cctx.log2CGSize(); subSetId++ )
   {
     cctx.initSubblock         ( subSetId, sigGroupFlags[subSetId] );
+#if JVET_V0054_TSRC_RICE
+    int goRiceParam = 1;
+    bool ricePresentFlag = false;
+    unsigned RiceBit[8]   = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP)
+    {
+      goRiceParam = goRiceParam + tu.cu->slice->get_tsrc_index();
+      if (isEncoding())
+      {
+        ricePresentFlag = true;
+        for (int i = 0; i < MAX_TSRC_RICE; i++)
+        {
+          RiceBit[i] = tu.cu->slice->getRiceBit(i);
+        }
+      }
+    }
+    residual_coding_subblockTS( cctx, coeff, RiceBit, goRiceParam, ricePresentFlag);
+    if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP && isEncoding())
+    {
+      for (int i = 0; i < MAX_TSRC_RICE; i++)
+      {
+        tu.cu->slice->setRiceBit(i, RiceBit[i]);
+      }
+    }
+#else
     residual_coding_subblockTS( cctx, coeff );
+#endif
   }
 }
 
+#if JVET_V0054_TSRC_RICE
+void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TCoeff* coeff, unsigned (&RiceBit)[8], int riceParam, bool ricePresentFlag)
+#else
 void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TCoeff* coeff )
+#endif
 {
   //===== init =====
   const int   minSubPos   = cctx.maxSubPos();
@@ -3216,10 +3246,39 @@ void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TC
 
     if( absLevel >= cutoffVal )
     {
+#if JVET_V0054_TSRC_RICE
+      int       rice = riceParam;
+#else
       int       rice = cctx.templateAbsSumTS( scanPos, coeff );
+#endif
       unsigned  rem = scanPos <= lastScanPosPass1 ? (absLevel - cutoffVal) >> 1 : absLevel;
       m_BinEncoder.encodeRemAbsEP( rem, rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "ts_rem_val() bin=%d ctx=%d sp=%d\n", rem, rice, scanPos );
+#if JVET_V0054_TSRC_RICE
+      if ( ricePresentFlag && (isEncoding()) && (cctx.compID() == COMPONENT_Y))
+      {
+        for (int idx = 1; idx < 9; idx++)
+        {
+          uint32_t length;
+          uint32_t symbol = rem;
+          if (rem < (5 << idx))
+          {
+            length = rem >> idx;
+            RiceBit[idx - 1] += (length + 1 + idx);
+          }
+          else
+          {
+            length = idx;
+            symbol = symbol - (5 << idx);
+            while (symbol >= (1 << length))
+            {
+              symbol -= (1 << (length++));
+            }
+            RiceBit[idx - 1] += (5 + length + 1 - idx + length);
+          }
+        }
+      }
+#endif
 
       if (absLevel && scanPos > lastScanPosPass1)
       {
