@@ -88,6 +88,11 @@ EncGOP::EncGOP()
   m_iLastRecoveryPicPOC = 0;
   m_latestDRAPPOC       = MAX_INT;
   m_lastRasPoc          = MAX_INT;
+#if JVET_V0054_TSRC_RICE
+  ::memset(m_riceBit, 0, 8 * 2 * sizeof(unsigned));
+  ::memset(m_preQP, MAX_INT, 2 * sizeof(int));
+  m_preIPOC             = 0;
+#endif
 
   m_pcCfg               = NULL;
   m_pcSliceEncoder      = NULL;
@@ -2840,6 +2845,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     {
       m_pcSliceEncoder->setJointCbCrModes(*pcPic->cs, Position(0, 0), pcPic->cs->area.lumaSize());
     }
+
     if( encPic )
     // now compress (trial encode) the various slice segments (slices, and dependent slices)
     {
@@ -2854,6 +2860,59 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       for(uint32_t sliceIdx = 0; sliceIdx < pcPic->cs->pps->getNumSlicesInPic(); sliceIdx++ )
       {
         pcSlice->setSliceMap( pcPic->cs->pps->getSliceMap( sliceIdx ) );
+#if JVET_V0054_TSRC_RICE
+        if (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && (pcPic->cs->pps->getNumSlicesInPic() == 1))
+        {
+          if (!pcSlice->isIntra())
+          {
+            int nextRice = 1;
+
+            if (m_preIPOC < pocCurr)
+            {
+              for (int idx = 0; idx < MAX_TSRC_RICE; idx++)
+              {
+                m_riceBit[idx][0] = m_riceBit[idx][1];
+              }
+              m_preQP[0] = m_preQP[1];
+              m_preIPOC = MAX_INT;
+            }
+
+            if (m_preQP[0] != pcSlice->getSliceQp())
+            {
+              m_riceBit[pcSlice->get_tsrc_index()][0] = (int) (m_riceBit[pcSlice->get_tsrc_index()][0] * 9 / 10);
+            }
+
+            for (int idx = 2; idx < 9; idx++)
+            {
+              if (m_riceBit[idx - 2][0] > m_riceBit[idx - 1][0])
+              {
+                nextRice = idx;
+              }
+              else
+              {
+                m_riceBit[idx - 1][0] = m_riceBit[idx - 2][0];
+              }
+              m_riceBit[idx - 2][0] = 0;
+            }
+            m_riceBit[7][0] = 0;
+            pcSlice->set_tsrc_index(nextRice - 1);
+          }
+          else
+          {
+            m_preIPOC = pocCurr;
+            m_preQP[0] = MAX_INT;          
+            m_preQP[1] = pcSlice->getSliceQp();
+            for (int idx = 0; idx < MAX_TSRC_RICE; idx++)
+            {
+              m_riceBit[idx][0] = 0;
+            }
+          }
+          for (int idx = 0; idx < MAX_TSRC_RICE; idx++)
+          {
+             pcSlice->setRiceBit(idx, m_riceBit[idx][0]);
+          }
+        }
+#endif
         if( pcPic->cs->pps->getRectSliceFlag() )
         {
           Position firstCtu;
@@ -3547,6 +3606,23 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           binCountsInNalUnits+=numBinsCoded;
           subPicStats[subpicIdx].numBinsWritten += numBinsCoded;
         }
+#if JVET_V0054_TSRC_RICE
+        if (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && (pcPic->cs->pps->getNumSlicesInPic() == 1))
+        {
+          if (pcSlice->getSliceType() == I_SLICE)
+          {
+            for (int idx = 0; idx < MAX_TSRC_RICE; idx++)
+            {
+              m_riceBit[idx][1] = pcSlice->getRiceBit(idx);
+            }
+          }
+          for (int idx = 0; idx < MAX_TSRC_RICE; idx++)
+          {
+            m_riceBit[idx][0] = pcSlice->getRiceBit(idx);
+          }
+          m_preQP[0] = pcSlice->getSliceQp();
+        }
+#endif
         {
           // Construct the final bitstream by concatenating substreams.
           // The final bitstream is either nalu.m_Bitstream or pcBitstreamRedirect;

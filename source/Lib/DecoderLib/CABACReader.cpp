@@ -3398,11 +3398,24 @@ void CABACReader::residual_codingTS( TransformUnit& tu, ComponentID compID )
   for( int subSetId = 0; subSetId <= ( cctx.maxNumCoeff() - 1 ) >> cctx.log2CGSize(); subSetId++ )
   {
     cctx.initSubblock         ( subSetId );
+#if JVET_V0054_TSRC_RICE
+    int goRiceParam = 1;
+    if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP)
+    {
+      goRiceParam = goRiceParam + tu.cu->slice->get_tsrc_index();
+    }
+    residual_coding_subblockTS( cctx, coeff, goRiceParam);
+#else
     residual_coding_subblockTS( cctx, coeff );
+#endif
   }
 }
 
+#if JVET_V0054_TSRC_RICE
+void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* coeff, int riceParam)
+#else
 void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* coeff )
+#endif
 {
   // NOTE: All coefficients of the subblock must be set to zero before calling this function
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
@@ -3544,7 +3557,11 @@ void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* 
     }
     if( tcoeff >= cutoffVal )
     {
+#if JVET_V0054_TSRC_RICE
+      int       rice = riceParam;
+#else
       int       rice = cctx.templateAbsSumTS( scanPos, coeff );
+#endif
       int       rem  = m_BinDecoder.decodeRemAbsEP( rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "ts_rem_val() bin=%d ctx=%d sp=%d\n", rem, rice, scanPos );
       tcoeff += (scanPos <= lastScanPosPass1) ? (rem << 1) : rem;

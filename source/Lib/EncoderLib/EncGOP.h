@@ -129,6 +129,11 @@ private:
   int                     m_iLastRecoveryPicPOC;
   int                     m_latestDRAPPOC;
   int                     m_lastRasPoc;
+#if JVET_V0054_TSRC_RICE
+  unsigned                m_riceBit[8][2];
+  int                     m_preQP[2];
+  int                     m_preIPOC;
+#endif
 
   //  Access channel
   EncLib*                 m_pcEncLib;
@@ -240,6 +245,10 @@ public:
 #if GDR_ENABLED
   void      setLastGdrIntervalPoc(int p)  { m_lastGdrIntervalPoc = p; }
   int       getLastGdrIntervalPoc() const { return m_lastGdrIntervalPoc; }
+#endif
+
+#if JVET_V0054_TSRC_RICE
+  int       getPreQP() const { return m_preQP[0]; }
 #endif
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 

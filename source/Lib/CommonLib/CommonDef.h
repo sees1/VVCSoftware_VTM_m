@@ -474,7 +474,10 @@ static const int SCALE_RATIO_BITS =                              14;
 static const int MAX_SCALING_RATIO =                              2;  // max downsampling ratio for RPR
 static const std::pair<int, int> SCALE_1X = std::pair<int, int>( 1 << SCALE_RATIO_BITS, 1 << SCALE_RATIO_BITS );  // scale ratio 1x
 static const int DELTA_QP_ACT[4] =                  { -5, 1, 3, 1 };
-
+#if JVET_V0054_TSRC_RICE
+static const int MAX_TSRC_RICE =                                  8;  ///<Maximum supported TSRC Rice parameter
+static const int MIN_TSRC_RICE =                                  1;  ///<Minimum supported TSRC Rice parameter
+#endif
 // ====================================================================================================================
 // Macro functions
 // ====================================================================================================================

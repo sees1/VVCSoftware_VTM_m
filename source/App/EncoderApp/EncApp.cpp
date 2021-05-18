@@ -618,6 +618,9 @@ void EncApp::xInitLibCfg()
 #if JVET_V0106_RRC_RICE
   m_cEncLib.setRrcRiceExtensionEnableFlag                        ( m_rrcRiceExtensionEnableFlag );
 #endif
+#if JVET_V0054_TSRC_RICE
+  m_cEncLib.setTSRCRicePresentFlag                               ( m_tsrcRicePresentFlag);
+#endif
   m_cEncLib.setHighPrecisionOffsetsEnabledFlag                   ( m_highPrecisionOffsetsEnabledFlag );
 
   m_cEncLib.setWeightedPredictionMethod( m_weightedPredictionMethod );
