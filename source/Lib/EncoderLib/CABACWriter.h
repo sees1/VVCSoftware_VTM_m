@@ -149,7 +149,11 @@ public:
   void        last_sig_coeff            ( CoeffCodingContext&           cctx,     const TransformUnit& tu, ComponentID       compID );
   void        residual_coding_subblock  ( CoeffCodingContext&           cctx,     const TCoeff*     coeff, const int stateTransTable, int& state );
   void        residual_codingTS         ( const TransformUnit&          tu,       ComponentID       compID );
+#if JVET_V0054_TSRC_RICE
+  void        residual_coding_subblockTS( CoeffCodingContext&           cctx,     const TCoeff*     coeff, unsigned (&RiceBit)[8], int riceParam, bool ricePresentFlag);
+#else 
   void        residual_coding_subblockTS( CoeffCodingContext&           cctx,     const TCoeff*     coeff  );
+#endif
   void        joint_cb_cr               ( const TransformUnit&          tu,       const int cbfMask );
 
 

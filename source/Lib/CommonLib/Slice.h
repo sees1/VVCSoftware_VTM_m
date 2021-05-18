@@ -1302,6 +1302,9 @@ private:
   bool             m_transformSkipRotationEnabledFlag;
   bool             m_transformSkipContextEnabledFlag;
   bool             m_extendedPrecisionProcessingFlag;
+#if JVET_V0054_TSRC_RICE
+  bool             m_tsrcRicePresentFlag;
+#endif
   bool             m_intraSmoothingDisabledFlag;
   bool             m_highPrecisionOffsetsEnabledFlag;
 #if JVET_V0106_RRC_RICE
@@ -1309,6 +1312,7 @@ private:
 #endif
   bool             m_persistentRiceAdaptationEnabledFlag;
   bool             m_cabacBypassAlignmentEnabledFlag;
+
 
 public:
   SPSRExt();
@@ -1318,6 +1322,9 @@ public:
     return getTransformSkipRotationEnabledFlag()
         || getTransformSkipContextEnabledFlag()
         || getExtendedPrecisionProcessingFlag()
+#if JVET_V0054_TSRC_RICE
+        || getTSRCRicePresentFlag()
+#endif
         || getIntraSmoothingDisabledFlag()
         || getHighPrecisionOffsetsEnabledFlag()
 #if JVET_V0106_RRC_RICE
@@ -1336,6 +1343,11 @@ public:
 
   bool getExtendedPrecisionProcessingFlag() const                                      { return m_extendedPrecisionProcessingFlag;      }
   void setExtendedPrecisionProcessingFlag(bool value)                                  { m_extendedPrecisionProcessingFlag = value;     }
+
+#if JVET_V0054_TSRC_RICE
+  bool getTSRCRicePresentFlag() const                                                  { return m_tsrcRicePresentFlag;                  }
+  void setTSRCRicePresentFlag(bool b)                                                  { m_tsrcRicePresentFlag = b;                     }
+#endif
 
   bool getIntraSmoothingDisabledFlag() const                                           { return m_intraSmoothingDisabledFlag;           }
   void setIntraSmoothingDisabledFlag(bool bValue)                                      { m_intraSmoothingDisabledFlag=bValue;           }
@@ -2732,6 +2744,10 @@ private:
   int                        m_ccAlfCrApsId;
   bool                       m_disableSATDForRd;
   bool                       m_isLossless;
+#if JVET_V0054_TSRC_RICE
+  int                        m_tsrc_index;
+  unsigned                   m_riceBit[8];
+#endif
 public:
                               Slice();
   virtual                     ~Slice();
@@ -2851,7 +2867,6 @@ public:
   void                        setRiceBaseLevel(int b) { m_riceBaseLevelValue = b; }
   int                         getRiceBaseLevel() const { return m_riceBaseLevelValue; }
 #endif
-
   void                        setSignDataHidingEnabledFlag( bool b )                 { m_signDataHidingEnabledFlag = b;                                                             }
   bool                        getSignDataHidingEnabledFlag() const                   { return m_signDataHidingEnabledFlag;                                                          }  
   void                        setTSResidualCodingDisabledFlag(bool b) { m_tsResidualCodingDisabledFlag = b; }
@@ -3047,6 +3062,12 @@ public:
 
   CcAlfFilterParam            m_ccAlfFilterParam;
   uint8_t*                    m_ccAlfFilterControl[2];
+#if JVET_V0054_TSRC_RICE
+  void                        set_tsrc_index(int v) { m_tsrc_index = v; }
+  int                         get_tsrc_index() const { return m_tsrc_index; }
+  void                        setRiceBit(int idx, int i) { m_riceBit[idx] = i; }
+  unsigned                    getRiceBit(int idx) const { return m_riceBit[idx]; }
+#endif
 
 protected:
   Picture*              xGetRefPic( PicList& rcListPic, const int poc, const int layerId );
