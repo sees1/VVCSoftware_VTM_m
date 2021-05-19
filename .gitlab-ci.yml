@@ -27,11 +27,6 @@ build_macos:
    tags:
       - macos
 
-build_ubuntu1604:
-   extends: .build_template_linux
-   tags:
-      - ubuntu1604
-
 build_ubuntu1804:
    extends: .build_template_linux
    tags:
