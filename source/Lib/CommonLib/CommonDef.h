@@ -484,10 +484,10 @@ static const int MIN_TSRC_RICE =                                  1;  ///<Minimu
 
 struct ClpRng
 {
-  int min;
-  int max;
-  int bd;
-  int n;
+  int min {0};
+  int max {0};
+  int bd  {0};
+  int n   {0};
 };
 
 struct ClpRngs
