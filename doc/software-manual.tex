@@ -3840,17 +3840,21 @@ disabled.
 
 
 \begin{OptionTableNoShorthand}{Display orientation SEI message encoder parameters}{tab:sei-display-orientation}
-\Option{SEIDisplayOrientation} &
+\Option{SEIDisplayOrientationEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of the Display orientation SEI messages.
+\\
+\Option{SEIDisplayOrientationCancelFlag} &
+\Default{true} &
+Indicates that display orientation SEI message cancels the persistence (true) or follows (false).
+\\
+\Option{SEIDisplayOrientationPersistenceFlag} &
+\Default{false} &
+Specifies the persistence of the display orientation SEI message.
+\\
+\Option{SEIDisplayOrientationTransformType} &
 \Default{0} &
-Enables or disables the insertion of the Display orientation
-SEI messages.
-\par
-\begin{tabular}{cp{0.20\textwidth}}
-  0 & Disabled \\
-  N: $0 < N < (2^{16} - 1)$ & Enable display orientation SEI message with 
-  \mbox{anticlockwise_rotation = N} 
-  and \mbox{display_orientation_repetition_period = 1} \\
-\end{tabular}
+Specifies the rotation and mirroring to be applied to the picture.
 \\
 \end{OptionTableNoShorthand}
 
