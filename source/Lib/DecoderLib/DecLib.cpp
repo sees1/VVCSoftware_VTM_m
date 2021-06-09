@@ -2738,7 +2738,9 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       pcSlice->getPic()->setEdrapRapId(seiEdrap->m_edrapIndicationRapIdMinus1 + 1);
       pcSlice->setEdrapNumRefRapPics(seiEdrap->m_edrapIndicationNumRefRapPicsMinus1 + 1);
       for (int i = 0; i < pcSlice->getEdrapNumRefRapPics(); i++)
+      {
         pcSlice->addEdrapRefRapIds(seiEdrap->m_edrapIndicationRefRapId[i]);
+      }
       pcSlice->setLatestEDRAPPOC(pcSlice->getPOC());
     }
     pcSlice->checkConformanceForEDRAP(nalu.m_temporalId);

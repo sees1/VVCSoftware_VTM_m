@@ -495,8 +495,8 @@ void SEIEncoder::initSEIDependentRAPIndication(SEIDependentRAPIndication *seiDep
 #if JVET_U0084_EDRAP
 void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
 {
-  CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(sei!=NULL), "Unspecified error");
+  CHECK(!(m_isInitialized), "Extended DRAP SEI already initialized");
+  CHECK(!(sei!=NULL), "Need a seiExtendedDrapIndication for initialization (got nullptr)");
   sei->m_edrapIndicationRapIdMinus1 = 0;
   sei->m_edrapIndicationLeadingPicturesDecodableFlag = false;
   sei->m_edrapIndicationReservedZero12Bits = 0;

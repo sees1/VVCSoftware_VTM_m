@@ -2338,6 +2338,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         m_latestEDRAPPOC = pocCurr;
         m_latestEdrapLeadingPicDecodableFlag = false;
         pcSlice->setTLayer(0); // Force Extended DRAP picture to have temporal layer 0
+        msg( NOTICE, "Force the temporal sublayer identifier of the EDRAP picture equal to 0.\n");
       }
       pcSlice->setLatestEDRAPPOC(m_latestEDRAPPOC);
       pcSlice->setLatestEdrapLeadingPicDecodableFlag(m_latestEdrapLeadingPicDecodableFlag);
@@ -6062,7 +6063,9 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
     {
       int refPoc = slice->getEdrapRefRapId(i) == 0 ? slice->getAssociatedIRAPPOC() : slice->getEdrapRefRapId(i) * m_pcEncLib->getEdrapPeriod();
       if( slice->isPOCInRefPicList( pLocalRPL0, refPoc ) )
+      {
         continue;
+      }
       if( slice->getUseLTforEdrap() && !slice->isPOCInRefPicList( rpl1, refPoc ) )
       {
         // Added as longterm picture
