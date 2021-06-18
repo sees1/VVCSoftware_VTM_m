@@ -70,7 +70,7 @@
 
 
 #define JVET_V0061_SEI                                    1 // JVET-V0061 Display orientation SEI message
-#define JVET_S0117                                        1 // sub-picture extraction rewriting
+#define JVET_S0117_VB                                     1 // sub-picture extraction VB rewriting
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
