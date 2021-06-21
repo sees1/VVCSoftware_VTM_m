@@ -648,6 +648,21 @@ protected:
   uint32_t  m_aveSEIAmbientIlluminance;
   uint16_t  m_aveSEIAmbientLightX;
   uint16_t  m_aveSEIAmbientLightY;
+#if JVET_V0108
+  // colour tranform information sei
+  bool      m_ctiSEIEnabled;
+  uint32_t  m_ctiSEIId;
+  bool      m_ctiSEISignalInfoFlag;
+  bool      m_ctiSEIFullRangeFlag;
+  uint32_t  m_ctiSEIPrimaries;
+  uint32_t  m_ctiSEITransferFunction;
+  uint32_t  m_ctiSEIMatrixCoefs;
+  bool      m_ctiSEICrossComponentFlag;
+  bool      m_ctiSEICrossComponentInferred;
+  uint32_t  m_ctiSEINumberChromaLut;
+  int       m_ctiSEIChromaOffset;
+  LutModel  m_ctiSEILut[MAX_NUM_COMPONENT];
+#endif
 // ccv sei
   bool      m_ccvSEIEnabled;
   bool      m_ccvSEICancelFlag;
@@ -1760,6 +1775,34 @@ public:
   uint16_t getAmbientViewingEnvironmentSEIAmbientLightX()            { return m_aveSEIAmbientLightX; }
   void  setAmbientViewingEnvironmentSEIAmbientLightY( uint16_t v )   { m_aveSEIAmbientLightY = v; }
   uint16_t getAmbientViewingEnvironmentSEIAmbientLightY()            { return m_aveSEIAmbientLightY; }
+#if JVET_V0108
+  // colour tranform information sei
+  void      setCtiSEIEnabled(bool b) { m_ctiSEIEnabled = b; }
+  bool      getCtiSEIEnabled() { return m_ctiSEIEnabled; }
+  void      setCtiSEIId(uint32_t b) { m_ctiSEIId = b; }
+  uint32_t  getCtiSEIId() { return m_ctiSEIId; }
+  void      setCtiSEISignalInfoFlag(bool b) { m_ctiSEISignalInfoFlag = b; }
+  bool      getCtiSEISignalInfoFlag() { return m_ctiSEISignalInfoFlag; }
+  void      setCtiSEIFullRangeFlag(bool b) { m_ctiSEIFullRangeFlag = b; }
+  bool      getCtiSEIFullRangeFlag() { return m_ctiSEIFullRangeFlag; }
+  uint32_t  getCtiSEIPrimaries() { return m_ctiSEIPrimaries; }
+  void      setCtiSEIPrimaries(uint32_t v) { m_ctiSEIPrimaries = v; }
+  uint32_t  getCtiSEITransferFunction() { return m_ctiSEITransferFunction; }
+  void      setCtiSEITransferFunction(uint32_t v) { m_ctiSEITransferFunction = v; }
+  uint32_t  getCtiSEIMatrixCoefs() { return m_ctiSEIMatrixCoefs; }
+  void      setCtiSEIMatrixCoefs(uint32_t v) { m_ctiSEIMatrixCoefs = v; }
+  void      setCtiSEICrossComponentFlag(bool b) { m_ctiSEICrossComponentFlag = b; }
+  bool      getCtiSEICrossComponentFlag() { return m_ctiSEICrossComponentFlag; }
+  void      setCtiSEICrossComponentInferred(bool b) { m_ctiSEICrossComponentInferred = b; }
+  bool      getCtiSEICrossComponentInferred() { return m_ctiSEICrossComponentInferred; }
+  uint32_t  getCtiSEINbChromaLut() { return m_ctiSEINumberChromaLut; }
+  void      setCtiSEINbChromaLut(uint32_t v) { m_ctiSEINumberChromaLut = v; }
+  int       getCtiSEIChromaOffset() { return m_ctiSEIChromaOffset; }
+  void      setCtiSEIChromaOffset(int v) { m_ctiSEIChromaOffset = v; }
+  LutModel  getCtiSEILut(int idx) { return m_ctiSEILut[idx]; }
+  void      setCtiSEILut(LutModel& cmp, int idx) { m_ctiSEILut[idx] = cmp; }
+  LutModel* getCtiSEILuts() { return m_ctiSEILut; }
+#endif
   // ccv SEI
   void     setCcvSEIEnabled(bool b)                                  { m_ccvSEIEnabled = b; }
   bool     getCcvSEIEnabled()                                        { return m_ccvSEIEnabled; }

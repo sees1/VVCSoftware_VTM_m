@@ -972,6 +972,23 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAmbientViewingEnvironmentSEIIlluminance           (m_aveSEIAmbientIlluminance);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightX         ((uint16_t)m_aveSEIAmbientLightX);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightY         ((uint16_t)m_aveSEIAmbientLightY);
+#if JVET_V0108
+  // colour tranform information sei
+  m_cEncLib.setCtiSEIEnabled(m_ctiSEIEnabled);
+  m_cEncLib.setCtiSEIId(m_ctiSEIId);
+  m_cEncLib.setCtiSEISignalInfoFlag(m_ctiSEISignalInfoFlag);
+  m_cEncLib.setCtiSEIFullRangeFlag(m_ctiSEIFullRangeFlag);
+  m_cEncLib.setCtiSEIPrimaries(m_ctiSEIPrimaries);
+  m_cEncLib.setCtiSEITransferFunction(m_ctiSEITransferFunction);
+  m_cEncLib.setCtiSEIMatrixCoefs(m_ctiSEIMatrixCoefs);
+  m_cEncLib.setCtiSEICrossComponentFlag(m_ctiSEICrossComponentFlag);
+  m_cEncLib.setCtiSEICrossComponentInferred(m_ctiSEICrossComponentInferred);
+  m_cEncLib.setCtiSEINbChromaLut(m_ctiSEINumberChromaLut);
+  m_cEncLib.setCtiSEIChromaOffset(m_ctiSEIChromaOffset);
+  for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
+    m_cEncLib.setCtiSEILut(m_ctiSEILut[i], i);
+  }
+#endif
   // content colour volume SEI
   m_cEncLib.setCcvSEIEnabled                                     (m_ccvSEIEnabled);
   m_cEncLib.setCcvSEICancelFlag                                  (m_ccvSEICancelFlag);

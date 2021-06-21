@@ -128,6 +128,11 @@ private:
   int                     m_prevPicPOC;
   int                     m_prevTid0POC;
   bool                    m_bFirstSliceInPicture;
+#if JVET_V0108
+  bool                    m_bFirstPictureInSequence;
+  SEIColourTransformApply m_colourTranfParams;
+  PelStorage              m_invColourTransfBuf;
+#endif
   bool                    m_firstSliceInSequence[MAX_VPS_LAYERS];
   bool                    m_firstSliceInBitstream;
   bool                    m_isFirstAuInCvs;

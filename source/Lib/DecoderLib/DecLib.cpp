@@ -426,6 +426,10 @@ DecLib::DecLib()
   , m_prevPicPOC(MAX_INT)
   , m_prevTid0POC(0)
   , m_bFirstSliceInPicture(true)
+#if JVET_V0108
+  , m_bFirstPictureInSequence(true)
+  , m_colourTranfParams()
+#endif
   , m_firstSliceInBitstream(true)
   , m_isFirstAuInCvs( true )
   , m_prevSliceSkipped(false)
@@ -1650,6 +1654,10 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
     m_pcPic->finalInit(vps, *sps, *pps, picHeader, apss, lmcsAPS, scalinglistAPS);
 #else
     m_pcPic->finalInit( vps, *sps, *pps, &m_picHeader, apss, lmcsAPS, scalinglistAPS );
+#endif
+#if JVET_V0108
+    m_pcPic->createColourTransfProcessor(m_bFirstPictureInSequence, &m_colourTranfParams, &m_invColourTransfBuf, pps->getPicWidthInLumaSamples(), pps->getPicHeightInLumaSamples(), sps->getChromaFormatIdc(), sps->getBitDepth(CHANNEL_TYPE_LUMA));
+    m_bFirstPictureInSequence = false;
 #endif
     m_pcPic->createTempBuffers( m_pcPic->cs->pps->pcv->maxCUWidth );
     m_pcPic->cs->createCoeffs((bool)m_pcPic->cs->sps->getPLTMode());

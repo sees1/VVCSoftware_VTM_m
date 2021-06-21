@@ -796,6 +796,32 @@ void SEIEncoder::initSEIContentColourVolume(SEIContentColourVolume *seiContentCo
     seiContentColourVolume->m_ccvAvgLuminanceValue = (uint32_t)(10000000 * m_pcCfg->getCcvSEIAvgLuminanceValue());
   }
 }
+#if JVET_V0108
+void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
+{
+  CHECK(!(m_isInitialized), "Unspecified error");
+  CHECK(!(seiCTI != NULL), "Unspecified error");
+
+  //  Set SEI message parameters read from command line options
+  seiCTI->m_id = m_pcCfg->getCtiSEIId();
+  seiCTI->m_signalInfoFlag = m_pcCfg->getCtiSEISignalInfoFlag();
+  seiCTI->m_fullRangeFlag = m_pcCfg->getCtiSEIFullRangeFlag();
+  seiCTI->m_primaries = m_pcCfg->getCtiSEIPrimaries();
+  seiCTI->m_transferFunction = m_pcCfg->getCtiSEITransferFunction();
+  seiCTI->m_matrixCoefs = m_pcCfg->getCtiSEIMatrixCoefs();
+  seiCTI->m_crossComponentFlag = m_pcCfg->getCtiSEICrossComponentFlag();
+  seiCTI->m_crossComponentInferred = m_pcCfg->getCtiSEICrossComponentInferred();
+  seiCTI->m_numberChromaLutMinus1 = m_pcCfg->getCtiSEINbChromaLut() - 1;
+  seiCTI->m_chromaOffset = m_pcCfg->getCtiSEIChromaOffset();
+
+  seiCTI->m_bitdepth = m_pcCfg->getBitDepth(CHANNEL_TYPE_LUMA);
+
+  for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
+    seiCTI->m_lut[i] = m_pcCfg->getCtiSEILut(i);
+  }
+  seiCTI->m_log2NumberOfPointsPerLut = floorLog2(seiCTI->m_lut[0].numLutValues - 1);
+}
+#endif
 void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SPS *sps)
 {
   const EncCfgParam::CfgSEISubpictureLevel &cfgSubPicLevel = m_pcCfg->getSubpicureLevelInfoSEICfg();

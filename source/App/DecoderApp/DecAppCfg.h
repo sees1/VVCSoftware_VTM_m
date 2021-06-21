@@ -72,6 +72,9 @@ protected:
   int           m_decodedPictureHashSEIEnabled;       ///< Checksum(3)/CRC(2)/MD5(1)/disable(0) acting on decoded picture hash SEI message
   bool          m_decodedNoDisplaySEIEnabled;         ///< Enable(true)/disable(false) writing only pictures that get displayed based on the no display SEI message
   std::string   m_colourRemapSEIFileName;             ///< output Colour Remapping file name
+#if JVET_V0108
+  std::string   m_SEICTIFileName;                     ///< output Recon with CTI file name
+#endif
   std::string   m_annotatedRegionsSEIFileName;        ///< annotated regions file name
   std::vector<int> m_targetDecLayerIdSet;             ///< set of LayerIds to be included in the sub-bitstream extraction process.
   std::string   m_outputDecodedSEIMessagesFilename;   ///< filename to output decoded SEI messages to. If '-', then use stdout. If empty, do not output details.

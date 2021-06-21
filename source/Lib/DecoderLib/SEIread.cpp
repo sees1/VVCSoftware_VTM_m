@@ -300,6 +300,12 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIContentColourVolume;
       xParseSEIContentColourVolume((SEIContentColourVolume&)*sei, payloadSize, pDecodedMessageOutputStream);
       break;
+#if JVET_V0108
+    case SEI::COLOUR_TRANSFORM_INFO:
+      sei = new SEIColourTransformInfo;
+      xParseSEIColourTransformInfo((SEIColourTransformInfo&)*sei, payloadSize, pDecodedMessageOutputStream);
+      break;
+#endif
     default:
       for (uint32_t i = 0; i < payloadSize; i++)
       {
@@ -1322,6 +1328,86 @@ void SEIReader::xParseSEIAmbientViewingEnvironment(SEIAmbientViewingEnvironment&
   sei_read_code(pDecodedMessageOutputStream, 16, code, "ambient_light_y");     sei.m_ambientLightY = (uint16_t)code;
 }
 
+#if JVET_V0108
+void SEIReader::xParseSEIColourTransformInfo(SEIColourTransformInfo& sei, uint32_t payloadSize, std::ostream* pDecodedMessageOutputStream)
+{
+  uint32_t code;
+
+  output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
+
+  sei_read_uvlc(pDecodedMessageOutputStream, code, "colour_transform_id");               sei.m_id = code;
+  sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_cancel_flag");      bool colourTransformCancelFlag = code;
+
+  if (colourTransformCancelFlag == 0)
+  {
+    sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_persistence_flag");
+    sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_video_signal_info_present_flag"); sei.m_signalInfoFlag = code;
+
+    if (sei.m_signalInfoFlag)
+    {
+      sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_full_range_flag");        sei.m_fullRangeFlag = code;
+      sei_read_code(pDecodedMessageOutputStream, 8, code, "colour_transform_primaries");           sei.m_primaries = code;
+      sei_read_code(pDecodedMessageOutputStream, 8, code, "colour_transform_transfer_function");   sei.m_transferFunction = code;
+      sei_read_code(pDecodedMessageOutputStream, 8, code, "colour_transform_matrix_coefficients"); sei.m_matrixCoefs = code;
+    }
+    else
+    {
+      sei.m_fullRangeFlag = 0;
+      sei.m_primaries = 0;
+      sei.m_transferFunction = 0;
+      sei.m_matrixCoefs = 0;
+    }
+    sei_read_code(pDecodedMessageOutputStream, 4, code, "colour_transform_bit_depth_minus8");                       sei.m_bitdepth = 8+code;
+    sei_read_code(pDecodedMessageOutputStream, 3, code, "colour_transform_log2_number_of_points_per_lut_minus1");   sei.m_log2NumberOfPointsPerLut = code + 1;
+    int numLutValues = (1 << sei.m_log2NumberOfPointsPerLut) + 1;
+    sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_cross_comp_flag");                sei.m_crossComponentFlag = code;
+    sei.m_crossComponentInferred = 0;
+    if (sei.m_crossComponentFlag == true)
+    {
+      sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_cross_comp_inferred");          sei.m_crossComponentInferred = code;
+    }
+    for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
+      sei.m_lut[i].lutValues.resize(numLutValues);
+    }
+
+    uint16_t lutCodingLength = 2 + sei.m_bitdepth - sei.m_log2NumberOfPointsPerLut;
+    for (uint32_t j = 0; j < numLutValues; j++)
+    {
+      sei_read_code(pDecodedMessageOutputStream, lutCodingLength, code, "colour_transform_lut[0][i]");
+      sei.m_lut[0].lutValues[j] = code;
+    }
+    sei.m_lut[0].numLutValues = numLutValues;
+    sei.m_lut[0].presentFlag = true;
+    if (sei.m_crossComponentFlag == 0 || sei.m_crossComponentInferred == 0)
+    {
+      sei_read_flag(pDecodedMessageOutputStream, code, "colour_transform_number_chroma_lut_minus1");      sei.m_numberChromaLutMinus1 = code;
+      for (uint32_t j = 0; j < numLutValues; j++)
+      {
+        sei_read_code(pDecodedMessageOutputStream, lutCodingLength, code, "colour_transform_lut[1][i]");
+        sei.m_lut[1].lutValues[j] = code;
+        sei.m_lut[2].lutValues[j] = code;
+      }
+      if (sei.m_numberChromaLutMinus1 == 1)
+      {
+        for (uint32_t j = 0; j < numLutValues; j++)
+        {
+          sei_read_code(pDecodedMessageOutputStream, lutCodingLength, code, "colour_transform_lut[2][i]");
+          sei.m_lut[2].lutValues[j] = code;
+        }
+      }
+      sei.m_lut[1].numLutValues = numLutValues;
+      sei.m_lut[2].numLutValues = numLutValues;
+      sei.m_lut[1].presentFlag = true;
+      sei.m_lut[2].presentFlag = true;
+    }
+    else
+    {
+      sei_read_code(pDecodedMessageOutputStream, lutCodingLength, code, "colour_transform_chroma_offset");
+      sei.m_chromaOffset = code;
+    }
+  }
+}
+#endif
 void SEIReader::xParseSEIContentColourVolume(SEIContentColourVolume& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   int i;

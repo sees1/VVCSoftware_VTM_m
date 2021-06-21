@@ -79,6 +79,9 @@ protected:
   void xWriteSEIContentLightLevelInfo(const SEIContentLightLevelInfo& sei);
   void xWriteSEIAmbientViewingEnvironment(const SEIAmbientViewingEnvironment& sei);
   void xWriteSEIContentColourVolume(const SEIContentColourVolume &sei);
+#if JVET_V0108
+  void xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei);
+#endif
   void xWriteSEIAnnotatedRegions                  (const SEIAnnotatedRegions& sei);
   void xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &hrd, const uint32_t temporalId);
   void xWriteByteAlign();

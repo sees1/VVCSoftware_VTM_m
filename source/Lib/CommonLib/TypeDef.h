@@ -68,6 +68,8 @@
 
 #define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
 
+#define JVET_V0108                                        1 // JVET_V0108: Colour Transform Information SEI 
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
@@ -911,8 +913,16 @@ struct LFCUParam
   bool leftEdge;                         ///< indicates left edge
   bool topEdge;                          ///< indicates top edge
 };
+#if JVET_V0108
+#define MAX_CTI_LUT_SIZE              64 ///< max size of lut for color transform   
 
-
+struct LutModel
+{
+  bool             presentFlag = false;
+  int              numLutValues = 0;
+  std::vector<Pel> lutValues;
+};
+#endif
 
 struct PictureHash
 {
