@@ -61,6 +61,9 @@ public:
     USER_DATA_UNREGISTERED               = 5,
     FILM_GRAIN_CHARACTERISTICS           = 19,
     FRAME_PACKING                        = 45,
+#if JVET_V0061_SEI
+    DISPLAY_ORIENTATION                  = 47,
+#endif
     PARAMETER_SETS_INCLUSION_INDICATION  = 129,
     DECODING_UNIT_INFO                   = 130,
     DECODED_PICTURE_HASH                 = 132,
@@ -457,6 +460,21 @@ public:
   bool m_arrangementPersistenceFlag;
   bool m_upsampledAspectRatio;
 };
+
+#if JVET_V0061_SEI
+class SEIDisplayOrientation : public SEI
+{
+public:
+  PayloadType payloadType() const { return DISPLAY_ORIENTATION; }
+
+  SEIDisplayOrientation() {}
+  virtual ~SEIDisplayOrientation() {}
+
+  bool                  m_doCancelFlag;
+  bool                  m_doPersistenceFlag;
+  int                   m_doTransformType;
+};
+#endif
 
 class SEIParameterSetsInclusionIndication : public SEI
 {

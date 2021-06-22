@@ -619,6 +619,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t> cfg_kneeSEIOutputKneePointValue     (0, 1000, 0, 999, defaultOutputKneeCodes, sizeof(defaultOutputKneeCodes)/sizeof(uint32_t));
   const int defaultPrimaryCodes[6]     = { 0,50000, 0,0, 50000,0 };
   const int defaultWhitePointCode[2]   = { 16667, 16667 };
+
   SMultiValueInput<int>  cfg_DisplayPrimariesCode            (0, 50000, 6, 6, defaultPrimaryCodes,   sizeof(defaultPrimaryCodes  )/sizeof(int));
   SMultiValueInput<int>  cfg_DisplayWhitePointCode           (0, 50000, 2, 2, defaultWhitePointCode, sizeof(defaultWhitePointCode)/sizeof(int));
 
@@ -1266,6 +1267,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
                                                                                                                "\t0: unspecified\n"
                                                                                                                "\t1: stereo pair, frame0 represents left view\n"
                                                                                                                "\t2: stereo pair, frame0 represents right view")
+#if JVET_V0061_SEI
+  ("SEIDisplayOrientationEnabled",                    m_doSEIEnabled,                                   false, "Controls if display orientation packing SEI message enabled")
+  ("SEIDisplayOrientationCancelFlag",                 m_doSEICancelFlag,                                 true, "Specifies the persistence of any previous display orientation SEI message in output order.")
+  ("SEIDisplayOrientationPersistenceFlag",            m_doSEIPersistenceFlag,                           false, "Specifies the persistence of the display orientation packing SEI message for the current layer.")
+  ("SEIDisplayOrientationTransformType",              m_doSEITransformType,                                 0, "specifies the rotation and mirroring to be applied to the picture.")
+#endif
   ("SEIParameterSetsInclusionIndication",             m_parameterSetsInclusionIndicationSEIEnabled,      false, "Control generation of Parameter sets inclusion indication SEI messages")
   ("SEISelfContainedClvsFlag",                        m_selfContainedClvsFlag,                               0, "Self contained CLVS indication flag value")
   ("SEIMasteringDisplayColourVolume",                 m_masteringDisplay.colourVolumeSEIEnabled,         false, "Control generation of mastering display colour volume SEI messages")
@@ -3830,6 +3837,13 @@ bool EncAppCfg::xCheckParameter()
   {
     xConfirmPara(m_framePackingSEIType < 3 || m_framePackingSEIType > 5 , "SEIFramePackingType must be in rage 3 to 5");
   }
+
+#if JVET_V0061_SEI
+  if (m_doSEIEnabled)
+  {
+    xConfirmPara(m_doSEITransformType < 0 || m_doSEITransformType > 7, "SEIDisplayOrientationTransformType must be in rage 0 to 7");
+  }
+#endif
 
   if( m_erpSEIEnabled && !m_erpSEICancelFlag )
   {

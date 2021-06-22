@@ -547,6 +547,12 @@ protected:
   int       m_framePackingSEIId;
   int       m_framePackingSEIQuincunx;
   int       m_framePackingSEIInterpretation;
+#if JVET_V0061_SEI  // Display orientation SEI message
+  bool      m_doSEIEnabled;
+  bool      m_doSEICancelFlag;
+  bool      m_doSEIPersistenceFlag;
+  int       m_doSEITransformType;
+#endif
   bool      m_parameterSetsInclusionIndicationSEIEnabled;
   bool      m_selfContainedClvsFlag;
   bool      m_bpDeltasGOPStructure;
@@ -1579,6 +1585,16 @@ public:
   int   getFramePackingArrangementSEIQuincunx()                      { return m_framePackingSEIQuincunx; }
   void  setFramePackingArrangementSEIInterpretation(int b)           { m_framePackingSEIInterpretation = b; }
   int   getFramePackingArrangementSEIInterpretation()                { return m_framePackingSEIInterpretation; }
+#if JVET_V0061_SEI
+  void  setDoSEIEnabled(bool b)                                      { m_doSEIEnabled = b; }
+  bool  getDoSEIEnabled() const                                      { return m_doSEIEnabled; }
+  void  setDoSEICancelFlag(bool b)                                   { m_doSEICancelFlag = b; }
+  bool  getDoSEICancelFlag()                                         { return m_doSEICancelFlag; }
+  void  setDoSEIPersistenceFlag(bool b)                              { m_doSEIPersistenceFlag = b; }
+  bool  getDoSEIPersistenceFlag()                                    { return m_doSEIPersistenceFlag; }
+  void  setDoSEITransformType(const int type)                        { m_doSEITransformType = type; }
+  int   getDOSEITransformType() const                                { return m_doSEITransformType; }
+#endif
   void  setParameterSetsInclusionIndicationSEIEnabled(bool b)        { m_parameterSetsInclusionIndicationSEIEnabled = b; }
   bool  getParameterSetsInclusionIndicationSEIEnabled() const        { return m_parameterSetsInclusionIndicationSEIEnabled; }
   void  setSelfContainedClvsFlag(bool b)                             { m_selfContainedClvsFlag = b; }
