@@ -39,7 +39,6 @@
 
 #if JVET_V0108
 #include "SEI.h"
-#include "unit.h"
 #include "Buffer.h"
 
 SEIColourTransformApply::SEIColourTransformApply()
