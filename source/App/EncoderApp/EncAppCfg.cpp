@@ -1689,8 +1689,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
    * Set any derived parameters
    */
 #if EXTENSION_360_VIDEO
-  m_inputFileWidth = m_iSourceWidth;
-  m_inputFileHeight = m_iSourceHeight;
+  m_inputFileWidth = m_sourceWidth;
+  m_inputFileHeight = m_sourceHeight;
   m_ext360.setMaxCUInfo(m_uiCTUSize, 1 << MIN_CU_LOG2);
 #endif
 
@@ -2530,7 +2530,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
  #if QP_SWITCHING_FOR_PARALLEL
   if ((m_iQP < 38) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && (m_sourceWidth <= 2048) && (m_sourceHeight <= 1280)
  #else
-  if (((int)m_fQP < 38) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && (m_iSourceWidth <= 2048) && (m_iSourceHeight <= 1280)
+  if (((int)m_fQP < 38) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && (m_sourceWidth <= 2048) && (m_sourceHeight <= 1280)
  #endif
  #if WCG_EXT && ER_CHROMA_QP_WCG_PPS
       && (!m_wcgChromaQpControl.enabled)
@@ -2541,9 +2541,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 #else
  #if QP_SWITCHING_FOR_PARALLEL
-  if( ( m_iQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_iSourceHeight <= 1280 ) && ( m_iSourceWidth <= 2048 ) )
+  if( ( m_iQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_sourceHeight <= 1280 ) && ( m_sourceWidth <= 2048 ) )
  #else
-  if( ( ( int ) m_fQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_iSourceHeight <= 1280 ) && ( m_iSourceWidth <= 2048 ) )
+  if( ( ( int ) m_fQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_sourceHeight <= 1280 ) && ( m_sourceWidth <= 2048 ) )
  #endif
   {
     msg( WARNING, "*************************************************************************\n" );
