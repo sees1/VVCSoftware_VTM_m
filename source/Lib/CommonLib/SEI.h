@@ -83,6 +83,9 @@ public:
     AMBIENT_VIEWING_ENVIRONMENT          = 148,
     CONTENT_COLOUR_VOLUME                = 149,
     ANNOTATED_REGIONS                    = 202,
+#if JVET_U0084_EDRAP
+    EXTENDED_DRAP_INDICATION             = 206,
+#endif
   };
 
   SEI() {}
@@ -747,6 +750,23 @@ public:
   std::vector<std::pair<AnnotatedRegionObjectIndex, AnnotatedRegionObject> > m_annotatedRegions;
   std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
 };
+
+#if JVET_U0084_EDRAP
+class SEIExtendedDrapIndication : public SEI
+{
+public:
+  PayloadType payloadType() const { return EXTENDED_DRAP_INDICATION; }
+
+  SEIExtendedDrapIndication() {}
+  virtual ~SEIExtendedDrapIndication() {}
+
+  int               m_edrapIndicationRapIdMinus1;
+  bool              m_edrapIndicationLeadingPicturesDecodableFlag;
+  int               m_edrapIndicationReservedZero12Bits;
+  int               m_edrapIndicationNumRefRapPicsMinus1;
+  std::vector<int>  m_edrapIndicationRefRapId;
+};
+#endif
 //! \}
 
 

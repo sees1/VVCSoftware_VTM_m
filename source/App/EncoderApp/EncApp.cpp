@@ -529,6 +529,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDecodingRefreshType                               ( m_iDecodingRefreshType );
   m_cEncLib.setGOPSize                                           ( m_iGOPSize );
   m_cEncLib.setDrapPeriod                                        ( m_drapPeriod );
+#if JVET_U0084_EDRAP
+  m_cEncLib.setEdrapPeriod                                       ( m_edrapPeriod );
+#endif
   m_cEncLib.setReWriteParamSets                                  ( m_rewriteParamSets );
   m_cEncLib.setRPLList0                                          ( m_RPLList0);
   m_cEncLib.setRPLList1                                          ( m_RPLList1);
@@ -861,6 +864,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDecodedPictureHashSEIType                         ( m_decodedPictureHashSEIType );
   m_cEncLib.setSubpicDecodedPictureHashType                      ( m_subpicDecodedPictureHashType );
   m_cEncLib.setDependentRAPIndicationSEIEnabled                  ( m_drapPeriod > 0 );
+#if JVET_U0084_EDRAP
+  m_cEncLib.setEdrapIndicationSEIEnabled                         ( m_edrapPeriod > 0 );
+#endif
   m_cEncLib.setBufferingPeriodSEIEnabled                         ( m_bufferingPeriodSEIEnabled );
   m_cEncLib.setPictureTimingSEIEnabled                           ( m_pictureTimingSEIEnabled );
   m_cEncLib.setFrameFieldInfoSEIEnabled                          ( m_frameFieldInfoSEIEnabled );

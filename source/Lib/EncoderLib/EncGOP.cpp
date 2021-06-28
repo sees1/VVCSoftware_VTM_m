@@ -87,6 +87,10 @@ EncGOP::EncGOP()
   m_bFirst              = true;
   m_iLastRecoveryPicPOC = 0;
   m_latestDRAPPOC       = MAX_INT;
+#if JVET_U0084_EDRAP
+  m_latestEDRAPPOC      = MAX_INT;
+  m_latestEdrapLeadingPicDecodableFlag = false;
+#endif
   m_lastRasPoc          = MAX_INT;
 #if JVET_V0054_TSRC_RICE
   ::memset(m_riceBit, 0, 8 * 2 * sizeof(unsigned));
@@ -801,6 +805,24 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
     m_seiEncoder.initSEIDependentRAPIndication(dependentRAPIndicationSEI);
     seiMessages.push_back(dependentRAPIndicationSEI);
   }
+
+#if JVET_U0084_EDRAP
+  if (m_pcEncLib->getEdrapIndicationSEIEnabled() && slice->getEdrapRapId() > 0)
+  {
+    SEIExtendedDrapIndication *seiExtendedDrapIndication = new SEIExtendedDrapIndication();
+    m_seiEncoder.initSEIExtendedDrapIndication(seiExtendedDrapIndication);
+    // update EDRAP SEI message according to the reference lists of the slice
+    seiExtendedDrapIndication->m_edrapIndicationRapIdMinus1 = slice->getEdrapRapId() - 1;
+    seiExtendedDrapIndication->m_edrapIndicationLeadingPicturesDecodableFlag = slice->getLatestEdrapLeadingPicDecodableFlag();
+    seiExtendedDrapIndication->m_edrapIndicationNumRefRapPicsMinus1 = slice->getEdrapNumRefRapPics() - 1;
+    seiExtendedDrapIndication->m_edrapIndicationRefRapId.resize(seiExtendedDrapIndication->m_edrapIndicationNumRefRapPicsMinus1 + 1);
+    for (int i = 0; i <= seiExtendedDrapIndication->m_edrapIndicationNumRefRapPicsMinus1; i++)
+    {
+      seiExtendedDrapIndication->m_edrapIndicationRefRapId[i] = slice->getEdrapRefRapId(i);
+    }
+    seiMessages.push_back(seiExtendedDrapIndication);
+  }
+#endif
 
   // insert one Annotated Region SEI for the picture (if the file exists)
   if (!m_pcCfg->getAnnotatedRegionSEIFileRoot().empty())
@@ -2200,6 +2222,13 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         m_associatedIRAPType[pcPic->layerId] = pcSlice->getNalUnitType();
         m_associatedIRAPPOC[pcPic->layerId] = pocCurr;
+#if JVET_U0084_EDRAP
+        if (m_pcEncLib->getEdrapIndicationSEIEnabled())
+        {
+          m_latestEDRAPPOC = MAX_INT;
+          pcPic->setEdrapRapId(0);
+        }
+#endif
       }
       pcSlice->setAssociatedIRAPType(m_associatedIRAPType[pcPic->layerId]);
       pcSlice->setAssociatedIRAPPOC(m_associatedIRAPPOC[pcPic->layerId]);
@@ -2238,6 +2267,13 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         m_associatedIRAPType[pcPic->layerId] = pcSlice->getNalUnitType();
         m_associatedIRAPPOC[pcPic->layerId] = pocCurr;
+#if JVET_U0084_EDRAP
+        if (m_pcEncLib->getEdrapIndicationSEIEnabled())
+        {
+          m_latestEDRAPPOC = MAX_INT;
+          pcPic->setEdrapRapId(0);
+        }
+#endif
       }
       pcSlice->setAssociatedIRAPType(m_associatedIRAPType[pcPic->layerId]);
       pcSlice->setAssociatedIRAPPOC(m_associatedIRAPPOC[pcPic->layerId]);
@@ -2281,10 +2317,71 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       }
     }
 
+#if JVET_U0084_EDRAP
+    pcSlice->setEnableEdrapSEI(m_pcEncLib->getEdrapIndicationSEIEnabled());
+    if (m_pcEncLib->getEdrapIndicationSEIEnabled())
+    {
+      // Only mark the picture as Extended DRAP if all of the following applies:
+      //  1) Extended DRAP indication SEI messages are enabled
+      //  2) The current picture is not an intra picture
+      //  3) The current picture is in the EDRAP period
+      //  4) The current picture is a trailing picture
+      if (m_pcEncLib->getEdrapIndicationSEIEnabled() && m_pcEncLib->getEdrapPeriod() > 0 && !pcSlice->isIntra() &&
+          pocCurr % m_pcEncLib->getEdrapPeriod() == 0 && pocCurr > pcSlice->getAssociatedIRAPPOC())
+      {
+        pcSlice->setEdrapRapId(pocCurr / m_pcEncLib->getEdrapPeriod());
+        pcSlice->getPic()->setEdrapRapId(pocCurr / m_pcEncLib->getEdrapPeriod());
+      }
+
+      if (pcSlice->getEdrapRapId() > 0)
+      {
+        m_latestEDRAPPOC = pocCurr;
+        m_latestEdrapLeadingPicDecodableFlag = false;
+        pcSlice->setTLayer(0); // Force Extended DRAP picture to have temporal layer 0
+        msg( NOTICE, "Force the temporal sublayer identifier of the EDRAP picture equal to 0.\n");
+      }
+      pcSlice->setLatestEDRAPPOC(m_latestEDRAPPOC);
+      pcSlice->setLatestEdrapLeadingPicDecodableFlag(m_latestEdrapLeadingPicDecodableFlag);
+      pcSlice->setUseLTforEdrap(false); // When set, sets the associated IRAP/EDRAP as long-term in RPL0 at slice level, unless the associated IRAP/EDRAP is already included in RPL0 or RPL1 defined in SPS
+
+      PicList::iterator iterPic = rcListPic.begin();
+      Picture *rpcPic;
+      while (iterPic != rcListPic.end())
+      {
+        rpcPic = *(iterPic++);
+        if ( pcSlice->getEdrapRapId() > 0 && rpcPic->getPOC() != pocCurr && rpcPic->getPOC() >= pcSlice->getAssociatedIRAPPOC() )
+        {
+          if (rpcPic->getEdrapRapId() >= 0 && rpcPic->getPOC() % m_pcEncLib->getEdrapPeriod() == 0)
+          {
+            bool bRefExist = false;
+            for (int i = 0; i < pcSlice->getEdrapNumRefRapPics(); i++)
+            {
+              if (pcSlice->getEdrapRefRapId(i) == rpcPic->getEdrapRapId())
+                bRefExist = true;
+            }
+            if (!bRefExist)
+            {
+              pcSlice->addEdrapRefRapIds(rpcPic->getPOC() / m_pcEncLib->getEdrapPeriod());
+              pcSlice->setEdrapNumRefRapPics(pcSlice->getEdrapNumRefRapPics() + 1);
+            }
+          }
+        }
+      }
+    }
+#endif
+
+#if JVET_U0084_EDRAP
+    if (pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL0(), 0, false) != 0 || pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL1(), 1, false) != 0 ||
+        (m_pcEncLib->getDependentRAPIndicationSEIEnabled() && !pcSlice->isIRAP() && ( pcSlice->isDRAP() || !pcSlice->isPOCInRefPicList(pcSlice->getRPL0(), pcSlice->getAssociatedIRAPPOC())) ) ||
+        (m_pcEncLib->getEdrapIndicationSEIEnabled() && !pcSlice->isIRAP() && ( pcSlice->getEdrapRapId() > 0 || !pcSlice->isPOCInRefPicList(pcSlice->getRPL0(), pcSlice->getAssociatedIRAPPOC()) ) )
+      || ((m_pcEncLib->getAvoidIntraInDepLayer() || !pcSlice->isIRAP()) && pcSlice->getPic()->cs->vps && m_pcEncLib->getNumRefLayers(pcSlice->getPic()->cs->vps->getGeneralLayerIdx(m_pcEncLib->getLayerId())))
+      )
+#else
     if (pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL0(), 0, false) != 0 || pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL1(), 1, false) != 0 ||
         (m_pcEncLib->getDependentRAPIndicationSEIEnabled() && !pcSlice->isIRAP() && ( pcSlice->isDRAP() || !pcSlice->isPOCInRefPicList(pcSlice->getRPL0(), pcSlice->getAssociatedIRAPPOC())) )
       || ((m_pcEncLib->getAvoidIntraInDepLayer() || !pcSlice->isIRAP()) && pcSlice->getPic()->cs->vps && m_pcEncLib->getNumRefLayers(pcSlice->getPic()->cs->vps->getGeneralLayerIdx(m_pcEncLib->getLayerId())))
       )
+#endif
     {
       xCreateExplicitReferencePictureSetFromReference( pcSlice, rcListPic, pcSlice->getRPL0(), pcSlice->getRPL1() );
     }
@@ -4618,6 +4715,12 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
   {
     c = 'D';
   }
+#if JVET_U0084_EDRAP
+  if (m_pcCfg->getEdrapIndicationSEIEnabled() && pcSlice->getEdrapRapId() > 0)
+  {
+    c = 'E';
+  }
+#endif
 
   if( g_verbosity >= NOTICE )
   {
@@ -5854,14 +5957,26 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
+#if JVET_U0084_EDRAP
+          if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
+              && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
+              && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP)
+              && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
+#else
           if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
+#endif
           {
             isAvailable = true;
             break;
           }
+#if JVET_U0084_EDRAP
+          else if (rpl0->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl0->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP)
+              && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
+#else
           else if (rpl0->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl0->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
+#endif
           {
             isAvailable = true;
             break;
@@ -5937,6 +6052,37 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
       }
     }
   }
+#if JVET_U0084_EDRAP
+  if( slice->getEnableEdrapSEI() )
+  {
+    pLocalRPL0->setNumberOfShorttermPictures( numOfSTRPL0 );
+    pLocalRPL0->setNumberOfLongtermPictures( numOfLTRPL0 );
+    pLocalRPL0->setNumberOfInterLayerPictures( numOfILRPL0 );
+
+    for (int i = 0; i < slice->getEdrapNumRefRapPics(); i++)
+    {
+      int refPoc = slice->getEdrapRefRapId(i) == 0 ? slice->getAssociatedIRAPPOC() : slice->getEdrapRefRapId(i) * m_pcEncLib->getEdrapPeriod();
+      if( slice->isPOCInRefPicList( pLocalRPL0, refPoc ) )
+      {
+        continue;
+      }
+      if( slice->getUseLTforEdrap() && !slice->isPOCInRefPicList( rpl1, refPoc ) )
+      {
+        // Added as longterm picture
+        pLocalRPL0->setRefPicIdentifier( refPicIdxL0, refPoc, true, false, 0 );
+        refPicIdxL0++;
+        numOfLTRPL0++;
+      }
+      else
+      {
+        // Added as shortterm picture
+        pLocalRPL0->setRefPicIdentifier(refPicIdxL0, refPoc - slice->getPOC(), false, false, 0);
+        refPicIdxL0++;
+        numOfSTRPL0++;
+      }
+    }
+  }
+#endif
 
   // now add higher TId refs
   for (int i = 0; i < higherTLayerRefs.size(); i++)
@@ -5975,14 +6121,25 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
+#if JVET_U0084_EDRAP
+          if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
+              && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
+              && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP)
+              && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
+#else
           if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
+#endif
           {
             isAvailable = true;
             break;
           }
+#if JVET_U0084_EDRAP
+          else if (rpl1->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl1->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP) && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
+#else
           else if (rpl1->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl1->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
+#endif
           {
             isAvailable = true;
             break;
@@ -6137,5 +6294,17 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL1->setLtrpInSliceHeaderFlag( 1 );
   slice->setRPL1idx( -1 );
   *slice->getRPL1() = localRPL1;
+#if JVET_U0084_EDRAP
+  // To ensure that any picture in the RefRapIds has been included in the refrence list.
+  for (int i = 0; i < slice->getEdrapNumRefRapPics(); i++)
+  {
+    int refPoc = slice->getEdrapRefRapId(i) == 0 ? slice->getAssociatedIRAPPOC() : slice->getEdrapRefRapId(i) * m_pcEncLib->getEdrapPeriod();
+    if (!slice->isPOCInRefPicList( pLocalRPL0, refPoc ) && !slice->isPOCInRefPicList( pLocalRPL1, refPoc ))
+    {
+      slice->deleteEdrapRefRapIds(i);
+    }
+  }
+#endif
+
 }
 //! \}
