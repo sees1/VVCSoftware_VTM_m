@@ -2316,6 +2316,10 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
         m_picHeader.setNoOutputBeforeRecoveryFlag( m_picHeader.getHandleGdrAsCvsStartFlag() );
       }
     }
+    else
+    {
+      m_picHeader.setNoOutputBeforeRecoveryFlag( false );
+    }
 
     //the inference for NoOutputOfPriorPicsFlag
     if( !m_firstSliceInBitstream && m_picHeader.getNoOutputBeforeRecoveryFlag() )
