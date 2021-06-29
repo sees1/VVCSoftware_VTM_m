@@ -352,10 +352,6 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
     }
     else
     {
-#if JVET_V0108
-      if (nalu_type == NAL_UNIT_PREFIX_SEI)
-        printf("insert NAL_UNIT_PREFIX_SEI\n");
-#endif
       out.insert(out.end(), p - nal_start, p);
       out.insert(out.end(), nalu.begin(), nalu.end());
     }

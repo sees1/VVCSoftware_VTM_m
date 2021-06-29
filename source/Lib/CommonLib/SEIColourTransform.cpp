@@ -69,12 +69,12 @@ SEIColourTransformApply::~SEIColourTransformApply()
 {
 }
 
-void SEIColourTransformApply::inverseColourTransform(PelStorage* pTransformBuf)
+void SEIColourTransformApply::inverseColourTransform(PelStorage* transformBuf)
 {
   uint8_t   numComp = m_chromaFormat ? MAX_NUM_COMPONENT : 1;
-  PelBuf*   buffY   = &pTransformBuf->Y();
-  PelBuf*   buffCb  = &pTransformBuf->Cb();
-  PelBuf*   buffCr  = &pTransformBuf->Cr();
+  PelBuf*   buffY   = &transformBuf->Y();
+  PelBuf*   buffCb  = &transformBuf->Cb();
+  PelBuf*   buffCr  = &transformBuf->Cr();
 
   if (numComp == 3)
   {

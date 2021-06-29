@@ -64,7 +64,7 @@ public:
   virtual ~SEIColourTransformApply();
 
   void create                   (uint32_t width, uint32_t height, ChromaFormat fmt, uint8_t bitDepth);
-  void inverseColourTransform   (PelStorage* pTransformBuf);
+  void inverseColourTransform   (PelStorage* transformBuf);
   void generateColourTransfLUTs ();
 
 };// END CLASS DEFINITION SEIColourTransformApply

@@ -64,7 +64,7 @@ Picture::Picture()
   precedingDRAP        = false;
   nonReferencePictureFlag = false;
 #if JVET_V0108
-  m_colourTranfParams = NULL;
+  m_colourTranfParams  = NULL;
 #endif
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )

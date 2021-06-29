@@ -2415,7 +2415,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     }
   }
 #if JVET_V0108
-  if (m_ctiSEIEnabled) {
+  if (m_ctiSEIEnabled) 
+  {
     CHECK(!m_ctiSEICrossComponentFlag && m_ctiSEICrossComponentInferred, "CTI CrossComponentFlag is 0, but CTI CrossComponentInferred is 1 (must be 0 for CrossComponentFlag 0)");
     CHECK(!m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred && !m_ctiSEINumberChromaLut, "For CTI CrossComponentFlag = 0, CTI NumberChromaLut needs to be specified (1 or 2) ");
     CHECK(m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred && !m_ctiSEINumberChromaLut, "For CTI CrossComponentFlag = 1 and CrossComponentInferred = 0, CTI NumberChromaLut needs to be specified (1 or 2) ");
@@ -2425,29 +2426,34 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_ctiSEILut[0].numLutValues = (int)cfg_SEICTILut0.values.size();
     m_ctiSEILut[0].lutValues = cfg_SEICTILut0.values;
 
-    if (!m_ctiSEICrossComponentFlag || (m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred)) {
+    if (!m_ctiSEICrossComponentFlag || (m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred)) 
+    {
       CHECK(cfg_SEICTILut1.values.empty(), "SEI CTI LUT1 not specified");
       m_ctiSEILut[1].presentFlag = true;
       m_ctiSEILut[1].numLutValues = (int)cfg_SEICTILut1.values.size();
       m_ctiSEILut[1].lutValues = cfg_SEICTILut1.values;
 
-      if (m_ctiSEINumberChromaLut == 1) { // Cb lut the same as Cr lut
+      if (m_ctiSEINumberChromaLut == 1) 
+      { // Cb lut the same as Cr lut
         m_ctiSEILut[2].presentFlag = true;
         m_ctiSEILut[2].numLutValues = m_ctiSEILut[1].numLutValues;
         m_ctiSEILut[2].lutValues = m_ctiSEILut[1].lutValues;
       }
-      else if (m_ctiSEINumberChromaLut == 2) { // read from cfg
+      else if (m_ctiSEINumberChromaLut == 2) 
+      { // read from cfg
         CHECK(cfg_SEICTILut2.values.empty(), "SEI CTI LUT2 not specified");
         m_ctiSEILut[2].presentFlag = true;
         m_ctiSEILut[2].numLutValues = (int)cfg_SEICTILut2.values.size();
         m_ctiSEILut[2].lutValues = cfg_SEICTILut2.values;
       }
-      else {
+      else 
+      {
         CHECK(m_ctiSEINumberChromaLut < 1 && m_ctiSEINumberChromaLut > 2, "Number of chroma LUTs is missing or out of range!");
       }
     }
     //  check if lut size is power of 2
-    for (int idx = 0; idx < MAX_NUM_COMPONENT; idx++) {
+    for (int idx = 0; idx < MAX_NUM_COMPONENT; idx++) 
+    {
       int n = m_ctiSEILut[idx].numLutValues - 1;
       CHECK(n > 0 && (n & (n - 1)) != 0, "Size of LUT minus 1 should be power of 2!");
       CHECK(n > MAX_CTI_LUT_SIZE, "LUT size minus 1 is larger than MAX_CTI_LUT_SIZE (64)!");
@@ -4293,9 +4299,9 @@ void EncAppCfg::xPrintParameter()
     msg(VERBOSE, "MIP:%d ", m_MIP);
     msg(VERBOSE, "EncDbOpt:%d ", m_encDbOpt);
 #if JVET_V0108
-    msg(VERBOSE, "\nSEI CTI:%d ", m_ctiSEIEnabled);
+    msg(VERBOSE, "SEI CTI:%d ", m_ctiSEIEnabled);
 #endif
-  msg( VERBOSE, "\nFAST TOOL CFG: " );
+  msg( VERBOSE, "FAST TOOL CFG: " );
   msg( VERBOSE, "LCTUFast:%d ", m_useFastLCTU );
   msg( VERBOSE, "FastMrg:%d ", m_useFastMrg );
   msg( VERBOSE, "PBIntraFast:%d ", m_usePbIntraFast );

@@ -991,7 +991,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setCtiSEICrossComponentInferred(m_ctiSEICrossComponentInferred);
   m_cEncLib.setCtiSEINbChromaLut(m_ctiSEINumberChromaLut);
   m_cEncLib.setCtiSEIChromaOffset(m_ctiSEIChromaOffset);
-  for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
+  for (int i = 0; i < MAX_NUM_COMPONENT; i++) 
+  {
     m_cEncLib.setCtiSEILut(m_ctiSEILut[i], i);
   }
 #endif
