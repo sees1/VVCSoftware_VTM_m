@@ -3515,7 +3515,7 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   139 & Temporal motion-constrained tile sets    & Table \ref{tab:sei-tmcts} \\
   140 & Chroma resampling filter hint            & Table \ref{tab:chroma-resampling-filter-hint} \\
   141 & Knee function information                & Table \ref{tab:sei-knee-function} \\
-  142 & Colour remapping information             & Table \ref{tab:sei-colour-remapping}\\
+  142 & Colour transform information             & Table \ref{tab:sei-colour-transform}\\
   143 & Deinterlaced field identification        & (Not handled)\\
   144 & Content light level info                 & Table \ref{tab:sei-content-light-level}\\
   147 & Alternative transfer characteristics     & Table \ref{tab:sei-alternative-transfer-characteristics}\\
@@ -4196,12 +4196,63 @@ Array of output knee point. Default table can be set to the following:
 \end{OptionTableNoShorthand}
 
 
-\begin{OptionTableNoShorthand}{Colour remapping SEI message encoder parameters}{tab:sei-colour-remapping}
-\Option{SEIColourRemappingInfoFileRoot (-cri)} &
-\Default{\NotSet} &
-Specifies the prefix of input Colour Remapping Information file. Prefix is completed by ``_x.txt'' where x is the  POC number.
-The contents of the file are a list of the SEI message's syntax element names (in decoding order) immediately followed by a `:' and then the associated value.
-An example file can be found in cfg/misc/example_colour_remapping_sei_encoder_0.txt.
+\begin{OptionTableNoShorthand}{Colour transform information SEI message encoder parameters}{tab:sei-colour-transform}
+\Option{SEICTIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of colour transform information (CTI) SEI message.
+Examples configuration files for CTI can be found in folder cfg/examples_SEI_CTI.
+\\
+\Option{SEICTIId} &
+\Default{0} &
+Specifies the ID of the CTI SEI message.
+\\
+\Option{SEICTISignalInfoFlag} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of output signal information after applying the colour transform.
+\\
+\Option{SEICTIFullRangeFlag} &
+\Default{false} &
+Specifies the range (true:full, false:limited) of the output signal after applying the colour transform.
+\\
+\Option{SEICTIPrimaries} &
+\Default{0} &
+Specifies the colour primaries of the output signal after applying the colour transform.
+\\
+\Option{SEICTITransferFunction} &
+\Default{0} &
+Specifies the transfer function (characteristics) of the output signal after applying the colour transform.
+\\
+\Option{SEICTIMatrixCoefs} &
+\Default{0} &
+Specifies the matrix coefficients type of the output signal after applying the colour transform.
+\\
+\Option{SEICTICrossCompFlag} &
+\Default{true} &
+Enables (true) or disables (false) the cross-component scaling for applying the colour transform.
+\\
+\Option{SEICTICrossCompInferred} &
+\Default{true} &
+Infers (true) or signals (false) the cross-component scaling tables for the colour transform.
+\\
+\Option{SEICTINbChromaLut} &
+\Default{0} &
+Specifies the number of chroma tables (1 or 2) for the colour transform (only used when SEICTICrossCompInferred = false).
+\\
+\Option{SEICTILut0} &
+\Default{0} &
+Specifies the transform table for colour component 0.
+\\
+\Option{SEICTILut1} &
+\Default{0} &
+Specifies the transform table for colour component 1 (only used when SEICTICrossCompFlag = false).
+\\
+\Option{SEICTILut2} &
+\Default{0} &
+Specifies the transform table for colour component 2 (only used when SEICTINbChromaLut = 2).
+\\
+\Option{SEICTIChromaOffset} &
+\Default{0} &
+Specifies the offset to be added to the values of the cross-component scaling tables (only used when SEICTICrossCompInferred = false).
 \\
 \end{OptionTableNoShorthand}
 
@@ -4922,10 +4973,10 @@ has the following behaviour:
 When a non-empty file name is specified, information regarding any decoded SEI messages will be output to the indicated file. If the file name is '-', then stdout is used instead.
 \\
 
-\Option{SEIColourRemappingInfoFilename} &
+\Option{SEICTIFilename} &
 %\ShortOption{\None} &
 \Default{\NotSet} &
-Specifies that the colour remapping SEI message should be applied to the output video, with the output written to this file.
+Specifies that the colour transform information (CTI) SEI message should be applied to the output video, with the output written to this file.
 If no value is specified, the SEI message is ignored and no mapping is applied.
 \\
 
