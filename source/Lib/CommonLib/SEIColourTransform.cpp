@@ -59,7 +59,8 @@ void SEIColourTransformApply::create(uint32_t width, uint32_t height, ChromaForm
   m_bitDepth            = bitDepth;
   m_pColourTransfParams = new SEIColourTransformInfo;
   m_lutSize             = 1 << m_bitDepth;
-  for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
+  for (int i = 0; i < MAX_NUM_COMPONENT; i++)
+  {
     m_mapLut[i].resize(m_lutSize, 0);
   }
 }
@@ -77,11 +78,13 @@ void SEIColourTransformApply::inverseColourTransform(PelStorage* pTransformBuf)
 
   if (numComp == 3)
   {
-    if (m_pColourTransfParams->m_crossComponentFlag) {
+    if (m_pColourTransfParams->m_crossComponentFlag) 
+    {
       buffCb->applyChromaCTI(buffY->buf, buffY->stride, m_mapLut[COMPONENT_Cb], m_bitDepth, m_chromaFormat, false);
       buffCr->applyChromaCTI(buffY->buf, buffY->stride, m_mapLut[COMPONENT_Cr], m_bitDepth, m_chromaFormat, false);
     }
-    else {
+    else 
+    {
       buffCb->applyLumaCTI(m_mapLut[COMPONENT_Cb]); // apply direct mapping like in luma (no cross component mapping); same function, but different lut.
       buffCr->applyLumaCTI(m_mapLut[COMPONENT_Cr]);
     }
@@ -108,7 +111,8 @@ void SEIColourTransformApply::generateColourTransfLUTs()
   pivotInPoints = m_pColourTransfParams->m_lut[0].lutValues;
   pivotMappedPointsX[0] = pivotInPoints[0];
   pivotMappedPointsY[0] = 0;
-  for (int j = 1; j < numPreLutPoints; j++) {
+  for (int j = 1; j < numPreLutPoints; j++) 
+  {
     pivotMappedPointsX[j] = pivotMappedPointsX[j - 1] + pivotInPoints[j];
     pivotMappedPointsY[j] = j * orgCW;
   }
@@ -128,14 +132,15 @@ void SEIColourTransformApply::generateColourTransfLUTs()
   //  calculate chroma LUTs
   if (m_pColourTransfParams->m_crossComponentInferred == 0)
   {    
-    for (int i = 1; i < numComp; i++) { // loop for U and V
+    for (int i = 1; i < numComp; i++) 
+    { // loop for U and V
       if (m_pColourTransfParams->m_crossComponentFlag == 1)
       {
         // cross-component U and V LUT
-        for (int j = 0; j < dynamicRange; j++) {
+        for (int j = 0; j < dynamicRange; j++) 
+        {
           int     idx     = j / orgCW;
           int  slope = scalingPreLut * (m_pColourTransfParams->m_lut[i].lutValues[idx + 1] - m_pColourTransfParams->m_lut[i].lutValues[idx]);
-          //m_mapLut[i][j] = (scalingPreLut * orgCW * m_pColourTransfParams->m_lut[i].lutValues[idx] + slope * (j - pivotMappedPointsY[idx]) + (orgCW / 2)) / orgCW;
           m_mapLut[i][j] = scalingPreLut * m_pColourTransfParams->m_lut[i].lutValues[idx] + slope * (j - pivotMappedPointsY[idx]) / orgCW;
         }
       }
@@ -145,7 +150,8 @@ void SEIColourTransformApply::generateColourTransfLUTs()
         // initialize pivot points
         pivotInPoints = m_pColourTransfParams->m_lut[i].lutValues;
         pivotMappedPointsX[0] = pivotInPoints[0];
-        for (int j = 1; j <= numPreLutPoints; j++) {
+        for (int j = 1; j <= numPreLutPoints; j++) 
+        {
           pivotMappedPointsX[j] = pivotMappedPointsX[j-1] + pivotInPoints[j];
         }
 
@@ -154,7 +160,8 @@ void SEIColourTransformApply::generateColourTransfLUTs()
           invScale[i] = ((int32_t)m_pColourTransfParams->m_lut[0].lutValues[i + 1] * (1 << FP_PREC) + (1 << (floorLog2(orgCW) - 1))) >> floorLog2(orgCW);
         }
 
-        for (int j = 0; j < dynamicRange; j++) {
+        for (int j = 0; j < dynamicRange; j++) 
+        {
           int idx = j / orgCW;
           int tempVal = pivotMappedPointsX[idx] + ((invScale[idx] * (j - pivotMappedPointsY[idx]) + (1 << (FP_PREC - 1))) >> FP_PREC);
           m_mapLut[i][j] = Clip3((Pel)0, (Pel)(dynamicRange - 1), (Pel)(tempVal));
@@ -174,7 +181,8 @@ void SEIColourTransformApply::generateColourTransfLUTs()
 
     // generate smoothed chroma LUT as done by JVET-U0078
     std::vector<int> interpLut(numPreLutPoints + 1);
-    for (int i = 1; i < numPreLutPoints; i++) {
+    for (int i = 1; i < numPreLutPoints; i++) 
+    {
       interpLut[i] = (chromaAdjHelpLUT[i] + chromaAdjHelpLUT[i - 1] + 1) / 2;
     }
     interpLut[0]                = chromaAdjHelpLUT[0];

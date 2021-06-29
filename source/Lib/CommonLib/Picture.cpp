@@ -1215,11 +1215,11 @@ void Picture::addPictureToHashMapForInter()
   }
 }
 #if JVET_V0108
-void Picture::createColourTransfProcessor(bool bFirstPictureInSequence, SEIColourTransformApply* pCtiCharacteristics, PelStorage* pCtiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
+void Picture::createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
 {
-  m_colourTranfParams = pCtiCharacteristics;
-  m_invColourTransfBuf = pCtiBuf;
-  if (bFirstPictureInSequence)
+  m_colourTranfParams = ctiCharacteristics;
+  m_invColourTransfBuf = ctiBuf;
+  if (firstPictureInSequence)
   {
     // Create and initialize the Colour Transform Processor
     m_colourTranfParams->create(width, height, fmt, bitDepth);

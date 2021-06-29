@@ -74,7 +74,7 @@ struct Picture : public UnitArea
 #if JVET_V0108
   SEIColourTransformApply* m_colourTranfParams;
   PelStorage* m_invColourTransfBuf;
-  void              createColourTransfProcessor(bool bFirstPictureInSequence, SEIColourTransformApply* pCtiCharacteristics, PelStorage* pCtiBuf, int width, int height, ChromaFormat fmt, int bitDepth);
+  void              createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth);
   PelUnitBuf        getDisplayBuf();
 #endif
 
