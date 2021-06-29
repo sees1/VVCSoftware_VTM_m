@@ -916,8 +916,6 @@ struct LFCUParam
   bool topEdge;                          ///< indicates top edge
 };
 #if JVET_V0108
-#define MAX_CTI_LUT_SIZE              64 ///< max size of lut for color transform   
-
 struct LutModel
 {
   bool             presentFlag = false;
