@@ -77,6 +77,13 @@ protected:
   void xWriteSEIOmniViewport                      (const SEIOmniViewport& sei);
   void xWriteSEIRegionWisePacking                 (const SEIRegionWisePacking &sei);
   void xWriteSEIGeneralizedCubemapProjection      (const SEIGeneralizedCubemapProjection &sei);
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  void xWriteSEIScalabilityDimensionInfo          (const SEIScalabilityDimensionInfo& sei);
+  void xWriteSEIMultiviewAcquisitionInfo          (const SEIMultiviewAcquisitionInfo& sei);
+  void xWriteSEIAlphaChannelInfo                  (const SEIAlphaChannelInfo& sei);
+  void xWriteSEIDepthRepresentationInfo           (const SEIDepthRepresentationInfo& sei);
+  void xWriteSEIDepthRepInfoElement               (double f);
+#endif
   void xWriteSEISubpictureLevelInfo               (const SEISubpicureLevelInfo &sei);
   void xWriteSEISampleAspectRatioInfo             (const SEISampleAspectRatioInfo &sei);
 

@@ -95,6 +95,10 @@ private:
 
 
   SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices, excluding prefix SEIs...
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  SEIScalabilityDimensionInfo* m_sdiSEIInFirstAU;
+  SEIMultiviewAcquisitionInfo* m_maiSEIInFirstAU;
+#endif
 
 
   // functional classes
