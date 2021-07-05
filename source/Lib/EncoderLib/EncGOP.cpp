@@ -806,6 +806,15 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     seiMessages.push_back(seiDepthRepresentationInfo);
   }
 #endif
+#if JVET_V0108
+  // colour transform information
+  if (m_pcCfg->getCtiSEIEnabled())
+  {
+    SEIColourTransformInfo* seiCTI = new SEIColourTransformInfo;
+    m_seiEncoder.initSEIColourTransformInfo(seiCTI);
+    seiMessages.push_back(seiCTI);
+  }
+#endif
 }
 
 void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice)

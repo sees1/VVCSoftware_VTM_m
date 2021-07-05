@@ -74,6 +74,8 @@
 
 #define JVET_V0061_SEI                                    1 // JVET-V0061 Display orientation SEI message
 
+#define JVET_V0108                                        1 // JVET_V0108: Colour Transform Information SEI 
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
@@ -917,8 +919,14 @@ struct LFCUParam
   bool leftEdge;                         ///< indicates left edge
   bool topEdge;                          ///< indicates top edge
 };
-
-
+#if JVET_V0108
+struct LutModel
+{
+  bool             presentFlag = false;
+  int              numLutValues = 0;
+  std::vector<Pel> lutValues;
+};
+#endif
 
 struct PictureHash
 {

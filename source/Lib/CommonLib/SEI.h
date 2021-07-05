@@ -69,6 +69,9 @@ public:
     DECODED_PICTURE_HASH                 = 132,
     SCALABLE_NESTING                     = 133,
     MASTERING_DISPLAY_COLOUR_VOLUME      = 137,
+#if JVET_V0108
+    COLOUR_TRANSFORM_INFO                = 142,
+#endif
     DEPENDENT_RAP_INDICATION             = 145,
     EQUIRECTANGULAR_PROJECTION           = 150,
     SPHERE_ROTATION                      = 154,
@@ -834,6 +837,30 @@ public:
   uint16_t m_ambientLightY;
 };
 
+#if JVET_V0108
+class SEIColourTransformInfo : public SEI
+{
+public:
+  PayloadType payloadType() const { return COLOUR_TRANSFORM_INFO; }
+  SEIColourTransformInfo() { }
+
+  virtual ~SEIColourTransformInfo() { }
+
+  uint16_t m_id;
+  bool     m_signalInfoFlag;
+  bool     m_fullRangeFlag;
+  uint16_t m_primaries;
+  uint16_t m_transferFunction;
+  uint16_t m_matrixCoefs;
+  bool     m_crossComponentFlag;
+  bool     m_crossComponentInferred;
+  uint16_t m_numberChromaLutMinus1;
+  int      m_chromaOffset;
+  uint16_t m_bitdepth;
+  uint16_t m_log2NumberOfPointsPerLut;
+  LutModel m_lut[MAX_NUM_COMPONENT];
+};
+#endif
 class SEIContentColourVolume : public SEI
 {
 public:
