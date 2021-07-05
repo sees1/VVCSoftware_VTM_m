@@ -145,6 +145,11 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::CONTENT_COLOUR_VOLUME:
     xWriteSEIContentColourVolume(*static_cast<const SEIContentColourVolume*>(&sei));
     break;
+#if JVET_V0108
+  case SEI::COLOUR_TRANSFORM_INFO:
+    xWriteSEIColourTransformInfo(*static_cast<const SEIColourTransformInfo*>(&sei));
+    break;
+#endif
   case SEI::SUBPICTURE_LEVEL_INFO:
     xWriteSEISubpictureLevelInfo(*static_cast<const SEISubpicureLevelInfo*>(&sei));
     break;
@@ -1287,4 +1292,60 @@ void SEIWriter::xWriteSEIContentColourVolume(const SEIContentColourVolume &sei)
   }
 }
 
+#if JVET_V0108
+void SEIWriter::xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei)
+{
+  bool colourTransformCancelFlag = 0;
+  bool colourTransformPersistenceFlag = 0;
+
+  WRITE_UVLC(sei.m_id, "colour_transform_id");
+  WRITE_FLAG(colourTransformCancelFlag, "colour_transform_cancel_flag");
+
+  if (colourTransformCancelFlag == 0)
+  {
+    WRITE_FLAG(colourTransformPersistenceFlag, "colour_transform_persistence_flag");
+    WRITE_FLAG(sei.m_signalInfoFlag, "colour_transform_video_signal_info_present_flag");
+
+    if (sei.m_signalInfoFlag)
+    {
+      WRITE_FLAG(sei.m_fullRangeFlag, "colour_transform_full_range_flag");
+      WRITE_CODE(sei.m_primaries, 8, "colour_transform_primaries");
+      WRITE_CODE(sei.m_transferFunction, 8, "colour_transform_transfer_function");
+      WRITE_CODE(sei.m_matrixCoefs, 8, "colour_transform_matrix_coefficients");
+    }
+    WRITE_CODE(sei.m_bitdepth - 8, 4, "colour_transform_bit_depth_minus8"); 
+    WRITE_CODE(sei.m_log2NumberOfPointsPerLut - 1, 3, "colour_transform_log2_number_of_points_per_lut_minus1");
+    WRITE_FLAG(sei.m_crossComponentFlag, "colour_transform_cross_comp_flag");
+    if (sei.m_crossComponentFlag)
+    {
+      WRITE_FLAG(sei.m_crossComponentInferred, "colour_transform_cross_comp_inferred");
+    }
+
+    uint16_t lutCodingLength = 2 + sei.m_bitdepth - sei.m_log2NumberOfPointsPerLut;
+    for (uint32_t j = 0; j < sei.m_lut[0].numLutValues; j++)
+    {
+      WRITE_CODE(sei.m_lut[0].lutValues[j], lutCodingLength, "colour_transform_lut[0][i]");
+    }
+    if (sei.m_crossComponentFlag == 0 || sei.m_crossComponentInferred == 0)
+    {
+      WRITE_FLAG(sei.m_numberChromaLutMinus1, "colour_transform_number_chroma_lut_minus1");
+      for (uint32_t j = 0; j < sei.m_lut[1].numLutValues; j++)
+      {
+        WRITE_CODE(sei.m_lut[1].lutValues[j], lutCodingLength, "colour_transform_lut[1][i]");
+      }
+      if (sei.m_numberChromaLutMinus1 == 1)
+      {
+        for (uint32_t j = 0; j < sei.m_lut[2].numLutValues; j++)
+        {
+          WRITE_CODE(sei.m_lut[2].lutValues[j], lutCodingLength, "colour_transform_lut[2][i]");
+        }
+      }
+    }
+    else
+    {
+      WRITE_CODE(sei.m_chromaOffset, lutCodingLength, "colour_transform_chroma_offset");
+    }
+  }
+}
+#endif
 //! \}

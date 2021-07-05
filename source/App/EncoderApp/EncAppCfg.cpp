@@ -623,6 +623,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<int>  cfg_DisplayPrimariesCode            (0, 50000, 6, 6, defaultPrimaryCodes,   sizeof(defaultPrimaryCodes  )/sizeof(int));
   SMultiValueInput<int>  cfg_DisplayWhitePointCode           (0, 50000, 2, 2, defaultWhitePointCode, sizeof(defaultWhitePointCode)/sizeof(int));
 
+#if JVET_V0108
+  SMultiValueInput<int16_t>  cfg_SEICTILut0(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<int16_t>  cfg_SEICTILut1(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<int16_t>  cfg_SEICTILut2(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+#endif
   SMultiValueInput<bool> cfg_timeCodeSeiTimeStampFlag        (0,  1, 0, MAX_TIMECODE_SEI_SETS);
   SMultiValueInput<bool> cfg_timeCodeSeiNumUnitFieldBasedFlag(0,  1, 0, MAX_TIMECODE_SEI_SETS);
   SMultiValueInput<int>  cfg_timeCodeSeiCountingType         (0,  6, 0, MAX_TIMECODE_SEI_SETS);
@@ -1413,6 +1418,23 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIAVEAmbientIlluminance",                        m_aveSEIAmbientIlluminance,                      100000u, "Specifies the environmental illluminance of the ambient viewing environment in units of 1/10000 lux for the ambient viewing environment SEI message")
   ("SEIAVEAmbientLightX",                             m_aveSEIAmbientLightX,                            15635u, "Specifies the normalized x chromaticity coordinate of the environmental ambient light in the nominal viewing enviornment according to the CIE 1931 definition in units of 1/50000 lux for the ambient viewing enviornment SEI message")
   ("SEIAVEAmbientLightY",                             m_aveSEIAmbientLightY,                            16450u, "Specifies the normalized y chromaticity coordinate of the environmental ambient light in the nominal viewing enviornment according to the CIE 1931 definition in units of 1/50000 lux for the ambient viewing enviornment SEI message")
+#if JVET_V0108
+// colour tranform information SEI
+  ("SEICTIEnabled",                                   m_ctiSEIEnabled,                                   false, "Control generation of the Colour transform information SEI message")
+  ("SEICTIId",                                        m_ctiSEIId,                                           0u, "Id of the Colour transform information SEI message")
+  ("SEICTISignalInfoFlag",                            m_ctiSEISignalInfoFlag,                            false, "indicates if signal information are present in the Colour transform information SEI message")
+  ("SEICTIFullRangeFlag",                             m_ctiSEIFullRangeFlag,                             false, "specifies signal range after applying the Colour transform information SEI message")
+  ("SEICTIPrimaries",                                 m_ctiSEIPrimaries,                                    0u, "indicates the signal primaries after applying the Colour transform information SEI message")
+  ("SEICTITransferFunction",                          m_ctiSEITransferFunction,                             0u, "indicates the signal transfer function after applying the Colour transform information SEI message")
+  ("SEICTIMatrixCoefs",                               m_ctiSEIMatrixCoefs,                                  0u, "indicates the signal matrix coefficients after applying the Colour transform information SEI message")
+  ("SEICTICrossCompFlag",                             m_ctiSEICrossComponentFlag,                         true, "Specifies if cross-component transform mode is enabled in SEI CTI")
+  ("SEICTICrossCompInferred",                         m_ctiSEICrossComponentInferred,                     true, "Specifies if cross-component transform LUT is inferred in SEI CTI")
+  ("SEICTINbChromaLut",                               m_ctiSEINumberChromaLut,                              0u, "Specifies the number of chroma LUTs in SEI CTI")
+  ("SEICTIChromaOffset",                              m_ctiSEIChromaOffset,                                  0, "Specifies the chroma offset of SEI CTI")
+  ("SEICTILut0",                                      cfg_SEICTILut0,                           cfg_SEICTILut0, "slope values for component 0 of SEI CTI")
+  ("SEICTILut1",                                      cfg_SEICTILut1,                           cfg_SEICTILut1, "slope values for component 1 of SEI CTI")
+  ("SEICTILut2",                                      cfg_SEICTILut2,                           cfg_SEICTILut2, "slope values for component 2 of SEI CTI")
+#endif
 // content colour volume SEI
   ("SEICCVEnabled",                                   m_ccvSEIEnabled,                                   false, "Control generation of the Content Colour Volume SEI message")
   ("SEICCVCancelFlag",                                m_ccvSEICancelFlag,                                 true, "Specifies the persistence of any previous content colour volume SEI message in output order.")
@@ -2479,6 +2501,52 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_masteringDisplay.whitePoint[idx] = uint16_t((cfg_DisplayWhitePointCode.values.size() > idx) ? cfg_DisplayWhitePointCode.values[idx] : 0);
     }
   }
+#if JVET_V0108
+  if (m_ctiSEIEnabled) 
+  {
+    CHECK(!m_ctiSEICrossComponentFlag && m_ctiSEICrossComponentInferred, "CTI CrossComponentFlag is 0, but CTI CrossComponentInferred is 1 (must be 0 for CrossComponentFlag 0)");
+    CHECK(!m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred && !m_ctiSEINumberChromaLut, "For CTI CrossComponentFlag = 0, CTI NumberChromaLut needs to be specified (1 or 2) ");
+    CHECK(m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred && !m_ctiSEINumberChromaLut, "For CTI CrossComponentFlag = 1 and CrossComponentInferred = 0, CTI NumberChromaLut needs to be specified (1 or 2) ");
+
+    CHECK(cfg_SEICTILut0.values.empty(), "SEI CTI (SEICTIEnabled) but no LUT0 specified");
+    m_ctiSEILut[0].presentFlag = true;
+    m_ctiSEILut[0].numLutValues = (int)cfg_SEICTILut0.values.size();
+    m_ctiSEILut[0].lutValues = cfg_SEICTILut0.values;
+
+    if (!m_ctiSEICrossComponentFlag || (m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred)) 
+    {
+      CHECK(cfg_SEICTILut1.values.empty(), "SEI CTI LUT1 not specified");
+      m_ctiSEILut[1].presentFlag = true;
+      m_ctiSEILut[1].numLutValues = (int)cfg_SEICTILut1.values.size();
+      m_ctiSEILut[1].lutValues = cfg_SEICTILut1.values;
+
+      if (m_ctiSEINumberChromaLut == 1) 
+      { // Cb lut the same as Cr lut
+        m_ctiSEILut[2].presentFlag = true;
+        m_ctiSEILut[2].numLutValues = m_ctiSEILut[1].numLutValues;
+        m_ctiSEILut[2].lutValues = m_ctiSEILut[1].lutValues;
+      }
+      else if (m_ctiSEINumberChromaLut == 2) 
+      { // read from cfg
+        CHECK(cfg_SEICTILut2.values.empty(), "SEI CTI LUT2 not specified");
+        m_ctiSEILut[2].presentFlag = true;
+        m_ctiSEILut[2].numLutValues = (int)cfg_SEICTILut2.values.size();
+        m_ctiSEILut[2].lutValues = cfg_SEICTILut2.values;
+      }
+      else 
+      {
+        CHECK(m_ctiSEINumberChromaLut < 1 && m_ctiSEINumberChromaLut > 2, "Number of chroma LUTs is missing or out of range!");
+      }
+    }
+    //  check if lut size is power of 2
+    for (int idx = 0; idx < MAX_NUM_COMPONENT; idx++) 
+    {
+      int n = m_ctiSEILut[idx].numLutValues - 1;
+      CHECK(n > 0 && (n & (n - 1)) != 0, "Size of LUT minus 1 should be power of 2!");
+      CHECK(n > MAX_CTI_LUT_SIZE, "LUT size minus 1 is larger than MAX_CTI_LUT_SIZE (64)!");
+    }
+  }
+#endif
   if ( m_omniViewportSEIEnabled && !m_omniViewportSEICancelFlag )
   {
     CHECK (!( m_omniViewportSEICntMinus1 >= 0 && m_omniViewportSEICntMinus1 < 16 ), "SEIOmniViewportCntMinus1 must be in the range of 0 to 16");
@@ -3031,6 +3099,12 @@ bool EncAppCfg::xCheckParameter()
     if (m_updateCtrl > 0 && m_adpOption > 2) { m_adpOption -= 2; }
   }
 
+#if JVET_V0108
+  if (m_ctiSEIEnabled)
+  {
+    xConfirmPara(m_ctiSEINumberChromaLut < 0 || m_ctiSEINumberChromaLut > 2, "CTI number of chroma LUTs is out of range");
+  }
+#endif
   xConfirmPara( m_cbQpOffset < -12,   "Min. Chroma Cb QP Offset is -12" );
   xConfirmPara( m_cbQpOffset >  12,   "Max. Chroma Cb QP Offset is  12" );
   xConfirmPara( m_crQpOffset < -12,   "Min. Chroma Cr QP Offset is -12" );
@@ -4419,6 +4493,9 @@ void EncAppCfg::xPrintParameter()
     msg( VERBOSE, "RPR:%d ", 0 );
   }
   msg(VERBOSE, "TemporalFilter:%d ", m_gopBasedTemporalFilterEnabled);
+#if JVET_V0108
+  msg(VERBOSE, "SEI CTI:%d ", m_ctiSEIEnabled);
+#endif 
 #if EXTENSION_360_VIDEO
   m_ext360.outputConfigurationSummary();
 #endif

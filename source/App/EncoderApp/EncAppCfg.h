@@ -546,6 +546,21 @@ protected:
   uint32_t  m_aveSEIAmbientIlluminance;
   uint32_t  m_aveSEIAmbientLightX;
   uint32_t  m_aveSEIAmbientLightY;
+#if JVET_V0108
+  // colour tranform information sei
+  bool      m_ctiSEIEnabled;
+  uint32_t  m_ctiSEIId;
+  bool      m_ctiSEISignalInfoFlag;
+  bool      m_ctiSEIFullRangeFlag;
+  uint32_t  m_ctiSEIPrimaries;
+  uint32_t  m_ctiSEITransferFunction;
+  uint32_t  m_ctiSEIMatrixCoefs;
+  bool      m_ctiSEICrossComponentFlag;
+  bool      m_ctiSEICrossComponentInferred;
+  uint32_t  m_ctiSEINumberChromaLut;
+  int       m_ctiSEIChromaOffset;
+  LutModel  m_ctiSEILut[MAX_NUM_COMPONENT];
+#endif
   // content colour volume sei
   bool      m_ccvSEIEnabled;
   bool      m_ccvSEICancelFlag;

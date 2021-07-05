@@ -478,6 +478,9 @@ static const int DELTA_QP_ACT[4] =                  { -5, 1, 3, 1 };
 static const int MAX_TSRC_RICE =                                  8;  ///<Maximum supported TSRC Rice parameter
 static const int MIN_TSRC_RICE =                                  1;  ///<Minimum supported TSRC Rice parameter
 #endif
+#if JVET_V0108
+static const int MAX_CTI_LUT_SIZE =                              64;  ///<Maximum colour transform LUT size for CTI SEI
+#endif
 // ====================================================================================================================
 // Macro functions
 // ====================================================================================================================

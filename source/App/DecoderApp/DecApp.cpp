@@ -417,6 +417,42 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
         }
       }
+#if JVET_V0108
+      if (!m_SEICTIFileName.empty() && !m_cVideoIOYuvSEICTIFile[nalu.m_nuhLayerId].isOpen())
+      {
+        const BitDepths& bitDepths = pcListPic->front()->cs->sps->getBitDepths(); // use bit depths of first reconstructed picture.
+        for (uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++)
+        {
+          if (m_outputBitDepth[channelType] == 0)
+          {
+            m_outputBitDepth[channelType] = bitDepths.recon[channelType];
+          }
+        }
+
+        if (m_packedYUVMode && (m_outputBitDepth[CH_L] != 10 && m_outputBitDepth[CH_L] != 12))
+        {
+          EXIT("Invalid output bit-depth for packed YUV output, aborting\n");
+        }
+
+        std::string SEICTIFileName = m_SEICTIFileName;
+        if (m_SEICTIFileName.compare("/dev/null") && m_cDecLib.getVPS() != nullptr && m_cDecLib.getVPS()->getMaxLayers() > 1 && xIsNaluWithinTargetOutputLayerIdSet(&nalu))
+        {
+          size_t pos = SEICTIFileName.find_last_of('.');
+          if (pos != string::npos)
+          {
+            SEICTIFileName.insert(pos, std::to_string(nalu.m_nuhLayerId));
+          }
+          else
+          {
+            SEICTIFileName.append(std::to_string(nalu.m_nuhLayerId));
+          }
+        }
+        if ((m_cDecLib.getVPS() != nullptr && (m_cDecLib.getVPS()->getMaxLayers() == 1 || xIsNaluWithinTargetOutputLayerIdSet(&nalu))) || m_cDecLib.getVPS() == nullptr)
+        {
+          m_cVideoIOYuvSEICTIFile[nalu.m_nuhLayerId].open(SEICTIFileName, true, m_outputBitDepth, m_outputBitDepth, bitDepths.recon); // write mode
+        }
+      }
+#endif
       if (!m_annotatedRegionsSEIFileName.empty())
       {
         xOutputAnnotatedRegions(pcListPic);
@@ -618,6 +654,15 @@ void DecApp::xDestroyDecLib()
       recFile.second.close();
     }
   }
+#if JVET_V0108
+  if (!m_SEICTIFileName.empty())
+  {
+    for (auto& recFile : m_cVideoIOYuvSEICTIFile)
+    {
+      recFile.second.close();
+    }
+  }
+#endif
 
   // destroy decoder class
   m_cDecLib.destroy();
@@ -776,6 +821,29 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
             }
         }
+#if JVET_V0108
+        // Perform CTI on decoded frame and write to output CTI file
+        if (!m_SEICTIFileName.empty())
+        {
+          const Window& conf = pcPic->getConformanceWindow();
+          const SPS* sps = pcPic->cs->sps;
+          ChromaFormat chromaFormatIDC = sps->getChromaFormatIdc();
+          if (m_upscaledOutput)
+          {
+            m_cVideoIOYuvSEICTIFile[pcPic->layerId].writeUpscaledPicture(*sps, *pcPic->cs->pps, pcPic->getDisplayBuf(), m_outputColourSpaceConvert, m_packedYUVMode, m_upscaledOutput, NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+          }
+          else
+          {
+            m_cVideoIOYuvSEICTIFile[pcPic->layerId].write(pcPic->getRecoBuf().get(COMPONENT_Y).width, pcPic->getRecoBuf().get(COMPONENT_Y).height, pcPic->getDisplayBuf(),
+              m_outputColourSpaceConvert, m_packedYUVMode,
+              conf.getWindowLeftOffset() * SPS::getWinUnitX(chromaFormatIDC),
+              conf.getWindowRightOffset() * SPS::getWinUnitX(chromaFormatIDC),
+              conf.getWindowTopOffset() * SPS::getWinUnitY(chromaFormatIDC),
+              conf.getWindowBottomOffset() * SPS::getWinUnitY(chromaFormatIDC),
+              NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+          }
+        }
+#endif
         writeLineToOutputLog(pcPic);
 
         // update POC of display order
@@ -923,6 +991,29 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
               }
           }
+#if JVET_V0108
+          // Perform CTI on decoded frame and write to output CTI file
+          if (!m_SEICTIFileName.empty())
+          {
+            const Window& conf = pcPic->getConformanceWindow();
+            const SPS* sps = pcPic->cs->sps;
+            ChromaFormat chromaFormatIDC = sps->getChromaFormatIdc();
+            if (m_upscaledOutput)
+            {
+              m_cVideoIOYuvSEICTIFile[pcPic->layerId].writeUpscaledPicture(*sps, *pcPic->cs->pps, pcPic->getDisplayBuf(), m_outputColourSpaceConvert, m_packedYUVMode, m_upscaledOutput, NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+            }
+            else
+            {
+              m_cVideoIOYuvSEICTIFile[pcPic->layerId].write(pcPic->getRecoBuf().get(COMPONENT_Y).width, pcPic->getRecoBuf().get(COMPONENT_Y).height, pcPic->getDisplayBuf(),
+                m_outputColourSpaceConvert, m_packedYUVMode,
+                conf.getWindowLeftOffset() * SPS::getWinUnitX(chromaFormatIDC),
+                conf.getWindowRightOffset() * SPS::getWinUnitX(chromaFormatIDC),
+                conf.getWindowTopOffset() * SPS::getWinUnitY(chromaFormatIDC),
+                conf.getWindowBottomOffset() * SPS::getWinUnitY(chromaFormatIDC),
+                NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+            }
+          }
+#endif
           writeLineToOutputLog(pcPic);
 #if JVET_S0078_NOOUTPUTPRIORPICFLAG
         }
