@@ -1748,6 +1748,13 @@ Specifies the DRAP period in frames.
 Dependent RAP indication SEI messages are disabled if DRAPPeriod is 0.
 \\
 
+\Option{EDRAPPeriod} &
+%\ShortOption{\None} &
+\Default{0} &
+Specifies the EDRAP period in frames.
+Extended DRAP indication SEI messages are disabled if EDRAPPeriod is 0.
+\\
+
 \Option{GOPSize (-g)} &
 %\ShortOption{-g} &
 \Default{1} &
@@ -3526,10 +3533,14 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   154 & Sphere rotation                          & Table \ref{tab:sei-sphere-rotation} \\
   155 & Region-wise packing                      & Table \ref{tab:sei-rwp} \\
   156 & Omni viewport                            & Table \ref{tab:sei-omni-viewport} \\  
+  165 & Alpha Channel Information                & Table \ref{tab:sei-aci} \\
   168 & Frame-field information                  & Table \ref{tab:sei-frame-field} \\  
+  177 & Depth Representation Information         & Table \ref{tab:sei-dri} \\
+  179 & Multiview Acquisition Information        & Table \ref{tab:sei-mai} \\
   202 & Annotated regions information            & Table \ref{tab:sei-annotated-regions} \\  
   203 & Subpicture Level Information             & Table \ref{tab:sei-subpic-level} \\  
   204 & Sample Aspect Ratio Information          & Table \ref{tab:sei-sari} \\  
+  205 & Scalability Dimension Information        & Table \ref{tab:sei-sdi} \\
 \end{SEIListTable}
 %%
 %% SEI messages
@@ -4589,6 +4600,242 @@ Specifies the horizontal size of the sample aspect ratio, if SEISARIAspectRatioI
 \Option{SEISARISarHeight} &
 \Default{0} &
 Specifies the vertical size of the sample aspect ratio, if SEISARIAspectRatioIdc is equal to 255.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Scalability Dimension Information SEI message encoder parameters}{tab:sei-sdi}
+\Option{SEISDIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Scalability Dimension Information SEI message.
+\\
+\Option{SEISDIMaxLayersMinus1} &
+\Default{0} &
+Specifies the maximum number of layers minus 1 in the current CVS.
+\\
+\Option{SEISDIMultiviewInfoFlag} &
+\Default{false} &
+Specifies the current CVS may have multiple views and the sdi_view_id_val[ ] syntax elements are present in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDIAuxiliaryInfoFlag} &
+\Default{false} &
+Specifies that one or more layers in the current CVS may be auxiliary layers, which carry auxiliary information, and the sdi_aux_id[ ] syntax elements are present in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDIViewIdLenMinus1} &
+\Default{0} &
+Specifies the length, in bits, of the sdi_view_id_val[ i ] syntax element minus 1 in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDILayerId} &
+\Default{""} &
+List of the layer identifiers that may be present in the scalaibility dimension information SEI message in the current CVS.
+\\
+\Option{SEISDIViewIdVal} &
+\Default{""} &
+List of the view identifiers in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDIAuxId} &
+\Default{""} &
+List of the auxiliary identifiers in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDINumAssociatedPrimaryLayersMinus1} &
+\Default{""} &
+List of the numbers of associated primary layers of i-th layer, which is an auxiliary layer.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Alpha Channel Information SEI message encoder parameters}{tab:sei-aci}
+\Option{SEIACIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Alpha Channel Information SEI message.
+\\
+\Option{SEIACICancelFlag} &
+\Default{false} &
+Specifies the persistence of any previous alpha channel information SEI message in output order.
+\\
+\Option{SEIACIUseIdc} &
+\Default{0} &
+Specifies the usage of the auxiliary picture in the alpha channel information SEI message.
+\\
+\Option{SEIACIBitDepthMinus8} &
+\Default{0} &
+Specifies the bit depth of the samples of the auxiliary picture in the alpha channel information SEI message.
+\\
+\Option{SEIACITransparentValue} &
+\Default{0} &
+Specifies the interpretation sample value of an auxiliary coded picture luma sample for which the associated luma and chroma samples of the primary coded picture are considered transparent for purposes of alpha blending in the alpha channel information SEI message.
+\\
+\Option{SEIACIOpaqueValue} &
+\Default{0} &
+Specifies the interpretation sample value of an auxiliary coded picture luma sample for which the associated luma and chroma samples of the primary coded picture are considered opaque for purposes of alpha blending in the alpha channel information SEI message.
+\\
+\Option{SEIACIIncrFlag} &
+\Default{false} &
+Specifies the interpretation sample value for each decoded auxiliary picture luma sample value is equal to the decoded auxiliary picture sample value for purposes of alpha blending in the alpha channel information SEI message.
+\\
+\Option{SEIACIClipFlag} &
+\Default{false} &
+Specifies whether clipping operation is applied in the alpha channel information SEI message.
+\\
+\Option{SEIACIClipTypeFlag} &
+\Default{false} &
+Specifies the type of clipping operation in the alpha channel information SEI message.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Depth Representation Information SEI message encoder parameters}{tab:sei-dri}
+\Option{SEIDRIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Depth Representation Information SEI message.
+\\
+\Option{SEIDRIZNearFlag} &
+\Default{false} &
+Specifies the presence of the nearest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIZFarFlag} &
+\Default{false} &
+Specifies the presence of the farthest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMinFlag} &
+\Default{false} &
+Specifies the presence of the minimum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMaxFlag} &
+\Default{false} &
+Specifies the presence of the maximum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIZNear} &
+\Default{0.0} &
+Specifies the nearest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIZFar} &
+\Default{0.0} &
+Specifies the farest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMin} &
+\Default{0.0} &
+Specifies the minimum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMax} &
+\Default{0.0} &
+Specifies the maximum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDepthRepresentationType} &
+\Default{0} &
+Specifies the the representation definition of decoded luma samples of auxiliary pictures in the depth representation information SEI message.
+\\
+\Option{SEIDRIDisparityRefViewId} &
+\Default{0} &
+Specifies the ViewId value against which the disparity values are derived in the depth representation information SEI message.
+\\
+\Option{SEIDRINonlinearNumMinus1} &
+\Default{0} &
+Specifies the number of piece-wise linear segments minus 2 for mapping of depth values to a scale that is uniformly quantized in terms of disparity  in the depth representation information SEI message.
+\\
+\Option{SEIDRINonlinearModel} &
+\Default{""} &
+List of the piece-wise linear segments for mapping of decoded luma sample values of an auxiliary picture to a scale that is uniformly quantized in terms of disparity in the depth representation information SEI message.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Multiview Acquisition Information SEI message encoder parameters}{tab:sei-mai}
+\Option{SEIMAIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Multiview Acquisition Information SEI message.
+\\
+\Option{SEIMAIIntrinsicParamFlag} &
+\Default{false} &
+Specifies the presence of intrinsic camera parameters in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExtrinsicParamFlag} &
+\Default{false} &
+Specifies the presence of extrinsic camera parameters in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAINumViewsMinus1} &
+\Default{0} &
+Specifies the number of views minus 1 in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIIntrinsicParamsEqualFlag} &
+\Default{false} &
+Specifies the intrinsic camera parameters are equal for all cameras in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecFocalLength} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for focal_length_x[i] and focal_length_y[i] in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecPrincipalPoint} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for principal_point_x[i] and principal_point_y[i] in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecSkewFactor} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for skew factor in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignFocalLengthX} &
+\Default{""} &
+List of the signs of the focal length of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentFocalLengthX} &
+\Default{""} &
+List of the exponent parts of the focal length of the camera in the horizontal direction. in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaFocalLengthX} &
+\Default{""} &
+List of the mantissa parts of the focal length of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignFocalLengthY} &
+\Default{""} &
+List of the signs of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentFocalLengthY} &
+\Default{""} &
+List of the exponent parts of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaFocalLengthY} &
+\Default{""} &
+List of the mantissa parts of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignPrincipalPointX} &
+\Default{""} &
+List of the signs of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentPrincipalPointX} &
+\Default{""} &
+List of the exponent parts of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaPrincipalPointX} &
+\Default{""} &
+List of the mantissa parts of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignPrincipalPointY} &
+\Default{""} &
+List of the signs of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentPrincipalPointY} &
+\Default{""} &
+List of the exponent parts of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaPrincipalPointY} &
+\Default{""} &
+List of the mantissa parts of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignSkewFactor} &
+\Default{""} &
+List of the signs of the skew factor of the camera in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentSkewFactor} &
+\Default{""} &
+List of the exponent parts of the skew factor of the camera in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaSkewFactor} &
+\Default{""} &
+List of the mantissa parts of the skew factor of the camera in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecRotationParam} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for rotation in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecTranslationParam} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for translation in the multiview acquisition information SEI message.
 \\
 \end{OptionTableNoShorthand}
 
