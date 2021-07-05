@@ -62,10 +62,13 @@ Picture::Picture()
   fieldPic             = false;
   topField             = false;
   precedingDRAP        = false;
-  nonReferencePictureFlag = false;
+#if JVET_U0084_EDRAP
+  edrapRapId           = -1;
+#endif
 #if JVET_V0108
   m_colourTranfParams  = NULL;
 #endif
+  nonReferencePictureFlag = false;
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
   {

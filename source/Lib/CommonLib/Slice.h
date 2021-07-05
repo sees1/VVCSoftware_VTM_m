@@ -2641,6 +2641,15 @@ private:
   bool                       m_useLTforDRAP;
   bool                       m_isDRAP;
   int                        m_latestDRAPPOC;
+#if JVET_U0084_EDRAP
+  bool                       m_enableEdrapSEI;
+  int                        m_edrapRapId;
+  bool                       m_useLTforEdrap;
+  int                        m_edrapNumRefRapPics;
+  std::vector<int>           m_edrapRefRapIds;
+  int                        m_latestEDRAPPOC;
+  bool                       m_latestEdrapLeadingPicDecodableFlag;
+#endif
   ReferencePictureList        m_RPL0;            //< RPL for L0 when present in slice header
   ReferencePictureList        m_RPL1;            //< RPL for L1 when present in slice header
   int                         m_rpl0Idx;              //< index of used RPL in the SPS or -1 for local RPL in the slice header
@@ -2906,6 +2915,26 @@ public:
   bool                        isPocRestrictedByDRAP( int poc, bool precedingDRAPinDecodingOrder );
   bool                        isPOCInRefPicList( const ReferencePictureList *rpl, int poc );
   void                        checkConformanceForDRAP( uint32_t temporalId );
+#if JVET_U0084_EDRAP
+  bool                        getEnableEdrapSEI () const                             { return m_enableEdrapSEI; }
+  void                        setEnableEdrapSEI ( bool b )                           { m_enableEdrapSEI = b; }
+  int                         getEdrapRapId () const                                 { return m_edrapRapId; }
+  void                        setEdrapRapId (int i)                                  { m_edrapRapId = i; }
+  bool                        getUseLTforEdrap () const                              { return m_useLTforEdrap; }
+  void                        setUseLTforEdrap ( bool b )                            { m_useLTforEdrap = b; }
+  int                         getEdrapNumRefRapPics () const                         { return m_edrapNumRefRapPics; }
+  void                        setEdrapNumRefRapPics (int i)                          { m_edrapNumRefRapPics = i; }
+  int                         getEdrapRefRapId (int idx) const                       { return m_edrapRefRapIds[idx]; }
+  void                        addEdrapRefRapIds (int i)                              { m_edrapRefRapIds.push_back(i); }
+  void                        deleteEdrapRefRapIds (int i)                           { m_edrapRefRapIds.erase(m_edrapRefRapIds.begin() + i); m_edrapNumRefRapPics--; }
+  bool                        isPocRestrictedByEdrap( int poc );
+  void                        setLatestEDRAPPOC ( int i )                            { m_latestEDRAPPOC = i; }
+  int                         getLatestEDRAPPOC () const                             { return m_latestEDRAPPOC; }
+  bool                        cvsHasPreviousEDRAP() const                            { return m_latestEDRAPPOC != MAX_INT; }
+  void                        setLatestEdrapLeadingPicDecodableFlag ( bool b )       { m_latestEdrapLeadingPicDecodableFlag = b; }
+  bool                        getLatestEdrapLeadingPicDecodableFlag () const         { return m_latestEdrapLeadingPicDecodableFlag; }
+  void                        checkConformanceForEDRAP( uint32_t temporalId );
+#endif
 
   void                        setLambdas( const double lambdas[MAX_NUM_COMPONENT] )  { for (int component = 0; component < MAX_NUM_COMPONENT; component++) m_lambdas[component] = lambdas[component]; }
   const double*               getLambdas() const                                     { return m_lambdas;                                             }
