@@ -1098,6 +1098,8 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
       sliceEnabled[componentIndex] = false;
     }
     m_CABACEstimator->getCtx() = SAOCtx(ctxPicStart);
+
+    resYuv.copyFrom(srcYuv);
   }
 
   EncSampleAdaptiveOffset::disabledRate( cs, reconParams, saoEncodingRate, saoEncodingRateChroma );
