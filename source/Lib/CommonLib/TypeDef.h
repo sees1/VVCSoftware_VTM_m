@@ -50,11 +50,14 @@
 #include <assert.h>
 #include <cassert>
 
+<<<<<<< HEAD
 #define JVET_U0082_SDI_MAI_ACI_DRI                        1 // scalability dimension information SEI and other three SEIs: Alpha channel information, Depth representation information, and Multiview acquisition information
 
 #define JVET_U0084_EDRAP                                  1 // EDRAP indication SEI message
 
 #define JVET_V0106_RRC_RICE                               1 // JVET_V0106: Extension of the RRC rice derivation for high bit depth profile (VVCv2). 
+=======
+>>>>>>> 80cb123d... implementation of JVET-V0131
 #define JVET_V0131_CORRECT_TR_HBD                          1 // correcting the 4x4 BDST7/DCT8 transform matrices for high bit-depth coding
 // clang-format off
 
@@ -77,7 +80,6 @@
 #define JVET_V0108                                        1 // JVET_V0108: Colour Transform Information SEI 
 
 #define JVET_V0111_DU                                     1 // JVET-V0111 Decoding Unit Information 
-
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
