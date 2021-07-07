@@ -623,6 +623,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<int>  cfg_DisplayPrimariesCode            (0, 50000, 6, 6, defaultPrimaryCodes,   sizeof(defaultPrimaryCodes  )/sizeof(int));
   SMultiValueInput<int>  cfg_DisplayWhitePointCode           (0, 50000, 2, 2, defaultWhitePointCode, sizeof(defaultWhitePointCode)/sizeof(int));
 
+#if JVET_V0108
+  SMultiValueInput<int16_t>  cfg_SEICTILut0(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<int16_t>  cfg_SEICTILut1(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<int16_t>  cfg_SEICTILut2(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+#endif
   SMultiValueInput<bool> cfg_timeCodeSeiTimeStampFlag        (0,  1, 0, MAX_TIMECODE_SEI_SETS);
   SMultiValueInput<bool> cfg_timeCodeSeiNumUnitFieldBasedFlag(0,  1, 0, MAX_TIMECODE_SEI_SETS);
   SMultiValueInput<int>  cfg_timeCodeSeiCountingType         (0,  6, 0, MAX_TIMECODE_SEI_SETS);
@@ -665,6 +670,28 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t>   cfg_gcmpSEIFunctionUAffectedByVFlag   (0, 1, 5, 6);
   SMultiValueInput<double>     cfg_gcmpSEIFunctionCoeffV             (0.0, 1.0, 5, 6);
   SMultiValueInput<uint32_t>   cfg_gcmpSEIFunctionVAffectedByUFlag   (0, 1, 5, 6);
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  SMultiValueInput<uint32_t>        cfg_sdiSEILayerId                  (0, 63, 0, 63);
+  SMultiValueInput<uint32_t>        cfg_sdiSEIViewIdVal                (0, 63, 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_sdiSEIAuxId                    (0, 255, 0, 63);
+  SMultiValueInput<uint32_t>        cfg_sdiSEINumAssociatedPrimaryLayersMinus1 (0, 63, 0, 63);
+  SMultiValueInput<bool>            cfg_maiSEISignFocalLengthX         (0, 1,   0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIExponentFocalLengthX     (0, 63, 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIMantissaFocalLengthX     (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<bool>            cfg_maiSEISignFocalLengthY         (0, 1,   0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIExponentFocalLengthY     (0, 63, 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIMantissaFocalLengthY     (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<bool>            cfg_maiSEISignPrincipalPointX      (0, 1,   0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIExponentPrincipalPointX  (0, 63, 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIMantissaPrincipalPointX  (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<bool>            cfg_maiSEISignPrincipalPointY      (0, 1,   0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIExponentPrincipalPointY  (0, 63, 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIMantissaPrincipalPointY  (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<bool>            cfg_maiSEISignSkewFactor           (0, 1,   0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIExponentSkewFactor       (0, 63, 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_maiSEIMantissaSkewFactor       (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
+  SMultiValueInput<uint32_t>        cfg_driSEINonlinearModel           (0, 31, 0, std::numeric_limits<uint32_t>::max());
+#endif
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
   const int defaultLadfQpOffset[3] = { 1, 0, 1 };
   const int defaultLadfIntervalLowerBound[2] = { 350, 833 };
@@ -1013,6 +1040,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DecodingRefreshType,-dr",                         m_iDecodingRefreshType,                               0, "Intra refresh type (0:none 1:CRA 2:IDR 3:RecPointSEI)")
   ("GOPSize,g",                                       m_iGOPSize,                                           1, "GOP size of temporal structure")
   ("DRAPPeriod",                                      m_drapPeriod,                                         0, "DRAP period in frames (0: disable Dependent RAP indication SEI messages)")
+#if JVET_U0084_EDRAP
+  ("EDRAPPeriod",                                     m_edrapPeriod,                                        0, "EDRAP period in frames (0: disable Extended Dependent RAP indication SEI messages)")
+#endif
   ("ReWriteParamSets",                                m_rewriteParamSets,                           false, "Enable rewriting of Parameter sets before every (intra) random access point")
   ("IDRRefParamList",                                 m_idrRefParamList,                            false, "Enable indication of reference picture list syntax elements in slice headers of IDR pictures")
   // motion search options
@@ -1388,6 +1418,23 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIAVEAmbientIlluminance",                        m_aveSEIAmbientIlluminance,                      100000u, "Specifies the environmental illluminance of the ambient viewing environment in units of 1/10000 lux for the ambient viewing environment SEI message")
   ("SEIAVEAmbientLightX",                             m_aveSEIAmbientLightX,                            15635u, "Specifies the normalized x chromaticity coordinate of the environmental ambient light in the nominal viewing enviornment according to the CIE 1931 definition in units of 1/50000 lux for the ambient viewing enviornment SEI message")
   ("SEIAVEAmbientLightY",                             m_aveSEIAmbientLightY,                            16450u, "Specifies the normalized y chromaticity coordinate of the environmental ambient light in the nominal viewing enviornment according to the CIE 1931 definition in units of 1/50000 lux for the ambient viewing enviornment SEI message")
+#if JVET_V0108
+// colour tranform information SEI
+  ("SEICTIEnabled",                                   m_ctiSEIEnabled,                                   false, "Control generation of the Colour transform information SEI message")
+  ("SEICTIId",                                        m_ctiSEIId,                                           0u, "Id of the Colour transform information SEI message")
+  ("SEICTISignalInfoFlag",                            m_ctiSEISignalInfoFlag,                            false, "indicates if signal information are present in the Colour transform information SEI message")
+  ("SEICTIFullRangeFlag",                             m_ctiSEIFullRangeFlag,                             false, "specifies signal range after applying the Colour transform information SEI message")
+  ("SEICTIPrimaries",                                 m_ctiSEIPrimaries,                                    0u, "indicates the signal primaries after applying the Colour transform information SEI message")
+  ("SEICTITransferFunction",                          m_ctiSEITransferFunction,                             0u, "indicates the signal transfer function after applying the Colour transform information SEI message")
+  ("SEICTIMatrixCoefs",                               m_ctiSEIMatrixCoefs,                                  0u, "indicates the signal matrix coefficients after applying the Colour transform information SEI message")
+  ("SEICTICrossCompFlag",                             m_ctiSEICrossComponentFlag,                         true, "Specifies if cross-component transform mode is enabled in SEI CTI")
+  ("SEICTICrossCompInferred",                         m_ctiSEICrossComponentInferred,                     true, "Specifies if cross-component transform LUT is inferred in SEI CTI")
+  ("SEICTINbChromaLut",                               m_ctiSEINumberChromaLut,                              0u, "Specifies the number of chroma LUTs in SEI CTI")
+  ("SEICTIChromaOffset",                              m_ctiSEIChromaOffset,                                  0, "Specifies the chroma offset of SEI CTI")
+  ("SEICTILut0",                                      cfg_SEICTILut0,                           cfg_SEICTILut0, "slope values for component 0 of SEI CTI")
+  ("SEICTILut1",                                      cfg_SEICTILut1,                           cfg_SEICTILut1, "slope values for component 1 of SEI CTI")
+  ("SEICTILut2",                                      cfg_SEICTILut2,                           cfg_SEICTILut2, "slope values for component 2 of SEI CTI")
+#endif
 // content colour volume SEI
   ("SEICCVEnabled",                                   m_ccvSEIEnabled,                                   false, "Control generation of the Content Colour Volume SEI message")
   ("SEICCVCancelFlag",                                m_ccvSEICancelFlag,                                 true, "Specifies the persistence of any previous content colour volume SEI message in output order.")
@@ -1405,6 +1452,68 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEICCVMaxLuminanceValue",                         m_ccvSEIMaxLuminanceValue,                           0.1, "specifies the CCV max luminance value  in the content colour volume SEI message")
   ("SEICCVAvgLuminanceValuePresent",                  m_ccvSEIAvgLuminanceValuePresentFlag,               true, "Specifies whether the CCV avg luminance value is present in the content colour volume SEI message")
   ("SEICCVAvgLuminanceValue",                         m_ccvSEIAvgLuminanceValue,                          0.01, "specifies the CCV avg luminance value  in the content colour volume SEI message")
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  // scalability dimension information SEI
+  ("SEISDIEnabled",                                   m_sdiSEIEnabled,                          false, "Control generation of scalaibility dimension information SEI message")
+  ("SEISDIMaxLayersMinus1",                           m_sdiSEIMaxLayersMinus1,                      0, "Specifies the maximum number of layers minus 1 in the current CVS")
+  ("SEISDIMultiviewInfoFlag",                         m_sdiSEIMultiviewInfoFlag,                false, "Specifies the current CVS may have multiple views and the sdi_view_id_val[ ] syntax elements are present in the scalaibility dimension information SEI message")
+  ("SEISDIAuxiliaryInfoFlag",                         m_sdiSEIAuxiliaryInfoFlag,                false, "Specifies that one or more layers in the current CVS may be auxiliary layers, which carry auxiliary information, and the sdi_aux_id[ ] syntax elements are present in the scalaibility dimension information SEI message")
+  ("SEISDIViewIdLenMinus1",                           m_sdiSEIViewIdLenMinus1,                      0, "Specifies the length, in bits, of the sdi_view_id_val[ i ] syntax element minus 1 in the scalaibility dimension information SEI message")
+  ("SEISDILayerId",                                   cfg_sdiSEILayerId,            cfg_sdiSEILayerId, "List of the layer identifiers that may be present in the scalaibility dimension information SEI message in the current CVS")
+  ("SEISDIViewIdVal",                                 cfg_sdiSEIViewIdVal,        cfg_sdiSEIViewIdVal, "List of the view identifiers in the scalaibility dimension information SEI message")
+  ("SEISDIAuxId",                                     cfg_sdiSEIAuxId,                cfg_sdiSEIAuxId, "List of the auxiliary identifiers in the scalaibility dimension information SEI message")
+  ("SEISDINumAssociatedPrimaryLayersMinus1",          cfg_sdiSEINumAssociatedPrimaryLayersMinus1, cfg_sdiSEINumAssociatedPrimaryLayersMinus1, "List of the numbers of associated primary layers of i-th layer, which is an auxiliary layer.")
+  // multiview acquisition information SEI
+  ("SEIMAIEnabled",                                   m_maiSEIEnabled,                                    false, "Control generation of multiview acquisition information SEI message")
+  ("SEIMAIIntrinsicParamFlag",                        m_maiSEIIntrinsicParamFlag,                         false, "Specifies the presence of intrinsic camera parameters in the multiview acquisition information SEI message")
+  ("SEIMAIExtrinsicParamFlag",                        m_maiSEIExtrinsicParamFlag,                         false, "Specifies the presence of extrinsic camera parameters in the multiview acquisition information SEI message")
+  ("SEIMAINumViewsMinus1",                            m_maiSEINumViewsMinus1,                                 0, "Specifies the number of views minus 1 in the multiview acquisition information SEI message")
+  ("SEIMAIIntrinsicParamsEqualFlag",                  m_maiSEIIntrinsicParamsEqualFlag,                   false, "Specifies the intrinsic camera parameters are equal for all cameras in the multiview acquisition information SEI message")
+  ("SEIMAIPrecFocalLength",                           m_maiSEIPrecFocalLength,                                0, "Specifies the exponent of the maximum allowable truncation error for focal_length_x[i] and focal_length_y[i] in the multiview acquisition information SEI message")
+  ("SEIMAIPrecPrincipalPoint",                        m_maiSEIPrecPrincipalPoint,                             0, "Specifies the exponent of the maximum allowable truncation error for principal_point_x[i] and principal_point_y[i] in the multiview acquisition information SEI message")
+  ("SEIMAIPrecSkewFactor",                            m_maiSEIPrecSkewFactor,                                 0, "Specifies the exponent of the maximum allowable truncation error for skew factor in the multiview acquisition information SEI message")
+  ("SEIMAISignFocalLengthX",                          cfg_maiSEISignFocalLengthX,    cfg_maiSEISignFocalLengthX, "List of the signs of the focal length of the camera in the horizontal direction in the multiview acquisition information SEI message")
+  ("SEIMAIExponentFocalLengthX",                      cfg_maiSEIExponentFocalLengthX, cfg_maiSEIExponentFocalLengthX, "List of the exponent parts of the focal length of the camera in the horizontal direction. in the multiview acquisition information SEI message")
+  ("SEIMAIMantissaFocalLengthX",                      cfg_maiSEIMantissaFocalLengthX, cfg_maiSEIMantissaFocalLengthX, "List of the mantissa parts of the focal length of the camera in the horizontal direction in the multiview acquisition information SEI message")
+  ("SEIMAISignFocalLengthY",                          cfg_maiSEISignFocalLengthY,    cfg_maiSEISignFocalLengthY, "List of the signs of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message")
+  ("SEIMAIExponentFocalLengthY",                      cfg_maiSEIExponentFocalLengthY, cfg_maiSEIExponentFocalLengthY, "List of the exponent parts of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message")
+  ("SEIMAIMantissaFocalLengthY",                      cfg_maiSEIMantissaFocalLengthY, cfg_maiSEIMantissaFocalLengthY, "List of the mantissa parts of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message")
+  ("SEIMAISignPrincipalPointX",                       cfg_maiSEISignPrincipalPointX, cfg_maiSEISignPrincipalPointX, "List of the signs of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message")
+  ("SEIMAIExponentPrincipalPointX",                   cfg_maiSEIExponentPrincipalPointX, cfg_maiSEIExponentPrincipalPointX, "List of the exponent parts of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message")
+  ("SEIMAIMantissaPrincipalPointX",                   cfg_maiSEIMantissaPrincipalPointX, cfg_maiSEIMantissaPrincipalPointX, "List of the mantissa parts of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message")
+  ("SEIMAISignPrincipalPointY",                       cfg_maiSEISignPrincipalPointY, cfg_maiSEISignPrincipalPointY, "List of the signs of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message")
+  ("SEIMAIExponentPrincipalPointY",                   cfg_maiSEIExponentPrincipalPointY, cfg_maiSEIExponentPrincipalPointY, "List of the exponent parts of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message")
+  ("SEIMAIMantissaPrincipalPointY",                   cfg_maiSEIMantissaPrincipalPointY, cfg_maiSEIMantissaPrincipalPointY, "List of the mantissa parts of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message")
+  ("SEIMAISignSkewFactor",                            cfg_maiSEISignSkewFactor,     cfg_maiSEISignSkewFactor, "List of the signs of the skew factor of the camera in the multiview acquisition information SEI message")
+  ("SEIMAIExponentSkewFactor",                        cfg_maiSEIExponentSkewFactor, cfg_maiSEIExponentSkewFactor, "List of the exponent parts of the skew factor of the camera in the multiview acquisition information SEI message")
+  ("SEIMAIMantissaSkewFactor",                        cfg_maiSEIMantissaSkewFactor, cfg_maiSEIMantissaSkewFactor, "List of the mantissa parts of the skew factor of the camera in the multiview acquisition information SEI message")
+  ("SEIMAIPrecRotationParam",                         m_maiSEIPrecRotationParam,                            0, "Specifies the exponent of the maximum allowable truncation error for rotation in the multiview acquisition information SEI message")
+  ("SEIMAIPrecTranslationParam",                      m_maiSEIPrecTranslationParam,                         0, "Specifies the exponent of the maximum allowable truncation error for translation in the multiview acquisition information SEI message")
+  // alpha channel information SEI
+  ("SEIACIEnabled",                                   m_aciSEIEnabled,                                   false, "Control generation of alpha channel information SEI message")
+  ("SEIACICancelFlag",                                m_aciSEICancelFlag,                                false, "Specifies the persistence of any previous alpha channel information SEI message in output order")
+  ("SEIACIUseIdc",                                    m_aciSEIUseIdc,                                        0, "Specifies the usage of the auxiliary picture in the alpha channel information SEI message")
+  ("SEIACIBitDepthMinus8",                            m_aciSEIBitDepthMinus8,                                0, "Specifies the bit depth of the samples of the auxiliary picture in the alpha channel information SEI message")
+  ("SEIACITransparentValue",                          m_aciSEITransparentValue,                              0, "Specifies the interpretation sample value of an auxiliary coded picture luma sample for which the associated luma and chroma samples of the primary coded picture are considered transparent for purposes of alpha blending in the alpha channel information SEI message")
+  ("SEIACIOpaqueValue",                               m_aciSEIOpaqueValue,                                   0, "Specifies the interpretation sample value of an auxiliary coded picture luma sample for which the associated luma and chroma samples of the primary coded picture are considered opaque for purposes of alpha blending in the alpha channel information SEI message")
+  ("SEIACIIncrFlag",                                  m_aciSEIIncrFlag,                                  false, "Specifies the interpretation sample value for each decoded auxiliary picture luma sample value is equal to the decoded auxiliary picture sample value for purposes of alpha blending in the alpha channel information SEI message")
+  ("SEIACIClipFlag",                                  m_aciSEIClipFlag,                                  false, "Specifies whether clipping operation is applied in the alpha channel information SEI message")
+  ("SEIACIClipTypeFlag",                              m_aciSEIClipTypeFlag,                              false, "Specifies the type of clipping operation in the alpha channel information SEI message")
+  // depth representation information SEI
+  ("SEIDRIEnabled",                                   m_driSEIEnabled,                                   false, "Control generation of depth representation information SEI message")
+  ("SEIDRIZNearFlag",                                 m_driSEIZNearFlag,                                 false, "Specifies the presence of the nearest depth value in the depth representation information SEI message")
+  ("SEIDRIZFarFlag",                                  m_driSEIZFarFlag,                                  false, "Specifies the presence of the farthest depth value in the depth representation information SEI message")
+  ("SEIDRIDMinFlag",                                  m_driSEIDMinFlag,                                  false, "Specifies the presence of the minimum disparity value in the depth representation information SEI message")
+  ("SEIDRIDMaxFlag",                                  m_driSEIDMaxFlag,                                  false, "Specifies the presence of the maximum disparity value in the depth representation information SEI message")
+  ("SEIDRIZNear",                                     m_driSEIZNear,                                       0.0, "Specifies the nearest depth value in the depth representation information SEI message")
+  ("SEIDRIZFar",                                      m_driSEIZFar,                                        0.0, "Specifies the farest depth value in the depth representation information SEI message")
+  ("SEIDRIDMin",                                      m_driSEIDMin,                                        0.0, "Specifies the minimum disparity value in the depth representation information SEI message")
+  ("SEIDRIDMax",                                      m_driSEIDMax,                                        0.0, "Specifies the maximum disparity value in the depth representation information SEI message")
+  ("SEIDRIDepthRepresentationType",                   m_driSEIDepthRepresentationType,                       0, "Specifies the the representation definition of decoded luma samples of auxiliary pictures in the depth representation information SEI message")
+  ("SEIDRIDisparityRefViewId",                        m_driSEIDisparityRefViewId,                            0, "Specifies the ViewId value against which the disparity values are derived in the depth representation information SEI message")
+  ("SEIDRINonlinearNumMinus1",                        m_driSEINonlinearNumMinus1,                            0, "Specifies the number of piece-wise linear segments minus 2 for mapping of depth values to a scale that is uniformly quantized in terms of disparity  in the depth representation information SEI message")
+  ("SEIDRINonlinearModel",                            cfg_driSEINonlinearModel,       cfg_driSEINonlinearModel, "List of the piece-wise linear segments for mapping of decoded luma sample values of an auxiliary picture to a scale that is uniformly quantized in terms of disparity in the depth representation information SEI message")
+#endif
 
   ("DebugBitstream",                                  m_decodeBitstreams[0],             string( "" ), "Assume the frames up to POC DebugPOC will be the same as in this bitstream. Load those frames from the bitstream instead of encoding them." )
   ("DebugPOC",                                        m_switchPOC,                                 -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC, return to normal encoding." )
@@ -1689,8 +1798,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
    * Set any derived parameters
    */
 #if EXTENSION_360_VIDEO
-  m_inputFileWidth = m_iSourceWidth;
-  m_inputFileHeight = m_iSourceHeight;
+  m_inputFileWidth = m_sourceWidth;
+  m_inputFileHeight = m_sourceHeight;
   m_ext360.setMaxCUInfo(m_uiCTUSize, 1 << MIN_CU_LOG2);
 #endif
 
@@ -2392,6 +2501,52 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_masteringDisplay.whitePoint[idx] = uint16_t((cfg_DisplayWhitePointCode.values.size() > idx) ? cfg_DisplayWhitePointCode.values[idx] : 0);
     }
   }
+#if JVET_V0108
+  if (m_ctiSEIEnabled) 
+  {
+    CHECK(!m_ctiSEICrossComponentFlag && m_ctiSEICrossComponentInferred, "CTI CrossComponentFlag is 0, but CTI CrossComponentInferred is 1 (must be 0 for CrossComponentFlag 0)");
+    CHECK(!m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred && !m_ctiSEINumberChromaLut, "For CTI CrossComponentFlag = 0, CTI NumberChromaLut needs to be specified (1 or 2) ");
+    CHECK(m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred && !m_ctiSEINumberChromaLut, "For CTI CrossComponentFlag = 1 and CrossComponentInferred = 0, CTI NumberChromaLut needs to be specified (1 or 2) ");
+
+    CHECK(cfg_SEICTILut0.values.empty(), "SEI CTI (SEICTIEnabled) but no LUT0 specified");
+    m_ctiSEILut[0].presentFlag = true;
+    m_ctiSEILut[0].numLutValues = (int)cfg_SEICTILut0.values.size();
+    m_ctiSEILut[0].lutValues = cfg_SEICTILut0.values;
+
+    if (!m_ctiSEICrossComponentFlag || (m_ctiSEICrossComponentFlag && !m_ctiSEICrossComponentInferred)) 
+    {
+      CHECK(cfg_SEICTILut1.values.empty(), "SEI CTI LUT1 not specified");
+      m_ctiSEILut[1].presentFlag = true;
+      m_ctiSEILut[1].numLutValues = (int)cfg_SEICTILut1.values.size();
+      m_ctiSEILut[1].lutValues = cfg_SEICTILut1.values;
+
+      if (m_ctiSEINumberChromaLut == 1) 
+      { // Cb lut the same as Cr lut
+        m_ctiSEILut[2].presentFlag = true;
+        m_ctiSEILut[2].numLutValues = m_ctiSEILut[1].numLutValues;
+        m_ctiSEILut[2].lutValues = m_ctiSEILut[1].lutValues;
+      }
+      else if (m_ctiSEINumberChromaLut == 2) 
+      { // read from cfg
+        CHECK(cfg_SEICTILut2.values.empty(), "SEI CTI LUT2 not specified");
+        m_ctiSEILut[2].presentFlag = true;
+        m_ctiSEILut[2].numLutValues = (int)cfg_SEICTILut2.values.size();
+        m_ctiSEILut[2].lutValues = cfg_SEICTILut2.values;
+      }
+      else 
+      {
+        CHECK(m_ctiSEINumberChromaLut < 1 && m_ctiSEINumberChromaLut > 2, "Number of chroma LUTs is missing or out of range!");
+      }
+    }
+    //  check if lut size is power of 2
+    for (int idx = 0; idx < MAX_NUM_COMPONENT; idx++) 
+    {
+      int n = m_ctiSEILut[idx].numLutValues - 1;
+      CHECK(n > 0 && (n & (n - 1)) != 0, "Size of LUT minus 1 should be power of 2!");
+      CHECK(n > MAX_CTI_LUT_SIZE, "LUT size minus 1 is larger than MAX_CTI_LUT_SIZE (64)!");
+    }
+  }
+#endif
   if ( m_omniViewportSEIEnabled && !m_omniViewportSEICancelFlag )
   {
     CHECK (!( m_omniViewportSEICntMinus1 >= 0 && m_omniViewportSEICntMinus1 < 16 ), "SEIOmniViewportCntMinus1 must be in the range of 0 to 16");
@@ -2500,6 +2655,82 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       }
     }
   }
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  if ( m_sdiSEIEnabled )
+  {
+    if (m_sdiSEIMultiviewInfoFlag || m_sdiSEIAuxiliaryInfoFlag)
+    {
+      m_sdiSEILayerId.resize(m_sdiSEIMaxLayersMinus1 + 1);
+      m_sdiSEIViewIdVal.resize(m_sdiSEIMaxLayersMinus1 + 1);
+      m_sdiSEIAuxId.resize(m_sdiSEIMaxLayersMinus1 + 1);
+      m_sdiSEINumAssociatedPrimaryLayersMinus1.resize(m_sdiSEIMaxLayersMinus1 + 1);
+      for (int i = 0; i <= m_sdiSEIMaxLayersMinus1; i++)
+      {
+        m_sdiSEILayerId[i] = cfg_sdiSEILayerId.values[i];
+        if (m_sdiSEIMultiviewInfoFlag)
+        {
+          m_sdiSEIViewIdVal[i] = cfg_sdiSEIViewIdVal.values[i];
+        }
+        if (m_sdiSEIAuxiliaryInfoFlag)
+        {
+          m_sdiSEIAuxId[i] = cfg_sdiSEIAuxId.values[i];
+          if (m_sdiSEIAuxId[i] > 0)
+          {
+            m_sdiSEINumAssociatedPrimaryLayersMinus1[i] = cfg_sdiSEINumAssociatedPrimaryLayersMinus1.values[i];
+          }
+        }
+      }
+    }
+  }
+  if ( m_maiSEIEnabled )
+  {
+    if (m_maiSEIIntrinsicParamFlag)
+    {
+      int numViews = m_maiSEIIntrinsicParamsEqualFlag ? 1 : m_maiSEINumViewsMinus1 + 1;
+      m_maiSEISignFocalLengthX       .resize( numViews );
+      m_maiSEIExponentFocalLengthX   .resize( numViews );
+      m_maiSEIMantissaFocalLengthX   .resize( numViews );
+      m_maiSEISignFocalLengthY       .resize( numViews );
+      m_maiSEIExponentFocalLengthY   .resize( numViews );
+      m_maiSEIMantissaFocalLengthY   .resize( numViews );
+      m_maiSEISignPrincipalPointX    .resize( numViews );
+      m_maiSEIExponentPrincipalPointX.resize( numViews );
+      m_maiSEIMantissaPrincipalPointX.resize( numViews );
+      m_maiSEISignPrincipalPointY    .resize( numViews );
+      m_maiSEIExponentPrincipalPointY.resize( numViews );
+      m_maiSEIMantissaPrincipalPointY.resize( numViews );
+      m_maiSEISignSkewFactor         .resize( numViews );
+      m_maiSEIExponentSkewFactor     .resize( numViews );
+      m_maiSEIMantissaSkewFactor     .resize( numViews );
+      for( int i = 0; i  <=  ( m_maiSEIIntrinsicParamsEqualFlag ? 0 : m_maiSEINumViewsMinus1 ); i++ )
+      {
+        m_maiSEISignFocalLengthX       [i] = cfg_maiSEISignFocalLengthX.values[i];
+        m_maiSEIExponentFocalLengthX   [i] = cfg_maiSEIExponentFocalLengthX.values[i];
+        m_maiSEIMantissaFocalLengthX   [i] = cfg_maiSEIMantissaFocalLengthX.values[i];
+        m_maiSEISignFocalLengthY       [i] = cfg_maiSEISignFocalLengthY.values[i];
+        m_maiSEIExponentFocalLengthY   [i] = cfg_maiSEIExponentFocalLengthY.values[i];
+        m_maiSEIMantissaFocalLengthY   [i] = cfg_maiSEIMantissaFocalLengthY.values[i];
+        m_maiSEISignPrincipalPointX    [i] = cfg_maiSEISignPrincipalPointX.values[i];
+        m_maiSEIExponentPrincipalPointX[i] = cfg_maiSEIExponentPrincipalPointX.values[i];
+        m_maiSEIMantissaPrincipalPointX[i] = cfg_maiSEIMantissaPrincipalPointX.values[i];
+        m_maiSEISignPrincipalPointY    [i] = cfg_maiSEISignPrincipalPointY.values[i];
+        m_maiSEIExponentPrincipalPointY[i] = cfg_maiSEIExponentPrincipalPointY.values[i];
+        m_maiSEIMantissaPrincipalPointY[i] = cfg_maiSEIMantissaPrincipalPointY.values[i];
+        m_maiSEISignSkewFactor         [i] = cfg_maiSEISignSkewFactor.values[i];
+        m_maiSEIExponentSkewFactor     [i] = cfg_maiSEIExponentSkewFactor.values[i];
+        m_maiSEIMantissaSkewFactor     [i] = cfg_maiSEIMantissaSkewFactor.values[i];
+      }
+    }
+  }
+  if ( m_driSEIEnabled )
+  {
+    m_driSEINonlinearModel.resize(m_driSEINonlinearNumMinus1+1);
+    for(int i=0; i<(m_driSEINonlinearNumMinus1+1); i++)
+    {
+      m_driSEINonlinearModel[i]   = cfg_driSEINonlinearModel.values.size() > i ? cfg_driSEINonlinearModel.values[i] : 0;
+    }
+  }
+#endif
   m_reshapeCW.binCW.resize(3);
   m_reshapeCW.rspFps = m_iFrameRate;
   m_reshapeCW.rspPicSize = m_sourceWidth*m_sourceHeight;
@@ -2530,7 +2761,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
  #if QP_SWITCHING_FOR_PARALLEL
   if ((m_iQP < 38) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && (m_sourceWidth <= 2048) && (m_sourceHeight <= 1280)
  #else
-  if (((int)m_fQP < 38) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && (m_iSourceWidth <= 2048) && (m_iSourceHeight <= 1280)
+  if (((int)m_fQP < 38) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && (m_sourceWidth <= 2048) && (m_sourceHeight <= 1280)
  #endif
  #if WCG_EXT && ER_CHROMA_QP_WCG_PPS
       && (!m_wcgChromaQpControl.enabled)
@@ -2541,9 +2772,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   }
 #else
  #if QP_SWITCHING_FOR_PARALLEL
-  if( ( m_iQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_iSourceHeight <= 1280 ) && ( m_iSourceWidth <= 2048 ) )
+  if( ( m_iQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_sourceHeight <= 1280 ) && ( m_sourceWidth <= 2048 ) )
  #else
-  if( ( ( int ) m_fQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_iSourceHeight <= 1280 ) && ( m_iSourceWidth <= 2048 ) )
+  if( ( ( int ) m_fQP < 38 ) && ( m_iGOPSize > 4 ) && m_bUsePerceptQPA && !m_bUseAdaptiveQP && ( m_sourceHeight <= 1280 ) && ( m_sourceWidth <= 2048 ) )
  #endif
   {
     msg( WARNING, "*************************************************************************\n" );
@@ -2776,6 +3007,9 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( m_iGOPSize > 1 &&  m_iGOPSize % 2,                                          "GOP Size must be a multiple of 2, if GOP Size is greater than 1" );
   xConfirmPara( (m_iIntraPeriod > 0 && m_iIntraPeriod < m_iGOPSize) || m_iIntraPeriod == 0, "Intra period must be more than GOP size, or -1 , not 0" );
   xConfirmPara( m_drapPeriod < 0,                                                           "DRAP period must be greater or equal to 0" );
+#if JVET_U0084_EDRAP
+  xConfirmPara( m_edrapPeriod < 0,                                                          "EDRAP period must be greater or equal to 0" );
+#endif
   xConfirmPara( m_iDecodingRefreshType < 0 || m_iDecodingRefreshType > 3,                   "Decoding Refresh Type must be comprised between 0 and 3 included" );
 
   if (m_isField)
@@ -2865,6 +3099,12 @@ bool EncAppCfg::xCheckParameter()
     if (m_updateCtrl > 0 && m_adpOption > 2) { m_adpOption -= 2; }
   }
 
+#if JVET_V0108
+  if (m_ctiSEIEnabled)
+  {
+    xConfirmPara(m_ctiSEINumberChromaLut < 0 || m_ctiSEINumberChromaLut > 2, "CTI number of chroma LUTs is out of range");
+  }
+#endif
   xConfirmPara( m_cbQpOffset < -12,   "Min. Chroma Cb QP Offset is -12" );
   xConfirmPara( m_cbQpOffset >  12,   "Max. Chroma Cb QP Offset is  12" );
   xConfirmPara( m_crQpOffset < -12,   "Min. Chroma Cr QP Offset is -12" );
@@ -4009,6 +4249,9 @@ void EncAppCfg::xPrintParameter()
   msg( DETAILS, "Intra period                           : %d\n", m_iIntraPeriod );
   msg( DETAILS, "Decoding refresh type                  : %d\n", m_iDecodingRefreshType );
   msg( DETAILS, "DRAP period                            : %d\n", m_drapPeriod );
+#if JVET_U0084_EDRAP
+  msg( DETAILS, "EDRAP period                           : %d\n", m_edrapPeriod );
+#endif
 #if QP_SWITCHING_FOR_PARALLEL
   if (m_qpIncrementAtSourceFrame.bPresent)
   {
@@ -4250,6 +4493,9 @@ void EncAppCfg::xPrintParameter()
     msg( VERBOSE, "RPR:%d ", 0 );
   }
   msg(VERBOSE, "TemporalFilter:%d ", m_gopBasedTemporalFilterEnabled);
+#if JVET_V0108
+  msg(VERBOSE, "SEI CTI:%d ", m_ctiSEIEnabled);
+#endif 
 #if EXTENSION_360_VIDEO
   m_ext360.outputConfigurationSummary();
 #endif

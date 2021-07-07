@@ -199,6 +199,16 @@ void Slice::initSlice()
   m_useLTforDRAP         = false;
   m_isDRAP               = false;
   m_latestDRAPPOC        = MAX_INT;
+#if JVET_U0084_EDRAP
+  m_edrapRapId           = 0;
+  m_enableEdrapSEI       = false;
+  m_edrapRapId           = 0;
+  m_useLTforEdrap        = false;
+  m_edrapNumRefRapPics   = 0;
+  m_edrapRefRapIds.resize(0);
+  m_latestEDRAPPOC       = MAX_INT;
+  m_latestEdrapLeadingPicDecodableFlag = false;
+#endif
   resetAlfEnabledFlag();
   m_ccAlfFilterParam.reset();
   m_ccAlfCbEnabledFlag = 0;
@@ -2055,6 +2065,17 @@ bool Slice::isPocRestrictedByDRAP( int poc, bool precedingDRAPInDecodingOrder )
          ( cvsHasPreviousDRAP() && getPOC() > getLatestDRAPPOC() && (precedingDRAPInDecodingOrder || poc < getLatestDRAPPOC()) );
 }
 
+#if JVET_U0084_EDRAP
+bool Slice::isPocRestrictedByEdrap( int poc )
+{
+  if (!getEnableEdrapSEI())
+  {
+    return false;
+  }
+  return getEdrapRapId() > 0 && poc != getAssociatedIRAPPOC();
+}
+#endif
+
 void Slice::checkConformanceForDRAP( uint32_t temporalId )
 {
   if (!(isDRAP() || cvsHasPreviousDRAP()))
@@ -2115,6 +2136,61 @@ void Slice::checkConformanceForDRAP( uint32_t temporalId )
     }
   }
 }
+
+#if JVET_U0084_EDRAP
+void Slice::checkConformanceForEDRAP( uint32_t temporalId )
+{
+  if (!(getEdrapRapId() > 0 || cvsHasPreviousEDRAP()))
+  {
+    return;
+  }
+
+  if (getEdrapRapId() > 0)
+  {
+    if (!(getNalUnitType() == NalUnitType::NAL_UNIT_CODED_SLICE_TRAIL ||
+          getNalUnitType() == NalUnitType::NAL_UNIT_CODED_SLICE_STSA))
+    {
+      msg( WARNING, "Warning, non-conforming bitstream. The EDRAP picture should be a trailing picture.\n");
+    }
+    if ( temporalId != 0)
+    {
+      msg( WARNING, "Warning, non-conforming bitstream. The EDRAP picture shall have a temporal sublayer identifier equal to 0.\n");
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_0); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_0,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in both decoding order and output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order or output order, with the exception of the referenceablePictures.\n");
+      }
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_1); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_1,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in both decoding order and output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order or output order, with the exception of the referenceablePictures.\n");
+      }
+    }
+  }
+
+  if (cvsHasPreviousEDRAP() && getPOC() > getLatestEDRAPPOC() && getLatestEdrapLeadingPicDecodableFlag())
+  {
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_0); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_0,i)->getPOC() < getLatestEDRAPPOC() && getRefPic(REF_PIC_LIST_0,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in decoding order and precedes the EDRAP picture in output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order, with the exception of the referenceablePictures. Problem is POC %d in RPL0.\n", getRefPic(REF_PIC_LIST_0,i)->getPOC());
+      }
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_1); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_1,i)->getPOC() < getLatestEDRAPPOC() && getRefPic(REF_PIC_LIST_1,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in decoding order and precedes the EDRAP picture in output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order, with the exception of the referenceablePictures. Problem is POC %d in RPL1\n", getRefPic(REF_PIC_LIST_1,i)->getPOC());
+      }
+    }
+  }
+}
+#endif
 
 
 //! get AC and DC values for weighted pred

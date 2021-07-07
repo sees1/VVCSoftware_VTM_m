@@ -529,6 +529,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDecodingRefreshType                               ( m_iDecodingRefreshType );
   m_cEncLib.setGOPSize                                           ( m_iGOPSize );
   m_cEncLib.setDrapPeriod                                        ( m_drapPeriod );
+#if JVET_U0084_EDRAP
+  m_cEncLib.setEdrapPeriod                                       ( m_edrapPeriod );
+#endif
   m_cEncLib.setReWriteParamSets                                  ( m_rewriteParamSets );
   m_cEncLib.setRPLList0                                          ( m_RPLList0);
   m_cEncLib.setRPLList1                                          ( m_RPLList1);
@@ -861,6 +864,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDecodedPictureHashSEIType                         ( m_decodedPictureHashSEIType );
   m_cEncLib.setSubpicDecodedPictureHashType                      ( m_subpicDecodedPictureHashType );
   m_cEncLib.setDependentRAPIndicationSEIEnabled                  ( m_drapPeriod > 0 );
+#if JVET_U0084_EDRAP
+  m_cEncLib.setEdrapIndicationSEIEnabled                         ( m_edrapPeriod > 0 );
+#endif
   m_cEncLib.setBufferingPeriodSEIEnabled                         ( m_bufferingPeriodSEIEnabled );
   m_cEncLib.setPictureTimingSEIEnabled                           ( m_pictureTimingSEIEnabled );
   m_cEncLib.setFrameFieldInfoSEIEnabled                          ( m_frameFieldInfoSEIEnabled );
@@ -978,6 +984,24 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAmbientViewingEnvironmentSEIIlluminance           (m_aveSEIAmbientIlluminance);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightX         ((uint16_t)m_aveSEIAmbientLightX);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightY         ((uint16_t)m_aveSEIAmbientLightY);
+#if JVET_V0108
+  // colour tranform information sei
+  m_cEncLib.setCtiSEIEnabled(m_ctiSEIEnabled);
+  m_cEncLib.setCtiSEIId(m_ctiSEIId);
+  m_cEncLib.setCtiSEISignalInfoFlag(m_ctiSEISignalInfoFlag);
+  m_cEncLib.setCtiSEIFullRangeFlag(m_ctiSEIFullRangeFlag);
+  m_cEncLib.setCtiSEIPrimaries(m_ctiSEIPrimaries);
+  m_cEncLib.setCtiSEITransferFunction(m_ctiSEITransferFunction);
+  m_cEncLib.setCtiSEIMatrixCoefs(m_ctiSEIMatrixCoefs);
+  m_cEncLib.setCtiSEICrossComponentFlag(m_ctiSEICrossComponentFlag);
+  m_cEncLib.setCtiSEICrossComponentInferred(m_ctiSEICrossComponentInferred);
+  m_cEncLib.setCtiSEINbChromaLut(m_ctiSEINumberChromaLut);
+  m_cEncLib.setCtiSEIChromaOffset(m_ctiSEIChromaOffset);
+  for (int i = 0; i < MAX_NUM_COMPONENT; i++) 
+  {
+    m_cEncLib.setCtiSEILut(m_ctiSEILut[i], i);
+  }
+#endif
   // content colour volume SEI
   m_cEncLib.setCcvSEIEnabled                                     (m_ccvSEIEnabled);
   m_cEncLib.setCcvSEICancelFlag                                  (m_ccvSEICancelFlag);
@@ -996,6 +1020,68 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setCcvSEIMinLuminanceValue                           (m_ccvSEIMinLuminanceValue);
   m_cEncLib.setCcvSEIMaxLuminanceValue                           (m_ccvSEIMaxLuminanceValue);
   m_cEncLib.setCcvSEIAvgLuminanceValue                           (m_ccvSEIAvgLuminanceValue);
+#if JVET_U0082_SDI_MAI_ACI_DRI
+  // scalability dimension information sei
+  m_cEncLib.setSdiSEIEnabled                                     (m_sdiSEIEnabled);
+  m_cEncLib.setSdiSEIMaxLayersMinus1                             (m_sdiSEIMaxLayersMinus1);
+  m_cEncLib.setSdiSEIMultiviewInfoFlag                           (m_sdiSEIMultiviewInfoFlag);
+  m_cEncLib.setSdiSEIAuxiliaryInfoFlag                           (m_sdiSEIAuxiliaryInfoFlag);
+  m_cEncLib.setSdiSEIViewIdLenMinus1                             (m_sdiSEIViewIdLenMinus1);
+  m_cEncLib.setSdiSEILayerId                                     (m_sdiSEILayerId);
+  m_cEncLib.setSdiSEIViewIdVal                                   (m_sdiSEIViewIdVal);
+  m_cEncLib.setSdiSEIAuxId                                       (m_sdiSEIAuxId);
+  m_cEncLib.setSdiSEINumAssociatedPrimaryLayersMinus1            (m_sdiSEINumAssociatedPrimaryLayersMinus1);
+  // multiview acquisition information sei
+  m_cEncLib.setMaiSEIEnabled                                     (m_maiSEIEnabled);
+  m_cEncLib.setMaiSEIIntrinsicParamFlag                          (m_maiSEIIntrinsicParamFlag);
+  m_cEncLib.setMaiSEIExtrinsicParamFlag                          (m_maiSEIExtrinsicParamFlag);
+  m_cEncLib.setMaiSEINumViewsMinus1                              (m_maiSEINumViewsMinus1);
+  m_cEncLib.setMaiSEIIntrinsicParamsEqualFlag                    (m_maiSEIIntrinsicParamsEqualFlag);
+  m_cEncLib.setMaiSEIPrecFocalLength                             (m_maiSEIPrecFocalLength);
+  m_cEncLib.setMaiSEIPrecPrincipalPoint                          (m_maiSEIPrecPrincipalPoint);
+  m_cEncLib.setMaiSEIPrecSkewFactor                              (m_maiSEIPrecSkewFactor);
+  m_cEncLib.setMaiSEISignFocalLengthX                            (m_maiSEISignFocalLengthX);
+  m_cEncLib.setMaiSEIExponentFocalLengthX                        (m_maiSEIExponentFocalLengthX);
+  m_cEncLib.setMaiSEIMantissaFocalLengthX                        (m_maiSEIMantissaFocalLengthX);
+  m_cEncLib.setMaiSEISignFocalLengthY                            (m_maiSEISignFocalLengthY);
+  m_cEncLib.setMaiSEIExponentFocalLengthY                        (m_maiSEIExponentFocalLengthY);
+  m_cEncLib.setMaiSEIMantissaFocalLengthY                        (m_maiSEIMantissaFocalLengthY);
+  m_cEncLib.setMaiSEISignPrincipalPointX                         (m_maiSEISignPrincipalPointX);
+  m_cEncLib.setMaiSEIExponentPrincipalPointX                     (m_maiSEIExponentPrincipalPointX);
+  m_cEncLib.setMaiSEIMantissaPrincipalPointX                     (m_maiSEIMantissaPrincipalPointX);
+  m_cEncLib.setMaiSEISignPrincipalPointY                         (m_maiSEISignPrincipalPointY);
+  m_cEncLib.setMaiSEIExponentPrincipalPointY                     (m_maiSEIExponentPrincipalPointY);
+  m_cEncLib.setMaiSEIMantissaPrincipalPointY                     (m_maiSEIMantissaPrincipalPointY);
+  m_cEncLib.setMaiSEISignSkewFactor                              (m_maiSEISignSkewFactor);
+  m_cEncLib.setMaiSEIExponentSkewFactor                          (m_maiSEIExponentSkewFactor);
+  m_cEncLib.setMaiSEIMantissaSkewFactor                          (m_maiSEIMantissaSkewFactor);
+  m_cEncLib.setMaiSEIPrecRotationParam                           (m_maiSEIPrecRotationParam);
+  m_cEncLib.setMaiSEIPrecTranslationParam                        (m_maiSEIPrecTranslationParam);
+  // alpha channel information sei
+  m_cEncLib.setAciSEIEnabled                                     (m_aciSEIEnabled);
+  m_cEncLib.setAciSEICancelFlag                                  (m_aciSEICancelFlag);
+  m_cEncLib.setAciSEIUseIdc                                      (m_aciSEIUseIdc);
+  m_cEncLib.setAciSEIBitDepthMinus8                              (m_aciSEIBitDepthMinus8);
+  m_cEncLib.setAciSEITransparentValue                            (m_aciSEITransparentValue);
+  m_cEncLib.setAciSEIOpaqueValue                                 (m_aciSEIOpaqueValue);
+  m_cEncLib.setAciSEIIncrFlag                                    (m_aciSEIIncrFlag);
+  m_cEncLib.setAciSEIClipFlag                                    (m_aciSEIClipFlag);
+  m_cEncLib.setAciSEIClipTypeFlag                                (m_aciSEIClipTypeFlag);
+  // depth representation information sei
+  m_cEncLib.setDriSEIEnabled                                     (m_driSEIEnabled);
+  m_cEncLib.setDriSEIZNearFlag                                   (m_driSEIZNearFlag);
+  m_cEncLib.setDriSEIZFarFlag                                    (m_driSEIZFarFlag);
+  m_cEncLib.setDriSEIDMinFlag                                    (m_driSEIDMinFlag);
+  m_cEncLib.setDriSEIDMaxFlag                                    (m_driSEIDMaxFlag);
+  m_cEncLib.setDriSEIZNear                                       (m_driSEIZNear);
+  m_cEncLib.setDriSEIZFar                                        (m_driSEIZFar);
+  m_cEncLib.setDriSEIDMin                                        (m_driSEIDMin);
+  m_cEncLib.setDriSEIDMax                                        (m_driSEIDMax);
+  m_cEncLib.setDriSEIDepthRepresentationType                     (m_driSEIDepthRepresentationType);
+  m_cEncLib.setDriSEIDisparityRefViewId                          (m_driSEIDisparityRefViewId);
+  m_cEncLib.setDriSEINonlinearNumMinus1                          (m_driSEINonlinearNumMinus1);
+  m_cEncLib.setDriSEINonlinearModel                              (m_driSEINonlinearModel);
+#endif
   m_cEncLib.setEntropyCodingSyncEnabledFlag                      ( m_entropyCodingSyncEnabledFlag );
   m_cEncLib.setEntryPointPresentFlag                             ( m_entryPointPresentFlag );
   m_cEncLib.setTMVPModeId                                        ( m_TMVPModeId );

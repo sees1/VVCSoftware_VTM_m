@@ -492,6 +492,23 @@ void SEIEncoder::initSEIDependentRAPIndication(SEIDependentRAPIndication *seiDep
   CHECK(!(seiDependentRAPIndication!=NULL), "Unspecified error");
 }
 
+#if JVET_U0084_EDRAP
+void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
+{
+  CHECK(!(m_isInitialized), "Extended DRAP SEI already initialized");
+  CHECK(!(sei!=NULL), "Need a seiExtendedDrapIndication for initialization (got nullptr)");
+  sei->m_edrapIndicationRapIdMinus1 = 0;
+  sei->m_edrapIndicationLeadingPicturesDecodableFlag = false;
+  sei->m_edrapIndicationReservedZero12Bits = 0;
+  sei->m_edrapIndicationNumRefRapPicsMinus1 = 0;
+  sei->m_edrapIndicationRefRapId.resize(sei->m_edrapIndicationNumRefRapPicsMinus1 + 1);
+  for (int i = 0; i <= sei->m_edrapIndicationNumRefRapPicsMinus1; i++)
+  {
+    sei->m_edrapIndicationRefRapId[i] = 0;
+  }
+}
+#endif
+
 
 template <typename T>
 static void readTokenValue(T            &returnedValue, /// value returned
@@ -796,6 +813,218 @@ void SEIEncoder::initSEIContentColourVolume(SEIContentColourVolume *seiContentCo
     seiContentColourVolume->m_ccvAvgLuminanceValue = (uint32_t)(10000000 * m_pcCfg->getCcvSEIAvgLuminanceValue());
   }
 }
+
+#if JVET_U0082_SDI_MAI_ACI_DRI
+void SEIEncoder::initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *sei)
+{
+  CHECK(!(m_isInitialized), "Scalability dimension information SEI already initialized");
+  CHECK(!(sei != NULL), "Need a seiScalabilityDimensionInfo for initialization (got nullptr)");
+  sei->m_sdiMaxLayersMinus1 = m_pcCfg->getSdiSEIMaxLayersMinus1();
+  sei->m_sdiMultiviewInfoFlag = m_pcCfg->getSdiSEIMultiviewInfoFlag();
+  sei->m_sdiAuxiliaryInfoFlag = m_pcCfg->getSdiSEIAuxiliaryInfoFlag();
+  if (sei->m_sdiMultiviewInfoFlag || sei->m_sdiAuxiliaryInfoFlag)
+  {
+    if (sei->m_sdiMultiviewInfoFlag)
+    {
+      sei->m_sdiViewIdLenMinus1 = m_pcCfg->getSdiSEIViewIdLenMinus1();
+    }
+    sei->m_sdiLayerId.resize(sei->m_sdiMaxLayersMinus1 + 1);
+    for (int i = 0; i <= sei->m_sdiMaxLayersMinus1; i++)
+    {
+      sei->m_sdiLayerId[i] = m_pcCfg->getSdiSEILayerId(i);
+      sei->m_sdiViewIdVal.resize(sei->m_sdiMaxLayersMinus1 + 1);
+      if (sei->m_sdiMultiviewInfoFlag)
+      {
+        sei->m_sdiViewIdVal[i] = m_pcCfg->getSdiSEIViewIdVal(i);
+      }
+      sei->m_sdiAuxId.resize(sei->m_sdiMaxLayersMinus1 + 1);
+      if (sei->m_sdiAuxiliaryInfoFlag)
+      {
+        sei->m_sdiAuxId[i] = m_pcCfg->getSdiSEIAuxId(i);
+        sei->m_sdiNumAssociatedPrimaryLayersMinus1.resize(sei->m_sdiMaxLayersMinus1 + 1);
+        sei->m_sdiAssociatedPrimaryLayerIdx.resize(sei->m_sdiMaxLayersMinus1 + 1);
+        if (sei->m_sdiAuxId[i] > 0)
+        {
+          sei->m_sdiNumAssociatedPrimaryLayersMinus1[i] = m_pcCfg->getSdiSEINumAssociatedPrimaryLayersMinus1(i);
+          sei->m_sdiAssociatedPrimaryLayerIdx[i].resize(sei->m_sdiNumAssociatedPrimaryLayersMinus1[i] + 1);
+          for (int j = 0; j <= sei->m_sdiNumAssociatedPrimaryLayersMinus1[i]; j++)
+          {
+            sei->m_sdiAssociatedPrimaryLayerIdx[i][j] = 0;
+          }
+        }
+      }
+    }
+    sei->m_sdiNumViews = 1;
+    if (sei->m_sdiMultiviewInfoFlag)
+    {
+      for (int i = 1; i <= sei->m_sdiMaxLayersMinus1; i++)
+      {
+        bool newViewFlag = true;
+        for (int j = 0; j < i; j++)
+        {
+          if (sei->m_sdiViewIdVal[i] == sei->m_sdiViewIdVal[j])
+          {
+            newViewFlag = false;
+          }
+        }
+        if (newViewFlag)
+        {
+          sei->m_sdiNumViews++;
+        }
+      }
+    }
+  }
+}
+
+void SEIEncoder::initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *sei)
+{
+  CHECK(!(m_isInitialized), "Multiview acquisition information SEI already initialized");
+  CHECK(!(sei != NULL), "Need a seiMultiviewAcquisitionInfo for initialization (got nullptr)");
+  sei->m_maiIntrinsicParamFlag        = m_pcCfg->getMaiSEIIntrinsicParamFlag();
+  sei->m_maiExtrinsicParamFlag        = m_pcCfg->getMaiSEIExtrinsicParamFlag();
+  sei->m_maiNumViewsMinus1            = m_pcCfg->getMaiSEINumViewsMinus1();
+  if (sei->m_maiIntrinsicParamFlag)
+  {
+    sei->m_maiIntrinsicParamsEqualFlag  = m_pcCfg->getMaiSEIIntrinsicParamsEqualFlag();
+    sei->m_maiPrecFocalLength           = m_pcCfg->getMaiSEIPrecFocalLength();
+    sei->m_maiPrecPrincipalPoint        = m_pcCfg->getMaiSEIPrecPrincipalPoint();
+    sei->m_maiPrecSkewFactor            = m_pcCfg->getMaiSEIPrecSkewFactor();
+    int numViews = sei->m_maiIntrinsicParamsEqualFlag ? 1 : sei->m_maiNumViewsMinus1 + 1;
+    sei->m_maiSignFocalLengthX       .resize( numViews );
+    sei->m_maiExponentFocalLengthX   .resize( numViews );
+    sei->m_maiMantissaFocalLengthX   .resize( numViews );
+    sei->m_maiSignFocalLengthY       .resize( numViews );
+    sei->m_maiExponentFocalLengthY   .resize( numViews );
+    sei->m_maiMantissaFocalLengthY   .resize( numViews );
+    sei->m_maiSignPrincipalPointX    .resize( numViews );
+    sei->m_maiExponentPrincipalPointX.resize( numViews );
+    sei->m_maiMantissaPrincipalPointX.resize( numViews );
+    sei->m_maiSignPrincipalPointY    .resize( numViews );
+    sei->m_maiExponentPrincipalPointY.resize( numViews );
+    sei->m_maiMantissaPrincipalPointY.resize( numViews );
+    sei->m_maiSignSkewFactor         .resize( numViews );
+    sei->m_maiExponentSkewFactor     .resize( numViews );
+    sei->m_maiMantissaSkewFactor     .resize( numViews );
+    for( int i = 0; i  <=  ( sei->m_maiIntrinsicParamsEqualFlag ? 0 : sei->m_maiNumViewsMinus1 ); i++ )
+    {
+      sei->m_maiSignFocalLengthX       [i] = m_pcCfg->getMaiSEISignFocalLengthX(i);
+      sei->m_maiExponentFocalLengthX   [i] = m_pcCfg->getMaiSEIExponentFocalLengthX(i);
+      sei->m_maiMantissaFocalLengthX   [i] = m_pcCfg->getMaiSEIMantissaFocalLengthX(i);
+      sei->m_maiSignFocalLengthY       [i] = m_pcCfg->getMaiSEISignFocalLengthY(i);
+      sei->m_maiExponentFocalLengthY   [i] = m_pcCfg->getMaiSEIExponentFocalLengthY(i);
+      sei->m_maiMantissaFocalLengthY   [i] = m_pcCfg->getMaiSEIMantissaFocalLengthY(i);
+      sei->m_maiSignPrincipalPointX    [i] = m_pcCfg->getMaiSEISignPrincipalPointX(i);
+      sei->m_maiExponentPrincipalPointX[i] = m_pcCfg->getMaiSEIExponentPrincipalPointX(i);
+      sei->m_maiMantissaPrincipalPointX[i] = m_pcCfg->getMaiSEIMantissaPrincipalPointX(i);
+      sei->m_maiSignPrincipalPointY    [i] = m_pcCfg->getMaiSEISignPrincipalPointY(i);
+      sei->m_maiExponentPrincipalPointY[i] = m_pcCfg->getMaiSEIExponentPrincipalPointY(i);
+      sei->m_maiMantissaPrincipalPointY[i] = m_pcCfg->getMaiSEIMantissaPrincipalPointY(i);
+      sei->m_maiSignSkewFactor         [i] = m_pcCfg->getMaiSEISignSkewFactor(i);
+      sei->m_maiExponentSkewFactor     [i] = m_pcCfg->getMaiSEIExponentSkewFactor(i);
+      sei->m_maiMantissaSkewFactor     [i] = m_pcCfg->getMaiSEIMantissaSkewFactor(i);
+    }
+  }
+  if (sei->m_maiExtrinsicParamFlag)
+  {
+    sei->m_maiPrecRotationParam = m_pcCfg->getMaiSEIPrecRotationParam();
+    sei->m_maiPrecTranslationParam = m_pcCfg->getMaiSEIPrecTranslationParam();
+    sei->m_maiSignR.resize(sei->m_maiNumViewsMinus1 + 1);
+    sei->m_maiExponentR.resize(sei->m_maiNumViewsMinus1 + 1);
+    sei->m_maiMantissaR.resize(sei->m_maiNumViewsMinus1 + 1);
+    sei->m_maiSignT.resize(sei->m_maiNumViewsMinus1 + 1);
+    sei->m_maiExponentT.resize(sei->m_maiNumViewsMinus1 + 1);
+    sei->m_maiMantissaT.resize(sei->m_maiNumViewsMinus1 + 1);
+    for (int i = 0; i <= sei->m_maiNumViewsMinus1; i++)
+    {
+      sei->m_maiSignR[i].resize(3);
+      sei->m_maiExponentR[i].resize(3);
+      sei->m_maiMantissaR[i].resize(3);
+      sei->m_maiSignT[i].resize(3);
+      sei->m_maiExponentT[i].resize(3);
+      sei->m_maiMantissaT[i].resize(3);
+      for (int j = 0; j < 3; j++)
+      {
+        sei->m_maiSignR[i][j].resize(3);
+        sei->m_maiExponentR[i][j].resize(3);
+        sei->m_maiMantissaR[i][j].resize(3);
+        for (int k = 0; k < 3; k++)
+        {
+          sei->m_maiSignR[i][j][k] = 0;
+          sei->m_maiExponentR[i][j][k] = 0;
+          sei->m_maiMantissaR[i][j][k] = 0;
+        }
+        sei->m_maiSignT[i][j] = 0;
+        sei->m_maiExponentT[i][j] = 0;
+        sei->m_maiMantissaT[i][j] = 0;
+      }
+    }
+  }
+}
+
+void SEIEncoder::initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei)
+{
+  CHECK(!(m_isInitialized), "Alpha channel information SEI already initialized");
+  CHECK(!(sei != NULL), "Need a seiAlphaChannelInfo for initialization (got nullptr)");
+  sei->m_aciCancelFlag = m_pcCfg->getAciSEICancelFlag();
+  sei->m_aciUseIdc = m_pcCfg->getAciSEIUseIdc();
+  sei->m_aciBitDepthMinus8 = m_pcCfg->getAciSEIBitDepthMinus8();
+  sei->m_aciTransparentValue = m_pcCfg->getAciSEITransparentValue();
+  sei->m_aciOpaqueValue = m_pcCfg->getAciSEIOpaqueValue();
+  sei->m_aciIncrFlag = m_pcCfg->getAciSEIIncrFlag();
+  sei->m_aciClipFlag = m_pcCfg->getAciSEIClipFlag();
+  sei->m_aciClipTypeFlag = m_pcCfg->getAciSEIClipTypeFlag();
+}
+
+void SEIEncoder::initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei)
+{
+  CHECK(!(m_isInitialized), "Depth representation information SEI already initialized");
+  CHECK(!(sei != NULL), "Need a seiDepthRepresentationInfo for initialization (got nullptr)");
+  sei->m_driZNearFlag = m_pcCfg->getDriSEIZNearFlag();
+  sei->m_driZFarFlag = m_pcCfg->getDriSEIZFarFlag();
+  sei->m_driDMinFlag = m_pcCfg->getDriSEIDMinFlag();
+  sei->m_driDMaxFlag = m_pcCfg->getDriSEIDMaxFlag();
+  sei->m_driZNear = m_pcCfg->getDriSEIZNear();
+  sei->m_driZFar = m_pcCfg->getDriSEIZFar();
+  sei->m_driDMin = m_pcCfg->getDriSEIDMin();
+  sei->m_driDMax = m_pcCfg->getDriSEIDMax();
+  sei->m_driDisparityRefViewId = m_pcCfg->getDriSEIDisparityRefViewId();
+  sei->m_driDepthRepresentationType = m_pcCfg->getDriSEIDepthRepresentationType();
+  sei->m_driDepthNonlinearRepresentationNumMinus1 = m_pcCfg->getDriSEINonlinearNumMinus1();
+  sei->m_driDepthNonlinearRepresentationModel.resize(sei->m_driDepthNonlinearRepresentationNumMinus1 + 1);
+  for(int i = 0; i < (sei->m_driDepthNonlinearRepresentationNumMinus1 + 1); i++)
+  {
+    sei->m_driDepthNonlinearRepresentationModel[i] = m_pcCfg->getDriSEINonlinearModel(i);
+  }
+}
+#endif
+
+#if JVET_V0108
+void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
+{
+  CHECK(!(m_isInitialized), "Unspecified error");
+  CHECK(!(seiCTI != NULL), "Unspecified error");
+
+  //  Set SEI message parameters read from command line options
+  seiCTI->m_id = m_pcCfg->getCtiSEIId();
+  seiCTI->m_signalInfoFlag = m_pcCfg->getCtiSEISignalInfoFlag();
+  seiCTI->m_fullRangeFlag = m_pcCfg->getCtiSEIFullRangeFlag();
+  seiCTI->m_primaries = m_pcCfg->getCtiSEIPrimaries();
+  seiCTI->m_transferFunction = m_pcCfg->getCtiSEITransferFunction();
+  seiCTI->m_matrixCoefs = m_pcCfg->getCtiSEIMatrixCoefs();
+  seiCTI->m_crossComponentFlag = m_pcCfg->getCtiSEICrossComponentFlag();
+  seiCTI->m_crossComponentInferred = m_pcCfg->getCtiSEICrossComponentInferred();
+  seiCTI->m_numberChromaLutMinus1 = m_pcCfg->getCtiSEINbChromaLut() - 1;
+  seiCTI->m_chromaOffset = m_pcCfg->getCtiSEIChromaOffset();
+
+  seiCTI->m_bitdepth = m_pcCfg->getBitDepth(CHANNEL_TYPE_LUMA);
+
+  for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
+    seiCTI->m_lut[i] = m_pcCfg->getCtiSEILut(i);
+  }
+  seiCTI->m_log2NumberOfPointsPerLut = floorLog2(seiCTI->m_lut[0].numLutValues - 1);
+}
+#endif
+
 void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SPS *sps)
 {
   const EncCfgParam::CfgSEISubpictureLevel &cfgSubPicLevel = m_pcCfg->getSubpicureLevelInfoSEICfg();
