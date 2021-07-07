@@ -587,7 +587,11 @@ public:
   SEIDecodingUnitInfo()
     : m_decodingUnitIdx(0)
     , m_dpbOutputDuDelayPresentFlag(false)
+ #if JVET_V0111_DU
+    , m_picSptDpbOutputDuDelay(-1)
+#else
     , m_picSptDpbOutputDuDelay(0)
+#endif
   {
     ::memset(m_duiSubLayerDelaysPresentFlag, 0, sizeof(m_duiSubLayerDelaysPresentFlag));
     ::memset(m_duSptCpbRemovalDelayIncrement, 0, sizeof(m_duSptCpbRemovalDelayIncrement));

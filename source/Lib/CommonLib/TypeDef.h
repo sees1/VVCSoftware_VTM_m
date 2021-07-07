@@ -76,6 +76,8 @@
 
 #define JVET_V0108                                        1 // JVET_V0108: Colour Transform Information SEI 
 
+#define JVET_V0111_DU                                     1 // JVET-V0111 Decoding Unit Information 
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 

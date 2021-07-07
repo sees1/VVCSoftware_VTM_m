@@ -2147,6 +2147,10 @@ void DecLib::xParsePrefixSEImessages()
     m_prefixSEINALUs.pop_front();
   }
   xCheckPrefixSEIMessages(m_SEIs);
+#if JVET_V0111_DU
+  xCheckDUISEIMessages(m_SEIs);
+#endif
+
 }
 
 void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
@@ -2236,6 +2240,45 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
   }
 #endif
 }
+
+#if JVET_V0111_DU
+void DecLib::xCheckDUISEIMessages(SEIMessages &prefixSEIs)
+{
+  SEIMessages BPSEIs  = getSeisByType(prefixSEIs, SEI::BUFFERING_PERIOD);
+  SEIMessages DUISEIs = getSeisByType(prefixSEIs, SEI::DECODING_UNIT_INFO);
+  if (BPSEIs.empty())
+  {
+    return;
+  }
+  else
+  {
+    bool duDelayFlag = false;
+
+    SEIBufferingPeriod *bp = (SEIBufferingPeriod *) BPSEIs.front();
+    if (bp->m_bpDecodingUnitHrdParamsPresentFlag)
+    {
+      if (!bp->m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
+      {
+        if (DUISEIs.empty())
+        {
+          return;
+        }
+        for (auto it = DUISEIs.cbegin(); it != DUISEIs.cend(); ++it)
+        {
+          const SEIDecodingUnitInfo *dui = (const SEIDecodingUnitInfo *) *it;
+          if (dui->m_picSptDpbOutputDuDelay != -1)
+          {
+            duDelayFlag = true;
+            break;
+          }
+        }
+        CHECK(duDelayFlag == false, "At least one DUI SEI should have dui->m_picSptDpbOutputDuDelay not equal to -1")
+      }
+    }
+  }
+}
+#endif
+
 
 void DecLib::xDecodePicHeader( InputNALUnit& nalu )
 {
