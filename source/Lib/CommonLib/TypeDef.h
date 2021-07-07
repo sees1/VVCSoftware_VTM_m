@@ -78,6 +78,8 @@
 
 #define JVET_V0111_DU                                     1 // JVET-V0111 Decoding Unit Information 
 
+#define JVET_S0117_VB                                     1 // sub-picture extraction VB rewriting
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
