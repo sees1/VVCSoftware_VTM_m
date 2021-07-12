@@ -1345,6 +1345,42 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
     }
   }
 }
+#if JVET_Q0443_MINCR_SEI
+
+static void
+validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBytesInVclNalUnits, const Slice *pSlice, const EncCfg *pCfg, const SEISubpicureLevelInfo &seiSubpic, const int subPicIdx, const int layerId)
+{
+  if (plt.getLevelTierFeatures() && plt.getProfileFeatures())
+  {
+	if (plt.getTier() == Level::Tier::MAIN)
+	{
+      const uint32_t formatCapabilityFactorx1000 = plt.getProfileFeatures()->formatCapabilityFactorx1000;
+	  const uint64_t maxLumaSr = plt.getLevelTierFeatures()->maxLumaSr;
+	  const double   denomx1000x256 = (256 * plt.getMinCr() * pCfg->getFrameRate() * 1000 * 256);
+
+      for (int i = 0; i < seiSubpic.m_numRefLevels; i++)
+      {
+        Level::Name level = seiSubpic.m_refLevelIdc[i][layerId];
+        if (level != Level::LEVEL15_5)
+        {
+          const int      nonSubpicLayersFraction = seiSubpic.m_nonSubpicLayersFraction[i][layerId];
+          const int      refLevelFraction = seiSubpic.m_refLevelFraction[i][subPicIdx][layerId] + 1; //m_refLevelFraction is actually sli_ref_level_fraction_minus1
+          const uint32_t olsRefLevelFractionx256 = nonSubpicLayersFraction * 256 + (256 - nonSubpicLayersFraction) * refLevelFraction;
+
+          const double   threshold = formatCapabilityFactorx1000 * maxLumaSr * olsRefLevelFractionx256 / denomx1000x256;
+
+          if (numBytesInVclNalUnits > threshold)
+          {
+            msg( WARNING, "WARNING: Encoded stream for sub-picture %d does not meet MinCr requirements numBytesInVclNalUnits (%.0f) must be <= %.0f. Try increasing Qp, tier or level\n",
+                      subPicIdx, (double) numBytesInVclNalUnits, threshold );
+          }
+        }
+      }
+	}
+  }
+}
+
+#endif
 static std::size_t
 cabac_zero_word_padding(const Slice *const pcSlice,
                         const Picture *const pcPic,
@@ -3819,6 +3855,14 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           // Check picture level encoding constraints/requirements
           ProfileLevelTierFeatures profileLevelTierFeatures;
           profileLevelTierFeatures.extractPTLInformation(*(pcSlice->getSPS()));
+#if JVET_Q0443_MINCR_SEI
+          const SEIMessages& subPictureLevelInfoSEIs = getSeisByType(leadingSeiMessages, SEI::SUBPICTURE_LEVEL_INFO);
+          if (!subPictureLevelInfoSEIs.empty())
+          {
+            const SEISubpicureLevelInfo& seiSubpic = static_cast<const SEISubpicureLevelInfo&>(*subPictureLevelInfoSEIs.front());
+            validateMinCrRequirements(profileLevelTierFeatures, subPicStats[subpicIdx].numBytesInVclNalUnits, pcSlice, m_pcCfg, seiSubpic, subpicIdx, m_pcEncLib->getLayerId());
+          }
+#endif
           sumZeroWords += cabac_zero_word_padding(pcSlice, pcPic, subPicStats[subpicIdx].numBinsWritten, subPicStats[subpicIdx].numBytesInVclNalUnits, 0,
                                                   accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
         }
