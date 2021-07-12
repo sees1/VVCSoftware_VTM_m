@@ -1352,11 +1352,11 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
 {
   if (plt.getLevelTierFeatures() && plt.getProfileFeatures())
   {
-	if (plt.getTier() == Level::Tier::MAIN)
-	{
+    if (plt.getTier() == Level::Tier::MAIN)
+    {
       const uint32_t formatCapabilityFactorx1000 = plt.getProfileFeatures()->formatCapabilityFactorx1000;
-	  const uint64_t maxLumaSr = plt.getLevelTierFeatures()->maxLumaSr;
-	  const double   denomx1000x256 = (256 * plt.getMinCr() * pCfg->getFrameRate() * 1000 * 256);
+      const uint64_t maxLumaSr = plt.getLevelTierFeatures()->maxLumaSr;
+      const double   denomx1000x256 = (256 * plt.getMinCr() * pCfg->getFrameRate() * 1000 * 256);
 
       for (int i = 0; i < seiSubpic.m_numRefLevels; i++)
       {
@@ -1376,7 +1376,7 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
           }
         }
       }
-	}
+    }
   }
 }
 
