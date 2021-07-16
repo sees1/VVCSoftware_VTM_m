@@ -1143,9 +1143,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setBs2ModPOCAndType                                  ( m_bs2ModPOCAndType );
   m_cEncLib.setDebugCTU                                          ( m_debugCTU );
   m_cEncLib.setUseALF                                            ( m_alf );
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   m_cEncLib.setAlfSaoTrueOrg                                     ( m_alfSaoTrueOrg );
-#endif
   m_cEncLib.setALFStrengthLuma                                   (m_alfStrengthLuma);
   m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
   m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);

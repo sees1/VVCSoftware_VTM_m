@@ -834,9 +834,7 @@ protected:
   CfgVPSParameters m_cfgVPSParameters;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   bool        m_alfSaoTrueOrg;
-#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
@@ -2216,10 +2214,8 @@ public:
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   void         setAlfSaoTrueOrg( bool b )                             { m_alfSaoTrueOrg = b; }
   bool         getAlfSaoTrueOrg()                               const { return m_alfSaoTrueOrg; }
-#endif
   void         setALFStrengthLuma(double s)                     { m_alfStrengthLuma = s; }
   double       getALFStrengthLuma()                             const { return m_alfStrengthLuma; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }

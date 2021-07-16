@@ -60,7 +60,6 @@
 
 
 
-#define JVET_V0095_ALF_SAO_TRUE_ORG                       1 // JVET-V0095: Using true original samples for SAO and ALF optimization when MCTF is applied
 
 #define JVET_V0056_MCTF                                   1 // JVET-V0056: Changes to MCTF
 
