@@ -54,11 +54,7 @@ CoeffCodingContext::CoeffCodingContext(const TransformUnit &tu, ComponentID comp
   , m_log2BlockHeight((unsigned) floorLog2(m_height))
   , m_maxNumCoeff(m_width * m_height)
   , m_signHiding(signHide)
-#if JVET_V0047_HIGH_PRECISION_TRANSFORM
   , m_extendedPrecision(tu.cs->sps->getSpsRangeExtension().getExtendedPrecisionProcessingFlag() && tu.cs->sps->getBitDepth( m_chType ) > 10)
-#else
-  , m_extendedPrecision(tu.cs->sps->getSpsRangeExtension().getExtendedPrecisionProcessingFlag())
-#endif
   , m_maxLog2TrDynamicRange(tu.cs->sps->getMaxLog2TrDynamicRange(m_chType))
   , m_scanType(SCAN_DIAG)
   , m_scan(
