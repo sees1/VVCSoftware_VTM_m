@@ -458,9 +458,7 @@ protected:
   ChromaFormat m_chromaFormatIDC;
 
   bool      m_extendedPrecisionProcessingFlag;
-#if JVET_V0054_TSRC_RICE
   bool      m_tsrcRicePresentFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
   bool      m_bUseAdaptiveQP;
   int       m_iQPAdaptationRange;
@@ -1406,10 +1404,8 @@ public:
 
   bool      getExtendedPrecisionProcessingFlag         ()         const { return m_extendedPrecisionProcessingFlag;  }
   void      setExtendedPrecisionProcessingFlag         (bool value)     { m_extendedPrecisionProcessingFlag = value; }
-#if JVET_V0054_TSRC_RICE
   bool      getTSRCRicePresentFlag         ()         const { return m_tsrcRicePresentFlag;  }
   void      setTSRCRicePresentFlag         (bool value)     { m_tsrcRicePresentFlag = value; }
-#endif
   bool      getHighPrecisionOffsetsEnabledFlag() const { return m_highPrecisionOffsetsEnabledFlag; }
   void      setHighPrecisionOffsetsEnabledFlag(bool value) { m_highPrecisionOffsetsEnabledFlag = value; }
 

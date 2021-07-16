@@ -131,11 +131,9 @@ private:
   int                     m_latestEDRAPPOC;
   bool                    m_latestEdrapLeadingPicDecodableFlag;
   int                     m_lastRasPoc;
-#if JVET_V0054_TSRC_RICE
   unsigned                m_riceBit[8][2];
   int                     m_preQP[2];
   int                     m_preIPOC;
-#endif
 
   //  Access channel
   EncLib*                 m_pcEncLib;
@@ -249,9 +247,7 @@ public:
   int       getLastGdrIntervalPoc() const { return m_lastGdrIntervalPoc; }
 #endif
 
-#if JVET_V0054_TSRC_RICE
   int       getPreQP() const { return m_preQP[0]; }
-#endif
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 
     const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths );

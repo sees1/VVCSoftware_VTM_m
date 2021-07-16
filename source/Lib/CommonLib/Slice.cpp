@@ -102,16 +102,12 @@ Slice::Slice()
 , m_encCABACTableIdx              (I_SLICE)
 , m_iProcessingStartTime          ( 0 )
 , m_dProcessingTime               ( 0 )
-#if JVET_V0054_TSRC_RICE
 , m_tsrc_index                    ( 0 )
-#endif
 {
-#if JVET_V0054_TSRC_RICE
   for (uint32_t i = 0; i < MAX_TSRC_RICE; i++)
   {
     m_riceBit[i] = 0;
   }
-#endif
 
   for(uint32_t i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
@@ -913,14 +909,12 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_depQuantEnabledFlag               = pSrc->m_depQuantEnabledFlag;
   m_signDataHidingEnabledFlag         = pSrc->m_signDataHidingEnabledFlag;
   m_tsResidualCodingDisabledFlag      = pSrc->m_tsResidualCodingDisabledFlag;
-#if JVET_V0054_TSRC_RICE
   m_tsrc_index                        = pSrc->m_tsrc_index;
 
   for (i = 0; i < MAX_TSRC_RICE; i++)
   {
     m_riceBit[i] = pSrc->m_riceBit[i];
   }
-#endif
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -2879,9 +2873,7 @@ SPSRExt::SPSRExt()
  : m_transformSkipRotationEnabledFlag   (false)
  , m_transformSkipContextEnabledFlag    (false)
  , m_extendedPrecisionProcessingFlag    (false)
-#if JVET_V0054_TSRC_RICE
  , m_tsrcRicePresentFlag                (false)
-#endif
  , m_intraSmoothingDisabledFlag         (false)
  , m_highPrecisionOffsetsEnabledFlag    (false)
  , m_rrcRiceExtensionEnableFlag(false)

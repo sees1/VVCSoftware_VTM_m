@@ -58,7 +58,6 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-#define JVET_V0054_TSRC_RICE                              1 // JVET-V0054: Entropy coding method for high bit depth in TSRC
 
 #define JVET_V0047_HIGH_PRECISION_TRANSFORM               1 // JVET-V0047: CE3.1 method for the high precision computation of transform scaling
 

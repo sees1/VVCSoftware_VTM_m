@@ -90,11 +90,9 @@ EncGOP::EncGOP()
   m_latestEDRAPPOC      = MAX_INT;
   m_latestEdrapLeadingPicDecodableFlag = false;
   m_lastRasPoc          = MAX_INT;
-#if JVET_V0054_TSRC_RICE
   ::memset(m_riceBit, 0, 8 * 2 * sizeof(unsigned));
   ::memset(m_preQP, MAX_INT, 2 * sizeof(int));
   m_preIPOC             = 0;
-#endif
 
   m_pcCfg               = NULL;
   m_pcSliceEncoder      = NULL;
@@ -3017,7 +3015,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       for(uint32_t sliceIdx = 0; sliceIdx < pcPic->cs->pps->getNumSlicesInPic(); sliceIdx++ )
       {
         pcSlice->setSliceMap( pcPic->cs->pps->getSliceMap( sliceIdx ) );
-#if JVET_V0054_TSRC_RICE
         if (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && (pcPic->cs->pps->getNumSlicesInPic() == 1))
         {
           if (!pcSlice->isIntra())
@@ -3069,7 +3066,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
              pcSlice->setRiceBit(idx, m_riceBit[idx][0]);
           }
         }
-#endif
         if( pcPic->cs->pps->getRectSliceFlag() )
         {
           Position firstCtu;
@@ -3763,7 +3759,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           binCountsInNalUnits+=numBinsCoded;
           subPicStats[subpicIdx].numBinsWritten += numBinsCoded;
         }
-#if JVET_V0054_TSRC_RICE
         if (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && (pcPic->cs->pps->getNumSlicesInPic() == 1))
         {
           if (pcSlice->getSliceType() == I_SLICE)
@@ -3779,7 +3774,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           }
           m_preQP[0] = pcSlice->getSliceQp();
         }
-#endif
         {
           // Construct the final bitstream by concatenating substreams.
           // The final bitstream is either nalu.m_Bitstream or pcBitstreamRedirect;

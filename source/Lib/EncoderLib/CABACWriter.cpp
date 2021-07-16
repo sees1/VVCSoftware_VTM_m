@@ -3087,7 +3087,6 @@ void CABACWriter::residual_codingTS( const TransformUnit& tu, ComponentID compID
   for( int subSetId = 0; subSetId <= ( cctx.maxNumCoeff() - 1 ) >> cctx.log2CGSize(); subSetId++ )
   {
     cctx.initSubblock         ( subSetId, sigGroupFlags[subSetId] );
-#if JVET_V0054_TSRC_RICE
     int goRiceParam = 1;
     bool ricePresentFlag = false;
     unsigned RiceBit[8]   = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -3111,17 +3110,10 @@ void CABACWriter::residual_codingTS( const TransformUnit& tu, ComponentID compID
         tu.cu->slice->setRiceBit(i, RiceBit[i]);
       }
     }
-#else
-    residual_coding_subblockTS( cctx, coeff );
-#endif
   }
 }
 
-#if JVET_V0054_TSRC_RICE
 void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TCoeff* coeff, unsigned (&RiceBit)[8], int riceParam, bool ricePresentFlag)
-#else
-void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TCoeff* coeff )
-#endif
 {
   //===== init =====
   const int   minSubPos   = cctx.maxSubPos();
@@ -3226,15 +3218,10 @@ void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TC
 
     if( absLevel >= cutoffVal )
     {
-#if JVET_V0054_TSRC_RICE
       int       rice = riceParam;
-#else
-      int       rice = cctx.templateAbsSumTS( scanPos, coeff );
-#endif
       unsigned  rem = scanPos <= lastScanPosPass1 ? (absLevel - cutoffVal) >> 1 : absLevel;
       m_BinEncoder.encodeRemAbsEP( rem, rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "ts_rem_val() bin=%d ctx=%d sp=%d\n", rem, rice, scanPos );
-#if JVET_V0054_TSRC_RICE
       if ( ricePresentFlag && (isEncoding()) && (cctx.compID() == COMPONENT_Y))
       {
         for (int idx = 1; idx < 9; idx++)
@@ -3258,7 +3245,6 @@ void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TC
           }
         }
       }
-#endif
 
       if (absLevel && scanPos > lastScanPosPass1)
       {

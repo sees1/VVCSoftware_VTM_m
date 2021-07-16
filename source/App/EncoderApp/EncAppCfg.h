@@ -418,9 +418,7 @@ protected:
   int       m_MSBExtendedBitDepth[MAX_NUM_CHANNEL_TYPE];      ///< bit-depth of input samples after MSB extension
   int       m_internalBitDepth[MAX_NUM_CHANNEL_TYPE];         ///< bit-depth codec operates at (input/output files will be converted)
   bool      m_extendedPrecisionProcessingFlag;
-#if JVET_V0054_TSRC_RICE
   bool      m_tsrcRicePresentFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
 
   //coding tools (chroma format)
