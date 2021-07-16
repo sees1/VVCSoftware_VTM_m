@@ -128,10 +128,8 @@ private:
   bool                    m_bFirst;
   int                     m_iLastRecoveryPicPOC;
   int                     m_latestDRAPPOC;
-#if JVET_U0084_EDRAP
   int                     m_latestEDRAPPOC;
   bool                    m_latestEdrapLeadingPicDecodableFlag;
-#endif
   int                     m_lastRasPoc;
 #if JVET_V0054_TSRC_RICE
   unsigned                m_riceBit[8][2];

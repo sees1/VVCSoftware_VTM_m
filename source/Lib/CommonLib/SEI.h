@@ -90,9 +90,7 @@ public:
     CONTENT_COLOUR_VOLUME                = 149,
     ANNOTATED_REGIONS                    = 202,
     SCALABILITY_DIMENSION_INFO           = 205,
-#if JVET_U0084_EDRAP
     EXTENDED_DRAP_INDICATION             = 206,
-#endif
   };
 
   SEI() {}
@@ -967,7 +965,6 @@ public:
   std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
 };
 
-#if JVET_U0084_EDRAP
 class SEIExtendedDrapIndication : public SEI
 {
 public:
@@ -982,7 +979,6 @@ public:
   int               m_edrapIndicationNumRefRapPicsMinus1;
   std::vector<int>  m_edrapIndicationRefRapId;
 };
-#endif
 //! \}
 
 

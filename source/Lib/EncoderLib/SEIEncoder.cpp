@@ -492,7 +492,6 @@ void SEIEncoder::initSEIDependentRAPIndication(SEIDependentRAPIndication *seiDep
   CHECK(!(seiDependentRAPIndication!=NULL), "Unspecified error");
 }
 
-#if JVET_U0084_EDRAP
 void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
 {
   CHECK(!(m_isInitialized), "Extended DRAP SEI already initialized");
@@ -507,7 +506,6 @@ void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
     sei->m_edrapIndicationRefRapId[i] = 0;
   }
 }
-#endif
 
 
 template <typename T>

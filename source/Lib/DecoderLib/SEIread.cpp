@@ -230,12 +230,10 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIDependentRAPIndication;
       xParseSEIDependentRAPIndication((SEIDependentRAPIndication&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#if JVET_U0084_EDRAP
     case SEI::EXTENDED_DRAP_INDICATION:
       sei = new SEIExtendedDrapIndication;
       xParseSEIExtendedDrapIndication((SEIExtendedDrapIndication&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#endif
     case SEI::FRAME_PACKING:
       sei = new SEIFramePacking;
       xParseSEIFramePacking((SEIFramePacking&) *sei, payloadSize, pDecodedMessageOutputStream);
@@ -2006,7 +2004,6 @@ void SEIReader::xParseSEISampleAspectRatioInfo(SEISampleAspectRatioInfo& sei, ui
   }
 }
 
-#if JVET_U0084_EDRAP
 void SEIReader::xParseSEIExtendedDrapIndication(SEIExtendedDrapIndication& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   uint32_t val;
@@ -2022,7 +2019,6 @@ void SEIReader::xParseSEIExtendedDrapIndication(SEIExtendedDrapIndication& sei, 
     sei.m_edrapIndicationRefRapId[i] = val;
   }
 }
-#endif
 
 #if JVET_S0257_DUMP_360SEI_MESSAGE
 void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps)

@@ -750,9 +750,7 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
   }
 
   if (pcSlice->isDRAP()) c = 'D';
-#if JVET_U0084_EDRAP
   if (pcSlice->getEdrapRapId() > 0) c = 'E';
-#endif
 
   //-- For time output for each slice
   msg( msgl, "POC %4d LId: %2d TId: %1d ( %s, %c-SLICE, QP%3d ) ", pcSlice->getPOC(), pcSlice->getPic()->layerId,
@@ -2870,7 +2868,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       pcSlice->setLatestDRAPPOC(pcSlice->getPOC());
     }
     pcSlice->checkConformanceForDRAP(nalu.m_temporalId);
-#if JVET_U0084_EDRAP
     if (pcSlice->isIntra())
       pcSlice->getPic()->setEdrapRapId(0);
     SEIMessages edrapSEIs = getSeisByType(m_pcPic->SEIs, SEI::EXTENDED_DRAP_INDICATION );
@@ -2888,7 +2885,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       pcSlice->setLatestEDRAPPOC(pcSlice->getPOC());
     }
     pcSlice->checkConformanceForEDRAP(nalu.m_temporalId);
-#endif
 
   Quant *quant = m_cTrQuant.getQuant();
 

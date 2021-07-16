@@ -271,9 +271,7 @@ protected:
   int       m_maxDecPicBuffering[MAX_TLAYER];
   int       m_maxNumReorderPics[MAX_TLAYER];
   int       m_drapPeriod;
-#if JVET_U0084_EDRAP
   int       m_edrapPeriod;
-#endif
 
   int       m_iQP;                              //  if (AdaptiveQP == OFF)
   ChromaQpMappingTableParams m_chromaQpMappingTableParams;
@@ -545,9 +543,7 @@ protected:
   bool      m_pictureTimingSEIEnabled;
   bool      m_frameFieldInfoSEIEnabled;
   bool      m_dependentRAPIndicationSEIEnabled;
-#if JVET_U0084_EDRAP
   bool      m_edrapIndicationSEIEnabled;
-#endif
   bool      m_framePackingSEIEnabled;
   int       m_framePackingSEIType;
   int       m_framePackingSEIId;
@@ -1078,9 +1074,7 @@ public:
   void      setMaxDecPicBuffering           ( uint32_t u, uint32_t tlayer ) { m_maxDecPicBuffering[tlayer] = u;    }
   void      setMaxNumReorderPics            ( int  i, uint32_t tlayer ) { m_maxNumReorderPics[tlayer] = i;    }
   void      setDrapPeriod                   (int drapPeriod) { m_drapPeriod = drapPeriod; }
-#if JVET_U0084_EDRAP
   void      setEdrapPeriod                  (int edrapPeriod) { m_edrapPeriod = edrapPeriod; }
-#endif
 
   void      setBaseQP                       ( int   i )      { m_iQP = i; }
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
@@ -1456,9 +1450,7 @@ public:
   int       getMaxDecPicBuffering           (uint32_t tlayer) { return m_maxDecPicBuffering[tlayer]; }
   int       getMaxNumReorderPics            (uint32_t tlayer) { return m_maxNumReorderPics[tlayer]; }
   int       getDrapPeriod                   ()     { return m_drapPeriod; }
-#if JVET_U0084_EDRAP
   int       getEdrapPeriod                  ()     { return m_edrapPeriod; }
-#endif
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   int       getIntraQPOffset                () const    { return  m_intraQPOffset; }
   int       getLambdaFromQPEnable           () const    { return  m_lambdaFromQPEnable; }
@@ -1647,10 +1639,8 @@ public:
   bool  getFrameFieldInfoSEIEnabled() const                           { return m_frameFieldInfoSEIEnabled; }
   void  setDependentRAPIndicationSEIEnabled(bool b)                  { m_dependentRAPIndicationSEIEnabled = b; }
   int   getDependentRAPIndicationSEIEnabled() const                  { return m_dependentRAPIndicationSEIEnabled; }
-#if JVET_U0084_EDRAP
   void  setEdrapIndicationSEIEnabled(bool b)                         { m_edrapIndicationSEIEnabled = b; }
   int   getEdrapIndicationSEIEnabled() const                         { return m_edrapIndicationSEIEnabled; }
-#endif
   void  setFramePackingArrangementSEIEnabled(bool b)                 { m_framePackingSEIEnabled = b; }
   bool  getFramePackingArrangementSEIEnabled() const                 { return m_framePackingSEIEnabled; }
   void  setFramePackingArrangementSEIType(int b)                     { m_framePackingSEIType = b; }

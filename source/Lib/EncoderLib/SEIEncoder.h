@@ -68,9 +68,7 @@ public:
   void initSEIFramePacking(SEIFramePacking *sei, int currPicNum);
   void initSEIParameterSetsInclusionIndication(SEIParameterSetsInclusionIndication* sei);
   void initSEIDependentRAPIndication(SEIDependentRAPIndication *sei);
-#if JVET_U0084_EDRAP
   void initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei);
-#endif
   void initSEIBufferingPeriod(SEIBufferingPeriod *sei, bool noLeadingPictures);
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI
   void initSEIAlternativeTransferCharacteristics(SEIAlternativeTransferCharacteristics *sei);

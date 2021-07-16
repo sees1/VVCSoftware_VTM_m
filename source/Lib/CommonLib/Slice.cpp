@@ -199,7 +199,6 @@ void Slice::initSlice()
   m_useLTforDRAP         = false;
   m_isDRAP               = false;
   m_latestDRAPPOC        = MAX_INT;
-#if JVET_U0084_EDRAP
   m_edrapRapId           = 0;
   m_enableEdrapSEI       = false;
   m_edrapRapId           = 0;
@@ -208,7 +207,6 @@ void Slice::initSlice()
   m_edrapRefRapIds.resize(0);
   m_latestEDRAPPOC       = MAX_INT;
   m_latestEdrapLeadingPicDecodableFlag = false;
-#endif
   resetAlfEnabledFlag();
   m_ccAlfFilterParam.reset();
   m_ccAlfCbEnabledFlag = 0;
@@ -2065,7 +2063,6 @@ bool Slice::isPocRestrictedByDRAP( int poc, bool precedingDRAPInDecodingOrder )
          ( cvsHasPreviousDRAP() && getPOC() > getLatestDRAPPOC() && (precedingDRAPInDecodingOrder || poc < getLatestDRAPPOC()) );
 }
 
-#if JVET_U0084_EDRAP
 bool Slice::isPocRestrictedByEdrap( int poc )
 {
   if (!getEnableEdrapSEI())
@@ -2074,7 +2071,6 @@ bool Slice::isPocRestrictedByEdrap( int poc )
   }
   return getEdrapRapId() > 0 && poc != getAssociatedIRAPPOC();
 }
-#endif
 
 void Slice::checkConformanceForDRAP( uint32_t temporalId )
 {
@@ -2137,7 +2133,6 @@ void Slice::checkConformanceForDRAP( uint32_t temporalId )
   }
 }
 
-#if JVET_U0084_EDRAP
 void Slice::checkConformanceForEDRAP( uint32_t temporalId )
 {
   if (!(getEdrapRapId() > 0 || cvsHasPreviousEDRAP()))
@@ -2190,7 +2185,6 @@ void Slice::checkConformanceForEDRAP( uint32_t temporalId )
     }
   }
 }
-#endif
 
 
 //! get AC and DC values for weighted pred

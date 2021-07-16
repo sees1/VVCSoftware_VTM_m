@@ -95,9 +95,7 @@ protected:
   void xParseSEIContentLightLevelInfo         (SEIContentLightLevelInfo& sei,         uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIAmbientViewingEnvironment     (SEIAmbientViewingEnvironment& sei,     uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIContentColourVolume           (SEIContentColourVolume& sei,           uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
-#if JVET_U0084_EDRAP
   void xParseSEIExtendedDrapIndication        (SEIExtendedDrapIndication& sei,        uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
-#endif
 #if JVET_V0108
   void xParseSEIColourTransformInfo           (SEIColourTransformInfo& sei, uint32_t payloadSize, std::ostream* pDecodedMessageOutputStream);
 #endif

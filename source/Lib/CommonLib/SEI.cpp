@@ -456,9 +456,7 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::SUBPICTURE_LEVEL_INFO:                return "Subpicture level information";
     case SEI::ANNOTATED_REGIONS:                    return "Annotated Region";
     case SEI::SCALABILITY_DIMENSION_INFO:           return "Scalability dimension information";
-#if JVET_U0084_EDRAP
     case SEI::EXTENDED_DRAP_INDICATION:             return "Extended DRAP indication";
-#endif
     default:                                        return "Unknown";
   }
 }

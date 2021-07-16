@@ -62,9 +62,7 @@ Picture::Picture()
   fieldPic             = false;
   topField             = false;
   precedingDRAP        = false;
-#if JVET_U0084_EDRAP
   edrapRapId           = -1;
-#endif
 #if JVET_V0108
   m_colourTranfParams  = NULL;
 #endif
