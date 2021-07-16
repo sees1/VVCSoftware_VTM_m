@@ -691,11 +691,7 @@ void SEIReader::xParseSEIDecodingUnitInfo(SEIDecodingUnitInfo& sei, uint32_t pay
       sei.m_duSptCpbRemovalDelayIncrement[i] = 0;
     }
   }
-#if JVET_V0111_DU
   if (!bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
-#else
-  if (bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
-#endif
 
   {
     sei_read_flag(pDecodedMessageOutputStream, val, "dpb_output_du_delay_present_flag"); sei.m_dpbOutputDuDelayPresentFlag = (val != 0);
@@ -707,10 +703,8 @@ void SEIReader::xParseSEIDecodingUnitInfo(SEIDecodingUnitInfo& sei, uint32_t pay
   if(sei.m_dpbOutputDuDelayPresentFlag)
   {
     sei_read_code( pDecodedMessageOutputStream, bp.getDpbOutputDelayDuLength(), val, "pic_spt_dpb_output_du_delay");
-#if JVET_V0111_DU
     if (sei.m_picSptDpbOutputDuDelay != -1)
        CHECK(sei.m_picSptDpbOutputDuDelay!=val,"When signaled m_picSptDpbOutputDuDelay value must be same for DUs");
-#endif
     sei.m_picSptDpbOutputDuDelay = val;
   }
 }

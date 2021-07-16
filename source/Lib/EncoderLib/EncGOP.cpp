@@ -917,9 +917,6 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
   // update decoding unit parameters
   if ((m_pcCfg->getPictureTimingSEIEnabled() || m_pcCfg->getDecodingUnitInfoSEIEnabled()) && slice->getNalUnitLayerId() == slice->getVPS()->getLayerId(0))
   {
- #if !JVET_V0111_DU
-    int picSptDpbOutputDuDelay = 0;
-#endif
     SEIPictureTiming *pictureTimingSEI = new SEIPictureTiming();
 
     // DU parameters
@@ -1113,12 +1110,6 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
     }
     int factor = hrd->getTickDivisorMinus2() + 2;
     pictureTimingSEI->m_picDpbOutputDuDelay = factor * pictureTimingSEI->m_picDpbOutputDelay;
-#if !JVET_V0111_DU
-    if( m_pcCfg->getDecodingUnitInfoSEIEnabled() )
-    {
-      picSptDpbOutputDuDelay = factor * pictureTimingSEI->m_picDpbOutputDelay;
-    }
-#endif
     if (m_bufferingPeriodSEIPresentInAU)
     {
       for( int i = temporalId ; i < maxNumSubLayers ; i ++ )
@@ -1155,9 +1146,6 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
           duInfoSEI->m_duSptCpbRemovalDelayIncrement[j] = pictureTimingSEI->m_duCpbRemovalDelayMinus1[i*maxNumSubLayers+j] + 1;
         }
         duInfoSEI->m_dpbOutputDuDelayPresentFlag = false;
-#if !JVET_V0111_DU
-        duInfoSEI->m_picSptDpbOutputDuDelay = picSptDpbOutputDuDelay;
-#endif
 
         duInfoSeiMessages.push_back(duInfoSEI);
       }

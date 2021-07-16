@@ -2133,9 +2133,7 @@ void DecLib::xParsePrefixSEImessages()
     m_prefixSEINALUs.pop_front();
   }
   xCheckPrefixSEIMessages(m_SEIs);
-#if JVET_V0111_DU
   xCheckDUISEIMessages(m_SEIs);
-#endif
 
 }
 
@@ -2225,7 +2223,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
   }
 }
 
-#if JVET_V0111_DU
 void DecLib::xCheckDUISEIMessages(SEIMessages &prefixSEIs)
 {
   SEIMessages BPSEIs  = getSeisByType(prefixSEIs, SEI::BUFFERING_PERIOD);
@@ -2261,7 +2258,6 @@ void DecLib::xCheckDUISEIMessages(SEIMessages &prefixSEIs)
     }
   }
 }
-#endif
 
 
 void DecLib::xDecodePicHeader( InputNALUnit& nalu )

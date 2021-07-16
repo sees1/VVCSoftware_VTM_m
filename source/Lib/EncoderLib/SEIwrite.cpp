@@ -277,11 +277,7 @@ void SEIWriter::xWriteSEIDecodingUnitInfo(const SEIDecodingUnitInfo& sei, const 
         WRITE_CODE( sei.m_duSptCpbRemovalDelayIncrement[i], bp.getDuCpbRemovalDelayIncrementLength(), "du_spt_cpb_removal_delay_increment[i]");
     }
   }
-#if JVET_V0111_DU
   if (!bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
-#else
-  if (bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
-#endif
   {
     WRITE_FLAG(sei.m_dpbOutputDuDelayPresentFlag, "dpb_output_du_delay_present_flag");
   }

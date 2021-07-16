@@ -329,9 +329,7 @@ protected:
   void      xParsePrefixSEImessages();
   void      xParsePrefixSEIsForUnknownVCLNal();
   void      xCheckPrefixSEIMessages( SEIMessages& prefixSEIs );
-#if JVET_V0111_DU
   void      xCheckDUISEIMessages(SEIMessages &prefixSEIs);
-#endif
 
 
   void  xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType );
