@@ -53,7 +53,6 @@
 
 
 
-#define JVET_V0131_CORRECT_TR_HBD                          1 // correcting the 4x4 BDST7/DCT8 transform matrices for high bit-depth coding
 // clang-format off
 
 #define JVET_V0078                                        1 // JVET-V0078: QP control for very smooth blocks
