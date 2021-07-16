@@ -410,7 +410,6 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
         }
       }
-#if JVET_V0108
       if (!m_SEICTIFileName.empty() && !m_cVideoIOYuvSEICTIFile[nalu.m_nuhLayerId].isOpen())
       {
         const BitDepths& bitDepths = pcListPic->front()->cs->sps->getBitDepths(); // use bit depths of first reconstructed picture.
@@ -445,7 +444,6 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvSEICTIFile[nalu.m_nuhLayerId].open(SEICTIFileName, true, m_outputBitDepth, m_outputBitDepth, bitDepths.recon); // write mode
         }
       }
-#endif
       if (!m_annotatedRegionsSEIFileName.empty())
       {
         xOutputAnnotatedRegions(pcListPic);
@@ -606,7 +604,6 @@ void DecApp::xDestroyDecLib()
       recFile.second.close();
     }
   }
-#if JVET_V0108
   if (!m_SEICTIFileName.empty())
   {
     for (auto& recFile : m_cVideoIOYuvSEICTIFile)
@@ -614,7 +611,6 @@ void DecApp::xDestroyDecLib()
       recFile.second.close();
     }
   }
-#endif
 
   // destroy decoder class
   m_cDecLib.destroy();
@@ -773,7 +769,6 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
             }
         }
-#if JVET_V0108
         // Perform CTI on decoded frame and write to output CTI file
         if (!m_SEICTIFileName.empty())
         {
@@ -795,7 +790,6 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
               NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
           }
         }
-#endif
         writeLineToOutputLog(pcPic);
 
         // update POC of display order
@@ -928,7 +922,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
               }
           }
-#if JVET_V0108
           // Perform CTI on decoded frame and write to output CTI file
           if (!m_SEICTIFileName.empty())
           {
@@ -950,7 +943,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                 NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
             }
           }
-#endif
           writeLineToOutputLog(pcPic);
         // update POC of display order
         m_iPOCLastDisplay = pcPic->getPOC();

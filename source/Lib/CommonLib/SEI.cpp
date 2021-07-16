@@ -439,9 +439,7 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::CONTENT_LIGHT_LEVEL_INFO:             return "Content light level information";
     case SEI::AMBIENT_VIEWING_ENVIRONMENT:          return "Ambient viewing environment";
     case SEI::CONTENT_COLOUR_VOLUME:                return "Content colour volume";
-#if JVET_V0108
     case SEI::COLOUR_TRANSFORM_INFO:                return "Colour transform information";
-#endif
     case SEI::EQUIRECTANGULAR_PROJECTION:           return "Equirectangular projection";
     case SEI::SPHERE_ROTATION:                      return "Sphere rotation";
     case SEI::REGION_WISE_PACKING:                  return "Region wise packing information";

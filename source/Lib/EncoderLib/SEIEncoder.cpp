@@ -994,7 +994,6 @@ void SEIEncoder::initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei)
   }
 }
 
-#if JVET_V0108
 void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
@@ -1019,7 +1018,6 @@ void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
   }
   seiCTI->m_log2NumberOfPointsPerLut = floorLog2(seiCTI->m_lut[0].numLutValues - 1);
 }
-#endif
 
 void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SPS *sps)
 {

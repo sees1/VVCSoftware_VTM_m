@@ -63,9 +63,7 @@ Picture::Picture()
   topField             = false;
   precedingDRAP        = false;
   edrapRapId           = -1;
-#if JVET_V0108
   m_colourTranfParams  = NULL;
-#endif
   nonReferencePictureFlag = false;
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
@@ -134,9 +132,7 @@ void Picture::destroy()
     delete[] m_spliceIdx;
     m_spliceIdx = NULL;
   }
-#if JVET_V0108
   m_invColourTransfBuf = NULL;
-#endif
 }
 
 void Picture::createTempBuffers( const unsigned _maxCUSize )
@@ -1215,7 +1211,6 @@ void Picture::addPictureToHashMapForInter()
     }
   }
 }
-#if JVET_V0108
 void Picture::createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
 {
   m_colourTranfParams = ctiCharacteristics;
@@ -1257,4 +1252,3 @@ PelUnitBuf Picture::getDisplayBuf()
 
   return *m_invColourTransfBuf;
 }
-#endif

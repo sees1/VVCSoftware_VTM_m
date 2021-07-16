@@ -48,9 +48,7 @@
 #include "CodingStructure.h"
 #include "Hash.h"
 #include "MCTS.h"
-#if JVET_V0108
 #include "SEIColourTransform.h"
-#endif
 #include <deque>
 
 
@@ -71,12 +69,10 @@ struct Picture : public UnitArea
 
   void createTempBuffers( const unsigned _maxCUSize );
   void destroyTempBuffers();
-#if JVET_V0108
   SEIColourTransformApply* m_colourTranfParams;
   PelStorage*              m_invColourTransfBuf;
   void              createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth);
   PelUnitBuf        getDisplayBuf();
-#endif
 
          PelBuf     getOrigBuf(const CompArea &blk);
   const CPelBuf     getOrigBuf(const CompArea &blk) const;

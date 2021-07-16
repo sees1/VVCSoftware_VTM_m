@@ -970,7 +970,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAmbientViewingEnvironmentSEIIlluminance           (m_aveSEIAmbientIlluminance);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightX         ((uint16_t)m_aveSEIAmbientLightX);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightY         ((uint16_t)m_aveSEIAmbientLightY);
-#if JVET_V0108
   // colour tranform information sei
   m_cEncLib.setCtiSEIEnabled(m_ctiSEIEnabled);
   m_cEncLib.setCtiSEIId(m_ctiSEIId);
@@ -987,7 +986,6 @@ void EncApp::xInitLibCfg()
   {
     m_cEncLib.setCtiSEILut(m_ctiSEILut[i], i);
   }
-#endif
   // content colour volume SEI
   m_cEncLib.setCcvSEIEnabled                                     (m_ccvSEIEnabled);
   m_cEncLib.setCcvSEICancelFlag                                  (m_ccvSEICancelFlag);

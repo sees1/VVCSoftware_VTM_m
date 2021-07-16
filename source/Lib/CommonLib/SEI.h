@@ -67,9 +67,7 @@ public:
     DECODED_PICTURE_HASH                 = 132,
     SCALABLE_NESTING                     = 133,
     MASTERING_DISPLAY_COLOUR_VOLUME      = 137,
-#if JVET_V0108
     COLOUR_TRANSFORM_INFO                = 142,
-#endif
     DEPENDENT_RAP_INDICATION             = 145,
     EQUIRECTANGULAR_PROJECTION           = 150,
     SPHERE_ROTATION                      = 154,
@@ -825,7 +823,6 @@ public:
   uint16_t m_ambientLightY;
 };
 
-#if JVET_V0108
 class SEIColourTransformInfo : public SEI
 {
 public:
@@ -848,7 +845,6 @@ public:
   uint16_t m_log2NumberOfPointsPerLut;
   LutModel m_lut[MAX_NUM_COMPONENT];
 };
-#endif
 class SEIContentColourVolume : public SEI
 {
 public:

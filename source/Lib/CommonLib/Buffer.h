@@ -137,10 +137,8 @@ struct AreaBuf : public Size
 
   void rspSignal            ( std::vector<Pel>& pLUT );
   void scaleSignal          ( const int scale, const bool dir , const ClpRng& clpRng);
-#if JVET_V0108
   void applyLumaCTI(std::vector<Pel>& pLUTY);
   void applyChromaCTI(Pel* bufY, int strideY, std::vector<Pel>& pLUTUV, int bitDepth, ChromaFormat chrFormat, bool fwdMap);
-#endif
   T    computeAvg           ( ) const;
 
         T& at( const int &x, const int &y )          { return buf[y * stride + x]; }

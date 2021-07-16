@@ -648,7 +648,6 @@ protected:
   uint32_t  m_aveSEIAmbientIlluminance;
   uint16_t  m_aveSEIAmbientLightX;
   uint16_t  m_aveSEIAmbientLightY;
-#if JVET_V0108
   // colour tranform information sei
   bool      m_ctiSEIEnabled;
   uint32_t  m_ctiSEIId;
@@ -662,7 +661,6 @@ protected:
   uint32_t  m_ctiSEINumberChromaLut;
   int       m_ctiSEIChromaOffset;
   LutModel  m_ctiSEILut[MAX_NUM_COMPONENT];
-#endif
 // ccv sei
   bool      m_ccvSEIEnabled;
   bool      m_ccvSEICancelFlag;
@@ -1839,7 +1837,6 @@ public:
   uint16_t getAmbientViewingEnvironmentSEIAmbientLightX()            { return m_aveSEIAmbientLightX; }
   void  setAmbientViewingEnvironmentSEIAmbientLightY( uint16_t v )   { m_aveSEIAmbientLightY = v; }
   uint16_t getAmbientViewingEnvironmentSEIAmbientLightY()            { return m_aveSEIAmbientLightY; }
-#if JVET_V0108
   // colour tranform information sei
   void      setCtiSEIEnabled(bool b) { m_ctiSEIEnabled = b; }
   bool      getCtiSEIEnabled() { return m_ctiSEIEnabled; }
@@ -1866,7 +1863,6 @@ public:
   LutModel  getCtiSEILut(int idx) { return m_ctiSEILut[idx]; }
   void      setCtiSEILut(LutModel& cmp, int idx) { m_ctiSEILut[idx] = cmp; }
   LutModel* getCtiSEILuts() { return m_ctiSEILut; }
-#endif
   // ccv SEI
   void     setCcvSEIEnabled(bool b)                                  { m_ccvSEIEnabled = b; }
   bool     getCcvSEIEnabled()                                        { return m_ccvSEIEnabled; }

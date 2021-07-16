@@ -139,11 +139,9 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::CONTENT_COLOUR_VOLUME:
     xWriteSEIContentColourVolume(*static_cast<const SEIContentColourVolume*>(&sei));
     break;
-#if JVET_V0108
   case SEI::COLOUR_TRANSFORM_INFO:
     xWriteSEIColourTransformInfo(*static_cast<const SEIColourTransformInfo*>(&sei));
     break;
-#endif
   case SEI::SUBPICTURE_LEVEL_INFO:
     xWriteSEISubpictureLevelInfo(*static_cast<const SEISubpicureLevelInfo*>(&sei));
     break;
@@ -1285,7 +1283,6 @@ void SEIWriter::xWriteSEIContentColourVolume(const SEIContentColourVolume &sei)
   }
 }
 
-#if JVET_V0108
 void SEIWriter::xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei)
 {
   bool colourTransformCancelFlag = 0;
@@ -1340,5 +1337,4 @@ void SEIWriter::xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei)
     }
   }
 }
-#endif
 //! \}

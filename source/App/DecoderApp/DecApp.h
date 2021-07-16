@@ -61,9 +61,7 @@ private:
   // class interface
   DecLib          m_cDecLib;                     ///< decoder class
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvReconFile;        ///< reconstruction YUV class
-#if JVET_V0108
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvSEICTIFile;       ///< reconstruction YUV with CTI class
-#endif
 
   // for output control
   int             m_iPOCLastDisplay;              ///< last POC in display order

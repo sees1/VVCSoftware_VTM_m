@@ -484,7 +484,6 @@ void AreaBuf<Pel>::scaleSignal(const int scale, const bool dir, const ClpRng& cl
   }
 }
 
-#if JVET_V0108
 template<>
 void AreaBuf<Pel>::applyLumaCTI(std::vector<Pel>& pLUTY)
 {
@@ -549,7 +548,6 @@ void AreaBuf<Pel>::applyChromaCTI(Pel* bufY, int strideY, std::vector<Pel>& pLUT
     }
   }
 }
-#endif
 template<>
 void AreaBuf<Pel>::addAvg( const AreaBuf<const Pel> &other1, const AreaBuf<const Pel> &other2, const ClpRng& clpRng)
 {

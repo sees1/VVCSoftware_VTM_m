@@ -92,9 +92,7 @@ public:
   void initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei);
   void initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei);
   bool initSEIAnnotatedRegions(SEIAnnotatedRegions *sei, int currPOC);
-#if JVET_V0108
   void initSEIColourTransformInfo(SEIColourTransformInfo* sei);
-#endif
   void readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed);
 private:
   EncCfg* m_pcCfg;
