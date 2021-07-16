@@ -89,12 +89,10 @@ public:
   void initSEIContentLightLevel(SEIContentLightLevelInfo *sei);
   void initSEIAmbientViewingEnvironment(SEIAmbientViewingEnvironment *sei);
   void initSEIContentColourVolume(SEIContentColourVolume *sei);
-#if JVET_U0082_SDI_MAI_ACI_DRI
   void initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *sei);
   void initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *sei);
   void initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei);
   void initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei);
-#endif
   bool initSEIAnnotatedRegions(SEIAnnotatedRegions *sei, int currPOC);
 #if JVET_V0108
   void initSEIColourTransformInfo(SEIColourTransformInfo* sei);

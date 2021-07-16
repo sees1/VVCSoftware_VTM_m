@@ -149,7 +149,6 @@ void SEIPictureTiming::copyTo (SEIPictureTiming& target) const
   target.m_vclCpbDelayOffset = m_vclCpbDelayOffset;
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 bool SEIScalabilityDimensionInfo::isSDISameContent(SEIScalabilityDimensionInfo* sdiB)
 {
   if (!sdiB)
@@ -414,7 +413,6 @@ bool SEIMultiviewAcquisitionInfo::isMAISameContent(SEIMultiviewAcquisitionInfo *
   }
   return true;
 }
-#endif
 
 // Static member
 const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
@@ -451,17 +449,13 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::REGION_WISE_PACKING:                  return "Region wise packing information";
     case SEI::OMNI_VIEWPORT:                        return "Omni viewport";
     case SEI::GENERALIZED_CUBEMAP_PROJECTION:       return "Generalized cubemap projection";
-#if JVET_U0082_SDI_MAI_ACI_DRI
     case SEI::ALPHA_CHANNEL_INFO:                   return "Alpha channel information";
     case SEI::DEPTH_REPRESENTATION_INFO:            return "Depth representation information";
     case SEI::MULTIVIEW_ACQUISITION_INFO:           return "Multiview acquisition information";
-#endif
     case SEI::SAMPLE_ASPECT_RATIO_INFO:             return "Sample aspect ratio information";
     case SEI::SUBPICTURE_LEVEL_INFO:                return "Subpicture level information";
     case SEI::ANNOTATED_REGIONS:                    return "Annotated Region";
-#if JVET_U0082_SDI_MAI_ACI_DRI
     case SEI::SCALABILITY_DIMENSION_INFO:           return "Scalability dimension information";
-#endif
 #if JVET_U0084_EDRAP
     case SEI::EXTENDED_DRAP_INDICATION:             return "Extended DRAP indication";
 #endif

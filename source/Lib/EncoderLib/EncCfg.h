@@ -688,7 +688,6 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // sdi sei
   bool              m_sdiSEIEnabled;
   int               m_sdiSEIMaxLayersMinus1;
@@ -749,7 +748,6 @@ protected:
   int       m_driSEIDisparityRefViewId;
   int       m_driSEINonlinearNumMinus1;
   std::vector<uint32_t> m_driSEINonlinearModel;
-#endif
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
@@ -1922,7 +1920,6 @@ public:
   double   getCcvSEIMaxLuminanceValue  ()                            { return m_ccvSEIMaxLuminanceValue;  }
   void     setCcvSEIAvgLuminanceValue  (double dValue)               { m_ccvSEIAvgLuminanceValue = dValue; }
   double   getCcvSEIAvgLuminanceValue  ()                            { return m_ccvSEIAvgLuminanceValue;  }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information SEI
   void     setSdiSEIEnabled(bool b)                                  { m_sdiSEIEnabled = b; }
   bool     getSdiSEIEnabled() const                                  { return m_sdiSEIEnabled; }
@@ -2039,7 +2036,6 @@ public:
   int      getDriSEINonlinearNumMinus1() const                       { return m_driSEINonlinearNumMinus1; }
   void     setDriSEINonlinearModel(const std::vector<uint32_t>& driSEINonLinearModel) { m_driSEINonlinearModel = driSEINonLinearModel; }
   uint32_t getDriSEINonlinearModel(int idx) const                                                    { return m_driSEINonlinearModel[idx]; }
-#endif
   void         setUseWP               ( bool b )                     { m_useWeightedPred   = b;    }
   void         setWPBiPred            ( bool b )                     { m_useWeightedBiPred = b;    }
   bool         getUseWP               ()                             { return m_useWeightedPred;   }

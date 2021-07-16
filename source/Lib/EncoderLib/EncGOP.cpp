@@ -777,7 +777,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     seiMessages.push_back(seiContentColourVolume);
   }
   
-#if JVET_U0082_SDI_MAI_ACI_DRI
   if (m_pcCfg->getSdiSEIEnabled())
   {
     SEIScalabilityDimensionInfo *seiScalabilityDimensionInfo = new SEIScalabilityDimensionInfo;
@@ -805,7 +804,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIDepthRepresentationInfo(seiDepthRepresentationInfo);
     seiMessages.push_back(seiDepthRepresentationInfo);
   }
-#endif
 #if JVET_V0108
   // colour transform information
   if (m_pcCfg->getCtiSEIEnabled())

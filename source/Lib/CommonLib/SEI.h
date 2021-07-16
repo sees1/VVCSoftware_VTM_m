@@ -78,16 +78,10 @@ public:
     REGION_WISE_PACKING                  = 155,
     OMNI_VIEWPORT                        = 156,
     GENERALIZED_CUBEMAP_PROJECTION       = 153,
-#if JVET_U0082_SDI_MAI_ACI_DRI
     ALPHA_CHANNEL_INFO                   = 165,
-#endif
     FRAME_FIELD_INFO                     = 168,
-#if JVET_U0082_SDI_MAI_ACI_DRI
     DEPTH_REPRESENTATION_INFO            = 177,
-#endif
-#if JVET_U0082_SDI_MAI_ACI_DRI
     MULTIVIEW_ACQUISITION_INFO           = 179,
-#endif
     SUBPICTURE_LEVEL_INFO                = 203,
     SAMPLE_ASPECT_RATIO_INFO             = 204,
     CONTENT_LIGHT_LEVEL_INFO             = 144,
@@ -95,9 +89,7 @@ public:
     AMBIENT_VIEWING_ENVIRONMENT          = 148,
     CONTENT_COLOUR_VOLUME                = 149,
     ANNOTATED_REGIONS                    = 202,
-#if JVET_U0082_SDI_MAI_ACI_DRI
     SCALABILITY_DIMENSION_INFO           = 205,
-#endif
 #if JVET_U0084_EDRAP
     EXTENDED_DRAP_INDICATION             = 206,
 #endif
@@ -223,7 +215,6 @@ public:
   uint8_t              m_gcmpGuardBandSamplesMinus1;
 };
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 class SEIScalabilityDimensionInfo : public SEI
 {
 public:
@@ -404,7 +395,6 @@ public:
   int m_driDepthNonlinearRepresentationNumMinus1;
   std::vector<int> m_driDepthNonlinearRepresentationModel;
 };
-#endif
 
 class SEISampleAspectRatioInfo : public SEI
 {

@@ -51,7 +51,6 @@
 #include <cassert>
 
 
-#define JVET_U0082_SDI_MAI_ACI_DRI                        1 // scalability dimension information SEI and other three SEIs: Alpha channel information, Depth representation information, and Multiview acquisition information
 
 #define JVET_U0084_EDRAP                                  1 // EDRAP indication SEI message
 

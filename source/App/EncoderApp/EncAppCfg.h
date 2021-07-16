@@ -574,7 +574,6 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information sei
   bool              m_sdiSEIEnabled;
   int               m_sdiSEIMaxLayersMinus1;
@@ -635,7 +634,6 @@ protected:
   int       m_driSEIDisparityRefViewId;
   int       m_driSEINonlinearNumMinus1;
   std::vector<uint32_t> m_driSEINonlinearModel;
-#endif
 
   bool      m_erpSEIEnabled;
   bool      m_erpSEICancelFlag;

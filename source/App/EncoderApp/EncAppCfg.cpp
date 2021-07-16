@@ -670,7 +670,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t>   cfg_gcmpSEIFunctionUAffectedByVFlag   (0, 1, 5, 6);
   SMultiValueInput<double>     cfg_gcmpSEIFunctionCoeffV             (0.0, 1.0, 5, 6);
   SMultiValueInput<uint32_t>   cfg_gcmpSEIFunctionVAffectedByUFlag   (0, 1, 5, 6);
-#if JVET_U0082_SDI_MAI_ACI_DRI
   SMultiValueInput<uint32_t>        cfg_sdiSEILayerId                  (0, 63, 0, 63);
   SMultiValueInput<uint32_t>        cfg_sdiSEIViewIdVal                (0, 63, 0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_sdiSEIAuxId                    (0, 255, 0, 63);
@@ -691,7 +690,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t>        cfg_maiSEIExponentSkewFactor       (0, 63, 0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_maiSEIMantissaSkewFactor       (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_driSEINonlinearModel           (0, 31, 0, std::numeric_limits<uint32_t>::max());
-#endif
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
   const int defaultLadfQpOffset[3] = { 1, 0, 1 };
   const int defaultLadfIntervalLowerBound[2] = { 350, 833 };
@@ -1452,7 +1450,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEICCVMaxLuminanceValue",                         m_ccvSEIMaxLuminanceValue,                           0.1, "specifies the CCV max luminance value  in the content colour volume SEI message")
   ("SEICCVAvgLuminanceValuePresent",                  m_ccvSEIAvgLuminanceValuePresentFlag,               true, "Specifies whether the CCV avg luminance value is present in the content colour volume SEI message")
   ("SEICCVAvgLuminanceValue",                         m_ccvSEIAvgLuminanceValue,                          0.01, "specifies the CCV avg luminance value  in the content colour volume SEI message")
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information SEI
   ("SEISDIEnabled",                                   m_sdiSEIEnabled,                          false, "Control generation of scalaibility dimension information SEI message")
   ("SEISDIMaxLayersMinus1",                           m_sdiSEIMaxLayersMinus1,                      0, "Specifies the maximum number of layers minus 1 in the current CVS")
@@ -1513,7 +1510,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIDRIDisparityRefViewId",                        m_driSEIDisparityRefViewId,                            0, "Specifies the ViewId value against which the disparity values are derived in the depth representation information SEI message")
   ("SEIDRINonlinearNumMinus1",                        m_driSEINonlinearNumMinus1,                            0, "Specifies the number of piece-wise linear segments minus 2 for mapping of depth values to a scale that is uniformly quantized in terms of disparity  in the depth representation information SEI message")
   ("SEIDRINonlinearModel",                            cfg_driSEINonlinearModel,       cfg_driSEINonlinearModel, "List of the piece-wise linear segments for mapping of decoded luma sample values of an auxiliary picture to a scale that is uniformly quantized in terms of disparity in the depth representation information SEI message")
-#endif
 
   ("DebugBitstream",                                  m_decodeBitstreams[0],             string( "" ), "Assume the frames up to POC DebugPOC will be the same as in this bitstream. Load those frames from the bitstream instead of encoding them." )
   ("DebugPOC",                                        m_switchPOC,                                 -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC, return to normal encoding." )
@@ -2655,7 +2651,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       }
     }
   }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   if ( m_sdiSEIEnabled )
   {
     if (m_sdiSEIMultiviewInfoFlag || m_sdiSEIAuxiliaryInfoFlag)
@@ -2730,7 +2725,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_driSEINonlinearModel[i]   = cfg_driSEINonlinearModel.values.size() > i ? cfg_driSEINonlinearModel.values[i] : 0;
     }
   }
-#endif
   m_reshapeCW.binCW.resize(3);
   m_reshapeCW.rspFps = m_iFrameRate;
   m_reshapeCW.rspPicSize = m_sourceWidth*m_sourceHeight;

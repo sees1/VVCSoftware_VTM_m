@@ -406,10 +406,8 @@ DecLib::DecLib()
   , m_parameterSetManager()
   , m_apcSlicePilot(NULL)
   , m_SEIs()
-#if JVET_U0082_SDI_MAI_ACI_DRI
   , m_sdiSEIInFirstAU(NULL)
   , m_maiSEIInFirstAU(NULL)
-#endif
   , m_cIntraPred()
   , m_cInterPred()
   , m_cTrQuant()
@@ -1173,10 +1171,8 @@ void DecLib::checkTidLayerIdInAccessUnit()
 
 void DecLib::checkSEIInAccessUnit()
 {
-#if JVET_U0082_SDI_MAI_ACI_DRI
   bool bSdiPresentInAu = false;
   bool bAuxSEIsBeforeSdiSEIPresent[3] = {false, false, false};
-#endif
   for (auto &sei : m_accessUnitSeiPayLoadTypes)
   {
     enum NalUnitType         naluType = std::get<0>(sei);
@@ -1209,7 +1205,6 @@ void DecLib::checkSEIInAccessUnit()
       }
       CHECK(!olsIncludeAllLayersFind, "When there is no OLS that includes all layers in the current CVS in the entire bitstream, there shall be no non-scalable-nested SEI message with payloadType equal to 0 (BP), 1 (PT), 130 (DUI), or 203 (SLI)");
     }
-#if JVET_U0082_SDI_MAI_ACI_DRI
     if (payloadType == SEI::SCALABILITY_DIMENSION_INFO)
     {
       bSdiPresentInAu = true;
@@ -1226,13 +1221,10 @@ void DecLib::checkSEIInAccessUnit()
     {
       bAuxSEIsBeforeSdiSEIPresent[2] = true;
     }
-#endif
   }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[0], "When an AU contains both an SDI SEI message and an MAI SEI message, the SDI SEI message shall precede the MAI SEI message in decoding order.");
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[1], "When an AU contains both an SDI SEI message with sdi_aux_id[i] equal to 1 for at least one value of i and an ACI SEI message, the SDI SEI message shall precede the ACI SEI message in decoding order.");
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[2], "When an AU contains both an SDI SEI message with sdi_aux_id[i] equal to 2 for at least one value of i and a DRI SEI message, the SDI SEI message shall precede the DRI SEI message in decoding order.");
-#endif
 }
 
 #define SEI_REPETITION_CONSTRAINT_LIST_SIZE  21
@@ -2167,7 +2159,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
       msg( WARNING, "Warning: ffi_display_elemental_periods_minus1 is different in picture timing and frame field information SEI messages!");
     }
   }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   if ((getVPS()->getMaxLayers() == 1 || m_audIrapOrGdrAuFlag) && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || ((m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR) && m_lastNoOutputBeforeRecoveryFlag[m_accessUnitPicInfo.begin()->m_nuhLayerId])) && m_accessUnitPicInfo.size() == 1)
   {
     m_sdiSEIInFirstAU = NULL;
@@ -2238,7 +2229,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
       CHECK(!m_sdiSEIInFirstAU, "When a CVS does not contain an SDI SEI message with sdi_aux_id[i] equal to 2 for at least one value of i, no picture in the CVS shall be associated with a DRI SEI message.");
     }
   }
-#endif
 }
 
 #if JVET_V0111_DU

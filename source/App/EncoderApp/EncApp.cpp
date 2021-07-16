@@ -1020,7 +1020,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setCcvSEIMinLuminanceValue                           (m_ccvSEIMinLuminanceValue);
   m_cEncLib.setCcvSEIMaxLuminanceValue                           (m_ccvSEIMaxLuminanceValue);
   m_cEncLib.setCcvSEIAvgLuminanceValue                           (m_ccvSEIAvgLuminanceValue);
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information sei
   m_cEncLib.setSdiSEIEnabled                                     (m_sdiSEIEnabled);
   m_cEncLib.setSdiSEIMaxLayersMinus1                             (m_sdiSEIMaxLayersMinus1);
@@ -1081,7 +1080,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDriSEIDisparityRefViewId                          (m_driSEIDisparityRefViewId);
   m_cEncLib.setDriSEINonlinearNumMinus1                          (m_driSEINonlinearNumMinus1);
   m_cEncLib.setDriSEINonlinearModel                              (m_driSEINonlinearModel);
-#endif
   m_cEncLib.setEntropyCodingSyncEnabledFlag                      ( m_entropyCodingSyncEnabledFlag );
   m_cEncLib.setEntryPointPresentFlag                             ( m_entryPointPresentFlag );
   m_cEncLib.setTMVPModeId                                        ( m_TMVPModeId );

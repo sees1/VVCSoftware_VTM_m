@@ -116,7 +116,6 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::GENERALIZED_CUBEMAP_PROJECTION:
     xWriteSEIGeneralizedCubemapProjection(*static_cast<const SEIGeneralizedCubemapProjection*>(&sei));
     break;
-#if JVET_U0082_SDI_MAI_ACI_DRI
   case SEI::SCALABILITY_DIMENSION_INFO:
     xWriteSEIScalabilityDimensionInfo(*static_cast<const SEIScalabilityDimensionInfo*>(&sei));
     break;
@@ -129,7 +128,6 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::DEPTH_REPRESENTATION_INFO:
     xWriteSEIDepthRepresentationInfo(*static_cast<const SEIDepthRepresentationInfo*>(&sei));
     break;
-#endif
   case SEI::USER_DATA_REGISTERED_ITU_T_T35:
     xWriteSEIUserDataRegistered(*static_cast<const SEIUserDataRegistered*>(&sei));
     break;
@@ -897,7 +895,6 @@ void SEIWriter::xWriteSEIGeneralizedCubemapProjection(const SEIGeneralizedCubema
   }
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 void SEIWriter::xWriteSEIScalabilityDimensionInfo(const SEIScalabilityDimensionInfo &sei)
 {
   WRITE_CODE(sei.m_sdiMaxLayersMinus1, 6,                           "sdi_max_layers_minus1");
@@ -1125,7 +1122,6 @@ void SEIWriter::xWriteSEIDepthRepInfoElement( double f )
   WRITE_CODE( x_mantissa_len-1, 5 ,            "da_mantissa_len_minus1" );
   WRITE_CODE( x_mantissa, x_mantissa_len ,     "da_mantissa" );
 };
-#endif
 
 void SEIWriter::xWriteSEISubpictureLevelInfo(const SEISubpicureLevelInfo &sei)
 {

@@ -284,7 +284,6 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIGeneralizedCubemapProjection;
       xParseSEIGeneralizedCubemapProjection((SEIGeneralizedCubemapProjection&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#if JVET_U0082_SDI_MAI_ACI_DRI
     case SEI::SCALABILITY_DIMENSION_INFO:
       sei = new SEIScalabilityDimensionInfo;
       xParseSEIScalabilityDimensionInfo((SEIScalabilityDimensionInfo&) *sei, payloadSize, pDecodedMessageOutputStream );
@@ -301,7 +300,6 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIDepthRepresentationInfo;
       xParseSEIDepthRepresentationInfo((SEIDepthRepresentationInfo&) *sei, payloadSize, pDecodedMessageOutputStream );
       break;
-#endif
     case SEI::SUBPICTURE_LEVEL_INFO:
       sei = new SEISubpicureLevelInfo;
       xParseSEISubpictureLevelInfo((SEISubpicureLevelInfo&) *sei, payloadSize, pDecodedMessageOutputStream);
@@ -630,10 +628,8 @@ void SEIReader::xCheckScalableNestingConstraints(const SEIScalableNesting& sei, 
   {
     CHECK(nestedsei->payloadType() == SEI::FILLER_PAYLOAD || nestedsei->payloadType() == SEI::SCALABLE_NESTING, "An SEI message that has payloadType equal to filler payload or scalable nesting shall not be contained in a scalable nesting SEI message");
     
-#if JVET_U0082_SDI_MAI_ACI_DRI
     CHECK(nestedsei->payloadType() == SEI::SCALABILITY_DIMENSION_INFO, "A scalability dimension information SEI message shall not be contained in a scalable nesting SEI message");
     CHECK(nestedsei->payloadType() == SEI::MULTIVIEW_ACQUISITION_INFO, "A multiview acquisition information SEI message shall not be contained in a scalable nesting SEI message");
-#endif
 
     CHECK(nestedsei->payloadType() != SEI::FILLER_PAYLOAD && nestedsei->payloadType() != SEI::DECODED_PICTURE_HASH && nalUnitType != NAL_UNIT_PREFIX_SEI, "When a scalable nesting SEI message contains an SEI message that has payloadType not equal to filler payload or decoded picture hash, the SEI NAL unit containing the scalable nesting SEI message shall have nal_unit_type equal to PREFIX_SEI_NUT");
 
@@ -1681,7 +1677,6 @@ void SEIReader::xParseSEIGeneralizedCubemapProjection(SEIGeneralizedCubemapProje
   }
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 void SEIReader::xParseSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
@@ -1906,7 +1901,6 @@ void SEIReader::xParseSEIDepthRepInfoElement(double& f,std::ostream *pDecodedMes
     f= -f;
   }
 };
-#endif
 
 void SEIReader::xParseSEISubpictureLevelInfo(SEISubpicureLevelInfo& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {

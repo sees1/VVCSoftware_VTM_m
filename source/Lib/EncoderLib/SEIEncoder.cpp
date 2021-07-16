@@ -814,7 +814,6 @@ void SEIEncoder::initSEIContentColourVolume(SEIContentColourVolume *seiContentCo
   }
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 void SEIEncoder::initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *sei)
 {
   CHECK(!(m_isInitialized), "Scalability dimension information SEI already initialized");
@@ -996,7 +995,6 @@ void SEIEncoder::initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei)
     sei->m_driDepthNonlinearRepresentationModel[i] = m_pcCfg->getDriSEINonlinearModel(i);
   }
 }
-#endif
 
 #if JVET_V0108
 void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
