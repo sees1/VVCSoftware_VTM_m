@@ -244,9 +244,6 @@ public:
   void  updatePrevIRAPAndGDRSubpic();
   bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
 
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  bool  getAudIrapOrGdrAuFlag() const       { return m_audIrapOrGdrAuFlag;  }
-#endif
   bool  getNoOutputPriorPicsFlag () const   { return m_isNoOutputPriorPics; }
   void  setNoOutputPriorPicsFlag (bool val) { m_isNoOutputPriorPics = val; }
   void  setFirstSliceInPicture (bool val)  { m_bFirstSliceInPicture = val; }

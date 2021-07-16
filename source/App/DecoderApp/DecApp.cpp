@@ -141,9 +141,6 @@ uint32_t DecApp::decode()
 
   bool isEosPresentInPu = false;
   bool isEosPresentInLastPu = false;
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  bool firstSliceInAU = true;
-#endif
 
   bool outputPicturePresentInBitstream = false;
   auto setOutputPicturePresentInStream = [&]()
@@ -204,9 +201,7 @@ uint32_t DecApp::decode()
           if (!m_cDecLib.getMixedNaluTypesInPicFlag())
           {
             m_newCLVS[nalu.m_nuhLayerId] = true;   // An IDR picture starts a new CLVS
-#if !JVET_S0078_NOOUTPUTPRIORPICFLAG
             xFlushOutput(pcListPic, nalu.m_nuhLayerId);
-#endif
           }
           else
           {
@@ -217,9 +212,7 @@ uint32_t DecApp::decode()
         {
           // A CRA that is immediately preceded by an EOS is a CLVSS
           m_newCLVS[nalu.m_nuhLayerId] = true;
-#if !JVET_S0078_NOOUTPUTPRIORPICFLAG
           xFlushOutput(pcListPic, nalu.m_nuhLayerId);
-#endif
         }
         else if (m_cDecLib.getFirstSliceInPicture() && nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && !isEosPresentInLastPu)
         {
@@ -478,47 +471,9 @@ uint32_t DecApp::decode()
         || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR)))
       {
         setOutputPicturePresentInStream();
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-        bool firstPicInCVSAUThatIsNotAU0 = false;
-        if (firstSliceInAU)
-        {
-          if (m_targetDecLayerIdSet.size() > 0)
-          {
-            if (m_cDecLib.getAudIrapOrGdrAuFlag())
-            {
-              firstPicInCVSAUThatIsNotAU0 = true;
-            }
-          }
-          else
-          {
-            if (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL
-                || nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP
-                || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA && isEosPresentInLastPu))
-            {
-              firstPicInCVSAUThatIsNotAU0 = true;
-            }
-          }
-        }
-        if (firstPicInCVSAUThatIsNotAU0)
-        {
-          xFlushOutput(pcListPic, NOT_VALID, m_cDecLib.getNoOutputPriorPicsFlag());
-        }
-        else
-        {
-          xWriteOutput(pcListPic, nalu.m_temporalId);
-        }
-#else
         xWriteOutput( pcListPic, nalu.m_temporalId );
-#endif
       }
     }
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-    if ((nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_TRAIL && nalu.m_nalUnitType <= NAL_UNIT_OPI)
-        || (nalu.m_nalUnitType >= NAL_UNIT_CODED_SLICE_IDR_W_RADL && nalu.m_nalUnitType <= NAL_UNIT_CODED_SLICE_GDR))
-    {
-      firstSliceInAU = false;
-    }
-#endif
     if( bNewPicture )
     {
       m_cDecLib.checkSeiInPictureUnit();
@@ -549,9 +504,6 @@ uint32_t DecApp::decode()
       m_cDecLib.resetAccessUnitNals();
       m_cDecLib.resetAccessUnitApsNals();
       m_cDecLib.resetAccessUnitPicInfo();
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-      firstSliceInAU = true;
-#endif
     }
   }
   if (!m_annotatedRegionsSEIFileName.empty())
@@ -864,11 +816,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
 
 /** \param pcListPic list of pictures to be written to file
  */
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-void DecApp::xFlushOutput( PicList *pcListPic, const int layerId, bool noOutputOfPriorPicsFlag)
-#else
 void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
-#endif
 {
   if(!pcListPic || pcListPic->empty())
   {
@@ -897,10 +845,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
 
       if ( pcPicTop->neededForOutput && pcPicBottom->neededForOutput && !(pcPicTop->getPOC()%2) && (pcPicBottom->getPOC() == pcPicTop->getPOC()+1) )
       {
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-        if (!noOutputOfPriorPicsFlag)
-        {
-#endif
           // write to file
           if ( !m_reconFileName.empty() )
           {
@@ -918,9 +862,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
           }
           writeLineToOutputLog(pcPicTop);
           writeLineToOutputLog(pcPicBottom);
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-        }
-#endif
         // update POC of display order
         m_iPOCLastDisplay = pcPicBottom->getPOC();
 
@@ -965,10 +906,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
 
       if (pcPic->neededForOutput)
       {
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-        if (!noOutputOfPriorPicsFlag)
-        {
-#endif
           // write to file
           if (!m_reconFileName.empty())
           {
@@ -1015,9 +952,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
           }
 #endif
           writeLineToOutputLog(pcPic);
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-        }
-#endif
         // update POC of display order
         m_iPOCLastDisplay = pcPic->getPOC();
 
