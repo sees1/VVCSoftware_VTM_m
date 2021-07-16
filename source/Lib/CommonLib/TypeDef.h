@@ -55,7 +55,6 @@
 
 // clang-format off
 
-#define JVET_V0078                                        1 // JVET-V0078: QP control for very smooth blocks
 
 //########### place macros to be removed in next cycle below this line ###############
 

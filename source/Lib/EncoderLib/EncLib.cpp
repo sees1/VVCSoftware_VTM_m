@@ -1474,12 +1474,10 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     bUseDQP = true;
   }
 #endif
-#if JVET_V0078
   if (getSmoothQPReductionEnable())
   {
     bUseDQP = true;
   }
-#endif
 #if ENABLE_QPA
   if (getUsePerceptQPA() && !bUseDQP)
   {
@@ -1807,12 +1805,10 @@ void EncLib::xInitPicHeader(PicHeader &picHeader, const SPS &sps, const PPS &pps
     bUseDQP = true;
   }
 #endif
-#if JVET_V0078
   if (getSmoothQPReductionEnable())
   {
     bUseDQP = true;
   }
-#endif
 #if ENABLE_QPA
   if( getUsePerceptQPA() && !bUseDQP )
   {

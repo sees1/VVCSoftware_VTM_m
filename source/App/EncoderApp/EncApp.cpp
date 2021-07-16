@@ -628,14 +628,12 @@ void EncApp::xInitLibCfg()
 #if SHARP_LUMA_DELTA_QP
   m_cEncLib.setLumaLevelToDeltaQPControls                        ( m_lumaLevelToDeltaQPMapping );
 #endif
-#if  JVET_V0078
   m_cEncLib.setSmoothQPReductionEnable                           (m_smoothQPReductionEnable);
   m_cEncLib.setSmoothQPReductionThreshold                        (m_smoothQPReductionThreshold);
   m_cEncLib.setSmoothQPReductionModelScale                       (m_smoothQPReductionModelScale);
   m_cEncLib.setSmoothQPReductionModelOffset                      (m_smoothQPReductionModelOffset);
   m_cEncLib.setSmoothQPReductionPeriodicity                      (m_smoothQPReductionPeriodicity);
   m_cEncLib.setSmoothQPReductionLimit                            (m_smoothQPReductionLimit);
-#endif
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   m_cEncLib.setDeltaQpRD( (m_costMode==COST_LOSSLESS_CODING) ? 0 : m_uiDeltaQpRD );
 #else
