@@ -1345,7 +1345,6 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
     }
   }
 }
-#if JVET_Q0443_MINCR_SEI
 
 static void
 validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBytesInVclNalUnits, const Slice *pSlice, const EncCfg *pCfg, const SEISubpicureLevelInfo &seiSubpic, const int subPicIdx, const int layerId)
@@ -1380,7 +1379,6 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
   }
 }
 
-#endif
 static std::size_t
 cabac_zero_word_padding(const Slice *const pcSlice,
                         const Picture *const pcPic,
@@ -3855,14 +3853,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           // Check picture level encoding constraints/requirements
           ProfileLevelTierFeatures profileLevelTierFeatures;
           profileLevelTierFeatures.extractPTLInformation(*(pcSlice->getSPS()));
-#if JVET_Q0443_MINCR_SEI
           const SEIMessages& subPictureLevelInfoSEIs = getSeisByType(leadingSeiMessages, SEI::SUBPICTURE_LEVEL_INFO);
           if (!subPictureLevelInfoSEIs.empty())
           {
             const SEISubpicureLevelInfo& seiSubpic = static_cast<const SEISubpicureLevelInfo&>(*subPictureLevelInfoSEIs.front());
             validateMinCrRequirements(profileLevelTierFeatures, subPicStats[subpicIdx].numBytesInVclNalUnits, pcSlice, m_pcCfg, seiSubpic, subpicIdx, m_pcEncLib->getLayerId());
           }
-#endif
           sumZeroWords += cabac_zero_word_padding(pcSlice, pcPic, subPicStats[subpicIdx].numBinsWritten, subPicStats[subpicIdx].numBytesInVclNalUnits, 0,
                                                   accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
         }
