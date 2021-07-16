@@ -508,12 +508,10 @@ protected:
   int       m_framePackingSEIId;
   int       m_framePackingSEIQuincunx;
   int       m_framePackingSEIInterpretation;
-#if JVET_V0061_SEI
   bool      m_doSEIEnabled;
   bool      m_doSEICancelFlag;
   bool      m_doSEIPersistenceFlag;
   int       m_doSEITransformType;
-#endif
   bool      m_parameterSetsInclusionIndicationSEIEnabled;
   int       m_selfContainedClvsFlag;
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI

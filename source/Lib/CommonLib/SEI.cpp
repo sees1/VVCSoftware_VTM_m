@@ -426,9 +426,7 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::USER_DATA_UNREGISTERED:               return "User data unregistered";
     case SEI::FILM_GRAIN_CHARACTERISTICS:           return "Film grain characteristics";           // not currently decoded
     case SEI::FRAME_PACKING:                        return "Frame packing arrangement";
-#if JVET_V0061_SEI
     case SEI::DISPLAY_ORIENTATION:                  return "Display orientation";
-#endif
     case SEI::PARAMETER_SETS_INCLUSION_INDICATION:  return "Parameter sets inclusion indication";
     case SEI::DECODING_UNIT_INFO:                   return "Decoding unit information";
     case SEI::SCALABLE_NESTING:                     return "Scalable nesting";

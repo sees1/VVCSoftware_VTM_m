@@ -62,9 +62,7 @@ protected:
   void xWriteSEIEdrapIndication(const SEIExtendedDrapIndication& sei);
   void xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei);
   void xWriteSEIFramePacking(const SEIFramePacking& sei);
-#if JVET_V0061_SEI
   void xWriteSEIDisplayOrientation(const SEIDisplayOrientation& sei);
-#endif
   void xWriteSEIParameterSetsInclusionIndication(const SEIParameterSetsInclusionIndication& sei);
   void xWriteSEIMasteringDisplayColourVolume( const SEIMasteringDisplayColourVolume& sei);
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI

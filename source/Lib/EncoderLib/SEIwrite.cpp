@@ -83,11 +83,9 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::FRAME_PACKING:
     xWriteSEIFramePacking(*static_cast<const SEIFramePacking*>(&sei));
     break;
-#if JVET_V0061_SEI
   case SEI::DISPLAY_ORIENTATION:
     xWriteSEIDisplayOrientation(*static_cast<const SEIDisplayOrientation*>(&sei));
     break;
-#endif
   case SEI::PARAMETER_SETS_INCLUSION_INDICATION:
     xWriteSEIParameterSetsInclusionIndication(*static_cast<const SEIParameterSetsInclusionIndication*>(&sei));
     break;
@@ -620,7 +618,6 @@ void SEIWriter::xWriteSEIFramePacking(const SEIFramePacking& sei)
 }
 
 
-#if JVET_V0061_SEI
 void SEIWriter::xWriteSEIDisplayOrientation(const SEIDisplayOrientation& sei)
 {
   WRITE_FLAG(sei.m_doCancelFlag, "display_orientation_cancel_flag");
@@ -632,7 +629,6 @@ void SEIWriter::xWriteSEIDisplayOrientation(const SEIDisplayOrientation& sei)
     WRITE_CODE(0, 3, "display_orientation_reserved_zero_3bits");
   }
 }
-#endif
 
 void SEIWriter::xWriteSEIParameterSetsInclusionIndication(const SEIParameterSetsInclusionIndication& sei)
 {

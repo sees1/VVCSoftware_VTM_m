@@ -63,7 +63,6 @@
 
 
 
-#define JVET_V0061_SEI                                    1 // JVET-V0061 Display orientation SEI message
 
 #define JVET_V0108                                        1 // JVET_V0108: Colour Transform Information SEI 
 
