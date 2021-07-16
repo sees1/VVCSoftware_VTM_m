@@ -837,7 +837,6 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   }
 #endif
 
-#if JVET_V0106_RRC_RICE
   if (rpcSlice->getSPS()->getSpsRangeExtension().getRrcRiceExtensionEnableFlag())
   {
     int bitDepth = rpcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA);
@@ -848,7 +847,6 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   {
     rpcSlice->setRiceBaseLevel(4);
   }
-#endif
 
 }
 
@@ -1464,7 +1462,6 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
 
   Slice* const pcSlice    = pcPic->slices[getSliceSegmentIdx()];
 
-#if JVET_V0106_RRC_RICE
   if (pcSlice->getSPS()->getSpsRangeExtension().getRrcRiceExtensionEnableFlag())
   {
     int bitDepth = pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA);
@@ -1475,7 +1472,6 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   {
     pcSlice->setRiceBaseLevel(4);
   }
-#endif
 
   // initialize cost values - these are used by precompressSlice (they should be parameters).
   m_uiPicTotalBits  = 0;

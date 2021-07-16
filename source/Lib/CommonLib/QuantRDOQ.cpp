@@ -645,7 +645,6 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
   const TCoeff entropyCodingMaximum =  (1 << maxLog2TrDynamicRange) - 1;
 
   CoeffCodingContext cctx(tu, compID, tu.cs->slice->getSignDataHidingEnabledFlag());
-#if JVET_V0106_RRC_RICE
   int baseLevel = cctx.getBaseLevel();
   if (tu.cs->slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag())
   {
@@ -657,7 +656,6 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
   {
     cctx.setHistValue(0);
   }
-#endif
   const int    iCGSizeM1      = (1 << cctx.log2CGSize()) - 1;
 
   int     iCGLastScanPos      = -1;
@@ -749,12 +747,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         uint32_t    goRiceZero    = 0;
         if( remRegBins < 4 )
         {
-#if JVET_V0106_RRC_RICE 
           goRiceParam = (cctx.*(cctx.deriveRiceRRC))(iScanPos, piDstCoeff, 0);
-#else
-          unsigned  sumAbs = cctx.templateAbsSum( iScanPos, piDstCoeff, 0 );
-          goRiceParam      = g_goRiceParsCoeff[sumAbs];
-#endif
           goRiceZero       = g_goRicePosCoeff0(0, goRiceParam);
         }
 
@@ -810,12 +803,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         }
         else if( remRegBins >= 4 )
         {
-#if JVET_V0106_RRC_RICE 
           goRiceParam = (cctx.*(cctx.deriveRiceRRC))(iScanPos, piDstCoeff, baseLevel);
-#else
-          int  sumAll = cctx.templateAbsSum(iScanPos, piDstCoeff, 4);
-          goRiceParam = g_goRiceParsCoeff[sumAll];
-#endif
           remRegBins -= (uiLevel < 2 ? uiLevel : 3) + (iScanPos != iLastScanPos);
         }
       }

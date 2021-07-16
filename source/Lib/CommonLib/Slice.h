@@ -1307,9 +1307,7 @@ private:
 #endif
   bool             m_intraSmoothingDisabledFlag;
   bool             m_highPrecisionOffsetsEnabledFlag;
-#if JVET_V0106_RRC_RICE
   bool             m_rrcRiceExtensionEnableFlag;
-#endif
   bool             m_persistentRiceAdaptationEnabledFlag;
   bool             m_cabacBypassAlignmentEnabledFlag;
 
@@ -1327,9 +1325,7 @@ public:
 #endif
         || getIntraSmoothingDisabledFlag()
         || getHighPrecisionOffsetsEnabledFlag()
-#if JVET_V0106_RRC_RICE
         || getRrcRiceExtensionEnableFlag()
-#endif
         || getPersistentRiceAdaptationEnabledFlag()
         || getCabacBypassAlignmentEnabledFlag();
   }
@@ -1355,10 +1351,8 @@ public:
   bool getHighPrecisionOffsetsEnabledFlag() const                                      { return m_highPrecisionOffsetsEnabledFlag;      }
   void setHighPrecisionOffsetsEnabledFlag(bool value)                                  { m_highPrecisionOffsetsEnabledFlag = value;     }
 
-#if JVET_V0106_RRC_RICE
   bool getRrcRiceExtensionEnableFlag()                                                 const { return m_rrcRiceExtensionEnableFlag; }
   void setRrcRiceExtensionEnableFlag(const bool value)                                       { m_rrcRiceExtensionEnableFlag = value; }
-#endif
 
   bool getPersistentRiceAdaptationEnabledFlag() const                                  { return m_persistentRiceAdaptationEnabledFlag;  }
   void setPersistentRiceAdaptationEnabledFlag(const bool value)                        { m_persistentRiceAdaptationEnabledFlag = value; }
@@ -2671,9 +2665,7 @@ private:
   int                        m_deblockingFilterCrBetaOffsetDiv2;  //< beta offset for deblocking filter
   int                        m_deblockingFilterCrTcOffsetDiv2;    //< tc offset for deblocking filter
   bool                       m_depQuantEnabledFlag;               //!< dependent quantization enabled flag
-#if JVET_V0106_RRC_RICE
   int                        m_riceBaseLevelValue;    //< baseLevel value for abs_remainder 
-#endif
   bool                       m_signDataHidingEnabledFlag;         //!< sign data hiding enabled flag
   bool                       m_tsResidualCodingDisabledFlag;
   int                        m_list1IdxToList0Idx[MAX_NUM_REF];
@@ -2870,10 +2862,8 @@ public:
   void                        setDeblockingFilterCrTcOffsetDiv2( int i )             { m_deblockingFilterCrTcOffsetDiv2 = i;                           }
   void                        setDepQuantEnabledFlag( bool b )                       { m_depQuantEnabledFlag = b;                                                                   }
   bool                        getDepQuantEnabledFlag() const                         { return m_depQuantEnabledFlag;                                                                }  
-#if JVET_V0106_RRC_RICE
   void                        setRiceBaseLevel(int b) { m_riceBaseLevelValue = b; }
   int                         getRiceBaseLevel() const { return m_riceBaseLevelValue; }
-#endif
   void                        setSignDataHidingEnabledFlag( bool b )                 { m_signDataHidingEnabledFlag = b;                                                             }
   bool                        getSignDataHidingEnabledFlag() const                   { return m_signDataHidingEnabledFlag;                                                          }  
   void                        setTSResidualCodingDisabledFlag(bool b) { m_tsResidualCodingDisabledFlag = b; }

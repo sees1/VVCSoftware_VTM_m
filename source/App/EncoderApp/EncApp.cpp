@@ -616,9 +616,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseWPSNR                                          ( m_bUseWPSNR );
 #endif
   m_cEncLib.setExtendedPrecisionProcessingFlag                   ( m_extendedPrecisionProcessingFlag );
-#if JVET_V0106_RRC_RICE
   m_cEncLib.setRrcRiceExtensionEnableFlag                        ( m_rrcRiceExtensionEnableFlag );
-#endif
 #if JVET_V0054_TSRC_RICE
   m_cEncLib.setTSRCRicePresentFlag                               ( m_tsrcRicePresentFlag);
 #endif
@@ -791,9 +789,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseBDPCM                                          ( m_useBDPCM );
   m_cEncLib.setTransformSkipRotationEnabledFlag                  ( m_transformSkipRotationEnabledFlag );
   m_cEncLib.setTransformSkipContextEnabledFlag                   ( m_transformSkipContextEnabledFlag   );
-#if JVET_V0106_RRC_RICE
   m_cEncLib.setRrcRiceExtensionEnableFlag(m_rrcRiceExtensionEnableFlag);
-#endif
   m_cEncLib.setPersistentRiceAdaptationEnabledFlag               ( m_persistentRiceAdaptationEnabledFlag );
   m_cEncLib.setCabacBypassAlignmentEnabledFlag                   ( m_cabacBypassAlignmentEnabledFlag );
   m_cEncLib.setLog2MaxTransformSkipBlockSize                     ( m_log2MaxTransformSkipBlockSize  );
