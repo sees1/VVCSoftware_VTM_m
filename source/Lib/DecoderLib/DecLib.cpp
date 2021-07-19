@@ -406,10 +406,8 @@ DecLib::DecLib()
   , m_parameterSetManager()
   , m_apcSlicePilot(NULL)
   , m_SEIs()
-#if JVET_U0082_SDI_MAI_ACI_DRI
   , m_sdiSEIInFirstAU(NULL)
   , m_maiSEIInFirstAU(NULL)
-#endif
   , m_cIntraPred()
   , m_cInterPred()
   , m_cTrQuant()
@@ -430,10 +428,8 @@ DecLib::DecLib()
   , m_prevPicPOC(MAX_INT)
   , m_prevTid0POC(0)
   , m_bFirstSliceInPicture(true)
-#if JVET_V0108
   , m_firstPictureInSequence(true)
   , m_colourTranfParams()
-#endif
   , m_firstSliceInBitstream(true)
   , m_isFirstAuInCvs( true )
   , m_prevSliceSkipped(false)
@@ -752,9 +748,7 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
   }
 
   if (pcSlice->isDRAP()) c = 'D';
-#if JVET_U0084_EDRAP
   if (pcSlice->getEdrapRapId() > 0) c = 'E';
-#endif
 
   //-- For time output for each slice
   msg( msgl, "POC %4d LId: %2d TId: %1d ( %s, %c-SLICE, QP%3d ) ", pcSlice->getPOC(), pcSlice->getPic()->layerId,
@@ -1173,10 +1167,8 @@ void DecLib::checkTidLayerIdInAccessUnit()
 
 void DecLib::checkSEIInAccessUnit()
 {
-#if JVET_U0082_SDI_MAI_ACI_DRI
   bool bSdiPresentInAu = false;
   bool bAuxSEIsBeforeSdiSEIPresent[3] = {false, false, false};
-#endif
   for (auto &sei : m_accessUnitSeiPayLoadTypes)
   {
     enum NalUnitType         naluType = std::get<0>(sei);
@@ -1209,7 +1201,6 @@ void DecLib::checkSEIInAccessUnit()
       }
       CHECK(!olsIncludeAllLayersFind, "When there is no OLS that includes all layers in the current CVS in the entire bitstream, there shall be no non-scalable-nested SEI message with payloadType equal to 0 (BP), 1 (PT), 130 (DUI), or 203 (SLI)");
     }
-#if JVET_U0082_SDI_MAI_ACI_DRI
     if (payloadType == SEI::SCALABILITY_DIMENSION_INFO)
     {
       bSdiPresentInAu = true;
@@ -1226,13 +1217,10 @@ void DecLib::checkSEIInAccessUnit()
     {
       bAuxSEIsBeforeSdiSEIPresent[2] = true;
     }
-#endif
   }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[0], "When an AU contains both an SDI SEI message and an MAI SEI message, the SDI SEI message shall precede the MAI SEI message in decoding order.");
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[1], "When an AU contains both an SDI SEI message with sdi_aux_id[i] equal to 1 for at least one value of i and an ACI SEI message, the SDI SEI message shall precede the ACI SEI message in decoding order.");
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[2], "When an AU contains both an SDI SEI message with sdi_aux_id[i] equal to 2 for at least one value of i and a DRI SEI message, the SDI SEI message shall precede the DRI SEI message in decoding order.");
-#endif
 }
 
 #define SEI_REPETITION_CONSTRAINT_LIST_SIZE  21
@@ -1689,10 +1677,8 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
 #else
     m_pcPic->finalInit( vps, *sps, *pps, &m_picHeader, apss, lmcsAPS, scalinglistAPS );
 #endif
-#if JVET_V0108
     m_pcPic->createColourTransfProcessor(m_firstPictureInSequence, &m_colourTranfParams, &m_invColourTransfBuf, pps->getPicWidthInLumaSamples(), pps->getPicHeightInLumaSamples(), sps->getChromaFormatIdc(), sps->getBitDepth(CHANNEL_TYPE_LUMA));
     m_firstPictureInSequence = false;
-#endif
     m_pcPic->createTempBuffers( m_pcPic->cs->pps->pcv->maxCUWidth );
     m_pcPic->cs->createCoeffs((bool)m_pcPic->cs->sps->getPLTMode());
 
@@ -2147,9 +2133,7 @@ void DecLib::xParsePrefixSEImessages()
     m_prefixSEINALUs.pop_front();
   }
   xCheckPrefixSEIMessages(m_SEIs);
-#if JVET_V0111_DU
   xCheckDUISEIMessages(m_SEIs);
-#endif
 
 }
 
@@ -2167,7 +2151,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
       msg( WARNING, "Warning: ffi_display_elemental_periods_minus1 is different in picture timing and frame field information SEI messages!");
     }
   }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   if ((getVPS()->getMaxLayers() == 1 || m_audIrapOrGdrAuFlag) && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || ((m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR) && m_lastNoOutputBeforeRecoveryFlag[m_accessUnitPicInfo.begin()->m_nuhLayerId])) && m_accessUnitPicInfo.size() == 1)
   {
     m_sdiSEIInFirstAU = NULL;
@@ -2238,10 +2221,8 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
       CHECK(!m_sdiSEIInFirstAU, "When a CVS does not contain an SDI SEI message with sdi_aux_id[i] equal to 2 for at least one value of i, no picture in the CVS shall be associated with a DRI SEI message.");
     }
   }
-#endif
 }
 
-#if JVET_V0111_DU
 void DecLib::xCheckDUISEIMessages(SEIMessages &prefixSEIs)
 {
   SEIMessages BPSEIs  = getSeisByType(prefixSEIs, SEI::BUFFERING_PERIOD);
@@ -2277,7 +2258,6 @@ void DecLib::xCheckDUISEIMessages(SEIMessages &prefixSEIs)
     }
   }
 }
-#endif
 
 
 void DecLib::xDecodePicHeader( InputNALUnit& nalu )
@@ -2659,7 +2639,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   m_pcPic->layerId     = nalu.m_nuhLayerId;
   m_pcPic->subLayerNonReferencePictureDueToSTSA = false;
 
-#if JVET_V0106_RRC_RICE
   if (pcSlice->getSPS()->getSpsRangeExtension().getRrcRiceExtensionEnableFlag())
   {
     int bitDepth = pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA);
@@ -2670,7 +2649,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   {
     pcSlice->setRiceBaseLevel(4);
   }
-#endif
 
   if (pcSlice->getSPS()->getProfileTierLevel()->getConstraintInfo()->getNoApsConstraintFlag())
   {
@@ -2884,7 +2862,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       pcSlice->setLatestDRAPPOC(pcSlice->getPOC());
     }
     pcSlice->checkConformanceForDRAP(nalu.m_temporalId);
-#if JVET_U0084_EDRAP
     if (pcSlice->isIntra())
       pcSlice->getPic()->setEdrapRapId(0);
     SEIMessages edrapSEIs = getSeisByType(m_pcPic->SEIs, SEI::EXTENDED_DRAP_INDICATION );
@@ -2902,7 +2879,6 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
       pcSlice->setLatestEDRAPPOC(pcSlice->getPOC());
     }
     pcSlice->checkConformanceForEDRAP(nalu.m_temporalId);
-#endif
 
   Quant *quant = m_cTrQuant.getQuant();
 

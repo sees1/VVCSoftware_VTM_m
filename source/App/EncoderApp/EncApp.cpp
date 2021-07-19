@@ -529,9 +529,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDecodingRefreshType                               ( m_iDecodingRefreshType );
   m_cEncLib.setGOPSize                                           ( m_iGOPSize );
   m_cEncLib.setDrapPeriod                                        ( m_drapPeriod );
-#if JVET_U0084_EDRAP
   m_cEncLib.setEdrapPeriod                                       ( m_edrapPeriod );
-#endif
   m_cEncLib.setReWriteParamSets                                  ( m_rewriteParamSets );
   m_cEncLib.setRPLList0                                          ( m_RPLList0);
   m_cEncLib.setRPLList1                                          ( m_RPLList1);
@@ -618,12 +616,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseWPSNR                                          ( m_bUseWPSNR );
 #endif
   m_cEncLib.setExtendedPrecisionProcessingFlag                   ( m_extendedPrecisionProcessingFlag );
-#if JVET_V0106_RRC_RICE
   m_cEncLib.setRrcRiceExtensionEnableFlag                        ( m_rrcRiceExtensionEnableFlag );
-#endif
-#if JVET_V0054_TSRC_RICE
   m_cEncLib.setTSRCRicePresentFlag                               ( m_tsrcRicePresentFlag);
-#endif
   m_cEncLib.setHighPrecisionOffsetsEnabledFlag                   ( m_highPrecisionOffsetsEnabledFlag );
 
   m_cEncLib.setWeightedPredictionMethod( m_weightedPredictionMethod );
@@ -632,14 +626,12 @@ void EncApp::xInitLibCfg()
 #if SHARP_LUMA_DELTA_QP
   m_cEncLib.setLumaLevelToDeltaQPControls                        ( m_lumaLevelToDeltaQPMapping );
 #endif
-#if  JVET_V0078
   m_cEncLib.setSmoothQPReductionEnable                           (m_smoothQPReductionEnable);
   m_cEncLib.setSmoothQPReductionThreshold                        (m_smoothQPReductionThreshold);
   m_cEncLib.setSmoothQPReductionModelScale                       (m_smoothQPReductionModelScale);
   m_cEncLib.setSmoothQPReductionModelOffset                      (m_smoothQPReductionModelOffset);
   m_cEncLib.setSmoothQPReductionPeriodicity                      (m_smoothQPReductionPeriodicity);
   m_cEncLib.setSmoothQPReductionLimit                            (m_smoothQPReductionLimit);
-#endif
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   m_cEncLib.setDeltaQpRD( (m_costMode==COST_LOSSLESS_CODING) ? 0 : m_uiDeltaQpRD );
 #else
@@ -793,9 +785,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseBDPCM                                          ( m_useBDPCM );
   m_cEncLib.setTransformSkipRotationEnabledFlag                  ( m_transformSkipRotationEnabledFlag );
   m_cEncLib.setTransformSkipContextEnabledFlag                   ( m_transformSkipContextEnabledFlag   );
-#if JVET_V0106_RRC_RICE
   m_cEncLib.setRrcRiceExtensionEnableFlag(m_rrcRiceExtensionEnableFlag);
-#endif
   m_cEncLib.setPersistentRiceAdaptationEnabledFlag               ( m_persistentRiceAdaptationEnabledFlag );
   m_cEncLib.setCabacBypassAlignmentEnabledFlag                   ( m_cabacBypassAlignmentEnabledFlag );
   m_cEncLib.setLog2MaxTransformSkipBlockSize                     ( m_log2MaxTransformSkipBlockSize  );
@@ -864,9 +854,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDecodedPictureHashSEIType                         ( m_decodedPictureHashSEIType );
   m_cEncLib.setSubpicDecodedPictureHashType                      ( m_subpicDecodedPictureHashType );
   m_cEncLib.setDependentRAPIndicationSEIEnabled                  ( m_drapPeriod > 0 );
-#if JVET_U0084_EDRAP
   m_cEncLib.setEdrapIndicationSEIEnabled                         ( m_edrapPeriod > 0 );
-#endif
   m_cEncLib.setBufferingPeriodSEIEnabled                         ( m_bufferingPeriodSEIEnabled );
   m_cEncLib.setPictureTimingSEIEnabled                           ( m_pictureTimingSEIEnabled );
   m_cEncLib.setFrameFieldInfoSEIEnabled                          ( m_frameFieldInfoSEIEnabled );
@@ -879,12 +867,10 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setFramePackingArrangementSEIId                      ( m_framePackingSEIId );
   m_cEncLib.setFramePackingArrangementSEIQuincunx                ( m_framePackingSEIQuincunx );
   m_cEncLib.setFramePackingArrangementSEIInterpretation          ( m_framePackingSEIInterpretation );
-#if JVET_V0061_SEI
   m_cEncLib.setDoSEIEnabled                                      ( m_doSEIEnabled );
   m_cEncLib.setDoSEICancelFlag                                   ( m_doSEICancelFlag );
   m_cEncLib.setDoSEIPersistenceFlag                              ( m_doSEIPersistenceFlag);
   m_cEncLib.setDoSEITransformType                                ( m_doSEITransformType);
-#endif
   m_cEncLib.setParameterSetsInclusionIndicationSEIEnabled        (m_parameterSetsInclusionIndicationSEIEnabled);
   m_cEncLib.setSelfContainedClvsFlag                             (m_selfContainedClvsFlag);
   m_cEncLib.setErpSEIEnabled                                     ( m_erpSEIEnabled );
@@ -984,7 +970,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setAmbientViewingEnvironmentSEIIlluminance           (m_aveSEIAmbientIlluminance);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightX         ((uint16_t)m_aveSEIAmbientLightX);
   m_cEncLib.setAmbientViewingEnvironmentSEIAmbientLightY         ((uint16_t)m_aveSEIAmbientLightY);
-#if JVET_V0108
   // colour tranform information sei
   m_cEncLib.setCtiSEIEnabled(m_ctiSEIEnabled);
   m_cEncLib.setCtiSEIId(m_ctiSEIId);
@@ -1001,7 +986,6 @@ void EncApp::xInitLibCfg()
   {
     m_cEncLib.setCtiSEILut(m_ctiSEILut[i], i);
   }
-#endif
   // content colour volume SEI
   m_cEncLib.setCcvSEIEnabled                                     (m_ccvSEIEnabled);
   m_cEncLib.setCcvSEICancelFlag                                  (m_ccvSEICancelFlag);
@@ -1020,7 +1004,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setCcvSEIMinLuminanceValue                           (m_ccvSEIMinLuminanceValue);
   m_cEncLib.setCcvSEIMaxLuminanceValue                           (m_ccvSEIMaxLuminanceValue);
   m_cEncLib.setCcvSEIAvgLuminanceValue                           (m_ccvSEIAvgLuminanceValue);
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information sei
   m_cEncLib.setSdiSEIEnabled                                     (m_sdiSEIEnabled);
   m_cEncLib.setSdiSEIMaxLayersMinus1                             (m_sdiSEIMaxLayersMinus1);
@@ -1081,7 +1064,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setDriSEIDisparityRefViewId                          (m_driSEIDisparityRefViewId);
   m_cEncLib.setDriSEINonlinearNumMinus1                          (m_driSEINonlinearNumMinus1);
   m_cEncLib.setDriSEINonlinearModel                              (m_driSEINonlinearModel);
-#endif
   m_cEncLib.setEntropyCodingSyncEnabledFlag                      ( m_entropyCodingSyncEnabledFlag );
   m_cEncLib.setEntryPointPresentFlag                             ( m_entryPointPresentFlag );
   m_cEncLib.setTMVPModeId                                        ( m_TMVPModeId );
@@ -1157,9 +1139,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setBs2ModPOCAndType                                  ( m_bs2ModPOCAndType );
   m_cEncLib.setDebugCTU                                          ( m_debugCTU );
   m_cEncLib.setUseALF                                            ( m_alf );
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   m_cEncLib.setAlfSaoTrueOrg                                     ( m_alfSaoTrueOrg );
-#endif
   m_cEncLib.setALFStrengthLuma                                   (m_alfStrengthLuma);
   m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
   m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);

@@ -239,7 +239,6 @@ int EncModeCtrl::calculateLumaDQP( const CPelBuf& rcOrg )
 }
 #endif
 
-#if JVET_V0078
 int EncModeCtrl::calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP)
 {
   double avg = 0;
@@ -318,7 +317,6 @@ int EncModeCtrl::calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP)
   }
   return qp;
 }
-#endif
 
 void CacheBlkInfoCtrl::create()
 {
@@ -1138,7 +1136,6 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
       baseQP = Clip3 (-cs.sps->getQpBDOffset (CHANNEL_TYPE_LUMA), MAX_QP, baseQP - m_lumaQPOffset);
     }
 #endif
-#if JVET_V0078
     if (m_pcEncCfg->getSmoothQPReductionEnable())
     {
       int smoothQPoffset = 0;
@@ -1161,7 +1158,6 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
       }
       baseQP = Clip3(-cs.sps->getQpBDOffset(CHANNEL_TYPE_LUMA), MAX_QP, baseQP + smoothQPoffset);
     }
-#endif
   }
   int minQP = baseQP;
   int maxQP = baseQP;

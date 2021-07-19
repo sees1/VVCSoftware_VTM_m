@@ -50,35 +50,9 @@
 #include <assert.h>
 #include <cassert>
 
-#define JVET_Q0443_MINCR_SEI                              1
-
-#define JVET_U0082_SDI_MAI_ACI_DRI                        1 // scalability dimension information SEI and other three SEIs: Alpha channel information, Depth representation information, and Multiview acquisition information
-
-#define JVET_U0084_EDRAP                                  1 // EDRAP indication SEI message
-
-#define JVET_V0106_RRC_RICE                               1 // JVET_V0106: Extension of the RRC rice derivation for high bit depth profile (VVCv2). 
-#define JVET_V0131_CORRECT_TR_HBD                          1 // correcting the 4x4 BDST7/DCT8 transform matrices for high bit-depth coding
 // clang-format off
 
-#define JVET_V0078                                        1 // JVET-V0078: QP control for very smooth blocks
-
 //########### place macros to be removed in next cycle below this line ###############
-
-#define JVET_V0054_TSRC_RICE                              1 // JVET-V0054: Entropy coding method for high bit depth in TSRC
-
-#define JVET_V0047_HIGH_PRECISION_TRANSFORM               1 // JVET-V0047: CE3.1 method for the high precision computation of transform scaling
-
-#define JVET_V0095_ALF_SAO_TRUE_ORG                       1 // JVET-V0095: Using true original samples for SAO and ALF optimization when MCTF is applied
-
-#define JVET_V0056_MCTF                                   1 // JVET-V0056: Changes to MCTF
-
-#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-
-#define JVET_V0061_SEI                                    1 // JVET-V0061 Display orientation SEI message
-
-#define JVET_V0108                                        1 // JVET_V0108: Colour Transform Information SEI 
-
-#define JVET_V0111_DU                                     1 // JVET-V0111 Decoding Unit Information 
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
@@ -248,9 +222,7 @@ typedef std::pair<int, int>  TrCost;
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            1 ///< 0 use original 6-bit transform matrices for both forward and inverse transform, 1 (default) = use original matrices for inverse transform and high precision matrices for forward transform
-#if JVET_V0106_RRC_RICE
 #define JVET_V0106_DEP_QUANT_ENC_OPT                      1 ///< 0 use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 (default) use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
-#endif
 #else
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            0 ///< 0 (default) use original 6-bit transform matrices for both forward and inverse transform, 1 = use original matrices for inverse transform and high precision matrices for forward transform
@@ -923,14 +895,12 @@ struct LFCUParam
   bool leftEdge;                         ///< indicates left edge
   bool topEdge;                          ///< indicates top edge
 };
-#if JVET_V0108
 struct LutModel
 {
   bool             presentFlag = false;
   int              numLutValues = 0;
   std::vector<Pel> lutValues;
 };
-#endif
 
 struct PictureHash
 {

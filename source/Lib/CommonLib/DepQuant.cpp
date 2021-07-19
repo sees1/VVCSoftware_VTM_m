@@ -38,9 +38,7 @@
 
 #include <bitset>
 
-#if JVET_V0106_RRC_RICE
 #include "ContextModelling.h"
-#endif
 
 
 
@@ -892,11 +890,7 @@ namespace DQIntern
     State( const RateEstimator& rateEst, CommonCtx& commonCtx, const int stateId );
 
     template<uint8_t numIPos>
-#if JVET_V0106_RRC_RICE
     inline void updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision, const int baseLevel, const bool extRiceFlag);
-#else
-    inline void updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision);
-#endif
     inline void updateStateEOS(const ScanInfo &scanInfo, const State *prevStates, const State *skipStates,
                                const Decision &decision);
 
@@ -1053,7 +1047,6 @@ namespace DQIntern
     unsigned                  effHeight;
   };
 
-#if JVET_V0106_RRC_RICE
   unsigned templateAbsCompare(TCoeff sum)
   {
     int rangeIdx = 0;
@@ -1079,7 +1072,6 @@ namespace DQIntern
     }
     return g_riceShift[rangeIdx];
   }
-#endif
 
   State::State( const RateEstimator& rateEst, CommonCtx& commonCtx, const int stateId )
     : m_sbbFracBits     { { 0, 0 } }
@@ -1091,11 +1083,7 @@ namespace DQIntern
   }
 
   template<uint8_t numIPos>
-#if JVET_V0106_RRC_RICE
   inline void State::updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision, const int baseLevel, const bool extRiceFlag)
-#else
-  inline void State::updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision)
-#endif
   {
     m_rdCost = decision.rdCost;
     if( decision.prevId > -2 )
@@ -1200,7 +1188,6 @@ namespace DQIntern
           UPDATE(4);
         }
 #undef UPDATE
-#if JVET_V0106_RRC_RICE 
         if (extRiceFlag)
         {
           unsigned currentShift = templateAbsCompare(sumAbs);
@@ -1214,10 +1201,6 @@ namespace DQIntern
           int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
           m_goRicePar = g_goRiceParsCoeff[sumAll];
         }
-#else
-        int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
-        m_goRicePar = g_goRiceParsCoeff[sumAll];
-#endif
       }
       else
       {
@@ -1254,7 +1237,6 @@ namespace DQIntern
           UPDATE(4);
         }
 #undef UPDATE
-#if JVET_V0106_RRC_RICE 
         if (extRiceFlag)
         {
           unsigned currentShift = templateAbsCompare(sumAbs);
@@ -1268,10 +1250,6 @@ namespace DQIntern
           sumAbs = std::min<TCoeff>(31, sumAbs);
           m_goRicePar = g_goRiceParsCoeff[sumAbs];
         }
-#else
-        sumAbs = std::min<TCoeff>(31, sumAbs);
-        m_goRicePar = g_goRiceParsCoeff[sumAbs];
-#endif
         m_goRiceZero = g_goRicePosCoeff0(m_stateId, m_goRicePar);
       }
     }
@@ -1402,10 +1380,8 @@ namespace DQIntern
     void    quant   ( TransformUnit& tu, const CCoeffBuf& srcCoeff, const ComponentID compID, const QpParam& cQP, const double lambda, const Ctx& ctx, TCoeff& absSum, bool enableScalingLists, int* quantCoeff );
     void    dequant ( const TransformUnit& tu, CoeffBuf& recCoeff, const ComponentID compID, const QpParam& cQP, bool enableScalingLists, int* quantCoeff );
 
-#if JVET_V0106_RRC_RICE
     int m_baseLevel;
     bool m_extRiceRRCFlag;
-#endif
 
   private:
     void    xDecideAndUpdate  ( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, TCoeff quantCoeff);
@@ -1504,7 +1480,6 @@ namespace DQIntern
       {
         switch( scanInfo.nextNbInfoSbb.num )
         {
-#if JVET_V0106_RRC_RICE
         case 0:
           m_currStates[0].updateState<0>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
           m_currStates[1].updateState<0>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
@@ -1540,43 +1515,6 @@ namespace DQIntern
           m_currStates[1].updateState<5>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
           m_currStates[2].updateState<5>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
           m_currStates[3].updateState<5>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
-#else
-        case 0:
-          m_currStates[0].updateState<0>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<0>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<0>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<0>( scanInfo, m_prevStates, decisions[3] );
-          break;
-        case 1:
-          m_currStates[0].updateState<1>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<1>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<1>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<1>( scanInfo, m_prevStates, decisions[3] );
-          break;
-        case 2:
-          m_currStates[0].updateState<2>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<2>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<2>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<2>( scanInfo, m_prevStates, decisions[3] );
-          break;
-        case 3:
-          m_currStates[0].updateState<3>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<3>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<3>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<3>( scanInfo, m_prevStates, decisions[3] );
-          break;
-        case 4:
-          m_currStates[0].updateState<4>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<4>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<4>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<4>( scanInfo, m_prevStates, decisions[3] );
-          break;
-        default:
-          m_currStates[0].updateState<5>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<5>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<5>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<5>( scanInfo, m_prevStates, decisions[3] );
-#endif
         }
       }
 
@@ -1595,10 +1533,8 @@ namespace DQIntern
     //===== reset / pre-init =====
     const TUParameters& tuPars  = *g_Rom.getTUPars( tu.blocks[compID], compID );
     m_quant.initQuantBlock    ( tu, compID, cQP, lambda );
-#if JVET_V0106_RRC_RICE
     m_baseLevel = ctx.getBaseLevel();
     m_extRiceRRCFlag = tu.cs->sps->getSpsRangeExtension().getRrcRiceExtensionEnableFlag();
-#endif
     TCoeff*       qCoeff      = tu.getCoeffs( compID ).buf;
     const TCoeff* tCoeff      = srcCoeff.buf;
     const int     numCoeff    = tu.blocks[compID].area();

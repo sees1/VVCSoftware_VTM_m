@@ -149,7 +149,6 @@ void SEIPictureTiming::copyTo (SEIPictureTiming& target) const
   target.m_vclCpbDelayOffset = m_vclCpbDelayOffset;
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 bool SEIScalabilityDimensionInfo::isSDISameContent(SEIScalabilityDimensionInfo* sdiB)
 {
   if (!sdiB)
@@ -414,7 +413,6 @@ bool SEIMultiviewAcquisitionInfo::isMAISameContent(SEIMultiviewAcquisitionInfo *
   }
   return true;
 }
-#endif
 
 // Static member
 const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
@@ -428,9 +426,7 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::USER_DATA_UNREGISTERED:               return "User data unregistered";
     case SEI::FILM_GRAIN_CHARACTERISTICS:           return "Film grain characteristics";           // not currently decoded
     case SEI::FRAME_PACKING:                        return "Frame packing arrangement";
-#if JVET_V0061_SEI
     case SEI::DISPLAY_ORIENTATION:                  return "Display orientation";
-#endif
     case SEI::PARAMETER_SETS_INCLUSION_INDICATION:  return "Parameter sets inclusion indication";
     case SEI::DECODING_UNIT_INFO:                   return "Decoding unit information";
     case SEI::SCALABLE_NESTING:                     return "Scalable nesting";
@@ -443,28 +439,20 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::CONTENT_LIGHT_LEVEL_INFO:             return "Content light level information";
     case SEI::AMBIENT_VIEWING_ENVIRONMENT:          return "Ambient viewing environment";
     case SEI::CONTENT_COLOUR_VOLUME:                return "Content colour volume";
-#if JVET_V0108
     case SEI::COLOUR_TRANSFORM_INFO:                return "Colour transform information";
-#endif
     case SEI::EQUIRECTANGULAR_PROJECTION:           return "Equirectangular projection";
     case SEI::SPHERE_ROTATION:                      return "Sphere rotation";
     case SEI::REGION_WISE_PACKING:                  return "Region wise packing information";
     case SEI::OMNI_VIEWPORT:                        return "Omni viewport";
     case SEI::GENERALIZED_CUBEMAP_PROJECTION:       return "Generalized cubemap projection";
-#if JVET_U0082_SDI_MAI_ACI_DRI
     case SEI::ALPHA_CHANNEL_INFO:                   return "Alpha channel information";
     case SEI::DEPTH_REPRESENTATION_INFO:            return "Depth representation information";
     case SEI::MULTIVIEW_ACQUISITION_INFO:           return "Multiview acquisition information";
-#endif
     case SEI::SAMPLE_ASPECT_RATIO_INFO:             return "Sample aspect ratio information";
     case SEI::SUBPICTURE_LEVEL_INFO:                return "Subpicture level information";
     case SEI::ANNOTATED_REGIONS:                    return "Annotated Region";
-#if JVET_U0082_SDI_MAI_ACI_DRI
     case SEI::SCALABILITY_DIMENSION_INFO:           return "Scalability dimension information";
-#endif
-#if JVET_U0084_EDRAP
     case SEI::EXTENDED_DRAP_INDICATION:             return "Extended DRAP indication";
-#endif
     default:                                        return "Unknown";
   }
 }

@@ -214,9 +214,7 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
   int off = 0;
   int cnt = 0;
   bool idr_found = false;
-#if JVET_V0108
   bool is_pre_sei_before_idr = true;
-#endif
 
   std::vector<uint8_t> out;
   out.reserve(v.size());
@@ -272,12 +270,10 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
       parameterSetManager.storePPS( pps, inp_nalu.getBitstream().getFifo() );
     }
 
-#if JVET_V0108
     if (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP)
     {
       is_pre_sei_before_idr = false;
     }
-#endif
     if(nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP)
     {
       poc = 0;
@@ -338,16 +334,10 @@ std::vector<uint8_t> filter_segment(const std::vector<uint8_t> & v, int idx, int
       skip_next_sei = true;
       idr_found = true;
     }
-#if JVET_V0108
     if ((idx > 1 && (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP))
       || ((idx > 1 && !idr_found) && (nalu_type == NAL_UNIT_OPI || nalu_type == NAL_UNIT_DCI || nalu_type == NAL_UNIT_VPS || nalu_type == NAL_UNIT_SPS || nalu_type == NAL_UNIT_PPS || nalu_type == NAL_UNIT_PREFIX_APS || nalu_type == NAL_UNIT_SUFFIX_APS || nalu_type == NAL_UNIT_PH || nalu_type == NAL_UNIT_ACCESS_UNIT_DELIMITER))
       || (nalu_type == NAL_UNIT_SUFFIX_SEI && skip_next_sei)
       || (idx > 1 && nalu_type == NAL_UNIT_PREFIX_SEI && is_pre_sei_before_idr))
-#else
-    if ((idx > 1 && (nalu_type == NAL_UNIT_CODED_SLICE_IDR_W_RADL || nalu_type == NAL_UNIT_CODED_SLICE_IDR_N_LP))
-      || ((idx > 1 && !idr_found) && (nalu_type == NAL_UNIT_OPI || nalu_type == NAL_UNIT_DCI || nalu_type == NAL_UNIT_VPS || nalu_type == NAL_UNIT_SPS || nalu_type == NAL_UNIT_PPS || nalu_type == NAL_UNIT_PREFIX_APS || nalu_type == NAL_UNIT_SUFFIX_APS || nalu_type == NAL_UNIT_PH || nalu_type == NAL_UNIT_ACCESS_UNIT_DELIMITER || nalu_type == NAL_UNIT_PREFIX_SEI))
-      || (nalu_type == NAL_UNIT_SUFFIX_SEI && skip_next_sei))
-#endif
     {
     }
     else

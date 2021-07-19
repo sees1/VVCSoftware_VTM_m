@@ -38,9 +38,7 @@
 #ifndef __CONTEXTMODELLING__
 #define __CONTEXTMODELLING__
 
-#if JVET_V0106_RRC_RICE
 #include "Rom.h"
-#endif
 #include "CommonDef.h"
 #include "Contexts.h"
 #include "Slice.h"
@@ -194,7 +192,6 @@ public:
     return unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
   }
 
-#if JVET_V0106_RRC_RICE
   void updateRiceStat(unsigned &riceStat, TCoeff rem, int remainderFlag)
   {
     if (remainderFlag)
@@ -313,7 +310,6 @@ public:
     unsigned riceParam = templateAbsSumExt(scanPos, coeff, baseLevel);
     return riceParam;
   }
-#endif
 
   unsigned sigCtxIdAbsTS( int scanPos, const TCoeff* coeff )
   {
@@ -486,14 +482,12 @@ public:
 
   int                       regBinLimit;
 
-#if JVET_V0106_RRC_RICE
   unsigned  getBaseLevel()                                   { return m_cctxBaseLevel; };
   void setBaseLevel(int value)                               { m_cctxBaseLevel = value; };
   TCoeff getHistValue()                                      { return m_histValue; };
   void setHistValue(TCoeff value)                            { m_histValue = value; };
   bool getUpdateHist() { return m_updateHist; };
   void setUpdateHist(bool value) { m_updateHist = value; };
-#endif
 
 private:
   // constant
@@ -549,11 +543,9 @@ private:
   int                       m_remainingContextBins;
   std::bitset<MLS_GRP_NUM>  m_sigCoeffGroupFlag;
   const bool                m_bdpcm;
-#if JVET_V0106_RRC_RICE
   int                       m_cctxBaseLevel; 
   TCoeff                    m_histValue;    
   bool                      m_updateHist;
-#endif
 };
 
 

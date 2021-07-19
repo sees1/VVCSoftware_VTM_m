@@ -523,10 +523,8 @@ UnitScale g_miScaling( MIN_CU_LOG2, MIN_CU_LOG2 );
 // ====================================================================================================================
 // Scanning order & context model mapping
 // ====================================================================================================================
-#if JVET_V0106_RRC_RICE
 int g_riceT[4] = { 32,128, 512, 2048 };
 int g_riceShift[5] = { 0, 2, 4, 6, 8 };
-#endif
 // scanning order table
 ScanElement *g_scanOrder[SCAN_NUMBER_OF_GROUP_TYPES][SCAN_NUMBER_OF_TYPES][MAX_CU_SIZE / 2 + 1][MAX_CU_SIZE / 2 + 1];
 ScanElement  g_coefTopLeftDiagScan8x8[ MAX_CU_SIZE / 2 + 1 ][ 64 ];

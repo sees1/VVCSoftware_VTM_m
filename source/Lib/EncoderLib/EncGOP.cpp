@@ -87,16 +87,12 @@ EncGOP::EncGOP()
   m_bFirst              = true;
   m_iLastRecoveryPicPOC = 0;
   m_latestDRAPPOC       = MAX_INT;
-#if JVET_U0084_EDRAP
   m_latestEDRAPPOC      = MAX_INT;
   m_latestEdrapLeadingPicDecodableFlag = false;
-#endif
   m_lastRasPoc          = MAX_INT;
-#if JVET_V0054_TSRC_RICE
   ::memset(m_riceBit, 0, 8 * 2 * sizeof(unsigned));
   ::memset(m_preQP, MAX_INT, 2 * sizeof(int));
   m_preIPOC             = 0;
-#endif
 
   m_pcCfg               = NULL;
   m_pcSliceEncoder      = NULL;
@@ -777,7 +773,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     seiMessages.push_back(seiContentColourVolume);
   }
   
-#if JVET_U0082_SDI_MAI_ACI_DRI
   if (m_pcCfg->getSdiSEIEnabled())
   {
     SEIScalabilityDimensionInfo *seiScalabilityDimensionInfo = new SEIScalabilityDimensionInfo;
@@ -805,8 +800,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIDepthRepresentationInfo(seiDepthRepresentationInfo);
     seiMessages.push_back(seiDepthRepresentationInfo);
   }
-#endif
-#if JVET_V0108
   // colour transform information
   if (m_pcCfg->getCtiSEIEnabled())
   {
@@ -814,7 +807,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIColourTransformInfo(seiCTI);
     seiMessages.push_back(seiCTI);
   }
-#endif
 }
 
 void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice)
@@ -845,7 +837,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
     seiMessages.push_back(dependentRAPIndicationSEI);
   }
 
-#if JVET_U0084_EDRAP
   if (m_pcEncLib->getEdrapIndicationSEIEnabled() && slice->getEdrapRapId() > 0)
   {
     SEIExtendedDrapIndication *seiExtendedDrapIndication = new SEIExtendedDrapIndication();
@@ -861,7 +852,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
     }
     seiMessages.push_back(seiExtendedDrapIndication);
   }
-#endif
 
   // insert one Annotated Region SEI for the picture (if the file exists)
   if (!m_pcCfg->getAnnotatedRegionSEIFileRoot().empty())
@@ -927,9 +917,6 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
   // update decoding unit parameters
   if ((m_pcCfg->getPictureTimingSEIEnabled() || m_pcCfg->getDecodingUnitInfoSEIEnabled()) && slice->getNalUnitLayerId() == slice->getVPS()->getLayerId(0))
   {
- #if !JVET_V0111_DU
-    int picSptDpbOutputDuDelay = 0;
-#endif
     SEIPictureTiming *pictureTimingSEI = new SEIPictureTiming();
 
     // DU parameters
@@ -1123,12 +1110,6 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
     }
     int factor = hrd->getTickDivisorMinus2() + 2;
     pictureTimingSEI->m_picDpbOutputDuDelay = factor * pictureTimingSEI->m_picDpbOutputDelay;
-#if !JVET_V0111_DU
-    if( m_pcCfg->getDecodingUnitInfoSEIEnabled() )
-    {
-      picSptDpbOutputDuDelay = factor * pictureTimingSEI->m_picDpbOutputDelay;
-    }
-#endif
     if (m_bufferingPeriodSEIPresentInAU)
     {
       for( int i = temporalId ; i < maxNumSubLayers ; i ++ )
@@ -1165,9 +1146,6 @@ void EncGOP::xCreatePictureTimingSEI  (int IRAPGOPid, SEIMessages& seiMessages, 
           duInfoSEI->m_duSptCpbRemovalDelayIncrement[j] = pictureTimingSEI->m_duCpbRemovalDelayMinus1[i*maxNumSubLayers+j] + 1;
         }
         duInfoSEI->m_dpbOutputDuDelayPresentFlag = false;
-#if !JVET_V0111_DU
-        duInfoSEI->m_picSptDpbOutputDuDelay = picSptDpbOutputDuDelay;
-#endif
 
         duInfoSeiMessages.push_back(duInfoSEI);
       }
@@ -1345,7 +1323,6 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
     }
   }
 }
-#if JVET_Q0443_MINCR_SEI
 
 static void
 validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBytesInVclNalUnits, const Slice *pSlice, const EncCfg *pCfg, const SEISubpicureLevelInfo &seiSubpic, const int subPicIdx, const int layerId)
@@ -1380,7 +1357,6 @@ validateMinCrRequirements(const ProfileLevelTierFeatures &plt, std::size_t numBy
   }
 }
 
-#endif
 static std::size_t
 cabac_zero_word_padding(const Slice *const pcSlice,
                         const Picture *const pcPic,
@@ -2303,13 +2279,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         m_associatedIRAPType[pcPic->layerId] = pcSlice->getNalUnitType();
         m_associatedIRAPPOC[pcPic->layerId] = pocCurr;
-#if JVET_U0084_EDRAP
         if (m_pcEncLib->getEdrapIndicationSEIEnabled())
         {
           m_latestEDRAPPOC = MAX_INT;
           pcPic->setEdrapRapId(0);
         }
-#endif
       }
       pcSlice->setAssociatedIRAPType(m_associatedIRAPType[pcPic->layerId]);
       pcSlice->setAssociatedIRAPPOC(m_associatedIRAPPOC[pcPic->layerId]);
@@ -2348,13 +2322,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         m_associatedIRAPType[pcPic->layerId] = pcSlice->getNalUnitType();
         m_associatedIRAPPOC[pcPic->layerId] = pocCurr;
-#if JVET_U0084_EDRAP
         if (m_pcEncLib->getEdrapIndicationSEIEnabled())
         {
           m_latestEDRAPPOC = MAX_INT;
           pcPic->setEdrapRapId(0);
         }
-#endif
       }
       pcSlice->setAssociatedIRAPType(m_associatedIRAPType[pcPic->layerId]);
       pcSlice->setAssociatedIRAPPOC(m_associatedIRAPPOC[pcPic->layerId]);
@@ -2398,7 +2370,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       }
     }
 
-#if JVET_U0084_EDRAP
     pcSlice->setEnableEdrapSEI(m_pcEncLib->getEdrapIndicationSEIEnabled());
     if (m_pcEncLib->getEdrapIndicationSEIEnabled())
     {
@@ -2449,20 +2420,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         }
       }
     }
-#endif
 
-#if JVET_U0084_EDRAP
     if (pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL0(), 0, false) != 0 || pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL1(), 1, false) != 0 ||
         (m_pcEncLib->getDependentRAPIndicationSEIEnabled() && !pcSlice->isIRAP() && ( pcSlice->isDRAP() || !pcSlice->isPOCInRefPicList(pcSlice->getRPL0(), pcSlice->getAssociatedIRAPPOC())) ) ||
         (m_pcEncLib->getEdrapIndicationSEIEnabled() && !pcSlice->isIRAP() && ( pcSlice->getEdrapRapId() > 0 || !pcSlice->isPOCInRefPicList(pcSlice->getRPL0(), pcSlice->getAssociatedIRAPPOC()) ) )
       || ((m_pcEncLib->getAvoidIntraInDepLayer() || !pcSlice->isIRAP()) && pcSlice->getPic()->cs->vps && m_pcEncLib->getNumRefLayers(pcSlice->getPic()->cs->vps->getGeneralLayerIdx(m_pcEncLib->getLayerId())))
       )
-#else
-    if (pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL0(), 0, false) != 0 || pcSlice->checkThatAllRefPicsAreAvailable(rcListPic, pcSlice->getRPL1(), 1, false) != 0 ||
-        (m_pcEncLib->getDependentRAPIndicationSEIEnabled() && !pcSlice->isIRAP() && ( pcSlice->isDRAP() || !pcSlice->isPOCInRefPicList(pcSlice->getRPL0(), pcSlice->getAssociatedIRAPPOC())) )
-      || ((m_pcEncLib->getAvoidIntraInDepLayer() || !pcSlice->isIRAP()) && pcSlice->getPic()->cs->vps && m_pcEncLib->getNumRefLayers(pcSlice->getPic()->cs->vps->getGeneralLayerIdx(m_pcEncLib->getLayerId())))
-      )
-#endif
     {
       xCreateExplicitReferencePictureSetFromReference( pcSlice, rcListPic, pcSlice->getRPL0(), pcSlice->getRPL1() );
     }
@@ -3038,7 +3001,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       for(uint32_t sliceIdx = 0; sliceIdx < pcPic->cs->pps->getNumSlicesInPic(); sliceIdx++ )
       {
         pcSlice->setSliceMap( pcPic->cs->pps->getSliceMap( sliceIdx ) );
-#if JVET_V0054_TSRC_RICE
         if (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && (pcPic->cs->pps->getNumSlicesInPic() == 1))
         {
           if (!pcSlice->isIntra())
@@ -3090,7 +3052,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
              pcSlice->setRiceBit(idx, m_riceBit[idx][0]);
           }
         }
-#endif
         if( pcPic->cs->pps->getRectSliceFlag() )
         {
           Position firstCtu;
@@ -3245,11 +3206,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       // SAO parameter estimation using non-deblocked pixels for CTU bottom and right boundary areas
       if( pcSlice->getSPS()->getSAOEnabledFlag() && m_pcCfg->getSaoCtuBoundary() )
       {
-#if JVET_V0095_ALF_SAO_TRUE_ORG
         m_pcSAO->getPreDBFStatistics( cs, m_pcCfg->getAlfSaoTrueOrg() );
-#else
-        m_pcSAO->getPreDBFStatistics( cs );
-#endif
       }
 
       //-- Loop filter
@@ -3285,19 +3242,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         bool sliceEnabled[MAX_NUM_COMPONENT];
         m_pcSAO->initCABACEstimator( m_pcEncLib->getCABACEncoder(), m_pcEncLib->getCtxCache(), pcSlice );
 
-#if JVET_V0095_ALF_SAO_TRUE_ORG
         m_pcSAO->SAOProcess( cs, sliceEnabled, pcSlice->getLambdas(),
 #if ENABLE_QPA
                              (m_pcCfg->getUsePerceptQPA() && !m_pcCfg->getUseRateCtrl() && pcSlice->getPPS()->getUseDQP() ? m_pcEncLib->getRdCost ()->getChromaWeight() : 0.0),
 #endif
                              m_pcCfg->getTestSAODisableAtPictureLevel(), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma(), m_pcCfg->getSaoCtuBoundary(), m_pcCfg->getSaoGreedyMergeEnc(), m_pcCfg->getAlfSaoTrueOrg() );
-#else
-        m_pcSAO->SAOProcess( cs, sliceEnabled, pcSlice->getLambdas(),
-#if ENABLE_QPA
-                             (m_pcCfg->getUsePerceptQPA() && !m_pcCfg->getUseRateCtrl() && pcSlice->getPPS()->getUseDQP() ? m_pcEncLib->getRdCost ()->getChromaWeight() : 0.0),
-#endif
-                             m_pcCfg->getTestSAODisableAtPictureLevel(), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma(), m_pcCfg->getSaoCtuBoundary(), m_pcCfg->getSaoGreedyMergeEnc() );
-#endif
         //assign SAO slice header
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
@@ -3784,7 +3733,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           binCountsInNalUnits+=numBinsCoded;
           subPicStats[subpicIdx].numBinsWritten += numBinsCoded;
         }
-#if JVET_V0054_TSRC_RICE
         if (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && (pcPic->cs->pps->getNumSlicesInPic() == 1))
         {
           if (pcSlice->getSliceType() == I_SLICE)
@@ -3800,7 +3748,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           }
           m_preQP[0] = pcSlice->getSliceQp();
         }
-#endif
         {
           // Construct the final bitstream by concatenating substreams.
           // The final bitstream is either nalu.m_Bitstream or pcBitstreamRedirect;
@@ -3855,14 +3802,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           // Check picture level encoding constraints/requirements
           ProfileLevelTierFeatures profileLevelTierFeatures;
           profileLevelTierFeatures.extractPTLInformation(*(pcSlice->getSPS()));
-#if JVET_Q0443_MINCR_SEI
           const SEIMessages& subPictureLevelInfoSEIs = getSeisByType(leadingSeiMessages, SEI::SUBPICTURE_LEVEL_INFO);
           if (!subPictureLevelInfoSEIs.empty())
           {
             const SEISubpicureLevelInfo& seiSubpic = static_cast<const SEISubpicureLevelInfo&>(*subPictureLevelInfoSEIs.front());
             validateMinCrRequirements(profileLevelTierFeatures, subPicStats[subpicIdx].numBytesInVclNalUnits, pcSlice, m_pcCfg, seiSubpic, subpicIdx, m_pcEncLib->getLayerId());
           }
-#endif
           sumZeroWords += cabac_zero_word_padding(pcSlice, pcPic, subPicStats[subpicIdx].numBinsWritten, subPicStats[subpicIdx].numBytesInVclNalUnits, 0,
                                                   accessUnit.back()->m_nalUnitData, m_pcCfg->getCabacZeroWordPaddingEnabled(), profileLevelTierFeatures);
         }
@@ -4804,12 +4749,10 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
   {
     c = 'D';
   }
-#if JVET_U0084_EDRAP
   if (m_pcCfg->getEdrapIndicationSEIEnabled() && pcSlice->getEdrapRapId() > 0)
   {
     c = 'E';
   }
-#endif
 
   if( g_verbosity >= NOTICE )
   {
@@ -6046,26 +5989,16 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
-#if JVET_U0084_EDRAP
           if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP)
               && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
-#else
-          if (!rpl0->isRefPicLongterm(ii) && rpcPic->referenced
-              && rpcPic->getPOC() == slice->getPOC() + rpl0->getRefPicIdentifier(ii)
-              && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;
           }
-#if JVET_U0084_EDRAP
           else if (rpl0->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl0->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP)
               && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
-#else
-          else if (rpl0->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl0->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;
@@ -6141,7 +6074,6 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
       }
     }
   }
-#if JVET_U0084_EDRAP
   if( slice->getEnableEdrapSEI() )
   {
     pLocalRPL0->setNumberOfShorttermPictures( numOfSTRPL0 );
@@ -6171,7 +6103,6 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
       }
     }
   }
-#endif
 
   // now add higher TId refs
   for (int i = 0; i < higherTLayerRefs.size(); i++)
@@ -6210,25 +6141,15 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (rpcPic->layerId == pic->layerId)
         {
           hasHigherTId = rpcPic->temporalId > pic->temporalId;
-#if JVET_U0084_EDRAP
           if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
               && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
               && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP)
               && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
-#else
-          if (!rpl1->isRefPicLongterm(ii) && rpcPic->referenced
-              && rpcPic->getPOC() == slice->getPOC() + rpl1->getRefPicIdentifier(ii)
-              && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;
           }
-#if JVET_U0084_EDRAP
           else if (rpl1->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl1->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP) && !slice->isPocRestrictedByEdrap(rpcPic->getPOC()))
-#else
-          else if (rpl1->isRefPicLongterm(ii) && rpcPic->referenced && (rpcPic->getPOC() & (pocCycle - 1)) == rpl1->getRefPicIdentifier(ii) && !slice->isPocRestrictedByDRAP(rpcPic->getPOC(), rpcPic->precedingDRAP))
-#endif
           {
             isAvailable = true;
             break;
@@ -6383,7 +6304,6 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL1->setLtrpInSliceHeaderFlag( 1 );
   slice->setRPL1idx( -1 );
   *slice->getRPL1() = localRPL1;
-#if JVET_U0084_EDRAP
   // To ensure that any picture in the RefRapIds has been included in the refrence list.
   for (int i = 0; i < slice->getEdrapNumRefRapPics(); i++)
   {
@@ -6393,7 +6313,6 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
       slice->deleteEdrapRefRapIds(i);
     }
   }
-#endif
 
 }
 //! \}

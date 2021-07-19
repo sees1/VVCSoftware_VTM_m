@@ -226,9 +226,7 @@ protected:
   int       m_iDecodingRefreshType;                           ///< random access type
   int       m_iGOPSize;                                       ///< GOP size of hierarchical structure
   int       m_drapPeriod;                                     ///< period of dependent RAP pictures
-#if JVET_U0084_EDRAP
   int       m_edrapPeriod;                                    ///< period of extended dependent RAP pictures
-#endif
   bool      m_rewriteParamSets;                              ///< Flag to enable rewriting of parameter sets at random access points
   RPLEntry  m_RPLList0[MAX_GOP];                               ///< the RPL entries from the config file
   RPLEntry  m_RPLList1[MAX_GOP];                               ///< the RPL entries from the config file
@@ -243,9 +241,7 @@ protected:
   uint32_t      m_log2MaxTransformSkipBlockSize;                  ///< transform-skip maximum size (minimum of 2)
   bool      m_transformSkipRotationEnabledFlag;               ///< control flag for transform-skip/transquant-bypass residual rotation
   bool      m_transformSkipContextEnabledFlag;                ///< control flag for transform-skip/transquant-bypass single significance map context
-#if JVET_V0106_RRC_RICE
   bool      m_rrcRiceExtensionEnableFlag;                        ///< control flag for enabling extension of the Golomb-Rice parameter derivation for RRC
-#endif
   bool      m_persistentRiceAdaptationEnabledFlag;            ///< control flag for Golomb-Rice parameter adaptation over each slice
   bool      m_cabacBypassAlignmentEnabledFlag;
   bool      m_ISP;
@@ -291,14 +287,12 @@ protected:
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping;      ///< mapping from luma level to Delta QP.
 #endif
   SEIMasteringDisplay m_masteringDisplay;
-#if JVET_V0078
   bool      m_smoothQPReductionEnable;
   double    m_smoothQPReductionThreshold;
   double    m_smoothQPReductionModelScale;
   double    m_smoothQPReductionModelOffset;
   int       m_smoothQPReductionLimit;
   int       m_smoothQPReductionPeriodicity;
-#endif
 
   bool      m_bUseAdaptiveQP;                                 ///< Flag for enabling QP adaptation based on a psycho-visual model
   int       m_iQPAdaptationRange;                             ///< dQP range by QP adaptation
@@ -424,9 +418,7 @@ protected:
   int       m_MSBExtendedBitDepth[MAX_NUM_CHANNEL_TYPE];      ///< bit-depth of input samples after MSB extension
   int       m_internalBitDepth[MAX_NUM_CHANNEL_TYPE];         ///< bit-depth codec operates at (input/output files will be converted)
   bool      m_extendedPrecisionProcessingFlag;
-#if JVET_V0054_TSRC_RICE
   bool      m_tsrcRicePresentFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
 
   //coding tools (chroma format)
@@ -516,12 +508,10 @@ protected:
   int       m_framePackingSEIId;
   int       m_framePackingSEIQuincunx;
   int       m_framePackingSEIInterpretation;
-#if JVET_V0061_SEI
   bool      m_doSEIEnabled;
   bool      m_doSEICancelFlag;
   bool      m_doSEIPersistenceFlag;
   int       m_doSEITransformType;
-#endif
   bool      m_parameterSetsInclusionIndicationSEIEnabled;
   int       m_selfContainedClvsFlag;
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI
@@ -546,7 +536,6 @@ protected:
   uint32_t  m_aveSEIAmbientIlluminance;
   uint32_t  m_aveSEIAmbientLightX;
   uint32_t  m_aveSEIAmbientLightY;
-#if JVET_V0108
   // colour tranform information sei
   bool      m_ctiSEIEnabled;
   uint32_t  m_ctiSEIId;
@@ -560,7 +549,6 @@ protected:
   uint32_t  m_ctiSEINumberChromaLut;
   int       m_ctiSEIChromaOffset;
   LutModel  m_ctiSEILut[MAX_NUM_COMPONENT];
-#endif
   // content colour volume sei
   bool      m_ccvSEIEnabled;
   bool      m_ccvSEICancelFlag;
@@ -574,7 +562,6 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information sei
   bool              m_sdiSEIEnabled;
   int               m_sdiSEIMaxLayersMinus1;
@@ -635,7 +622,6 @@ protected:
   int       m_driSEIDisparityRefViewId;
   int       m_driSEINonlinearNumMinus1;
   std::vector<uint32_t> m_driSEINonlinearModel;
-#endif
 
   bool      m_erpSEIEnabled;
   bool      m_erpSEICancelFlag;
@@ -799,9 +785,7 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   bool        m_alfSaoTrueOrg;
-#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;

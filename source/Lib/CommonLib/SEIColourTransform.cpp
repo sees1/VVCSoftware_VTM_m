@@ -37,7 +37,6 @@
 
 #include "SEIColourTransform.h"
 
-#if JVET_V0108
 #include "SEI.h"
 #include "Unit.h"
 #include "Buffer.h"
@@ -197,4 +196,3 @@ void SEIColourTransformApply::generateColourTransfLUTs()
     }
   }
 }
-#endif

@@ -95,10 +95,8 @@ private:
 
 
   SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices, excluding prefix SEIs...
-#if JVET_U0082_SDI_MAI_ACI_DRI
   SEIScalabilityDimensionInfo* m_sdiSEIInFirstAU;
   SEIMultiviewAcquisitionInfo* m_maiSEIInFirstAU;
-#endif
 
 
   // functional classes
@@ -132,11 +130,9 @@ private:
   int                     m_prevPicPOC;
   int                     m_prevTid0POC;
   bool                    m_bFirstSliceInPicture;
-#if JVET_V0108
   bool                    m_firstPictureInSequence;
   SEIColourTransformApply m_colourTranfParams;
   PelStorage              m_invColourTransfBuf;
-#endif
   bool                    m_firstSliceInSequence[MAX_VPS_LAYERS];
   bool                    m_firstSliceInBitstream;
   bool                    m_isFirstAuInCvs;
@@ -246,9 +242,6 @@ public:
   void  updatePrevIRAPAndGDRSubpic();
   bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
 
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  bool  getAudIrapOrGdrAuFlag() const       { return m_audIrapOrGdrAuFlag;  }
-#endif
   bool  getNoOutputPriorPicsFlag () const   { return m_isNoOutputPriorPics; }
   void  setNoOutputPriorPicsFlag (bool val) { m_isNoOutputPriorPics = val; }
   void  setFirstSliceInPicture (bool val)  { m_bFirstSliceInPicture = val; }
@@ -336,9 +329,7 @@ protected:
   void      xParsePrefixSEImessages();
   void      xParsePrefixSEIsForUnknownVCLNal();
   void      xCheckPrefixSEIMessages( SEIMessages& prefixSEIs );
-#if JVET_V0111_DU
   void      xCheckDUISEIMessages(SEIMessages &prefixSEIs);
-#endif
 
 
   void  xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType );

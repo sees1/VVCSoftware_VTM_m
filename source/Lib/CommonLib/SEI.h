@@ -61,33 +61,23 @@ public:
     USER_DATA_UNREGISTERED               = 5,
     FILM_GRAIN_CHARACTERISTICS           = 19,
     FRAME_PACKING                        = 45,
-#if JVET_V0061_SEI
     DISPLAY_ORIENTATION                  = 47,
-#endif
     PARAMETER_SETS_INCLUSION_INDICATION  = 129,
     DECODING_UNIT_INFO                   = 130,
     DECODED_PICTURE_HASH                 = 132,
     SCALABLE_NESTING                     = 133,
     MASTERING_DISPLAY_COLOUR_VOLUME      = 137,
-#if JVET_V0108
     COLOUR_TRANSFORM_INFO                = 142,
-#endif
     DEPENDENT_RAP_INDICATION             = 145,
     EQUIRECTANGULAR_PROJECTION           = 150,
     SPHERE_ROTATION                      = 154,
     REGION_WISE_PACKING                  = 155,
     OMNI_VIEWPORT                        = 156,
     GENERALIZED_CUBEMAP_PROJECTION       = 153,
-#if JVET_U0082_SDI_MAI_ACI_DRI
     ALPHA_CHANNEL_INFO                   = 165,
-#endif
     FRAME_FIELD_INFO                     = 168,
-#if JVET_U0082_SDI_MAI_ACI_DRI
     DEPTH_REPRESENTATION_INFO            = 177,
-#endif
-#if JVET_U0082_SDI_MAI_ACI_DRI
     MULTIVIEW_ACQUISITION_INFO           = 179,
-#endif
     SUBPICTURE_LEVEL_INFO                = 203,
     SAMPLE_ASPECT_RATIO_INFO             = 204,
     CONTENT_LIGHT_LEVEL_INFO             = 144,
@@ -95,12 +85,8 @@ public:
     AMBIENT_VIEWING_ENVIRONMENT          = 148,
     CONTENT_COLOUR_VOLUME                = 149,
     ANNOTATED_REGIONS                    = 202,
-#if JVET_U0082_SDI_MAI_ACI_DRI
     SCALABILITY_DIMENSION_INFO           = 205,
-#endif
-#if JVET_U0084_EDRAP
     EXTENDED_DRAP_INDICATION             = 206,
-#endif
   };
 
   SEI() {}
@@ -223,7 +209,6 @@ public:
   uint8_t              m_gcmpGuardBandSamplesMinus1;
 };
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 class SEIScalabilityDimensionInfo : public SEI
 {
 public:
@@ -404,7 +389,6 @@ public:
   int m_driDepthNonlinearRepresentationNumMinus1;
   std::vector<int> m_driDepthNonlinearRepresentationModel;
 };
-#endif
 
 class SEISampleAspectRatioInfo : public SEI
 {
@@ -587,11 +571,7 @@ public:
   SEIDecodingUnitInfo()
     : m_decodingUnitIdx(0)
     , m_dpbOutputDuDelayPresentFlag(false)
- #if JVET_V0111_DU
     , m_picSptDpbOutputDuDelay(-1)
-#else
-    , m_picSptDpbOutputDuDelay(0)
-#endif
   {
     ::memset(m_duiSubLayerDelaysPresentFlag, 0, sizeof(m_duiSubLayerDelaysPresentFlag));
     ::memset(m_duSptCpbRemovalDelayIncrement, 0, sizeof(m_duSptCpbRemovalDelayIncrement));
@@ -663,7 +643,6 @@ public:
   bool m_upsampledAspectRatio;
 };
 
-#if JVET_V0061_SEI
 class SEIDisplayOrientation : public SEI
 {
 public:
@@ -676,7 +655,6 @@ public:
   bool                  m_doPersistenceFlag;
   int                   m_doTransformType;
 };
-#endif
 
 class SEIParameterSetsInclusionIndication : public SEI
 {
@@ -841,7 +819,6 @@ public:
   uint16_t m_ambientLightY;
 };
 
-#if JVET_V0108
 class SEIColourTransformInfo : public SEI
 {
 public:
@@ -864,7 +841,6 @@ public:
   uint16_t m_log2NumberOfPointsPerLut;
   LutModel m_lut[MAX_NUM_COMPONENT];
 };
-#endif
 class SEIContentColourVolume : public SEI
 {
 public:
@@ -977,7 +953,6 @@ public:
   std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
 };
 
-#if JVET_U0084_EDRAP
 class SEIExtendedDrapIndication : public SEI
 {
 public:
@@ -992,7 +967,6 @@ public:
   int               m_edrapIndicationNumRefRapPicsMinus1;
   std::vector<int>  m_edrapIndicationRefRapId;
 };
-#endif
 //! \}
 
 

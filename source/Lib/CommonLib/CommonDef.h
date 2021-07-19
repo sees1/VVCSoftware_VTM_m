@@ -282,11 +282,7 @@ static const int MAX_NUM_QP_VALUES =    MAX_QP + 1 - MIN_QP_VALUE_FOR_16_BIT; //
 // Cost mode support
 static const int LOSSLESS_AND_MIXED_LOSSLESS_RD_COST_TEST_QP =      0; ///< QP to use for lossless coding.
 static const int LOSSLESS_AND_MIXED_LOSSLESS_RD_COST_TEST_QP_PRIME =4; ///< QP' to use for mixed_lossy_lossless coding.
-#if JVET_V0106_RRC_RICE
 static const int RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS = MAX_NUM_COMPONENT;
-#else
-static const int RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS =     4;
-#endif
 
 static const int RExt__PREDICTION_WEIGHTING_ANALYSIS_DC_PRECISION = 0; ///< Additional fixed bit precision used during encoder-side weighting prediction analysis. Currently only used when high_precision_prediction_weighting_flag is set, for backwards compatibility reasons.
 
@@ -474,13 +470,9 @@ static const int SCALE_RATIO_BITS =                              14;
 static const int MAX_SCALING_RATIO =                              2;  // max downsampling ratio for RPR
 static const std::pair<int, int> SCALE_1X = std::pair<int, int>( 1 << SCALE_RATIO_BITS, 1 << SCALE_RATIO_BITS );  // scale ratio 1x
 static const int DELTA_QP_ACT[4] =                  { -5, 1, 3, 1 };
-#if JVET_V0054_TSRC_RICE
 static const int MAX_TSRC_RICE =                                  8;  ///<Maximum supported TSRC Rice parameter
 static const int MIN_TSRC_RICE =                                  1;  ///<Minimum supported TSRC Rice parameter
-#endif
-#if JVET_V0108
 static const int MAX_CTI_LUT_SIZE =                              64;  ///<Maximum colour transform LUT size for CTI SEI
-#endif
 // ====================================================================================================================
 // Macro functions
 // ====================================================================================================================

@@ -271,9 +271,7 @@ protected:
   int       m_maxDecPicBuffering[MAX_TLAYER];
   int       m_maxNumReorderPics[MAX_TLAYER];
   int       m_drapPeriod;
-#if JVET_U0084_EDRAP
   int       m_edrapPeriod;
-#endif
 
   int       m_iQP;                              //  if (AdaptiveQP == OFF)
   ChromaQpMappingTableParams m_chromaQpMappingTableParams;
@@ -460,9 +458,7 @@ protected:
   ChromaFormat m_chromaFormatIDC;
 
   bool      m_extendedPrecisionProcessingFlag;
-#if JVET_V0054_TSRC_RICE
   bool      m_tsrcRicePresentFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
   bool      m_bUseAdaptiveQP;
   int       m_iQPAdaptationRange;
@@ -494,22 +490,18 @@ protected:
   uint32_t      m_log2MaxTransformSkipBlockSize;
   bool      m_transformSkipRotationEnabledFlag;
   bool      m_transformSkipContextEnabledFlag;
-#if JVET_V0106_RRC_RICE
   bool      m_rrcRiceExtensionEnableFlag;
-#endif
   bool      m_persistentRiceAdaptationEnabledFlag;
   bool      m_cabacBypassAlignmentEnabledFlag;
 #if SHARP_LUMA_DELTA_QP
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping; ///< mapping from luma level to delta QP.
 #endif
-#if JVET_V0078
   bool      m_smoothQPReductionEnable;
   double    m_smoothQPReductionThreshold;
   double    m_smoothQPReductionModelScale;
   double    m_smoothQPReductionModelOffset;
   int       m_smoothQPReductionPeriodicity;
   int       m_smoothQPReductionLimit;
-#endif
   int*      m_aidQP;
   uint32_t      m_uiDeltaQpRD;
   bool      m_bFastDeltaQP;
@@ -545,20 +537,16 @@ protected:
   bool      m_pictureTimingSEIEnabled;
   bool      m_frameFieldInfoSEIEnabled;
   bool      m_dependentRAPIndicationSEIEnabled;
-#if JVET_U0084_EDRAP
   bool      m_edrapIndicationSEIEnabled;
-#endif
   bool      m_framePackingSEIEnabled;
   int       m_framePackingSEIType;
   int       m_framePackingSEIId;
   int       m_framePackingSEIQuincunx;
   int       m_framePackingSEIInterpretation;
-#if JVET_V0061_SEI  // Display orientation SEI message
   bool      m_doSEIEnabled;
   bool      m_doSEICancelFlag;
   bool      m_doSEIPersistenceFlag;
   int       m_doSEITransformType;
-#endif
   bool      m_parameterSetsInclusionIndicationSEIEnabled;
   bool      m_selfContainedClvsFlag;
   bool      m_bpDeltasGOPStructure;
@@ -660,7 +648,6 @@ protected:
   uint32_t  m_aveSEIAmbientIlluminance;
   uint16_t  m_aveSEIAmbientLightX;
   uint16_t  m_aveSEIAmbientLightY;
-#if JVET_V0108
   // colour tranform information sei
   bool      m_ctiSEIEnabled;
   uint32_t  m_ctiSEIId;
@@ -674,7 +661,6 @@ protected:
   uint32_t  m_ctiSEINumberChromaLut;
   int       m_ctiSEIChromaOffset;
   LutModel  m_ctiSEILut[MAX_NUM_COMPONENT];
-#endif
 // ccv sei
   bool      m_ccvSEIEnabled;
   bool      m_ccvSEICancelFlag;
@@ -688,7 +674,6 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // sdi sei
   bool              m_sdiSEIEnabled;
   int               m_sdiSEIMaxLayersMinus1;
@@ -749,7 +734,6 @@ protected:
   int       m_driSEIDisparityRefViewId;
   int       m_driSEINonlinearNumMinus1;
   std::vector<uint32_t> m_driSEINonlinearModel;
-#endif
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
@@ -846,9 +830,7 @@ protected:
   CfgVPSParameters m_cfgVPSParameters;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   bool        m_alfSaoTrueOrg;
-#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
@@ -1080,9 +1062,7 @@ public:
   void      setMaxDecPicBuffering           ( uint32_t u, uint32_t tlayer ) { m_maxDecPicBuffering[tlayer] = u;    }
   void      setMaxNumReorderPics            ( int  i, uint32_t tlayer ) { m_maxNumReorderPics[tlayer] = i;    }
   void      setDrapPeriod                   (int drapPeriod) { m_drapPeriod = drapPeriod; }
-#if JVET_U0084_EDRAP
   void      setEdrapPeriod                  (int edrapPeriod) { m_edrapPeriod = edrapPeriod; }
-#endif
 
   void      setBaseQP                       ( int   i )      { m_iQP = i; }
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
@@ -1403,7 +1383,6 @@ public:
   void      setLumaLevelToDeltaQPControls( const LumaLevelToDeltaQPMapping &lumaLevelToDeltaQPMapping ) { m_lumaLevelToDeltaQPMapping=lumaLevelToDeltaQPMapping; }
   const LumaLevelToDeltaQPMapping& getLumaLevelToDeltaQPMapping() const { return m_lumaLevelToDeltaQPMapping; }
 #endif
-#if JVET_V0078
   bool      getSmoothQPReductionEnable()                  const { return m_smoothQPReductionEnable; }
   void      setSmoothQPReductionEnable(bool value)        { m_smoothQPReductionEnable = value; }
   double    getSmoothQPReductionThreshold()               const { return m_smoothQPReductionThreshold; }
@@ -1416,14 +1395,11 @@ public:
   void      setSmoothQPReductionPeriodicity(int value)    { m_smoothQPReductionPeriodicity = value; }
   int       getSmoothQPReductionLimit()                   const { return m_smoothQPReductionLimit; }
   void      setSmoothQPReductionLimit(int value)          { m_smoothQPReductionLimit = value; }
-#endif
 
   bool      getExtendedPrecisionProcessingFlag         ()         const { return m_extendedPrecisionProcessingFlag;  }
   void      setExtendedPrecisionProcessingFlag         (bool value)     { m_extendedPrecisionProcessingFlag = value; }
-#if JVET_V0054_TSRC_RICE
   bool      getTSRCRicePresentFlag         ()         const { return m_tsrcRicePresentFlag;  }
   void      setTSRCRicePresentFlag         (bool value)     { m_tsrcRicePresentFlag = value; }
-#endif
   bool      getHighPrecisionOffsetsEnabledFlag() const { return m_highPrecisionOffsetsEnabledFlag; }
   void      setHighPrecisionOffsetsEnabledFlag(bool value) { m_highPrecisionOffsetsEnabledFlag = value; }
 
@@ -1458,9 +1434,7 @@ public:
   int       getMaxDecPicBuffering           (uint32_t tlayer) { return m_maxDecPicBuffering[tlayer]; }
   int       getMaxNumReorderPics            (uint32_t tlayer) { return m_maxNumReorderPics[tlayer]; }
   int       getDrapPeriod                   ()     { return m_drapPeriod; }
-#if JVET_U0084_EDRAP
   int       getEdrapPeriod                  ()     { return m_edrapPeriod; }
-#endif
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   int       getIntraQPOffset                () const    { return  m_intraQPOffset; }
   int       getLambdaFromQPEnable           () const    { return  m_lambdaFromQPEnable; }
@@ -1569,10 +1543,8 @@ public:
   void setUseBDPCM                                     ( bool b ) { m_useBDPCM  = b;   }
   bool getUseJointCbCr                                 ()         { return m_JointCbCrMode; }
   void setUseJointCbCr                                 (bool b)   { m_JointCbCrMode = b; }
-#if JVET_V0106_RRC_RICE
   bool getRrcRiceExtensionEnableFlag()                 const { return m_rrcRiceExtensionEnableFlag; }
   void setRrcRiceExtensionEnableFlag(const bool value) { m_rrcRiceExtensionEnableFlag = value; }
-#endif
   bool getPersistentRiceAdaptationEnabledFlag          ()                 const { return m_persistentRiceAdaptationEnabledFlag;  }
   void setPersistentRiceAdaptationEnabledFlag          (const bool value)       { m_persistentRiceAdaptationEnabledFlag = value; }
   bool getCabacBypassAlignmentEnabledFlag              ()       const      { return m_cabacBypassAlignmentEnabledFlag;  }
@@ -1649,10 +1621,8 @@ public:
   bool  getFrameFieldInfoSEIEnabled() const                           { return m_frameFieldInfoSEIEnabled; }
   void  setDependentRAPIndicationSEIEnabled(bool b)                  { m_dependentRAPIndicationSEIEnabled = b; }
   int   getDependentRAPIndicationSEIEnabled() const                  { return m_dependentRAPIndicationSEIEnabled; }
-#if JVET_U0084_EDRAP
   void  setEdrapIndicationSEIEnabled(bool b)                         { m_edrapIndicationSEIEnabled = b; }
   int   getEdrapIndicationSEIEnabled() const                         { return m_edrapIndicationSEIEnabled; }
-#endif
   void  setFramePackingArrangementSEIEnabled(bool b)                 { m_framePackingSEIEnabled = b; }
   bool  getFramePackingArrangementSEIEnabled() const                 { return m_framePackingSEIEnabled; }
   void  setFramePackingArrangementSEIType(int b)                     { m_framePackingSEIType = b; }
@@ -1663,7 +1633,6 @@ public:
   int   getFramePackingArrangementSEIQuincunx()                      { return m_framePackingSEIQuincunx; }
   void  setFramePackingArrangementSEIInterpretation(int b)           { m_framePackingSEIInterpretation = b; }
   int   getFramePackingArrangementSEIInterpretation()                { return m_framePackingSEIInterpretation; }
-#if JVET_V0061_SEI
   void  setDoSEIEnabled(bool b)                                      { m_doSEIEnabled = b; }
   bool  getDoSEIEnabled() const                                      { return m_doSEIEnabled; }
   void  setDoSEICancelFlag(bool b)                                   { m_doSEICancelFlag = b; }
@@ -1672,7 +1641,6 @@ public:
   bool  getDoSEIPersistenceFlag()                                    { return m_doSEIPersistenceFlag; }
   void  setDoSEITransformType(const int type)                        { m_doSEITransformType = type; }
   int   getDOSEITransformType() const                                { return m_doSEITransformType; }
-#endif
   void  setParameterSetsInclusionIndicationSEIEnabled(bool b)        { m_parameterSetsInclusionIndicationSEIEnabled = b; }
   bool  getParameterSetsInclusionIndicationSEIEnabled() const        { return m_parameterSetsInclusionIndicationSEIEnabled; }
   void  setSelfContainedClvsFlag(bool b)                             { m_selfContainedClvsFlag = b; }
@@ -1869,7 +1837,6 @@ public:
   uint16_t getAmbientViewingEnvironmentSEIAmbientLightX()            { return m_aveSEIAmbientLightX; }
   void  setAmbientViewingEnvironmentSEIAmbientLightY( uint16_t v )   { m_aveSEIAmbientLightY = v; }
   uint16_t getAmbientViewingEnvironmentSEIAmbientLightY()            { return m_aveSEIAmbientLightY; }
-#if JVET_V0108
   // colour tranform information sei
   void      setCtiSEIEnabled(bool b) { m_ctiSEIEnabled = b; }
   bool      getCtiSEIEnabled() { return m_ctiSEIEnabled; }
@@ -1896,7 +1863,6 @@ public:
   LutModel  getCtiSEILut(int idx) { return m_ctiSEILut[idx]; }
   void      setCtiSEILut(LutModel& cmp, int idx) { m_ctiSEILut[idx] = cmp; }
   LutModel* getCtiSEILuts() { return m_ctiSEILut; }
-#endif
   // ccv SEI
   void     setCcvSEIEnabled(bool b)                                  { m_ccvSEIEnabled = b; }
   bool     getCcvSEIEnabled()                                        { return m_ccvSEIEnabled; }
@@ -1922,7 +1888,6 @@ public:
   double   getCcvSEIMaxLuminanceValue  ()                            { return m_ccvSEIMaxLuminanceValue;  }
   void     setCcvSEIAvgLuminanceValue  (double dValue)               { m_ccvSEIAvgLuminanceValue = dValue; }
   double   getCcvSEIAvgLuminanceValue  ()                            { return m_ccvSEIAvgLuminanceValue;  }
-#if JVET_U0082_SDI_MAI_ACI_DRI
   // scalability dimension information SEI
   void     setSdiSEIEnabled(bool b)                                  { m_sdiSEIEnabled = b; }
   bool     getSdiSEIEnabled() const                                  { return m_sdiSEIEnabled; }
@@ -2039,7 +2004,6 @@ public:
   int      getDriSEINonlinearNumMinus1() const                       { return m_driSEINonlinearNumMinus1; }
   void     setDriSEINonlinearModel(const std::vector<uint32_t>& driSEINonLinearModel) { m_driSEINonlinearModel = driSEINonLinearModel; }
   uint32_t getDriSEINonlinearModel(int idx) const                                                    { return m_driSEINonlinearModel[idx]; }
-#endif
   void         setUseWP               ( bool b )                     { m_useWeightedPred   = b;    }
   void         setWPBiPred            ( bool b )                     { m_useWeightedBiPred = b;    }
   bool         getUseWP               ()                             { return m_useWeightedPred;   }
@@ -2242,10 +2206,8 @@ public:
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   void         setAlfSaoTrueOrg( bool b )                             { m_alfSaoTrueOrg = b; }
   bool         getAlfSaoTrueOrg()                               const { return m_alfSaoTrueOrg; }
-#endif
   void         setALFStrengthLuma(double s)                     { m_alfStrengthLuma = s; }
   double       getALFStrengthLuma()                             const { return m_alfStrengthLuma; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }

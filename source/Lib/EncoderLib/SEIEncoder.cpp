@@ -492,7 +492,6 @@ void SEIEncoder::initSEIDependentRAPIndication(SEIDependentRAPIndication *seiDep
   CHECK(!(seiDependentRAPIndication!=NULL), "Unspecified error");
 }
 
-#if JVET_U0084_EDRAP
 void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
 {
   CHECK(!(m_isInitialized), "Extended DRAP SEI already initialized");
@@ -507,7 +506,6 @@ void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
     sei->m_edrapIndicationRefRapId[i] = 0;
   }
 }
-#endif
 
 
 template <typename T>
@@ -814,7 +812,6 @@ void SEIEncoder::initSEIContentColourVolume(SEIContentColourVolume *seiContentCo
   }
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 void SEIEncoder::initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *sei)
 {
   CHECK(!(m_isInitialized), "Scalability dimension information SEI already initialized");
@@ -996,9 +993,7 @@ void SEIEncoder::initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei)
     sei->m_driDepthNonlinearRepresentationModel[i] = m_pcCfg->getDriSEINonlinearModel(i);
   }
 }
-#endif
 
-#if JVET_V0108
 void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
@@ -1023,7 +1018,6 @@ void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
   }
   seiCTI->m_log2NumberOfPointsPerLut = floorLog2(seiCTI->m_lut[0].numLutValues - 1);
 }
-#endif
 
 void SEIEncoder::initSEISubpictureLevelInfo(SEISubpicureLevelInfo *sei, const SPS *sps)
 {
