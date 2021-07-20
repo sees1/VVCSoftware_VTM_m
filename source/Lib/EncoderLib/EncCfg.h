@@ -417,6 +417,9 @@ protected:
   bool      m_DeblockingFilterMetric;
 #endif
   bool      m_bUseSAO;
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  bool      m_saoTrueOrg;
+#endif
   bool      m_bTestSAODisableAtPictureLevel;
   double    m_saoEncodingRate;       // When non-0 SAO early picture termination is enabled for luma and chroma
   double    m_saoEncodingRateChroma; // The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma.
@@ -842,7 +845,11 @@ protected:
   CfgVPSParameters m_cfgVPSParameters;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  bool        m_alfTrueOrg;
+#else
   bool        m_alfSaoTrueOrg;
+#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
@@ -1623,6 +1630,10 @@ public:
   bool      getSingleSlicePerSubPicFlagFlag( )                       { return m_singleSlicePerSubPicFlag;    }
   void      setUseSAO                  (bool bVal)                   { m_bUseSAO = bVal; }
   bool      getUseSAO                  ()                            { return m_bUseSAO; }
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  void      setSaoTrueOrg              (bool b)                      { m_saoTrueOrg = b; }
+  bool      getSaoTrueOrg              () const                      { return m_saoTrueOrg; }
+#endif
   void  setTestSAODisableAtPictureLevel (bool bVal)                  { m_bTestSAODisableAtPictureLevel = bVal; }
   bool  getTestSAODisableAtPictureLevel ( ) const                    { return m_bTestSAODisableAtPictureLevel; }
 
@@ -2238,8 +2249,13 @@ public:
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  void         setAlfTrueOrg( bool b )                                { m_alfTrueOrg = b; }
+  bool         getAlfTrueOrg()                                  const { return m_alfTrueOrg; }
+#else
   void         setAlfSaoTrueOrg( bool b )                             { m_alfSaoTrueOrg = b; }
   bool         getAlfSaoTrueOrg()                               const { return m_alfSaoTrueOrg; }
+#endif
   void         setALFStrengthLuma(double s)                     { m_alfStrengthLuma = s; }
   double       getALFStrengthLuma()                             const { return m_alfStrengthLuma; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }
