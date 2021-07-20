@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{jvetdoc}
+﻿\documentclass[a4paper,11pt]{jvetdoc}
 
 \usepackage{geometry}[2010/02/12]
 
@@ -2211,32 +2211,50 @@ For Cr component with BT.2020 container use 1.79; for BT.709 material and 1.39 f
 \Default{0} &
 Enable QP reduction for smooth blocks according to a QP reduction model:
 $Clip3(SmoothQPReductionLimit, 0, SmoothQPReductionModelScale*QP+SmoothQPReductionModelOffset)$.
-The QP reduction model is used when SAD is less than SmoothQPReductionThreshold * number of samples in block.
+The QP reduction model is used when SAD is less than SmoothQPReductionThreshold * number of samples in block. Separate parameters for intra and inter pictures.
 Where SAD is defined as the sum of absolute differences between original luma samples and luma samples predicted by a 2nd order polynomial model.
 The model parameters are determined by a least square fit to original luma samples on a granularity of 64x64 samples.
-MaxCuDQPSubdiv is preferably set to 1 or 2 to achieve best subjective performance.
 \\
 
-\Option{SmoothQPReductionThreshold} &
+\Option{SmoothQPReductionThresholdIntra} &
 \Default{3.0} &
-Threshold parameter for smoothness.
+Threshold parameter for smoothness for intra pictures.
 \\
 
-\Option{SmoothQPReductionModelScale} &
+\Option{SmoothQPReductionModelScaleIntra} &
 \Default{-1.0} &
-Scale parameter of the QP reduction model.
+Scale parameter of the QP reduction model for intra pictures.
 \\
 
-\Option{SmoothQPReductionModelOffset} &
+\Option{SmoothQPReductionModelOffsetIntra} &
 \Default{27.0} &
-Offset parameter of the QP reduction model.
+Offset parameter of the QP reduction model for intra pictures.
 \\
 
-\Option{SmoothQPReductionLimit} &
+\Option{SmoothQPReductionLimitIntra} &
 \Default{-16.0} &
-Threshold parameter for controlling amount of QP reduction by the QP reduction model.
+Threshold parameter for controlling amount of QP reduction by the QP reduction model for intra pictures.
 \\
 
+\Option{SmoothQPReductionThresholdInter} &
+\Default{3.0} &
+Threshold parameter for smoothness for inter pictures.
+\\
+
+\Option{SmoothQPReductionModelScaleInter} &
+\Default{-1.0} &
+Scale parameter of the QP reduction model for inter pictures.
+\\
+
+\Option{SmoothQPReductionModelOffsetInter} &
+\Default{27.0} &
+Offset parameter of the QP reduction model for inter pictures.
+\\
+
+\Option{SmoothQPReductionLimitInter} &
+\Default{-16.0} &
+Threshold parameter for controlling amount of QP reduction by the QP reduction model for inter pictures.
+\\
 
 \Option{SmoothQPReductionPeriodicity} &
 \Default{1} &

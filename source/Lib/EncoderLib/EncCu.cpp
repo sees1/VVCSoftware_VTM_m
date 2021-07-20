@@ -1062,7 +1062,11 @@ void EncCu::updateLambda (Slice* slice, const int dQP,
   {
     m_pcRdCost->setLambda (newLambda, slice->getSPS()->getBitDepths());
 #if WCG_EXT
+#if !JVET_W0043
     if (!(m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || m_pcEncCfg->getSmoothQPReductionEnable()))
+#else
+    if (!m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled())
+#endif
     {
       m_pcRdCost->saveUnadjustedLambda();
     }

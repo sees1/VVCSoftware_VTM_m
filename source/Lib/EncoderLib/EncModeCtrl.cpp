@@ -239,11 +239,19 @@ int EncModeCtrl::calculateLumaDQP( const CPelBuf& rcOrg )
 }
 #endif
 
+#if JVET_W0043
+int EncModeCtrl::calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP, double threshold, double scale, double offset, int limit)
+#else
 int EncModeCtrl::calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP)
+#endif
 {
   double avg = 0;
   double diff = 0;
+#if JVET_W0043
+  double thr = (double)threshold*rcOrg.height*rcOrg.width;
+#else
   double thr = (double)m_pcEncCfg->getSmoothQPReductionThreshold()*rcOrg.height*rcOrg.width;
+#endif
   int qp = 0;
   if (rcOrg.height >= 64 && rcOrg.width >= 64)
   {
@@ -312,7 +320,11 @@ int EncModeCtrl::calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP)
     }
     if (diff < thr)
     {
+#if JVET_W0043
+      qp = max(limit, min(0, (int)(scale*(double)baseQP + offset)));
+#else
       qp = max(m_pcEncCfg->getSmoothQPReductionLimit(), min(0, (int)(m_pcEncCfg->getSmoothQPReductionModelScale()*(double)baseQP + m_pcEncCfg->getSmoothQPReductionModelOffset())));
+#endif
     }
   }
   return qp;
@@ -1153,7 +1165,19 @@ void EncModeCtrlMTnoRQT::initCULevel( Partitioner &partitioner, const CodingStru
         }
         if (checkSmoothQP)
         {
+#if JVET_W0043
+          bool isIntraSlice = cs.slice->isIntra();
+          if (isIntraSlice)
+          {
+            smoothQPoffset = calculateLumaDQPsmooth(cs.getOrgBuf(clipArea(cs.area.Y(), cs.picture->Y())), baseQP, m_pcEncCfg->getSmoothQPReductionThresholdIntra(), m_pcEncCfg->getSmoothQPReductionModelScaleIntra(), m_pcEncCfg->getSmoothQPReductionModelOffsetIntra(), m_pcEncCfg->getSmoothQPReductionLimitIntra());
+          }
+          else
+          {
+            smoothQPoffset = calculateLumaDQPsmooth(cs.getOrgBuf(clipArea(cs.area.Y(), cs.picture->Y())), baseQP, m_pcEncCfg->getSmoothQPReductionThresholdInter(), m_pcEncCfg->getSmoothQPReductionModelScaleInter(), m_pcEncCfg->getSmoothQPReductionModelOffsetInter(), m_pcEncCfg->getSmoothQPReductionLimitInter());
+          }
+#else
           smoothQPoffset = calculateLumaDQPsmooth(cs.getOrgBuf(clipArea(cs.area.Y(), cs.picture->Y())), baseQP);
+#endif
         }
       }
       baseQP = Clip3(-cs.sps->getQpBDOffset(CHANNEL_TYPE_LUMA), MAX_QP, baseQP + smoothQPoffset);
