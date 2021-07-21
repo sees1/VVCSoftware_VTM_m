@@ -2252,7 +2252,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     }
 
     // note : first picture is GDR(I_SLICE)
-    if (pocCurr == 0)
+    if (m_pcCfg->getGdrEnabled() && pocCurr == 0)
     {
       pcSlice->setSliceType(I_SLICE);
     }

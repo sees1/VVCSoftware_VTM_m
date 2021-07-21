@@ -4516,7 +4516,11 @@ void Slice::freeScaledRefPicList( Picture *scaledRefPic[] )
   {
     if( scaledRefPic[i] != nullptr )
     {
+#if GDR_ENABLED      
+      scaledRefPic[i]->destroy(false); // do not clean up picHeader
+#else
       scaledRefPic[i]->destroy();
+#endif
       scaledRefPic[i] = nullptr;
     }
   }

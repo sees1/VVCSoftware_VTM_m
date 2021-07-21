@@ -65,7 +65,11 @@ struct Picture : public UnitArea
   Picture();
 
   void create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned margin, const bool bDecoder, const int layerId, const bool gopBasedTemporalFilterEnabled = false );
+#if GDR_ENABLED
+  void destroy(const bool cleanUpPicHeader = true);
+#else
   void destroy();
+#endif
 
   void createTempBuffers( const unsigned _maxCUSize );
   void destroyTempBuffers();
