@@ -627,11 +627,23 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setLumaLevelToDeltaQPControls                        ( m_lumaLevelToDeltaQPMapping );
 #endif
   m_cEncLib.setSmoothQPReductionEnable                           (m_smoothQPReductionEnable);
+#if JVET_W0043
+  m_cEncLib.setSmoothQPReductionPeriodicity                      (m_smoothQPReductionPeriodicity);
+  m_cEncLib.setSmoothQPReductionThresholdIntra                   (m_smoothQPReductionThresholdIntra);
+  m_cEncLib.setSmoothQPReductionModelScaleIntra                  (m_smoothQPReductionModelScaleIntra);
+  m_cEncLib.setSmoothQPReductionModelOffsetIntra                 (m_smoothQPReductionModelOffsetIntra);
+  m_cEncLib.setSmoothQPReductionLimitIntra                       (m_smoothQPReductionLimitIntra);
+  m_cEncLib.setSmoothQPReductionThresholdInter                   (m_smoothQPReductionThresholdInter);
+  m_cEncLib.setSmoothQPReductionModelScaleInter                  (m_smoothQPReductionModelScaleInter);
+  m_cEncLib.setSmoothQPReductionModelOffsetInter                 (m_smoothQPReductionModelOffsetInter);
+  m_cEncLib.setSmoothQPReductionLimitInter                       (m_smoothQPReductionLimitInter);
+#else
   m_cEncLib.setSmoothQPReductionThreshold                        (m_smoothQPReductionThreshold);
   m_cEncLib.setSmoothQPReductionModelScale                       (m_smoothQPReductionModelScale);
   m_cEncLib.setSmoothQPReductionModelOffset                      (m_smoothQPReductionModelOffset);
   m_cEncLib.setSmoothQPReductionPeriodicity                      (m_smoothQPReductionPeriodicity);
   m_cEncLib.setSmoothQPReductionLimit                            (m_smoothQPReductionLimit);
+#endif
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   m_cEncLib.setDeltaQpRD( (m_costMode==COST_LOSSLESS_CODING) ? 0 : m_uiDeltaQpRD );
 #else

@@ -951,7 +951,11 @@ void EncSlice::resetQP( Picture* pic, int sliceQP, double lambda )
 #endif
   setUpLambda(slice, lambda, sliceQP);
 #if WCG_EXT
+#if !JVET_W0043
   if (!(m_pcCfg->getLumaLevelToDeltaQPMapping().isEnabled() || m_pcCfg->getSmoothQPReductionEnable()))
+#else
+  if (!m_pcCfg->getLumaLevelToDeltaQPMapping().isEnabled())
+#endif
   {
     m_pcRdCost->saveUnadjustedLambda();
   }
