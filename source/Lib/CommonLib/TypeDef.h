@@ -54,6 +54,8 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
+#define JVET_W0070_W0121_SPSRE_CLEANUP                    1 // JVET-W0070 Proposal 3 & JVET-W0121 Option 1 : condition the signaling of sps_ts_residual_coding_rice_present_in_sh_flag
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
