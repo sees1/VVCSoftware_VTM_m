@@ -2285,6 +2285,8 @@ const CPelUnitBuf CodingStructure::getOrgBuf(const UnitArea &unit)     const { r
 const CPelBuf     CodingStructure::getOrgBuf(const ComponentID &compID)const { return picture->getBuf(area.blocks[compID], PIC_ORIGINAL); }
        PelUnitBuf CodingStructure::getOrgBuf()                               { return picture->getBuf(area, PIC_ORIGINAL); }
 const CPelUnitBuf CodingStructure::getOrgBuf()                         const { return picture->getBuf(area, PIC_ORIGINAL); }
+       PelUnitBuf CodingStructure::getTrueOrgBuf()                           { return picture->getBuf(area, PIC_TRUE_ORIGINAL); }
+const CPelUnitBuf CodingStructure::getTrueOrgBuf()                     const { return picture->getBuf(area, PIC_TRUE_ORIGINAL); }
 
 PelBuf CodingStructure::getBuf( const CompArea &blk, const PictureType &type )
 {

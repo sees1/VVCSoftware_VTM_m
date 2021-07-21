@@ -485,6 +485,70 @@ void AreaBuf<Pel>::scaleSignal(const int scale, const bool dir, const ClpRng& cl
 }
 
 template<>
+void AreaBuf<Pel>::applyLumaCTI(std::vector<Pel>& pLUTY)
+{
+  Pel* dst = buf;
+  Pel* src = buf;
+  for (unsigned y = 0; y < height; y++)
+  {
+    for (unsigned x = 0; x < width; x++)
+    {
+      dst[x] = pLUTY[src[x]];
+    }
+    dst += stride;
+    src += stride;
+  }
+}
+
+template<>
+void AreaBuf<Pel>::applyChromaCTI(Pel* bufY, int strideY, std::vector<Pel>& pLUTC, int bitDepth, ChromaFormat chrFormat, bool fwdMap)
+{
+  int range = 1 << bitDepth;
+  int offset = range / 2;
+  int sx = 1;
+  int sy = 1;
+  if (CHROMA_420 == chrFormat) 
+  {
+    sx = 2; 
+    sy = 2;
+  }
+  else if (CHROMA_422 == chrFormat)
+  {
+    sx = 2;
+  }
+
+  Pel* dst = buf;
+  Pel* src = buf;
+  if (fwdMap)
+  {
+    for (unsigned y = 0; y < height; y++)
+    {
+      for (unsigned x = 0; x < width; x++)
+      {
+        int pelY = bufY[sy * y * strideY + sx * x];
+        double scale = (double)pLUTC[pelY] / (double)(1 << CSCALE_FP_PREC);
+        dst[x] = Clip3((Pel)0, (Pel)(range - 1), (Pel)(offset + (double)(src[x] - offset) / scale + .5));
+      }
+      dst += stride;
+      src += stride;
+    }
+  }
+  else
+  {
+    for (unsigned y = 0; y < height; y++)
+    {
+      for (unsigned x = 0; x < width; x++)
+      {
+        int pelY = bufY[sy * y * strideY + sx * x];
+        int scal = pLUTC[pelY];
+        dst[x] = Clip3(0, range - 1, ((offset << CSCALE_FP_PREC) + (src[x] - offset) * scal + (1 << (CSCALE_FP_PREC - 1))) >> CSCALE_FP_PREC);
+      }
+      dst += stride;
+      src += stride;
+    }
+  }
+}
+template<>
 void AreaBuf<Pel>::addAvg( const AreaBuf<const Pel> &other1, const AreaBuf<const Pel> &other2, const ClpRng& clpRng)
 {
   const Pel* src0 = other1.buf;

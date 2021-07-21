@@ -1302,10 +1302,13 @@ private:
   bool             m_transformSkipRotationEnabledFlag;
   bool             m_transformSkipContextEnabledFlag;
   bool             m_extendedPrecisionProcessingFlag;
+  bool             m_tsrcRicePresentFlag;
   bool             m_intraSmoothingDisabledFlag;
   bool             m_highPrecisionOffsetsEnabledFlag;
+  bool             m_rrcRiceExtensionEnableFlag;
   bool             m_persistentRiceAdaptationEnabledFlag;
   bool             m_cabacBypassAlignmentEnabledFlag;
+
 
 public:
   SPSRExt();
@@ -1315,8 +1318,10 @@ public:
     return getTransformSkipRotationEnabledFlag()
         || getTransformSkipContextEnabledFlag()
         || getExtendedPrecisionProcessingFlag()
+        || getTSRCRicePresentFlag()
         || getIntraSmoothingDisabledFlag()
         || getHighPrecisionOffsetsEnabledFlag()
+        || getRrcRiceExtensionEnableFlag()
         || getPersistentRiceAdaptationEnabledFlag()
         || getCabacBypassAlignmentEnabledFlag();
   }
@@ -1331,11 +1336,17 @@ public:
   bool getExtendedPrecisionProcessingFlag() const                                      { return m_extendedPrecisionProcessingFlag;      }
   void setExtendedPrecisionProcessingFlag(bool value)                                  { m_extendedPrecisionProcessingFlag = value;     }
 
+  bool getTSRCRicePresentFlag() const                                                  { return m_tsrcRicePresentFlag;                  }
+  void setTSRCRicePresentFlag(bool b)                                                  { m_tsrcRicePresentFlag = b;                     }
+
   bool getIntraSmoothingDisabledFlag() const                                           { return m_intraSmoothingDisabledFlag;           }
   void setIntraSmoothingDisabledFlag(bool bValue)                                      { m_intraSmoothingDisabledFlag=bValue;           }
 
   bool getHighPrecisionOffsetsEnabledFlag() const                                      { return m_highPrecisionOffsetsEnabledFlag;      }
   void setHighPrecisionOffsetsEnabledFlag(bool value)                                  { m_highPrecisionOffsetsEnabledFlag = value;     }
+
+  bool getRrcRiceExtensionEnableFlag()                                                 const { return m_rrcRiceExtensionEnableFlag; }
+  void setRrcRiceExtensionEnableFlag(const bool value)                                       { m_rrcRiceExtensionEnableFlag = value; }
 
   bool getPersistentRiceAdaptationEnabledFlag() const                                  { return m_persistentRiceAdaptationEnabledFlag;  }
   void setPersistentRiceAdaptationEnabledFlag(const bool value)                        { m_persistentRiceAdaptationEnabledFlag = value; }
@@ -1709,7 +1720,7 @@ public:
   void                    setEntropyCodingSyncEnabledFlag(bool val)                                       { m_entropyCodingSyncEnabledFlag = val;                                }
   bool                    getEntryPointsPresentFlag() const                                               { return m_entryPointPresentFlag;                                      }
   void                    setEntryPointsPresentFlag(bool val)                                             { m_entryPointPresentFlag = val;                                       }
-  int                     getMaxLog2TrDynamicRange(ChannelType channelType) const                         { return getSpsRangeExtension().getExtendedPrecisionProcessingFlag() ? std::max<int>(15, int(m_bitDepths.recon[channelType] + 6)) : 15; }
+  int                     getMaxLog2TrDynamicRange(ChannelType channelType) const                         { return getSpsRangeExtension().getExtendedPrecisionProcessingFlag() && int(m_bitDepths.recon[channelType]) > 10 ? std::min<int>(20, int(m_bitDepths.recon[channelType] + 6)) : 15; }
 
   int                     getDifferentialLumaChromaBitDepth() const                                       { return int(m_bitDepths.recon[CHANNEL_TYPE_LUMA]) - int(m_bitDepths.recon[CHANNEL_TYPE_CHROMA]); }
   int                     getQpBDOffset(ChannelType type) const                                           { return m_qpBDOffset[type];                                           }
@@ -2614,6 +2625,13 @@ private:
   bool                       m_useLTforDRAP;
   bool                       m_isDRAP;
   int                        m_latestDRAPPOC;
+  bool                       m_enableEdrapSEI;
+  int                        m_edrapRapId;
+  bool                       m_useLTforEdrap;
+  int                        m_edrapNumRefRapPics;
+  std::vector<int>           m_edrapRefRapIds;
+  int                        m_latestEDRAPPOC;
+  bool                       m_latestEdrapLeadingPicDecodableFlag;
   ReferencePictureList        m_RPL0;            //< RPL for L0 when present in slice header
   ReferencePictureList        m_RPL1;            //< RPL for L1 when present in slice header
   int                         m_rpl0Idx;              //< index of used RPL in the SPS or -1 for local RPL in the slice header
@@ -2637,6 +2655,7 @@ private:
   int                        m_deblockingFilterCrBetaOffsetDiv2;  //< beta offset for deblocking filter
   int                        m_deblockingFilterCrTcOffsetDiv2;    //< tc offset for deblocking filter
   bool                       m_depQuantEnabledFlag;               //!< dependent quantization enabled flag
+  int                        m_riceBaseLevelValue;    //< baseLevel value for abs_remainder 
   bool                       m_signDataHidingEnabledFlag;         //!< sign data hiding enabled flag
   bool                       m_tsResidualCodingDisabledFlag;
   int                        m_list1IdxToList0Idx[MAX_NUM_REF];
@@ -2714,6 +2733,8 @@ private:
   int                        m_ccAlfCrApsId;
   bool                       m_disableSATDForRd;
   bool                       m_isLossless;
+  int                        m_tsrc_index;
+  unsigned                   m_riceBit[8];
 public:
                               Slice();
   virtual                     ~Slice();
@@ -2829,6 +2850,8 @@ public:
   void                        setDeblockingFilterCrTcOffsetDiv2( int i )             { m_deblockingFilterCrTcOffsetDiv2 = i;                           }
   void                        setDepQuantEnabledFlag( bool b )                       { m_depQuantEnabledFlag = b;                                                                   }
   bool                        getDepQuantEnabledFlag() const                         { return m_depQuantEnabledFlag;                                                                }  
+  void                        setRiceBaseLevel(int b) { m_riceBaseLevelValue = b; }
+  int                         getRiceBaseLevel() const { return m_riceBaseLevelValue; }
   void                        setSignDataHidingEnabledFlag( bool b )                 { m_signDataHidingEnabledFlag = b;                                                             }
   bool                        getSignDataHidingEnabledFlag() const                   { return m_signDataHidingEnabledFlag;                                                          }  
   void                        setTSResidualCodingDisabledFlag(bool b) { m_tsResidualCodingDisabledFlag = b; }
@@ -2868,6 +2891,24 @@ public:
   bool                        isPocRestrictedByDRAP( int poc, bool precedingDRAPinDecodingOrder );
   bool                        isPOCInRefPicList( const ReferencePictureList *rpl, int poc );
   void                        checkConformanceForDRAP( uint32_t temporalId );
+  bool                        getEnableEdrapSEI () const                             { return m_enableEdrapSEI; }
+  void                        setEnableEdrapSEI ( bool b )                           { m_enableEdrapSEI = b; }
+  int                         getEdrapRapId () const                                 { return m_edrapRapId; }
+  void                        setEdrapRapId (int i)                                  { m_edrapRapId = i; }
+  bool                        getUseLTforEdrap () const                              { return m_useLTforEdrap; }
+  void                        setUseLTforEdrap ( bool b )                            { m_useLTforEdrap = b; }
+  int                         getEdrapNumRefRapPics () const                         { return m_edrapNumRefRapPics; }
+  void                        setEdrapNumRefRapPics (int i)                          { m_edrapNumRefRapPics = i; }
+  int                         getEdrapRefRapId (int idx) const                       { return m_edrapRefRapIds[idx]; }
+  void                        addEdrapRefRapIds (int i)                              { m_edrapRefRapIds.push_back(i); }
+  void                        deleteEdrapRefRapIds (int i)                           { m_edrapRefRapIds.erase(m_edrapRefRapIds.begin() + i); m_edrapNumRefRapPics--; }
+  bool                        isPocRestrictedByEdrap( int poc );
+  void                        setLatestEDRAPPOC ( int i )                            { m_latestEDRAPPOC = i; }
+  int                         getLatestEDRAPPOC () const                             { return m_latestEDRAPPOC; }
+  bool                        cvsHasPreviousEDRAP() const                            { return m_latestEDRAPPOC != MAX_INT; }
+  void                        setLatestEdrapLeadingPicDecodableFlag ( bool b )       { m_latestEdrapLeadingPicDecodableFlag = b; }
+  bool                        getLatestEdrapLeadingPicDecodableFlag () const         { return m_latestEdrapLeadingPicDecodableFlag; }
+  void                        checkConformanceForEDRAP( uint32_t temporalId );
 
   void                        setLambdas( const double lambdas[MAX_NUM_COMPONENT] )  { for (int component = 0; component < MAX_NUM_COMPONENT; component++) m_lambdas[component] = lambdas[component]; }
   const double*               getLambdas() const                                     { return m_lambdas;                                             }
@@ -3024,6 +3065,10 @@ public:
 
   CcAlfFilterParam            m_ccAlfFilterParam;
   uint8_t*                    m_ccAlfFilterControl[2];
+  void                        set_tsrc_index(int v) { m_tsrc_index = v; }
+  int                         get_tsrc_index() const { return m_tsrc_index; }
+  void                        setRiceBit(int idx, int i) { m_riceBit[idx] = i; }
+  unsigned                    getRiceBit(int idx) const { return m_riceBit[idx]; }
 
 protected:
   Picture*              xGetRefPic( PicList& rcListPic, const int poc, const int layerId );

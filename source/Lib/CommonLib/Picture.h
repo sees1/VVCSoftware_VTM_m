@@ -48,6 +48,7 @@
 #include "CodingStructure.h"
 #include "Hash.h"
 #include "MCTS.h"
+#include "SEIColourTransform.h"
 #include <deque>
 
 
@@ -68,6 +69,10 @@ struct Picture : public UnitArea
 
   void createTempBuffers( const unsigned _maxCUSize );
   void destroyTempBuffers();
+  SEIColourTransformApply* m_colourTranfParams;
+  PelStorage*              m_invColourTransfBuf;
+  void              createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth);
+  PelUnitBuf        getDisplayBuf();
 
          PelBuf     getOrigBuf(const CompArea &blk);
   const CPelBuf     getOrigBuf(const CompArea &blk) const;
@@ -126,6 +131,8 @@ struct Picture : public UnitArea
   void setPictureType(const NalUnitType val)        { m_pictureType = val;          }
   void setBorderExtension( bool bFlag)              { m_bIsBorderExtended = bFlag;}
   Pel* getOrigin( const PictureType &type, const ComponentID compID ) const;
+  int  getEdrapRapId()                        const { return edrapRapId ; }
+  void setEdrapRapId(const int val)                 { edrapRapId = val; }
 
   void setLossyQPValue(int i)                 { m_lossyQP = i; }
   int getLossyQPValue()                       const { return m_lossyQP; }
@@ -183,6 +190,7 @@ public:
   bool fieldPic;
   int  m_prevQP[MAX_NUM_CHANNEL_TYPE];
   bool precedingDRAP; // preceding a DRAP picture in decoding order
+  int  edrapRapId;
   bool nonReferencePictureFlag;
 
   int  poc;

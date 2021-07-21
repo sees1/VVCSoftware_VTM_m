@@ -40,7 +40,7 @@
 
 // Include files
 #include "CommonLib/TrQuant.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 #include "CommonLib/NAL.h"
 
 #include "Utilities/VideoIOYuv.h"
@@ -83,7 +83,7 @@ private:
   IntraSearch               m_cIntraSearch;                       ///< encoder search class
   // coding tool
   TrQuant                   m_cTrQuant;                           ///< transform & quantization class
-  LoopFilter                m_cLoopFilter;                        ///< deblocking filter class
+  DeblockingFilter          m_deblockingFilter;                   ///< deblocking filter class
   EncSampleAdaptiveOffset   m_cEncSAO;                            ///< sample adaptive offset class
   EncAdaptiveLoopFilter     m_cEncALF;
   HLSWriter                 m_HLSWriter;                          ///< CAVLC encoder
@@ -169,7 +169,7 @@ public:
   IntraSearch*            getIntraSearch        ()              { return  &m_cIntraSearch;         }
 
   TrQuant*                getTrQuant            ()              { return  &m_cTrQuant;             }
-  LoopFilter*             getLoopFilter         ()              { return  &m_cLoopFilter;          }
+  DeblockingFilter*       getDeblockingFilter   ()              { return  &m_deblockingFilter;     }
   EncSampleAdaptiveOffset* getSAO               ()              { return  &m_cEncSAO;              }
   EncAdaptiveLoopFilter*  getALF                ()              { return  &m_cEncALF;              }
   EncGOP*                 getGOPEncoder         ()              { return  &m_cGOPEncoder;          }

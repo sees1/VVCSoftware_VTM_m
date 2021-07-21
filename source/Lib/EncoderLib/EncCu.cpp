@@ -239,7 +239,7 @@ void EncCu::init( EncLib* pcEncLib, const SPS& sps )
   m_CtxCache           = pcEncLib->getCtxCache();
   m_pcRateCtrl         = pcEncLib->getRateCtrl();
   m_pcSliceEncoder     = pcEncLib->getSliceEncoder();
-  m_pcLoopFilter       = pcEncLib->getLoopFilter();
+  m_deblockingFilter   = pcEncLib->getDeblockingFilter();
   m_GeoCostList.init(GEO_NUM_PARTITION_MODE, m_pcEncCfg->getMaxNumGeoCand());
   m_AFFBestSATDCost = MAX_DOUBLE;
 
@@ -739,6 +739,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
 #if SHARP_LUMA_DELTA_QP
         (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled()) ||
 #endif
+        (m_pcEncCfg->getSmoothQPReductionEnable()) ||
 #if ENABLE_QPA_SUB_CTU
         (m_pcEncCfg->getUsePerceptQPA() && !m_pcEncCfg->getUseRateCtrl() && pps.getUseDQP())
 #else
@@ -1061,7 +1062,7 @@ void EncCu::updateLambda (Slice* slice, const int dQP,
   {
     m_pcRdCost->setLambda (newLambda, slice->getSPS()->getBitDepths());
 #if WCG_EXT
-    if (!m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled())
+    if (!(m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || m_pcEncCfg->getSmoothQPReductionEnable()))
     {
       m_pcRdCost->saveUnadjustedLambda();
     }
@@ -4529,7 +4530,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     return;
   }
 
-  m_pcLoopFilter->setEnc(true);
+  m_deblockingFilter->setEnc(true);
   const ChromaFormat format = cs.area.chromaFormat;
   CodingUnit*                cu = cs.getCU(partitioner.chType);
   const Position lumaPos = cu->Y().valid() ? cu->Y().pos() : recalcPosition( format, cu->chType, CHANNEL_TYPE_LUMA, cu->blocks[cu->chType].pos() );
@@ -4540,7 +4541,6 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
 
   if ( calDist )
   {
-    const UnitArea currCsArea = clipArea( CS::getArea( cs, cs.area, partitioner.chType ), *cs.picture );
     ComponentID compStr = ( cu->isSepTree() && !isLuma( partitioner.chType ) ) ? COMPONENT_Cb : COMPONENT_Y;
     ComponentID compEnd = ( cu->isSepTree() && isLuma( partitioner.chType ) ) ? COMPONENT_Y : COMPONENT_Cr;
     Distortion finalDistortion = 0;
@@ -4549,7 +4549,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
       const ComponentID compID = ComponentID( comp );
       CPelBuf org = cs.getOrgBuf( compID );
       CPelBuf reco = cs.getRecoBuf( compID );
-      finalDistortion += getDistortionDb( cs, org, reco, compID, currCsArea.block( compID ), false );
+      finalDistortion += getDistortionDb(cs, org, reco, compID, cs.area.block(COMPONENT_Y), false);
     }
     //updated distortion
     cs.dist = finalDistortion;
@@ -4560,9 +4560,9 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     ComponentID compStr = ( cu->isSepTree() && !isLuma( partitioner.chType ) ) ? COMPONENT_Cb : COMPONENT_Y;
     ComponentID compEnd = ( cu->isSepTree() &&  isLuma( partitioner.chType ) ) ? COMPONENT_Y : COMPONENT_Cr;
 
-    const UnitArea currCsArea = clipArea( CS::getArea( cs, cs.area, partitioner.chType ), *cs.picture );
+    const UnitArea currCsArea = clipArea(cs.area, *cs.picture);
 
-    PelStorage&          picDbBuf = m_pcLoopFilter->getDbEncPicYuvBuffer();
+    PelStorage&          picDbBuf = m_deblockingFilter->getDbEncPicYuvBuffer();
 
     //deblock neighbour pixels
     const Size     lumaSize = cu->Y().valid() ? cu->Y().size() : recalcSize( format, cu->chType, CHANNEL_TYPE_LUMA, cu->blocks[cu->chType].size() );
@@ -4608,14 +4608,14 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     //deblock
     if ( leftEdgeAvai )
     {
-      m_pcLoopFilter->resetFilterLengths();
-      m_pcLoopFilter->xDeblockCU( *cu, EDGE_VER );
+      m_deblockingFilter->resetFilterLengths();
+      m_deblockingFilter->xDeblockCU( *cu, EDGE_VER );
     }
 
     if (topEdgeAvai)
     {
-      m_pcLoopFilter->resetFilterLengths();
-      m_pcLoopFilter->xDeblockCU( *cu, EDGE_HOR );
+      m_deblockingFilter->resetFilterLengths();
+      m_deblockingFilter->xDeblockCU( *cu, EDGE_HOR );
     }
 
     //update current CU SSE
@@ -4625,7 +4625,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
       ComponentID compId = (ComponentID)compIdx;
       CPelBuf reco = picDbBuf.getBuf( currCsArea.block( compId ) );
       CPelBuf org = cs.getOrgBuf( compId );
-      distCur += getDistortionDb( cs, org, reco, compId, currCsArea.block( compId ), true );
+      distCur += getDistortionDb(cs, org, reco, compId, currCsArea.block(COMPONENT_Y), true);
     }
 
     //calculate difference between DB_before_SSE and DB_after_SSE for neighbouring CUs
@@ -4639,8 +4639,8 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
         CPelBuf org = cs.picture->getOrigBuf( compArea );
         CPelBuf reco = cs.picture->getRecoBuf( compArea );
         CPelBuf recoDb = picDbBuf.getBuf( compArea );
-        distBeforeDb += getDistortionDb( cs, org, reco,   compId, compArea, false );
-        distAfterDb  += getDistortionDb( cs, org, recoDb, compId, compArea, true  );
+        distBeforeDb += getDistortionDb(cs, org, reco, compId, areaLeft.block(COMPONENT_Y), false);
+        distAfterDb += getDistortionDb(cs, org, recoDb, compId, areaLeft.block(COMPONENT_Y), true);
       }
       if ( topEdgeAvai )
       {
@@ -4648,8 +4648,8 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
         CPelBuf org = cs.picture->getOrigBuf( compArea );
         CPelBuf reco = cs.picture->getRecoBuf( compArea );
         CPelBuf recoDb = picDbBuf.getBuf( compArea );
-        distBeforeDb += getDistortionDb( cs, org, reco,   compId, compArea, false );
-        distAfterDb  += getDistortionDb( cs, org, recoDb, compId, compArea, true  );
+        distBeforeDb += getDistortionDb(cs, org, reco, compId, areaTop.block(COMPONENT_Y), false);
+        distAfterDb += getDistortionDb(cs, org, recoDb, compId, areaTop.block(COMPONENT_Y), true);
       }
     }
 
@@ -4660,7 +4660,7 @@ void EncCu::xCalDebCost( CodingStructure &cs, Partitioner &partitioner, bool cal
     cs.costDbOffset = sign * m_pcRdCost->calcRdCost( 0, distTmp );
   }
 
-  m_pcLoopFilter->setEnc( false );
+  m_deblockingFilter->setEnc( false );
 }
 
 Distortion EncCu::getDistortionDb( CodingStructure &cs, CPelBuf org, CPelBuf reco, ComponentID compID, const CompArea& compArea, bool afterDb )
@@ -4668,7 +4668,7 @@ Distortion EncCu::getDistortionDb( CodingStructure &cs, CPelBuf org, CPelBuf rec
   Distortion dist = 0;
 #if WCG_EXT
   m_pcRdCost->setChromaFormat(cs.sps->getChromaFormatIdc());
-  CPelBuf orgLuma = cs.picture->getOrigBuf( cs.area.blocks[COMPONENT_Y] );
+  CPelBuf orgLuma = cs.picture->getOrigBuf(compArea);
   if (m_pcEncCfg->getLumaLevelToDeltaQPMapping().isEnabled() || (
     m_pcEncCfg->getLmcs() && (cs.slice->getLmcsEnabledFlag() && m_pcReshape->getCTUFlag())))
   {

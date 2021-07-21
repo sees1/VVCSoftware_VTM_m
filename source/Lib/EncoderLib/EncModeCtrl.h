@@ -319,6 +319,7 @@ public:
   void                  initLumaDeltaQpLUT();
   int                   calculateLumaDQP  ( const CPelBuf& rcOrg );
 #endif
+  int                                 calculateLumaDQPsmooth(const CPelBuf& rcOrg, int baseQP);
   void setFastDeltaQp                 ( bool b )                {        m_fastDeltaQP = b;                               }
   bool getFastDeltaQp                 ()                  const { return m_fastDeltaQP;                                   }
 

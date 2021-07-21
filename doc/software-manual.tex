@@ -205,7 +205,7 @@ fontsize=\footnotesize}
 \maketitle
 \begin{abstract}
 This document is a user manual describing usage of the VTM reference software
-for the VVC project. It applies to version 12.1 of the software.
+for the VVC project. It applies to version 13.1 of the software.
 \end{abstract}
 
 \tableofcontents
@@ -258,7 +258,7 @@ be available in older compilers.
  \thead{Versions} \\
 \hline
 MS Visual Studio  & 2017 and 2019 \\
-GCC               & 5.4, 7.3 and 8.3\\
+GCC               & 7.3, 8.3 and 9.3\\
 Xcode/clang       & latest \\
 \hline
 \end{tabular}
@@ -453,32 +453,32 @@ range is between
 0.3 and 1.
 
 \item[]\textbf{tcOffsetDiv2}: An in-loop deblocking filter parameter for luma component, tcOffsetDiv2 
-is added to the base parameter LoopFilterTcOffset_div2 to set the final tc_offset_div2 
+is added to the base parameter DeblockingFilterTcOffset_div2 to set the final tc_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of tc_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{betaOffsetDiv2}: An in-loop deblocking filter parameter for luma component, betaOffsetDiv2 
-is added to the base parameter LoopFilterBetaOffset_div2 to set the final beta_offset_div2 
+is added to the base parameter DeblockingFilterBetaOffset_div2 to set the final beta_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of beta_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CbTcOffsetDiv2}: An in-loop deblocking filter parameter for Cb component, CbTcOffsetDiv2 
-is added to the base parameter LoopFilterCbTcOffset_div2 to set the final tc_offset_div2 
+is added to the base parameter DeblockingFilterCbTcOffset_div2 to set the final tc_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of tc_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CbBetaOffsetDiv2}: An in-loop deblocking filter parameter for Cb component, CbBetaOffsetDiv2 
-is added to the base parameter LoopFilterCbBetaOffset_div2 to set the final beta_offset_div2 
+is added to the base parameter DeblockingFilterCbBetaOffset_div2 to set the final beta_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of beta_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CrTcOffsetDiv2}: An in-loop deblocking filter parameter for Cr component, CrTcOffsetDiv2 
-is added to the base parameter LoopFilterCrTcOffset_div2 to set the final tc_offset_div2 
+is added to the base parameter DeblockingFilterCrTcOffset_div2 to set the final tc_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of tc_offset_div2 shall be an integer number in the range $-12..12$.
 
 \item[]\textbf{CrBetaOffsetDiv2}: An in-loop deblocking filter parameter for Cr component, CrBetaOffsetDiv2 
-is added to the base parameter LoopFilterCrBetaOffset_div2 to set the final beta_offset_div2 
+is added to the base parameter DeblockingFilterCrBetaOffset_div2 to set the final beta_offset_div2 
 parameter for this picture signalled in the slice segment header. The final 
 value of beta_offset_div2 shall be an integer number in the range $-12..12$.
 
@@ -784,7 +784,7 @@ When 1, CABAC zero word padding will be enabled. This is currently not the defau
 
 \Option{ConformanceWindowMode} &
 %\ShortOption{\None} &
-\Default{0} &
+\Default{1} &
 Specifies how the parameters related to the conformance window are interpreted (cropping/padding).
 The following modes are available:
 \par
@@ -954,6 +954,11 @@ low delay configurations.
 Strength for every * frame in GOP based temporal filter, where * is an integer. E.g. --TemporalFilterStrengthFrame8 0.95 will
 enable GOP based temporal filter at every 8th frame with strength 0.95. Longer intervals overrides shorter when there are
 multiple matches.
+\\
+\Option{AlfSaoTrueOrg} &
+%\ShortOption{\None} &
+\Default{false} &
+When GOP based temporal filter is enabled, enable or disable using true original samples for ALF and SAO optimization .
 \\
 \end{OptionTableNoShorthand}
 
@@ -1743,6 +1748,13 @@ Specifies the DRAP period in frames.
 Dependent RAP indication SEI messages are disabled if DRAPPeriod is 0.
 \\
 
+\Option{EDRAPPeriod} &
+%\ShortOption{\None} &
+\Default{0} &
+Specifies the EDRAP period in frames.
+Extended DRAP indication SEI messages are disabled if EDRAPPeriod is 0.
+\\
+
 \Option{GOPSize (-g)} &
 %\ShortOption{-g} &
 \Default{1} &
@@ -2195,6 +2207,42 @@ For Cb component with BT.2020 container use 1.14; for BT.709 material and 1.04 f
 For Cr component with BT.2020 container use 1.79; for BT.709 material and 1.39 for P3 material.
 \\
 
+\Option{SmoothQPReductionEnable} &
+\Default{0} &
+Enable QP reduction for smooth blocks according to a QP reduction model:
+$Clip3(SmoothQPReductionLimit, 0, SmoothQPReductionModelScale*QP+SmoothQPReductionModelOffset)$.
+The QP reduction model is used when SAD is less than SmoothQPReductionThreshold * number of samples in block.
+Where SAD is defined as the sum of absolute differences between original luma samples and luma samples predicted by a 2nd order polynomial model.
+The model parameters are determined by a least square fit to original luma samples on a granularity of 64x64 samples.
+MaxCuDQPSubdiv is preferably set to 1 or 2 to achieve best subjective performance.
+\\
+
+\Option{SmoothQPReductionThreshold} &
+\Default{3.0} &
+Threshold parameter for smoothness.
+\\
+
+\Option{SmoothQPReductionModelScale} &
+\Default{-1.0} &
+Scale parameter of the QP reduction model.
+\\
+
+\Option{SmoothQPReductionModelOffset} &
+\Default{27.0} &
+Offset parameter of the QP reduction model.
+\\
+
+\Option{SmoothQPReductionLimit} &
+\Default{-16.0} &
+Threshold parameter for controlling amount of QP reduction by the QP reduction model.
+\\
+
+
+\Option{SmoothQPReductionPeriodicity} &
+\Default{1} &
+Periodicity parameter for application of the QP reduction model. 1: all frames, 0: only intra pictures, 2: every second frame, etc.
+\\
+
 \Option{SliceChromaQPOffsetPeriodicity} &
 \Default{0} &
 Defines the periodicity for inter slices that use the slice-level chroma QP offsets, as defined by SliceCbQpOffsetIntraOrPeriodic and SliceCrQpOffsetIntraOrPeriodic. A value of 0 disables the periodicity. It is intended to be used in low-delay configurations where an regular intra period is not defined.
@@ -2552,13 +2600,13 @@ Target subpic index for target output layers that containing multiple subpicture
 %% In-loop filtering parameters
 %%
 \begin{OptionTableNoShorthand}{In-loop filtering parameters}{tab:inloop-filter}
-\Option{LoopFilterDisable} &
+\Option{DeblockingFilterDisable} &
 %\ShortOption{\None} &
 \Default{false} &
 Enables or disables the in-loop deblocking filter.
 \\
 
-\Option{LoopFilterOffsetInPPS}&
+\Option{DeblockingFilterOffsetInPPS}&
 %\ShortOption{\None}&
 \Default{false}&
 If enabled, the in-loop deblocking filter control parameters are sent in PPS. 
@@ -2571,42 +2619,42 @@ In this case, the final value of the deblocking filter parameter sent for a cert
 (base parameter + GOP parameter for this picture). Intra-pictures use the base parameters values.
 \\
 
-\Option{LoopFilterTcOffset_div2}&
+\Option{DeblockingFilterTcOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter tc_offset_div2 for luma component. The final value of tc_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterBetaOffset_div2}&
+\Option{DeblockingFilterBetaOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter beta_offset_div2 for luma component. The final value of beta_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCbTcOffset_div2}&
+\Option{DeblockingFilterCbTcOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter tc_offset_div2 for Cb component. The final value of tc_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCbBetaOffset_div2}&
+\Option{DeblockingFilterCbBetaOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter beta_offset_div2 for Cb component. The final value of beta_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCrTcOffset_div2}&
+\Option{DeblockingFilterCrTcOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter tc_offset_div2 for Cr component. The final value of tc_offset_div2 
 shall be an integer number in the range $-12..12$.
 \\
 
-\Option{LoopFilterCrBetaOffset_div2}&
+\Option{DeblockingFilterCrBetaOffset_div2}&
 %\ShortOption{\None}&
 \Default{0}&
 Specifies the base value for the in-loop deblocking filter parameter beta_offset_div2 for Cr component. The final value of beta_offset_div2 
@@ -3385,6 +3433,11 @@ Specifies the use of extended_precision_processing flag. Note that unless the HI
 This setting is only valid for the 16-bit RExt profiles.
 \\
 
+\Option{TSRCRicePresent} &
+\Default{false} &
+When true, specifies the that extension of the Golomb-Rice parameter derivation for TSRC is used. Version 1  profiles require this to be false and some Version 2 (RExt) profiles may require this to be true.
+\\
+
 \Option{HighPrecisionPredictionWeighting} &
 \Default{false} &
 Specifies the value of high_precision_prediction_weighting_flag. This setting is only valid for the 16-bit or 4:4:4 RExt profiles.
@@ -3409,6 +3462,11 @@ When true, specifies the use of the residual rotation tool. Version 1 and some V
 \Option{SingleSignificanceMapContext} &
 \Default{false} &
 When true, specifies the use of a single significance map context for transform-skipped and transquant-bypassed TUs. Version 1 and some Version 2 (RExt) profiles require this to be false.
+\\
+
+\Option{ExtendedRiceRRC} &
+\Default{false} &
+When true, specifies the that extension of the Golomb-Rice parameter derivation for RRC is used. Version 1  profiles require this to be false and some Version 2 (RExt) profiles may require this to be true.
 \\
 
 \Option{GolombRiceParameterAdaptation} &
@@ -3464,7 +3522,7 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   139 & Temporal motion-constrained tile sets    & Table \ref{tab:sei-tmcts} \\
   140 & Chroma resampling filter hint            & Table \ref{tab:chroma-resampling-filter-hint} \\
   141 & Knee function information                & Table \ref{tab:sei-knee-function} \\
-  142 & Colour remapping information             & Table \ref{tab:sei-colour-remapping}\\
+  142 & Colour transform information             & Table \ref{tab:sei-colour-transform}\\
   143 & Deinterlaced field identification        & (Not handled)\\
   144 & Content light level info                 & Table \ref{tab:sei-content-light-level}\\
   147 & Alternative transfer characteristics     & Table \ref{tab:sei-alternative-transfer-characteristics}\\
@@ -3475,10 +3533,14 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   154 & Sphere rotation                          & Table \ref{tab:sei-sphere-rotation} \\
   155 & Region-wise packing                      & Table \ref{tab:sei-rwp} \\
   156 & Omni viewport                            & Table \ref{tab:sei-omni-viewport} \\  
+  165 & Alpha Channel Information                & Table \ref{tab:sei-aci} \\
   168 & Frame-field information                  & Table \ref{tab:sei-frame-field} \\  
+  177 & Depth Representation Information         & Table \ref{tab:sei-dri} \\
+  179 & Multiview Acquisition Information        & Table \ref{tab:sei-mai} \\
   202 & Annotated regions information            & Table \ref{tab:sei-annotated-regions} \\  
   203 & Subpicture Level Information             & Table \ref{tab:sei-subpic-level} \\  
   204 & Sample Aspect Ratio Information          & Table \ref{tab:sei-sari} \\  
+  205 & Scalability Dimension Information        & Table \ref{tab:sei-sdi} \\
 \end{SEIListTable}
 %%
 %% SEI messages
@@ -3789,17 +3851,21 @@ disabled.
 
 
 \begin{OptionTableNoShorthand}{Display orientation SEI message encoder parameters}{tab:sei-display-orientation}
-\Option{SEIDisplayOrientation} &
+\Option{SEIDisplayOrientationEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of the Display orientation SEI messages.
+\\
+\Option{SEIDisplayOrientationCancelFlag} &
+\Default{true} &
+Indicates that display orientation SEI message cancels the persistence (true) or follows (false).
+\\
+\Option{SEIDisplayOrientationPersistenceFlag} &
+\Default{false} &
+Specifies the persistence of the display orientation SEI message.
+\\
+\Option{SEIDisplayOrientationTransformType} &
 \Default{0} &
-Enables or disables the insertion of the Display orientation
-SEI messages.
-\par
-\begin{tabular}{cp{0.20\textwidth}}
-  0 & Disabled \\
-  N: $0 < N < (2^{16} - 1)$ & Enable display orientation SEI message with 
-  \mbox{anticlockwise_rotation = N} 
-  and \mbox{display_orientation_repetition_period = 1} \\
-\end{tabular}
+Specifies the rotation and mirroring to be applied to the picture.
 \\
 \end{OptionTableNoShorthand}
 
@@ -4141,12 +4207,63 @@ Array of output knee point. Default table can be set to the following:
 \end{OptionTableNoShorthand}
 
 
-\begin{OptionTableNoShorthand}{Colour remapping SEI message encoder parameters}{tab:sei-colour-remapping}
-\Option{SEIColourRemappingInfoFileRoot (-cri)} &
-\Default{\NotSet} &
-Specifies the prefix of input Colour Remapping Information file. Prefix is completed by ``_x.txt'' where x is the  POC number.
-The contents of the file are a list of the SEI message's syntax element names (in decoding order) immediately followed by a `:' and then the associated value.
-An example file can be found in cfg/misc/example_colour_remapping_sei_encoder_0.txt.
+\begin{OptionTableNoShorthand}{Colour transform information SEI message encoder parameters}{tab:sei-colour-transform}
+\Option{SEICTIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of colour transform information (CTI) SEI message.
+Examples configuration files for CTI can be found in folder cfg/examples_SEI_CTI.
+\\
+\Option{SEICTIId} &
+\Default{0} &
+Specifies the ID of the CTI SEI message.
+\\
+\Option{SEICTISignalInfoFlag} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of output signal information after applying the colour transform.
+\\
+\Option{SEICTIFullRangeFlag} &
+\Default{false} &
+Specifies the range (true:full, false:limited) of the output signal after applying the colour transform.
+\\
+\Option{SEICTIPrimaries} &
+\Default{0} &
+Specifies the colour primaries of the output signal after applying the colour transform.
+\\
+\Option{SEICTITransferFunction} &
+\Default{0} &
+Specifies the transfer function (characteristics) of the output signal after applying the colour transform.
+\\
+\Option{SEICTIMatrixCoefs} &
+\Default{0} &
+Specifies the matrix coefficients type of the output signal after applying the colour transform.
+\\
+\Option{SEICTICrossCompFlag} &
+\Default{true} &
+Enables (true) or disables (false) the cross-component scaling for applying the colour transform.
+\\
+\Option{SEICTICrossCompInferred} &
+\Default{true} &
+Infers (true) or signals (false) the cross-component scaling tables for the colour transform.
+\\
+\Option{SEICTINbChromaLut} &
+\Default{0} &
+Specifies the number of chroma tables (1 or 2) for the colour transform (only used when SEICTICrossCompInferred = false).
+\\
+\Option{SEICTILut0} &
+\Default{0} &
+Specifies the transform table for colour component 0.
+\\
+\Option{SEICTILut1} &
+\Default{0} &
+Specifies the transform table for colour component 1 (only used when SEICTICrossCompFlag = false).
+\\
+\Option{SEICTILut2} &
+\Default{0} &
+Specifies the transform table for colour component 2 (only used when SEICTINbChromaLut = 2).
+\\
+\Option{SEICTIChromaOffset} &
+\Default{0} &
+Specifies the offset to be added to the values of the cross-component scaling tables (only used when SEICTICrossCompInferred = false).
 \\
 \end{OptionTableNoShorthand}
 
@@ -4486,6 +4603,242 @@ Specifies the vertical size of the sample aspect ratio, if SEISARIAspectRatioIdc
 \\
 \end{OptionTableNoShorthand}
 
+\begin{OptionTableNoShorthand}{Scalability Dimension Information SEI message encoder parameters}{tab:sei-sdi}
+\Option{SEISDIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Scalability Dimension Information SEI message.
+\\
+\Option{SEISDIMaxLayersMinus1} &
+\Default{0} &
+Specifies the maximum number of layers minus 1 in the current CVS.
+\\
+\Option{SEISDIMultiviewInfoFlag} &
+\Default{false} &
+Specifies the current CVS may have multiple views and the sdi_view_id_val[ ] syntax elements are present in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDIAuxiliaryInfoFlag} &
+\Default{false} &
+Specifies that one or more layers in the current CVS may be auxiliary layers, which carry auxiliary information, and the sdi_aux_id[ ] syntax elements are present in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDIViewIdLenMinus1} &
+\Default{0} &
+Specifies the length, in bits, of the sdi_view_id_val[ i ] syntax element minus 1 in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDILayerId} &
+\Default{""} &
+List of the layer identifiers that may be present in the scalaibility dimension information SEI message in the current CVS.
+\\
+\Option{SEISDIViewIdVal} &
+\Default{""} &
+List of the view identifiers in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDIAuxId} &
+\Default{""} &
+List of the auxiliary identifiers in the scalaibility dimension information SEI message.
+\\
+\Option{SEISDINumAssociatedPrimaryLayersMinus1} &
+\Default{""} &
+List of the numbers of associated primary layers of i-th layer, which is an auxiliary layer.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Alpha Channel Information SEI message encoder parameters}{tab:sei-aci}
+\Option{SEIACIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Alpha Channel Information SEI message.
+\\
+\Option{SEIACICancelFlag} &
+\Default{false} &
+Specifies the persistence of any previous alpha channel information SEI message in output order.
+\\
+\Option{SEIACIUseIdc} &
+\Default{0} &
+Specifies the usage of the auxiliary picture in the alpha channel information SEI message.
+\\
+\Option{SEIACIBitDepthMinus8} &
+\Default{0} &
+Specifies the bit depth of the samples of the auxiliary picture in the alpha channel information SEI message.
+\\
+\Option{SEIACITransparentValue} &
+\Default{0} &
+Specifies the interpretation sample value of an auxiliary coded picture luma sample for which the associated luma and chroma samples of the primary coded picture are considered transparent for purposes of alpha blending in the alpha channel information SEI message.
+\\
+\Option{SEIACIOpaqueValue} &
+\Default{0} &
+Specifies the interpretation sample value of an auxiliary coded picture luma sample for which the associated luma and chroma samples of the primary coded picture are considered opaque for purposes of alpha blending in the alpha channel information SEI message.
+\\
+\Option{SEIACIIncrFlag} &
+\Default{false} &
+Specifies the interpretation sample value for each decoded auxiliary picture luma sample value is equal to the decoded auxiliary picture sample value for purposes of alpha blending in the alpha channel information SEI message.
+\\
+\Option{SEIACIClipFlag} &
+\Default{false} &
+Specifies whether clipping operation is applied in the alpha channel information SEI message.
+\\
+\Option{SEIACIClipTypeFlag} &
+\Default{false} &
+Specifies the type of clipping operation in the alpha channel information SEI message.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Depth Representation Information SEI message encoder parameters}{tab:sei-dri}
+\Option{SEIDRIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Depth Representation Information SEI message.
+\\
+\Option{SEIDRIZNearFlag} &
+\Default{false} &
+Specifies the presence of the nearest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIZFarFlag} &
+\Default{false} &
+Specifies the presence of the farthest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMinFlag} &
+\Default{false} &
+Specifies the presence of the minimum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMaxFlag} &
+\Default{false} &
+Specifies the presence of the maximum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIZNear} &
+\Default{0.0} &
+Specifies the nearest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIZFar} &
+\Default{0.0} &
+Specifies the farest depth value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMin} &
+\Default{0.0} &
+Specifies the minimum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDMax} &
+\Default{0.0} &
+Specifies the maximum disparity value in the depth representation information SEI message.
+\\
+\Option{SEIDRIDepthRepresentationType} &
+\Default{0} &
+Specifies the the representation definition of decoded luma samples of auxiliary pictures in the depth representation information SEI message.
+\\
+\Option{SEIDRIDisparityRefViewId} &
+\Default{0} &
+Specifies the ViewId value against which the disparity values are derived in the depth representation information SEI message.
+\\
+\Option{SEIDRINonlinearNumMinus1} &
+\Default{0} &
+Specifies the number of piece-wise linear segments minus 2 for mapping of depth values to a scale that is uniformly quantized in terms of disparity  in the depth representation information SEI message.
+\\
+\Option{SEIDRINonlinearModel} &
+\Default{""} &
+List of the piece-wise linear segments for mapping of decoded luma sample values of an auxiliary picture to a scale that is uniformly quantized in terms of disparity in the depth representation information SEI message.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Multiview Acquisition Information SEI message encoder parameters}{tab:sei-mai}
+\Option{SEIMAIEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Multiview Acquisition Information SEI message.
+\\
+\Option{SEIMAIIntrinsicParamFlag} &
+\Default{false} &
+Specifies the presence of intrinsic camera parameters in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExtrinsicParamFlag} &
+\Default{false} &
+Specifies the presence of extrinsic camera parameters in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAINumViewsMinus1} &
+\Default{0} &
+Specifies the number of views minus 1 in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIIntrinsicParamsEqualFlag} &
+\Default{false} &
+Specifies the intrinsic camera parameters are equal for all cameras in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecFocalLength} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for focal_length_x[i] and focal_length_y[i] in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecPrincipalPoint} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for principal_point_x[i] and principal_point_y[i] in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecSkewFactor} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for skew factor in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignFocalLengthX} &
+\Default{""} &
+List of the signs of the focal length of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentFocalLengthX} &
+\Default{""} &
+List of the exponent parts of the focal length of the camera in the horizontal direction. in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaFocalLengthX} &
+\Default{""} &
+List of the mantissa parts of the focal length of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignFocalLengthY} &
+\Default{""} &
+List of the signs of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentFocalLengthY} &
+\Default{""} &
+List of the exponent parts of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaFocalLengthY} &
+\Default{""} &
+List of the mantissa parts of the focal length of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignPrincipalPointX} &
+\Default{""} &
+List of the signs of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentPrincipalPointX} &
+\Default{""} &
+List of the exponent parts of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaPrincipalPointX} &
+\Default{""} &
+List of the mantissa parts of the principal point of the camera in the horizontal direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignPrincipalPointY} &
+\Default{""} &
+List of the signs of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentPrincipalPointY} &
+\Default{""} &
+List of the exponent parts of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaPrincipalPointY} &
+\Default{""} &
+List of the mantissa parts of the principal point of the camera in the vertical direction in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAISignSkewFactor} &
+\Default{""} &
+List of the signs of the skew factor of the camera in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIExponentSkewFactor} &
+\Default{""} &
+List of the exponent parts of the skew factor of the camera in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIMantissaSkewFactor} &
+\Default{""} &
+List of the mantissa parts of the skew factor of the camera in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecRotationParam} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for rotation in the multiview acquisition information SEI message.
+\\
+\Option{SEIMAIPrecTranslationParam} &
+\Default{0} &
+Specifies the exponent of the maximum allowable truncation error for translation in the multiview acquisition information SEI message.
+\\
+\end{OptionTableNoShorthand}
+
 \begin{OptionTableNoShorthand}{Frame-Field Information SEI message encoder parameters}{tab:sei-frame-field}
 \Option{SEIFrameFieldInfo} &
 \Default{false} &
@@ -4532,7 +4885,7 @@ Enable signalling of level information for each sublayer
 \\
 \Option{SEISubpicLevelInfoNonSubpicLayersFractions} &
 \Default{""} &
-List of fraction of levels to be signalled for non-subpicture layers.
+List of fractions of levels to be signalled for non-subpicture layers. Each value in the list shall be in the range 0 to 255.
 \par
 \begin{tabular}{p{0.49\columnwidth}}
 When sli_sublayer_info_present_flag = 0, the number of input elements shall be equal to numReflevels. List is ordered by level.\\
@@ -4550,7 +4903,7 @@ When sli_sublayer_info_present_flag = 1, the number of input elements shall be e
 \\
 \Option{SEISubpicLevelInfoRefLevelFractions} &
 \Default{""} &
-List of fractions of levels to be signalled.
+List of fractions of levels to be signalled. Each value in the list shall be in the range 0 to 255.
 \par
 \begin{tabular}{p{0.49\columnwidth}}
 When sli_sublayer_info_present_flag = 0, the number of input elements shall be equal to numSubpics * numReflevels. List is ordered by subpicture then level.\\
@@ -4867,10 +5220,10 @@ has the following behaviour:
 When a non-empty file name is specified, information regarding any decoded SEI messages will be output to the indicated file. If the file name is '-', then stdout is used instead.
 \\
 
-\Option{SEIColourRemappingInfoFilename} &
+\Option{SEICTIFilename} &
 %\ShortOption{\None} &
 \Default{\NotSet} &
-Specifies that the colour remapping SEI message should be applied to the output video, with the output written to this file.
+Specifies that the colour transform information (CTI) SEI message should be applied to the output video, with the output written to this file.
 If no value is specified, the SEI message is ignored and no mapping is applied.
 \\
 

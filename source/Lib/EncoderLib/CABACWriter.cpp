@@ -61,6 +61,8 @@ void CABACWriter::initCtxModels( const Slice& slice )
     sliceType = encCABACTableIdx;
   }
   m_BinEncoder.reset( qp, (int)sliceType );
+  m_BinEncoder.setBaseLevel(slice.getRiceBaseLevel());
+  m_BinEncoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA)); // provide bit depth for derivation (CE14_C method)
 }
 
 
@@ -2706,6 +2708,15 @@ void CABACWriter::residual_coding( const TransformUnit& tu, ComponentID compID, 
   int ctxBinSampleRatio = (compID == COMPONENT_Y) ? MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_LUMA : MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_CHROMA;
   cctx.regBinLimit = (tu.getTbAreaAfterCoefZeroOut(compID) * ctxBinSampleRatio) >> 4;
 
+  int baseLevel = m_BinEncoder.getCtx().getBaseLevel();
+  cctx.setBaseLevel(baseLevel);
+  if (tu.cs->slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag())
+  {
+    cctx.setUpdateHist(1);
+    unsigned riceStats = m_BinEncoder.getCtx().getGRAdaptStats((unsigned)compID);
+    TCoeff historyValue = (TCoeff)1 << riceStats;
+    cctx.setHistValue(historyValue);
+  }
   for( int subSetId = ( cctx.scanPosLast() >> cctx.log2CGSize() ); subSetId >= 0; subSetId--)
   {
     cctx.initSubblock       ( subSetId, sigGroupFlags[subSetId] );
@@ -2855,16 +2866,16 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   }
 
   unsigned CtxLast;
-  unsigned GroupIdxX = g_uiGroupIdx[ posX ];
-  unsigned GroupIdxY = g_uiGroupIdx[ posY ];
+  unsigned GroupIdxX = g_groupIdx[posX];
+  unsigned GroupIdxY = g_groupIdx[posY];
 
   unsigned maxLastPosX = cctx.maxLastPosX();
   unsigned maxLastPosY = cctx.maxLastPosY();
 
   if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
   {
-    maxLastPosX = ( tu.blocks[compID].width  == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosX;
-    maxLastPosY = ( tu.blocks[compID].height == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosY;
+    maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
+    maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;
   }
 
   for( CtxLast = 0; CtxLast < GroupIdxX; CtxLast++ )
@@ -2885,7 +2896,7 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   }
   if( GroupIdxX > 3 )
   {
-    posX -= g_uiMinInGroup[ GroupIdxX ];
+    posX -= g_minInGroup[GroupIdxX];
     for (int i = ( ( GroupIdxX - 2 ) >> 1 ) - 1 ; i >= 0; i-- )
     {
       m_BinEncoder.encodeBinEP( ( posX >> i ) & 1 );
@@ -2893,7 +2904,7 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   }
   if( GroupIdxY > 3 )
   {
-    posY -= g_uiMinInGroup[ GroupIdxY ];
+    posY -= g_minInGroup[GroupIdxY];
     for ( int i = ( ( GroupIdxY - 2 ) >> 1 ) - 1 ; i >= 0; i-- )
     {
       m_BinEncoder.encodeBinEP( ( posY >> i ) & 1 );
@@ -2908,6 +2919,8 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   const bool  isLast      = cctx.isLast();
   int         firstSigPos = ( isLast ? cctx.scanPosLast() : cctx.maxSubPos() );
   int         nextSigPos  = firstSigPos;
+  int baseLevel = cctx.getBaseLevel();
+  bool updateHistory = cctx.getUpdateHist();
 
   //===== encode significant_coeffgroup_flag =====
   if( !isLast && cctx.isNotFirst() )
@@ -2993,14 +3006,21 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   unsigned ricePar = 0;
   for( int scanPos = firstSigPos; scanPos > firstPosMode2; scanPos-- )
   {
-    int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
-    ricePar = g_auiGoRiceParsCoeff[sumAll];
+     ricePar = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, baseLevel);
+
     unsigned absLevel = (unsigned) abs( coeff[ cctx.blockPos( scanPos ) ] );
     if( absLevel >= 4 )
     {
       unsigned rem      = ( absLevel - 4 ) >> 1;
       m_BinEncoder.encodeRemAbsEP( rem, ricePar, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, ricePar );
+      if ((updateHistory) && (rem > 0))
+      {
+        unsigned &riceStats = m_BinEncoder.getCtx().getGRAdaptStats((unsigned)(cctx.compID()));
+        cctx.updateRiceStat(riceStats, rem, 1);
+        cctx.setUpdateHist(0);
+        updateHistory = 0;
+      }
     }
   }
 
@@ -3009,13 +3029,19 @@ void CABACWriter::residual_coding_subblock( CoeffCodingContext& cctx, const TCoe
   {
     TCoeff    Coeff     = coeff[ cctx.blockPos( scanPos ) ];
     unsigned    absLevel  = (unsigned) abs( Coeff );
-    int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
-    int       rice      = g_auiGoRiceParsCoeff                        [sumAll];
-    int       pos0      = g_auiGoRicePosCoeff0(state, rice);
+    int rice = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, 0);
+    int         pos0      = g_goRicePosCoeff0(state, rice);
     unsigned  rem       = ( absLevel == 0 ? pos0 : absLevel <= pos0 ? absLevel-1 : absLevel );
     m_BinEncoder.encodeRemAbsEP( rem, rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
     DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, rice );
     state = ( stateTransTable >> ((state<<2)+((absLevel&1)<<1)) ) & 3;
+    if ((updateHistory) && (rem > 0))
+    {
+      unsigned &riceStats = m_BinEncoder.getCtx().getGRAdaptStats((unsigned)cctx.compID());
+      cctx.updateRiceStat(riceStats, rem, 0);
+      cctx.setUpdateHist(0);
+      updateHistory = 0;
+    }
     if( absLevel )
     {
       numNonZero++;
@@ -3061,11 +3087,33 @@ void CABACWriter::residual_codingTS( const TransformUnit& tu, ComponentID compID
   for( int subSetId = 0; subSetId <= ( cctx.maxNumCoeff() - 1 ) >> cctx.log2CGSize(); subSetId++ )
   {
     cctx.initSubblock         ( subSetId, sigGroupFlags[subSetId] );
-    residual_coding_subblockTS( cctx, coeff );
+    int goRiceParam = 1;
+    bool ricePresentFlag = false;
+    unsigned RiceBit[8]   = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP)
+    {
+      goRiceParam = goRiceParam + tu.cu->slice->get_tsrc_index();
+      if (isEncoding())
+      {
+        ricePresentFlag = true;
+        for (int i = 0; i < MAX_TSRC_RICE; i++)
+        {
+          RiceBit[i] = tu.cu->slice->getRiceBit(i);
+        }
+      }
+    }
+    residual_coding_subblockTS( cctx, coeff, RiceBit, goRiceParam, ricePresentFlag);
+    if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP && isEncoding())
+    {
+      for (int i = 0; i < MAX_TSRC_RICE; i++)
+      {
+        tu.cu->slice->setRiceBit(i, RiceBit[i]);
+      }
+    }
   }
 }
 
-void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TCoeff* coeff )
+void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TCoeff* coeff, unsigned (&RiceBit)[8], int riceParam, bool ricePresentFlag)
 {
   //===== init =====
   const int   minSubPos   = cctx.maxSubPos();
@@ -3170,10 +3218,33 @@ void CABACWriter::residual_coding_subblockTS( CoeffCodingContext& cctx, const TC
 
     if( absLevel >= cutoffVal )
     {
-      int       rice = cctx.templateAbsSumTS( scanPos, coeff );
+      int       rice = riceParam;
       unsigned  rem = scanPos <= lastScanPosPass1 ? (absLevel - cutoffVal) >> 1 : absLevel;
       m_BinEncoder.encodeRemAbsEP( rem, rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "ts_rem_val() bin=%d ctx=%d sp=%d\n", rem, rice, scanPos );
+      if ( ricePresentFlag && (isEncoding()) && (cctx.compID() == COMPONENT_Y))
+      {
+        for (int idx = 1; idx < 9; idx++)
+        {
+          uint32_t length;
+          uint32_t symbol = rem;
+          if (rem < (5 << idx))
+          {
+            length = rem >> idx;
+            RiceBit[idx - 1] += (length + 1 + idx);
+          }
+          else
+          {
+            length = idx;
+            symbol = symbol - (5 << idx);
+            while (symbol >= (1 << length))
+            {
+              symbol -= (1 << (length++));
+            }
+            RiceBit[idx - 1] += (5 + length + 1 - idx + length);
+          }
+        }
+      }
 
       if (absLevel && scanPos > lastScanPosPass1)
       {

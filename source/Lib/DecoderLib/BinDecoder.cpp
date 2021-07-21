@@ -97,6 +97,10 @@ void BinDecoderBase::reset( int qp, int initId )
   start();
 }
 
+void BinDecoderBase::riceStatReset(int bitDepth)
+{
+  Ctx::riceStatReset(bitDepth);
+}
 
 unsigned BinDecoderBase::decodeBinEP()
 {

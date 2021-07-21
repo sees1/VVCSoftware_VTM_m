@@ -38,7 +38,7 @@
 #ifndef __CONTEXTMODELLING__
 #define __CONTEXTMODELLING__
 
-
+#include "Rom.h"
 #include "CommonDef.h"
 #include "Contexts.h"
 #include "Slice.h"
@@ -190,6 +190,125 @@ public:
       }
     }
     return unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
+  }
+
+  void updateRiceStat(unsigned &riceStat, TCoeff rem, int remainderFlag)
+  {
+    if (remainderFlag)
+    {
+      riceStat = (riceStat + floorLog2((uint32_t)rem) + 2) >> 1;
+    }
+    else 
+    {
+      riceStat = (riceStat + floorLog2((uint32_t)rem)) >> 1;
+    }
+  }
+  
+  unsigned templateAbsCompare(TCoeff sum)
+  {
+    int rangeIdx = 0;
+    if (sum < g_riceT[0])
+    {
+      rangeIdx = 0;
+    }
+    else if (sum < g_riceT[1])
+    {
+      rangeIdx = 1;
+    }
+    else if (sum < g_riceT[2])
+    {
+      rangeIdx = 2;
+    }
+    else if (sum < g_riceT[3])
+    {
+      rangeIdx = 3;
+    }
+    else
+    {
+      rangeIdx = 4;
+    }
+
+    return g_riceShift[rangeIdx];
+  }
+
+  unsigned templateAbsSumExt(int scanPos, const TCoeff* coeff, int baseLevel)
+  {
+    unsigned riceParam;
+    const uint32_t  posY = m_scan[scanPos].y;
+    const uint32_t  posX = m_scan[scanPos].x;
+    const TCoeff*   data = coeff + posX + posY * m_width;
+    TCoeff          sum = 0;
+    if (posX < m_width - 1)
+    {
+      sum += abs(data[1]);
+      if (posX < m_width - 2)
+      {
+        sum += abs(data[2]);
+      }
+      else
+      {
+        sum += m_histValue;
+      }
+
+      if (posY < m_height - 1)
+      {
+        sum += abs(data[m_width + 1]);
+      }
+      else
+      {
+        sum += m_histValue;
+      }
+    }
+    else
+    {
+      sum += 2 * m_histValue;
+    }
+    if (posY < m_height - 1)
+    {
+      sum += abs(data[m_width]);
+      if (posY < m_height - 2)
+      {
+        sum += abs(data[m_width << 1]);
+      }
+      else
+      {
+        sum += m_histValue;
+      }
+    }
+    else
+    {
+      sum += m_histValue;
+    }
+
+    int currentShift = templateAbsCompare(sum);
+    sum = sum >> currentShift;
+    if (baseLevel == 0)
+    {
+      riceParam = unsigned(std::min<TCoeff>(sum, 31));
+    }
+    else
+    {
+      riceParam = unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - baseLevel, 31), 0));
+    }
+
+    riceParam = g_goRiceParsCoeff[riceParam] + currentShift;
+
+    return riceParam;
+  }
+
+  unsigned (CoeffCodingContext::*deriveRiceRRC)(int scanPos, const TCoeff* coeff, int baseLevel);
+
+  unsigned deriveRice(int scanPos, const TCoeff* coeff, int baseLevel)
+  {
+    unsigned sumAbs = templateAbsSum(scanPos, coeff, baseLevel);
+    unsigned riceParam = g_goRiceParsCoeff[sumAbs];
+    return riceParam;
+  }
+  
+  unsigned deriveRiceExt(int scanPos, const TCoeff* coeff, int baseLevel)
+  {
+    unsigned riceParam = templateAbsSumExt(scanPos, coeff, baseLevel);
+    return riceParam;
   }
 
   unsigned sigCtxIdAbsTS( int scanPos, const TCoeff* coeff )
@@ -363,6 +482,13 @@ public:
 
   int                       regBinLimit;
 
+  unsigned  getBaseLevel()                                   { return m_cctxBaseLevel; };
+  void setBaseLevel(int value)                               { m_cctxBaseLevel = value; };
+  TCoeff getHistValue()                                      { return m_histValue; };
+  void setHistValue(TCoeff value)                            { m_histValue = value; };
+  bool getUpdateHist() { return m_updateHist; };
+  void setUpdateHist(bool value) { m_updateHist = value; };
+
 private:
   // constant
   const ComponentID         m_compID;
@@ -417,6 +543,9 @@ private:
   int                       m_remainingContextBins;
   std::bitset<MLS_GRP_NUM>  m_sigCoeffGroupFlag;
   const bool                m_bdpcm;
+  int                       m_cctxBaseLevel; 
+  TCoeff                    m_histValue;    
+  bool                      m_updateHist;
 };
 
 

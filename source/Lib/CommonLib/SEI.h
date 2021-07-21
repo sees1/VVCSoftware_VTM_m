@@ -61,18 +61,23 @@ public:
     USER_DATA_UNREGISTERED               = 5,
     FILM_GRAIN_CHARACTERISTICS           = 19,
     FRAME_PACKING                        = 45,
+    DISPLAY_ORIENTATION                  = 47,
     PARAMETER_SETS_INCLUSION_INDICATION  = 129,
     DECODING_UNIT_INFO                   = 130,
     DECODED_PICTURE_HASH                 = 132,
     SCALABLE_NESTING                     = 133,
     MASTERING_DISPLAY_COLOUR_VOLUME      = 137,
+    COLOUR_TRANSFORM_INFO                = 142,
     DEPENDENT_RAP_INDICATION             = 145,
     EQUIRECTANGULAR_PROJECTION           = 150,
     SPHERE_ROTATION                      = 154,
     REGION_WISE_PACKING                  = 155,
     OMNI_VIEWPORT                        = 156,
     GENERALIZED_CUBEMAP_PROJECTION       = 153,
+    ALPHA_CHANNEL_INFO                   = 165,
     FRAME_FIELD_INFO                     = 168,
+    DEPTH_REPRESENTATION_INFO            = 177,
+    MULTIVIEW_ACQUISITION_INFO           = 179,
     SUBPICTURE_LEVEL_INFO                = 203,
     SAMPLE_ASPECT_RATIO_INFO             = 204,
     CONTENT_LIGHT_LEVEL_INFO             = 144,
@@ -80,6 +85,8 @@ public:
     AMBIENT_VIEWING_ENVIRONMENT          = 148,
     CONTENT_COLOUR_VOLUME                = 149,
     ANNOTATED_REGIONS                    = 202,
+    SCALABILITY_DIMENSION_INFO           = 205,
+    EXTENDED_DRAP_INDICATION             = 206,
   };
 
   SEI() {}
@@ -200,6 +207,187 @@ public:
   uint8_t              m_gcmpGuardBandType;
   bool                 m_gcmpGuardBandBoundaryExteriorFlag;
   uint8_t              m_gcmpGuardBandSamplesMinus1;
+};
+
+class SEIScalabilityDimensionInfo : public SEI
+{
+public:
+  PayloadType payloadType() const { return SCALABILITY_DIMENSION_INFO; }
+  SEIScalabilityDimensionInfo()
+  : m_sdiNumViews (0)
+  , m_sdiMaxLayersMinus1 (0)
+  , m_sdiMultiviewInfoFlag (false)
+  , m_sdiAuxiliaryInfoFlag (false)
+  , m_sdiViewIdLenMinus1 (0)
+  {
+  }
+  virtual ~SEIScalabilityDimensionInfo() {}
+  bool isSDISameContent(SEIScalabilityDimensionInfo* sdiB);
+
+  int                   m_sdiNumViews;
+  int                   m_sdiMaxLayersMinus1;
+  bool                  m_sdiMultiviewInfoFlag;
+  bool                  m_sdiAuxiliaryInfoFlag;
+  int                   m_sdiViewIdLenMinus1;
+  std::vector<int>      m_sdiLayerId;
+  std::vector<int>      m_sdiViewIdVal;
+  std::vector<int>      m_sdiAuxId;
+  std::vector<int>      m_sdiNumAssociatedPrimaryLayersMinus1;
+  std::vector<std::vector<int>> m_sdiAssociatedPrimaryLayerIdx;
+};
+
+class SEIMultiviewAcquisitionInfo : public SEI
+{
+public:
+  PayloadType payloadType( ) const { return MULTIVIEW_ACQUISITION_INFO; }
+  SEIMultiviewAcquisitionInfo ( ) { };
+  ~SEIMultiviewAcquisitionInfo( ) { };
+  SEI* getCopy( ) const { return new SEIMultiviewAcquisitionInfo(*this); };
+  bool isMAISameContent(SEIMultiviewAcquisitionInfo* maiB);
+
+  void resizeArrays( )
+  {
+    int numViews = m_maiIntrinsicParamsEqualFlag ? 1 : m_maiNumViewsMinus1 + 1;
+    m_maiSignFocalLengthX       .resize( numViews );
+    m_maiExponentFocalLengthX   .resize( numViews );
+    m_maiMantissaFocalLengthX   .resize( numViews );
+    m_maiSignFocalLengthY       .resize( numViews );
+    m_maiExponentFocalLengthY   .resize( numViews );
+    m_maiMantissaFocalLengthY   .resize( numViews );
+    m_maiSignPrincipalPointX    .resize( numViews );
+    m_maiExponentPrincipalPointX.resize( numViews );
+    m_maiMantissaPrincipalPointX.resize( numViews );
+    m_maiSignPrincipalPointY    .resize( numViews );
+    m_maiExponentPrincipalPointY.resize( numViews );
+    m_maiMantissaPrincipalPointY.resize( numViews );
+    m_maiSignSkewFactor         .resize( numViews );
+    m_maiExponentSkewFactor     .resize( numViews );
+    m_maiMantissaSkewFactor     .resize( numViews );
+
+    m_maiSignR                  .resize( m_maiNumViewsMinus1 + 1 );
+    m_maiExponentR              .resize( m_maiNumViewsMinus1 + 1 );
+    m_maiMantissaR              .resize( m_maiNumViewsMinus1 + 1 );
+    m_maiSignT                  .resize( m_maiNumViewsMinus1 + 1 );
+    m_maiExponentT              .resize( m_maiNumViewsMinus1 + 1 );
+    m_maiMantissaT              .resize( m_maiNumViewsMinus1 + 1 );
+
+    for( int i = 0; i <= m_maiNumViewsMinus1 ; i++ )
+    {
+      m_maiSignR    [i].resize( 3 );
+      m_maiExponentR[i].resize( 3 );
+      m_maiMantissaR[i].resize( 3 );
+      m_maiSignT    [i].resize( 3 );
+      m_maiExponentT[i].resize( 3 );
+      m_maiMantissaT[i].resize( 3 );
+
+      for (int j = 0; j < 3; j++)
+      {
+        m_maiSignR    [i][j].resize( 3 );
+        m_maiExponentR[i][j].resize( 3 );
+        m_maiMantissaR[i][j].resize( 3 );
+      }
+    }
+  }
+
+  uint32_t getMantissaFocalLengthXLen   (int i) const;
+  uint32_t getMantissaFocalLengthYLen   (int i) const;
+  uint32_t getMantissaPrincipalPointXLen(int i) const;
+  uint32_t getMantissaPrincipalPointYLen(int i) const;
+  uint32_t getMantissaSkewFactorLen     (int i) const;
+  uint32_t getMantissaRLen              (int i, int j, int k ) const;
+  uint32_t getMantissaTLen              (int i, int j )        const;
+
+  bool              m_maiIntrinsicParamFlag;
+  bool              m_maiExtrinsicParamFlag;
+  int               m_maiNumViewsMinus1;
+  bool              m_maiIntrinsicParamsEqualFlag;
+  int               m_maiPrecFocalLength;
+  int               m_maiPrecPrincipalPoint;
+  int               m_maiPrecSkewFactor;
+  std::vector<bool> m_maiSignFocalLengthX;
+  std::vector<int>  m_maiExponentFocalLengthX;
+  std::vector<int>  m_maiMantissaFocalLengthX;
+  std::vector<bool> m_maiSignFocalLengthY;
+  std::vector<int>  m_maiExponentFocalLengthY;
+  std::vector<int>  m_maiMantissaFocalLengthY;
+  std::vector<bool> m_maiSignPrincipalPointX;
+  std::vector<int>  m_maiExponentPrincipalPointX;
+  std::vector<int>  m_maiMantissaPrincipalPointX;
+  std::vector<bool> m_maiSignPrincipalPointY;
+  std::vector<int>  m_maiExponentPrincipalPointY;
+  std::vector<int>  m_maiMantissaPrincipalPointY;
+  std::vector<bool> m_maiSignSkewFactor;
+  std::vector<int>  m_maiExponentSkewFactor;
+  std::vector<int>  m_maiMantissaSkewFactor;
+  int               m_maiPrecRotationParam;
+  int               m_maiPrecTranslationParam;
+  std::vector< std::vector<std::vector<bool>>> m_maiSignR;
+  std::vector< std::vector<std::vector<int>>>  m_maiExponentR;
+  std::vector< std::vector<std::vector<int>>>  m_maiMantissaR;
+  std::vector< std::vector<bool>> m_maiSignT;
+  std::vector< std::vector<int>>  m_maiExponentT;
+  std::vector< std::vector<int>>  m_maiMantissaT;
+private:
+  uint32_t xGetSyntaxElementLen( int expo, int prec, int val ) const;
+};
+
+class SEIAlphaChannelInfo : public SEI
+{
+public:
+  PayloadType payloadType() const { return ALPHA_CHANNEL_INFO; }
+  SEIAlphaChannelInfo()
+  : m_aciCancelFlag (false)
+  , m_aciUseIdc (0)
+  , m_aciBitDepthMinus8 (0)
+  , m_aciTransparentValue (0)
+  , m_aciOpaqueValue (255)
+  , m_aciIncrFlag (false)
+  , m_aciClipFlag (false)
+  , m_aciClipTypeFlag (false)
+  {};
+  virtual ~SEIAlphaChannelInfo() {};
+
+  bool m_aciCancelFlag;
+  int  m_aciUseIdc;
+  int  m_aciBitDepthMinus8;
+  int  m_aciTransparentValue;
+  int  m_aciOpaqueValue;
+  bool m_aciIncrFlag;
+  bool m_aciClipFlag;
+  bool m_aciClipTypeFlag;
+};
+
+class SEIDepthRepresentationInfo : public SEI
+{
+public:
+  PayloadType payloadType() const { return DEPTH_REPRESENTATION_INFO; }
+  SEIDepthRepresentationInfo()
+  : m_driZNearFlag (false)
+  , m_driZFarFlag (false)
+  , m_driDMinFlag (false)
+  , m_driDMaxFlag (false)
+  , m_driZNear (0.0)
+  , m_driZFar (0.0)
+  , m_driDMin (0.0)
+  , m_driDMax (0.0)
+  , m_driDepthRepresentationType (0)
+  , m_driDisparityRefViewId (0)
+  , m_driDepthNonlinearRepresentationNumMinus1 (0)
+  {};
+  virtual ~SEIDepthRepresentationInfo() {};
+
+  bool m_driZNearFlag;
+  bool m_driZFarFlag;
+  bool m_driDMinFlag;
+  bool m_driDMaxFlag;
+  double m_driZNear;
+  double m_driZFar;
+  double m_driDMin;
+  double m_driDMax;
+  int m_driDepthRepresentationType;
+  int m_driDisparityRefViewId;
+  int m_driDepthNonlinearRepresentationNumMinus1;
+  std::vector<int> m_driDepthNonlinearRepresentationModel;
 };
 
 class SEISampleAspectRatioInfo : public SEI
@@ -383,7 +571,7 @@ public:
   SEIDecodingUnitInfo()
     : m_decodingUnitIdx(0)
     , m_dpbOutputDuDelayPresentFlag(false)
-    , m_picSptDpbOutputDuDelay(0)
+    , m_picSptDpbOutputDuDelay(-1)
   {
     ::memset(m_duiSubLayerDelaysPresentFlag, 0, sizeof(m_duiSubLayerDelaysPresentFlag));
     ::memset(m_duSptCpbRemovalDelayIncrement, 0, sizeof(m_duSptCpbRemovalDelayIncrement));
@@ -453,6 +641,19 @@ public:
   int  m_arrangementReservedByte;
   bool m_arrangementPersistenceFlag;
   bool m_upsampledAspectRatio;
+};
+
+class SEIDisplayOrientation : public SEI
+{
+public:
+  PayloadType payloadType() const { return DISPLAY_ORIENTATION; }
+
+  SEIDisplayOrientation() {}
+  virtual ~SEIDisplayOrientation() {}
+
+  bool                  m_doCancelFlag;
+  bool                  m_doPersistenceFlag;
+  int                   m_doTransformType;
 };
 
 class SEIParameterSetsInclusionIndication : public SEI
@@ -618,6 +819,28 @@ public:
   uint16_t m_ambientLightY;
 };
 
+class SEIColourTransformInfo : public SEI
+{
+public:
+  PayloadType payloadType() const { return COLOUR_TRANSFORM_INFO; }
+  SEIColourTransformInfo() { }
+
+  virtual ~SEIColourTransformInfo() { }
+
+  uint16_t m_id;
+  bool     m_signalInfoFlag;
+  bool     m_fullRangeFlag;
+  uint16_t m_primaries;
+  uint16_t m_transferFunction;
+  uint16_t m_matrixCoefs;
+  bool     m_crossComponentFlag;
+  bool     m_crossComponentInferred;
+  uint16_t m_numberChromaLutMinus1;
+  int      m_chromaOffset;
+  uint16_t m_bitdepth;
+  uint16_t m_log2NumberOfPointsPerLut;
+  LutModel m_lut[MAX_NUM_COMPONENT];
+};
 class SEIContentColourVolume : public SEI
 {
 public:
@@ -728,6 +951,21 @@ public:
   AnnotatedRegionHeader m_hdr;
   std::vector<std::pair<AnnotatedRegionObjectIndex, AnnotatedRegionObject> > m_annotatedRegions;
   std::vector<std::pair<AnnotatedRegionLabelIndex,  AnnotatedRegionLabel>  > m_annotatedLabels;
+};
+
+class SEIExtendedDrapIndication : public SEI
+{
+public:
+  PayloadType payloadType() const { return EXTENDED_DRAP_INDICATION; }
+
+  SEIExtendedDrapIndication() {}
+  virtual ~SEIExtendedDrapIndication() {}
+
+  int               m_edrapIndicationRapIdMinus1;
+  bool              m_edrapIndicationLeadingPicturesDecodableFlag;
+  int               m_edrapIndicationReservedZero12Bits;
+  int               m_edrapIndicationNumRefRapPicsMinus1;
+  std::vector<int>  m_edrapIndicationRefRapId;
 };
 //! \}
 

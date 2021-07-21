@@ -95,8 +95,8 @@ protected:
   int       m_iFrameRate;                                     ///< source frame-rates (Hz)
   uint32_t      m_FrameSkip;                                      ///< number of skipped frames from the beginning
   uint32_t      m_temporalSubsampleRatio;                         ///< temporal subsample ratio, 2 means code every two frames
-  int       m_iSourceWidth;                                   ///< source width in pixel
-  int       m_iSourceHeight;                                  ///< source height in pixel (when interlaced = field height)
+  int       m_sourceWidth;                                   ///< source width in pixel
+  int       m_sourceHeight;                                  ///< source height in pixel (when interlaced = field height)
 #if EXTENSION_360_VIDEO
   int       m_inputFileWidth;                                 ///< width of image in input file  (this is equivalent to sourceWidth,  if sourceWidth  is not subsequently altered due to padding)
   int       m_inputFileHeight;                                ///< height of image in input file (this is equivalent to sourceHeight, if sourceHeight is not subsequently altered due to padding)
@@ -113,8 +113,8 @@ protected:
   int       m_confWinRight;
   int       m_confWinTop;
   int       m_confWinBottom;
+  int       m_sourcePadding[2];                                       ///< number of padded pixels for width and height
   int       m_framesToBeEncoded;                              ///< number of encoded frames
-  int       m_aiPad[2];                                       ///< number of padded pixels for width and height
   bool      m_AccessUnitDelimiter;                            ///< add Access Unit Delimiter NAL units
   bool      m_enablePictureHeaderInSliceHeader;               ///< Enable Picture Header in Slice Header
   InputColourSpaceConversion m_inputColourSpaceConvert;       ///< colour space conversion to apply to input video
@@ -127,9 +127,7 @@ protected:
   bool      m_printFrameMSE;
   bool      m_printSequenceMSE;
   bool      m_printMSSSIM;
-#if PRINT_WPSNR
   bool      m_printWPSNR;
-#endif
   bool      m_cabacZeroWordPaddingEnabled;
   bool      m_bClipInputVideoToRec709Range;
   bool      m_bClipOutputVideoToRec709Range;
@@ -228,6 +226,7 @@ protected:
   int       m_iDecodingRefreshType;                           ///< random access type
   int       m_iGOPSize;                                       ///< GOP size of hierarchical structure
   int       m_drapPeriod;                                     ///< period of dependent RAP pictures
+  int       m_edrapPeriod;                                    ///< period of extended dependent RAP pictures
   bool      m_rewriteParamSets;                              ///< Flag to enable rewriting of parameter sets at random access points
   RPLEntry  m_RPLList0[MAX_GOP];                               ///< the RPL entries from the config file
   RPLEntry  m_RPLList1[MAX_GOP];                               ///< the RPL entries from the config file
@@ -242,6 +241,7 @@ protected:
   uint32_t      m_log2MaxTransformSkipBlockSize;                  ///< transform-skip maximum size (minimum of 2)
   bool      m_transformSkipRotationEnabledFlag;               ///< control flag for transform-skip/transquant-bypass residual rotation
   bool      m_transformSkipContextEnabledFlag;                ///< control flag for transform-skip/transquant-bypass single significance map context
+  bool      m_rrcRiceExtensionEnableFlag;                        ///< control flag for enabling extension of the Golomb-Rice parameter derivation for RRC
   bool      m_persistentRiceAdaptationEnabledFlag;            ///< control flag for Golomb-Rice parameter adaptation over each slice
   bool      m_cabacBypassAlignmentEnabledFlag;
   bool      m_ISP;
@@ -287,6 +287,12 @@ protected:
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping;      ///< mapping from luma level to Delta QP.
 #endif
   SEIMasteringDisplay m_masteringDisplay;
+  bool      m_smoothQPReductionEnable;
+  double    m_smoothQPReductionThreshold;
+  double    m_smoothQPReductionModelScale;
+  double    m_smoothQPReductionModelOffset;
+  int       m_smoothQPReductionLimit;
+  int       m_smoothQPReductionPeriodicity;
 
   bool      m_bUseAdaptiveQP;                                 ///< Flag for enabling QP adaptation based on a psycho-visual model
   int       m_iQPAdaptationRange;                             ///< dQP range by QP adaptation
@@ -412,6 +418,7 @@ protected:
   int       m_MSBExtendedBitDepth[MAX_NUM_CHANNEL_TYPE];      ///< bit-depth of input samples after MSB extension
   int       m_internalBitDepth[MAX_NUM_CHANNEL_TYPE];         ///< bit-depth codec operates at (input/output files will be converted)
   bool      m_extendedPrecisionProcessingFlag;
+  bool      m_tsrcRicePresentFlag;
   bool      m_highPrecisionOffsetsEnabledFlag;
 
   //coding tools (chroma format)
@@ -427,14 +434,14 @@ protected:
   bool      m_saoCtuBoundary;                                 ///< SAO parameter estimation using non-deblocked pixels for CTU bottom and right boundary areas
   bool      m_saoGreedyMergeEnc;                              ///< SAO greedy merge encoding algorithm
   // coding tools (loop filter)
-  bool      m_bLoopFilterDisable;                             ///< flag for using deblocking filter
-  bool      m_loopFilterOffsetInPPS;                         ///< offset for deblocking filter in 0 = slice header, 1 = PPS
-  int       m_loopFilterBetaOffsetDiv2;                     ///< beta offset for deblocking filter
-  int       m_loopFilterTcOffsetDiv2;                       ///< tc offset for deblocking filter
-  int       m_loopFilterCbBetaOffsetDiv2;                     ///< beta offset for Cb deblocking filter
-  int       m_loopFilterCbTcOffsetDiv2;                       ///< tc offset for Cb deblocking filter
-  int       m_loopFilterCrBetaOffsetDiv2;                     ///< beta offset for Cr deblocking filter
-  int       m_loopFilterCrTcOffsetDiv2;                       ///< tc offset for Cr deblocking filter
+  bool      m_deblockingFilterDisable;                        ///< flag for using deblocking filter
+  bool      m_deblockingFilterOffsetInPPS;                    ///< offset for deblocking filter in 0 = slice header, 1 = PPS
+  int       m_deblockingFilterBetaOffsetDiv2;                 ///< beta offset for deblocking filter
+  int       m_deblockingFilterTcOffsetDiv2;                   ///< tc offset for deblocking filter
+  int       m_deblockingFilterCbBetaOffsetDiv2;               ///< beta offset for Cb deblocking filter
+  int       m_deblockingFilterCbTcOffsetDiv2;                 ///< tc offset for Cb deblocking filter
+  int       m_deblockingFilterCrBetaOffsetDiv2;               ///< beta offset for Cr deblocking filter
+  int       m_deblockingFilterCrTcOffsetDiv2;                 ///< tc offset for Cr deblocking filter
 #if W0038_DB_OPT
   int       m_deblockingFilterMetric;                         ///< blockiness metric in encoder
 #else
@@ -501,11 +508,16 @@ protected:
   int       m_framePackingSEIId;
   int       m_framePackingSEIQuincunx;
   int       m_framePackingSEIInterpretation;
+  bool      m_doSEIEnabled;
+  bool      m_doSEICancelFlag;
+  bool      m_doSEIPersistenceFlag;
+  int       m_doSEITransformType;
   bool      m_parameterSetsInclusionIndicationSEIEnabled;
   int       m_selfContainedClvsFlag;
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI
   int       m_preferredTransferCharacteristics;
 #endif
+
   // film grain characterstics sei
   bool      m_fgcSEIEnabled;
   bool      m_fgcSEICancelFlag;
@@ -524,6 +536,19 @@ protected:
   uint32_t  m_aveSEIAmbientIlluminance;
   uint32_t  m_aveSEIAmbientLightX;
   uint32_t  m_aveSEIAmbientLightY;
+  // colour tranform information sei
+  bool      m_ctiSEIEnabled;
+  uint32_t  m_ctiSEIId;
+  bool      m_ctiSEISignalInfoFlag;
+  bool      m_ctiSEIFullRangeFlag;
+  uint32_t  m_ctiSEIPrimaries;
+  uint32_t  m_ctiSEITransferFunction;
+  uint32_t  m_ctiSEIMatrixCoefs;
+  bool      m_ctiSEICrossComponentFlag;
+  bool      m_ctiSEICrossComponentInferred;
+  uint32_t  m_ctiSEINumberChromaLut;
+  int       m_ctiSEIChromaOffset;
+  LutModel  m_ctiSEILut[MAX_NUM_COMPONENT];
   // content colour volume sei
   bool      m_ccvSEIEnabled;
   bool      m_ccvSEICancelFlag;
@@ -537,6 +562,66 @@ protected:
   double    m_ccvSEIMinLuminanceValue;
   double    m_ccvSEIMaxLuminanceValue;
   double    m_ccvSEIAvgLuminanceValue;
+  // scalability dimension information sei
+  bool              m_sdiSEIEnabled;
+  int               m_sdiSEIMaxLayersMinus1;
+  bool              m_sdiSEIMultiviewInfoFlag;
+  bool              m_sdiSEIAuxiliaryInfoFlag;
+  int               m_sdiSEIViewIdLenMinus1;
+  std::vector<uint32_t>  m_sdiSEILayerId;
+  std::vector<uint32_t>  m_sdiSEIViewIdVal;
+  std::vector<uint32_t>  m_sdiSEIAuxId;
+  std::vector<uint32_t>  m_sdiSEINumAssociatedPrimaryLayersMinus1;
+  // multiview acquisition information sei
+  bool              m_maiSEIEnabled;
+  bool              m_maiSEIIntrinsicParamFlag;
+  bool              m_maiSEIExtrinsicParamFlag;
+  int               m_maiSEINumViewsMinus1;
+  bool              m_maiSEIIntrinsicParamsEqualFlag;
+  int               m_maiSEIPrecFocalLength;
+  int               m_maiSEIPrecPrincipalPoint;
+  int               m_maiSEIPrecSkewFactor;
+  std::vector<bool> m_maiSEISignFocalLengthX;
+  std::vector<uint32_t>  m_maiSEIExponentFocalLengthX;
+  std::vector<uint32_t>  m_maiSEIMantissaFocalLengthX;
+  std::vector<bool>      m_maiSEISignFocalLengthY;
+  std::vector<uint32_t>  m_maiSEIExponentFocalLengthY;
+  std::vector<uint32_t>  m_maiSEIMantissaFocalLengthY;
+  std::vector<bool>      m_maiSEISignPrincipalPointX;
+  std::vector<uint32_t>  m_maiSEIExponentPrincipalPointX;
+  std::vector<uint32_t>  m_maiSEIMantissaPrincipalPointX;
+  std::vector<bool>      m_maiSEISignPrincipalPointY;
+  std::vector<uint32_t>  m_maiSEIExponentPrincipalPointY;
+  std::vector<uint32_t>  m_maiSEIMantissaPrincipalPointY;
+  std::vector<bool>      m_maiSEISignSkewFactor;
+  std::vector<uint32_t>  m_maiSEIExponentSkewFactor;
+  std::vector<uint32_t>  m_maiSEIMantissaSkewFactor;
+  int               m_maiSEIPrecRotationParam;
+  int               m_maiSEIPrecTranslationParam;
+  // alpha channel information sei
+  bool      m_aciSEIEnabled;
+  bool      m_aciSEICancelFlag;
+  int       m_aciSEIUseIdc;
+  int       m_aciSEIBitDepthMinus8;
+  int       m_aciSEITransparentValue;
+  int       m_aciSEIOpaqueValue;
+  bool      m_aciSEIIncrFlag;
+  bool      m_aciSEIClipFlag;
+  bool      m_aciSEIClipTypeFlag;
+  // depth representation information sei
+  bool      m_driSEIEnabled;
+  bool      m_driSEIZNearFlag;
+  bool      m_driSEIZFarFlag;
+  bool      m_driSEIDMinFlag;
+  bool      m_driSEIDMaxFlag;
+  double    m_driSEIZNear;
+  double    m_driSEIZFar;
+  double    m_driSEIDMin;
+  double    m_driSEIDMax;
+  int       m_driSEIDepthRepresentationType;
+  int       m_driSEIDisparityRefViewId;
+  int       m_driSEINonlinearNumMinus1;
+  std::vector<uint32_t> m_driSEINonlinearModel;
 
   bool      m_erpSEIEnabled;
   bool      m_erpSEICancelFlag;
@@ -700,19 +785,14 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_U0081
+  bool        m_alfSaoTrueOrg;
   double      m_alfStrengthLuma;
-#else
-  double      m_alfStrength;
-#endif
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
-#if JVET_U0081
   double      m_alfStrengthChroma;
   double      m_alfStrengthTargetLuma;
   double      m_alfStrengthTargetChroma;
   double      m_ccalfStrengthTarget;
-#endif
   bool        m_ccalf;
   int         m_ccalfQpThreshold;
 

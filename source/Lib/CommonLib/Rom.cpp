@@ -494,35 +494,13 @@ const int g_invQuantScales[2][SCALING_LIST_REM_NUM] = // can be represented as a
 // Intra prediction
 // ====================================================================================================================
 
-const uint8_t g_aucIntraModeNumFast_UseMPM_2D[7 - MIN_CU_LOG2 + 1][7 - MIN_CU_LOG2 + 1] =
-{
-  {3, 3, 3, 3, 2, 2},  //   4x4,   4x8,   4x16,   4x32,   4x64,   4x128,
-  {3, 3, 3, 3, 3, 2},  //   8x4,   8x8,   8x16,   8x32,   8x64,   8x128,
-  {3, 3, 3, 3, 3, 2},  //  16x4,  16x8,  16x16,  16x32,  16x64,  16x128,
-  {3, 3, 3, 3, 3, 2},  //  32x4,  32x8,  32x16,  32x32,  32x64,  32x128,
-  {2, 3, 3, 3, 3, 2},  //  64x4,  64x8,  64x16,  64x32,  64x64,  64x128,
-  {2, 2, 2, 2, 2, 3},  // 128x4, 128x8, 128x16, 128x32, 128x64, 128x128,
-};
-
-const uint8_t g_aucIntraModeNumFast_UseMPM[MAX_CU_DEPTH] =
-{
-  3,  //   2x2
-  8,  //   4x4
-  8,  //   8x8
-  3,  //  16x16
-  3,  //  32x32
-  3,  //  64x64
-  3   // 128x128
-};
-const uint8_t g_aucIntraModeNumFast_NotUseMPM[MAX_CU_DEPTH] =
-{
-  3,  //   2x2
-  9,  //   4x4
-  9,  //   8x8
-  4,  //  16x16   33
-  4,  //  32x32   33
-  5,  //  64x64   33
-  5   // 128x128
+const uint8_t g_intraModeNumFastUseMPM2D[7 - MIN_CU_LOG2 + 1][7 - MIN_CU_LOG2 + 1] = {
+  { 3, 3, 3, 3, 2, 2 },   //   4x4,   4x8,   4x16,   4x32,   4x64,   4x128,
+  { 3, 3, 3, 3, 3, 2 },   //   8x4,   8x8,   8x16,   8x32,   8x64,   8x128,
+  { 3, 3, 3, 3, 3, 2 },   //  16x4,  16x8,  16x16,  16x32,  16x64,  16x128,
+  { 3, 3, 3, 3, 3, 2 },   //  32x4,  32x8,  32x16,  32x32,  32x64,  32x128,
+  { 2, 3, 3, 3, 3, 2 },   //  64x4,  64x8,  64x16,  64x32,  64x64,  64x128,
+  { 2, 2, 2, 2, 2, 3 },   // 128x4, 128x8, 128x16, 128x32, 128x64, 128x128,
 };
 
 const uint8_t g_chroma422IntraAngleMappingTable[NUM_INTRA_MODE] =
@@ -545,17 +523,21 @@ UnitScale g_miScaling( MIN_CU_LOG2, MIN_CU_LOG2 );
 // ====================================================================================================================
 // Scanning order & context model mapping
 // ====================================================================================================================
-
+int g_riceT[4] = { 32,128, 512, 2048 };
+int g_riceShift[5] = { 0, 2, 4, 6, 8 };
 // scanning order table
 ScanElement *g_scanOrder[SCAN_NUMBER_OF_GROUP_TYPES][SCAN_NUMBER_OF_TYPES][MAX_CU_SIZE / 2 + 1][MAX_CU_SIZE / 2 + 1];
 ScanElement  g_coefTopLeftDiagScan8x8[ MAX_CU_SIZE / 2 + 1 ][ 64 ];
 
-const uint32_t g_uiMinInGroup[LAST_SIGNIFICANT_GROUPS] = { 0,1,2,3,4,6,8,12,16,24,32,48,64,96 };
-const uint32_t g_uiGroupIdx[MAX_TB_SIZEY] = { 0,1,2,3,4,4,5,5,6,6,6,6,7,7,7,7,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9, 10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11 };
-const uint32_t g_auiGoRiceParsCoeff[32] =
-{
-  0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3
-};
+const uint32_t g_minInGroup[LAST_SIGNIFICANT_GROUPS] = { 0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96 };
+
+const uint32_t g_groupIdx[MAX_TB_SIZEY] = { 0,  1,  2,  3,  4,  4,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,
+                                            8,  8,  8,  8,  8,  8,  8,  8,  9,  9,  9,  9,  9,  9,  9,  9,
+                                            10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+                                            11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11 };
+
+const uint32_t g_goRiceParsCoeff[32] = { 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2,
+                                         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3 };
 const char *MatrixType[SCALING_LIST_SIZE_NUM][SCALING_LIST_NUM] =
 {
   {

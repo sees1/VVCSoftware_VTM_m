@@ -62,6 +62,8 @@ Picture::Picture()
   fieldPic             = false;
   topField             = false;
   precedingDRAP        = false;
+  edrapRapId           = -1;
+  m_colourTranfParams  = NULL;
   nonReferencePictureFlag = false;
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
@@ -130,6 +132,7 @@ void Picture::destroy()
     delete[] m_spliceIdx;
     m_spliceIdx = NULL;
   }
+  m_invColourTransfBuf = NULL;
 }
 
 void Picture::createTempBuffers( const unsigned _maxCUSize )
@@ -1214,4 +1217,45 @@ void Picture::addPictureToHashMapForInter()
       delete[] bIsBlockSame[i][j];
     }
   }
+}
+void Picture::createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
+{
+  m_colourTranfParams = ctiCharacteristics;
+  m_invColourTransfBuf = ctiBuf;
+  if (firstPictureInSequence)
+  {
+    // Create and initialize the Colour Transform Processor
+    m_colourTranfParams->create(width, height, fmt, bitDepth);
+
+    //Frame level PelStorage buffer created to apply the Colour Transform
+    m_invColourTransfBuf->create(UnitArea(chromaFormat, Area(0, 0, width, height)));
+  }
+}
+
+PelUnitBuf Picture::getDisplayBuf()
+{
+  int payloadType = 0;
+  std::list<SEI*>::iterator message;
+
+  for (message = SEIs.begin(); message != SEIs.end(); ++message)
+  {
+    payloadType = (*message)->payloadType();
+    if (payloadType == SEI::COLOUR_TRANSFORM_INFO)
+    {
+      // re-init parameters
+      *m_colourTranfParams->m_pColourTransfParams = *static_cast<SEIColourTransformInfo*>(*message);
+      //m_colourTranfParams->m_pColourTransfParams = static_cast<SEIColourTransformInfo*>(*message);
+      break;
+    }
+  }
+
+  m_invColourTransfBuf->copyFrom(getRecoBuf());
+
+  if (m_colourTranfParams->m_pColourTransfParams != NULL)
+  {
+    m_colourTranfParams->generateColourTransfLUTs();
+    m_colourTranfParams->inverseColourTransform(m_invColourTransfBuf);
+  }
+
+  return *m_invColourTransfBuf;
 }

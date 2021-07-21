@@ -83,6 +83,8 @@ void CABACReader::initCtxModels( Slice& slice )
     }
   }
   m_BinDecoder.reset( qp, (int)sliceType );
+  m_BinDecoder.setBaseLevel(slice.getRiceBaseLevel());
+  m_BinDecoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA));
 }
 
 
@@ -2961,6 +2963,15 @@ void CABACReader::residual_coding( TransformUnit& tu, ComponentID compID, CUCtx&
   int ctxBinSampleRatio = (compID == COMPONENT_Y) ? MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_LUMA : MAX_TU_LEVEL_CTX_CODED_BIN_CONSTRAINT_CHROMA;
   cctx.regBinLimit = (tu.getTbAreaAfterCoefZeroOut(compID) * ctxBinSampleRatio) >> 4;
 
+  int baseLevel = m_BinDecoder.getCtx().getBaseLevel();
+  cctx.setBaseLevel(baseLevel);
+  if (tu.cs->slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag())
+  {
+    cctx.setUpdateHist(1);
+    unsigned riceStats = m_BinDecoder.getCtx().getGRAdaptStats((unsigned)compID);
+    TCoeff historyValue = (TCoeff)1 << riceStats;
+    cctx.setHistValue(historyValue);
+  }
   for (int subSetId = (cctx.scanPosLast() >> cctx.log2CGSize()); subSetId >= 0; subSetId--)
   {
     cctx.initSubblock(subSetId);
@@ -3120,8 +3131,8 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
 
   if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
   {
-    maxLastPosX = ( tu.blocks[ compID ].width  == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosX;
-    maxLastPosY = ( tu.blocks[ compID ].height == 32 ) ? g_uiGroupIdx[ 15 ] : maxLastPosY;
+    maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
+    maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;
   }
 
   for( ; PosLastX < maxLastPosX; PosLastX++ )
@@ -3140,23 +3151,23 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
   }
   if( PosLastX > 3 )
   {
-    uint32_t uiTemp  = 0;
+    uint32_t temp    = 0;
     uint32_t uiCount = ( PosLastX - 2 ) >> 1;
     for ( int i = uiCount - 1; i >= 0; i-- )
     {
-      uiTemp += m_BinDecoder.decodeBinEP( ) << i;
+      temp += m_BinDecoder.decodeBinEP() << i;
     }
-    PosLastX = g_uiMinInGroup[ PosLastX ] + uiTemp;
+    PosLastX = g_minInGroup[PosLastX] + temp;
   }
   if( PosLastY > 3 )
   {
-    uint32_t uiTemp  = 0;
+    uint32_t temp    = 0;
     uint32_t uiCount = ( PosLastY - 2 ) >> 1;
     for ( int i = uiCount - 1; i >= 0; i-- )
     {
-      uiTemp += m_BinDecoder.decodeBinEP( ) << i;
+      temp += m_BinDecoder.decodeBinEP() << i;
     }
-    PosLastY = g_uiMinInGroup[ PosLastY ] + uiTemp;
+    PosLastY = g_minInGroup[PosLastY] + temp;
   }
 
   int blkPos;
@@ -3196,6 +3207,8 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   const bool  isLast      = cctx.isLast();
   int         firstSigPos = ( isLast ? cctx.scanPosLast() : cctx.maxSubPos() );
   int         nextSigPos  = firstSigPos;
+  int baseLevel = cctx.getBaseLevel();
+  bool updateHistory = cctx.getUpdateHist();
 
   //===== decode significant_coeffgroup_flag =====
   RExt__DECODER_DEBUG_BIT_STATISTICS_SET( ctype_group );
@@ -3281,8 +3294,8 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   unsigned ricePar = 0;
   for( int scanPos = firstSigPos; scanPos > firstPosMode2; scanPos-- )
   {
-    int       sumAll = cctx.templateAbsSum(scanPos, coeff, 4);
-    ricePar = g_auiGoRiceParsCoeff[sumAll];
+    ricePar = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, baseLevel);
+
     TCoeff& tcoeff = coeff[ cctx.blockPos( scanPos ) ];
     if( tcoeff >= 4 )
     {
@@ -3290,20 +3303,33 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
       int       rem     = m_BinDecoder.decodeRemAbsEP( ricePar, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, ricePar );
       tcoeff += (rem<<1);
+      if ((updateHistory) && (rem > 0))
+      {
+        unsigned &riceStats = m_BinDecoder.getCtx().getGRAdaptStats((unsigned)(cctx.compID()));
+        cctx.updateRiceStat(riceStats, rem, 1);
+        cctx.setUpdateHist(0);
+        updateHistory = 0;
+      }
     }
   }
 
   //===== coeff bypass ====
   for( int scanPos = firstPosMode2; scanPos >= minSubPos; scanPos-- )
   {
-    int       sumAll = cctx.templateAbsSum(scanPos, coeff, 0);
-    int       rice      = g_auiGoRiceParsCoeff                        [sumAll];
-    int       pos0      = g_auiGoRicePosCoeff0(state, rice);
+    int rice = (cctx.*(cctx.deriveRiceRRC))(scanPos, coeff, 0);
+    int       pos0   = g_goRicePosCoeff0(state, rice);
     RExt__DECODER_DEBUG_BIT_STATISTICS_SET(ctype_escs);
     int       rem       = m_BinDecoder.decodeRemAbsEP( rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
     DTRACE( g_trace_ctx, D_SYNTAX_RESI, "rem_val() bin=%d ctx=%d\n", rem, rice );
     TCoeff    tcoeff  = ( rem == pos0 ? 0 : rem < pos0 ? rem+1 : rem );
     state = ( stateTransTable >> ((state<<2)+((tcoeff&1)<<1)) ) & 3;
+    if ((updateHistory) && (rem > 0))
+    {
+      unsigned &riceStats = m_BinDecoder.getCtx().getGRAdaptStats((unsigned)(cctx.compID()));
+      cctx.updateRiceStat(riceStats, rem, 0);
+      cctx.setUpdateHist(0);
+      updateHistory = 0;
+    }
     if( tcoeff )
     {
       int        blkPos         = cctx.blockPos( scanPos );
@@ -3352,11 +3378,16 @@ void CABACReader::residual_codingTS( TransformUnit& tu, ComponentID compID )
   for( int subSetId = 0; subSetId <= ( cctx.maxNumCoeff() - 1 ) >> cctx.log2CGSize(); subSetId++ )
   {
     cctx.initSubblock         ( subSetId );
-    residual_coding_subblockTS( cctx, coeff );
+    int goRiceParam = 1;
+    if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP)
+    {
+      goRiceParam = goRiceParam + tu.cu->slice->get_tsrc_index();
+    }
+    residual_coding_subblockTS( cctx, coeff, goRiceParam);
   }
 }
 
-void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* coeff )
+void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* coeff, int riceParam)
 {
   // NOTE: All coefficients of the subblock must be set to zero before calling this function
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
@@ -3498,7 +3529,7 @@ void CABACReader::residual_coding_subblockTS( CoeffCodingContext& cctx, TCoeff* 
     }
     if( tcoeff >= cutoffVal )
     {
-      int       rice = cctx.templateAbsSumTS( scanPos, coeff );
+      int       rice = riceParam;
       int       rem  = m_BinDecoder.decodeRemAbsEP( rice, COEF_REMAIN_BIN_REDUCTION, cctx.maxLog2TrDRange() );
       DTRACE( g_trace_ctx, D_SYNTAX_RESI, "ts_rem_val() bin=%d ctx=%d sp=%d\n", rem, rice, scanPos );
       tcoeff += (scanPos <= lastScanPosPass1) ? (rem << 1) : rem;

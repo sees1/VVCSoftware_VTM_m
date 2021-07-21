@@ -68,6 +68,7 @@ public:
   void initSEIFramePacking(SEIFramePacking *sei, int currPicNum);
   void initSEIParameterSetsInclusionIndication(SEIParameterSetsInclusionIndication* sei);
   void initSEIDependentRAPIndication(SEIDependentRAPIndication *sei);
+  void initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei);
   void initSEIBufferingPeriod(SEIBufferingPeriod *sei, bool noLeadingPictures);
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI
   void initSEIAlternativeTransferCharacteristics(SEIAlternativeTransferCharacteristics *sei);
@@ -86,7 +87,12 @@ public:
   void initSEIContentLightLevel(SEIContentLightLevelInfo *sei);
   void initSEIAmbientViewingEnvironment(SEIAmbientViewingEnvironment *sei);
   void initSEIContentColourVolume(SEIContentColourVolume *sei);
+  void initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *sei);
+  void initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *sei);
+  void initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei);
+  void initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei);
   bool initSEIAnnotatedRegions(SEIAnnotatedRegions *sei, int currPOC);
+  void initSEIColourTransformInfo(SEIColourTransformInfo* sei);
   void readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed);
 private:
   EncCfg* m_pcCfg;

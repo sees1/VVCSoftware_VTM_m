@@ -49,7 +49,7 @@
 #include "CommonLib/TrQuant.h"
 #include "CommonLib/InterPrediction.h"
 #include "CommonLib/IntraPrediction.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 #include "CommonLib/AdaptiveLoopFilter.h"
 #include "CommonLib/SEI.h"
 #include "CommonLib/Unit.h"
@@ -95,6 +95,8 @@ private:
 
 
   SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices, excluding prefix SEIs...
+  SEIScalabilityDimensionInfo* m_sdiSEIInFirstAU;
+  SEIMultiviewAcquisitionInfo* m_maiSEIInFirstAU;
 
 
   // functional classes
@@ -110,7 +112,7 @@ private:
 #if JVET_S0257_DUMP_360SEI_MESSAGE
   SeiCfgFileDump          m_seiCfgDump;
 #endif
-  LoopFilter              m_cLoopFilter;
+  DeblockingFilter        m_deblockingFilter;
   SampleAdaptiveOffset    m_cSAO;
   AdaptiveLoopFilter      m_cALF;
   Reshape                 m_cReshaper;                        ///< reshaper class
@@ -128,6 +130,9 @@ private:
   int                     m_prevPicPOC;
   int                     m_prevTid0POC;
   bool                    m_bFirstSliceInPicture;
+  bool                    m_firstPictureInSequence;
+  SEIColourTransformApply m_colourTranfParams;
+  PelStorage              m_invColourTransfBuf;
   bool                    m_firstSliceInSequence[MAX_VPS_LAYERS];
   bool                    m_firstSliceInBitstream;
   bool                    m_isFirstAuInCvs;
@@ -237,9 +242,6 @@ public:
   void  updatePrevIRAPAndGDRSubpic();
   bool  getGDRRecoveryPocReached()          { return ( m_pcPic->getPOC() >= m_prevGDRInSameLayerRecoveryPOC[m_pcPic->layerId] ); }
 
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  bool  getAudIrapOrGdrAuFlag() const       { return m_audIrapOrGdrAuFlag;  }
-#endif
   bool  getNoOutputPriorPicsFlag () const   { return m_isNoOutputPriorPics; }
   void  setNoOutputPriorPicsFlag (bool val) { m_isNoOutputPriorPics = val; }
   void  setFirstSliceInPicture (bool val)  { m_bFirstSliceInPicture = val; }
@@ -327,6 +329,8 @@ protected:
   void      xParsePrefixSEImessages();
   void      xParsePrefixSEIsForUnknownVCLNal();
   void      xCheckPrefixSEIMessages( SEIMessages& prefixSEIs );
+  void      xCheckDUISEIMessages(SEIMessages &prefixSEIs);
+
 
   void  xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType );
   void     xCheckMixedNalUnit(Slice* pcSlice, SPS *sps, InputNALUnit &nalu);

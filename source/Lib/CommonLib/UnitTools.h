@@ -210,8 +210,8 @@ int getMipSizeId      (const Size& block);
 bool allowLfnstWithMip(const Size& block);
 
 template<typename T, size_t N>
-uint32_t updateCandList(T uiMode, double uiCost, static_vector<T, N>& candModeList, static_vector<double, N>& candCostList
-  , size_t uiFastCandNum = N, int* iserttPos = nullptr)
+uint32_t updateCandList(T mode, double uiCost, static_vector<T, N> &candModeList,
+                        static_vector<double, N> &candCostList, size_t uiFastCandNum = N, int *iserttPos = nullptr)
 {
   CHECK( std::min( uiFastCandNum, candModeList.size() ) != std::min( uiFastCandNum, candCostList.size() ), "Sizes do not match!" );
   CHECK( uiFastCandNum > candModeList.capacity(), "The vector is to small to hold all the candidates!" );
@@ -232,7 +232,7 @@ uint32_t updateCandList(T uiMode, double uiCost, static_vector<T, N>& candModeLi
       candModeList[currSize - i] = candModeList[currSize - 1 - i];
       candCostList[currSize - i] = candCostList[currSize - 1 - i];
     }
-    candModeList[currSize - shift] = uiMode;
+    candModeList[currSize - shift] = mode;
     candCostList[currSize - shift] = uiCost;
     if (iserttPos != nullptr)
     {
@@ -242,7 +242,7 @@ uint32_t updateCandList(T uiMode, double uiCost, static_vector<T, N>& candModeLi
   }
   else if( currSize < uiFastCandNum )
   {
-    candModeList.insert( candModeList.end() - shift, uiMode );
+    candModeList.insert(candModeList.end() - shift, mode);
     candCostList.insert( candCostList.end() - shift, uiCost );
     if (iserttPos != nullptr)
     {

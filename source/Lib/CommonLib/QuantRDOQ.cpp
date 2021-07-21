@@ -302,18 +302,18 @@ inline double QuantRDOQ::xGetRateSigCoeffGroup( const BinFracBits& fracBitsSigCG
 */
 inline double QuantRDOQ::xGetRateLast( const int* lastBitsX, const int* lastBitsY, unsigned PosX, unsigned PosY ) const
 {
-  uint32_t    CtxX  = g_uiGroupIdx[PosX];
-  uint32_t    CtxY  = g_uiGroupIdx[PosY];
-  double  Cost  = lastBitsX[ CtxX ] + lastBitsY[ CtxY ];
-  if( CtxX > 3 )
+  uint32_t ctxX = g_groupIdx[PosX];
+  uint32_t ctxY = g_groupIdx[PosY];
+  double   cost = lastBitsX[ctxX] + lastBitsY[ctxY];
+  if (ctxX > 3)
   {
-    Cost += xGetIEPRate() * ((CtxX-2)>>1);
+    cost += xGetIEPRate() * ((ctxX - 2) >> 1);
   }
-  if( CtxY > 3 )
+  if (ctxY > 3)
   {
-    Cost += xGetIEPRate() * ((CtxY-2)>>1);
+    cost += xGetIEPRate() * ((ctxY - 2) >> 1);
   }
-  return xGetICost( Cost );
+  return xGetICost(cost);
 }
 
 
@@ -645,6 +645,17 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
   const TCoeff entropyCodingMaximum =  (1 << maxLog2TrDynamicRange) - 1;
 
   CoeffCodingContext cctx(tu, compID, tu.cs->slice->getSignDataHidingEnabledFlag());
+  int baseLevel = cctx.getBaseLevel();
+  if (tu.cs->slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag())
+  {
+    unsigned riceStats = ctx.getGRAdaptStats((unsigned)compID);
+    TCoeff historyValue = (TCoeff)1 << riceStats;
+    cctx.setHistValue(historyValue);
+  }
+  else
+  {
+    cctx.setHistValue(0);
+  }
   const int    iCGSizeM1      = (1 << cctx.log2CGSize()) - 1;
 
   int     iCGLastScanPos      = -1;
@@ -736,9 +747,8 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         uint32_t    goRiceZero    = 0;
         if( remRegBins < 4 )
         {
-          unsigned  sumAbs = cctx.templateAbsSum( iScanPos, piDstCoeff, 0 );
-          goRiceParam             = g_auiGoRiceParsCoeff   [ sumAbs ];
-          goRiceZero              = g_auiGoRicePosCoeff0(0, goRiceParam);
+          goRiceParam = (cctx.*(cctx.deriveRiceRRC))(iScanPos, piDstCoeff, 0);
+          goRiceZero       = g_goRicePosCoeff0(0, goRiceParam);
         }
 
         const BinFracBits fracBitsPar = fracBits.getFracBitsArray( uiParCtx );
@@ -793,8 +803,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         }
         else if( remRegBins >= 4 )
         {
-          int  sumAll = cctx.templateAbsSum(iScanPos, piDstCoeff, 4);
-          goRiceParam = g_auiGoRiceParsCoeff[sumAll];
+          goRiceParam = (cctx.*(cctx.deriveRiceRRC))(iScanPos, piDstCoeff, baseLevel);
           remRegBins -= (uiLevel < 2 ? uiLevel : 3) + (iScanPos != iLastScanPos);
         }
       }
@@ -954,7 +963,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
     int bitsY = 0;
     int ctxId;
     //X-coordinate
-    for ( ctxId = 0; ctxId < g_uiGroupIdx[dim1-1]; ctxId++)
+    for (ctxId = 0; ctxId < g_groupIdx[dim1 - 1]; ctxId++)
     {
       const BinFracBits fB = fracBits.getFracBitsArray( cctx.lastXCtxId(ctxId) );
       lastBitsX[ ctxId ]   = bitsX + fB.intBits[ 0 ];
@@ -962,7 +971,7 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
     }
     lastBitsX[ctxId] = bitsX;
     //Y-coordinate
-    for ( ctxId = 0; ctxId < g_uiGroupIdx[dim2-1]; ctxId++)
+    for (ctxId = 0; ctxId < g_groupIdx[dim2 - 1]; ctxId++)
     {
       const BinFracBits fB = fracBits.getFracBitsArray( cctx.lastYCtxId(ctxId) );
       lastBitsY[ ctxId ]   = bitsY + fB.intBits[ 0 ];
@@ -1300,6 +1309,10 @@ void QuantRDOQ::xRateDistOptQuantTS( TransformUnit &tu, const ComponentID &compI
       const BinFracBits fracBitsPar = fracBits.getFracBitsArray( cctx.parityCtxIdAbsTS() );
 
       goRiceParam = cctx.templateAbsSumTS( scanPos, dstCoeff );
+      if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP)
+      {
+        goRiceParam = goRiceParam + tu.cu->slice->get_tsrc_index();
+      }
       unsigned ctxIdSign = cctx.signCtxIdAbsTS(scanPos, dstCoeff, 0);
       const BinFracBits fracBitsSign = fracBits.getFracBitsArray(ctxIdSign);
       const uint8_t     sign         = srcCoeff[ blkPos ] < 0 ? 1 : 0;
@@ -1519,6 +1532,10 @@ void QuantRDOQ::forwardBDPCM(TransformUnit &tu, const ComponentID &compID, const
       const BinFracBits fracBitsPar = fracBits.getFracBitsArray(cctx.parityCtxIdAbsTS());
 
       goRiceParam = cctx.templateAbsSumTS(scanPos, dstCoeff);
+      if (tu.cu->slice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() && tu.mtsIdx[compID] == MTS_SKIP)
+      {
+        goRiceParam = goRiceParam + tu.cu->slice->get_tsrc_index();
+      }
       unsigned ctxIdSign = cctx.signCtxIdAbsTS(scanPos, dstCoeff, dirMode);
       const BinFracBits fracBitsSign = fracBits.getFracBitsArray(ctxIdSign);
       const uint8_t     sign = srcCoeff[blkPos] - predCoeff < 0 ? 1 : 0;

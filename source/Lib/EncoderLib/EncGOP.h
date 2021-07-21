@@ -43,7 +43,7 @@
 #include <stdlib.h>
 
 #include "CommonLib/Picture.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 #include "CommonLib/NAL.h"
 #include "EncSampleAdaptiveOffset.h"
 #include "EncAdaptiveLoopFilter.h"
@@ -128,7 +128,12 @@ private:
   bool                    m_bFirst;
   int                     m_iLastRecoveryPicPOC;
   int                     m_latestDRAPPOC;
+  int                     m_latestEDRAPPOC;
+  bool                    m_latestEdrapLeadingPicDecodableFlag;
   int                     m_lastRasPoc;
+  unsigned                m_riceBit[8][2];
+  int                     m_preQP[2];
+  int                     m_preIPOC;
 
   //  Access channel
   EncLib*                 m_pcEncLib;
@@ -137,7 +142,7 @@ private:
   PicList*                m_pcListPic;
 
   HLSWriter*              m_HLSWriter;
-  LoopFilter*             m_pcLoopFilter;
+  DeblockingFilter*             m_pcLoopFilter;
 
   SEIWriter               m_seiWriter;
 
@@ -241,6 +246,8 @@ public:
   void      setLastGdrIntervalPoc(int p)  { m_lastGdrIntervalPoc = p; }
   int       getLastGdrIntervalPoc() const { return m_lastGdrIntervalPoc; }
 #endif
+
+  int       getPreQP() const { return m_preQP[0]; }
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 
     const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths );

@@ -131,13 +131,13 @@ void VLCWriter::xWriteCode     ( uint32_t uiCode, uint32_t uiLength )
 void VLCWriter::xWriteUvlc     ( uint32_t uiCode )
 {
   uint32_t uiLength = 1;
-  uint32_t uiTemp = ++uiCode;
+  uint32_t temp     = ++uiCode;
 
-  CHECK( !uiTemp, "Integer overflow" );
+  CHECK(!temp, "Integer overflow");
 
-  while( 1 != uiTemp )
+  while (1 != temp)
   {
-    uiTemp >>= 1;
+    temp >>= 1;
     uiLength += 2;
   }
   // Take care of cases where uiLength > 32
@@ -1291,8 +1291,10 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
           WRITE_FLAG( (spsRangeExtension.getTransformSkipRotationEnabledFlag() ? 1 : 0),      "transform_skip_rotation_enabled_flag");
           WRITE_FLAG( (spsRangeExtension.getTransformSkipContextEnabledFlag() ? 1 : 0),       "transform_skip_context_enabled_flag");
           WRITE_FLAG( (spsRangeExtension.getExtendedPrecisionProcessingFlag() ? 1 : 0),       "extended_precision_processing_flag" );
+          WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                   "sps_ts_residual_coding_rice_present_in_sh_flag");
           WRITE_FLAG( (spsRangeExtension.getIntraSmoothingDisabledFlag() ? 1 : 0),            "intra_smoothing_disabled_flag" );
           WRITE_FLAG( (spsRangeExtension.getHighPrecisionOffsetsEnabledFlag() ? 1 : 0),       "high_precision_offsets_enabled_flag" );
+          WRITE_FLAG( (spsRangeExtension.getRrcRiceExtensionEnableFlag() ? 1 : 0),                   "rrc_rice_extension_flag");
           WRITE_FLAG( (spsRangeExtension.getPersistentRiceAdaptationEnabledFlag() ? 1 : 0),   "persistent_rice_adaptation_enabled_flag" );
           WRITE_FLAG( (spsRangeExtension.getCabacBypassAlignmentEnabledFlag() ? 1 : 0),       "cabac_bypass_alignment_enabled_flag" );
           break;
@@ -2590,6 +2592,10 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
     WRITE_FLAG(pcSlice->getTSResidualCodingDisabledFlag() ? 1 : 0, "sh_ts_residual_coding_disabled_flag");
   }
 
+  if ((!pcSlice->getTSResidualCodingDisabledFlag()) && (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag()))
+  {
+      WRITE_CODE(pcSlice->get_tsrc_index(), 3, "sh_ts_residual_coding_rice_idx_minus1");
+  }
 
   if(pcSlice->getPPS()->getSliceHeaderExtensionPresentFlag())
   {

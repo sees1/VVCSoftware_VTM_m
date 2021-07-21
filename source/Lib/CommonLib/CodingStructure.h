@@ -321,7 +321,8 @@ public:
   const CPelBuf       getOrgBuf(const ComponentID &compID) const;
          PelUnitBuf   getOrgBuf();
   const CPelUnitBuf   getOrgBuf() const;
-
+         PelUnitBuf   getTrueOrgBuf();
+  const CPelUnitBuf   getTrueOrgBuf() const;
 
   // pred buffer
          PelBuf       getPredBuf(const ComponentID &compID)       { return m_pred.get(compID); }

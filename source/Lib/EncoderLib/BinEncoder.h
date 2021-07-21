@@ -172,6 +172,7 @@ public:
   void      finish  ();
   void      restart ();
   void      reset   ( int qp, int initId );
+  void      riceStatReset(int bitDepth);
 public:
   void      resetBits           ();
   uint64_t  getEstFracBits      ()                    const { THROW( "not supported" ); return 0; }

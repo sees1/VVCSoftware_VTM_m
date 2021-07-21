@@ -46,7 +46,7 @@
 #include "CommonLib/Unit.h"
 #include "CommonLib/UnitPartitioner.h"
 #include "CommonLib/IbcHashMap.h"
-#include "CommonLib/LoopFilter.h"
+#include "CommonLib/DeblockingFilter.h"
 
 #include "DecoderLib/DecCu.h"
 
@@ -179,7 +179,7 @@ private:
   TrQuant*              m_pcTrQuant;
   RdCost*               m_pcRdCost;
   EncSlice*             m_pcSliceEncoder;
-  LoopFilter*           m_pcLoopFilter;
+  DeblockingFilter*     m_deblockingFilter;
 
   CABACWriter*          m_CABACEstimator;
   RateCtrl*             m_pcRateCtrl;

@@ -211,9 +211,9 @@ void EncSampleAdaptiveOffset::SAOProcess( CodingStructure& cs, bool* sliceEnable
 #if ENABLE_QPA
                                           const double lambdaChromaWeight,
 #endif
-                                          const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding )
+                                          const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding, bool usingTrueOrg )
 {
-  PelUnitBuf org = cs.getOrgBuf();
+  PelUnitBuf org = usingTrueOrg ? cs.getTrueOrgBuf() : cs.getOrgBuf();
   PelUnitBuf res = cs.getRecoBuf();
   PelUnitBuf src = m_tempBuf;
   memcpy(m_lambda, lambdas, sizeof(m_lambda));
@@ -248,10 +248,9 @@ void EncSampleAdaptiveOffset::SAOProcess( CodingStructure& cs, bool* sliceEnable
 
 }
 
-
-void EncSampleAdaptiveOffset::getPreDBFStatistics(CodingStructure& cs)
+void EncSampleAdaptiveOffset::getPreDBFStatistics( CodingStructure& cs, bool usingTrueOrg )
 {
-  PelUnitBuf org = cs.getOrgBuf();
+  PelUnitBuf org = usingTrueOrg ? cs.getTrueOrgBuf() : cs.getOrgBuf();
   PelUnitBuf rec = cs.getRecoBuf();
   getStatistics(m_preDBFstatData, org, rec, cs, true);
 }
@@ -825,7 +824,7 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
 
   int     mergeCtuAddr = 1; //Ctu to be merged
   int     groupSize = 1;
-  double  Cost[2] = { 0, 0 };
+  double  cost[2]      = { 0, 0 };
   TempCtx ctxBeforeMerge(m_CtxCache);
   TempCtx ctxAfterMerge(m_CtxCache);
 
@@ -920,13 +919,13 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
       {
         if (ctuRsAddr == (mergeCtuAddr - 1))
         {
-          Cost[0] = minCost;  //previous
+          cost[0]   = minCost;   // previous
           groupSize = 1;
           getMergeList(cs, ctuRsAddr, reconParams, startingMergeList);
         }
         else if (ctuRsAddr == mergeCtuAddr)
         {
-          Cost[1] = minCost;
+          cost[1]  = minCost;
           minCost2 = MAX_DOUBLE;
           for (int tmp = groupSize; tmp >= 0; tmp--)
           {
@@ -980,13 +979,13 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
             ctxAfterMerge = SAOCtx(m_CABACEstimator->getCtx());
           }
 
-          totalCost += Cost[0];
-          totalCost += Cost[1];
+          totalCost += cost[0];
+          totalCost += cost[1];
 
-          if ((Cost[0] + Cost[1]) > minCost2) //merge current CTU
+          if ((cost[0] + cost[1]) > minCost2)   // merge current CTU
           {
             //original merge all
-            totalCost = totalCost - Cost[0] - Cost[1] + minCost2;
+            totalCost                          = totalCost - cost[0] - cost[1] + minCost2;
             codedParams[ctuRsAddr - groupSize] = groupParam;
             for (int compIdx = 0; compIdx < MAX_NUM_COMPONENT; compIdx++)
             {
@@ -1007,7 +1006,7 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
             }
             else //next CTU can be merged with current group
             {
-              Cost[0] = minCost2;
+              cost[0] = minCost2;
               groupSize += 1;
             }
             m_CABACEstimator->getCtx() = SAOCtx(ctxAfterMerge);
@@ -1016,7 +1015,7 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
           {
             mergeCtuAddr += 1;
             // Current block will be the starting block for successive operations
-            Cost[0] = Cost[1];
+            cost[0] = cost[1];
             getMergeList(cs, ctuRsAddr, reconParams, startingMergeList);
             groupSize = 1;
             m_CABACEstimator->getCtx() = SAOCtx(ctxStart);
@@ -1026,7 +1025,7 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
             {
               mergeCtuAddr += 1;
             }
-          } //else, if(Cost[0] + Cost[1] > minCost2)
+          }   // else, if(cost[0] + cost[1] > minCost2)
         }//else if (ctuRsAddr == mergeCtuAddr)
       }
       else
@@ -1083,6 +1082,8 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
       sliceEnabled[componentIndex] = false;
     }
     m_CABACEstimator->getCtx() = SAOCtx(ctxPicStart);
+
+    resYuv.copyFrom(srcYuv);
   }
 
   EncSampleAdaptiveOffset::disabledRate( cs, reconParams, saoEncodingRate, saoEncodingRateChroma );

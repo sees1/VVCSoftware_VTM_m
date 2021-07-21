@@ -61,6 +61,7 @@ public:
   void      start   ();
   void      finish  ();
   void      reset   ( int qp, int initId );
+  void      riceStatReset(int bitDepth);
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
   void      set     ( const CodingStatisticsClassType& type) { ptype = &type; }
 #endif

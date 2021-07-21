@@ -104,11 +104,11 @@ void EncLib::create( const int layerId )
   m_cInterSearch.cacheAssign( &m_cacheModel );
 #endif
 
-  m_cLoopFilter.create(floorLog2(m_maxCUWidth) - MIN_CU_LOG2);
+  m_deblockingFilter.create(floorLog2(m_maxCUWidth) - MIN_CU_LOG2);
 
-  if (!m_bLoopFilterDisable && m_encDbOpt)
+  if (!m_deblockingFilterDisable && m_encDbOpt)
   {
-    m_cLoopFilter.initEncPicYuvBuffer(m_chromaFormatIDC, Size(getSourceWidth(), getSourceHeight()), getMaxCUWidth());
+    m_deblockingFilter.initEncPicYuvBuffer(m_chromaFormatIDC, Size(getSourceWidth(), getSourceHeight()), getMaxCUWidth());
   }
 
   if (m_lmcsEnabled)
@@ -117,7 +117,7 @@ void EncLib::create( const int layerId )
   }
   if ( m_RCEnableRateControl )
   {
-    m_cRateCtrl.init(m_framesToBeEncoded, m_RCTargetBitrate, (int)((double)m_iFrameRate / m_temporalSubsampleRatio + 0.5), m_iGOPSize, m_iSourceWidth, m_iSourceHeight,
+    m_cRateCtrl.init(m_framesToBeEncoded, m_RCTargetBitrate, (int)((double)m_iFrameRate / m_temporalSubsampleRatio + 0.5), m_iGOPSize, m_sourceWidth, m_sourceHeight,
       m_maxCUWidth, m_maxCUHeight, getBitDepth(CHANNEL_TYPE_LUMA), m_RCKeepHierarchicalBit, m_RCUseLCUSeparateModel, m_GOPList);
   }
 
@@ -135,7 +135,7 @@ void EncLib::destroy ()
   }
   m_cEncSAO.            destroyEncData();
   m_cEncSAO.            destroy();
-  m_cLoopFilter.        destroy();
+  m_deblockingFilter.   destroy();
   m_cRateCtrl.          destroy();
   m_cReshaper.          destroy();
   m_cInterSearch.       destroy();
@@ -184,8 +184,8 @@ void EncLib::init(AUWriterIf *auWriterIf)
   m_cRdCost.setCostMode ( m_costMode );
 
   // initialize PPS
-  pps0.setPicWidthInLumaSamples( m_iSourceWidth );
-  pps0.setPicHeightInLumaSamples( m_iSourceHeight );
+  pps0.setPicWidthInLumaSamples( m_sourceWidth );
+  pps0.setPicHeightInLumaSamples( m_sourceHeight );
   if (pps0.getPicWidthInLumaSamples() == sps0.getMaxPicWidthInLumaSamples() && pps0.getPicHeightInLumaSamples() == sps0.getMaxPicHeightInLumaSamples())
   {
     pps0.setConformanceWindow( sps0.getConformanceWindow() );
@@ -1142,12 +1142,12 @@ void EncLib::xInitSPS( SPS& sps )
   sps.setGDREnabledFlag(false);
 #endif
 
-  sps.setMaxPicWidthInLumaSamples( m_iSourceWidth );
-  sps.setMaxPicHeightInLumaSamples( m_iSourceHeight );
+  sps.setMaxPicWidthInLumaSamples( m_sourceWidth );
+  sps.setMaxPicHeightInLumaSamples( m_sourceHeight );
   if (m_resChangeInClvsEnabled)
   {
-    int maxPicWidth = std::max(m_iSourceWidth, (int)((double)m_iSourceWidth / m_scalingRatioHor + 0.5));
-    int maxPicHeight = std::max(m_iSourceHeight, (int)((double)m_iSourceHeight / m_scalingRatioVer + 0.5));
+    int maxPicWidth = std::max(m_sourceWidth, (int)((double)m_sourceWidth / m_scalingRatioHor + 0.5));
+    int maxPicHeight = std::max(m_sourceHeight, (int)((double)m_sourceHeight / m_scalingRatioVer + 0.5));
     const int minCuSize = std::max(8, 1 << m_log2MinCUSize);
     if (maxPicWidth % minCuSize)
     {
@@ -1340,8 +1340,10 @@ void EncLib::xInitSPS( SPS& sps )
   sps.getSpsRangeExtension().setTransformSkipRotationEnabledFlag(m_transformSkipRotationEnabledFlag);
   sps.getSpsRangeExtension().setTransformSkipContextEnabledFlag(m_transformSkipContextEnabledFlag);
   sps.getSpsRangeExtension().setExtendedPrecisionProcessingFlag(m_extendedPrecisionProcessingFlag);
+  sps.getSpsRangeExtension().setTSRCRicePresentFlag(m_tsrcRicePresentFlag);
   sps.getSpsRangeExtension().setIntraSmoothingDisabledFlag( m_intraSmoothingDisabledFlag );
   sps.getSpsRangeExtension().setHighPrecisionOffsetsEnabledFlag(m_highPrecisionOffsetsEnabledFlag);
+  sps.getSpsRangeExtension().setRrcRiceExtensionEnableFlag(m_rrcRiceExtensionEnableFlag);
   sps.getSpsRangeExtension().setPersistentRiceAdaptationEnabledFlag(m_persistentRiceAdaptationEnabledFlag);
   sps.getSpsRangeExtension().setCabacBypassAlignmentEnabledFlag(m_cabacBypassAlignmentEnabledFlag);
 
@@ -1352,7 +1354,7 @@ void EncLib::xInitSPS( SPS& sps )
     sps.setSubPicSameSizeFlag(m_subPicSameSizeFlag);
     if (m_subPicSameSizeFlag)
     {
-      uint32_t numSubpicCols = (m_iSourceWidth + m_CTUSize - 1) / m_CTUSize / m_subPicWidth[0];
+      uint32_t numSubpicCols = (m_sourceWidth + m_CTUSize - 1) / m_CTUSize / m_subPicWidth[0];
       for (unsigned int i = 0; i < m_numSubPics; i++)
       {
         sps.setSubPicCtuTopLeftX(i, (i % numSubpicCols) * m_subPicWidth[0]);
@@ -1386,8 +1388,8 @@ void EncLib::xInitSPS( SPS& sps )
     sps.setNumSubPics(1);
     sps.setSubPicCtuTopLeftX(0, 0);
     sps.setSubPicCtuTopLeftY(0, 0);
-    sps.setSubPicWidth(0, m_iSourceWidth);
-    sps.setSubPicHeight(0, m_iSourceHeight);
+    sps.setSubPicWidth(0, m_sourceWidth);
+    sps.setSubPicHeight(0, m_sourceHeight);
     sps.setSubPicTreatedAsPicFlag(0, 1);
     sps.setLoopFilterAcrossSubpicEnabledFlag(0, 0);
     sps.setSubPicIdLen(0);
@@ -1470,6 +1472,10 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     bUseDQP = true;
   }
 #endif
+  if (getSmoothQPReductionEnable())
+  {
+    bUseDQP = true;
+  }
 #if ENABLE_QPA
   if (getUsePerceptQPA() && !bUseDQP)
   {
@@ -1671,18 +1677,18 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
   }
   else
   {
-    pps.setDeblockingFilterOverrideEnabledFlag( !getLoopFilterOffsetInPPS() );
-    pps.setPPSDeblockingFilterDisabledFlag( getLoopFilterDisable() );
+    pps.setDeblockingFilterOverrideEnabledFlag( !getDeblockingFilterOffsetInPPS() );
+    pps.setPPSDeblockingFilterDisabledFlag( getDeblockingFilterDisable() );
   }
 
   if (! pps.getPPSDeblockingFilterDisabledFlag())
   {
-    pps.setDeblockingFilterBetaOffsetDiv2( getLoopFilterBetaOffset() );
-    pps.setDeblockingFilterTcOffsetDiv2( getLoopFilterTcOffset() );
-    pps.setDeblockingFilterCbBetaOffsetDiv2( getLoopFilterCbBetaOffset() );
-    pps.setDeblockingFilterCbTcOffsetDiv2( getLoopFilterCbTcOffset() );
-    pps.setDeblockingFilterCrBetaOffsetDiv2( getLoopFilterCrBetaOffset() );
-    pps.setDeblockingFilterCrTcOffsetDiv2( getLoopFilterCrTcOffset() );
+    pps.setDeblockingFilterBetaOffsetDiv2  ( getDeblockingFilterBetaOffset() );
+    pps.setDeblockingFilterTcOffsetDiv2    ( getDeblockingFilterTcOffset() );
+    pps.setDeblockingFilterCbBetaOffsetDiv2( getDeblockingFilterCbBetaOffset() );
+    pps.setDeblockingFilterCbTcOffsetDiv2  ( getDeblockingFilterCbTcOffset() );
+    pps.setDeblockingFilterCrBetaOffsetDiv2( getDeblockingFilterCrBetaOffset() );
+    pps.setDeblockingFilterCrTcOffsetDiv2  ( getDeblockingFilterCrTcOffset() );
   }
   else
   {
@@ -1797,6 +1803,10 @@ void EncLib::xInitPicHeader(PicHeader &picHeader, const SPS &sps, const PPS &pps
     bUseDQP = true;
   }
 #endif
+  if (getSmoothQPReductionEnable())
+  {
+    bUseDQP = true;
+  }
 #if ENABLE_QPA
   if( getUsePerceptQPA() && !bUseDQP )
   {

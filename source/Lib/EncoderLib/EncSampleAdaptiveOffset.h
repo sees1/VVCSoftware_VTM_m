@@ -93,10 +93,10 @@ public:
 #if ENABLE_QPA
                    const double lambdaChromaWeight,
 #endif
-                   const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding );
+                   const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding, bool usingTrueOrg );
 
   void disabledRate( CodingStructure& cs, SAOBlkParam* reconParams, const double saoEncodingRate, const double saoEncodingRateChroma );
-  void getPreDBFStatistics(CodingStructure& cs);
+  void getPreDBFStatistics( CodingStructure& cs, bool usingTrueOrg );
 private: //methods
 
   void deriveLoopFilterBoundaryAvailibility(CodingStructure& cs, const Position &pos, bool& isLeftAvail, bool& isAboveAvail, bool& isAboveLeftAvail) const;

@@ -50,9 +50,11 @@
 #include <assert.h>
 #include <cassert>
 
+// clang-format off
 
-#define PRINT_WPSNR 1
+//########### place macros to be removed in next cycle below this line ###############
 
+//########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
 #if GDR_ENABLED
@@ -61,16 +63,6 @@
 #define GDR_DEC_TRACE  0
 #endif
 
-// clang-format off
-
-#define JVET_U0081                                        1 // ALF filter strength target
-
-//########### place macros to be removed in next cycle below this line ###############
-#define JVET_U0103_HIGH_BIT_DEPTH_SIMD                    1 // JVET-U0103: SIMD implementation for high bit depth coding
-
-#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-
-//########### place macros to be be kept below this line ###############
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
@@ -188,11 +180,7 @@ typedef std::pair<int, int>  TrCost;
 
 // SIMD optimizations
 #define SIMD_ENABLE                                       1
-#if JVET_U0103_HIGH_BIT_DEPTH_SIMD
 #define ENABLE_SIMD_OPT                                 SIMD_ENABLE                                         ///< SIMD optimizations, no impact on RD performance
-#else
-#define ENABLE_SIMD_OPT                                 ( SIMD_ENABLE && !RExt__HIGH_BIT_DEPTH_SUPPORT )    ///< SIMD optimizations, no impact on RD performance
-#endif
 #define ENABLE_SIMD_OPT_MCIF                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the interpolation filter, no impact on RD performance
 #define ENABLE_SIMD_OPT_BUFFER                          ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the buffer operations, no impact on RD performance
 #define ENABLE_SIMD_OPT_DIST                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the distortion calculations(SAD,SSE,HADAMARD), no impact on RD performance
@@ -234,9 +222,11 @@ typedef std::pair<int, int>  TrCost;
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            1 ///< 0 use original 6-bit transform matrices for both forward and inverse transform, 1 (default) = use original matrices for inverse transform and high precision matrices for forward transform
+#define JVET_V0106_DEP_QUANT_ENC_OPT                      1 ///< 0 use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 (default) use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
 #else
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            0 ///< 0 (default) use original 6-bit transform matrices for both forward and inverse transform, 1 = use original matrices for inverse transform and high precision matrices for forward transform
+#define JVET_V0106_DEP_QUANT_ENC_OPT                      0 ///< 0 (default) use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 - use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
 #endif
 
 #if FULL_NBIT
@@ -905,8 +895,12 @@ struct LFCUParam
   bool leftEdge;                         ///< indicates left edge
   bool topEdge;                          ///< indicates top edge
 };
-
-
+struct LutModel
+{
+  bool             presentFlag = false;
+  int              numLutValues = 0;
+  std::vector<Pel> lutValues;
+};
 
 struct PictureHash
 {

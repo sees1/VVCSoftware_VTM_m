@@ -102,7 +102,13 @@ Slice::Slice()
 , m_encCABACTableIdx              (I_SLICE)
 , m_iProcessingStartTime          ( 0 )
 , m_dProcessingTime               ( 0 )
+, m_tsrc_index                    ( 0 )
 {
+  for (uint32_t i = 0; i < MAX_TSRC_RICE; i++)
+  {
+    m_riceBit[i] = 0;
+  }
+
   for(uint32_t i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
     m_aiNumRefIdx[i] = 0;
@@ -189,6 +195,14 @@ void Slice::initSlice()
   m_useLTforDRAP         = false;
   m_isDRAP               = false;
   m_latestDRAPPOC        = MAX_INT;
+  m_edrapRapId           = 0;
+  m_enableEdrapSEI       = false;
+  m_edrapRapId           = 0;
+  m_useLTforEdrap        = false;
+  m_edrapNumRefRapPics   = 0;
+  m_edrapRefRapIds.resize(0);
+  m_latestEDRAPPOC       = MAX_INT;
+  m_latestEdrapLeadingPicDecodableFlag = false;
   resetAlfEnabledFlag();
   m_ccAlfFilterParam.reset();
   m_ccAlfCbEnabledFlag = 0;
@@ -895,6 +909,12 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_depQuantEnabledFlag               = pSrc->m_depQuantEnabledFlag;
   m_signDataHidingEnabledFlag         = pSrc->m_signDataHidingEnabledFlag;
   m_tsResidualCodingDisabledFlag      = pSrc->m_tsResidualCodingDisabledFlag;
+  m_tsrc_index                        = pSrc->m_tsrc_index;
+
+  for (i = 0; i < MAX_TSRC_RICE; i++)
+  {
+    m_riceBit[i] = pSrc->m_riceBit[i];
+  }
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -2037,6 +2057,15 @@ bool Slice::isPocRestrictedByDRAP( int poc, bool precedingDRAPInDecodingOrder )
          ( cvsHasPreviousDRAP() && getPOC() > getLatestDRAPPOC() && (precedingDRAPInDecodingOrder || poc < getLatestDRAPPOC()) );
 }
 
+bool Slice::isPocRestrictedByEdrap( int poc )
+{
+  if (!getEnableEdrapSEI())
+  {
+    return false;
+  }
+  return getEdrapRapId() > 0 && poc != getAssociatedIRAPPOC();
+}
+
 void Slice::checkConformanceForDRAP( uint32_t temporalId )
 {
   if (!(isDRAP() || cvsHasPreviousDRAP()))
@@ -2093,6 +2122,59 @@ void Slice::checkConformanceForDRAP( uint32_t temporalId )
                     "and output order shall not include, in the active entries of its reference picture lists, any picture "
                     "that precedes the DRAP picture in decoding order or output order, with the exception of the preceding "
                     "IRAP picture in decoding order. Problem is POC %d in RPL1", getRefPic(REF_PIC_LIST_1,i)->getPOC());
+      }
+    }
+  }
+}
+
+void Slice::checkConformanceForEDRAP( uint32_t temporalId )
+{
+  if (!(getEdrapRapId() > 0 || cvsHasPreviousEDRAP()))
+  {
+    return;
+  }
+
+  if (getEdrapRapId() > 0)
+  {
+    if (!(getNalUnitType() == NalUnitType::NAL_UNIT_CODED_SLICE_TRAIL ||
+          getNalUnitType() == NalUnitType::NAL_UNIT_CODED_SLICE_STSA))
+    {
+      msg( WARNING, "Warning, non-conforming bitstream. The EDRAP picture should be a trailing picture.\n");
+    }
+    if ( temporalId != 0)
+    {
+      msg( WARNING, "Warning, non-conforming bitstream. The EDRAP picture shall have a temporal sublayer identifier equal to 0.\n");
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_0); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_0,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in both decoding order and output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order or output order, with the exception of the referenceablePictures.\n");
+      }
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_1); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_1,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in both decoding order and output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order or output order, with the exception of the referenceablePictures.\n");
+      }
+    }
+  }
+
+  if (cvsHasPreviousEDRAP() && getPOC() > getLatestEDRAPPOC() && getLatestEdrapLeadingPicDecodableFlag())
+  {
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_0); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_0,i)->getPOC() < getLatestEDRAPPOC() && getRefPic(REF_PIC_LIST_0,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in decoding order and precedes the EDRAP picture in output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order, with the exception of the referenceablePictures. Problem is POC %d in RPL0.\n", getRefPic(REF_PIC_LIST_0,i)->getPOC());
+      }
+    }
+    for (int i = 0; i < getNumRefIdx(REF_PIC_LIST_1); i++)
+    {
+      if (getRefPic(REF_PIC_LIST_1,i)->getPOC() < getLatestEDRAPPOC() && getRefPic(REF_PIC_LIST_1,i)->getEdrapRapId() < 0)
+      {
+        msg( WARNING, "Warning, non-conforming bitstream. Any picture that is in the same layer and follows the EDRAP picture in decoding order and precedes the EDRAP picture in output order does not include, in the active entries of its reference picture lists, any picture that is in the same layer and precedes the EDRAP picture in decoding order, with the exception of the referenceablePictures. Problem is POC %d in RPL1\n", getRefPic(REF_PIC_LIST_1,i)->getPOC());
       }
     }
   }
@@ -2791,8 +2873,10 @@ SPSRExt::SPSRExt()
  : m_transformSkipRotationEnabledFlag   (false)
  , m_transformSkipContextEnabledFlag    (false)
  , m_extendedPrecisionProcessingFlag    (false)
+ , m_tsrcRicePresentFlag                (false)
  , m_intraSmoothingDisabledFlag         (false)
  , m_highPrecisionOffsetsEnabledFlag    (false)
+ , m_rrcRiceExtensionEnableFlag(false)
  , m_persistentRiceAdaptationEnabledFlag(false)
  , m_cabacBypassAlignmentEnabledFlag    (false)
 {
