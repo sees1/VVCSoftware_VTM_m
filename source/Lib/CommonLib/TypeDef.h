@@ -53,6 +53,7 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_W0134_UNIFORM_METRICS_LOG                    1 // change metrics output for easy parsing
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1

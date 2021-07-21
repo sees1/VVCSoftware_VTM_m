@@ -250,7 +250,11 @@ public:
   int       getPreQP() const { return m_preQP[0]; }
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 
-    const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths );
+    const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths
+#if JVET_W0134_UNIFORM_METRICS_LOG
+                       , int layerId
+#endif
+                       );
 #if W0038_DB_OPT
   uint64_t  preLoopFilterPicAndCalcDist( Picture* pcPic );
 #endif
