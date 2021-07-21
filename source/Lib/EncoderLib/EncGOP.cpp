@@ -3206,7 +3206,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       // SAO parameter estimation using non-deblocked pixels for CTU bottom and right boundary areas
       if( pcSlice->getSPS()->getSAOEnabledFlag() && m_pcCfg->getSaoCtuBoundary() )
       {
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+        m_pcSAO->getPreDBFStatistics( cs, m_pcCfg->getSaoTrueOrg() );
+#else
         m_pcSAO->getPreDBFStatistics( cs, m_pcCfg->getAlfSaoTrueOrg() );
+#endif
       }
 
       //-- Loop filter
@@ -3241,12 +3245,19 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         bool sliceEnabled[MAX_NUM_COMPONENT];
         m_pcSAO->initCABACEstimator( m_pcEncLib->getCABACEncoder(), m_pcEncLib->getCtxCache(), pcSlice );
-
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+        m_pcSAO->SAOProcess( cs, sliceEnabled, pcSlice->getLambdas(),
+#if ENABLE_QPA
+                             (m_pcCfg->getUsePerceptQPA() && !m_pcCfg->getUseRateCtrl() && pcSlice->getPPS()->getUseDQP() ? m_pcEncLib->getRdCost ()->getChromaWeight() : 0.0),
+#endif
+                             m_pcCfg->getTestSAODisableAtPictureLevel(), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma(), m_pcCfg->getSaoCtuBoundary(), m_pcCfg->getSaoGreedyMergeEnc(), m_pcCfg->getSaoTrueOrg() );
+#else
         m_pcSAO->SAOProcess( cs, sliceEnabled, pcSlice->getLambdas(),
 #if ENABLE_QPA
                              (m_pcCfg->getUsePerceptQPA() && !m_pcCfg->getUseRateCtrl() && pcSlice->getPPS()->getUseDQP() ? m_pcEncLib->getRdCost ()->getChromaWeight() : 0.0),
 #endif
                              m_pcCfg->getTestSAODisableAtPictureLevel(), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma(), m_pcCfg->getSaoCtuBoundary(), m_pcCfg->getSaoGreedyMergeEnc(), m_pcCfg->getAlfSaoTrueOrg() );
+#endif
         //assign SAO slice header
         for (int s = 0; s < uiNumSliceSegments; s++)
         {

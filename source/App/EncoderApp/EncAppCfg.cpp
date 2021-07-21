@@ -1177,6 +1177,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("GolombRiceParameterAdaptation",                   m_persistentRiceAdaptationEnabledFlag,            false, "Enable the adaptation of the Golomb-Rice parameter over the course of each slice")
   ("AlignCABACBeforeBypass",                          m_cabacBypassAlignmentEnabledFlag,                false, "Align the CABAC engine to a defined fraction of a bit prior to coding bypass data. Must be 1 in high bit rate profile, 0 otherwise")
   ("SAO",                                             m_bUseSAO,                                         true, "Enable Sample Adaptive Offset")
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  ("SaoTrueOrg",                                      m_saoTrueOrg,                                     false, "Using true original samples for SAO optimization when MCTF is enabled\n")
+#endif
   ("TestSAODisableAtPictureLevel",                    m_bTestSAODisableAtPictureLevel,                  false, "Enables the testing of disabling SAO at the picture level after having analysed all blocks")
   ("SaoEncodingRate",                                 m_saoEncodingRate,                                 0.75, "When >0 SAO early picture termination is enabled for luma and chroma")
   ("SaoEncodingRateChroma",                           m_saoEncodingRateChroma,                            0.5, "The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma")
@@ -1521,7 +1524,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DecodeBitstream2ModPOCAndType",                   m_bs2ModPOCAndType,                       false, "Modify POC and NALU-type of second input bitstream, to use second BS as closing I-slice")
 
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  ("AlfTrueOrg",                                      m_alfTrueOrg,                              true, "Using true original samples for ALF optimization when MCTF is enabled\n")
+#else
   ("AlfSaoTrueOrg",                                    m_alfSaoTrueOrg,                         false, "Using true original samples for ALF and SAO optimization when MCTF is enabled\n")
+#endif
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")
