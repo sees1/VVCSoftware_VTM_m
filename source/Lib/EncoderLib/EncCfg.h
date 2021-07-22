@@ -417,6 +417,9 @@ protected:
   bool      m_DeblockingFilterMetric;
 #endif
   bool      m_bUseSAO;
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  bool      m_saoTrueOrg;
+#endif
   bool      m_bTestSAODisableAtPictureLevel;
   double    m_saoEncodingRate;       // When non-0 SAO early picture termination is enabled for luma and chroma
   double    m_saoEncodingRateChroma; // The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma.
@@ -497,11 +500,23 @@ protected:
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping; ///< mapping from luma level to delta QP.
 #endif
   bool      m_smoothQPReductionEnable;
+#if JVET_W0043
+  int       m_smoothQPReductionPeriodicity;
+  double    m_smoothQPReductionThresholdIntra;
+  double    m_smoothQPReductionModelScaleIntra;
+  double    m_smoothQPReductionModelOffsetIntra;
+  int       m_smoothQPReductionLimitIntra;
+  double    m_smoothQPReductionThresholdInter;
+  double    m_smoothQPReductionModelScaleInter;
+  double    m_smoothQPReductionModelOffsetInter;
+  int       m_smoothQPReductionLimitInter;
+#else
   double    m_smoothQPReductionThreshold;
   double    m_smoothQPReductionModelScale;
   double    m_smoothQPReductionModelOffset;
   int       m_smoothQPReductionPeriodicity;
   int       m_smoothQPReductionLimit;
+#endif
   int*      m_aidQP;
   uint32_t      m_uiDeltaQpRD;
   bool      m_bFastDeltaQP;
@@ -830,7 +845,11 @@ protected:
   CfgVPSParameters m_cfgVPSParameters;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  bool        m_alfTrueOrg;
+#else
   bool        m_alfSaoTrueOrg;
+#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
@@ -1385,6 +1404,26 @@ public:
 #endif
   bool      getSmoothQPReductionEnable()                  const { return m_smoothQPReductionEnable; }
   void      setSmoothQPReductionEnable(bool value)        { m_smoothQPReductionEnable = value; }
+#if JVET_W0043
+  int       getSmoothQPReductionPeriodicity()                 const { return m_smoothQPReductionPeriodicity; }
+  void      setSmoothQPReductionPeriodicity(int value)        { m_smoothQPReductionPeriodicity = value; }
+  double    getSmoothQPReductionThresholdIntra()              const { return m_smoothQPReductionThresholdIntra; }
+  void      setSmoothQPReductionThresholdIntra(double value)  { m_smoothQPReductionThresholdIntra = value; }
+  double    getSmoothQPReductionModelScaleIntra()              const { return m_smoothQPReductionModelScaleIntra; }
+  void      setSmoothQPReductionModelScaleIntra(double value) { m_smoothQPReductionModelScaleIntra = value; }
+  double    getSmoothQPReductionModelOffsetIntra()             const { return m_smoothQPReductionModelOffsetIntra; }
+  void      setSmoothQPReductionModelOffsetIntra(double value) { m_smoothQPReductionModelOffsetIntra = value; }
+  int       getSmoothQPReductionLimitIntra()                   const { return m_smoothQPReductionLimitIntra; }
+  void      setSmoothQPReductionLimitIntra(int value)          { m_smoothQPReductionLimitIntra = value; }
+  double    getSmoothQPReductionThresholdInter()               const { return m_smoothQPReductionThresholdInter; }
+  void      setSmoothQPReductionThresholdInter(double value)   { m_smoothQPReductionThresholdInter = value; }
+  double    getSmoothQPReductionModelScaleInter()              const { return m_smoothQPReductionModelScaleInter; }
+  void      setSmoothQPReductionModelScaleInter(double value) { m_smoothQPReductionModelScaleInter = value; }
+  double    getSmoothQPReductionModelOffsetInter()             const { return m_smoothQPReductionModelOffsetInter; }
+  void      setSmoothQPReductionModelOffsetInter(double value) { m_smoothQPReductionModelOffsetInter = value; }
+  int       getSmoothQPReductionLimitInter()                   const { return m_smoothQPReductionLimitInter; }
+  void      setSmoothQPReductionLimitInter(int value)          { m_smoothQPReductionLimitInter = value; }
+#else
   double    getSmoothQPReductionThreshold()               const { return m_smoothQPReductionThreshold; }
   void      setSmoothQPReductionThreshold(double value)   { m_smoothQPReductionThreshold = value; }
   double    getSmoothQPReductionModelScale()              const { return m_smoothQPReductionModelScale; }
@@ -1395,7 +1434,7 @@ public:
   void      setSmoothQPReductionPeriodicity(int value)    { m_smoothQPReductionPeriodicity = value; }
   int       getSmoothQPReductionLimit()                   const { return m_smoothQPReductionLimit; }
   void      setSmoothQPReductionLimit(int value)          { m_smoothQPReductionLimit = value; }
-
+#endif
   bool      getExtendedPrecisionProcessingFlag         ()         const { return m_extendedPrecisionProcessingFlag;  }
   void      setExtendedPrecisionProcessingFlag         (bool value)     { m_extendedPrecisionProcessingFlag = value; }
   bool      getTSRCRicePresentFlag         ()         const { return m_tsrcRicePresentFlag;  }
@@ -1591,6 +1630,10 @@ public:
   bool      getSingleSlicePerSubPicFlagFlag( )                       { return m_singleSlicePerSubPicFlag;    }
   void      setUseSAO                  (bool bVal)                   { m_bUseSAO = bVal; }
   bool      getUseSAO                  ()                            { return m_bUseSAO; }
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  void      setSaoTrueOrg              (bool b)                      { m_saoTrueOrg = b; }
+  bool      getSaoTrueOrg              () const                      { return m_saoTrueOrg; }
+#endif
   void  setTestSAODisableAtPictureLevel (bool bVal)                  { m_bTestSAODisableAtPictureLevel = bVal; }
   bool  getTestSAODisableAtPictureLevel ( ) const                    { return m_bTestSAODisableAtPictureLevel; }
 
@@ -2206,8 +2249,13 @@ public:
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  void         setAlfTrueOrg( bool b )                                { m_alfTrueOrg = b; }
+  bool         getAlfTrueOrg()                                  const { return m_alfTrueOrg; }
+#else
   void         setAlfSaoTrueOrg( bool b )                             { m_alfSaoTrueOrg = b; }
   bool         getAlfSaoTrueOrg()                               const { return m_alfSaoTrueOrg; }
+#endif
   void         setALFStrengthLuma(double s)                     { m_alfStrengthLuma = s; }
   double       getALFStrengthLuma()                             const { return m_alfStrengthLuma; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }

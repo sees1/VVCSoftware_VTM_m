@@ -1088,11 +1088,23 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("LumaLevelToDeltaQPMappingDQP",                    cfg_lumaLeveltoDQPMappingQP,  cfg_lumaLeveltoDQPMappingQP, "Luma to Delta QP Mapping - DQP values")
 #endif
   ("SmoothQPReductionEnable",                         m_smoothQPReductionEnable,                         false, "Enable QP reduction for smooth blocks according to: Clip3(SmoothQPReductionLimit, 0, SmoothQPReductionModelScale*baseQP+SmoothQPReductionModelOffset)")
+#if JVET_W0043
+  ("SmoothQPReductionPeriodicity",                    m_smoothQPReductionPeriodicity,                        0, "Periodicity parameter of the QP reduction model, 1: all frames, 0: only intra pictures, 2: every second frame, etc")
+  ("SmoothQPReductionThresholdIntra",                 m_smoothQPReductionThresholdIntra,                   3.0, "Threshold parameter for smoothness for intra pictures (SmoothQPReductionThresholdIntra * number of samples in block)")
+  ("SmoothQPReductionModelScaleIntra",                m_smoothQPReductionModelScaleIntra,                 -1.0, "Scale parameter of the QP reduction model for intra pictures ")
+  ("SmoothQPReductionModelOffsetIntra",               m_smoothQPReductionModelOffsetIntra,                27.0, "Offset parameter of the QP reduction model for intra pictures ")
+  ("SmoothQPReductionLimitIntra",                     m_smoothQPReductionLimitIntra,                       -16, "Threshold parameter for controlling maximum amount of QP reduction by the QP reduction model for intra pictures ")
+  ("SmoothQPReductionThresholdInter",                 m_smoothQPReductionThresholdInter,                   3.0, "Threshold parameter for smoothness for inter pictures (SmoothQPReductionThresholdInter * number of samples in block)")
+  ("SmoothQPReductionModelScaleInter",                m_smoothQPReductionModelScaleInter,                 -1.0, "Scale parameter of the QP reduction model for inter pictures")
+  ("SmoothQPReductionModelOffsetInter",               m_smoothQPReductionModelOffsetInter,                27.0, "Offset parameter of the QP reduction model for inter pictures")
+  ("SmoothQPReductionLimitInter",                     m_smoothQPReductionLimitInter,                        -4, "Threshold parameter for controlling maximum amount of QP reduction by the QP reduction model for inter pictures")
+#else
   ("SmoothQPReductionThreshold",                      m_smoothQPReductionThreshold,                        3.0, "Threshold parameter for smoothness (SmoothQPReductionThreshold * number of samples in block)")
   ("SmoothQPReductionModelScale",                     m_smoothQPReductionModelScale,                      -1.0, "Scale parameter of the QP reduction model")
   ("SmoothQPReductionModelOffset",                    m_smoothQPReductionModelOffset,                     27.0, "Offset parameter of the QP reduction model")
   ("SmoothQPReductionLimit",                          m_smoothQPReductionLimit,                            -16, "Threshold parameter for controlling maximum amount of QP reduction by the QP reduction model")
   ("SmoothQPReductionPeriodicity",                    m_smoothQPReductionPeriodicity,                        1, "Periodicity parameter of the QP reduction model, 1: all frames, 0: only intra pictures, 2: every second frame, etc")
+#endif
   ("UseIdentityTableForNon420Chroma",                 m_useIdentityTableForNon420Chroma,                  true, "True: Indicates that 422/444 chroma uses identity chroma QP mapping tables; False: explicit Qp table may be specified in config")
   ("SameCQPTablesForAllChroma",                       m_chromaQpMappingTableParams.m_sameCQPTableForAllChromaFlag,                        true, "0: Different tables for Cb, Cr and joint Cb-Cr components, 1 (default): Same tables for all three chroma components")
   ("QpInValCb",                                       cfg_qpInValCb,                            cfg_qpInValCb, "Input coordinates for the QP table for Cb component")
@@ -1165,6 +1177,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("GolombRiceParameterAdaptation",                   m_persistentRiceAdaptationEnabledFlag,            false, "Enable the adaptation of the Golomb-Rice parameter over the course of each slice")
   ("AlignCABACBeforeBypass",                          m_cabacBypassAlignmentEnabledFlag,                false, "Align the CABAC engine to a defined fraction of a bit prior to coding bypass data. Must be 1 in high bit rate profile, 0 otherwise")
   ("SAO",                                             m_bUseSAO,                                         true, "Enable Sample Adaptive Offset")
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  ("SaoTrueOrg",                                      m_saoTrueOrg,                                     false, "Using true original samples for SAO optimization when MCTF is enabled\n")
+#endif
   ("TestSAODisableAtPictureLevel",                    m_bTestSAODisableAtPictureLevel,                  false, "Enables the testing of disabling SAO at the picture level after having analysed all blocks")
   ("SaoEncodingRate",                                 m_saoEncodingRate,                                 0.75, "When >0 SAO early picture termination is enabled for luma and chroma")
   ("SaoEncodingRateChroma",                           m_saoEncodingRateChroma,                            0.5, "The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma")
@@ -1509,7 +1524,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DecodeBitstream2ModPOCAndType",                   m_bs2ModPOCAndType,                       false, "Modify POC and NALU-type of second input bitstream, to use second BS as closing I-slice")
 
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  ("AlfTrueOrg",                                      m_alfTrueOrg,                              true, "Using true original samples for ALF optimization when MCTF is enabled\n")
+#else
   ("AlfSaoTrueOrg",                                    m_alfSaoTrueOrg,                         false, "Using true original samples for ALF and SAO optimization when MCTF is enabled\n")
+#endif
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")

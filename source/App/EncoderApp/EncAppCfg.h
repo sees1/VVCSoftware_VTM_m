@@ -288,10 +288,21 @@ protected:
 #endif
   SEIMasteringDisplay m_masteringDisplay;
   bool      m_smoothQPReductionEnable;
+#if JVET_W0043
+  double    m_smoothQPReductionThresholdIntra;
+  double    m_smoothQPReductionModelScaleIntra;
+  double    m_smoothQPReductionModelOffsetIntra;
+  int       m_smoothQPReductionLimitIntra;
+  double    m_smoothQPReductionThresholdInter;
+  double    m_smoothQPReductionModelScaleInter;
+  double    m_smoothQPReductionModelOffsetInter;
+  int       m_smoothQPReductionLimitInter;
+#else
   double    m_smoothQPReductionThreshold;
   double    m_smoothQPReductionModelScale;
   double    m_smoothQPReductionModelOffset;
   int       m_smoothQPReductionLimit;
+#endif
   int       m_smoothQPReductionPeriodicity;
 
   bool      m_bUseAdaptiveQP;                                 ///< Flag for enabling QP adaptation based on a psycho-visual model
@@ -427,6 +438,9 @@ protected:
 
   // coding tool (SAO)
   bool      m_bUseSAO;
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  bool      m_saoTrueOrg;
+#endif
   bool      m_bTestSAODisableAtPictureLevel;
   double    m_saoEncodingRate;                                ///< When >0 SAO early picture termination is enabled for luma and chroma
   double    m_saoEncodingRateChroma;                          ///< The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma.
@@ -785,7 +799,11 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  bool        m_alfTrueOrg;
+#else
   bool        m_alfSaoTrueOrg;
+#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
