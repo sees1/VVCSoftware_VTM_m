@@ -77,19 +77,15 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::DEPENDENT_RAP_INDICATION:
     xWriteSEIDependentRAPIndication(*static_cast<const SEIDependentRAPIndication*>(&sei));
     break;
-#if JVET_U0084_EDRAP
   case SEI::EXTENDED_DRAP_INDICATION:
     xWriteSEIEdrapIndication(*static_cast<const SEIExtendedDrapIndication*>(&sei));
     break;
-#endif
   case SEI::FRAME_PACKING:
     xWriteSEIFramePacking(*static_cast<const SEIFramePacking*>(&sei));
     break;
-#if JVET_V0061_SEI
   case SEI::DISPLAY_ORIENTATION:
     xWriteSEIDisplayOrientation(*static_cast<const SEIDisplayOrientation*>(&sei));
     break;
-#endif
   case SEI::PARAMETER_SETS_INCLUSION_INDICATION:
     xWriteSEIParameterSetsInclusionIndication(*static_cast<const SEIParameterSetsInclusionIndication*>(&sei));
     break;
@@ -116,7 +112,6 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::GENERALIZED_CUBEMAP_PROJECTION:
     xWriteSEIGeneralizedCubemapProjection(*static_cast<const SEIGeneralizedCubemapProjection*>(&sei));
     break;
-#if JVET_U0082_SDI_MAI_ACI_DRI
   case SEI::SCALABILITY_DIMENSION_INFO:
     xWriteSEIScalabilityDimensionInfo(*static_cast<const SEIScalabilityDimensionInfo*>(&sei));
     break;
@@ -129,7 +124,6 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::DEPTH_REPRESENTATION_INFO:
     xWriteSEIDepthRepresentationInfo(*static_cast<const SEIDepthRepresentationInfo*>(&sei));
     break;
-#endif
   case SEI::USER_DATA_REGISTERED_ITU_T_T35:
     xWriteSEIUserDataRegistered(*static_cast<const SEIUserDataRegistered*>(&sei));
     break;
@@ -145,11 +139,9 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::CONTENT_COLOUR_VOLUME:
     xWriteSEIContentColourVolume(*static_cast<const SEIContentColourVolume*>(&sei));
     break;
-#if JVET_V0108
   case SEI::COLOUR_TRANSFORM_INFO:
     xWriteSEIColourTransformInfo(*static_cast<const SEIColourTransformInfo*>(&sei));
     break;
-#endif
   case SEI::SUBPICTURE_LEVEL_INFO:
     xWriteSEISubpictureLevelInfo(*static_cast<const SEISubpicureLevelInfo*>(&sei));
     break;
@@ -285,10 +277,11 @@ void SEIWriter::xWriteSEIDecodingUnitInfo(const SEIDecodingUnitInfo& sei, const 
         WRITE_CODE( sei.m_duSptCpbRemovalDelayIncrement[i], bp.getDuCpbRemovalDelayIncrementLength(), "du_spt_cpb_removal_delay_increment[i]");
     }
   }
-  if (bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
+  if (!bp.m_decodingUnitDpbDuParamsInPicTimingSeiFlag)
   {
     WRITE_FLAG(sei.m_dpbOutputDuDelayPresentFlag, "dpb_output_du_delay_present_flag");
   }
+ 
   if(sei.m_dpbOutputDuDelayPresentFlag)
   {
     WRITE_CODE(sei.m_picSptDpbOutputDuDelay, bp.getDpbOutputDelayDuLength(), "pic_spt_dpb_output_du_delay");
@@ -516,7 +509,6 @@ void SEIWriter::xWriteSEIDependentRAPIndication(const SEIDependentRAPIndication&
   // intentionally empty
 }
 
-#if JVET_U0084_EDRAP
 void SEIWriter::xWriteSEIEdrapIndication(const SEIExtendedDrapIndication& sei)
 {
   WRITE_CODE( sei.m_edrapIndicationRapIdMinus1, 16,        "edrap_rap_id_minsu1" );
@@ -528,7 +520,6 @@ void SEIWriter::xWriteSEIEdrapIndication(const SEIExtendedDrapIndication& sei)
     WRITE_CODE( sei.m_edrapIndicationRefRapId[i], 16, "edrap_ref_rap_id[i]" );
   }
 }
-#endif
 
 void SEIWriter::xWriteSEIScalableNesting(OutputBitstream& bs, const SEIScalableNesting& sei)
 {
@@ -621,7 +612,6 @@ void SEIWriter::xWriteSEIFramePacking(const SEIFramePacking& sei)
 }
 
 
-#if JVET_V0061_SEI
 void SEIWriter::xWriteSEIDisplayOrientation(const SEIDisplayOrientation& sei)
 {
   WRITE_FLAG(sei.m_doCancelFlag, "display_orientation_cancel_flag");
@@ -633,7 +623,6 @@ void SEIWriter::xWriteSEIDisplayOrientation(const SEIDisplayOrientation& sei)
     WRITE_CODE(0, 3, "display_orientation_reserved_zero_3bits");
   }
 }
-#endif
 
 void SEIWriter::xWriteSEIParameterSetsInclusionIndication(const SEIParameterSetsInclusionIndication& sei)
 {
@@ -892,7 +881,6 @@ void SEIWriter::xWriteSEIGeneralizedCubemapProjection(const SEIGeneralizedCubema
   }
 }
 
-#if JVET_U0082_SDI_MAI_ACI_DRI
 void SEIWriter::xWriteSEIScalabilityDimensionInfo(const SEIScalabilityDimensionInfo &sei)
 {
   WRITE_CODE(sei.m_sdiMaxLayersMinus1, 6,                           "sdi_max_layers_minus1");
@@ -1120,7 +1108,6 @@ void SEIWriter::xWriteSEIDepthRepInfoElement( double f )
   WRITE_CODE( x_mantissa_len-1, 5 ,            "da_mantissa_len_minus1" );
   WRITE_CODE( x_mantissa, x_mantissa_len ,     "da_mantissa" );
 };
-#endif
 
 void SEIWriter::xWriteSEISubpictureLevelInfo(const SEISubpicureLevelInfo &sei)
 {
@@ -1292,7 +1279,6 @@ void SEIWriter::xWriteSEIContentColourVolume(const SEIContentColourVolume &sei)
   }
 }
 
-#if JVET_V0108
 void SEIWriter::xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei)
 {
   bool colourTransformCancelFlag = 0;
@@ -1347,5 +1333,4 @@ void SEIWriter::xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei)
     }
   }
 }
-#endif
 //! \}

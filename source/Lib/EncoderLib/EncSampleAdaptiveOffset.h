@@ -89,26 +89,14 @@ public:
   void createEncData(bool isPreDBFSamplesUsed, uint32_t numCTUsPic);
   void destroyEncData();
   void initCABACEstimator( CABACEncoder* cabacEncoder, CtxCache* ctxCache, Slice* pcSlice );
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   void SAOProcess( CodingStructure& cs, bool* sliceEnabled, const double* lambdas,
 #if ENABLE_QPA
                    const double lambdaChromaWeight,
 #endif
                    const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding, bool usingTrueOrg );
-#else
-  void SAOProcess( CodingStructure& cs, bool* sliceEnabled, const double* lambdas,
-#if ENABLE_QPA
-                   const double lambdaChromaWeight,
-#endif
-                   const bool bTestSAODisableAtPictureLevel, const double saoEncodingRate, const double saoEncodingRateChroma, const bool isPreDBFSamplesUsed, bool isGreedyMergeEncoding );
-#endif
 
   void disabledRate( CodingStructure& cs, SAOBlkParam* reconParams, const double saoEncodingRate, const double saoEncodingRateChroma );
-#if JVET_V0095_ALF_SAO_TRUE_ORG
   void getPreDBFStatistics( CodingStructure& cs, bool usingTrueOrg );
-#else
-  void getPreDBFStatistics(CodingStructure& cs);
-#endif
 private: //methods
 
   void deriveLoopFilterBoundaryAvailibility(CodingStructure& cs, const Position &pos, bool& isLeftAvail, bool& isAboveAvail, bool& isAboveLeftAvail) const;

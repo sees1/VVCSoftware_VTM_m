@@ -61,9 +61,7 @@ private:
   // class interface
   DecLib          m_cDecLib;                     ///< decoder class
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvReconFile;        ///< reconstruction YUV class
-#if JVET_V0108
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvSEICTIFile;       ///< reconstruction YUV with CTI class
-#endif
 
   // for output control
   int             m_iPOCLastDisplay;              ///< last POC in display order
@@ -91,11 +89,7 @@ private:
   void  xCreateDecLib     (); ///< create internal classes
   void  xDestroyDecLib    (); ///< destroy internal classes
   void  xWriteOutput      ( PicList* pcListPic , uint32_t tId); ///< write YUV to file
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  void  xFlushOutput( PicList *pcListPic, const int layerId = NOT_VALID, bool noOutputOfPriorPicsFlag = false );   ///< flush all remaining decoded pictures to file
-#else
   void  xFlushOutput( PicList* pcListPic, const int layerId = NOT_VALID ); ///< flush all remaining decoded pictures to file
-#endif
   bool  isNewPicture(ifstream *bitstreamFile, class InputByteStream *bytestream);  ///< check if next NAL unit will be the first NAL unit from a new picture
   bool  isNewAccessUnit(bool newPicture, ifstream *bitstreamFile, class InputByteStream *bytestream);  ///< check if next NAL unit will be the first NAL unit from a new access unit
 

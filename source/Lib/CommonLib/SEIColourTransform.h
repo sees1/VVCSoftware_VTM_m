@@ -42,7 +42,6 @@
 //! \ingroup CommonLib
 //! \{
 
-#if JVET_V0108
 struct PelStorage;
 class SEIColourTransformInfo;
 
@@ -68,6 +67,5 @@ public:
   void generateColourTransfLUTs ();
 
 };// END CLASS DEFINITION SEIColourTransformApply
-#endif
 
 #endif

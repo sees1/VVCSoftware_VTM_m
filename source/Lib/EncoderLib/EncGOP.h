@@ -128,16 +128,12 @@ private:
   bool                    m_bFirst;
   int                     m_iLastRecoveryPicPOC;
   int                     m_latestDRAPPOC;
-#if JVET_U0084_EDRAP
   int                     m_latestEDRAPPOC;
   bool                    m_latestEdrapLeadingPicDecodableFlag;
-#endif
   int                     m_lastRasPoc;
-#if JVET_V0054_TSRC_RICE
   unsigned                m_riceBit[8][2];
   int                     m_preQP[2];
   int                     m_preIPOC;
-#endif
 
   //  Access channel
   EncLib*                 m_pcEncLib;
@@ -251,12 +247,14 @@ public:
   int       getLastGdrIntervalPoc() const { return m_lastGdrIntervalPoc; }
 #endif
 
-#if JVET_V0054_TSRC_RICE
   int       getPreQP() const { return m_preQP[0]; }
-#endif
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 
-    const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths );
+    const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths
+#if JVET_W0134_UNIFORM_METRICS_LOG
+                       , int layerId
+#endif
+                       );
 #if W0038_DB_OPT
   uint64_t  preLoopFilterPicAndCalcDist( Picture* pcPic );
 #endif

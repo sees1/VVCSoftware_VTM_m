@@ -97,12 +97,10 @@ void BinDecoderBase::reset( int qp, int initId )
   start();
 }
 
-#if JVET_V0106_RRC_RICE
 void BinDecoderBase::riceStatReset(int bitDepth)
 {
   Ctx::riceStatReset(bitDepth);
 }
-#endif
 
 unsigned BinDecoderBase::decodeBinEP()
 {

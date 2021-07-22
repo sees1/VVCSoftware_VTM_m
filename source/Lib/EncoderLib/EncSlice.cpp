@@ -635,12 +635,10 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   rpcSlice->setSliceQp           ( iQP );
   rpcSlice->setSliceQpDelta      ( 0 );
   pcPic->setLossyQPValue(iQP);
-#if JVET_V0054_TSRC_RICE
   if ((!rpcSlice->getTSResidualCodingDisabledFlag()) && ( rpcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag() ))
   {
     rpcSlice->set_tsrc_index(Clip3(MIN_TSRC_RICE, MAX_TSRC_RICE, (int) ((19 - iQP) / 6)) - 1);
   }
-#endif
 #if !W0038_CQP_ADJ
   rpcSlice->setSliceChromaQpDelta( COMPONENT_Cb, 0 );
   rpcSlice->setSliceChromaQpDelta( COMPONENT_Cr, 0 );
@@ -837,7 +835,6 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   }
 #endif
 
-#if JVET_V0106_RRC_RICE
   if (rpcSlice->getSPS()->getSpsRangeExtension().getRrcRiceExtensionEnableFlag())
   {
     int bitDepth = rpcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA);
@@ -848,7 +845,6 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   {
     rpcSlice->setRiceBaseLevel(4);
   }
-#endif
 
 }
 
@@ -955,7 +951,7 @@ void EncSlice::resetQP( Picture* pic, int sliceQP, double lambda )
 #endif
   setUpLambda(slice, lambda, sliceQP);
 #if WCG_EXT
-#if JVET_V0078
+#if !JVET_W0043
   if (!(m_pcCfg->getLumaLevelToDeltaQPMapping().isEnabled() || m_pcCfg->getSmoothQPReductionEnable()))
 #else
   if (!m_pcCfg->getLumaLevelToDeltaQPMapping().isEnabled())
@@ -1464,7 +1460,6 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
 
   Slice* const pcSlice    = pcPic->slices[getSliceSegmentIdx()];
 
-#if JVET_V0106_RRC_RICE
   if (pcSlice->getSPS()->getSpsRangeExtension().getRrcRiceExtensionEnableFlag())
   {
     int bitDepth = pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA);
@@ -1475,7 +1470,6 @@ void EncSlice::compressSlice( Picture* pcPic, const bool bCompressEntireSlice, c
   {
     pcSlice->setRiceBaseLevel(4);
   }
-#endif
 
   // initialize cost values - these are used by precompressSlice (they should be parameters).
   m_uiPicTotalBits  = 0;
@@ -1686,7 +1680,6 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
       int hashBlkHitPerc = m_pcCuEncoder->getIbcHashMap().calHashBlkMatchPerc(cs.area.Y());
       cs.slice->setDisableSATDForRD(hashBlkHitPerc > 59);
     }
-#if JVET_V0054_TSRC_RICE
     if ((pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag()) && (m_pcGOPEncoder->getPreQP() != pcSlice->getSliceQp()) && (pcPic->cs->pps->getNumSlicesInPic() == 1) && (pcSlice->get_tsrc_index() > 0) && (pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA) <= 12))
     {
       uint32_t totalCtu  = 0;
@@ -1710,7 +1703,6 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
         }
       }
     }
-#endif
   }
 
   // for every CTU in the slice

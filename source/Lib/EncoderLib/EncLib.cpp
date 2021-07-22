@@ -1340,14 +1340,10 @@ void EncLib::xInitSPS( SPS& sps )
   sps.getSpsRangeExtension().setTransformSkipRotationEnabledFlag(m_transformSkipRotationEnabledFlag);
   sps.getSpsRangeExtension().setTransformSkipContextEnabledFlag(m_transformSkipContextEnabledFlag);
   sps.getSpsRangeExtension().setExtendedPrecisionProcessingFlag(m_extendedPrecisionProcessingFlag);
-#if JVET_V0054_TSRC_RICE
   sps.getSpsRangeExtension().setTSRCRicePresentFlag(m_tsrcRicePresentFlag);
-#endif
   sps.getSpsRangeExtension().setIntraSmoothingDisabledFlag( m_intraSmoothingDisabledFlag );
   sps.getSpsRangeExtension().setHighPrecisionOffsetsEnabledFlag(m_highPrecisionOffsetsEnabledFlag);
-#if JVET_V0106_RRC_RICE
   sps.getSpsRangeExtension().setRrcRiceExtensionEnableFlag(m_rrcRiceExtensionEnableFlag);
-#endif
   sps.getSpsRangeExtension().setPersistentRiceAdaptationEnabledFlag(m_persistentRiceAdaptationEnabledFlag);
   sps.getSpsRangeExtension().setCabacBypassAlignmentEnabledFlag(m_cabacBypassAlignmentEnabledFlag);
 
@@ -1476,12 +1472,10 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     bUseDQP = true;
   }
 #endif
-#if JVET_V0078
   if (getSmoothQPReductionEnable())
   {
     bUseDQP = true;
   }
-#endif
 #if ENABLE_QPA
   if (getUsePerceptQPA() && !bUseDQP)
   {
@@ -1809,12 +1803,10 @@ void EncLib::xInitPicHeader(PicHeader &picHeader, const SPS &sps, const PPS &pps
     bUseDQP = true;
   }
 #endif
-#if JVET_V0078
   if (getSmoothQPReductionEnable())
   {
     bUseDQP = true;
   }
-#endif
 #if ENABLE_QPA
   if( getUsePerceptQPA() && !bUseDQP )
   {

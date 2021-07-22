@@ -925,11 +925,10 @@ void EncAdaptiveLoopFilter::ALFProcess(CodingStructure& cs, const double *lambda
   m_lambda[COMPONENT_Y] = lambdas[COMPONENT_Y] * double(1 << shiftLuma);
   m_lambda[COMPONENT_Cb] = lambdas[COMPONENT_Cb] * double(1 << shiftChroma);
   m_lambda[COMPONENT_Cr] = lambdas[COMPONENT_Cr] * double(1 << shiftChroma);
-
-#if JVET_V0095_ALF_SAO_TRUE_ORG
-  PelUnitBuf orgYuv = m_encCfg->getAlfSaoTrueOrg() ? cs.getTrueOrgBuf() : cs.getOrgBuf();
+#if JVET_W0129_ENABLE_ALF_TRUEORG
+  PelUnitBuf orgYuv = m_encCfg->getAlfTrueOrg() ? cs.getTrueOrgBuf() : cs.getOrgBuf();
 #else
-  PelUnitBuf orgYuv = cs.getOrgBuf();
+  PelUnitBuf orgYuv = m_encCfg->getAlfSaoTrueOrg() ? cs.getTrueOrgBuf() : cs.getOrgBuf();
 #endif
 
   m_tempBuf.copyFrom( cs.getRecoBuf() );

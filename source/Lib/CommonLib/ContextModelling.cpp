@@ -54,11 +54,7 @@ CoeffCodingContext::CoeffCodingContext(const TransformUnit &tu, ComponentID comp
   , m_log2BlockHeight((unsigned) floorLog2(m_height))
   , m_maxNumCoeff(m_width * m_height)
   , m_signHiding(signHide)
-#if JVET_V0047_HIGH_PRECISION_TRANSFORM
   , m_extendedPrecision(tu.cs->sps->getSpsRangeExtension().getExtendedPrecisionProcessingFlag() && tu.cs->sps->getBitDepth( m_chType ) > 10)
-#else
-  , m_extendedPrecision(tu.cs->sps->getSpsRangeExtension().getExtendedPrecisionProcessingFlag())
-#endif
   , m_maxLog2TrDynamicRange(tu.cs->sps->getMaxLog2TrDynamicRange(m_chType))
   , m_scanType(SCAN_DIAG)
   , m_scan(
@@ -116,7 +112,6 @@ CoeffCodingContext::CoeffCodingContext(const TransformUnit &tu, ComponentID comp
     const_cast<int&>(m_lastShiftY)  = (log2sizeY + 1) >> 2;
   }
 
-#if JVET_V0106_RRC_RICE
   m_cctxBaseLevel = 4; // default value for RRC rice derivation in VVCv1, is updated for extended RRC rice derivation
   m_histValue = 0;  // default value for RRC rice derivation in VVCv1, is updated for history-based extention of RRC rice derivation
   m_updateHist = 0;  // default value for RRC rice derivation (history update is disabled), is updated for history-based extention of RRC rice derivation
@@ -129,7 +124,6 @@ CoeffCodingContext::CoeffCodingContext(const TransformUnit &tu, ComponentID comp
   {
     deriveRiceRRC = &CoeffCodingContext::deriveRice;
   }
-#endif
 }
 
 void CoeffCodingContext::initSubblock( int SubsetId, bool sigGroupFlag )
