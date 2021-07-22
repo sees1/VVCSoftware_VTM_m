@@ -101,22 +101,17 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
   m_hashMap.clearAll();
 }
 
-#if GDR_ENABLED
-void Picture::destroy(const bool cleanUpPicHeader)
-#else
 void Picture::destroy()
-#endif
 {
   for (uint32_t t = 0; t < NUM_PIC_TYPES; t++)
   {
     M_BUFS(jId, t).destroy();
   }
   m_hashMap.clearAll();
-
   if (cs)
   {
 #if GDR_ENABLED
-    if (cs->picHeader && cleanUpPicHeader)
+    if (cs->picHeader)
     {
       delete cs->picHeader;
     }
@@ -250,6 +245,9 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   cs->pps     = &pps;
   picHeader->setSPSId( sps.getSPSId() );
   picHeader->setPPSId( pps.getPPSId() );
+#if GDR_ENABLED
+  picHeader->setPic(this);
+#endif
   cs->picHeader = picHeader;
   memcpy(cs->alfApss, alfApss, sizeof(cs->alfApss));
   cs->lmcsAps = lmcsAps;

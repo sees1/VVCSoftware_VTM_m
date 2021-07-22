@@ -2011,7 +2011,7 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
       {
         int modIP = pic->getPOC() - pic->getPOC() / m_pcCfg->getReshapeCW().rspFpsToIp * m_pcCfg->getReshapeCW().rspFpsToIp;
 #if GDR_ENABLED
-        if (slice->isInterGDR())
+        if (slice->getSPS()->getGDREnabledFlag() && slice->isInterGDR())
         {
           modIP = 0;
         }
@@ -2030,15 +2030,19 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
     }
 
     //set all necessary information in LMCS APS and picture header
-    picHeader->setLmcsEnabledFlag(m_pcReshaper->getSliceReshaperInfo().getUseSliceReshaper());
+    picHeader->setLmcsEnabledFlag(m_pcReshaper->getSliceReshaperInfo().getUseSliceReshaper());    
     slice->setLmcsEnabledFlag(m_pcReshaper->getSliceReshaperInfo().getUseSliceReshaper());
-    picHeader->setLmcsChromaResidualScaleFlag(m_pcReshaper->getSliceReshaperInfo().getSliceReshapeChromaAdj() == 1);
+    picHeader->setLmcsChromaResidualScaleFlag(m_pcReshaper->getSliceReshaperInfo().getSliceReshapeChromaAdj() == 1);    
 
 #if GDR_ENABLED
-    if (picHeader->getInGdrInterval())
+    if (slice->getSPS()->getGDREnabledFlag() && picHeader->getInGdrInterval())
     {
       picHeader->setLmcsChromaResidualScaleFlag(false);
     }
+    else 
+    {
+      picHeader->setLmcsChromaResidualScaleFlag(true);
+    }    
 #endif
 
     if (m_pcReshaper->getSliceReshaperInfo().getSliceReshapeModelPresentFlag())
@@ -2776,7 +2780,14 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       }
     }
 
+#if GDR_ENABLED
+    PicHeader *picHeader = new PicHeader;
+    *picHeader = *pcPic->cs->picHeader;
+    pcSlice->scaleRefPicList(scaledRefPic, picHeader, m_pcEncLib->getApss(), picHeader->getLmcsAPS(), picHeader->getScalingListAPS(), false);
+    picHeader = pcPic->cs->picHeader;
+#else
     pcSlice->scaleRefPicList( scaledRefPic, pcPic->cs->picHeader, m_pcEncLib->getApss(), picHeader->getLmcsAPS(), picHeader->getScalingListAPS(), false );
+#endif
 
     // set adaptive search range for non-intra-slices
     if (m_pcCfg->getUseASR() && !pcSlice->isIntra())
@@ -3145,9 +3156,13 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         picHeader->setLmcsEnabledFlag(true);
 #if GDR_ENABLED
-        if (picHeader->getInGdrInterval())
+        if (cs.sps->getGDREnabledFlag() && picHeader->getInGdrInterval())
         {
           picHeader->setLmcsChromaResidualScaleFlag(false);
+        }
+        else
+        {
+          picHeader->setLmcsChromaResidualScaleFlag(true);
         }
 #endif
         int apsId = std::min<int>(3, m_pcEncLib->getVPS() == nullptr ? 0 : m_pcEncLib->getVPS()->getGeneralLayerIdx(m_pcEncLib->getLayerId()));
