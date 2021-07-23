@@ -96,7 +96,7 @@ void SEIColourTransformApply::generateColourTransfLUTs()
   uint8_t numComp     = m_chromaFormat ? MAX_NUM_COMPONENT : 1;
   int numPreLutPoints = 1 << m_pColourTransfParams->m_log2NumberOfPointsPerLut;
   int dynamicRange    = 1 << m_bitDepth;
-  const uint32_t orgCW     = dynamicRange / numPreLutPoints;
+  const int orgCW     = dynamicRange / numPreLutPoints;
   int scalingPreLut   = 1 << ( 11 - (int)floorLog2(orgCW) ); // scale-up values from cfg file (chroma preLut is scaled down in cfg)
 
   std::vector<Pel> pivotInPoints;
