@@ -1903,9 +1903,8 @@ public:
   void      setCtiSEINbChromaLut(uint32_t v) { m_ctiSEINumberChromaLut = v; }
   int       getCtiSEIChromaOffset() { return m_ctiSEIChromaOffset; }
   void      setCtiSEIChromaOffset(int v) { m_ctiSEIChromaOffset = v; }
-  LutModel  getCtiSEILut(int idx) { return m_ctiSEILut[idx]; }
+  const LutModel&  getCtiSEILut(int idx) const { return m_ctiSEILut[idx]; }
   void      setCtiSEILut(LutModel& cmp, int idx) { m_ctiSEILut[idx] = cmp; }
-  LutModel* getCtiSEILuts() { return m_ctiSEILut; }
   // ccv SEI
   void     setCcvSEIEnabled(bool b)                                  { m_ccvSEIEnabled = b; }
   bool     getCcvSEIEnabled()                                        { return m_ccvSEIEnabled; }

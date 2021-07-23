@@ -505,17 +505,8 @@ void AreaBuf<Pel>::applyChromaCTI(Pel* bufY, int strideY, std::vector<Pel>& pLUT
 {
   int range = 1 << bitDepth;
   int offset = range / 2;
-  int sx = 1;
-  int sy = 1;
-  if (CHROMA_420 == chrFormat) 
-  {
-    sx = 2; 
-    sy = 2;
-  }
-  else if (CHROMA_422 == chrFormat)
-  {
-    sx = 2;
-  }
+  int sx = 1 << getComponentScaleX(COMPONENT_Cb, chrFormat);
+  int sy = 1 << getComponentScaleY(COMPONENT_Cb, chrFormat);
 
   Pel* dst = buf;
   Pel* src = buf;

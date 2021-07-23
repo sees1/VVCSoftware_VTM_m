@@ -623,9 +623,15 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<int>  cfg_DisplayPrimariesCode            (0, 50000, 6, 6, defaultPrimaryCodes,   sizeof(defaultPrimaryCodes  )/sizeof(int));
   SMultiValueInput<int>  cfg_DisplayWhitePointCode           (0, 50000, 2, 2, defaultWhitePointCode, sizeof(defaultWhitePointCode)/sizeof(int));
 
-  SMultiValueInput<int16_t>  cfg_SEICTILut0(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
-  SMultiValueInput<int16_t>  cfg_SEICTILut1(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
-  SMultiValueInput<int16_t>  cfg_SEICTILut2(0, 128, 0, MAX_CTI_LUT_SIZE + 1);
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+  SMultiValueInput<Pel>  cfg_SEICTILut0(0, ((1 << (2 + 16 - 1)) - 1), 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<Pel>  cfg_SEICTILut1(0, ((1 << (2 + 16 - 1)) - 1), 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<Pel>  cfg_SEICTILut2(0, ((1 << (2 + 16 - 1)) - 1), 0, MAX_CTI_LUT_SIZE + 1);
+#else
+  SMultiValueInput<Pel>  cfg_SEICTILut0(0, ((1 << (2 + 12 - 1)) - 1), 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<Pel>  cfg_SEICTILut1(0, ((1 << (2 + 12 - 1)) - 1), 0, MAX_CTI_LUT_SIZE + 1);
+  SMultiValueInput<Pel>  cfg_SEICTILut2(0, ((1 << (2 + 12 - 1)) - 1), 0, MAX_CTI_LUT_SIZE + 1);
+#endif
   SMultiValueInput<bool> cfg_timeCodeSeiTimeStampFlag        (0,  1, 0, MAX_TIMECODE_SEI_SETS);
   SMultiValueInput<bool> cfg_timeCodeSeiNumUnitFieldBasedFlag(0,  1, 0, MAX_TIMECODE_SEI_SETS);
   SMultiValueInput<int>  cfg_timeCodeSeiCountingType         (0,  6, 0, MAX_TIMECODE_SEI_SETS);
