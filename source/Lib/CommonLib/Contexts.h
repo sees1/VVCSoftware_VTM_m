@@ -386,7 +386,12 @@ public:
   {
     for (std::size_t k = 0; k < RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS; k++)
     {
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+      CHECK(bitDepth <= 10,"BitDepth shall be larger than 10.");
+      m_GRAdaptStats[k] = 2 * floorLog2(bitDepth - 10);
+#else
       m_GRAdaptStats[k] = (bitDepth > 10) ? 2 * floorLog2(bitDepth - 10) : 0; 
+#endif
     }
   }
 

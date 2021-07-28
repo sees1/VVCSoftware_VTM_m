@@ -2077,6 +2077,11 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   // KJS: no SPS extensions defined yet
 
   READ_FLAG( uiCode, "sps_extension_present_flag");
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  if (pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) <= 10)
+    CHECK(uiCode == 1, "The value of sps_range_extension_flag shall be 0 when BitDepth is less than or equal to 10.");
+#endif
+
   if (uiCode)
   {
 #if ENABLE_TRACING || RExt__DECODER_DEBUG_BIT_STATISTICS
