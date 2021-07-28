@@ -61,6 +61,8 @@
 
 #define JVET_W0043                                        1 // Alignment of smooth block QP control with adaptive QP in VTM
 
+#define JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS              1 // JVET-W0178: bitstream constraints on RExt tools for low bit-depth (bit-depth <=10)
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
