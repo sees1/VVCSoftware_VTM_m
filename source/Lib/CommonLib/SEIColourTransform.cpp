@@ -66,6 +66,7 @@ void SEIColourTransformApply::create(uint32_t width, uint32_t height, ChromaForm
 
 SEIColourTransformApply::~SEIColourTransformApply()
 {
+  delete m_pColourTransfParams;
 }
 
 void SEIColourTransformApply::inverseColourTransform(PelStorage* transformBuf)
