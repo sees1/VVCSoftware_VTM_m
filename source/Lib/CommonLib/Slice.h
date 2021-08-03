@@ -1307,6 +1307,9 @@ private:
   bool             m_highPrecisionOffsetsEnabledFlag;
   bool             m_rrcRiceExtensionEnableFlag;
   bool             m_persistentRiceAdaptationEnabledFlag;
+#if JVET_W0046_RLSCP
+  bool             m_reverseLastSigCoeffEnabledFlag;
+#endif
   bool             m_cabacBypassAlignmentEnabledFlag;
 
 
@@ -1323,6 +1326,9 @@ public:
         || getHighPrecisionOffsetsEnabledFlag()
         || getRrcRiceExtensionEnableFlag()
         || getPersistentRiceAdaptationEnabledFlag()
+#if JVET_W0046_RLSCP
+        || getReverseLastSigCoeffEnabledFlag()
+#endif
         || getCabacBypassAlignmentEnabledFlag();
   }
 
@@ -1350,6 +1356,11 @@ public:
 
   bool getPersistentRiceAdaptationEnabledFlag() const                                  { return m_persistentRiceAdaptationEnabledFlag;  }
   void setPersistentRiceAdaptationEnabledFlag(const bool value)                        { m_persistentRiceAdaptationEnabledFlag = value; }
+
+#if JVET_W0046_RLSCP
+  bool getReverseLastSigCoeffEnabledFlag() const                                       { return m_reverseLastSigCoeffEnabledFlag;       }
+  void setReverseLastSigCoeffEnabledFlag(bool value)                                   { m_reverseLastSigCoeffEnabledFlag = value;      }
+#endif
 
   bool getCabacBypassAlignmentEnabledFlag() const                                      { return m_cabacBypassAlignmentEnabledFlag;      }
   void setCabacBypassAlignmentEnabledFlag(const bool value)                            { m_cabacBypassAlignmentEnabledFlag = value;     }
@@ -2659,6 +2670,9 @@ private:
   int                        m_deblockingFilterCrTcOffsetDiv2;    //< tc offset for deblocking filter
   bool                       m_depQuantEnabledFlag;               //!< dependent quantization enabled flag
   int                        m_riceBaseLevelValue;    //< baseLevel value for abs_remainder 
+#if JVET_W0046_RLSCP
+  bool                       m_reverseLastSigCoeffFlag;
+#endif
   bool                       m_signDataHidingEnabledFlag;         //!< sign data hiding enabled flag
   bool                       m_tsResidualCodingDisabledFlag;
   int                        m_list1IdxToList0Idx[MAX_NUM_REF];
@@ -2738,6 +2752,9 @@ private:
   bool                       m_isLossless;
   int                        m_tsrc_index;
   unsigned                   m_riceBit[8];
+#if JVET_W0046_RLSCP
+  int                        m_cnt_right_bottom;
+#endif
 public:
                               Slice();
   virtual                     ~Slice();
@@ -2855,6 +2872,10 @@ public:
   bool                        getDepQuantEnabledFlag() const                         { return m_depQuantEnabledFlag;                                                                }  
   void                        setRiceBaseLevel(int b) { m_riceBaseLevelValue = b; }
   int                         getRiceBaseLevel() const { return m_riceBaseLevelValue; }
+#if JVET_W0046_RLSCP
+  void                        setReverseLastSigCoeffFlag( bool b )                   { m_reverseLastSigCoeffFlag = b;                                }
+  bool                        getReverseLastSigCoeffFlag() const                     { return m_reverseLastSigCoeffFlag;                             }
+#endif
   void                        setSignDataHidingEnabledFlag( bool b )                 { m_signDataHidingEnabledFlag = b;                                                             }
   bool                        getSignDataHidingEnabledFlag() const                   { return m_signDataHidingEnabledFlag;                                                          }  
   void                        setTSResidualCodingDisabledFlag(bool b) { m_tsResidualCodingDisabledFlag = b; }
@@ -3072,6 +3093,10 @@ public:
   int                         get_tsrc_index() const { return m_tsrc_index; }
   void                        setRiceBit(int idx, int i) { m_riceBit[idx] = i; }
   unsigned                    getRiceBit(int idx) const { return m_riceBit[idx]; }
+#if JVET_W0046_RLSCP
+  void updateCntRightBottom(int v) { m_cnt_right_bottom += v; }
+  int  getCntRightBottom() { return m_cnt_right_bottom; }
+#endif
 
 protected:
   Picture*              xGetRefPic( PicList& rcListPic, const int poc, const int layerId );

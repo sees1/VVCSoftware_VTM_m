@@ -1345,6 +1345,9 @@ void EncLib::xInitSPS( SPS& sps )
   sps.getSpsRangeExtension().setHighPrecisionOffsetsEnabledFlag(m_highPrecisionOffsetsEnabledFlag);
   sps.getSpsRangeExtension().setRrcRiceExtensionEnableFlag(m_rrcRiceExtensionEnableFlag);
   sps.getSpsRangeExtension().setPersistentRiceAdaptationEnabledFlag(m_persistentRiceAdaptationEnabledFlag);
+#if JVET_W0046_RLSCP
+  sps.getSpsRangeExtension().setReverseLastSigCoeffEnabledFlag(m_reverseLastSigCoeffEnabledFlag);
+#endif
   sps.getSpsRangeExtension().setCabacBypassAlignmentEnabledFlag(m_cabacBypassAlignmentEnabledFlag);
 
   sps.setSubPicInfoPresentFlag(m_subPicInfoPresentFlag);
