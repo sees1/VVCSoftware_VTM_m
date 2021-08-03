@@ -142,6 +142,10 @@ EncGOP::EncGOP()
   m_isUseLTRef = false;
   m_isPrepareLTRef = true;
   m_lastLTRefPoc = 0;
+#if JVET_W0046_RLSCP
+  m_cnt_right_bottom = 0;
+  m_cnt_right_bottom_i = 0;
+#endif
 }
 
 EncGOP::~EncGOP()
@@ -2987,6 +2991,30 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       m_pcSliceEncoder->setJointCbCrModes(*pcPic->cs, Position(0, 0), pcPic->cs->area.lumaSize());
     }
 
+#if JVET_W0046_RLSCP
+    if (!pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag() || pcSlice->getSliceQp() > 12)
+    {
+      pcSlice->setReverseLastSigCoeffFlag(false);
+    }
+    else
+    {
+      /*for RA serial and parallel alignment start*/
+      if (m_pcCfg->getIntraPeriod() > 1)
+      {
+        if (pcSlice->isIntra())
+        {
+          m_cnt_right_bottom = 0;
+        }
+        if ((pocCurr % m_pcCfg->getIntraPeriod()) <= m_pcCfg->getGOPSize() && iGOPid == 0 && !pcSlice->isIntra())
+        {
+          m_cnt_right_bottom = m_cnt_right_bottom_i;
+        }
+      }
+      /*for RA serial and parallel alignment end*/
+      pcSlice->setReverseLastSigCoeffFlag(m_cnt_right_bottom >= 0);
+    }
+#endif
+
     if( encPic )
     // now compress (trial encode) the various slice segments (slices, and dependent slices)
     {
@@ -3950,6 +3978,13 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       fflush( stdout );
     }
 
+#if JVET_W0046_RLSCP
+    m_cnt_right_bottom = pcSlice->getCntRightBottom();
+    if (m_pcCfg->getIntraPeriod() > 1 && pcSlice->isIntra())
+    {
+      m_cnt_right_bottom_i = m_cnt_right_bottom;
+    }
+#endif
 
     DTRACE_UPDATE( g_trace_ctx, ( std::make_pair( "final", 0 ) ) );
 

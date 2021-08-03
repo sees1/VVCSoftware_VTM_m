@@ -3497,6 +3497,11 @@ When true, specifies the that extension of the Golomb-Rice parameter derivation 
 When true, enable the adaptation of the Golomb-Rice parameter over the course of each slice. Version 1 and some Version 2 (RExt) profiles require this to be false.
 \\
 
+\Option{ReverseLastSigCoeff} &
+\Default{false} &
+When true, enable reverse last significant coefficient postion in RRC. Version 1 and some Version 2 (RExt) profiles require this to be false.
+\\
+
 \Option{AlignCABACBeforeBypass} &
 \Default{false} &
 When true, align the CABAC engine to a defined fraction of a bit prior to coding bypass data (including sign bits) when coeff_abs_level_remaining syntax elements are present in the group.

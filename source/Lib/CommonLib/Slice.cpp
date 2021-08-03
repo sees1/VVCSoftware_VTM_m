@@ -74,6 +74,9 @@ Slice::Slice()
 , m_deblockingFilterCrBetaOffsetDiv2( 0 )
 , m_deblockingFilterCrTcOffsetDiv2  ( 0 )
 , m_depQuantEnabledFlag             ( false )
+#if JVET_W0046_RLSCP
+, m_reverseLastSigCoeffFlag         ( false )
+#endif
 , m_signDataHidingEnabledFlag       ( false )
 , m_tsResidualCodingDisabledFlag  ( false )
 , m_pendingRasInit                ( false )
@@ -108,6 +111,10 @@ Slice::Slice()
   {
     m_riceBit[i] = 0;
   }
+
+#if JVET_W0046_RLSCP
+  m_cnt_right_bottom = 0;
+#endif
 
   for(uint32_t i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
@@ -915,6 +922,10 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   {
     m_riceBit[i] = pSrc->m_riceBit[i];
   }
+#if JVET_W0046_RLSCP
+  m_reverseLastSigCoeffFlag = pSrc->m_reverseLastSigCoeffFlag;
+  m_cnt_right_bottom        = pSrc->m_cnt_right_bottom;
+#endif
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -2878,6 +2889,9 @@ SPSRExt::SPSRExt()
  , m_highPrecisionOffsetsEnabledFlag    (false)
  , m_rrcRiceExtensionEnableFlag(false)
  , m_persistentRiceAdaptationEnabledFlag(false)
+#if JVET_W0046_RLSCP
+ , m_reverseLastSigCoeffEnabledFlag     (false)
+#endif
  , m_cabacBypassAlignmentEnabledFlag    (false)
 {
 }

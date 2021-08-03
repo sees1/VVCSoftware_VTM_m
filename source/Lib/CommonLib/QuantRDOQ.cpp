@@ -980,6 +980,16 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
     lastBitsY[ctxId] = bitsY;
   }
 
+#if JVET_W0046_RLSCP
+  unsigned zoTbWdith  = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.width());
+  unsigned zoTbHeight = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.height());
+  if (tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[compID].width <= 32 && tu.blocks[compID].height <= 32
+      && compID == COMPONENT_Y)
+  {
+    zoTbWdith  = (tu.blocks[compID].width == 32) ? 16 : zoTbWdith;
+    zoTbHeight = (tu.blocks[compID].height == 32) ? 16 : zoTbHeight;
+  }
+#endif
 
   bool bFoundLast = false;
   for (int iCGScanPos = iCGLastScanPos; iCGScanPos >= 0; iCGScanPos--)
@@ -1006,6 +1016,13 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
         {
           uint32_t   uiPosY = uiBlkPos >> uiLog2BlockWidth;
           uint32_t   uiPosX = uiBlkPos - ( uiPosY << uiLog2BlockWidth );
+#if JVET_W0046_RLSCP
+          if (tu.cu->slice->getReverseLastSigCoeffFlag())
+          {
+            uiPosX = zoTbWdith - 1 - uiPosX;
+            uiPosY = zoTbHeight - 1 - uiPosY;
+          }
+#endif
           double d64CostLast  = xGetRateLast( lastBitsX, lastBitsY, uiPosX, uiPosY );
 
           double totalCost = d64BaseCost + d64CostLast - pdCostSig[ iScanPos ];

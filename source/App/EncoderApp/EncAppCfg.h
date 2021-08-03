@@ -430,6 +430,9 @@ protected:
   int       m_internalBitDepth[MAX_NUM_CHANNEL_TYPE];         ///< bit-depth codec operates at (input/output files will be converted)
   bool      m_extendedPrecisionProcessingFlag;
   bool      m_tsrcRicePresentFlag;
+#if JVET_W0046_RLSCP
+  bool      m_reverseLastSigCoeffEnabledFlag;
+#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
 
   //coding tools (chroma format)
