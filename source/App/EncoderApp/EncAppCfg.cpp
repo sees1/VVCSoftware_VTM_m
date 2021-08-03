@@ -2992,12 +2992,12 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( (m_MSBExtendedBitDepth[CHANNEL_TYPE_CHROMA] < m_inputBitDepth[CHANNEL_TYPE_CHROMA]), "MSB-extended bit depth for chroma channel (--MSBExtendedBitDepthC) must be greater than or equal to input bit depth for chroma channel (--InputBitDepthC)" );
 
 #if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
-  bool check_sps_extension_flag = m_extendedPrecisionProcessingFlag || 
+  bool check_sps_range_extension_flag = m_extendedPrecisionProcessingFlag || 
                                   m_rrcRiceExtensionEnableFlag ||
                                   m_persistentRiceAdaptationEnabledFlag || 
                                   m_tsrcRicePresentFlag;
   if (m_internalBitDepth[CHANNEL_TYPE_LUMA] <= 10)
-    xConfirmPara( (check_sps_extension_flag == 1) ,
+    xConfirmPara( (check_sps_range_extension_flag == 1) ,
                  "RExt tools (Extended Precision Processing, RRC Rice Extension, Persistent Rice Adaptation and TSRC Rice Extension) must be disabled for BitDepth is less than or equal to 10 (the value of sps_range_extension_flag shall be 0 when BitDepth is less than or equal to 10.)");
 #endif
 
