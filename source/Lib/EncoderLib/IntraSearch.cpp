@@ -4465,6 +4465,7 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
 
     const bool tsAllowed = TU::isTSAllowed(tu, COMPONENT_Y);
     const bool mtsAllowed = CU::isMTSAllowed(cu, COMPONENT_Y);
+    const bool lossless = m_pcEncCfg->getCostMode() == COST_LOSSLESS_CODING && slice.isLossless();
     std::vector<TrMode> trModes;
 
     if (sps.getUseLFNST())
@@ -4481,7 +4482,7 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
     }
     else
     {
-      if (m_pcEncCfg->getCostMode() == COST_LOSSLESS_CODING && slice.isLossless())
+      if (lossless)
       {
         nNumTransformCands = 1;
         CHECK(!tsAllowed && !cu.bdpcmMode, "transform skip should be enabled for LS");
@@ -4536,8 +4537,13 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
     bool    cbfDCT2 = true;
     if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
     m_pcRdCost->lambdaAdjustColorTrans(true, COMPONENT_Y);
-    for( int modeId = firstCheckId; modeId <= ( sps.getUseLFNST() ? lastCheckId : ( nNumTransformCands - 1 ) ); modeId++ )
+    for (int modeIndex = firstCheckId; sps.getUseLFNST() || modeIndex < trModes.size(); modeIndex++)
     {
+      const int modeId = sps.getUseLFNST() ? modeIndex : trModes[modeIndex].first;
+      if (modeId > (lossless ? (nNumTransformCands - 1) : lastCheckId))
+      {
+        break;
+      }
       uint8_t transformIndex = modeId;
       csFull->getResiBuf(tu.Y()).copyFrom(csFull->getOrgResiBuf(tu.Y()));
 
@@ -4557,18 +4563,18 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       }
       else
       {
-        if (!(m_pcEncCfg->getCostMode() == COST_LOSSLESS_CODING && slice.isLossless()))
+        if (!lossless)
         {
           if (!cbfDCT2 || (m_pcEncCfg->getUseTransformSkipFast() && bestLumaModeId == 1))
           {
             break;
           }
-          if (!trModes[modeId].second)
+          if (!trModes[modeIndex].second)
           {
             continue;
           }
         }
-        tu.mtsIdx[COMPONENT_Y] = trModes[modeId].first;
+        tu.mtsIdx[COMPONENT_Y] = modeId;
       }
 
       singleDistTmpLuma = 0;
@@ -4648,7 +4654,7 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       cuCtx.isDQPCoded = true;
       cuCtx.isChromaQpAdjCoded = true;
       //----- determine rate and r-d cost -----
-      if ((sps.getUseLFNST() ? (modeId == lastCheckId && modeId != 0 && checkTransformSkip) : (trModes[modeId].first != 0)) && !TU::getCbfAtDepth(tu, COMPONENT_Y, currDepth))
+      if ((sps.getUseLFNST() ? (modeId == lastCheckId && modeId != 0 && checkTransformSkip) : (modeId != 0)) && !TU::getCbfAtDepth(tu, COMPONENT_Y, currDepth))
       {
         //In order not to code TS flag when cbf is zero, the case for TS with cbf being zero is forbidden.
         if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
@@ -4693,8 +4699,8 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
         }
         else
         {
-          bestLumaModeId = trModes[modeId].first;
-          if (trModes[modeId].first == 0)
+          bestLumaModeId = modeId;
+          if (modeId == 0)
           {
             cbfDCT2 = TU::getCbfAtDepth(tu, COMPONENT_Y, currDepth);
           }
@@ -4768,7 +4774,7 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
       bool        cbfDCT2 = true;
 
       trModes.clear();
-      if (m_pcEncCfg->getCostMode() == COST_LOSSLESS_CODING && slice.isLossless())
+      if (lossless)
       {
         numTransformCands = 1;
         CHECK(!tsAllowed && !cu.bdpcmModeChroma, "transform skip should be enabled for LS");
