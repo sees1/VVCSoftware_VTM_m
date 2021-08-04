@@ -3259,6 +3259,10 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(!m_useTransformSkip, "BDPCM cannot be used when transform skip is disabled.");
   }
 
+  if (m_tsrcRicePresentFlag)
+  {
+    xConfirmPara(!m_useTransformSkip, "TSRCRicePresent cannot be enabled when transform skip is disabled.");
+  }
 
   if (!m_alf)
   {
