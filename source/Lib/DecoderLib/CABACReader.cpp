@@ -84,7 +84,11 @@ void CABACReader::initCtxModels( Slice& slice )
   }
   m_BinDecoder.reset( qp, (int)sliceType );
   m_BinDecoder.setBaseLevel(slice.getRiceBaseLevel());
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  m_BinDecoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA), slice.getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag());
+#else
   m_BinDecoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA));
+#endif
 }
 
 
