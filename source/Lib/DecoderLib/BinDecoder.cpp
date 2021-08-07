@@ -97,9 +97,17 @@ void BinDecoderBase::reset( int qp, int initId )
   start();
 }
 
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+void BinDecoderBase::riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag)
+#else
 void BinDecoderBase::riceStatReset(int bitDepth)
+#endif
 {
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  Ctx::riceStatReset(bitDepth, persistentRiceAdaptationEnabledFlag);
+#else
   Ctx::riceStatReset(bitDepth);
+#endif
 }
 
 unsigned BinDecoderBase::decodeBinEP()

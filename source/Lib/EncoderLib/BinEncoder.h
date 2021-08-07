@@ -172,7 +172,11 @@ public:
   void      finish  ();
   void      restart ();
   void      reset   ( int qp, int initId );
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  void      riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag);
+#else
   void      riceStatReset(int bitDepth);
+#endif
 public:
   void      resetBits           ();
   uint64_t  getEstFracBits      ()                    const { THROW( "not supported" ); return 0; }

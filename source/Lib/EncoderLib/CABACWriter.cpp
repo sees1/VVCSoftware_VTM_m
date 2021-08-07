@@ -62,7 +62,11 @@ void CABACWriter::initCtxModels( const Slice& slice )
   }
   m_BinEncoder.reset( qp, (int)sliceType );
   m_BinEncoder.setBaseLevel(slice.getRiceBaseLevel());
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  m_BinEncoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA), slice.getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag()); // provide bit depth for derivation (CE14_C method)
+#else
   m_BinEncoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA)); // provide bit depth for derivation (CE14_C method)
+#endif
 }
 
 
