@@ -110,6 +110,13 @@ void Picture::destroy()
   m_hashMap.clearAll();
   if (cs)
   {
+#if GDR_ENABLED
+    if (cs->picHeader)
+    {
+      delete cs->picHeader;
+    }
+    cs->picHeader = nullptr;
+#endif
     cs->destroy();
     delete cs;
     cs = nullptr;
@@ -238,6 +245,9 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   cs->pps     = &pps;
   picHeader->setSPSId( sps.getSPSId() );
   picHeader->setPPSId( pps.getPPSId() );
+#if GDR_ENABLED
+  picHeader->setPic(this);
+#endif
   cs->picHeader = picHeader;
   memcpy(cs->alfApss, alfApss, sizeof(cs->alfApss));
   cs->lmcsAps = lmcsAps;

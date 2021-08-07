@@ -1767,7 +1767,9 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit &cu, Partitioner &partitioner
 #if GDR_ENABLED
         bool allOk = (dCost < dBestCost);
         if (m_pcEncCfg->getGdrEnabled())
+        {
           allOk = allOk && dBestCost && isValidIntraPredChroma(pu, (int)PU::getCoLocatedIntraLumaMode(pu), chromaIntraMode);
+        }
 
         if (allOk)
 #else

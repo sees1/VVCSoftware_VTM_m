@@ -135,13 +135,6 @@ void CodingStructure::destroy()
   delete[] m_motionBuf;
   m_motionBuf = nullptr;
 
-#if GDR_ENABLED
-  if (picHeader)
-  {
-    delete picHeader;
-    picHeader = nullptr;
-  }
-#endif
 
   m_tuCache.cache( tus );
   m_puCache.cache( pus );
@@ -1549,9 +1542,6 @@ void CodingStructure::create(const ChromaFormat &_chromaFormat, const Area& _are
     return;
   }
 
-#if GDR_ENABLED
-  picHeader = new PicHeader();
-#endif
 
   m_reco.create( area );
   m_pred.create( area );
@@ -1568,9 +1558,6 @@ void CodingStructure::create(const UnitArea& _unit, const bool isTopLayer, const
     return;
   }
 
-#if GDR_ENABLED
-  picHeader = new PicHeader();
-#endif
 
   m_reco.create( area );
   m_pred.create( area );
@@ -1846,16 +1833,7 @@ void CodingStructure::initSubStructure( CodingStructure& subStruct, const Channe
   subStruct.sps       = sps;
   subStruct.vps       = vps;
   subStruct.pps       = pps;
-#if GDR_ENABLED
-  if (!subStruct.picHeader)
-  {
-    subStruct.picHeader = new PicHeader;
-    subStruct.picHeader->initPicHeader();
-  }
-  *subStruct.picHeader = *picHeader;
-#else
   subStruct.picHeader = picHeader;
-#endif
 
   memcpy(subStruct.alfApss, alfApss, sizeof(alfApss));
 

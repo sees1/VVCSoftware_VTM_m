@@ -2732,8 +2732,14 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     CU::checkConformanceILRP(pcSlice);
   }
 
+#if GDR_ENABLED
+  PicHeader *picHeader = new PicHeader;
+  *picHeader = *m_pcPic->cs->picHeader;  
+  pcSlice->scaleRefPicList(scaledRefPic, m_pcPic->cs->picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true);
+  picHeader = m_pcPic->cs->picHeader;  
+#else
   pcSlice->scaleRefPicList( scaledRefPic, m_pcPic->cs->picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true );
-
+#endif
 
     if (!pcSlice->isIntra())
     {
