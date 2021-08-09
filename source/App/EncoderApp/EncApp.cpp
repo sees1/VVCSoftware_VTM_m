@@ -1058,6 +1058,11 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setMaiSEIMantissaSkewFactor                          (m_maiSEIMantissaSkewFactor);
   m_cEncLib.setMaiSEIPrecRotationParam                           (m_maiSEIPrecRotationParam);
   m_cEncLib.setMaiSEIPrecTranslationParam                        (m_maiSEIPrecTranslationParam);
+#if JVET_W0078_MVP_SEI 
+  m_cEncLib.setMvpSEIEnabled(m_mvpSEIEnabled);
+  m_cEncLib.setMvpSEINumViewsMinus1(m_mvpSEINumViewsMinus1);
+  m_cEncLib.setMvpSEIViewPosition(m_mvpSEIViewPosition);
+#endif
   // alpha channel information sei
   m_cEncLib.setAciSEIEnabled                                     (m_aciSEIEnabled);
   m_cEncLib.setAciSEICancelFlag                                  (m_aciSEICancelFlag);

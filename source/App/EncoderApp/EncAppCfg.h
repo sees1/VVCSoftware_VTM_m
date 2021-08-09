@@ -615,6 +615,12 @@ protected:
   std::vector<uint32_t>  m_maiSEIMantissaSkewFactor;
   int               m_maiSEIPrecRotationParam;
   int               m_maiSEIPrecTranslationParam;
+#if JVET_W0078_MVP_SEI 
+  // multiview acquisition information sei
+  bool              m_mvpSEIEnabled;
+  int               m_mvpSEINumViewsMinus1;
+  std::vector<uint32_t>  m_mvpSEIViewPosition;
+#endif
   // alpha channel information sei
   bool      m_aciSEIEnabled;
   bool      m_aciSEICancelFlag;

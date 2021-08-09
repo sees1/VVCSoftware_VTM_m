@@ -1,4 +1,4 @@
-﻿\documentclass[a4paper,11pt]{jvetdoc}
+\documentclass[a4paper,11pt]{jvetdoc}
 
 \usepackage{geometry}[2010/02/12]
 
@@ -3565,6 +3565,7 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   168 & Frame-field information                  & Table \ref{tab:sei-frame-field} \\  
   177 & Depth Representation Information         & Table \ref{tab:sei-dri} \\
   179 & Multiview Acquisition Information        & Table \ref{tab:sei-mai} \\
+  180 & Multiview View Position        			 & Table \ref{tab:sei-mvp} \\
   202 & Annotated regions information            & Table \ref{tab:sei-annotated-regions} \\  
   203 & Subpicture Level Information             & Table \ref{tab:sei-subpic-level} \\  
   204 & Sample Aspect Ratio Information          & Table \ref{tab:sei-sari} \\  
@@ -4864,6 +4865,21 @@ Specifies the exponent of the maximum allowable truncation error for rotation in
 \Option{SEIMAIPrecTranslationParam} &
 \Default{0} &
 Specifies the exponent of the maximum allowable truncation error for translation in the multiview acquisition information SEI message.
+\\
+\end{OptionTableNoShorthand}
+
+\begin{OptionTableNoShorthand}{Multiview View Position SEI message encoder parameters}{tab:sei-mvp}
+\Option{SEIMVPEnabled} &
+\Default{false} &
+Enables (true) or disables (false) the insertion of Multiview View Position SEI message.
+\\
+\Option{SEIMVPNumViewsMinus1} &
+\Default{0} &
+Specifies the number of views minus 1 in the multiview view position SEI message.
+\\
+\Option{SEIMVPViewPosition} &
+\Default{""} &
+List of the view position in the multiview view position SEI message.
 \\
 \end{OptionTableNoShorthand}
 

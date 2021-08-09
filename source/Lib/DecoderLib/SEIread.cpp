@@ -288,6 +288,12 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIMultiviewAcquisitionInfo;
       xParseSEIMultiviewAcquisitionInfo((SEIMultiviewAcquisitionInfo&) *sei, payloadSize, pDecodedMessageOutputStream );
       break;
+#if JVET_W0078_MVP_SEI 
+    case SEI::MULTIVIEW_VIEW_POSITION:
+      sei = new SEIMultiviewViewPosition;
+      xParseSEIMultiviewViewPosition((SEIMultiviewViewPosition&)*sei, payloadSize, pDecodedMessageOutputStream);
+      break;
+#endif
     case SEI::ALPHA_CHANNEL_INFO:
       sei = new SEIAlphaChannelInfo;
       xParseSEIAlphaChannelInfo((SEIAlphaChannelInfo&) *sei, payloadSize, pDecodedMessageOutputStream );
@@ -1776,6 +1782,21 @@ void SEIReader::xParseSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo& s
     }
   }
 };
+
+#if JVET_W0078_MVP_SEI
+void SEIReader::xParseSEIMultiviewViewPosition(SEIMultiviewViewPosition& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
+{
+  uint32_t val;
+  output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
+
+  sei_read_uvlc(pDecodedMessageOutputStream, val, "num_views_minus1"); sei.m_mvpNumViewsMinus1 = val;
+  sei.m_mvpViewPosition.resize(sei.m_mvpNumViewsMinus1 + 1);
+  for (int i = 0; i <= sei.m_mvpNumViewsMinus1; i++)
+  {
+    sei_read_uvlc(pDecodedMessageOutputStream, val, "view_position"); sei.m_mvpViewPosition[i] = val;
+  }
+};
+#endif
 
 void SEIReader::xParseSEIAlphaChannelInfo(SEIAlphaChannelInfo& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {

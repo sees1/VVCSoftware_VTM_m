@@ -728,6 +728,12 @@ protected:
   std::vector<uint32_t>  m_maiSEIMantissaSkewFactor;
   int               m_maiSEIPrecRotationParam;
   int               m_maiSEIPrecTranslationParam;
+#if JVET_W0078_MVP_SEI 
+  // mvp sei
+  bool              m_mvpSEIEnabled;
+  int               m_mvpSEINumViewsMinus1;
+  std::vector<uint32_t>  m_mvpSEIViewPosition;
+#endif
   // aci sei
   bool      m_aciSEIEnabled;
   bool      m_aciSEICancelFlag;
@@ -2007,6 +2013,15 @@ public:
   int      getMaiSEIPrecRotationParam() const                        { return m_maiSEIPrecRotationParam; }
   void     setMaiSEIPrecTranslationParam(int i)                      { m_maiSEIPrecTranslationParam = i; }
   int      getMaiSEIPrecTranslationParam() const                     { return m_maiSEIPrecTranslationParam; }
+#if JVET_W0078_MVP_SEI 
+  // multiview view position SEI
+  void     setMvpSEIEnabled(bool b) { m_mvpSEIEnabled = b; }
+  bool     getMvpSEIEnabled() const { return m_mvpSEIEnabled; }
+  void     setMvpSEINumViewsMinus1(int i) { m_mvpSEINumViewsMinus1 = i; }
+  int      getMvpSEINumViewsMinus1() const { return m_mvpSEINumViewsMinus1; }
+  void     setMvpSEIViewPosition(const std::vector<uint32_t>& mvpSEIViewPosition) { m_mvpSEIViewPosition = mvpSEIViewPosition; }
+  uint32_t      getMvpSEIViewPosition(int idx) const { return m_mvpSEIViewPosition[idx]; }
+#endif
   // alpha channel information SEI
   void     setAciSEIEnabled(bool b)                                  { m_aciSEIEnabled = b; }
   bool     getAciSEIEnabled() const                                  { return m_aciSEIEnabled; }

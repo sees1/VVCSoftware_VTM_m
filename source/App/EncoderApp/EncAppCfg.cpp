@@ -693,6 +693,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<bool>            cfg_maiSEISignSkewFactor           (0, 1,   0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_maiSEIExponentSkewFactor       (0, 63, 0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_maiSEIMantissaSkewFactor       (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
+#if JVET_W0078_MVP_SEI 
+  SMultiValueInput<uint32_t>        cfg_mvpSEIViewPosition             (0, 63, 0, std::numeric_limits<uint32_t>::max());
+#endif
+
   SMultiValueInput<uint32_t>        cfg_driSEINonlinearModel           (0, 31, 0, std::numeric_limits<uint32_t>::max());
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
   const int defaultLadfQpOffset[3] = { 1, 0, 1 };
@@ -1496,7 +1500,13 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIMAIMantissaSkewFactor",                        cfg_maiSEIMantissaSkewFactor, cfg_maiSEIMantissaSkewFactor, "List of the mantissa parts of the skew factor of the camera in the multiview acquisition information SEI message")
   ("SEIMAIPrecRotationParam",                         m_maiSEIPrecRotationParam,                            0, "Specifies the exponent of the maximum allowable truncation error for rotation in the multiview acquisition information SEI message")
   ("SEIMAIPrecTranslationParam",                      m_maiSEIPrecTranslationParam,                         0, "Specifies the exponent of the maximum allowable truncation error for translation in the multiview acquisition information SEI message")
-  // alpha channel information SEI
+#if JVET_W0078_MVP_SEI 
+// multiview view position SEI
+  ("SEIMVPEnabled",                                   m_mvpSEIEnabled,                                  false, "Control generation of multiview view position SEI message")
+  ("SEIMVPNumViewsMinus1",                            m_mvpSEINumViewsMinus1,                               0, "Specifies the number of views minus 1 in the multiview view postion SEI message")
+  ("SEIMVPViewPosition",                              cfg_mvpSEIViewPosition,           cfg_mvpSEIViewPosition, "List of View Positions in the multiview view postion SEI message")
+#endif
+// alpha channel information SEI
   ("SEIACIEnabled",                                   m_aciSEIEnabled,                                   false, "Control generation of alpha channel information SEI message")
   ("SEIACICancelFlag",                                m_aciSEICancelFlag,                                false, "Specifies the persistence of any previous alpha channel information SEI message in output order")
   ("SEIACIUseIdc",                                    m_aciSEIUseIdc,                                        0, "Specifies the usage of the auxiliary picture in the alpha channel information SEI message")
@@ -2727,6 +2737,17 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       }
     }
   }
+#if JVET_W0078_MVP_SEI 
+  if (m_mvpSEIEnabled)
+  {
+    int numViews = m_mvpSEINumViewsMinus1 + 1;
+    m_mvpSEIViewPosition.resize(numViews);
+    for (int i = 0; i <= m_mvpSEINumViewsMinus1; i++)
+    {
+        m_mvpSEIViewPosition[i] = cfg_mvpSEIViewPosition.values[i];
+    }
+  }
+#endif
   if ( m_driSEIEnabled )
   {
     m_driSEINonlinearModel.resize(m_driSEINonlinearNumMinus1+1);

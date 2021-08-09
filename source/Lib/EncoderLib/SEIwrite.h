@@ -75,6 +75,9 @@ protected:
   void xWriteSEIGeneralizedCubemapProjection      (const SEIGeneralizedCubemapProjection &sei);
   void xWriteSEIScalabilityDimensionInfo          (const SEIScalabilityDimensionInfo& sei);
   void xWriteSEIMultiviewAcquisitionInfo          (const SEIMultiviewAcquisitionInfo& sei);
+#if JVET_W0078_MVP_SEI 
+  void xWriteSEIMultiviewViewPosition             (const SEIMultiviewViewPosition& sei);
+#endif
   void xWriteSEIAlphaChannelInfo                  (const SEIAlphaChannelInfo& sei);
   void xWriteSEIDepthRepresentationInfo           (const SEIDepthRepresentationInfo& sei);
   void xWriteSEIDepthRepInfoElement               (double f);
