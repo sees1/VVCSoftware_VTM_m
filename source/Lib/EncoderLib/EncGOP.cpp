@@ -811,6 +811,13 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIColourTransformInfo(seiCTI);
     seiMessages.push_back(seiCTI);
   }
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  if (m_pcCfg->getConstrainedRaslencoding())
+  {
+    SEIConstrainedRaslIndication* seiConstrainedRasl = new SEIConstrainedRaslIndication;
+    seiMessages.push_back(seiConstrainedRasl);
+  }
+#endif
 }
 
 void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice)
@@ -2905,6 +2912,18 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setBiDirPred( false, -1, -1 );
     }
 
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+    if( pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL && m_pcCfg->getRprRASLtoolSwitch() )
+    {
+      pcSlice->setDisableLmChromaCheck( true );
+      if( pcSlice->isInterB() )
+      {
+        picHeader->setDmvrDisabledFlag( true );
+        xUpdateRPRtmvp( picHeader, pcSlice );
+      }
+    }
+#endif
+    
     double lambda            = 0.0;
     int actualHeadBits       = 0;
     int actualTotalBits      = 0;
@@ -5494,6 +5513,69 @@ void EncGOP::xUpdateRasInit(Slice* slice)
     m_lastRasPoc = slice->getPOC();
   }
 }
+
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+void EncGOP::xUpdateRPRtmvp( PicHeader* pcPicHeader, Slice* pcSlice )
+{
+  if( pcPicHeader->getEnableTMVPFlag() )
+  {
+    int colRefIdxL0 = -1, colRefIdxL1 = -1;
+
+    for( int refIdx = 0; refIdx < pcSlice->getNumRefIdx( REF_PIC_LIST_0 ); refIdx++ )
+    {
+      if( !( pcSlice->getRefPic( REF_PIC_LIST_0, refIdx )->slices[0]->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL &&
+            pcSlice->getRefPic( REF_PIC_LIST_0, refIdx )->poc <= m_pocCRA ) )
+      {
+        colRefIdxL0 = refIdx;
+        break;
+      }
+    }
+
+    for( int refIdx = 0; refIdx < pcSlice->getNumRefIdx( REF_PIC_LIST_1 ); refIdx++ )
+    {
+      if( !( pcSlice->getRefPic( REF_PIC_LIST_1, refIdx )->slices[0]->getNalUnitType() != NAL_UNIT_CODED_SLICE_RASL &&
+            pcSlice->getRefPic( REF_PIC_LIST_1, refIdx )->poc <= m_pocCRA ) )
+      {
+        colRefIdxL1 = refIdx;
+        break;
+      }
+    }
+
+    if( colRefIdxL0 >= 0 && colRefIdxL1 >= 0 )
+    {
+      const Picture *refPicL0 = pcSlice->getRefPic( REF_PIC_LIST_0, colRefIdxL0 );
+      const Picture *refPicL1 = pcSlice->getRefPic( REF_PIC_LIST_1, colRefIdxL1 );
+
+      CHECK( !refPicL0->slices.size(), "Wrong L0 reference picture" );
+      CHECK( !refPicL1->slices.size(), "Wrong L1 reference picture" );
+
+      const uint32_t uiColFromL0 = refPicL0->slices[0]->getSliceQp() > refPicL1->slices[0]->getSliceQp();
+      pcPicHeader->setPicColFromL0Flag( uiColFromL0 );
+      pcSlice->setColFromL0Flag(uiColFromL0);
+      pcSlice->setColRefIdx( uiColFromL0 ? colRefIdxL0 : colRefIdxL1 );
+      pcPicHeader->setColRefIdx( uiColFromL0 ? colRefIdxL0 : colRefIdxL1 );
+    }
+    else if( colRefIdxL0 < 0 && colRefIdxL1 >= 0 )
+    {
+      pcPicHeader->setPicColFromL0Flag( false );
+      pcSlice->setColFromL0Flag( false );
+      pcSlice->setColRefIdx( colRefIdxL1 );
+      pcPicHeader->setColRefIdx( colRefIdxL1 );
+    }
+    else if( colRefIdxL0 >= 0 && colRefIdxL1 < 0 )
+    {
+      pcPicHeader->setPicColFromL0Flag( true );
+      pcSlice->setColFromL0Flag( true );
+      pcSlice->setColRefIdx( colRefIdxL0 );
+      pcPicHeader->setColRefIdx( colRefIdxL0 );
+    }
+    else
+    {
+      pcPicHeader->setEnableTMVPFlag( false );
+    }
+  }
+}
+#endif
 
 double EncGOP::xCalculateRVM()
 {
