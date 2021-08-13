@@ -986,12 +986,13 @@ void DecLib::xCreateLostPicture( int iLostPoc, const int layerId )
 void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailablePoc, const bool longTermFlag, const int temporalId, const int layerId, const bool interLayerRefPicFlag )
 {
   msg(INFO, "Note: Inserting unavailable POC : %d\n", iUnavailablePoc);
-  Picture* cFillPic = xGetNewPicBuffer( *( m_parameterSetManager.getFirstSPS() ), *( m_parameterSetManager.getFirstPPS() ), 0, layerId );
+  auto const sps = m_parameterSetManager.getSPS(pps->getSPSId());
+  Picture* cFillPic = xGetNewPicBuffer( *sps, *pps, 0, layerId );
 
   cFillPic->cs = new CodingStructure( g_globalUnitCache.cuCache, g_globalUnitCache.puCache, g_globalUnitCache.tuCache );
-  cFillPic->cs->sps = m_parameterSetManager.getFirstSPS();
-  cFillPic->cs->pps = m_parameterSetManager.getFirstPPS();
-  cFillPic->cs->vps = m_parameterSetManager.getVPS(0);
+  cFillPic->cs->sps = sps;
+  cFillPic->cs->pps = pps;
+  cFillPic->cs->vps = m_parameterSetManager.getVPS(sps->getVPSId());
   cFillPic->cs->create(cFillPic->cs->sps->getChromaFormatIdc(), Area(0, 0, cFillPic->cs->pps->getPicWidthInLumaSamples(), cFillPic->cs->pps->getPicHeightInLumaSamples()), true, (bool)(cFillPic->cs->sps->getPLTMode()));
   cFillPic->allocateNewSlice();
 
@@ -1001,8 +1002,8 @@ void  DecLib::xCreateUnavailablePicture( const PPS *pps, const int iUnavailableP
   cFillPic->subLayerNonReferencePictureDueToSTSA = false;
   cFillPic->unscaledPic = cFillPic;
 
-  uint32_t yFill = 1 << (m_parameterSetManager.getFirstSPS()->getBitDepth(CHANNEL_TYPE_LUMA) - 1);
-  uint32_t cFill = 1 << (m_parameterSetManager.getFirstSPS()->getBitDepth(CHANNEL_TYPE_CHROMA) - 1);
+  uint32_t yFill = 1 << (sps->getBitDepth(CHANNEL_TYPE_LUMA) - 1);
+  uint32_t cFill = 1 << (sps->getBitDepth(CHANNEL_TYPE_CHROMA) - 1);
   cFillPic->getRecoBuf().Y().fill(yFill);
   cFillPic->getRecoBuf().Cb().fill(cFill);
   cFillPic->getRecoBuf().Cr().fill(cFill);
