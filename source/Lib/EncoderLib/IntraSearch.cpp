@@ -1735,7 +1735,11 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit &cu, Partitioner &partitioner
           chromaIntraMode = chromaCandModes[mode];
 
           cu.bdpcmModeChroma = 0;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+          if( PU::isLMCMode( chromaIntraMode ) && ( !PU::isLMCModeEnabled( pu, chromaIntraMode ) || cu.slice->getDisableLmChromaCheck() ) )
+#else
           if( PU::isLMCMode( chromaIntraMode ) && ! PU::isLMCModeEnabled( pu, chromaIntraMode ) )
+#endif
           {
             continue;
           }
