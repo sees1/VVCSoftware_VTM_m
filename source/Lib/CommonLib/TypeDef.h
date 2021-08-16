@@ -65,6 +65,8 @@
 
 #define JVET_W0046_RLSCP                                  1 // JVET-W0046: CE1.1 reverse last significant coefficient position
 
+#define JVET_W2005_RANGE_EXTENSION_PROFILES               1 // JVET-W2005 (JVET-W0136 profile plus meeting decisions)
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
@@ -684,6 +686,9 @@ namespace Profile
   enum Name
   {
     NONE                                 = 0,
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    INTRA                                = 8,
+#endif
     STILL_PICTURE                        = 64,
     MAIN_10                              = 1,
     MAIN_10_STILL_PICTURE                = MAIN_10 | STILL_PICTURE,
@@ -693,6 +698,17 @@ namespace Profile
     MAIN_10_444_STILL_PICTURE            = MAIN_10_444 | STILL_PICTURE,
     MULTILAYER_MAIN_10_444               = 49,
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    MAIN_12                              = 2,
+    MAIN_12_444                          = 34,
+    MAIN_16_444                          = 36,
+    MAIN_12_INTRA                        = MAIN_12 | INTRA,
+    MAIN_12_444_INTRA                    = MAIN_12_444 | INTRA,
+    MAIN_16_444_INTRA                    = MAIN_16_444 | INTRA,
+    MAIN_12_STILL_PICTURE                = MAIN_12 | STILL_PICTURE,
+    MAIN_12_444_STILL_PICTURE            = MAIN_12_444 | STILL_PICTURE,
+    MAIN_16_444_STILL_PICTURE            = MAIN_16_444 | STILL_PICTURE,
+#endif
   };
 }
 
