@@ -189,6 +189,9 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+  bool      m_generalLowerBitRateConstraintFlag;
+#endif
 
   // profile/level
   Profile::Name m_profile;
