@@ -2916,11 +2916,8 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     if( pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL && m_pcCfg->getRprRASLtoolSwitch() )
     {
       pcSlice->setDisableLmChromaCheck( true );
-      if( pcSlice->isInterB() )
-      {
-        picHeader->setDmvrDisabledFlag( true );
-        xUpdateRPRtmvp( picHeader, pcSlice );
-      }
+      picHeader->setDmvrDisabledFlag( true );
+      xUpdateRPRtmvp( picHeader, pcSlice );
     }
 #endif
     
