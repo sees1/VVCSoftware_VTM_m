@@ -4522,6 +4522,13 @@ void EncAppCfg::xPrintParameter()
   m_ext360.outputConfigurationSummary();
 #endif
 
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  if( m_constrainedRaslEncoding )
+  {
+    msg(VERBOSE, "\n\nWarning: with SEIConstrainedRASL enabled, LMChroma estimation is skipped in RASL frames" );
+  }
+#endif
+
   msg( VERBOSE, "\n\n");
 
   msg( NOTICE, "\n");

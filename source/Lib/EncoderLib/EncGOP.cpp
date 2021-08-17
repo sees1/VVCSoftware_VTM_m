@@ -5549,11 +5549,11 @@ void EncGOP::xUpdateRPRtmvp( PicHeader* pcPicHeader, Slice* pcSlice )
       CHECK( !refPicL0->slices.size(), "Wrong L0 reference picture" );
       CHECK( !refPicL1->slices.size(), "Wrong L1 reference picture" );
 
-      const uint32_t uiColFromL0 = refPicL0->slices[0]->getSliceQp() > refPicL1->slices[0]->getSliceQp();
-      pcPicHeader->setPicColFromL0Flag( uiColFromL0 );
-      pcSlice->setColFromL0Flag(uiColFromL0);
-      pcSlice->setColRefIdx( uiColFromL0 ? colRefIdxL0 : colRefIdxL1 );
-      pcPicHeader->setColRefIdx( uiColFromL0 ? colRefIdxL0 : colRefIdxL1 );
+      const uint32_t colFromL0 = refPicL0->slices[0]->getSliceQp() > refPicL1->slices[0]->getSliceQp();
+      pcPicHeader->setPicColFromL0Flag( colFromL0 );
+      pcSlice->setColFromL0Flag(colFromL0);
+      pcSlice->setColRefIdx( colFromL0 ? colRefIdxL0 : colRefIdxL1 );
+      pcPicHeader->setColRefIdx( colFromL0 ? colRefIdxL0 : colRefIdxL1 );
     }
     else if( colRefIdxL0 < 0 && colRefIdxL1 >= 0 )
     {
