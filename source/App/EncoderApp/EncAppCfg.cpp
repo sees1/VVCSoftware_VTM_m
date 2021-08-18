@@ -1677,8 +1677,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
     int8_t sliceType = m_GOPList[0].m_sliceType;
 
-    m_GOPList[0].m_POC = 1;
-    m_GOPList[0].m_sliceType = sliceType;
+    m_GOPList[0].m_POC = 1;    
     m_GOPList[0].m_QPOffset = 0;
     m_GOPList[0].m_QPOffsetModelOffset = 0;
     m_GOPList[0].m_QPOffsetModelScale = 0;
