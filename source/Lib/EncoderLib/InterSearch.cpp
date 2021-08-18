@@ -6394,6 +6394,8 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 
   // if (isEncodeGdrClean)
   {
+    iRefIdxBi[0] = -1;
+    iRefIdxBi[1] = -1;
     memset(mvHevcSolid, init_value, sizeof(mvHevcSolid));
 
     // note : will have Solid problem if initialize to true
@@ -7819,15 +7821,19 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
     if (isEncodeGdrClean)
     {
       PelUnitBuf     tmpBuf = m_tmpAffiStorage.getBuf(UnitAreaRelative(*pu.cu, pu));
-      const Picture *refPic0 = pu.cu->slice->getRefPic((RefPicList)REF_PIC_LIST_0, pu.refIdx[REF_PIC_LIST_0]);
-      const Picture *refPic1 = pu.cu->slice->getRefPic((RefPicList)REF_PIC_LIST_1, pu.refIdx[REF_PIC_LIST_1]);
+      const Picture *refPic0 = (pu.refIdx[REF_PIC_LIST_0] < 0) ? nullptr : pu.cu->slice->getRefPic((RefPicList)REF_PIC_LIST_0, pu.refIdx[REF_PIC_LIST_0]);
+      const Picture *refPic1 = (pu.refIdx[REF_PIC_LIST_1] < 0) ? nullptr : pu.cu->slice->getRefPic((RefPicList)REF_PIC_LIST_1, pu.refIdx[REF_PIC_LIST_1]);
 
       pu.mvAffiSolid[REF_PIC_LIST_0][0] = cMvBiSolid[REF_PIC_LIST_0][0];
       pu.mvAffiSolid[REF_PIC_LIST_0][1] = cMvBiSolid[REF_PIC_LIST_0][1];
       pu.mvAffiSolid[REF_PIC_LIST_0][2] = cMvBiSolid[REF_PIC_LIST_0][2];
 
-      bool isSubPuYYClean0 = xPredAffineBlk(COMPONENT_Y, pu, refPic0, cMvBi[0], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Y));
-      bool isSubPuCbClean0 = (isSubPuYYClean0) ? xPredAffineBlk(COMPONENT_Cb, pu, refPic0, cMvBi[0], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Cb)) : false;
+      bool isSubPuYYClean0 = false;
+      bool isSubPuCbClean0 = false;
+      if (refPic0) {
+        isSubPuYYClean0 = xPredAffineBlk(COMPONENT_Y, pu, refPic0, cMvBi[0], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Y));
+        isSubPuCbClean0 = (isSubPuYYClean0) ? xPredAffineBlk(COMPONENT_Cb, pu, refPic0, cMvBi[0], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Cb)) : false;
+      }
 
       pu.mvAffiValid[REF_PIC_LIST_0][0] = cMvBiValid[REF_PIC_LIST_0][0] = isSubPuYYClean0 && isSubPuCbClean0;
       pu.mvAffiValid[REF_PIC_LIST_0][1] = cMvBiValid[REF_PIC_LIST_0][1] = isSubPuYYClean0 && isSubPuCbClean0;
@@ -7838,8 +7844,13 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       pu.mvAffiSolid[REF_PIC_LIST_1][1] = cMvBiSolid[REF_PIC_LIST_1][1];
       pu.mvAffiSolid[REF_PIC_LIST_1][2] = cMvBiSolid[REF_PIC_LIST_1][2];
 
-      bool isSubPuYYClean1 = xPredAffineBlk(COMPONENT_Y, pu, refPic1, cMvBi[1], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Y));
-      bool isSubPuCbClean1 = (isSubPuYYClean1) ? xPredAffineBlk(COMPONENT_Cb, pu, refPic1, cMvBi[1], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Cb)) : false;
+      bool isSubPuYYClean1 = false;
+      bool isSubPuCbClean1 = false;
+      if (refPic1)
+      {
+        isSubPuYYClean1 = xPredAffineBlk(COMPONENT_Y, pu, refPic1, cMvBi[1], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Y));
+        isSubPuCbClean1 = (isSubPuYYClean1) ? xPredAffineBlk(COMPONENT_Cb, pu, refPic1, cMvBi[1], tmpBuf, false, pu.cu->slice->clpRng(COMPONENT_Cb)) : false;
+      }
 
       pu.mvAffiValid[REF_PIC_LIST_1][0] = cMvBiValid[REF_PIC_LIST_1][0] = isSubPuYYClean1 && isSubPuCbClean1;
       pu.mvAffiValid[REF_PIC_LIST_1][1] = cMvBiValid[REF_PIC_LIST_1][1] = isSubPuYYClean1 && isSubPuCbClean1;

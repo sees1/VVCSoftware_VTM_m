@@ -1675,8 +1675,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_intraQPOffset = 0;
     m_iGOPSize = 1;
 
+    int8_t sliceType = m_GOPList[0].m_sliceType;
+
     m_GOPList[0].m_POC = 1;
-    m_GOPList[0].m_sliceType = 'B';
+    m_GOPList[0].m_sliceType = sliceType;
     m_GOPList[0].m_QPOffset = 0;
     m_GOPList[0].m_QPOffsetModelOffset = 0;
     m_GOPList[0].m_QPOffsetModelScale = 0;
@@ -1698,12 +1700,15 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_GOPList[0].m_deltaRefPics0[2] = 3;
     m_GOPList[0].m_deltaRefPics0[3] = 4;
 
-    m_GOPList[0].m_numRefPicsActive1 = 4;
-    m_GOPList[0].m_numRefPics1 = 4;
-    m_GOPList[0].m_deltaRefPics1[0] = 1;
-    m_GOPList[0].m_deltaRefPics1[1] = 2;
-    m_GOPList[0].m_deltaRefPics1[2] = 3;
-    m_GOPList[0].m_deltaRefPics1[3] = 4;
+    if (sliceType == 'B')
+    {
+      m_GOPList[0].m_numRefPicsActive1 = 4;
+      m_GOPList[0].m_numRefPics1 = 4;
+      m_GOPList[0].m_deltaRefPics1[0] = 1;
+      m_GOPList[0].m_deltaRefPics1[1] = 2;
+      m_GOPList[0].m_deltaRefPics1[2] = 3;
+      m_GOPList[0].m_deltaRefPics1[3] = 4;
+    }
 
     m_BIO  = false;
     m_DMVR = false;
