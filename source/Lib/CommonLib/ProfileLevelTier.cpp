@@ -156,16 +156,19 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
     }
   }
 #if JVET_W2005_RANGE_EXTENSION_PROFILES
-  Profile::Name profile = m_pProfile->profile;
-  if (profile == Profile::MAIN_10 || profile == Profile::MAIN_10_444 ||
-      profile == Profile::MULTILAYER_MAIN_10 || profile == Profile::MULTILAYER_MAIN_10_444 ||
-      profile == Profile::MAIN_12 || profile == Profile::MAIN_12_444 || profile == Profile::MAIN_16_444)
+  if (m_pProfile)
   {
-    m_hbrFactor = 1;
-  }
-  else
-  {
-    m_hbrFactor = 2 - sps.getProfileTierLevel()->getConstraintInfo()->getLowerBitRateConstraintFlag();
+    Profile::Name profile = m_pProfile->profile;
+    if (profile == Profile::MAIN_10 || profile == Profile::MAIN_10_444 ||
+        profile == Profile::MULTILAYER_MAIN_10 || profile == Profile::MULTILAYER_MAIN_10_444 ||
+        profile == Profile::MAIN_12 || profile == Profile::MAIN_12_444 || profile == Profile::MAIN_16_444)
+    {
+      m_hbrFactor = 1;
+    }
+    else
+    {
+      m_hbrFactor = 2 - sps.getProfileTierLevel()->getConstraintInfo()->getLowerBitRateConstraintFlag();
+    }
   }
 #endif
 }
