@@ -5409,17 +5409,6 @@ void EncGOP::xCalculateInterlacedAddPSNR( Picture* pcPicOrgFirstField, Picture* 
  */
 NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
 {
-  if (pocCurr == 0)
-  {
-    return NAL_UNIT_CODED_SLICE_IDR_N_LP;
-  }
-
-  if (m_pcCfg->getEfficientFieldIRAPEnabled() && isField && pocCurr == (m_pcCfg->getUseCompositeRef() ? 2: 1))
-  {
-    // to avoid the picture becoming an IRAP
-    return NAL_UNIT_CODED_SLICE_TRAIL;
-  }
-
 #if GDR_ENABLED
   if (m_pcCfg->getGdrEnabled() && m_pcCfg->getDecodingRefreshType() == 3 && (pocCurr >= m_pcCfg->getGdrPocStart()))
   {
@@ -5431,6 +5420,17 @@ NalUnitType EncGOP::getNalUnitType(int pocCurr, int lastIDR, bool isField)
     }
   }
 #endif
+
+  if (pocCurr == 0)
+  {
+    return NAL_UNIT_CODED_SLICE_IDR_N_LP;
+  }
+
+  if (m_pcCfg->getEfficientFieldIRAPEnabled() && isField && pocCurr == (m_pcCfg->getUseCompositeRef() ? 2: 1))
+  {
+    // to avoid the picture becoming an IRAP
+    return NAL_UNIT_CODED_SLICE_TRAIL;
+  }
 
   if (m_pcCfg->getDecodingRefreshType() != 3 && (pocCurr - isField) % (m_pcCfg->getIntraPeriod() * (m_pcCfg->getUseCompositeRef() ? 2 : 1)) == 0)
   {

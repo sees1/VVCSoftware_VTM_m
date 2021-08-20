@@ -604,6 +604,13 @@ Picture* DecLib::xGetNewPicBuffer( const SPS &sps, const PPS &pps, const uint32_
       pcPic->destroy();
       pcPic->create( sps.getChromaFormatIdc(), Size( pps.getPicWidthInLumaSamples(), pps.getPicHeightInLumaSamples() ), sps.getMaxCUWidth(), sps.getMaxCUWidth() + 16, true, layerId );
     }
+#if GDR_ENABLED // picHeader should be deleted in case pcPic slot gets reused
+    if (pcPic && pcPic->cs && pcPic->cs->picHeader)
+    {          
+      delete pcPic->cs->picHeader;
+      pcPic->cs->picHeader = nullptr;    
+    }
+#endif
   }
 
   pcPic->setBorderExtension( false );
@@ -898,11 +905,7 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
   m_pcPic->destroyTempBuffers();
   m_pcPic->cs->destroyCoeffs();
   m_pcPic->cs->releaseIntermediateData();
-#if GDR_ENABLED
-  m_picHeader.initPicHeader();
-#else
   m_pcPic->cs->picHeader->initPicHeader();
-#endif
   m_puCounter++;
 }
 
@@ -2734,10 +2737,8 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   }
 
 #if GDR_ENABLED
-  PicHeader *picHeader = new PicHeader;
-  *picHeader = *m_pcPic->cs->picHeader;  
-  pcSlice->scaleRefPicList(scaledRefPic, m_pcPic->cs->picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true);
-  picHeader = m_pcPic->cs->picHeader;  
+  PicHeader *picHeader = nullptr; // picHeader is not necessary for scaledReference picture at decoder but should not share picHeader with non-scaled picture
+  pcSlice->scaleRefPicList(scaledRefPic, picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true);
 #else
   pcSlice->scaleRefPicList( scaledRefPic, m_pcPic->cs->picHeader, m_parameterSetManager.getAPSs(), m_picHeader.getLmcsAPS(), m_picHeader.getScalingListAPS(), true );
 #endif

@@ -434,6 +434,12 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
       if(m_pcCfg->getDecodingRefreshType() == 3)
       {
         eSliceType = (pocLast == 0 || pocCurr % (m_pcCfg->getIntraPeriod() * multipleFactor) == 0 || m_pcGOPEncoder->getGOPSize() == 0) && (!useIlRef) ? I_SLICE : eSliceType;
+#if GDR_ENABLED
+        if (m_pcCfg->getGdrEnabled() && (pocCurr >= m_pcCfg->getGdrPocStart()) && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
+        {
+          eSliceType = B_SLICE;
+        }
+#endif
       }
       else
       {
@@ -605,6 +611,12 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
         if(m_pcCfg->getDecodingRefreshType() == 3)
         {
           eSliceType = (pocLast == 0 || pocCurr % (m_pcCfg->getIntraPeriod() * multipleFactor) == 0 || m_pcGOPEncoder->getGOPSize() == 0) && (!useIlRef) ? I_SLICE : eSliceType;
+#if GDR_ENABLED
+          if (m_pcCfg->getGdrEnabled() && (pocCurr >= m_pcCfg->getGdrPocStart()) && ((pocCurr - m_pcCfg->getGdrPocStart()) % m_pcCfg->getGdrPeriod() == 0))
+          {
+            eSliceType = B_SLICE;
+          }
+#endif
         }
         else
         {
