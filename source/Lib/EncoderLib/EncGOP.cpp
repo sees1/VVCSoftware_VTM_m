@@ -2043,10 +2043,6 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
     {
       picHeader->setLmcsChromaResidualScaleFlag(false);
     }
-    else 
-    {
-      picHeader->setLmcsChromaResidualScaleFlag(true);
-    }    
 #endif
 
     if (m_pcReshaper->getSliceReshaperInfo().getSliceReshapeModelPresentFlag())
@@ -3187,10 +3183,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         if (cs.sps->getGDREnabledFlag() && picHeader->getInGdrInterval())
         {
           picHeader->setLmcsChromaResidualScaleFlag(false);
-        }
-        else
-        {
-          picHeader->setLmcsChromaResidualScaleFlag(true);
         }
 #endif
         int apsId = std::min<int>(3, m_pcEncLib->getVPS() == nullptr ? 0 : m_pcEncLib->getVPS()->getGeneralLayerIdx(m_pcEncLib->getLayerId()));
