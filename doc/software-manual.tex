@@ -3569,6 +3569,7 @@ The table below lists the SEI messages defined for Version 1 and Range-Extension
   203 & Subpicture Level Information             & Table \ref{tab:sei-subpic-level} \\  
   204 & Sample Aspect Ratio Information          & Table \ref{tab:sei-sari} \\  
   205 & Scalability Dimension Information        & Table \ref{tab:sei-sdi} \\
+  207 & Constrained RASL encoding                & Table \ref{tab:sei-constrained-rasl-encoding} \\
 \end{SEIListTable}
 %%
 %% SEI messages
@@ -5055,6 +5056,13 @@ specifies the CCV avg luminance value in the content colour volume SEI message.
 \\
 \end{OptionTableNoShorthand}
 
+
+\begin{OptionTableNoShorthand}{Constrained RASL encoding for bitstream switching}{tab:sei-constrained-rasl-encoding}
+\Option{SEIConstrainedRASL} &
+\Default{false} &
+When true (non-zero), the SEI enables several restrictions for encoding RASL frames: CCLM estimation is skipped in intra search, TMVP is disabled and PH syntax ph_dmvr_disabled_flag is set to 1.
+\\
+\end{OptionTableNoShorthand}
 
 
 

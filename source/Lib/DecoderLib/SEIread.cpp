@@ -328,6 +328,12 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIColourTransformInfo;
       xParseSEIColourTransformInfo((SEIColourTransformInfo&)*sei, payloadSize, pDecodedMessageOutputStream);
       break;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+    case SEI::CONSTRAINED_RASL_ENCODING:
+      sei = new SEIConstrainedRaslIndication;
+      xParseSEIConstrainedRaslIndication((SEIConstrainedRaslIndication&) *sei, payloadSize, pDecodedMessageOutputStream);
+      break;
+#endif
     default:
       for (uint32_t i = 0; i < payloadSize; i++)
       {
@@ -2005,6 +2011,13 @@ void SEIReader::xParseSEIExtendedDrapIndication(SEIExtendedDrapIndication& sei, 
     sei.m_edrapIndicationRefRapId[i] = val;
   }
 }
+
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+void SEIReader::xParseSEIConstrainedRaslIndication( SEIConstrainedRaslIndication& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream )
+{
+  output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
+}
+#endif
 
 #if JVET_S0257_DUMP_360SEI_MESSAGE
 void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps)

@@ -1556,7 +1556,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIDRIDisparityRefViewId",                        m_driSEIDisparityRefViewId,                            0, "Specifies the ViewId value against which the disparity values are derived in the depth representation information SEI message")
   ("SEIDRINonlinearNumMinus1",                        m_driSEINonlinearNumMinus1,                            0, "Specifies the number of piece-wise linear segments minus 2 for mapping of depth values to a scale that is uniformly quantized in terms of disparity  in the depth representation information SEI message")
   ("SEIDRINonlinearModel",                            cfg_driSEINonlinearModel,       cfg_driSEINonlinearModel, "List of the piece-wise linear segments for mapping of decoded luma sample values of an auxiliary picture to a scale that is uniformly quantized in terms of disparity in the depth representation information SEI message")
-
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  ("SEIConstrainedRASL",                              m_constrainedRaslEncoding,                         false, "Control generation of constrained RASL encoding SEI message")
+#endif
+  
   ("DebugBitstream",                                  m_decodeBitstreams[0],             string( "" ), "Assume the frames up to POC DebugPOC will be the same as in this bitstream. Load those frames from the bitstream instead of encoding them." )
   ("DebugPOC",                                        m_switchPOC,                                 -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC, return to normal encoding." )
   ("DecodeBitstream1",                                m_decodeBitstreams[0],             string( "" ), "Assume the frames up to POC DebugPOC will be the same as in this bitstream. Load those frames from the bitstream instead of encoding them." )
@@ -1648,6 +1651,20 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   m_resChangeInClvsEnabled = m_scalingRatioHor != 1.0 || m_scalingRatioVer != 1.0;
   m_resChangeInClvsEnabled = m_resChangeInClvsEnabled && m_rprEnabledFlag;
+  
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  if( m_constrainedRaslEncoding )
+  {
+    m_craAPSreset            = true;
+    m_rprRASLtoolSwitch      = true;
+  }
+  else
+  {
+    m_craAPSreset            = false;
+    m_rprRASLtoolSwitch      = false;
+  }
+#endif
+  
   if( m_fractionOfFrames != 1.0 )
   {
     m_framesToBeEncoded = int( m_framesToBeEncoded * m_fractionOfFrames );
@@ -4627,6 +4644,13 @@ void EncAppCfg::xPrintParameter()
   msg(VERBOSE, "SEI CTI:%d ", m_ctiSEIEnabled);
 #if EXTENSION_360_VIDEO
   m_ext360.outputConfigurationSummary();
+#endif
+
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  if( m_constrainedRaslEncoding )
+  {
+    msg(VERBOSE, "\n\nWarning: with SEIConstrainedRASL enabled, LMChroma estimation is skipped in RASL frames" );
+  }
 #endif
 
   msg( VERBOSE, "\n\n");

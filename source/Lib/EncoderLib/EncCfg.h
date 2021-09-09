@@ -756,6 +756,10 @@ protected:
   int       m_driSEINonlinearNumMinus1;
   std::vector<uint32_t> m_driSEINonlinearModel;
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  bool      m_constrainedRaslEncoding;
+#endif
+
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
   bool      m_useWeightedBiPred;    //< Use of Bi-directional Weighting Prediction (B_SLICE)
@@ -887,6 +891,10 @@ protected:
   int         m_upscaledOutput;
   int         m_numRefLayers[MAX_VPS_LAYERS];
   bool        m_avoidIntraInDepLayer;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  bool        m_craAPSreset;
+  bool        m_rprRASLtoolSwitch;
+#endif
 
 public:
   EncCfg()
@@ -2059,6 +2067,15 @@ public:
   int      getDriSEINonlinearNumMinus1() const                       { return m_driSEINonlinearNumMinus1; }
   void     setDriSEINonlinearModel(const std::vector<uint32_t>& driSEINonLinearModel) { m_driSEINonlinearModel = driSEINonLinearModel; }
   uint32_t getDriSEINonlinearModel(int idx) const                                                    { return m_driSEINonlinearModel[idx]; }
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  void     setConstrainedRaslencoding(bool b)                        { m_constrainedRaslEncoding = b; }
+  bool     getConstrainedRaslencoding()                              { return m_constrainedRaslEncoding; }
+  void     setCraAPSreset(bool b)                                    { m_craAPSreset = b; }
+  bool     getCraAPSreset()                                    const { return m_craAPSreset; }
+  void     setRprRASLtoolSwitch(bool b)                              { m_rprRASLtoolSwitch = b; }
+  bool     getRprRASLtoolSwitch()                                    { return m_rprRASLtoolSwitch; }
+#endif
+
   void         setUseWP               ( bool b )                     { m_useWeightedPred   = b;    }
   void         setWPBiPred            ( bool b )                     { m_useWeightedBiPred = b;    }
   bool         getUseWP               ()                             { return m_useWeightedPred;   }

@@ -82,6 +82,9 @@ Slice::Slice()
 , m_pendingRasInit                ( false )
 , m_bCheckLDC                     ( false )
 , m_biDirPred                    ( false )
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+, m_lmChromaCheckDisable          ( false )
+#endif
 , m_iSliceQpDelta                 ( 0 )
 , m_iDepth                        ( 0 )
 , m_pcSPS                         ( NULL )
@@ -184,6 +187,9 @@ void Slice::initSlice()
   m_bCheckLDC = false;
 
   m_biDirPred = false;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  m_lmChromaCheckDisable = false;
+#endif
   m_symRefIdx[0] = -1;
   m_symRefIdx[1] = -1;
 
@@ -941,6 +947,9 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_iSliceQpDelta        = pSrc->m_iSliceQpDelta;
 
   m_biDirPred = pSrc->m_biDirPred;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  m_lmChromaCheckDisable = pSrc->m_lmChromaCheckDisable;;
+#endif
   m_symRefIdx[0] = pSrc->m_symRefIdx[0];
   m_symRefIdx[1] = pSrc->m_symRefIdx[1];
 

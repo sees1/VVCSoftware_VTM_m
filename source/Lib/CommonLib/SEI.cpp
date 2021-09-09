@@ -453,6 +453,9 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::ANNOTATED_REGIONS:                    return "Annotated Region";
     case SEI::SCALABILITY_DIMENSION_INFO:           return "Scalability dimension information";
     case SEI::EXTENDED_DRAP_INDICATION:             return "Extended DRAP indication";
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+    case SEI::CONSTRAINED_RASL_ENCODING:            return "Constrained RASL encoding";
+#endif
     default:                                        return "Unknown";
   }
 }

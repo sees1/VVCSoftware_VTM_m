@@ -1121,6 +1121,11 @@ void EncApp::xInitLibCfg()
   {
     m_cEncLib.setScalingMatrixDesignatedColourSpace(m_scalingMatrixDesignatedColourSpace);
   }
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  m_cEncLib.setConstrainedRaslencoding                           ( m_constrainedRaslEncoding );
+  m_cEncLib.setCraAPSreset                                       ( m_craAPSreset );
+  m_cEncLib.setRprRASLtoolSwitch                                 ( m_rprRASLtoolSwitch );
+#endif
   m_cEncLib.setDepQuantEnabledFlag                               ( m_depQuantEnabledFlag);
   m_cEncLib.setSignDataHidingEnabledFlag                         ( m_signDataHidingEnabledFlag);
   m_cEncLib.setUseRateCtrl                                       ( m_RCEnableRateControl );

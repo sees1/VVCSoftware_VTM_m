@@ -2682,6 +2682,9 @@ private:
   bool                       m_bCheckLDC;
 
   bool                       m_biDirPred;
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  bool                       m_lmChromaCheckDisable;
+#endif
   int                        m_symRefIdx[2];
 
   //  Data
@@ -2894,6 +2897,10 @@ public:
 
   void                        setBiDirPred( bool b, int refIdx0, int refIdx1 ) { m_biDirPred = b; m_symRefIdx[0] = refIdx0; m_symRefIdx[1] = refIdx1; }
   bool                        getBiDirPred() const { return m_biDirPred; }
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  void                        setDisableLmChromaCheck( bool b )  { m_lmChromaCheckDisable = b; }
+  bool                        getDisableLmChromaCheck() const { return m_lmChromaCheckDisable; }
+#endif
   int                         getSymRefIdx( int refList ) const { return m_symRefIdx[refList]; }
 
   bool                        isIntra() const                                        { return m_eSliceType == I_SLICE;                               }
