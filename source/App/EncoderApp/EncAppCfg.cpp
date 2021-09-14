@@ -2744,7 +2744,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_mvpSEIViewPosition.resize(numViews);
     for (int i = 0; i <= m_mvpSEINumViewsMinus1; i++)
     {
-        m_mvpSEIViewPosition[i] = cfg_mvpSEIViewPosition.values[i];
+      m_mvpSEIViewPosition[i] = cfg_mvpSEIViewPosition.values[i];
     }
   }
 #endif

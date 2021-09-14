@@ -2169,6 +2169,8 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
     m_sdiSEIInFirstAU = NULL;
     m_maiSEIInFirstAU = NULL;
 #if JVET_W0078_MVP_SEI 
+    if (m_mvpSEIInFirstAU != NULL)
+      delete m_mvpSEIInFirstAU;
     m_mvpSEIInFirstAU = NULL;
 #endif
     SEIMessages sdiSEIs  = getSeisByType(prefixSEIs, SEI::SCALABILITY_DIMENSION_INFO);
