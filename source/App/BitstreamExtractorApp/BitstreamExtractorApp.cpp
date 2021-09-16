@@ -951,7 +951,12 @@ uint32_t BitstreamExtractorApp::decode()
             // remove unqualified timing related SEI
             if (sei->payloadType() == SEI::BUFFERING_PERIOD || (m_removeTimingSEI && sei->payloadType() == SEI::PICTURE_TIMING) || sei->payloadType() == SEI::DECODING_UNIT_INFO || sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
             {
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
               writeInpuNalUnitToStream &= targetOlsIncludeAllVclLayers;
+#else
+              bool targetOlsIdxGreaterThanZero = m_targetOlsIdx > 0;
+              writeInpuNalUnitToStream &= !targetOlsIdxGreaterThanZero;
+#endif
             }
           }
 #if !JVET_S0154_ASPECT9_AND_S0158_ASPECT4
