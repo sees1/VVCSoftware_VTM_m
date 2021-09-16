@@ -292,6 +292,47 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
   conf.setWindowRightOffset(subpicConfWinRightOffset);
   conf.setWindowTopOffset(subpicConfWinTopOffset);
   conf.setWindowBottomOffset(subpicConfWinBottomOffset);
+
+#if JVET_S0117_VB  // Virtual boundaries rewriting
+  if (sourceSPS.getVirtualBoundariesEnabledFlag() && sourceSPS.getVirtualBoundariesPresentFlag())
+  { 
+    targetSPS.setNumVerVirtualBoundaries(0);
+    for (int i = 0; i < sourceSPS.getNumVerVirtualBoundaries() ; i ++)
+    {
+      int subPicLeftX = subPic.getSubPicCtuTopLeftX() * sourceSPS.getCTUSize();
+      int subPicRightX = (subPic.getSubPicCtuTopLeftX() + subPic.getSubPicWidthInCTUs()) * sourceSPS.getCTUSize();
+      if (subPicRightX > sourceSPS.getMaxPicWidthInLumaSamples())
+      {
+        subPicRightX = sourceSPS.getMaxPicWidthInLumaSamples();
+      }
+      if ( sourceSPS.getVirtualBoundariesPosX(i) > subPicLeftX && sourceSPS.getVirtualBoundariesPosX(i) < subPicRightX)
+      {
+        targetSPS.setVirtualBoundariesPosX(targetSPS.getNumVerVirtualBoundaries(), sourceSPS.getVirtualBoundariesPosX(i) - subPicLeftX);
+        targetSPS.setNumVerVirtualBoundaries(targetSPS.getNumVerVirtualBoundaries() + 1);
+      }
+    }
+
+    targetSPS.setNumHorVirtualBoundaries(0);
+    for (int i = 0; i < sourceSPS.getNumHorVirtualBoundaries(); i++)
+    {
+      int subPicTopY = subPic.getSubPicCtuTopLeftY() * sourceSPS.getCTUSize();
+      int subPicBottomY = (subPic.getSubPicCtuTopLeftY() + subPic.getSubPicHeightInCTUs()) * sourceSPS.getCTUSize();
+      if (subPicBottomY > sourceSPS.getMaxPicHeightInLumaSamples())
+      {
+        subPicBottomY = sourceSPS.getMaxPicHeightInLumaSamples();
+      }
+      if (sourceSPS.getVirtualBoundariesPosY(i) > subPicTopY && sourceSPS.getVirtualBoundariesPosY(i) < subPicBottomY)
+      {
+        targetSPS.setVirtualBoundariesPosY(targetSPS.getNumHorVirtualBoundaries(), sourceSPS.getVirtualBoundariesPosY(i) - subPicTopY);
+        targetSPS.setNumHorVirtualBoundaries(targetSPS.getNumHorVirtualBoundaries() + 1);
+      }
+    }
+    if (targetSPS.getNumVerVirtualBoundaries() == 0 && targetSPS.getNumHorVirtualBoundaries() == 0)
+    {
+      targetSPS.setVirtualBoundariesEnabledFlag(0);
+    }
+  }
+#endif
 }
 
 void BitstreamExtractorApp::xRewritePPS(PPS &targetPPS, const PPS &sourcePPS, const SPS &sourceSPS, SubPic &subPic)
@@ -307,7 +348,7 @@ void BitstreamExtractorApp::xRewritePPS(PPS &targetPPS, const PPS &sourcePPS, co
   // picture size
   targetPPS.setPicWidthInLumaSamples(subPic.getSubPicWidthInLumaSample());
   targetPPS.setPicHeightInLumaSamples(subPic.getSubPicHeightInLumaSample());
-  // todo: Conformance window
+  // todo: Conformance window (conf window rewriting is not needed per JVET-S0117)
 
   int subWidthC = SPS::getWinUnitX(sourceSPS.getChromaFormatIdc());
   int subHeightC = SPS::getWinUnitY(sourceSPS.getChromaFormatIdc());
