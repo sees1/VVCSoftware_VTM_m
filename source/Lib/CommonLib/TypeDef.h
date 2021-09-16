@@ -69,6 +69,10 @@
 
 #define JVET_W2005_RANGE_EXTENSION_PROFILES               1 // JVET-W2005 (JVET-W0136 profile plus meeting decisions)
 
+#define JVET_S0154_ASPECT9_AND_S0158_ASPECT4              1 // JVET-S0154 #9:  In the subpicture sub-bitstream extraction process, insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
+                                                            // JVET-S0158 #4c: Insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
+
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
