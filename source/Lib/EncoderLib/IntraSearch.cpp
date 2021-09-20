@@ -4550,7 +4550,7 @@ bool IntraSearch::xRecurIntraCodingACTQT(CodingStructure &cs, Partitioner &parti
     for (int modeIndex = firstCheckId; sps.getUseLFNST() || modeIndex < trModes.size(); modeIndex++)
     {
       const int modeId = sps.getUseLFNST() ? modeIndex : trModes[modeIndex].first;
-      if (modeId > (lossless ? (nNumTransformCands - 1) : lastCheckId))
+      if (modeId > lastCheckId)
       {
         break;
       }
