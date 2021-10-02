@@ -948,7 +948,7 @@ bool VideoIOYuv::read ( PelUnitBuf& pic, PelUnitBuf& picOrg, const InputColourSp
 
     if (processComponent)
     {
-      if (! verifyPlane( dst, stride444, width444, height444, pad_h444, pad_v444, compID, format, m_fileBitdepth[chType]) )
+      if (! verifyPlane( dst, stride444, width444, height444, pad_h444, pad_v444, compID, picOrg.chromaFormat, m_fileBitdepth[chType]) )
       {
          EXIT("Source image contains values outside the specified bit range!");
       }
