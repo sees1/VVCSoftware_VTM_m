@@ -53,6 +53,8 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+#define BUG_FIX_TICKET_1512  1
+
 #define JVET_W0133_CONSTRAINED_RASL_ENCODING              1 // SEI message for Constrained RASL encoding for bitstream switching
 
 #define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
