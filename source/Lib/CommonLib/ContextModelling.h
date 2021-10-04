@@ -176,29 +176,23 @@ public:
       {
         sum += abs(pData[2]);
       }
-#if BUG_FIX_TICKET_1512
       else
       {
         sum += m_histValue;
       }
-#endif
       if (posY < m_height - 1)
       {
         sum += abs(pData[m_width + 1]);
       }
-#if BUG_FIX_TICKET_1512
       else
       {
         sum += m_histValue;
       }
-#endif
     }
-#if BUG_FIX_TICKET_1512
     else
     {
       sum += 2 * m_histValue;
     }
-#endif
 
     if (posY < m_height - 1)
     {
@@ -207,19 +201,15 @@ public:
       {
         sum += abs(pData[m_width << 1]);
       }
-#if BUG_FIX_TICKET_1512
       else
       {
         sum += m_histValue;
       }
-#endif
     }
-#if BUG_FIX_TICKET_1512
     else
     {
       sum += m_histValue;
     }
-#endif
     return unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
   }
 
