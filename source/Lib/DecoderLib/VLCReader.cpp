@@ -443,6 +443,7 @@ void HLSyntaxReader::parsePPS( PPS* pcPPS )
     READ_UVLC(uiCode, "pps_conf_win_bottom_offset");             conf.setWindowBottomOffset(uiCode);
   }
   READ_FLAG( uiCode, "pps_scaling_window_explicit_signalling_flag" );
+  pcPPS->setExplicitScalingWindowFlag( uiCode );
   if( uiCode != 0 )
   {
     Window &scalingWindow = pcPPS->getScalingWindow();
@@ -2765,7 +2766,12 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     pps->getConformanceWindow().setWindowRightOffset(sps->getConformanceWindow().getWindowRightOffset());
     pps->getConformanceWindow().setWindowTopOffset(sps->getConformanceWindow().getWindowTopOffset());
     pps->getConformanceWindow().setWindowBottomOffset(sps->getConformanceWindow().getWindowBottomOffset());
+    if (!pps->getExplicitScalingWindowFlag())
+    {
+      pps->setScalingWindow(pps->getConformanceWindow());
+    }
   }
+  CHECK(!sps->getRprEnabledFlag() && pps->getExplicitScalingWindowFlag(), "When sps_ref_pic_resampling_enabled_flag is equal to 0, the value of pps_scaling_window_explicit_signalling_flag shall be equal to 0");
 
   // initialize tile/slice info for no partitioning case
 

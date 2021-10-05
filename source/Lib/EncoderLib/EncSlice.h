@@ -118,7 +118,7 @@ public:
 
   /// preparation of slice encoding (reference marking, QP and lambda)
   void    initEncSlice        ( Picture*  pcPic, const int pocLast, const int pocCurr,
-                                const int iGOPid, Slice*& rpcSlice, const bool isField, bool isEncodeLtRef, int layerId );
+                                const int iGOPid, Slice*& rpcSlice, const bool isField, bool isEncodeLtRef, int layerId, NalUnitType nalType );
 
   void    resetQP             ( Picture* pic, int sliceQP, double lambda );
 
