@@ -3364,6 +3364,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           pcPic->slices[s]->m_ccAlfFilterControl[1] = m_pcALF->getCcAlfControlIdc(COMPONENT_Cr);
         }
       }
+      else if (!layerIdx && (cs.slice->getPendingRasInit() || cs.slice->isIDRorBLA()))
+      {
+        m_pcALF->setApsIdStart(ALF_CTB_MAX_NUM_APS);
+      }
       DTRACE_UPDATE( g_trace_ctx, ( std::make_pair( "final", 1 ) ) );
       if (m_pcCfg->getUseCompositeRef() && getPrepareLTRef())
       {
