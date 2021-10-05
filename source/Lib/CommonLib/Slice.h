@@ -2023,6 +2023,7 @@ private:
   uint32_t         m_picWidthInLumaSamples;
   uint32_t         m_picHeightInLumaSamples;
   Window           m_conformanceWindow;
+  bool             m_explicitScalingWindowFlag;
   Window           m_scalingWindow;
 
   bool             m_wrapAroundEnabledFlag;               //< reference wrap around enabled or not
@@ -2265,6 +2266,8 @@ public:
   const Window&           getConformanceWindow() const                                    { return  m_conformanceWindow; }
   void                    setConformanceWindow( Window& conformanceWindow )               { m_conformanceWindow = conformanceWindow; }
 
+  void                    setExplicitScalingWindowFlag(bool flag)                         { m_explicitScalingWindowFlag = flag; }
+  bool                    getExplicitScalingWindowFlag() const                            { return m_explicitScalingWindowFlag; }
   Window&                 getScalingWindow()                                              { return  m_scalingWindow; }
   const Window&           getScalingWindow()                                        const { return  m_scalingWindow; }
   void                    setScalingWindow( Window& scalingWindow )                       { m_scalingWindow = scalingWindow; }

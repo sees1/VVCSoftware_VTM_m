@@ -196,6 +196,10 @@ void EncLib::init(AUWriterIf *auWriterIf)
     pps0.setConformanceWindow( m_conformanceWindow );
     pps0.setConformanceWindowFlag( m_conformanceWindow.getWindowEnabledFlag() );
   }
+  if (!pps0.getExplicitScalingWindowFlag())
+  {
+    pps0.setScalingWindow(pps0.getConformanceWindow());
+  }
   xInitPPS(pps0, sps0);
   // initialize APS
   xInitRPL(sps0);
@@ -232,6 +236,7 @@ void EncLib::init(AUWriterIf *auWriterIf)
     Window scalingWindow;
     scalingWindow.setWindow( 0, ( width - scaledWidth ) / SPS::getWinUnitX( sps0.getChromaFormatIdc() ), 0, ( height - scaledHeight ) / SPS::getWinUnitY( sps0.getChromaFormatIdc() ) );
     pps.setScalingWindow( scalingWindow );
+    pps.setExplicitScalingWindowFlag(scalingWindow.getWindowEnabledFlag());
 
     //register the width/height of the current pic into reference SPS
     if (!sps0.getPPSValidFlag(pps.getPPSId()))

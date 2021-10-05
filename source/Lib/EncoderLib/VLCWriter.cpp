@@ -284,9 +284,8 @@ void HLSWriter::codePPS( const PPS* pcPPS )
     WRITE_UVLC(conf.getWindowBottomOffset(), "pps_conf_win_bottom_offset");
   }
   Window scalingWindow = pcPPS->getScalingWindow();
-
-  WRITE_FLAG( scalingWindow.getWindowEnabledFlag(), "pps_scaling_window_explicit_signalling_flag" );
-  if( scalingWindow.getWindowEnabledFlag() )
+  WRITE_FLAG( pcPPS->getExplicitScalingWindowFlag(), "pps_scaling_window_explicit_signalling_flag");
+  if ( pcPPS->getExplicitScalingWindowFlag() )
   {
     WRITE_SVLC( scalingWindow.getWindowLeftOffset(), "pps_scaling_win_left_offset" );
     WRITE_SVLC( scalingWindow.getWindowRightOffset(), "pps_scaling_win_right_offset" );
