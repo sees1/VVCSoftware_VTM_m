@@ -2247,6 +2247,12 @@ int EncCfg::getQPForPicture(const uint32_t gopIndex, const Slice *pSlice) const
     }
     else
     {
+      if (pSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_N_LP || pSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA)
+      {
+        qp += getIntraQPOffset();
+      }
+      else
+      {
         const GOPEntry &gopEntry=getGOPEntry(gopIndex);
         // adjust QP according to the QP offset for the GOP entry.
         qp +=gopEntry.m_QPOffset;
@@ -2256,6 +2262,7 @@ int EncCfg::getQPForPicture(const uint32_t gopIndex, const Slice *pSlice) const
         int qpOffset = (int)floor(Clip3<double>(0.0, 3.0, dqpOffset));
         qp += qpOffset ;
       }
+    }
 
 #if !QP_SWITCHING_FOR_PARALLEL
     // modify QP if a fractional QP was originally specified, cause dQPs to be 0 or 1.

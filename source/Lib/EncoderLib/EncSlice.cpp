@@ -328,7 +328,7 @@ static int applyQPAdaptationChroma (Picture* const pcPic, Slice* const pcSlice, 
  \param isField       true for field coding
  */
 void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr, const int iGOPid, Slice*& rpcSlice, const bool isField,
-                            bool isEncodeLtRef, int layerId)
+                            bool isEncodeLtRef, int layerId, NalUnitType nalType)
 {
   double dQP;
   double dLambda;
@@ -472,6 +472,7 @@ void EncSlice::initEncSlice(Picture* pcPic, const int pocLast, const int pocCurr
   // ------------------------------------------------------------------------------------------------------------------
 
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
+  rpcSlice->setNalUnitType(nalType);
   dQP = m_pcCfg->getQPForPicture(iGOPid, rpcSlice);
 #else
   dQP = m_pcCfg->getBaseQP();
