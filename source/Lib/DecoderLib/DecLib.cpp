@@ -492,7 +492,13 @@ DecLib::~DecLib()
     delete m_prefixSEINALUs.front();
     m_prefixSEINALUs.pop_front();
   }
-
+#if JVET_W0078_MVP_SEI 
+  if (m_mvpSEIInFirstAU != NULL)
+  {
+    delete m_mvpSEIInFirstAU;
+  }
+  m_mvpSEIInFirstAU = NULL;
+#endif
 }
 
 void DecLib::create()
@@ -2169,8 +2175,10 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
     m_sdiSEIInFirstAU = NULL;
     m_maiSEIInFirstAU = NULL;
 #if JVET_W0078_MVP_SEI 
-    if (m_mvpSEIInFirstAU != NULL)
+    if (m_mvpSEIInFirstAU != NULL) 
+    {
       delete m_mvpSEIInFirstAU;
+    }
     m_mvpSEIInFirstAU = NULL;
 #endif
     SEIMessages sdiSEIs  = getSeisByType(prefixSEIs, SEI::SCALABILITY_DIMENSION_INFO);
