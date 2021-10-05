@@ -55,6 +55,8 @@
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_W0133_CONSTRAINED_RASL_ENCODING              1 // SEI message for Constrained RASL encoding for bitstream switching
 
+#define JVET_W0078_MVP_SEI                                1 // JVET-W0078 Multiview view position SEI message
+
 #define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
 
 #define JVET_W0134_UNIFORM_METRICS_LOG                    1 // change metrics output for easy parsing

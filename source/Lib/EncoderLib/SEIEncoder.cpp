@@ -958,6 +958,22 @@ void SEIEncoder::initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *se
   }
 }
 
+#if JVET_W0078_MVP_SEI 
+void SEIEncoder::initSEIMultiviewViewPosition(SEIMultiviewViewPosition *sei)
+{
+  CHECK(!(m_isInitialized), "Multiview view position SEI already initialized");
+  CHECK(!(sei != NULL), "Need a seiMultiviewViewPosition for initialization (got nullptr)");
+  sei->m_mvpNumViewsMinus1 = m_pcCfg->getMvpSEINumViewsMinus1();
+
+  int numViews = sei->m_mvpNumViewsMinus1 + 1;
+  sei->m_mvpViewPosition.resize(numViews);
+  for (int i = 0; i <= sei->m_mvpNumViewsMinus1; i++)
+  {
+    sei->m_mvpViewPosition[i] = m_pcCfg->getMvpSEIViewPosition(i);
+  }
+}
+#endif
+
 void SEIEncoder::initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei)
 {
   CHECK(!(m_isInitialized), "Alpha channel information SEI already initialized");

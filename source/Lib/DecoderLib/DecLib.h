@@ -97,7 +97,9 @@ private:
   SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices, excluding prefix SEIs...
   SEIScalabilityDimensionInfo* m_sdiSEIInFirstAU;
   SEIMultiviewAcquisitionInfo* m_maiSEIInFirstAU;
-
+#if JVET_W0078_MVP_SEI 
+  SEIMultiviewViewPosition*    m_mvpSEIInFirstAU;
+#endif
 
   // functional classes
   IntraPrediction         m_cIntraPred;
