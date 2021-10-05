@@ -111,6 +111,7 @@ EncAppCfg::~EncAppCfg()
 
 #if ENABLE_TRACING
   tracing_uninit(g_trace_ctx);
+  g_trace_ctx = nullptr;
 #endif
 }
 
