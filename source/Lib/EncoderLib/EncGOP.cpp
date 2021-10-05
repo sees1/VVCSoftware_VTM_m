@@ -6092,6 +6092,8 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   static_vector<int, MAX_NUM_REF_PICS> higherTLayerRefs;
 
   higherTLayerRefs.resize(0);
+  static_vector<int, MAX_NUM_REF_PICS> inactiveRefs;
+  inactiveRefs.resize(0);
   if (isIntraLayerPredAllowed)
   {
     for (int ii = 0; ii < numOfRefPic; ii++)
@@ -6133,6 +6135,10 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         {
           higherTLayerRefs.push_back(ii);
         }
+        else if (refPicIdxL0 >= rpl1->getNumberOfActivePictures() && layerIdx && vps && !vps->getAllIndependentLayersFlag() && isInterLayerPredAllowed)
+        {
+          inactiveRefs.push_back(ii);
+        }
         else
         {
           pLocalRPL0->setRefPicIdentifier(refPicIdxL0, rpl0->getRefPicIdentifier(ii), rpl0->isRefPicLongterm(ii), false,
@@ -6169,6 +6175,16 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         }
       }
     }
+  }
+  // now add inactive refs
+  for (int i = 0; i < inactiveRefs.size(); i++)
+  {
+    const int ii = inactiveRefs[i];
+    pLocalRPL0->setRefPicIdentifier(refPicIdxL0, rpl0->getRefPicIdentifier(ii), rpl0->isRefPicLongterm(ii), false,
+      NOT_VALID);
+    refPicIdxL0++;
+    numOfSTRPL0 = numOfSTRPL0 + ((rpl0->isRefPicLongterm(ii)) ? 0 : 1);
+    numOfLTRPL0 += (rpl0->isRefPicLongterm(ii) && !rpl0->isInterLayerRefPic(ii)) ? 1 : 0;
   }
 
   if( slice->getEnableDRAPSEI() )
@@ -6246,6 +6262,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   uint32_t refPicIdxL1 = 0;
 
   higherTLayerRefs.resize(0);
+  inactiveRefs.resize(0);
   if (isIntraLayerPredAllowed)
   {
     for (int ii = 0; ii < numOfRefPic; ii++)
@@ -6283,6 +6300,10 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         if (hasHigherTId)
         {
           higherTLayerRefs.push_back(ii);
+        }
+        else if (refPicIdxL1 >= rpl1->getNumberOfActivePictures() && layerIdx && vps && !vps->getAllIndependentLayersFlag() && isInterLayerPredAllowed)
+        {
+          inactiveRefs.push_back(ii);
         }
         else
         {
@@ -6323,6 +6344,15 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
     }
   }
 
+  for (int i = 0; i < inactiveRefs.size(); i++)
+  {
+    const int ii = inactiveRefs[i];
+    pLocalRPL1->setRefPicIdentifier(refPicIdxL1, rpl1->getRefPicIdentifier(ii), rpl1->isRefPicLongterm(ii), false,
+                                    NOT_VALID);
+    refPicIdxL1++;
+    numOfSTRPL1 = numOfSTRPL1 + ((rpl1->isRefPicLongterm(ii)) ? 0 : 1);
+    numOfLTRPL1 += (rpl1->isRefPicLongterm(ii) && !rpl1->isInterLayerRefPic(ii)) ? 1 : 0;
+  }
   // now add higher TId refs
   for (int i = 0; i < higherTLayerRefs.size(); i++)
   {
@@ -6383,7 +6413,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   *slice->getRPL0() = localRPL0;
 
   //Copy from L0 if we have less than active ref pic
-  numOfNeedToFill = pLocalRPL0->getNumberOfActivePictures() - ( numOfLTRPL1 + numOfSTRPL1 );
+  numOfNeedToFill = pLocalRPL0->getNumberOfActivePictures() - ( numOfLTRPL1 + numOfSTRPL1 ) - numOfILRPL0;
 
   for( int ii = 0; numOfNeedToFill > 0 && ii < ( pLocalRPL0->getNumberOfLongtermPictures() + pLocalRPL0->getNumberOfShorttermPictures() + pLocalRPL0->getNumberOfInterLayerPictures() ); ii++ )
   {
@@ -6411,7 +6441,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
         refPicIdxL1++;
         numOfSTRPL1 = numOfSTRPL1 + ( ( pLocalRPL0->isRefPicLongterm( ii ) ) ? 0 : 1 );
         numOfLTRPL1 += ( pLocalRPL0->isRefPicLongterm( ii ) && !pLocalRPL0->isInterLayerRefPic( ii ) ) ? 1 : 0;
-        numOfLTRPL1 += pLocalRPL0->isInterLayerRefPic( ii ) ? 1 : 0;
+		numOfILRPL1 += pLocalRPL0->isInterLayerRefPic( ii ) ? 1 : 0;
         numOfNeedToFill--;
       }
     }
