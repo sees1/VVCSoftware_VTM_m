@@ -492,6 +492,16 @@ DecLib::~DecLib()
     delete m_prefixSEINALUs.front();
     m_prefixSEINALUs.pop_front();
   }
+  if (m_sdiSEIInFirstAU != NULL)
+  {
+    delete m_sdiSEIInFirstAU;
+  }
+  m_sdiSEIInFirstAU = NULL;
+  if (m_maiSEIInFirstAU != NULL)
+  {
+    delete m_maiSEIInFirstAU;
+  }
+  m_maiSEIInFirstAU = NULL;
 #if JVET_W0078_MVP_SEI 
   if (m_mvpSEIInFirstAU != NULL)
   {
@@ -2176,7 +2186,15 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
   }
   if ((getVPS()->getMaxLayers() == 1 || m_audIrapOrGdrAuFlag) && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || ((m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR) && m_lastNoOutputBeforeRecoveryFlag[m_accessUnitPicInfo.begin()->m_nuhLayerId])) && m_accessUnitPicInfo.size() == 1)
   {
+    if (m_sdiSEIInFirstAU != NULL)
+    {
+      delete m_sdiSEIInFirstAU;
+    }
     m_sdiSEIInFirstAU = NULL;
+    if (m_maiSEIInFirstAU != NULL)
+    {
+      delete m_maiSEIInFirstAU;
+    }
     m_maiSEIInFirstAU = NULL;
 #if JVET_W0078_MVP_SEI 
     if (m_mvpSEIInFirstAU != NULL) 
