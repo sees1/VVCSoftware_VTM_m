@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,9 @@ class ProfileLevelTierFeatures
     const ProfileFeatures   *m_pProfile;
     const LevelTierFeatures *m_pLevelTier;
     Level::Tier              m_tier;
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    int                      m_hbrFactor;
+#endif
   public:
     ProfileLevelTierFeatures() : m_pProfile(nullptr), m_pLevelTier(nullptr), m_tier(Level::MAIN) {}
 

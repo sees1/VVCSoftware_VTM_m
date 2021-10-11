@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -131,13 +131,13 @@ void VLCWriter::xWriteCode     ( uint32_t uiCode, uint32_t uiLength )
 void VLCWriter::xWriteUvlc     ( uint32_t uiCode )
 {
   uint32_t uiLength = 1;
-  uint32_t uiTemp = ++uiCode;
+  uint32_t temp     = ++uiCode;
 
-  CHECK( !uiTemp, "Integer overflow" );
+  CHECK(!temp, "Integer overflow");
 
-  while( 1 != uiTemp )
+  while (1 != temp)
   {
-    uiTemp >>= 1;
+    temp >>= 1;
     uiLength += 2;
   }
   // Take care of cases where uiLength > 32
@@ -284,9 +284,8 @@ void HLSWriter::codePPS( const PPS* pcPPS )
     WRITE_UVLC(conf.getWindowBottomOffset(), "pps_conf_win_bottom_offset");
   }
   Window scalingWindow = pcPPS->getScalingWindow();
-
-  WRITE_FLAG( scalingWindow.getWindowEnabledFlag(), "pps_scaling_window_explicit_signalling_flag" );
-  if( scalingWindow.getWindowEnabledFlag() )
+  WRITE_FLAG( pcPPS->getExplicitScalingWindowFlag(), "pps_scaling_window_explicit_signalling_flag");
+  if ( pcPPS->getExplicitScalingWindowFlag() )
   {
     WRITE_SVLC( scalingWindow.getWindowLeftOffset(), "pps_scaling_win_left_offset" );
     WRITE_SVLC( scalingWindow.getWindowRightOffset(), "pps_scaling_win_right_offset" );
@@ -715,10 +714,8 @@ void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
   WRITE_CODE(hrd->getTimeScale(), 32, "time_scale");
   WRITE_FLAG(hrd->getGeneralNalHrdParametersPresentFlag() ? 1 : 0, "general_nal_hrd_parameters_present_flag");
   WRITE_FLAG(hrd->getGeneralVclHrdParametersPresentFlag() ? 1 : 0, "general_vcl_hrd_parameters_present_flag");
-#if JVET_S0175_ASPECT6
   if( hrd->getGeneralNalHrdParametersPresentFlag() || hrd->getGeneralVclHrdParametersPresentFlag() )
   {
-#endif
     WRITE_FLAG(hrd->getGeneralSamePicTimingInAllOlsFlag() ? 1 : 0, "general_same_pic_timing_in_all_ols_flag");
     WRITE_FLAG(hrd->getGeneralDecodingUnitHrdParamsPresentFlag() ? 1 : 0, "general_decoding_unit_hrd_params_present_flag");
     if (hrd->getGeneralDecodingUnitHrdParamsPresentFlag())
@@ -732,9 +729,7 @@ void HLSWriter::codeGeneralHrdparameters(const GeneralHrdParams * hrd)
       WRITE_CODE(hrd->getCpbSizeDuScale(), 4, "cpb_size_du_scale");
     }
     WRITE_UVLC(hrd->getHrdCpbCntMinus1(), "hrd_cpb_cnt_minus1");
-#if JVET_S0175_ASPECT6
   }
-#endif
 }
 void HLSWriter::codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd, const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1)
 {
@@ -752,11 +747,7 @@ void HLSWriter::codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const 
     {
       WRITE_UVLC(hrd->getElementDurationInTcMinus1(), "elemental_duration_in_tc_minus1");
     }
-#if JVET_S0175_ASPECT6
     else if ( (generalHrd->getGeneralNalHrdParametersPresentFlag() || generalHrd->getGeneralVclHrdParametersPresentFlag()) && generalHrd->getHrdCpbCntMinus1() == 0)
-#else
-    else if (generalHrd->getHrdCpbCntMinus1() == 0)
-#endif
     {
       WRITE_FLAG(hrd->getLowDelayHrdFlag() ? 1 : 0, "low_delay_hrd_flag");
     }
@@ -905,7 +896,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   WRITE_FLAG( pcSPS->getEntropyCodingSyncEnabledFlag() ? 1 : 0, "sps_entropy_coding_sync_enabled_flag" );
   WRITE_FLAG( pcSPS->getEntryPointsPresentFlag() ? 1 : 0, "sps_entry_point_offsets_present_flag" );
   WRITE_CODE(pcSPS->getBitsForPOC()-4, 4, "sps_log2_max_pic_order_cnt_lsb_minus4");
-  
+
   WRITE_FLAG(pcSPS->getPocMsbCycleFlag() ? 1 : 0, "sps_poc_msb_cycle_flag");
   if (pcSPS->getPocMsbCycleFlag())
   {
@@ -1272,6 +1263,15 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   {
 #if ENABLE_TRACING /*|| RExt__DECODER_DEBUG_BIT_STATISTICS*/
     static const char *syntaxStrings[]={ "sps_range_extension_flag",
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+      "sps_extension_7bits[0]",
+      "sps_extension_7bits[1]",
+      "sps_extension_7bits[2]",
+      "sps_extension_7bits[3]",
+      "sps_extension_7bits[4]",
+      "sps_extension_7bits[5]",
+      "sps_extension_7bits[6]" };
+#else
       "sps_multilayer_extension_flag",
       "sps_extension_6bits[0]",
       "sps_extension_6bits[1]",
@@ -1279,6 +1279,13 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
       "sps_extension_6bits[3]",
       "sps_extension_6bits[4]",
       "sps_extension_6bits[5]" };
+#endif
+#endif
+
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+    if (pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) <= 10)
+      CHECK((sps_extension_flags[SPS_EXT__REXT] == 1),
+            "The value of sps_range_extension_flag shall be 0 when BitDepth is less than or equal to 10.");
 #endif
 
     for(int i=0; i<NUM_SPS_EXTENSION_FLAGS; i++)
@@ -1296,13 +1303,31 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
         {
           const SPSRExt &spsRangeExtension=pcSPS->getSpsRangeExtension();
 
+#if !JVET_W2005_RANGE_EXTENSION_PROFILES
           WRITE_FLAG( (spsRangeExtension.getTransformSkipRotationEnabledFlag() ? 1 : 0),      "transform_skip_rotation_enabled_flag");
           WRITE_FLAG( (spsRangeExtension.getTransformSkipContextEnabledFlag() ? 1 : 0),       "transform_skip_context_enabled_flag");
+#endif
           WRITE_FLAG( (spsRangeExtension.getExtendedPrecisionProcessingFlag() ? 1 : 0),       "extended_precision_processing_flag" );
+#if JVET_W0070_W0121_SPSRE_CLEANUP
+          if (pcSPS->getTransformSkipEnabledFlag())
+          {
+            WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                 "sps_ts_residual_coding_rice_present_in_sh_flag");
+          }
+#else
+          WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                   "sps_ts_residual_coding_rice_present_in_sh_flag");
+#endif
+#if !JVET_W2005_RANGE_EXTENSION_PROFILES
           WRITE_FLAG( (spsRangeExtension.getIntraSmoothingDisabledFlag() ? 1 : 0),            "intra_smoothing_disabled_flag" );
           WRITE_FLAG( (spsRangeExtension.getHighPrecisionOffsetsEnabledFlag() ? 1 : 0),       "high_precision_offsets_enabled_flag" );
+#endif
+          WRITE_FLAG( (spsRangeExtension.getRrcRiceExtensionEnableFlag() ? 1 : 0),                   "rrc_rice_extension_flag");
           WRITE_FLAG( (spsRangeExtension.getPersistentRiceAdaptationEnabledFlag() ? 1 : 0),   "persistent_rice_adaptation_enabled_flag" );
+#if JVET_W0046_RLSCP
+          WRITE_FLAG( (spsRangeExtension.getReverseLastSigCoeffEnabledFlag() ? 1 : 0),        "reverse_last_sig_coeff_enabled_flag" );
+#endif
+#if !JVET_W2005_RANGE_EXTENSION_PROFILES
           WRITE_FLAG( (spsRangeExtension.getCabacBypassAlignmentEnabledFlag() ? 1 : 0),       "cabac_bypass_alignment_enabled_flag" );
+#endif
           break;
         }
         default:
@@ -1335,7 +1360,6 @@ void HLSWriter::codeDCI(const DCI* dci)
   xWriteRbspTrailingBits();
 }
 
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
 void HLSWriter::codeOPI(const OPI *opi)
 {
 #if ENABLE_TRACING
@@ -1344,19 +1368,18 @@ void HLSWriter::codeOPI(const OPI *opi)
   WRITE_FLAG(opi->getOlsInfoPresentFlag(), "opi_ols_info_present_flag");
   WRITE_FLAG(opi->getHtidInfoPresentFlag(), "opi_htid_info_present_flag");
 
-  if (opi->getOlsInfoPresentFlag()) 
+  if (opi->getOlsInfoPresentFlag())
   {
-    WRITE_UVLC(opi->getOpiOlsIdx(), "opi_ols_idx");  
+    WRITE_UVLC(opi->getOpiOlsIdx(), "opi_ols_idx");
   }
 
-  if (opi->getHtidInfoPresentFlag()) 
+  if (opi->getHtidInfoPresentFlag())
   {
-    WRITE_CODE(opi->getOpiHtidPlus1(), 3, "opi_htid_plus1");  
+    WRITE_CODE(opi->getOpiHtidPlus1(), 3, "opi_htid_plus1");
   }
   WRITE_FLAG(0, "opi_extension_flag");
   xWriteRbspTrailingBits();
 }
-#endif
 
 void HLSWriter::codeVPS(const VPS* pcVPS)
 {
@@ -1382,7 +1405,6 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       WRITE_FLAG(pcVPS->getIndependentLayerFlag(i), "vps_independent_layer_flag");
       if (!pcVPS->getIndependentLayerFlag(i))
       {
-#if JVET_R0193
         bool presentFlag = false;
         for (int j = 0; j < i; j++)
         {
@@ -1397,18 +1419,6 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
             WRITE_CODE(pcVPS->getMaxTidIlRefPicsPlus1(i, j), 3, "max_tid_il_ref_pics_plus1[ i ][ j ]");
           }
         }
-#else
-        for (int j = 0; j < i; j++)
-        {
-          WRITE_FLAG(pcVPS->getDirectRefLayerFlag(i, j), "vps_direct_dependency_flag");
-        }
-        bool presentFlag = ( pcVPS->getMaxTidIlRefPicsPlus1(i) != 7 );
-        WRITE_FLAG(presentFlag, "vps_max_tid_ref_present_flag[ i ]");
-        if (presentFlag)
-        {
-          WRITE_CODE(pcVPS->getMaxTidIlRefPicsPlus1(i), 3, "vps_max_tid_il_ref_pics_plus1[ i ]");
-        }
-#endif
       }
     }
   }
@@ -1444,11 +1454,11 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   {
     if(i > 0)
       WRITE_FLAG(pcVPS->getPtPresentFlag(i), "vps_pt_present_flag");
-    if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag()) 
+    if (!pcVPS->getDefaultPtlDpbHrdMaxTidFlag())
     {
       WRITE_CODE(pcVPS->getPtlMaxTemporalId(i), 3, "vps_ptl_max_tid");
     }
-    else 
+    else
     {
       CHECK(pcVPS->getPtlMaxTemporalId(i) != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_ptl_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
     }
@@ -1462,7 +1472,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
   CHECK(cnt>=8, "More than '8' alignment bytes written");
   for (int i = 0; i < pcVPS->getNumPtls(); i++)
   {
-    codeProfileTierLevel(&pcVPS->getProfileTierLevel(i), pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i) - 1);
+    codeProfileTierLevel(&pcVPS->getProfileTierLevel(i), pcVPS->getPtPresentFlag(i), pcVPS->getPtlMaxTemporalId(i));
   }
   for (int i = 0; i < totalNumOlss; i++)
   {
@@ -1537,7 +1547,7 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
       {
         WRITE_CODE(pcVPS->getHrdMaxTid(i), 3, "vps_hrd_max_tid[i]");
       }
-      else 
+      else
       {
         CHECK(pcVPS->getHrdMaxTid(i) != pcVPS->getMaxSubLayers() - 1, "When vps_default_ptl_dpb_hrd_max_tid_flag is equal to 1, the value of vps_hrd_max_tid[ i ] is inferred to be equal to vps_max_sublayers_minus1");
       }
@@ -1572,7 +1582,7 @@ void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingB
   {
     slice = picHeader->getPic()->cs->slice;
   }
-WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
+  WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   WRITE_FLAG(picHeader->getNonReferencePictureFlag(), "ph_non_ref_pic_flag");
   if (picHeader->getGdrOrIrapPicFlag())
   {
@@ -1601,6 +1611,11 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
   {
     picHeader->setRecoveryPocCnt( -1 );
   }
+#if GDR_ENC_TRACE
+  printf("-gdr_pic_flag:%d\n", picHeader->getGdrPicFlag());
+  printf("-recovery_poc_cnt:%d\n", picHeader->getRecoveryPocCnt());
+  printf("-InGdrInterval:%d\n", picHeader->getInGdrInterval());
+#endif
   // PH extra bits are not written in the reference encoder
   // as these bits are reserved for future extensions
   // for( i = 0; i < NumExtraPhBits; i++ )
@@ -1624,9 +1639,9 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
       WRITE_FLAG(picHeader->getAlfEnabledFlag(COMPONENT_Y), "ph_alf_enabled_flag");
       if (picHeader->getAlfEnabledFlag(COMPONENT_Y))
       {
-        WRITE_CODE(picHeader->getNumAlfAps(), 3, "ph_num_alf_aps_ids_luma");
-        const std::vector<int>&   apsId = picHeader->getAlfAPSs();
-        for (int i = 0; i < picHeader->getNumAlfAps(); i++)
+        WRITE_CODE(picHeader->getNumAlfApsIdsLuma(), 3, "ph_num_alf_aps_ids_luma");
+        const std::vector<int>&   apsId = picHeader->getAlfApsIdsLuma();
+        for (int i = 0; i < picHeader->getNumAlfApsIdsLuma(); i++)
         {
           WRITE_CODE(apsId[i], 3, "ph_alf_aps_id_luma");
         }
@@ -1696,6 +1711,10 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     picHeader->setLmcsEnabledFlag(false);
     picHeader->setLmcsChromaResidualScaleFlag(false);
   }
+#if GDR_ENC_TRACE
+  printf("-pic_lmcs_enabled_flag:%d\n", picHeader->getLmcsEnabledFlag() ? 1 : 0);
+  printf("-pic_chroma_residual_scale_flag:%d\n", picHeader->getLmcsChromaResidualScaleFlag() ? 1 : 0);
+#endif
 
   // quantization scaling lists
   if( sps->getScalingListFlag() )
@@ -1719,6 +1738,56 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     WRITE_FLAG( picHeader->getVirtualBoundariesPresentFlag(), "ph_virtual_boundaries_present_flag" );
     if( picHeader->getVirtualBoundariesPresentFlag() )
     {
+#if GDR_ENABLED
+      if (sps->getGDREnabledFlag())
+      {
+        int n = picHeader->getNumVerVirtualBoundaries();
+        for (unsigned i = 0; i < n; i++)
+        {
+          if (picHeader->getVirtualBoundariesPosX(i) == pps->getPicWidthInLumaSamples())
+          {
+            n = n - 1;
+          }
+        }
+
+        WRITE_UVLC(n, "ph_num_ver_virtual_boundaries");
+
+        if (pps->getPicWidthInLumaSamples() <= 8)
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        }
+        else
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
+        }
+
+        for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
+        {
+          if (picHeader->getVirtualBoundariesPosX(i) != pps->getPicWidthInLumaSamples())
+          {
+            WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
+            CHECK(((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
+          }
+        }
+      }
+      else
+      {
+        WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
+        if (pps->getPicWidthInLumaSamples() <= 8)
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() != 0, "PH: When picture width is less than or equal to 8, the number of vertical virtual boundaries shall be equal to 0");
+        }
+        else
+        {
+          CHECK(picHeader->getNumVerVirtualBoundaries() > 3, "PH: The number of vertical virtual boundaries shall be in the range of 0 to 3");
+        }
+        for (unsigned i = 0; i < picHeader->getNumVerVirtualBoundaries(); i++)
+        {
+          WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
+          CHECK(((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
+        }
+      }
+#else
       WRITE_UVLC(picHeader->getNumVerVirtualBoundaries(), "ph_num_ver_virtual_boundaries");
       if (pps->getPicWidthInLumaSamples() <= 8)
       {
@@ -1733,6 +1802,7 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
         WRITE_UVLC((picHeader->getVirtualBoundariesPosX(i) >> 3) - 1, "ph_virtual_boundary_pos_x_minus1[i]");
         CHECK(((picHeader->getVirtualBoundariesPosX(i)>>3) - 1) > (((pps->getPicWidthInLumaSamples() + 7) >> 3) - 2), "The value of ph_virtual_boundary_pos_x_minus1[ i ] shall be in the range of 0 to Ceil( pps_pic_width_in_luma_samples / 8 ) - 2, inclusive.");
       }
+#endif
       WRITE_UVLC(picHeader->getNumHorVirtualBoundaries(), "ph_num_hor_virtual_boundaries");
       if (pps->getPicHeightInLumaSamples() <= 8)
       {
@@ -1898,10 +1968,6 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     {
       WRITE_UVLC( picHeader->getCuChromaQpOffsetSubdivIntra(), "ph_cu_chroma_qp_offset_subdiv_intra_slice" );
     }
-    else
-    {
-      picHeader->setCuChromaQpOffsetSubdivIntra( 0 );
-    }
   }
 
 
@@ -1931,11 +1997,8 @@ WRITE_FLAG(picHeader->getGdrOrIrapPicFlag(), "ph_gdr_or_irap_pic_flag");
     {
       WRITE_UVLC(picHeader->getCuChromaQpOffsetSubdivInter(), "ph_cu_chroma_qp_offset_subdiv_inter_slice");
     }
-    else
-    {
-      picHeader->setCuChromaQpOffsetSubdivInter(0);
-    }
-  // temporal motion vector prediction
+
+    // temporal motion vector prediction
     if (sps->getSPSTemporalMVPEnabledFlag())
     {
       WRITE_FLAG( picHeader->getEnableTMVPFlag(), "ph_temporal_mvp_enabled_flag" );
@@ -2209,27 +2272,27 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
 
   if (pcSlice->getSPS()->getALFEnabledFlag() && !pcSlice->getPPS()->getAlfInfoInPhFlag())
   {
-    const int alfEnabled = pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Y);
+    const int alfEnabled = pcSlice->getAlfEnabledFlag(COMPONENT_Y);
     WRITE_FLAG(alfEnabled, "sh_alf_enabled_flag");
 
     if (alfEnabled)
     {
-      WRITE_CODE(pcSlice->getTileGroupNumAps(), 3, "sh_num_alf_aps_ids_luma");
-      const std::vector<int>&   apsId = pcSlice->getTileGroupApsIdLuma();
-      for (int i = 0; i < pcSlice->getTileGroupNumAps(); i++)
+      WRITE_CODE(pcSlice->getNumAlfApsIdsLuma(), 3, "sh_num_alf_aps_ids_luma");
+      const std::vector<int>&   apsId = pcSlice->getAlfApsIdsLuma();
+      for (int i = 0; i < pcSlice->getNumAlfApsIdsLuma(); i++)
       {
         WRITE_CODE(apsId[i], 3, "sh_alf_aps_id_luma[i]");
       }
 
-      const int alfChromaIdc = pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cb) + pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cr) * 2;
+      const int alfChromaIdc = pcSlice->getAlfEnabledFlag(COMPONENT_Cb) + pcSlice->getAlfEnabledFlag(COMPONENT_Cr) * 2;
       if (chromaEnabled)
       {
-        WRITE_CODE(pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cb), 1, "sh_alf_cb_enabled_flag");
-        WRITE_CODE(pcSlice->getTileGroupAlfEnabledFlag(COMPONENT_Cr), 1, "sh_alf_cr_enabled_flag");
+        WRITE_CODE(pcSlice->getAlfEnabledFlag(COMPONENT_Cb), 1, "sh_alf_cb_enabled_flag");
+        WRITE_CODE(pcSlice->getAlfEnabledFlag(COMPONENT_Cr), 1, "sh_alf_cr_enabled_flag");
       }
       if (alfChromaIdc)
       {
-        WRITE_CODE(pcSlice->getTileGroupApsIdChroma(), 3, "sh_alf_aps_id_chroma");
+        WRITE_CODE(pcSlice->getAlfApsIdChroma(), 3, "sh_alf_aps_id_chroma");
       }
 
       if (pcSlice->getSPS()->getCCALFEnabledFlag())
@@ -2239,14 +2302,14 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
         if (filterParam.ccAlfFilterEnabled[COMPONENT_Cb - 1])
         {
           // write CC ALF Cb APS ID
-          WRITE_CODE(pcSlice->getTileGroupCcAlfCbApsId(), 3, "sh_alf_cc_cb_aps_id");
+          WRITE_CODE(pcSlice->getCcAlfCbApsId(), 3, "sh_alf_cc_cb_aps_id");
         }
         // Cr
         WRITE_FLAG(filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1] ? 1 : 0, "sh_alf_cc_cr_enabled_flag");
         if (filterParam.ccAlfFilterEnabled[COMPONENT_Cr - 1])
         {
           // write CC ALF Cr APS ID
-          WRITE_CODE(pcSlice->getTileGroupCcAlfCrApsId(), 3, "sh_alf_cc_cr_aps_id");
+          WRITE_CODE(pcSlice->getCcAlfCrApsId(), 3, "sh_alf_cc_cr_aps_id");
         }
       }
     }
@@ -2560,7 +2623,16 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
     WRITE_FLAG(pcSlice->getTSResidualCodingDisabledFlag() ? 1 : 0, "sh_ts_residual_coding_disabled_flag");
   }
 
-
+  if ((!pcSlice->getTSResidualCodingDisabledFlag()) && (pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag()))
+  {
+      WRITE_CODE(pcSlice->get_tsrc_index(), 3, "sh_ts_residual_coding_rice_idx_minus1");
+  }
+#if JVET_W0046_RLSCP
+  if (pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag()) 
+  {
+    WRITE_FLAG(pcSlice->getReverseLastSigCoeffFlag(), "sh_reverse_last_sig_coeff_flag");
+  }
+#endif
   if(pcSlice->getPPS()->getSliceHeaderExtensionPresentFlag())
   {
     WRITE_UVLC(0,"sh_slice_header_extension_length");
@@ -2568,7 +2640,11 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
 
 }
 
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo, const ProfileTierLevel* ptl )
+#else
 void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
+#endif
 {
   WRITE_FLAG(cinfo->getGciPresentFlag(), "gci_present_flag");
   if (cinfo->getGciPresentFlag())
@@ -2657,9 +2733,25 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "gci_no_lmcs_constraint_flag");
     WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "gci_no_ladf_constraint_flag");
     WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "gci_no_virtual_boundaries_constraint_flag");
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    Profile::Name profile = ptl->getProfileIdc();
+    if (profile == Profile::MAIN_12 || profile == Profile::MAIN_12_INTRA || profile == Profile::MAIN_12_STILL_PICTURE ||
+        profile == Profile::MAIN_12_444 || profile == Profile::MAIN_12_444_INTRA || profile == Profile::MAIN_12_444_STILL_PICTURE ||
+        profile == Profile::MAIN_16_444 || profile == Profile::MAIN_16_444_INTRA || profile == Profile::MAIN_16_444_STILL_PICTURE)
+    {
+      int numReservedBits = 1;
+      WRITE_CODE(numReservedBits, 8, "gci_num_reserved_bits");
+      WRITE_FLAG(cinfo->getLowerBitRateConstraintFlag() ? 1 : 0, "general_lower_bit_rate_constraint_flag");
+    }
+    else
+    {
+      WRITE_CODE(0, 8, "gci_num_reserved_bits");
+    }
+#else
     //The value of gci_num_reserved_bits shall be equal to 0 in bitstreams conforming to this version of this Specification.
     //Other values of gci_num_reserved_bits are reserved for future use by ITU-T | ISO/IEC.
     WRITE_CODE(0, 8, "gci_num_reserved_bits");
+#endif
   }
 
   while (!isByteAligned())
@@ -2683,7 +2775,11 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 
   if(profileTierPresentFlag)
   {
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    codeConstraintInfo(ptl->getConstraintInfo(), ptl);
+#else
     codeConstraintInfo(ptl->getConstraintInfo());
+#endif
   }
 
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)
@@ -2926,7 +3022,7 @@ void HLSWriter::xCodePredWeightTable(PicHeader *picHeader, const PPS *pps, const
     if (numRef == 0)
     {
       numLxWeights         = picHeader->getNumL1Weights();
-      if (pps->getWPBiPred() == 0) 
+      if (pps->getWPBiPred() == 0)
       {
         numLxWeights = 0;
       }

@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/** \file     LoopFilter.h
+/** \file     DeblockingFilter.h
     \brief    deblocking filter (header)
 */
 
-#ifndef __LOOPFILTER__
-#define __LOOPFILTER__
+#ifndef __DEBLOCKINGFILTER__
+#define __DEBLOCKINGFILTER__
 
 #include "CommonDef.h"
 #include "Unit.h"
@@ -52,7 +52,7 @@
 // ====================================================================================================================
 
 /// deblocking filter class
-class LoopFilter
+class DeblockingFilter
 {
 private:
   static_vector<char, MAX_NUM_PARTS_IN_CTU> m_aapucBS       [NUM_EDGE_DIR];         ///< Bs for [Ver/Hor][Y/U/V][Blk_Idx]
@@ -68,7 +68,7 @@ private:
 private:
 
   // set / get functions
-  void xSetLoopfilterParam        ( const CodingUnit& cu );
+  void xSetDeblockingFilterParam        ( const CodingUnit& cu );
 
   // filtering functions
   unsigned
@@ -107,8 +107,8 @@ private:
 
 public:
 
-  LoopFilter();
-  ~LoopFilter();
+  DeblockingFilter();
+  ~DeblockingFilter();
 
   /// CU-level deblocking function
   void xDeblockCU(CodingUnit& cu, const DeblockEdgeDir edgeDir);
@@ -120,8 +120,7 @@ public:
   void  destroy                   ();
 
   /// picture-level deblocking filter
-  void loopFilterPic              ( CodingStructure& cs
-                                    );
+  void deblockingFilterPic        ( CodingStructure& cs );
 
   static int getBeta              ( const int qp )
   {

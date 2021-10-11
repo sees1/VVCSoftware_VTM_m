@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@ private:
   // class interface
   DecLib          m_cDecLib;                     ///< decoder class
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvReconFile;        ///< reconstruction YUV class
+  std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvSEICTIFile;       ///< reconstruction YUV with CTI class
 
   // for output control
   int             m_iPOCLastDisplay;              ///< last POC in display order
@@ -70,6 +71,9 @@ private:
 
   bool            m_newCLVS[MAX_NUM_LAYER_IDS];   ///< used to record a new CLVSS
 
+  SEIAnnotatedRegions::AnnotatedRegionHeader                 m_arHeader; ///< AR header
+  std::map<uint32_t, SEIAnnotatedRegions::AnnotatedRegionObject> m_arObjects; ///< AR object pool
+  std::map<uint32_t, std::string>                                m_arLabels; ///< AR label pool
 
 private:
   bool  xIsNaluWithinTargetDecLayerIdSet( const InputNALUnit* nalu ) const; ///< check whether given Nalu is within targetDecLayerIdSet
@@ -85,15 +89,12 @@ private:
   void  xCreateDecLib     (); ///< create internal classes
   void  xDestroyDecLib    (); ///< destroy internal classes
   void  xWriteOutput      ( PicList* pcListPic , uint32_t tId); ///< write YUV to file
-#if JVET_S0078_NOOUTPUTPRIORPICFLAG
-  void  xFlushOutput( PicList *pcListPic, const int layerId = NOT_VALID, bool noOutputOfPriorPicsFlag = false );   ///< flush all remaining decoded pictures to file
-#else
   void  xFlushOutput( PicList* pcListPic, const int layerId = NOT_VALID ); ///< flush all remaining decoded pictures to file
-#endif
   bool  isNewPicture(ifstream *bitstreamFile, class InputByteStream *bytestream);  ///< check if next NAL unit will be the first NAL unit from a new picture
   bool  isNewAccessUnit(bool newPicture, ifstream *bitstreamFile, class InputByteStream *bytestream);  ///< check if next NAL unit will be the first NAL unit from a new access unit
 
   void  writeLineToOutputLog(Picture * pcPic);
+  void xOutputAnnotatedRegions(PicList* pcListPic);
 
 };
 

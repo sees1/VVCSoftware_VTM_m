@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,11 +87,12 @@ static const int g_transformMatrixShift[TRANSFORM_NUMBER_OF_DIRECTIONS] = {  6, 
 // ====================================================================================================================
 // Scanning order & context mapping table
 // ====================================================================================================================
-
-extern const uint32_t   g_uiGroupIdx[ MAX_TB_SIZEY ];
-extern const uint32_t   g_uiMinInGroup[ LAST_SIGNIFICANT_GROUPS ];
-extern const uint32_t   g_auiGoRiceParsCoeff     [ 32 ];
-inline uint32_t g_auiGoRicePosCoeff0(int st, uint32_t ricePar)
+extern int g_riceT[4];
+extern int g_riceShift[5];
+extern const uint32_t g_groupIdx[MAX_TB_SIZEY];
+extern const uint32_t g_minInGroup[LAST_SIGNIFICANT_GROUPS];
+extern const uint32_t g_goRiceParsCoeff[32];
+inline uint32_t       g_goRicePosCoeff0(int st, uint32_t ricePar)
 {
   return (st < 2 ? 1 : 2) << ricePar;
 }
@@ -100,9 +101,7 @@ inline uint32_t g_auiGoRicePosCoeff0(int st, uint32_t ricePar)
 // Intra prediction table
 // ====================================================================================================================
 
-extern const uint8_t  g_aucIntraModeNumFast_UseMPM_2D[7 - MIN_CU_LOG2 + 1][7 - MIN_CU_LOG2 + 1];
-extern const uint8_t  g_aucIntraModeNumFast_UseMPM   [MAX_CU_DEPTH];
-extern const uint8_t  g_aucIntraModeNumFast_NotUseMPM[MAX_CU_DEPTH];
+extern const uint8_t g_intraModeNumFastUseMPM2D[7 - MIN_CU_LOG2 + 1][7 - MIN_CU_LOG2 + 1];
 
 extern const uint8_t  g_chroma422IntraAngleMappingTable[NUM_INTRA_MODE];
 

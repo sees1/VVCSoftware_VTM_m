@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -172,6 +172,11 @@ public:
   void      finish  ();
   void      restart ();
   void      reset   ( int qp, int initId );
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  void      riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag);
+#else
+  void      riceStatReset(int bitDepth);
+#endif
 public:
   void      resetBits           ();
   uint64_t  getEstFracBits      ()                    const { THROW( "not supported" ); return 0; }

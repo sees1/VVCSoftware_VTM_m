@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -146,6 +146,11 @@ public:
 
 class HLSyntaxReader : public VLCReader
 {
+#if GDR_ENABLED
+  int m_lastGdrPoc;
+  int m_lastGdrRecoveryPocCnt;
+#endif
+
 public:
   HLSyntaxReader();
   virtual ~HLSyntaxReader();
@@ -155,10 +160,14 @@ protected:
   void  parseRefPicList(SPS* pcSPS, ReferencePictureList* rpl, int rplIdx);
 
 public:
-  void  setBitstream        ( InputBitstream* p )   { m_pcBitstream = p; }
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
-  void  parseOPI            ( OPI* opi );
+#if GDR_ENABLED
+  void setLastGdrPoc(int poc) { m_lastGdrPoc = poc;  }
+  int  getLastGdrPoc()        { return m_lastGdrPoc; }
+  void setLastGdrRecoveryPocCnt(int recoveryPocCnt) { m_lastGdrRecoveryPocCnt = recoveryPocCnt; }
+  int  getLastGdrRecoveryPocCnt()                     { return m_lastGdrRecoveryPocCnt; }
 #endif
+  void  setBitstream        ( InputBitstream* p )   { m_pcBitstream = p; }
+  void  parseOPI            ( OPI* opi );
   void  parseVPS            ( VPS* pcVPS );
   void  parseDCI            ( DCI* dci );
   void  parseSPS            ( SPS* pcSPS );
@@ -168,7 +177,11 @@ public:
   void  parseLmcsAps        ( APS* pcAPS );
   void  parseScalingListAps ( APS* pcAPS );
   void  parseVUI            ( VUI* pcVUI, SPS* pcSPS );
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+  void  parseConstraintInfo (ConstraintInfo *cinfo, const ProfileTierLevel* ptl );
+#else
   void  parseConstraintInfo   (ConstraintInfo *cinfo);
+#endif
   void  parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1);
   void  parseOlsHrdParameters(GeneralHrdParams* generalHrd, OlsHrdParams *olsHrd, uint32_t firstSubLayer, uint32_t tempLevelHigh);
   void parseGeneralHrdParameters(GeneralHrdParams *generalHrd);

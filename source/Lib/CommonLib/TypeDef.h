@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,26 +53,40 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_W0133_CONSTRAINED_RASL_ENCODING              1 // SEI message for Constrained RASL encoding for bitstream switching
 
 #define JVET_T0055_ITEM2                                  1 // JVET-T0055 item 2: Remove the step 9 of the general sub-bitstream extraction process.
-#define JVET_S0096_RPL_CONSTRAINT                         1 // JVET-S0096 aspect 1: When pps_rpl_info_in_ph_flag is equal to 1 and ph_inter_slice_allowed_flag is equal to 1, the value of num_ref_entries[ 0 ][ RplsIdx[ 0 ] ] shall be greater than 0.
-#define JVET_S0078_NOOUTPUTPRIORPICFLAG                   0 // JVET-S0078: Handling of NoOutputOfPriorPicsFlag in output process
-#define JVET_S0219_ASPECT1                                1 // JVET-S0219 aspect1 : removal non-referred APS parameter set in the non-output layer.
-#define JVET_R0193                                        1 // JVET-R0193: signalling of the number of maximum sublayers used for inter-layer prediction for each layer
-#define JVET_R0193_S0141                                  1 // JVET-S0141 item 47 : item 47: In the general sub-bitstream extraction process, specify the conditions under which an output sub-bitstream is required to be a conforming bitstream such that the value of tIdTarget is specified to be in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive (instead of 0 to 6 inclusive). (JVET-S0158 aspect 1)
-#define JVET_T0065_LEVEL_6_3                              1 // JVET-T0065: Add level 6.3
-#define JVET_T0091_LMCS_ENC_OVERFLOW_FIX                  1 // JVET-T0091: LMCS encoder overflow fix at high bit-depth for SDR
-#define JVET_S0163_ON_TARGETOLS_SUBLAYERS                 1 // JVET-S0163: On target OLS and sublayers for decoding (OPI NAL Unit)
-#define JVET_R0266_GCI                                    1 // JVET-R0266 #5: Specify that no_gdr_constraint_flag equal to 1 specifies that sps_gdr_enabled_flag shall be equal to 0
-#define JVET_S0084_S0110_RADL                             1 // When the current picture is a RADL picture, allow RASL pictures with pps_mixed_nalu_types_in_pic_flag is equal to 1 in active entries in RefPicList[ 0 ] or RefPicList[ 1 ]
-#define FIX_TICKET_1405                                   1 // Add dph_sei_single_component_flag and dph_sei_reserved_zero_7bits syntax to decoded picture hash SEI message
-#define FIX_SUBPICS_W_RPR                                 1 // Fix handling of RPR with subpictures (via scaling windows with no resolution change)
-#define JVET_S0175_ASPECT5                                1 // use u(8) instead of u(4) for (ffi_)display_elemental_periods_minus1 and pt_display_elemental_periods_minus1
-#define JVET_S0175_ASPECT6                                1 // The general_nal_hrd_params_present_flag and general_vcl_hrd_params_present_flag are allowed to both be equal to 0
-#define JVET_R0046_IRAP_ASPECT2                           1 // Add a constraint on an ILRP being either an IRAP picture or having TemporalId less than or equal to Max (0, vps_max_tid_il_ref_pics_plus1[ refPicVpsLayerId ] - 1 )
-#define JVET_T0064                                        1 // JVET-T0064: control of filter strength for ALF
+
+#define JVET_W0078_MVP_SEI                                1 // JVET-W0078 Multiview view position SEI message
+
+#define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
+
+#define JVET_W0134_UNIFORM_METRICS_LOG                    1 // change metrics output for easy parsing
+
+#define JVET_W0070_W0121_SPSRE_CLEANUP                    1 // JVET-W0070 Proposal 3 & JVET-W0121 Option 1 : condition the signaling of sps_ts_residual_coding_rice_present_in_sh_flag
+
+#define JVET_W0043                                        1 // Alignment of smooth block QP control with adaptive QP in VTM
+
+#define JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS              1 // JVET-W0178: bitstream constraints on RExt tools for low bit-depth (bit-depth <=10)
+
+#define JVET_W0046_RLSCP                                  1 // JVET-W0046: CE1.1 reverse last significant coefficient position
+
+#define JVET_W2005_RANGE_EXTENSION_PROFILES               1 // JVET-W2005 (JVET-W0136 profile plus meeting decisions)
+
+#define JVET_S0154_ASPECT9_AND_S0158_ASPECT4              1 // JVET-S0154 #9:  In the subpicture sub-bitstream extraction process, insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
+                                                            // JVET-S0158 #4c: Insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
+
+#define JVET_S0117_VB                                     1 // sub-picture extraction VB rewriting
 
 //########### place macros to be be kept below this line ###############
+#define GDR_ENABLED   1
+
+#if GDR_ENABLED
+#define GDR_LEAK_TEST  0
+#define GDR_ENC_TRACE  0
+#define GDR_DEC_TRACE  0
+#endif
+
 #define JVET_S0257_DUMP_360SEI_MESSAGE                    1 // Software support of 360 SEI messages
 
 #define JVET_R0351_HIGH_BIT_DEPTH_ENABLED                 0 // JVET-R0351: high bit depth coding enabled (increases accuracies of some calculations, e.g. transforms)
@@ -108,17 +122,6 @@ typedef std::pair<int, int>  TrCost;
 #define JVET_O0756_CONFIG_HDRMETRICS                      1
 #if EXTENSION_HDRTOOLS
 #define JVET_O0756_CALCULATE_HDRMETRICS                   1
-#endif
-
-#ifndef ENABLE_SPLIT_PARALLELISM
-#define ENABLE_SPLIT_PARALLELISM                          0
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-#define PARL_SPLIT_MAX_NUM_JOBS                           6                             // number of parallel jobs that can be defined and need memory allocated
-#define NUM_RESERVERD_SPLIT_JOBS                        ( PARL_SPLIT_MAX_NUM_JOBS + 1 )  // number of all data structures including the merge thread (0)
-#define PARL_SPLIT_MAX_NUM_THREADS                        PARL_SPLIT_MAX_NUM_JOBS
-#define NUM_SPLIT_THREADS_IF_MSVC                         4
-
 #endif
 
 // clang-format on
@@ -201,7 +204,7 @@ typedef std::pair<int, int>  TrCost;
 
 // SIMD optimizations
 #define SIMD_ENABLE                                       1
-#define ENABLE_SIMD_OPT                                 ( SIMD_ENABLE && !RExt__HIGH_BIT_DEPTH_SUPPORT )    ///< SIMD optimizations, no impact on RD performance
+#define ENABLE_SIMD_OPT                                 SIMD_ENABLE                                         ///< SIMD optimizations, no impact on RD performance
 #define ENABLE_SIMD_OPT_MCIF                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the interpolation filter, no impact on RD performance
 #define ENABLE_SIMD_OPT_BUFFER                          ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the buffer operations, no impact on RD performance
 #define ENABLE_SIMD_OPT_DIST                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the distortion calculations(SAD,SSE,HADAMARD), no impact on RD performance
@@ -243,9 +246,11 @@ typedef std::pair<int, int>  TrCost;
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            1 ///< 0 use original 6-bit transform matrices for both forward and inverse transform, 1 (default) = use original matrices for inverse transform and high precision matrices for forward transform
+#define JVET_V0106_DEP_QUANT_ENC_OPT                      1 ///< 0 use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 (default) use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
 #else
 #define FULL_NBIT                                         1 ///< When enabled, use distortion measure derived from all bits of source data, otherwise discard (bitDepth - 8) least-significant bits of distortion
 #define RExt__HIGH_PRECISION_FORWARD_TRANSFORM            0 ///< 0 (default) use original 6-bit transform matrices for both forward and inverse transform, 1 = use original matrices for inverse transform and high precision matrices for forward transform
+#define JVET_V0106_DEP_QUANT_ENC_OPT                      0 ///< 0 (default) use original g_goRiceBits[4][32] LUT for codeword length estimation at encoder, 1 - use extended g_goRiceBits[16][64] LUT for codeword length estimation at encoder
 #endif
 
 #if FULL_NBIT
@@ -692,6 +697,9 @@ namespace Profile
   enum Name
   {
     NONE                                 = 0,
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    INTRA                                = 8,
+#endif
     STILL_PICTURE                        = 64,
     MAIN_10                              = 1,
     MAIN_10_STILL_PICTURE                = MAIN_10 | STILL_PICTURE,
@@ -701,6 +709,17 @@ namespace Profile
     MAIN_10_444_STILL_PICTURE            = MAIN_10_444 | STILL_PICTURE,
     MULTILAYER_MAIN_10_444               = 49,
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
+#if JVET_W2005_RANGE_EXTENSION_PROFILES
+    MAIN_12                              = 2,
+    MAIN_12_444                          = 34,
+    MAIN_16_444                          = 36,
+    MAIN_12_INTRA                        = MAIN_12 | INTRA,
+    MAIN_12_444_INTRA                    = MAIN_12_444 | INTRA,
+    MAIN_16_444_INTRA                    = MAIN_16_444 | INTRA,
+    MAIN_12_STILL_PICTURE                = MAIN_12 | STILL_PICTURE,
+    MAIN_12_444_STILL_PICTURE            = MAIN_12_444 | STILL_PICTURE,
+    MAIN_16_444_STILL_PICTURE            = MAIN_16_444 | STILL_PICTURE,
+#endif
   };
 }
 
@@ -730,9 +749,7 @@ namespace Level
     LEVEL6   = 96,
     LEVEL6_1 = 99,
     LEVEL6_2 = 102,
-#if JVET_T0065_LEVEL_6_3
     LEVEL6_3 = 105,
-#endif
     LEVEL15_5 = 255,
   };
 }
@@ -791,11 +808,7 @@ enum NalUnitType
   NAL_UNIT_CODED_SLICE_GDR,         // 10
 
   NAL_UNIT_RESERVED_IRAP_VCL_11,
-#if JVET_S0163_ON_TARGETOLS_SUBLAYERS
   NAL_UNIT_OPI,                     // 12
-#else
-  NAL_UNIT_RESERVED_IRAP_VCL_12,
-#endif
   NAL_UNIT_DCI,                     // 13
   NAL_UNIT_VPS,                     // 14
   NAL_UNIT_SPS,                     // 15
@@ -920,8 +933,12 @@ struct LFCUParam
   bool leftEdge;                         ///< indicates left edge
   bool topEdge;                          ///< indicates top edge
 };
-
-
+struct LutModel
+{
+  bool             presentFlag = false;
+  int              numLutValues = 0;
+  std::vector<Pel> lutValues;
+};
 
 struct PictureHash
 {
@@ -1229,20 +1246,8 @@ template<typename T>
 class dynamic_cache
 {
   std::vector<T*> m_cache;
-#if ENABLE_SPLIT_PARALLELISM
-  int64_t         m_cacheId;
-#endif
 
 public:
-
-#if ENABLE_SPLIT_PARALLELISM
-  dynamic_cache()
-  {
-    static int cacheId = 0;
-    m_cacheId = cacheId++;
-  }
-
-#endif
   ~dynamic_cache()
   {
     deleteEntries();
@@ -1267,48 +1272,22 @@ public:
     {
       ret = m_cache.back();
       m_cache.pop_back();
-#if ENABLE_SPLIT_PARALLELISM
-      CHECK( ret->cacheId != m_cacheId, "Putting item into wrong cache!" );
-      CHECK( !ret->cacheUsed,           "Fetched an element that should've been in cache!!" );
-#endif
     }
     else
     {
       ret = new T;
     }
 
-#if ENABLE_SPLIT_PARALLELISM
-    ret->cacheId   = m_cacheId;
-    ret->cacheUsed = false;
-
-#endif
     return ret;
   }
 
   void cache( T* el )
   {
-#if ENABLE_SPLIT_PARALLELISM
-    CHECK( el->cacheId != m_cacheId, "Putting item into wrong cache!" );
-    CHECK( el->cacheUsed,            "Putting cached item back into cache!" );
-
-    el->cacheUsed = true;
-
-#endif
     m_cache.push_back( el );
   }
 
   void cache( std::vector<T*>& vel )
   {
-#if ENABLE_SPLIT_PARALLELISM
-    for( auto el : vel )
-    {
-      CHECK( el->cacheId != m_cacheId, "Putting item into wrong cache!" );
-      CHECK( el->cacheUsed,            "Putting cached item back into cache!" );
-
-      el->cacheUsed = true;
-    }
-
-#endif
     m_cache.insert( m_cache.end(), vel.begin(), vel.end() );
     vel.clear();
   }

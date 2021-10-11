@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -557,6 +557,10 @@ void PredictionUnit::initData()
     for ( uint32_t j = 0; j < 3; j++ )
     {
       mvAffi[i][j].setZero();
+#if GDR_ENABLED
+      mvAffiSolid[i][j] = true;
+      mvAffiValid[i][j] = true;
+#endif
     }
   }
   ciipFlag = false;

@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -948,7 +948,7 @@ bool VideoIOYuv::read ( PelUnitBuf& pic, PelUnitBuf& picOrg, const InputColourSp
 
     if (processComponent)
     {
-      if (! verifyPlane( dst, stride444, width444, height444, pad_h444, pad_v444, compID, format, m_fileBitdepth[chType]) )
+      if (! verifyPlane( dst, stride444, width444, height444, pad_h444, pad_v444, compID, picOrg.chromaFormat, m_fileBitdepth[chType]) )
       {
          EXIT("Source image contains values outside the specified bit range!");
       }

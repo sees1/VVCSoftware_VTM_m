@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,10 @@ protected:
   void xParseSEIFrameFieldinfo                (SEIFrameFieldInfo& sei,                uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream);
   void xParseSEIDependentRAPIndication        (SEIDependentRAPIndication& sei,        uint32_t payLoadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIFramePacking                  (SEIFramePacking& sei,                  uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIDisplayOrientation            (SEIDisplayOrientation& sei,            uint32_t payloadSize,                     std::ostream* pDecodedMessageOutputStream);
   void xParseSEIParameterSetsInclusionIndication(SEIParameterSetsInclusionIndication& sei, uint32_t payloadSize,                std::ostream* pDecodedMessageOutputStream);
   void xParseSEIMasteringDisplayColourVolume  (SEIMasteringDisplayColourVolume& sei,  uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIAnnotatedRegions              (SEIAnnotatedRegions& sei,              uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
 #if U0033_ALTERNATIVE_TRANSFER_CHARACTERISTICS_SEI
   void xParseSEIAlternativeTransferCharacteristics(SEIAlternativeTransferCharacteristics& sei,              uint32_t payLoadSize,                     std::ostream *pDecodedMessageOutputStream);
 #endif
@@ -79,6 +81,14 @@ protected:
   void xParseSEIOmniViewport                  (SEIOmniViewport& sei,                  uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIRegionWisePacking             (SEIRegionWisePacking& sei,             uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIGeneralizedCubemapProjection  (SEIGeneralizedCubemapProjection &sei,  uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIScalabilityDimensionInfo      (SEIScalabilityDimensionInfo& sei,      uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIMultiviewAcquisitionInfo      (SEIMultiviewAcquisitionInfo& sei,      uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream);
+#if JVET_W0078_MVP_SEI 
+  void xParseSEIMultiviewViewPosition         (SEIMultiviewViewPosition& sei,         uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream);
+#endif
+  void xParseSEIAlphaChannelInfo              (SEIAlphaChannelInfo& sei,              uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIDepthRepresentationInfo       (SEIDepthRepresentationInfo& sei,       uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIDepthRepInfoElement           (double &f,std::ostream *pDecodedMessageOutputStream);
   void xParseSEISubpictureLevelInfo           (SEISubpicureLevelInfo& sei,            uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEISampleAspectRatioInfo         (SEISampleAspectRatioInfo& sei,         uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIUserDataRegistered            (SEIUserDataRegistered& sei,            uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
@@ -86,6 +96,11 @@ protected:
   void xParseSEIContentLightLevelInfo         (SEIContentLightLevelInfo& sei,         uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIAmbientViewingEnvironment     (SEIAmbientViewingEnvironment& sei,     uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
   void xParseSEIContentColourVolume           (SEIContentColourVolume& sei,           uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIExtendedDrapIndication        (SEIExtendedDrapIndication& sei,        uint32_t payloadSize,                     std::ostream *pDecodedMessageOutputStream);
+  void xParseSEIColourTransformInfo           (SEIColourTransformInfo& sei, uint32_t payloadSize, std::ostream* pDecodedMessageOutputStream);
+#if JVET_W0133_CONSTRAINED_RASL_ENCODING
+  void xParseSEIConstrainedRaslIndication     (SEIConstrainedRaslIndication& sei,     uint32_t payLoadSize,                     std::ostream *pDecodedMessageOutputStream);
+#endif
 
   void sei_read_scode(std::ostream *pOS, uint32_t length, int& code, const char *pSymbolName);
   void sei_read_code(std::ostream *pOS, uint32_t uiLength, uint32_t& ruiCode, const char *pSymbolName);

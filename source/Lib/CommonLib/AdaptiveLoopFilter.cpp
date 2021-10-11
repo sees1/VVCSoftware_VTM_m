@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -435,7 +435,7 @@ void AdaptiveLoopFilter::ALFProcess(CodingStructure& cs)
       const CodingUnit *cu = cs.getCU( Position(xPos, yPos), CHANNEL_TYPE_LUMA );
 
       // skip this CTU if ALF is disabled
-      if (!cu->slice->getTileGroupAlfEnabledFlag(COMPONENT_Y) && !cu->slice->getTileGroupAlfEnabledFlag(COMPONENT_Cb) && !cu->slice->getTileGroupAlfEnabledFlag(COMPONENT_Cr))
+      if (!cu->slice->getAlfEnabledFlag(COMPONENT_Y) && !cu->slice->getAlfEnabledFlag(COMPONENT_Cb) && !cu->slice->getAlfEnabledFlag(COMPONENT_Cr))
       {
         ctuIdx++;
         continue;
@@ -445,7 +445,7 @@ void AdaptiveLoopFilter::ALFProcess(CodingStructure& cs)
       if(ctuIdx == 0 || lastSliceIdx != cu->slice->getSliceID() || alfCtuFilterIndex==nullptr)
       {
         cs.slice = cu->slice;
-        reconstructCoeffAPSs(cs, true, cu->slice->getTileGroupAlfEnabledFlag(COMPONENT_Cb) || cu->slice->getTileGroupAlfEnabledFlag(COMPONENT_Cr), false);
+        reconstructCoeffAPSs(cs, true, cu->slice->getAlfEnabledFlag(COMPONENT_Cb) || cu->slice->getAlfEnabledFlag(COMPONENT_Cr), false);
         alfCtuFilterIndex = cu->slice->getPic()->getAlfCtbFilterIndex();
         m_ccAlfFilterParam = cu->slice->m_ccAlfFilterParam;
       }
@@ -627,9 +627,9 @@ void AdaptiveLoopFilter::reconstructCoeffAPSs(CodingStructure& cs, bool luma, bo
   APS* curAPS;
   if (luma)
   {
-    for (int i = 0; i < cs.slice->getTileGroupNumAps(); i++)
+    for (int i = 0; i < cs.slice->getNumAlfApsIdsLuma(); i++)
     {
-      int apsIdx = cs.slice->getTileGroupApsIdLuma()[i];
+      int apsIdx = cs.slice->getAlfApsIdsLuma()[i];
       curAPS = aps[apsIdx];
       CHECK(curAPS == NULL, "invalid APS");
       alfParamTmp = curAPS->getAlfAPSParam();
@@ -642,7 +642,7 @@ void AdaptiveLoopFilter::reconstructCoeffAPSs(CodingStructure& cs, bool luma, bo
   //chroma
   if (chroma)
   {
-    int apsIdxChroma = cs.slice->getTileGroupApsIdChroma();
+    int apsIdxChroma = cs.slice->getAlfApsIdChroma();
     curAPS = aps[apsIdxChroma];
     m_alfParamChroma = &curAPS->getAlfAPSParam();
     alfParamTmp = *m_alfParamChroma;

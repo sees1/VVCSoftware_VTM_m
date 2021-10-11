@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -501,14 +501,6 @@ void Quant::init( uint32_t uiMaxTrSize,
   m_resetStore = true;
 }
 
-#if ENABLE_SPLIT_PARALLELISM
-void Quant::copyState( const Quant& other )
-{
-  m_dLambda = other.m_dLambda;
-  memcpy( m_lambdas, other.m_lambdas, sizeof( m_lambdas ) );
-}
-#endif
-
 /** set quantized matrix coefficient for encode
  * \param scalingList            quantized matrix address
  * \param format                 chroma format
@@ -527,7 +519,9 @@ void Quant::setScalingList(ScalingList *scalingList, const int maxLog2TrDynamicR
     for(uint32_t list = 0; list < SCALING_LIST_NUM; list++)
     {
       if (size == SCALING_LIST_2x2 && list < 4)   // skip 2x2 luma
+      {
         continue;
+      }
       scalingListId = g_scalingListId[size][list];
       if (scalingList->getChromaScalingListPresentFlag() || scalingList->isLumaScalingList(scalingListId))
       {
@@ -548,7 +542,11 @@ void Quant::setScalingList(ScalingList *scalingList, const int maxLog2TrDynamicR
   {
     for (uint32_t sizeh = 0; sizeh <= SCALING_LIST_LAST_CODED; sizeh++) //7
     {
-      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh<SCALING_LIST_4x4) || (sizeh == SCALING_LIST_1x1 && sizew<SCALING_LIST_4x4)) continue;
+      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh < SCALING_LIST_4x4)
+          || (sizeh == SCALING_LIST_1x1 && sizew < SCALING_LIST_4x4))
+      {
+        continue;
+      }
       for (uint32_t list = 0; list < SCALING_LIST_NUM; list++) //9
       {
         int largerSide = (sizew > sizeh) ? sizew : sizeh;
@@ -579,7 +577,9 @@ void Quant::setScalingListDec(const ScalingList &scalingList)
     for(uint32_t list = 0; list < SCALING_LIST_NUM; list++)
     {
       if (size == SCALING_LIST_2x2 && list < 4)   // skip 2x2 luma
+      {
         continue;
+      }
       scalingListId = g_scalingListId[size][list];
       for(int qp = minimumQp; qp < maximumQp; qp++)
       {
@@ -593,7 +593,11 @@ void Quant::setScalingListDec(const ScalingList &scalingList)
   {
     for (uint32_t sizeh = 0; sizeh <= SCALING_LIST_LAST_CODED; sizeh++) //7
     {
-      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh<SCALING_LIST_4x4) || (sizeh == SCALING_LIST_1x1 && sizew<SCALING_LIST_4x4)) continue;
+      if (sizew == sizeh || (sizew == SCALING_LIST_1x1 && sizeh < SCALING_LIST_4x4)
+          || (sizeh == SCALING_LIST_1x1 && sizew < SCALING_LIST_4x4))
+      {
+        continue;
+      }
       for (uint32_t list = 0; list < SCALING_LIST_NUM; list++) //9
       {
         int largerSide = (sizew > sizeh) ? sizew : sizeh;
@@ -866,7 +870,9 @@ void Quant::processScalingListDec( const int *coeff, int *dequantcoeff, int invQ
     }
     int largeOne = (width > height) ? width : height;
     if (largeOne > 8)
+    {
       dequantcoeff[0] = invQuantScales * dc;
+    }
     return;
   }
   for (uint32_t j = 0; j<height; j++)
@@ -946,7 +952,10 @@ void Quant::xInitScalingList( const Quant* other )
  */
 void Quant::xDestroyScalingList()
 {
-  if( !m_isScalingListOwner ) return;
+  if (!m_isScalingListOwner)
+  {
+    return;
+  }
 
   delete[] m_quantCoef[0][0][0][0];
 }
@@ -1170,7 +1179,7 @@ void Quant::invTrSkipDeQuantOneSample(TransformUnit &tu, const ComponentID &comp
   const int            channelBitDepth        = sps.getBitDepth(toChannelType(compID));
   const int            iTransformShift        = getTransformShift(channelBitDepth, rect.size(), maxLog2TrDynamicRange);
   const int            scalingListType        = getScalingListType(tu.cu->predMode, compID);
-  
+
   const bool           disableSMForLFNST = tu.cs->slice->getExplicitScalingListUsed() ? tu.cs->slice->getSPS()->getDisableScalingMatrixForLfnstBlks() : false;
   const bool           isLfnstApplied = tu.cu->lfnstIdx > 0 && (tu.cu->isSepTree() ? true : isLuma(compID));
   const bool           disableSMForACT = tu.cs->slice->getSPS()->getScalingMatrixForAlternativeColourSpaceDisabledFlag() && (tu.cs->slice->getSPS()->getScalingMatrixDesignatedColourSpaceFlag() == tu.cu->colorTransform);

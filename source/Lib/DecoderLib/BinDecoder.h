@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,11 @@ public:
   void      start   ();
   void      finish  ();
   void      reset   ( int qp, int initId );
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  void      riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag);
+#else
+  void      riceStatReset(int bitDepth);
+#endif
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
   void      set     ( const CodingStatisticsClassType& type) { ptype = &type; }
 #endif

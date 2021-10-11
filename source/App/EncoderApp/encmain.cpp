@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,16 +101,6 @@ int main(int argc, char* argv[])
 #endif
 #if ENABLE_TRACING
   fprintf( stdout, "[ENABLE_TRACING] " );
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-  fprintf( stdout, "[SPLIT_PARALLEL (%d jobs)]", PARL_SPLIT_MAX_NUM_JOBS );
-#endif
-#if ENABLE_SPLIT_PARALLELISM
-  const char* waitPolicy = getenv( "OMP_WAIT_POLICY" );
-  const char* maxThLim   = getenv( "OMP_THREAD_LIMIT" );
-  fprintf( stdout, waitPolicy ? "[OMP: WAIT_POLICY=%s," : "[OMP: WAIT_POLICY=,", waitPolicy );
-  fprintf( stdout, maxThLim   ? "THREAD_LIMIT=%s" : "THREAD_LIMIT=", maxThLim );
-  fprintf( stdout, "]" );
 #endif
   fprintf( stdout, "\n" );
 

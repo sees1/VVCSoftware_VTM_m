@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -148,11 +148,18 @@ namespace PU
   void fillIBCMvpCand                 (PredictionUnit &pu, AMVPInfo &amvpInfo);
   void fillAffineMvpCand              (      PredictionUnit &pu, const RefPicList &eRefPicList, const int &refIdx, AffineAMVPInfo &affiAMVPInfo);
   bool addMVPCandUnscaled             (const PredictionUnit &pu, const RefPicList &eRefPicList, const int &iRefIdx, const Position &pos, const MvpDir &eDir, AMVPInfo &amvpInfo);
+#if GDR_ENABLED
+  void xInheritedAffineMv(const PredictionUnit &pu, const PredictionUnit* puNeighbour, RefPicList eRefPicList, Mv rcMv[3], bool rcMvSolid[3], MvpType rcMvType[3], Position rcMvPos[3]);  
+#endif
   void xInheritedAffineMv             ( const PredictionUnit &pu, const PredictionUnit* puNeighbour, RefPicList eRefPicList, Mv rcMv[3] );
   bool addMergeHMVPCand               (const CodingStructure &cs, MergeCtx& mrgCtx, const int& mrgCandIdx, const uint32_t maxNumMergeCandMin1, int &cnt
     , const bool isAvailableA1, const MotionInfo miLeft, const bool isAvailableB1, const MotionInfo miAbove
     , const bool ibcFlag
     , const bool isGt4x4
+#if GDR_ENABLED
+    , const PredictionUnit &pu
+    , bool &allCandSolidInAbove  
+#endif
   );
   void addAMVPHMVPCand                (const PredictionUnit &pu, const RefPicList eRefPicList, const int currRefPOC, AMVPInfo &info);
   bool addAffineMVPCandUnscaled       ( const PredictionUnit &pu, const RefPicList &refPicList, const int &refIdx, const Position &pos, const MvpDir &dir, AffineAMVPInfo &affiAmvpInfo );
@@ -203,8 +210,8 @@ int getMipSizeId      (const Size& block);
 bool allowLfnstWithMip(const Size& block);
 
 template<typename T, size_t N>
-uint32_t updateCandList(T uiMode, double uiCost, static_vector<T, N>& candModeList, static_vector<double, N>& candCostList
-  , size_t uiFastCandNum = N, int* iserttPos = nullptr)
+uint32_t updateCandList(T mode, double uiCost, static_vector<T, N> &candModeList,
+                        static_vector<double, N> &candCostList, size_t uiFastCandNum = N, int *iserttPos = nullptr)
 {
   CHECK( std::min( uiFastCandNum, candModeList.size() ) != std::min( uiFastCandNum, candCostList.size() ), "Sizes do not match!" );
   CHECK( uiFastCandNum > candModeList.capacity(), "The vector is to small to hold all the candidates!" );
@@ -225,7 +232,7 @@ uint32_t updateCandList(T uiMode, double uiCost, static_vector<T, N>& candModeLi
       candModeList[currSize - i] = candModeList[currSize - 1 - i];
       candCostList[currSize - i] = candCostList[currSize - 1 - i];
     }
-    candModeList[currSize - shift] = uiMode;
+    candModeList[currSize - shift] = mode;
     candCostList[currSize - shift] = uiCost;
     if (iserttPos != nullptr)
     {
@@ -235,7 +242,7 @@ uint32_t updateCandList(T uiMode, double uiCost, static_vector<T, N>& candModeLi
   }
   else if( currSize < uiFastCandNum )
   {
-    candModeList.insert( candModeList.end() - shift, uiMode );
+    candModeList.insert(candModeList.end() - shift, mode);
     candCostList.insert( candCostList.end() - shift, uiCost );
     if (iserttPos != nullptr)
     {

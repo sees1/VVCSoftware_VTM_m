@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,6 +137,8 @@ struct AreaBuf : public Size
 
   void rspSignal            ( std::vector<Pel>& pLUT );
   void scaleSignal          ( const int scale, const bool dir , const ClpRng& clpRng);
+  void applyLumaCTI(std::vector<Pel>& pLUTY);
+  void applyChromaCTI(Pel* bufY, int strideY, std::vector<Pel>& pLUTUV, int bitDepth, ChromaFormat chrFormat, bool fwdMap);
   T    computeAvg           ( ) const;
 
         T& at( const int &x, const int &y )          { return buf[y * stride + x]; }
@@ -430,11 +432,17 @@ void AreaBuf<T>::removeWeightHighFreq(const AreaBuf<T>& other, const bool bClip,
   if(!bClip)
   {
     if(!(width & 7))
+    {
       g_pelBufOP.removeWeightHighFreq8(dst, dstStride, src, srcStride, width, height, 16, bcwWeight);
+    }
     else if(!(width & 3))
+    {
       g_pelBufOP.removeWeightHighFreq4(dst, dstStride, src, srcStride, width, height, 16, bcwWeight);
+    }
     else
-      CHECK(true, "Not supported");
+    {
+      THROW("Not supported");
+    }
   }
   else
   {
@@ -479,11 +487,17 @@ void AreaBuf<T>::removeHighFreq( const AreaBuf<T>& other, const bool bClip, cons
   if (!bClip)
   {
     if(!(width & 7))
+    {
       g_pelBufOP.removeHighFreq8(dst, dstStride, src, srcStride, width, height);
+    }
     else if (!(width & 3))
+    {
       g_pelBufOP.removeHighFreq4(dst, dstStride, src, srcStride, width, height);
+    }
     else
-      CHECK(true, "Not supported");
+    {
+      THROW("Not supported");
+    }
   }
   else
   {

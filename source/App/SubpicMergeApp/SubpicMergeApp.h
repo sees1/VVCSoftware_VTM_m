@@ -3,7 +3,7 @@
 * and contributor rights, including patent rights, and no such rights are
 * granted under this license.
 *
-* Copyright (c) 2010-2020, ITU/ISO/IEC
+* Copyright (c) 2010-2021, ITU/ISO/IEC
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,8 @@ struct SubpicParams {
 struct Subpicture;
 class InputByteStream;
 class HLSyntaxReader;
+class SEIReader;
+class SEI;
 class DCI;
 class ParameterSetManager;
 class PicHeader;
@@ -92,9 +94,10 @@ private:
   int parseSPS(HLSyntaxReader &hlsReader, ParameterSetManager &psManager);
   int parsePPS(HLSyntaxReader &hlsReader, ParameterSetManager &psManager);
   void parseAPS(HLSyntaxReader &hlsReader, ParameterSetManager &psManager, int &apsId, int &apsType);
+  void parseSEI(SEIReader& seiReader, InputNALUnit &nalu, const VPS *vps, const SPS *sps, SEI *&decodePictureHashSei);
   void parsePictureHeader(HLSyntaxReader &hlsReader, PicHeader &picHeader, ParameterSetManager &psManager);
   void parseSliceHeader(HLSyntaxReader &hlsReader, InputNALUnit &nalu, Slice &slice, PicHeader &picHeader, OutputBitstream &sliceData, ParameterSetManager &psManager, int prevTid0Poc);
-  void decodeNalu(Subpicture &subpic, InputNALUnit &nalu);
+  void decodeNalu(Subpicture &subpic, InputNALUnit &nalu, SEI *&decodePictureHashSei);
   void parseSubpic(Subpicture &subpic, bool &morePictures);
   void generateMergedStreamVPSes(std::vector<VPS*> &vpsList);
   int computeSubPicIdLen(int numSubpics);

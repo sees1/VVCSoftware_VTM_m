@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -221,26 +221,6 @@ void RdCost::init()
   m_resetStore = true;
   m_pairCheck    = 0;
 }
-
-
-#if ENABLE_SPLIT_PARALLELISM
-
-void RdCost::copyState( const RdCost& other )
-{
-  m_costMode      = other.m_costMode;
-  m_dLambda       = other.m_dLambda;
-  m_DistScale     = other.m_DistScale;
-  memcpy( m_distortionWeight, other.m_distortionWeight, sizeof( m_distortionWeight ) );
-  m_mvPredictor   = other.m_mvPredictor;
-  m_motionLambda  = other.m_motionLambda;
-  m_iCostScale    = other.m_iCostScale;
-  m_dLambdaMotionSAD = other.m_dLambdaMotionSAD;
-#if WCG_EXT
-  m_dLambda_unadjusted  = other.m_dLambda_unadjusted ;
-  m_DistScaleUnadjusted = other.m_DistScaleUnadjusted;
-#endif
-}
-#endif
 
 void RdCost::setDistParam( DistParam &rcDP, const CPelBuf &org, const Pel* piRefY, int iRefStride, int bitDepth, ComponentID compID, int subShiftMode, int step, bool useHadamard )
 {
@@ -2950,11 +2930,16 @@ void RdCost::saveUnadjustedLambda()
   m_DistScaleUnadjusted = m_DistScale;
 }
 
-void RdCost::initLumaLevelToWeightTable()
+void RdCost::initLumaLevelToWeightTable(int bitDepth)
 {
-  for (int i = 0; i < LUMA_LEVEL_TO_DQP_LUT_MAXSIZE; i++)
+  int lutSize = 1 << bitDepth;
+  if (m_lumaLevelToWeightPLUT.empty())
   {
-    double x = i;
+    m_lumaLevelToWeightPLUT.resize(lutSize, 1.0);
+  }
+  for (int i = 0; i < lutSize; i++)
+  {
+    double x = bitDepth < 10 ? i << (10 - bitDepth) : bitDepth > 10 ? i >> (bitDepth - 10) : i;
     double y;
 
     y = 0.015 * x - 1.5

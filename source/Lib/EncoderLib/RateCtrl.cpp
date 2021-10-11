@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -402,120 +402,117 @@ void EncRCGOP::create( EncRCSeq* encRCSeq, int numPic )
     }
     else if (encRCSeq->getAdaptiveBits() == 2 && encRCSeq->getGOPSize() == 16 )  // for GOP size = 16, random access case
     {
-      {
-        const double qdfParaLev2A = 0.5847;
-        const double qdfParaLev2B = -0.0782;
-        const double qdfParaLev3A = 0.5468;
-        const double qdfParaLev3B = -0.1364;
-        const double qdfParaLev4A = 0.6539;
-        const double qdfParaLev4B = -0.203;
-        const double qdfParaLev5A = 0.8623;
-        const double qdfParaLev5B = -0.4676;
-        double qdfLev1Lev2 = Clip3(0.12, 0.9, qdfParaLev2A * encRCSeq->getPicPara(2).m_skipRatio + qdfParaLev2B);
-        double qdfLev1Lev3 = Clip3(0.13, 0.9, qdfParaLev3A * encRCSeq->getPicPara(3).m_skipRatio + qdfParaLev3B);
-        double qdfLev1Lev4 = Clip3(0.15, 0.9, qdfParaLev4A * encRCSeq->getPicPara(4).m_skipRatio + qdfParaLev4B);
-        double qdfLev1Lev5 = Clip3(0.20, 0.9, qdfParaLev5A * encRCSeq->getPicPara(5).m_skipRatio + qdfParaLev5B);
-        double qdfLev2Lev3 = Clip3(0.09, 0.9, qdfLev1Lev3 * (1 - qdfLev1Lev2));
-        double qdfLev2Lev4 = Clip3(0.12, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev2));
-        double qdfLev2Lev5 = Clip3(0.14, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev2));
-        double qdfLev3Lev4 = Clip3(0.06, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev3));
-        double qdfLev3Lev5 = Clip3(0.09, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev3));
-        double qdfLev4Lev5 = Clip3(0.10, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev4));
+      const double qdfParaLev2A = 0.5847;
+      const double qdfParaLev2B = -0.0782;
+      const double qdfParaLev3A = 0.5468;
+      const double qdfParaLev3B = -0.1364;
+      const double qdfParaLev4A = 0.6539;
+      const double qdfParaLev4B = -0.203;
+      const double qdfParaLev5A = 0.8623;
+      const double qdfParaLev5B = -0.4676;
+      double       qdfLev1Lev2  = Clip3(0.12, 0.9, qdfParaLev2A * encRCSeq->getPicPara(2).m_skipRatio + qdfParaLev2B);
+      double       qdfLev1Lev3  = Clip3(0.13, 0.9, qdfParaLev3A * encRCSeq->getPicPara(3).m_skipRatio + qdfParaLev3B);
+      double       qdfLev1Lev4  = Clip3(0.15, 0.9, qdfParaLev4A * encRCSeq->getPicPara(4).m_skipRatio + qdfParaLev4B);
+      double       qdfLev1Lev5  = Clip3(0.20, 0.9, qdfParaLev5A * encRCSeq->getPicPara(5).m_skipRatio + qdfParaLev5B);
+      double       qdfLev2Lev3  = Clip3(0.09, 0.9, qdfLev1Lev3 * (1 - qdfLev1Lev2));
+      double       qdfLev2Lev4  = Clip3(0.12, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev2));
+      double       qdfLev2Lev5  = Clip3(0.14, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev2));
+      double       qdfLev3Lev4  = Clip3(0.06, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev3));
+      double       qdfLev3Lev5  = Clip3(0.09, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev3));
+      double       qdfLev4Lev5  = Clip3(0.10, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev4));
 
-        double lambdaLev1 = 1 / (1 + 2 * (qdfLev1Lev2 + 2 * qdfLev1Lev3 + 4 * qdfLev1Lev4 + 8 * qdfLev1Lev5));
-        double lambdaLev2 = 1 / (1 + (3 * qdfLev2Lev3 + 5 * qdfLev2Lev4 + 8 * qdfLev2Lev5));
-        double lambdaLev3 = 1 / (1 + 2 * qdfLev3Lev4 + 4 * qdfLev3Lev5);
-        double lambdaLev4 = 1 / (1 + 2 * qdfLev4Lev5);
-        double lambdaLev5 = 1 / (1.0);
+      double lambdaLev1 = 1 / (1 + 2 * (qdfLev1Lev2 + 2 * qdfLev1Lev3 + 4 * qdfLev1Lev4 + 8 * qdfLev1Lev5));
+      double lambdaLev2 = 1 / (1 + (3 * qdfLev2Lev3 + 5 * qdfLev2Lev4 + 8 * qdfLev2Lev5));
+      double lambdaLev3 = 1 / (1 + 2 * qdfLev3Lev4 + 4 * qdfLev3Lev5);
+      double lambdaLev4 = 1 / (1 + 2 * qdfLev4Lev5);
+      double lambdaLev5 = 1 / (1.0);
 
-        lambdaRatio[0] = 1.0;
-        lambdaRatio[1] = lambdaLev2 / lambdaLev1;
-        lambdaRatio[2] = lambdaLev3 / lambdaLev1;
-        lambdaRatio[3] = lambdaLev4 / lambdaLev1;
-        lambdaRatio[4] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[5] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[6] = lambdaLev4 / lambdaLev1;
-        lambdaRatio[7] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[8] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[9] = lambdaLev3 / lambdaLev1;
-        lambdaRatio[10] = lambdaLev4 / lambdaLev1;
-        lambdaRatio[11] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[12] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[13] = lambdaLev4 / lambdaLev1;
-        lambdaRatio[14] = lambdaLev5 / lambdaLev1;
-        lambdaRatio[15] = lambdaLev5 / lambdaLev1;
-      }
+      lambdaRatio[0]  = 1.0;
+      lambdaRatio[1]  = lambdaLev2 / lambdaLev1;
+      lambdaRatio[2]  = lambdaLev3 / lambdaLev1;
+      lambdaRatio[3]  = lambdaLev4 / lambdaLev1;
+      lambdaRatio[4]  = lambdaLev5 / lambdaLev1;
+      lambdaRatio[5]  = lambdaLev5 / lambdaLev1;
+      lambdaRatio[6]  = lambdaLev4 / lambdaLev1;
+      lambdaRatio[7]  = lambdaLev5 / lambdaLev1;
+      lambdaRatio[8]  = lambdaLev5 / lambdaLev1;
+      lambdaRatio[9]  = lambdaLev3 / lambdaLev1;
+      lambdaRatio[10] = lambdaLev4 / lambdaLev1;
+      lambdaRatio[11] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[12] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[13] = lambdaLev4 / lambdaLev1;
+      lambdaRatio[14] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[15] = lambdaLev5 / lambdaLev1;
     }
     else if (encRCSeq->getAdaptiveBits() == 2 && encRCSeq->getGOPSize() == 32 )  // for GOP size = 32, random access case
     {
-      {
-        const double qdfParaLev2A = 0.7534;
-        const double qdfParaLev2B = -0.0303;
-        const double qdfParaLev3A = 0.7044;
-        const double qdfParaLev3B = -0.0445;
-        const double qdfParaLev4A = 0.7084;
-        const double qdfParaLev4B = -0.1401;
-        const double qdfParaLev5A = 0.8844;
-        const double qdfParaLev5B = -0.3676;
-        const double qdfParaLev6A = 1.2336;
-        const double qdfParaLev6B = -0.7511;
+      const double qdfParaLev2A = 0.7534;
+      const double qdfParaLev2B = -0.0303;
+      const double qdfParaLev3A = 0.7044;
+      const double qdfParaLev3B = -0.0445;
+      const double qdfParaLev4A = 0.7084;
+      const double qdfParaLev4B = -0.1401;
+      const double qdfParaLev5A = 0.8844;
+      const double qdfParaLev5B = -0.3676;
+      const double qdfParaLev6A = 1.2336;
+      const double qdfParaLev6B = -0.7511;
 
-        double qdfLev1Lev2 = Clip3(0.12, 0.9, qdfParaLev2A * encRCSeq->getPicPara(2).m_skipRatio + qdfParaLev2B);
-        double qdfLev1Lev3 = Clip3(0.13, 0.9, qdfParaLev3A * encRCSeq->getPicPara(3).m_skipRatio + qdfParaLev3B);
-        double qdfLev1Lev4 = Clip3(0.15, 0.9, qdfParaLev4A * encRCSeq->getPicPara(4).m_skipRatio + qdfParaLev4B);
-        double qdfLev1Lev5 = Clip3(0.20, 0.9, qdfParaLev5A * encRCSeq->getPicPara(5).m_skipRatio + qdfParaLev5B);
-        double qdfLev1Lev6 = Clip3(0.25, 0.9, qdfParaLev6A * encRCSeq->getPicPara(6).m_skipRatio + qdfParaLev6B);
-        double qdfLev2Lev3 = Clip3(0.09, 0.9, qdfLev1Lev3 * (1 - qdfLev1Lev2));
-        double qdfLev2Lev4 = Clip3(0.12, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev2));
-        double qdfLev2Lev5 = Clip3(0.14, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev2));
-        double qdfLev2Lev6 = Clip3(0.16, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev2));
-        double qdfLev3Lev4 = Clip3(0.06, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev3));
-        double qdfLev3Lev5 = Clip3(0.09, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev3));
-        double qdfLev3Lev6 = Clip3(0.10, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev3));
-        double qdfLev4Lev5 = Clip3(0.10, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev4));
-        double qdfLev4Lev6 = Clip3(0.10, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev4));
-        double qdfLev5Lev6 = Clip3(0.12, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev5));
+      double qdfLev1Lev2 = Clip3(0.12, 0.9, qdfParaLev2A * encRCSeq->getPicPara(2).m_skipRatio + qdfParaLev2B);
+      double qdfLev1Lev3 = Clip3(0.13, 0.9, qdfParaLev3A * encRCSeq->getPicPara(3).m_skipRatio + qdfParaLev3B);
+      double qdfLev1Lev4 = Clip3(0.15, 0.9, qdfParaLev4A * encRCSeq->getPicPara(4).m_skipRatio + qdfParaLev4B);
+      double qdfLev1Lev5 = Clip3(0.20, 0.9, qdfParaLev5A * encRCSeq->getPicPara(5).m_skipRatio + qdfParaLev5B);
+      double qdfLev1Lev6 = Clip3(0.25, 0.9, qdfParaLev6A * encRCSeq->getPicPara(6).m_skipRatio + qdfParaLev6B);
+      double qdfLev2Lev3 = Clip3(0.09, 0.9, qdfLev1Lev3 * (1 - qdfLev1Lev2));
+      double qdfLev2Lev4 = Clip3(0.12, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev2));
+      double qdfLev2Lev5 = Clip3(0.14, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev2));
+      double qdfLev2Lev6 = Clip3(0.16, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev2));
+      double qdfLev3Lev4 = Clip3(0.06, 0.9, qdfLev1Lev4 * (1 - qdfLev1Lev3));
+      double qdfLev3Lev5 = Clip3(0.09, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev3));
+      double qdfLev3Lev6 = Clip3(0.10, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev3));
+      double qdfLev4Lev5 = Clip3(0.10, 0.9, qdfLev1Lev5 * (1 - qdfLev1Lev4));
+      double qdfLev4Lev6 = Clip3(0.10, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev4));
+      double qdfLev5Lev6 = Clip3(0.12, 0.9, qdfLev1Lev6 * (1 - qdfLev1Lev5));
 
-         double lambdaLev1 = 1 / (1 + 2 * qdfLev1Lev2 + 4 * qdfLev1Lev3 + 6 * qdfLev1Lev4 + 8 * qdfLev1Lev5 + 10 * qdfLev1Lev6);
-         double lambdaLev2 = 1 / (1 + 3 * qdfLev2Lev3 + 5 * qdfLev2Lev4 + 8 * qdfLev2Lev5 + 9 * qdfLev2Lev6);
-         double lambdaLev3 = 1 / (1 + 2 * qdfLev3Lev4 + 4 * qdfLev3Lev5 + 6 * qdfLev3Lev6);
-         double lambdaLev4 = 1 / (1 + 2 * qdfLev4Lev5 + 4 * qdfLev4Lev6);
-         double lambdaLev5 = 1 / (1 + 2 * qdfLev5Lev6);
-         double lambdaLev6 = 1 / (1.0);
+      double lambdaLev1 =
+        1 / (1 + 2 * qdfLev1Lev2 + 4 * qdfLev1Lev3 + 6 * qdfLev1Lev4 + 8 * qdfLev1Lev5 + 10 * qdfLev1Lev6);
+      double lambdaLev2 = 1 / (1 + 3 * qdfLev2Lev3 + 5 * qdfLev2Lev4 + 8 * qdfLev2Lev5 + 9 * qdfLev2Lev6);
+      double lambdaLev3 = 1 / (1 + 2 * qdfLev3Lev4 + 4 * qdfLev3Lev5 + 6 * qdfLev3Lev6);
+      double lambdaLev4 = 1 / (1 + 2 * qdfLev4Lev5 + 4 * qdfLev4Lev6);
+      double lambdaLev5 = 1 / (1 + 2 * qdfLev5Lev6);
+      double lambdaLev6 = 1 / (1.0);
 
-         lambdaRatio[0] = 1.0;
-         lambdaRatio[1]  = lambdaLev2 / lambdaLev1;
-         lambdaRatio[2]  = lambdaLev3 / lambdaLev1;
-         lambdaRatio[3]  = lambdaLev4 / lambdaLev1;
-         lambdaRatio[4]  = lambdaLev5 / lambdaLev1;
-         lambdaRatio[5]  = lambdaLev6 / lambdaLev1;
-         lambdaRatio[6]  = lambdaLev6 / lambdaLev1;
-         lambdaRatio[7]  = lambdaLev5 / lambdaLev1;
-         lambdaRatio[8]  = lambdaLev6 / lambdaLev1;
-         lambdaRatio[9]  = lambdaLev6 / lambdaLev1;
-         lambdaRatio[10] = lambdaLev4 / lambdaLev1;
-         lambdaRatio[11] = lambdaLev5 / lambdaLev1;
-         lambdaRatio[12] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[13] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[14] = lambdaLev5 / lambdaLev1;
-         lambdaRatio[15] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[16] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[17] = lambdaLev3 / lambdaLev1;
-         lambdaRatio[18] = lambdaLev4 / lambdaLev1;
-         lambdaRatio[19] = lambdaLev5 / lambdaLev1;
-         lambdaRatio[20] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[21] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[22] = lambdaLev5 / lambdaLev1;
-         lambdaRatio[23] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[24] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[25] = lambdaLev4 / lambdaLev1;
-         lambdaRatio[26] = lambdaLev5 / lambdaLev1;
-         lambdaRatio[27] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[28] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[29] = lambdaLev5 / lambdaLev1;
-         lambdaRatio[30] = lambdaLev6 / lambdaLev1;
-         lambdaRatio[31] = lambdaLev6 / lambdaLev1;
-      }
+      lambdaRatio[0]  = 1.0;
+      lambdaRatio[1]  = lambdaLev2 / lambdaLev1;
+      lambdaRatio[2]  = lambdaLev3 / lambdaLev1;
+      lambdaRatio[3]  = lambdaLev4 / lambdaLev1;
+      lambdaRatio[4]  = lambdaLev5 / lambdaLev1;
+      lambdaRatio[5]  = lambdaLev6 / lambdaLev1;
+      lambdaRatio[6]  = lambdaLev6 / lambdaLev1;
+      lambdaRatio[7]  = lambdaLev5 / lambdaLev1;
+      lambdaRatio[8]  = lambdaLev6 / lambdaLev1;
+      lambdaRatio[9]  = lambdaLev6 / lambdaLev1;
+      lambdaRatio[10] = lambdaLev4 / lambdaLev1;
+      lambdaRatio[11] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[12] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[13] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[14] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[15] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[16] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[17] = lambdaLev3 / lambdaLev1;
+      lambdaRatio[18] = lambdaLev4 / lambdaLev1;
+      lambdaRatio[19] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[20] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[21] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[22] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[23] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[24] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[25] = lambdaLev4 / lambdaLev1;
+      lambdaRatio[26] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[27] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[28] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[29] = lambdaLev5 / lambdaLev1;
+      lambdaRatio[30] = lambdaLev6 / lambdaLev1;
+      lambdaRatio[31] = lambdaLev6 / lambdaLev1;
     }
     else
     {
@@ -1235,7 +1232,7 @@ double EncRCPic::calAverageLambda()
       {
         totalSSE += m_LCUs[i].m_actualSSE;
         totalPixels += m_LCUs[i].m_numberOfPixel;
-       }
+      }
     }
   }
 

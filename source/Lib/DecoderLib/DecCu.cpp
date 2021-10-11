@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -609,26 +609,6 @@ void DecCu::xIntraRecACTQT(CodingUnit &cu)
   for (auto &currTU : CU::traverseTUs(cu))
   {
     xIntraRecACTBlk(currTU);
-  }
-}
-
-/** Function for filling the PCM buffer of a CU using its reconstructed sample array
-* \param pCU   pointer to current CU
-* \param depth CU Depth
-*/
-void DecCu::xFillPCMBuffer(CodingUnit &cu)
-{
-  for( auto &currTU : CU::traverseTUs( cu ) )
-  {
-    for (const CompArea &area : currTU.blocks)
-    {
-      if( !area.valid() ) continue;;
-
-      CPelBuf source      = cu.cs->getRecoBuf(area);
-       PelBuf destination = currTU.getPcmbuf(area.compID);
-
-      destination.copyFrom(source);
-    }
   }
 }
 

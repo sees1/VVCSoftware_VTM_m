@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,11 @@ protected:
   void xPrintSubPicInfo (PPS *pps);
   void xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, SubPic &subPic);
   void xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, const SPS &sourceSPS, SubPic &subPic);
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+  bool xCheckSEIFiller(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten);
+#else
   bool xCheckSeiSubpicture(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten, bool isVclNalUnitRemoved);
+#endif
 
 #if JVET_R0107_BITSTREAM_EXTACTION
   Slice xParseSliceHeader(InputNALUnit &nalu);
@@ -74,7 +78,12 @@ protected:
   bool xCheckSliceSubpicture(InputNALUnit &nalu, int subPicId);
 #endif
   void xReadPicHeader(InputNALUnit &nalu);
+#if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
+  bool xIsTargetOlsIncludeAllVclLayers();
+  bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId, VPS *vps);
+#else
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId);
+#endif
 #if !JVET_T0055_ITEM2
   bool xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps);
 #endif

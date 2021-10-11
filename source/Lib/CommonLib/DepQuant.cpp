@@ -3,7 +3,7 @@
  * and contributor rights, including patent rights, and no such rights are
  * granted under this license.
  *
- * Copyright (c) 2010-2020, ITU/ISO/IEC
+ * Copyright (c) 2010-2021, ITU/ISO/IEC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 
 #include <bitset>
 
-
+#include "ContextModelling.h"
 
 
 
@@ -386,9 +386,13 @@ namespace DQIntern
     scanInfo.eosbb      = ( scanInfo.insidePos == 0 );
     scanInfo.spt        = SCAN_ISCSBB;
     if(  scanInfo.insidePos == m_sbbMask && scanIdx > scanInfo.sbbSize && scanIdx < m_numCoeff - 1 )
+    {
       scanInfo.spt      = SCAN_SOCSBB;
+    }
     else if( scanInfo.eosbb && scanIdx > 0 && scanIdx < m_numCoeff - m_sbbSize )
+    {
       scanInfo.spt      = SCAN_EOCSBB;
+    }
     scanInfo.posX = m_scanId2BlkPos[scanIdx].x;
     scanInfo.posY = m_scanId2BlkPos[scanIdx].y;
     if( scanIdx )
@@ -433,10 +437,20 @@ namespace DQIntern
       return m_sigFracBits[std::max(((int) stateId) - 1, 0)];
     }
     inline const CoeffFracBits *gtxFracBits(unsigned stateId) const { return m_gtxFracBits; }
+#if JVET_W0046_RLSCP
+    inline int32_t lastOffset(unsigned scanIdx, int effWidth, int effHeight, bool reverseLast) const
+    {
+      if (reverseLast)
+        return m_lastBitsX[effWidth - 1 - m_scanId2Pos[scanIdx].x] + m_lastBitsY[effHeight - 1 - m_scanId2Pos[scanIdx].y];
+      else
+        return m_lastBitsX[m_scanId2Pos[scanIdx].x] + m_lastBitsY[m_scanId2Pos[scanIdx].y];
+    }
+#else
     inline int32_t              lastOffset(unsigned scanIdx) const
     {
       return m_lastBitsX[m_scanId2Pos[scanIdx].x] + m_lastBitsY[m_scanId2Pos[scanIdx].y];
     }
+#endif
 
   private:
     void  xSetLastCoeffOffset ( const FracBitsAccess& fracBitsAccess, const TUParameters& tuPars, const TransformUnit& tu, const ComponentID compID );
@@ -528,7 +542,7 @@ namespace DQIntern
       const unsigned      lastShift   = ( compID == COMPONENT_Y ? (log2Size+1)>>2 : Clip3<unsigned>(0,2,size>>3) );
       const unsigned      lastOffset  = ( compID == COMPONENT_Y ? ( prefixCtx[log2Size] ) : 0 );
       uint32_t            sumFBits    = 0;
-      unsigned            maxCtxId    = g_uiGroupIdx[std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, size) - 1];
+      unsigned            maxCtxId    = g_groupIdx[std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, size) - 1];
       for( unsigned ctxId = 0; ctxId < maxCtxId; ctxId++ )
       {
         const BinFracBits bits  = fracBitsAccess.getFracBitsArray( ctxSetLast( lastOffset + ( ctxId >> lastShift ) ) );
@@ -538,7 +552,7 @@ namespace DQIntern
       ctxBits  [ maxCtxId ]     = sumFBits + ( maxCtxId>3 ? ((maxCtxId-2)>>1)<<SCALE_BITS : 0 ) + bitOffset;
       for (unsigned pos = 0; pos < std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, size); pos++)
       {
-        lastBits[ pos ]         = ctxBits[ g_uiGroupIdx[ pos ] ];
+        lastBits[pos] = ctxBits[g_groupIdx[pos]];
       }
     }
   }
@@ -756,7 +770,9 @@ namespace DQIntern
       if( level )
       {
         if (enableScalingLists)
+        {
           invQScale = piDequantCoef[rasterPos];//scalingfactor*levelScale
+        }
         if (shift < 0 && (enableScalingLists || scanIdx == lastScanIdx))
         {
           invQScale <<= -shift;
@@ -843,13 +859,38 @@ namespace DQIntern
     uint8_t                     m_memory[ 8 * ( MAX_TB_SIZEY * MAX_TB_SIZEY + MLS_GRP_NUM ) ];
   };
 
+#if JVET_V0106_DEP_QUANT_ENC_OPT
+#define RICEMAX 64
+#define RICE_ORDER_MAX 16
+  const int32_t g_goRiceBits[RICE_ORDER_MAX][RICEMAX] =
+#else
 #define RICEMAX 32
   const int32_t g_goRiceBits[4][RICEMAX] =
+#endif
   {
+#if JVET_V0106_DEP_QUANT_ENC_OPT
+    { 32768, 65536, 98304, 131072, 163840, 196608, 262144, 262144, 327680, 327680, 327680, 327680, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288 },
+    { 65536, 65536, 98304, 98304, 131072, 131072, 163840, 163840, 196608, 196608, 229376, 229376, 294912, 294912, 294912, 294912, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520 },
+    { 98304, 98304, 98304, 98304, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752 },
+    { 131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448 },
+    { 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144 },
+    { 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376 },
+    { 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376 },
+    { 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144, 262144 },
+    { 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912, 294912 },
+    { 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680 },
+    { 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448 },
+    { 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216 },
+    { 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984 },
+    { 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752 },
+    { 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520, 491520 },
+    { 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288, 524288 },
+#else
     { 32768,  65536,  98304, 131072, 163840, 196608, 262144, 262144, 327680, 327680, 327680, 327680, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 393216, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752, 458752},
     { 65536,  65536,  98304,  98304, 131072, 131072, 163840, 163840, 196608, 196608, 229376, 229376, 294912, 294912, 294912, 294912, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 360448, 425984, 425984, 425984, 425984, 425984, 425984, 425984, 425984},
     { 98304,  98304,  98304,  98304, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 262144, 262144, 262144, 262144, 327680, 327680, 327680, 327680, 327680, 327680, 327680, 327680},
     {131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 163840, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 196608, 229376, 229376, 229376, 229376, 229376, 229376, 229376, 229376}
+#endif
   };
 
   class State
@@ -859,7 +900,7 @@ namespace DQIntern
     State( const RateEstimator& rateEst, CommonCtx& commonCtx, const int stateId );
 
     template<uint8_t numIPos>
-    inline void updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision);
+    inline void updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision, const int baseLevel, const bool extRiceFlag);
     inline void updateStateEOS(const ScanInfo &scanInfo, const State *prevStates, const State *skipStates,
                                const Decision &decision);
 
@@ -880,70 +921,82 @@ namespace DQIntern
       int64_t         rdCostA   = m_rdCost + pqDataA.deltaDist;
       int64_t         rdCostB   = m_rdCost + pqDataB.deltaDist;
       int64_t         rdCostZ   = m_rdCost;
-        if( m_remRegBins >= 4 )
+      if (m_remRegBins >= 4)
+      {
+        if (pqDataA.absLevel < 4)
         {
-          if( pqDataA.absLevel < 4 )
-            rdCostA += m_coeffFracBits.bits[ pqDataA.absLevel ];
-          else
-          {
-            const TCoeff value = ( pqDataA.absLevel - 4 ) >> 1;
-            rdCostA += m_coeffFracBits.bits[ pqDataA.absLevel - ( value << 1 ) ] + goRiceTab[ value < RICEMAX ? value : RICEMAX - 1 ];
-          }
-          if( pqDataB.absLevel < 4 )
-            rdCostB += m_coeffFracBits.bits[ pqDataB.absLevel ];
-          else
-          {
-            const TCoeff value = ( pqDataB.absLevel - 4 ) >> 1;
-            rdCostB += m_coeffFracBits.bits[ pqDataB.absLevel - ( value << 1 ) ] + goRiceTab[ value < RICEMAX ? value : RICEMAX - 1 ];
-          }
-          if( spt == SCAN_ISCSBB )
-          {
-            rdCostA += m_sigFracBits.intBits[ 1 ];
-            rdCostB += m_sigFracBits.intBits[ 1 ];
-            rdCostZ += m_sigFracBits.intBits[ 0 ];
-          }
-          else if( spt == SCAN_SOCSBB )
-          {
-            rdCostA += m_sbbFracBits.intBits[ 1 ] + m_sigFracBits.intBits[ 1 ];
-            rdCostB += m_sbbFracBits.intBits[ 1 ] + m_sigFracBits.intBits[ 1 ];
-            rdCostZ += m_sbbFracBits.intBits[ 1 ] + m_sigFracBits.intBits[ 0 ];
-          }
-          else if( m_numSigSbb )
-          {
-            rdCostA += m_sigFracBits.intBits[ 1 ];
-            rdCostB += m_sigFracBits.intBits[ 1 ];
-            rdCostZ += m_sigFracBits.intBits[ 0 ];
-          }
-          else
-          {
-            rdCostZ = decisionA.rdCost;
-          }
+          rdCostA += m_coeffFracBits.bits[pqDataA.absLevel];
         }
         else
         {
-          rdCostA += ( 1 << SCALE_BITS ) + goRiceTab[ pqDataA.absLevel <= m_goRiceZero ? pqDataA.absLevel - 1 : ( pqDataA.absLevel < RICEMAX ? pqDataA.absLevel : RICEMAX - 1 ) ];
-          rdCostB += ( 1 << SCALE_BITS ) + goRiceTab[ pqDataB.absLevel <= m_goRiceZero ? pqDataB.absLevel - 1 : ( pqDataB.absLevel < RICEMAX ? pqDataB.absLevel : RICEMAX - 1 ) ];
-          rdCostZ += goRiceTab[ m_goRiceZero ];
+          const TCoeff value = (pqDataA.absLevel - 4) >> 1;
+          rdCostA +=
+            m_coeffFracBits.bits[pqDataA.absLevel - (value << 1)] + goRiceTab[value < RICEMAX ? value : RICEMAX - 1];
         }
-        if( rdCostA < decisionA.rdCost )
+        if (pqDataB.absLevel < 4)
         {
-          decisionA.rdCost = rdCostA;
-          decisionA.absLevel = pqDataA.absLevel;
-          decisionA.prevId = m_stateId;
+          rdCostB += m_coeffFracBits.bits[pqDataB.absLevel];
         }
-        if( rdCostZ < decisionA.rdCost )
+        else
         {
-          decisionA.rdCost = rdCostZ;
-          decisionA.absLevel = 0;
-          decisionA.prevId = m_stateId;
+          const TCoeff value = (pqDataB.absLevel - 4) >> 1;
+          rdCostB +=
+            m_coeffFracBits.bits[pqDataB.absLevel - (value << 1)] + goRiceTab[value < RICEMAX ? value : RICEMAX - 1];
         }
-        if( rdCostB < decisionB.rdCost )
+        if (spt == SCAN_ISCSBB)
         {
-          decisionB.rdCost = rdCostB;
-          decisionB.absLevel = pqDataB.absLevel;
-          decisionB.prevId = m_stateId;
+          rdCostA += m_sigFracBits.intBits[1];
+          rdCostB += m_sigFracBits.intBits[1];
+          rdCostZ += m_sigFracBits.intBits[0];
+        }
+        else if (spt == SCAN_SOCSBB)
+        {
+          rdCostA += m_sbbFracBits.intBits[1] + m_sigFracBits.intBits[1];
+          rdCostB += m_sbbFracBits.intBits[1] + m_sigFracBits.intBits[1];
+          rdCostZ += m_sbbFracBits.intBits[1] + m_sigFracBits.intBits[0];
+        }
+        else if (m_numSigSbb)
+        {
+          rdCostA += m_sigFracBits.intBits[1];
+          rdCostB += m_sigFracBits.intBits[1];
+          rdCostZ += m_sigFracBits.intBits[0];
+        }
+        else
+        {
+          rdCostZ = decisionA.rdCost;
         }
       }
+      else
+      {
+        rdCostA +=
+          (1 << SCALE_BITS)
+          + goRiceTab[pqDataA.absLevel <= m_goRiceZero ? pqDataA.absLevel - 1
+                                                       : (pqDataA.absLevel < RICEMAX ? pqDataA.absLevel : RICEMAX - 1)];
+        rdCostB +=
+          (1 << SCALE_BITS)
+          + goRiceTab[pqDataB.absLevel <= m_goRiceZero ? pqDataB.absLevel - 1
+                                                       : (pqDataB.absLevel < RICEMAX ? pqDataB.absLevel : RICEMAX - 1)];
+        rdCostZ += goRiceTab[m_goRiceZero];
+      }
+      if (rdCostA < decisionA.rdCost)
+      {
+        decisionA.rdCost   = rdCostA;
+        decisionA.absLevel = pqDataA.absLevel;
+        decisionA.prevId   = m_stateId;
+      }
+      if (rdCostZ < decisionA.rdCost)
+      {
+        decisionA.rdCost   = rdCostZ;
+        decisionA.absLevel = 0;
+        decisionA.prevId   = m_stateId;
+      }
+      if (rdCostB < decisionB.rdCost)
+      {
+        decisionB.rdCost   = rdCostB;
+        decisionB.absLevel = pqDataB.absLevel;
+        decisionB.prevId   = m_stateId;
+      }
+    }
 
     inline void checkRdCostStart(int32_t lastOffset, const PQData &pqData, Decision &decision) const
     {
@@ -1004,6 +1057,31 @@ namespace DQIntern
     unsigned                  effHeight;
   };
 
+  unsigned templateAbsCompare(TCoeff sum)
+  {
+    int rangeIdx = 0;
+    if (sum < g_riceT[0])
+    {
+      rangeIdx = 0;
+    }
+    else if (sum < g_riceT[1])
+    {
+      rangeIdx = 1;
+    }
+    else if (sum < g_riceT[2])
+    {
+      rangeIdx = 2;
+    }
+    else if (sum < g_riceT[3])
+    {
+      rangeIdx = 3;
+    }
+    else
+    {
+      rangeIdx = 4;
+    }
+    return g_riceShift[rangeIdx];
+  }
 
   State::State( const RateEstimator& rateEst, CommonCtx& commonCtx, const int stateId )
     : m_sbbFracBits     { { 0, 0 } }
@@ -1015,7 +1093,7 @@ namespace DQIntern
   }
 
   template<uint8_t numIPos>
-  inline void State::updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision)
+  inline void State::updateState(const ScanInfo &scanInfo, const State *prevStates, const Decision &decision, const int baseLevel, const bool extRiceFlag)
   {
     m_rdCost = decision.rdCost;
     if( decision.prevId > -2 )
@@ -1120,8 +1198,19 @@ namespace DQIntern
           UPDATE(4);
         }
 #undef UPDATE
-        int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
-        m_goRicePar = g_auiGoRiceParsCoeff[sumAll];
+        if (extRiceFlag)
+        {
+          unsigned currentShift = templateAbsCompare(sumAbs);
+          sumAbs = sumAbs >> currentShift;
+          int sumAll = std::max(std::min(31, (int)sumAbs - (int)baseLevel), 0);
+          m_goRicePar = g_goRiceParsCoeff[sumAll];
+          m_goRicePar += currentShift;
+        }
+        else
+        {
+          int sumAll = std::max(std::min(31, (int)sumAbs - 4 * 5), 0);
+          m_goRicePar = g_goRiceParsCoeff[sumAll];
+        }
       }
       else
       {
@@ -1158,9 +1247,20 @@ namespace DQIntern
           UPDATE(4);
         }
 #undef UPDATE
-        sumAbs = std::min<TCoeff>(31, sumAbs);
-        m_goRicePar = g_auiGoRiceParsCoeff[sumAbs];
-        m_goRiceZero = g_auiGoRicePosCoeff0(m_stateId, m_goRicePar);
+        if (extRiceFlag)
+        {
+          unsigned currentShift = templateAbsCompare(sumAbs);
+          sumAbs = sumAbs >> currentShift;
+          sumAbs = std::min<TCoeff>(31, sumAbs);
+          m_goRicePar = g_goRiceParsCoeff[sumAbs];
+          m_goRicePar += currentShift;
+        }
+        else
+        {
+          sumAbs = std::min<TCoeff>(31, sumAbs);
+          m_goRicePar = g_goRiceParsCoeff[sumAbs];
+        }
+        m_goRiceZero = g_goRicePosCoeff0(m_stateId, m_goRicePar);
       }
     }
   }
@@ -1290,8 +1390,15 @@ namespace DQIntern
     void    quant   ( TransformUnit& tu, const CCoeffBuf& srcCoeff, const ComponentID compID, const QpParam& cQP, const double lambda, const Ctx& ctx, TCoeff& absSum, bool enableScalingLists, int* quantCoeff );
     void    dequant ( const TransformUnit& tu, CoeffBuf& recCoeff, const ComponentID compID, const QpParam& cQP, bool enableScalingLists, int* quantCoeff );
 
+    int m_baseLevel;
+    bool m_extRiceRRCFlag;
+
   private:
+#if JVET_W0046_RLSCP
+    void    xDecideAndUpdate  ( const TCoeff absCoeff, const ScanInfo &scanInfo, bool zeroOut, TCoeff quantCoeff, int effWidth, int effHeight, bool reverseLast );
+#else
     void    xDecideAndUpdate  ( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, TCoeff quantCoeff);
+#endif
     void    xDecide           ( const ScanPosType spt, const TCoeff absCoeff, const int lastOffset, Decision* decisions, bool zeroOut, TCoeff quantCoeff );
 
   private:
@@ -1354,23 +1461,31 @@ namespace DQIntern
     m_prevStates[3].checkRdCosts( spt, pqData[3], pqData[1], decisions[3], decisions[1]);
     if( spt==SCAN_EOCSBB )
     {
-        m_skipStates[0].checkRdCostSkipSbb( decisions[0] );
-        m_skipStates[1].checkRdCostSkipSbb( decisions[1] );
-        m_skipStates[2].checkRdCostSkipSbb( decisions[2] );
-        m_skipStates[3].checkRdCostSkipSbb( decisions[3] );
+      m_skipStates[0].checkRdCostSkipSbb(decisions[0]);
+      m_skipStates[1].checkRdCostSkipSbb(decisions[1]);
+      m_skipStates[2].checkRdCostSkipSbb(decisions[2]);
+      m_skipStates[3].checkRdCostSkipSbb(decisions[3]);
     }
 
     m_startState.checkRdCostStart( lastOffset, pqData[0], decisions[0] );
     m_startState.checkRdCostStart( lastOffset, pqData[2], decisions[2] );
   }
 
+#if JVET_W0046_RLSCP
+  void DepQuant::xDecideAndUpdate( const TCoeff absCoeff, const ScanInfo &scanInfo, bool zeroOut, TCoeff quantCoeff, int effWidth, int effHeight, bool reverseLast )
+#else
   void DepQuant::xDecideAndUpdate( const TCoeff absCoeff, const ScanInfo& scanInfo, bool zeroOut, TCoeff quantCoeff )
+#endif
   {
     Decision* decisions = m_trellis[ scanInfo.scanIdx ];
 
     std::swap( m_prevStates, m_currStates );
 
+#if JVET_W0046_RLSCP
+    xDecide( scanInfo.spt, absCoeff, lastOffset(scanInfo.scanIdx, effWidth, effHeight, reverseLast), decisions, zeroOut, quantCoeff );
+#else
     xDecide( scanInfo.spt, absCoeff, lastOffset(scanInfo.scanIdx), decisions, zeroOut, quantCoeff );
+#endif
 
     if( scanInfo.scanIdx )
     {
@@ -1388,40 +1503,40 @@ namespace DQIntern
         switch( scanInfo.nextNbInfoSbb.num )
         {
         case 0:
-          m_currStates[0].updateState<0>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<0>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<0>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<0>( scanInfo, m_prevStates, decisions[3] );
+          m_currStates[0].updateState<0>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<0>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<0>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<0>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
           break;
         case 1:
-          m_currStates[0].updateState<1>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<1>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<1>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<1>( scanInfo, m_prevStates, decisions[3] );
+          m_currStates[0].updateState<1>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<1>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<1>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<1>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
           break;
         case 2:
-          m_currStates[0].updateState<2>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<2>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<2>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<2>( scanInfo, m_prevStates, decisions[3] );
+          m_currStates[0].updateState<2>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<2>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<2>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<2>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
           break;
         case 3:
-          m_currStates[0].updateState<3>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<3>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<3>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<3>( scanInfo, m_prevStates, decisions[3] );
+          m_currStates[0].updateState<3>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<3>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<3>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<3>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
           break;
         case 4:
-          m_currStates[0].updateState<4>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<4>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<4>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<4>( scanInfo, m_prevStates, decisions[3] );
+          m_currStates[0].updateState<4>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<4>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<4>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<4>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
           break;
         default:
-          m_currStates[0].updateState<5>( scanInfo, m_prevStates, decisions[0] );
-          m_currStates[1].updateState<5>( scanInfo, m_prevStates, decisions[1] );
-          m_currStates[2].updateState<5>( scanInfo, m_prevStates, decisions[2] );
-          m_currStates[3].updateState<5>( scanInfo, m_prevStates, decisions[3] );
+          m_currStates[0].updateState<5>(scanInfo, m_prevStates, decisions[0], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[1].updateState<5>(scanInfo, m_prevStates, decisions[1], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[2].updateState<5>(scanInfo, m_prevStates, decisions[2], m_baseLevel, m_extRiceRRCFlag);
+          m_currStates[3].updateState<5>(scanInfo, m_prevStates, decisions[3], m_baseLevel, m_extRiceRRCFlag);
         }
       }
 
@@ -1440,6 +1555,8 @@ namespace DQIntern
     //===== reset / pre-init =====
     const TUParameters& tuPars  = *g_Rom.getTUPars( tu.blocks[compID], compID );
     m_quant.initQuantBlock    ( tu, compID, cQP, lambda );
+    m_baseLevel = ctx.getBaseLevel();
+    m_extRiceRRCFlag = tu.cs->sps->getSpsRangeExtension().getRrcRiceExtensionEnableFlag();
     TCoeff*       qCoeff      = tu.getCoeffs( compID ).buf;
     const TCoeff* tCoeff      = srcCoeff.buf;
     const int     numCoeff    = tu.blocks[compID].area();
@@ -1478,7 +1595,9 @@ namespace DQIntern
     {
       if (zeroOutforThres && (tuPars.m_scanId2BlkPos[firstTestPos].x >= ((tuPars.m_width == 32 && zeroOut) ? 16 : 32)
                            || tuPars.m_scanId2BlkPos[firstTestPos].y >= ((tuPars.m_height == 32 && zeroOut) ? 16 : 32)))
+      {
         continue;
+      }
       TCoeff thresTmp = (enableScalingLists) ? TCoeff(thres / (4 * quantCoeff[tuPars.m_scanId2BlkPos[firstTestPos].idx]))
                                              : TCoeff(thres / (4 * defaultQuantisationCoefficient));
 
@@ -1519,10 +1638,20 @@ namespace DQIntern
       if (enableScalingLists)
       {
         m_quant.initQuantBlock(tu, compID, cQP, lambda, quantCoeff[scanInfo.rasterPos]);
+#if JVET_W0046_RLSCP
+        xDecideAndUpdate( abs( tCoeff[scanInfo.rasterPos]), scanInfo, (zeroOut && (scanInfo.posX >= effWidth || scanInfo.posY >= effHeight)), quantCoeff[scanInfo.rasterPos], effectWidth, effectHeight, tu.cu->slice->getReverseLastSigCoeffFlag() );
+#else
         xDecideAndUpdate( abs( tCoeff[scanInfo.rasterPos]), scanInfo, (zeroOut && (scanInfo.posX >= effWidth || scanInfo.posY >= effHeight)), quantCoeff[scanInfo.rasterPos] );
+#endif
       }
       else
+      {
+#if JVET_W0046_RLSCP
+        xDecideAndUpdate( abs( tCoeff[scanInfo.rasterPos]), scanInfo, (zeroOut && (scanInfo.posX >= effWidth || scanInfo.posY >= effHeight)), defaultQuantisationCoefficient, effectWidth, effectHeight, tu.cu->slice->getReverseLastSigCoeffFlag() );
+#else
         xDecideAndUpdate( abs( tCoeff[scanInfo.rasterPos]), scanInfo, (zeroOut && (scanInfo.posX >= effWidth || scanInfo.posY >= effHeight)), defaultQuantisationCoefficient );
+#endif
+      }
     }
 
     //===== find best path =====
