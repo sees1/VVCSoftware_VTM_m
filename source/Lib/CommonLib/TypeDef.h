@@ -55,6 +55,8 @@
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_W0133_CONSTRAINED_RASL_ENCODING              1 // SEI message for Constrained RASL encoding for bitstream switching
 
+#define JVET_T0055_ITEM2                                  1 // JVET-T0055 item 2: Remove the step 9 of the general sub-bitstream extraction process.
+
 #define JVET_W0078_MVP_SEI                                1 // JVET-W0078 Multiview view position SEI message
 
 #define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
@@ -73,7 +75,6 @@
 
 #define JVET_S0154_ASPECT9_AND_S0158_ASPECT4              1 // JVET-S0154 #9:  In the subpicture sub-bitstream extraction process, insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
                                                             // JVET-S0158 #4c: Insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
-
 
 #define JVET_S0117_VB                                     1 // sub-picture extraction VB rewriting
 
