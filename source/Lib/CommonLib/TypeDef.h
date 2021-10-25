@@ -56,7 +56,6 @@
 
 
 
-#define JVET_W0078_MVP_SEI                                1 // JVET-W0078 Multiview view position SEI message
 
 #define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
 

@@ -958,7 +958,6 @@ void SEIEncoder::initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *se
   }
 }
 
-#if JVET_W0078_MVP_SEI 
 void SEIEncoder::initSEIMultiviewViewPosition(SEIMultiviewViewPosition *sei)
 {
   CHECK(!(m_isInitialized), "Multiview view position SEI already initialized");
@@ -972,7 +971,6 @@ void SEIEncoder::initSEIMultiviewViewPosition(SEIMultiviewViewPosition *sei)
     sei->m_mvpViewPosition[i] = m_pcCfg->getMvpSEIViewPosition(i);
   }
 }
-#endif
 
 void SEIEncoder::initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei)
 {

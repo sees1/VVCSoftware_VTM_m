@@ -790,7 +790,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIMultiviewAcquisitionInfo(seiMultiviewAcquisitionInfo);
     seiMessages.push_back(seiMultiviewAcquisitionInfo);
   }
-#if JVET_W0078_MVP_SEI 
   // multiview view position
   if (m_pcCfg->getMvpSEIEnabled())
   {
@@ -798,7 +797,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIMultiviewViewPosition(seiMultiviewViewPosition);
     seiMessages.push_back(seiMultiviewViewPosition);
   }
-#endif
   // alpha channel information
   if (m_pcCfg->getAciSEIEnabled())
   {

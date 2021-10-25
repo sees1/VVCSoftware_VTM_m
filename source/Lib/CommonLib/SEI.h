@@ -78,9 +78,7 @@ public:
     FRAME_FIELD_INFO                     = 168,
     DEPTH_REPRESENTATION_INFO            = 177,
     MULTIVIEW_ACQUISITION_INFO           = 179,
-#if JVET_W0078_MVP_SEI 
     MULTIVIEW_VIEW_POSITION              = 180,
-#endif
     SUBPICTURE_LEVEL_INFO                = 203,
     SAMPLE_ASPECT_RATIO_INFO             = 204,
     CONTENT_LIGHT_LEVEL_INFO             = 144,
@@ -335,7 +333,6 @@ private:
   uint32_t xGetSyntaxElementLen( int expo, int prec, int val ) const;
 };
 
-#if JVET_W0078_MVP_SEI 
 class SEIMultiviewViewPosition : public SEI
 {
 public:
@@ -347,7 +344,6 @@ public:
   int               m_mvpNumViewsMinus1;
   std::vector<int>  m_mvpViewPosition;
 };
-#endif
 
 class SEIAlphaChannelInfo : public SEI
 {

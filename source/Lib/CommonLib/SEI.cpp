@@ -414,7 +414,6 @@ bool SEIMultiviewAcquisitionInfo::isMAISameContent(SEIMultiviewAcquisitionInfo *
   return true;
 }
 
-#if JVET_W0078_MVP_SEI 
 bool SEIMultiviewViewPosition::isMVPSameContent(SEIMultiviewViewPosition *mvpB)
 {
   if (!mvpB)
@@ -434,7 +433,6 @@ bool SEIMultiviewViewPosition::isMVPSameContent(SEIMultiviewViewPosition *mvpB)
   }
   return true;
 }
-#endif
 
 // Static member
 const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
@@ -470,9 +468,7 @@ const char *SEI::getSEIMessageString(SEI::PayloadType payloadType)
     case SEI::ALPHA_CHANNEL_INFO:                   return "Alpha channel information";
     case SEI::DEPTH_REPRESENTATION_INFO:            return "Depth representation information";
     case SEI::MULTIVIEW_ACQUISITION_INFO:           return "Multiview acquisition information";
-#if JVET_W0078_MVP_SEI 
     case SEI::MULTIVIEW_VIEW_POSITION:              return "Multiview view position";
-#endif
     case SEI::SAMPLE_ASPECT_RATIO_INFO:             return "Sample aspect ratio information";
     case SEI::SUBPICTURE_LEVEL_INFO:                return "Subpicture level information";
     case SEI::ANNOTATED_REGIONS:                    return "Annotated Region";

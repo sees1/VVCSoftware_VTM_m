@@ -94,9 +94,7 @@ public:
   bool initSEIAnnotatedRegions(SEIAnnotatedRegions *sei, int currPOC);
   void initSEIColourTransformInfo(SEIColourTransformInfo* sei);
   void readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *seiAnnoRegion, bool &failed);
-#if JVET_W0078_MVP_SEI
   void initSEIMultiviewViewPosition(SEIMultiviewViewPosition *sei);
-#endif
 private:
   EncCfg* m_pcCfg;
   EncLib* m_pcEncLib;

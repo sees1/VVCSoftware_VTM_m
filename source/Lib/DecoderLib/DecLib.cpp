@@ -408,9 +408,7 @@ DecLib::DecLib()
   , m_SEIs()
   , m_sdiSEIInFirstAU(NULL)
   , m_maiSEIInFirstAU(NULL)
-#if JVET_W0078_MVP_SEI 
   , m_mvpSEIInFirstAU(NULL)
-#endif
   , m_cIntraPred()
   , m_cInterPred()
   , m_cTrQuant()
@@ -503,13 +501,11 @@ DecLib::~DecLib()
     delete m_maiSEIInFirstAU;
   }
   m_maiSEIInFirstAU = NULL;
-#if JVET_W0078_MVP_SEI 
   if (m_mvpSEIInFirstAU != NULL)
   {
     delete m_mvpSEIInFirstAU;
   }
   m_mvpSEIInFirstAU = NULL;
-#endif
 }
 
 void DecLib::create()
@@ -1199,11 +1195,7 @@ void DecLib::checkSEIInAccessUnit()
   bool isNonNestedSliFound = false;
 
   bool bSdiPresentInAu = false;
-#if JVET_W0078_MVP_SEI 
   bool bAuxSEIsBeforeSdiSEIPresent[4] = { false, false, false, false };
-#else
-  bool bAuxSEIsBeforeSdiSEIPresent[3] = { false, false, false };
-#endif
   for (auto &sei : m_accessUnitSeiPayLoadTypes)
   {
     enum NalUnitType         naluType = std::get<0>(sei);
@@ -1257,12 +1249,10 @@ void DecLib::checkSEIInAccessUnit()
     {
       bAuxSEIsBeforeSdiSEIPresent[2] = true;
     }
-#if JVET_W0078_MVP_SEI 
     else if (payloadType == SEI::MULTIVIEW_VIEW_POSITION && !bSdiPresentInAu)
     {
       bAuxSEIsBeforeSdiSEIPresent[3] = true;
     }
-#endif
   }
 
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[0], "When an AU contains both an SDI SEI message and an MAI SEI message, the SDI SEI message shall precede the MAI SEI message in decoding order.");
@@ -2265,13 +2255,11 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
       delete m_maiSEIInFirstAU;
     }
     m_maiSEIInFirstAU = NULL;
-#if JVET_W0078_MVP_SEI 
     if (m_mvpSEIInFirstAU != NULL) 
     {
       delete m_mvpSEIInFirstAU;
     }
     m_mvpSEIInFirstAU = NULL;
-#endif
     SEIMessages sdiSEIs  = getSeisByType(prefixSEIs, SEI::SCALABILITY_DIMENSION_INFO);
     if (!sdiSEIs.empty())
     {
@@ -2298,7 +2286,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
         }
       }
     }
-#if JVET_W0078_MVP_SEI 
     SEIMessages mvpSEIs = getSeisByType(prefixSEIs, SEI::MULTIVIEW_VIEW_POSITION);
     if (!mvpSEIs.empty())
     {
@@ -2312,7 +2299,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
         }
       }
     }
-#endif
   }
   else
   {
@@ -2334,7 +2320,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
         CHECK(!m_maiSEIInFirstAU->isMAISameContent((SEIMultiviewAcquisitionInfo*)*it), "All MAI SEI messages in a CVS shall have the same content.")
       }
     }
-#if JVET_W0078_MVP_SEI 
     SEIMessages mvpSEIs = getSeisByType(prefixSEIs, SEI::MULTIVIEW_VIEW_POSITION);
     CHECK(!m_mvpSEIInFirstAU && !mvpSEIs.empty(), "When an MVP SEI message is present in any AU of a CVS, an MVP SEI message shall be present for the first AU of the CVS.");
     if (!mvpSEIs.empty())
@@ -2344,7 +2329,6 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
         CHECK(!m_mvpSEIInFirstAU->isMVPSameContent((SEIMultiviewViewPosition*)*it), "All MVP SEI messages in a CVS shall have the same content.")
       }
     }
-#endif
   }
 
   for (SEIMessages::const_iterator it=prefixSEIs.begin(); it!=prefixSEIs.end(); it++)
@@ -2363,14 +2347,12 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
     {
       CHECK(!m_sdiSEIInFirstAU, "When a CVS does not contain an SDI SEI message with sdi_aux_id[i] equal to 2 for at least one value of i, no picture in the CVS shall be associated with a DRI SEI message.");
     }
-#if JVET_W0078_MVP_SEI
     else if ((*it)->payloadType() == SEI::MULTIVIEW_VIEW_POSITION)
     {
       CHECK(!m_sdiSEIInFirstAU, "When a CVS does not contain an SDI SEI message, the CVS shall not contain an MVP SEI message.");
       SEIMultiviewViewPosition *mvpSei = (SEIMultiviewViewPosition*)*it;
       CHECK(m_sdiSEIInFirstAU->m_sdiNumViews - 1 != mvpSei->m_mvpNumViewsMinus1, "The value of num_views_minus1 shall be equal to NumViews - 1");
     }
-#endif
   }
 }
 
