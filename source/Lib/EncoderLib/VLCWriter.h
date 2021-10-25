@@ -142,11 +142,7 @@ public:
   void  codePictureHeader       ( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice = 0 );
   void  codeSliceHeader         ( Slice* pcSlice, PicHeader *picheader = 0 );
   void  codeOPI                 ( const OPI* opi );
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   void  codeConstraintInfo      ( const ConstraintInfo* cinfo, const ProfileTierLevel* ptl );
-#else
-  void  codeConstraintInfo      ( const ConstraintInfo* cinfo );
-#endif
   void  codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1 );
   void  codeOlsHrdParameters(const GeneralHrdParams * generalHrd, const OlsHrdParams *olsHrd , const uint32_t firstSubLayer, const uint32_t maxNumSubLayersMinus1);
 

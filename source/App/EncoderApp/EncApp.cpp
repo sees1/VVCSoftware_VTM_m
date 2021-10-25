@@ -220,19 +220,12 @@ void EncApp::xInitLibCfg()
   ptls[0].setTierFlag                                            ( m_levelTier );
   ptls[0].setFrameOnlyConstraintFlag                             ( m_frameOnlyConstraintFlag);
   ptls[0].setMultiLayerEnabledFlag                               ( m_multiLayerEnabledFlag);
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   CHECK((m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_10_444 || \
          m_profile == Profile::MAIN_10_STILL_PICTURE || m_profile == Profile::MAIN_10_444_STILL_PICTURE || \
          m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_STILL_PICTURE || \
          m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_12_444_STILL_PICTURE || \
          m_profile == Profile::MAIN_16_444 || m_profile == Profile::MAIN_16_444_INTRA || m_profile == Profile::MAIN_16_444_STILL_PICTURE) \
           && m_multiLayerEnabledFlag, "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#else
-  CHECK((m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_10_444
-         || m_profile == Profile::MAIN_10_STILL_PICTURE || m_profile == Profile::MAIN_10_444_STILL_PICTURE)
-          && m_multiLayerEnabledFlag,
-        "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#endif
   ptls[0].setNumSubProfile                                       ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
   {
@@ -459,13 +452,11 @@ void EncApp::xInitLibCfg()
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     m_cEncLib.setGeneralLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
     if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
     {
       CHECK(m_generalLowerBitRateConstraintFlag==0, "generalLowerBitRateConstraintFlag shall be 1 when non-Intra/Still Picture operation range extension profiles are used");
     }
-#endif
   }
   else
   {
@@ -531,9 +522,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoActConstraintFlag(false);
     m_cEncLib.setNoLmcsConstraintFlag(false);
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     m_cEncLib.setGeneralLowerBitRateConstraintFlag(false);
-#endif
   }
 
   //====== Coding Structure ========

@@ -92,7 +92,6 @@ static const ProfileFeatures validProfiles[] = {
   { Profile::MAIN_10_444, "Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75, mainLevelTierInfo, false },
   { Profile::MULTILAYER_MAIN_10_444, "Multilayer_Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75,
     mainLevelTierInfo, false },
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   { Profile::MAIN_12, "Main_12", 12, CHROMA_420, true, 1500, 1650, 2250, 100, mainLevelTierInfo, false },
   { Profile::MAIN_12_INTRA, "Main_12_Intra", 12, CHROMA_420, true, 1500, 1650, 2250, 100, mainLevelTierInfo, false },
   { Profile::MAIN_12_STILL_PICTURE, "Main_12_Still_Picture", 12, CHROMA_420, true, 1500, 1650, 2250, 100, mainLevelTierInfo, false },
@@ -102,7 +101,6 @@ static const ProfileFeatures validProfiles[] = {
   { Profile::MAIN_16_444, "Main_16_444", 16, CHROMA_444, true, 4000, 4400, 6000, 50, mainLevelTierInfo, false },
   { Profile::MAIN_16_444_INTRA, "Main_16_444_Intra", 16, CHROMA_444, true, 4000, 4400, 6000, 50, mainLevelTierInfo, false },
   { Profile::MAIN_16_444_STILL_PICTURE, "Main_16_444_Still_Picture", 16, CHROMA_444, true, 4000, 4400, 6000, 50, mainLevelTierInfo, false },
-#endif
   { Profile::NONE, 0 },
 };
 
@@ -155,7 +153,6 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
       }
     }
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   if (m_pProfile)
   {
     Profile::Name profile = m_pProfile->profile;
@@ -170,25 +167,16 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
       m_hbrFactor = 2 - sps.getProfileTierLevel()->getConstraintInfo()->getLowerBitRateConstraintFlag();
     }
   }
-#endif
 }
 
 double ProfileLevelTierFeatures::getMinCr() const
 {
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   return (m_pLevelTier!=0 && m_pProfile!=0) ? (m_pProfile->minCrScaleFactorx100 * m_pLevelTier->minCrBase[m_tier?1:0] / m_hbrFactor)/100.0 : 0.0 ;
-#else
-  return (m_pLevelTier!=0 && m_pProfile!=0) ? (m_pProfile->minCrScaleFactorx100 * m_pLevelTier->minCrBase[m_tier?1:0])/100.0 : 0.0 ;
-#endif
 }
 
 uint64_t ProfileLevelTierFeatures::getCpbSizeInBits() const
 {
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   return (m_pLevelTier!=0 && m_pProfile!=0) ? uint64_t(m_pProfile->cpbVclFactor) * m_pLevelTier->maxCpb[m_tier?1:0] * m_hbrFactor : uint64_t(0);
-#else
-  return (m_pLevelTier!=0 && m_pProfile!=0) ? uint64_t(m_pProfile->cpbVclFactor) * m_pLevelTier->maxCpb[m_tier?1:0] : uint64_t(0);
-#endif
 }
 
 uint32_t ProfileLevelTierFeatures::getMaxDpbSize( uint32_t picSizeMaxInSamplesY ) const

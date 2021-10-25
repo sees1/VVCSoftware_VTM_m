@@ -177,11 +177,7 @@ public:
   void  parseLmcsAps        ( APS* pcAPS );
   void  parseScalingListAps ( APS* pcAPS );
   void  parseVUI            ( VUI* pcVUI, SPS* pcSPS );
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   void  parseConstraintInfo (ConstraintInfo *cinfo, const ProfileTierLevel* ptl );
-#else
-  void  parseConstraintInfo   (ConstraintInfo *cinfo);
-#endif
   void  parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTierPresentFlag, int maxNumSubLayersMinus1);
   void  parseOlsHrdParameters(GeneralHrdParams* generalHrd, OlsHrdParams *olsHrd, uint32_t firstSubLayer, uint32_t tempLevelHigh);
   void parseGeneralHrdParameters(GeneralHrdParams *generalHrd);

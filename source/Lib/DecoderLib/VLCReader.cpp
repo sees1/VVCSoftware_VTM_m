@@ -1924,10 +1924,8 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setVerCollocatedChromaFlag(true);
   }
   READ_FLAG( uiCode,  "sps_palette_enabled_flag");                                pcSPS->setPLTMode                ( uiCode != 0 );
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   CHECK((profile == Profile::MAIN_12 || profile == Profile::MAIN_12_INTRA || profile == Profile::MAIN_12_STILL_PICTURE)
     && uiCode != 0, "sps_palette_enabled_flag shall be equal to 0 for Main 12 (420) profiles");
-#endif
   if (pcSPS->getChromaFormatIdc() == CHROMA_444 && pcSPS->getLog2MaxTbSize() != 6)
   {
     READ_FLAG(uiCode, "sps_act_enabled_flag");                                pcSPS->setUseColorTrans(uiCode != 0);
@@ -2118,25 +2116,14 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
           CHECK(bSkipTrailingExtensionBits, "Skipping trailing extension bits not supported");
           {
             SPSRExt &spsRangeExtension = pcSPS->getSpsRangeExtension();
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-            READ_FLAG( uiCode, "transform_skip_rotation_enabled_flag");     spsRangeExtension.setTransformSkipRotationEnabledFlag(uiCode != 0);
-            READ_FLAG( uiCode, "transform_skip_context_enabled_flag");      spsRangeExtension.setTransformSkipContextEnabledFlag (uiCode != 0);
-#endif
             READ_FLAG( uiCode, "extended_precision_processing_flag");       spsRangeExtension.setExtendedPrecisionProcessingFlag (uiCode != 0);
             if (pcSPS->getTransformSkipEnabledFlag()) 
             {
               READ_FLAG( uiCode, "sps_ts_residual_coding_rice_present_in_sh_flag"); spsRangeExtension.setTSRCRicePresentFlag(uiCode != 0);
             }
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-            READ_FLAG( uiCode, "intra_smoothing_disabled_flag");            spsRangeExtension.setIntraSmoothingDisabledFlag      (uiCode != 0);
-            READ_FLAG( uiCode, "high_precision_offsets_enabled_flag");      spsRangeExtension.setHighPrecisionOffsetsEnabledFlag (uiCode != 0);
-#endif
             READ_FLAG(uiCode,  "rrc_rice_extension_flag");                  spsRangeExtension.setRrcRiceExtensionEnableFlag      (uiCode != 0);
             READ_FLAG( uiCode, "persistent_rice_adaptation_enabled_flag");  spsRangeExtension.setPersistentRiceAdaptationEnabledFlag (uiCode != 0);
             READ_FLAG( uiCode, "reverse_last_position_enabled_flag");       spsRangeExtension.setReverseLastSigCoeffEnabledFlag(uiCode != 0);
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-            READ_FLAG( uiCode, "cabac_bypass_alignment_enabled_flag");      spsRangeExtension.setCabacBypassAlignmentEnabledFlag  (uiCode != 0);
-#endif
           }
           break;
         default:
@@ -4495,11 +4482,7 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
   DTRACE_UPDATE( g_trace_ctx, std::make_pair( "final", 1 ) );
 }
 
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
 void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo, const ProfileTierLevel* ptl )
-#else
-void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
-#endif
 {
   uint32_t symbol;
   READ_FLAG(symbol, "gci_present_flag"); cinfo->setGciPresentFlag(symbol ? true : false);
@@ -4591,7 +4574,6 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
     READ_FLAG(symbol, "gci_no_virtual_boundaries_constraint_flag");      cinfo->setNoVirtualBoundaryConstraintFlag(symbol > 0 ? true : false);
     READ_CODE(8, symbol, "gci_num_reserved_bits");
     uint32_t const numReservedBits = symbol;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     int numReservedBitsUsed;
     if (numReservedBits > 0)
     {
@@ -4606,9 +4588,6 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo)
       numReservedBitsUsed = 0;
     }
     for (int i = 0; i < numReservedBits - numReservedBitsUsed; i++)
-#else
-    for (int i = 0; i < numReservedBits; i++)
-#endif
     {
       READ_FLAG(symbol, "gci_reserved_zero_bit");                    CHECK(symbol != 0, "gci_reserved_zero_bit not equal to zero");
     }
@@ -4641,11 +4620,7 @@ void HLSyntaxReader::parseProfileTierLevel(ProfileTierLevel *ptl, bool profileTi
 
   if(profileTierPresentFlag)
   {
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     parseConstraintInfo(ptl->getConstraintInfo(), ptl);
-#else
-    parseConstraintInfo(ptl->getConstraintInfo());
-#endif
   }
 
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)

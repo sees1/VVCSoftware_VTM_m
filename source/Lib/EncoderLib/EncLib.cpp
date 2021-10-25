@@ -1118,9 +1118,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoCraConstraintFlag(m_noCraConstraintFlag);
   cinfo->setNoGdrConstraintFlag(m_noGdrConstraintFlag);
   cinfo->setNoApsConstraintFlag(m_noApsConstraintFlag);
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   cinfo->setLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
-#endif
 
   profileTierLevel->setLevelIdc                    (m_level);
   profileTierLevel->setTierFlag                    (m_levelTier);

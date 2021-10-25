@@ -1263,7 +1263,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   {
 #if ENABLE_TRACING /*|| RExt__DECODER_DEBUG_BIT_STATISTICS*/
     static const char *syntaxStrings[]={ "sps_range_extension_flag",
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
       "sps_extension_7bits[0]",
       "sps_extension_7bits[1]",
       "sps_extension_7bits[2]",
@@ -1271,15 +1270,6 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
       "sps_extension_7bits[4]",
       "sps_extension_7bits[5]",
       "sps_extension_7bits[6]" };
-#else
-      "sps_multilayer_extension_flag",
-      "sps_extension_6bits[0]",
-      "sps_extension_6bits[1]",
-      "sps_extension_6bits[2]",
-      "sps_extension_6bits[3]",
-      "sps_extension_6bits[4]",
-      "sps_extension_6bits[5]" };
-#endif
 #endif
 
     if (pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) <= 10)
@@ -1301,25 +1291,14 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
         {
           const SPSRExt &spsRangeExtension=pcSPS->getSpsRangeExtension();
 
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-          WRITE_FLAG( (spsRangeExtension.getTransformSkipRotationEnabledFlag() ? 1 : 0),      "transform_skip_rotation_enabled_flag");
-          WRITE_FLAG( (spsRangeExtension.getTransformSkipContextEnabledFlag() ? 1 : 0),       "transform_skip_context_enabled_flag");
-#endif
           WRITE_FLAG( (spsRangeExtension.getExtendedPrecisionProcessingFlag() ? 1 : 0),       "extended_precision_processing_flag" );
           if (pcSPS->getTransformSkipEnabledFlag())
           {
             WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                 "sps_ts_residual_coding_rice_present_in_sh_flag");
           }
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-          WRITE_FLAG( (spsRangeExtension.getIntraSmoothingDisabledFlag() ? 1 : 0),            "intra_smoothing_disabled_flag" );
-          WRITE_FLAG( (spsRangeExtension.getHighPrecisionOffsetsEnabledFlag() ? 1 : 0),       "high_precision_offsets_enabled_flag" );
-#endif
           WRITE_FLAG( (spsRangeExtension.getRrcRiceExtensionEnableFlag() ? 1 : 0),                   "rrc_rice_extension_flag");
           WRITE_FLAG( (spsRangeExtension.getPersistentRiceAdaptationEnabledFlag() ? 1 : 0),   "persistent_rice_adaptation_enabled_flag" );
           WRITE_FLAG( (spsRangeExtension.getReverseLastSigCoeffEnabledFlag() ? 1 : 0),        "reverse_last_sig_coeff_enabled_flag" );
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-          WRITE_FLAG( (spsRangeExtension.getCabacBypassAlignmentEnabledFlag() ? 1 : 0),       "cabac_bypass_alignment_enabled_flag" );
-#endif
           break;
         }
         default:
@@ -2630,11 +2609,7 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
 
 }
 
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
 void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo, const ProfileTierLevel* ptl )
-#else
-void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
-#endif
 {
   WRITE_FLAG(cinfo->getGciPresentFlag(), "gci_present_flag");
   if (cinfo->getGciPresentFlag())
@@ -2723,7 +2698,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     WRITE_FLAG(cinfo->getNoLmcsConstraintFlag() ? 1 : 0, "gci_no_lmcs_constraint_flag");
     WRITE_FLAG(cinfo->getNoLadfConstraintFlag() ? 1 : 0, "gci_no_ladf_constraint_flag");
     WRITE_FLAG(cinfo->getNoVirtualBoundaryConstraintFlag() ? 1 : 0, "gci_no_virtual_boundaries_constraint_flag");
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     Profile::Name profile = ptl->getProfileIdc();
     if (profile == Profile::MAIN_12 || profile == Profile::MAIN_12_INTRA || profile == Profile::MAIN_12_STILL_PICTURE ||
         profile == Profile::MAIN_12_444 || profile == Profile::MAIN_12_444_INTRA || profile == Profile::MAIN_12_444_STILL_PICTURE ||
@@ -2737,11 +2711,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo )
     {
       WRITE_CODE(0, 8, "gci_num_reserved_bits");
     }
-#else
-    //The value of gci_num_reserved_bits shall be equal to 0 in bitstreams conforming to this version of this Specification.
-    //Other values of gci_num_reserved_bits are reserved for future use by ITU-T | ISO/IEC.
-    WRITE_CODE(0, 8, "gci_num_reserved_bits");
-#endif
   }
 
   while (!isByteAligned())
@@ -2765,11 +2734,7 @@ void  HLSWriter::codeProfileTierLevel    ( const ProfileTierLevel* ptl, bool pro
 
   if(profileTierPresentFlag)
   {
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     codeConstraintInfo(ptl->getConstraintInfo(), ptl);
-#else
-    codeConstraintInfo(ptl->getConstraintInfo());
-#endif
   }
 
   for (int i = maxNumSubLayersMinus1 - 1; i >= 0; i--)

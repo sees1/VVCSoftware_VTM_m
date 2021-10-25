@@ -69,7 +69,6 @@ enum ExtendedProfileName   // this is used for determining profile strings, wher
   MULTILAYER_MAIN_10_STILL_PICTURE,
   MULTILAYER_MAIN_10_444,
   MULTILAYER_MAIN_10_444_STILL_PICTURE,
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   MAIN_12,
   MAIN_12_444,
   MAIN_16_444,
@@ -79,7 +78,6 @@ enum ExtendedProfileName   // this is used for determining profile strings, wher
   MAIN_12_STILL_PICTURE,
   MAIN_12_444_STILL_PICTURE,
   MAIN_16_444_STILL_PICTURE,
-#endif
   AUTO = -1
 };
 
@@ -190,7 +188,6 @@ static const struct MapStrToProfile
   { "multilayer_main_10_444", Profile::MULTILAYER_MAIN_10_444 },
   { "multilayer_main_10_still_picture", Profile::MULTILAYER_MAIN_10_STILL_PICTURE },
   { "multilayer_main_10_444_still_picture", Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE },
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   { "main_12", Profile::MAIN_12 },
   { "main_12_444", Profile::MAIN_12_444 },
   { "main_16_444", Profile::MAIN_16_444 },
@@ -200,7 +197,6 @@ static const struct MapStrToProfile
   { "main_12_still_picture", Profile::MAIN_12_STILL_PICTURE },
   { "main_12_444_still_picture", Profile::MAIN_12_444_STILL_PICTURE },
   { "main_16_444_still_picture", Profile::MAIN_16_444_STILL_PICTURE },
-#endif
 };
 
 static const struct MapStrToExtendedProfile
@@ -217,7 +213,6 @@ static const struct MapStrToExtendedProfile
   { "multilayer_main_10_444", MULTILAYER_MAIN_10_444 },
   { "multilayer_main_10_still_picture", MULTILAYER_MAIN_10_STILL_PICTURE },
   { "multilayer_main_10_444_still_picture", MULTILAYER_MAIN_10_444_STILL_PICTURE },
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   { "main_12", MAIN_12 },
   { "main_12_444", MAIN_12_444 },
   { "main_16_444", MAIN_16_444 },
@@ -227,7 +222,6 @@ static const struct MapStrToExtendedProfile
   { "main_12_still_picture", MAIN_12_STILL_PICTURE },
   { "main_12_444_still_picture", MAIN_12_444_STILL_PICTURE },
   { "main_16_444_still_picture", MAIN_16_444_STILL_PICTURE },
-#endif
   { "auto", AUTO },
 };
 
@@ -928,9 +922,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoLmcsConstraintFlag",                            m_noLmcsConstraintFlag,                           false, "Indicate that LMCS is deactivated")
   ("NoLadfConstraintFlag",                            m_noLadfConstraintFlag,                          false, "Indicate that LADF is deactivated")
   ("NoVirtualBoundaryConstraintFlag",                 m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   ("GeneralLowerBitRateConstraintFlag",               m_generalLowerBitRateConstraintFlag,              false, "Indicate whether lower bitrate constraint is used")
-#endif
 
   ("CTUSize",                                         m_uiCTUSize,                                       128u, "CTUSize (specifies the CTU size if QTBT is on) [default: 128]")
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")
@@ -2138,7 +2130,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     case ExtendedProfileName::MULTILAYER_MAIN_10_444_STILL_PICTURE:
       m_profile = Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE;
       break;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     case ExtendedProfileName::MAIN_12:
       m_profile = Profile::MAIN_12; break;
     case ExtendedProfileName::MAIN_12_444:
@@ -2157,7 +2148,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_profile = Profile::MAIN_12_444_STILL_PICTURE; break;
     case ExtendedProfileName::MAIN_16_444_STILL_PICTURE:
       m_profile = Profile::MAIN_16_444_STILL_PICTURE; break;
-#endif
     default: EXIT("Unable to determine profile from configured settings"); break;
     }
   }
@@ -2186,7 +2176,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   m_inputColourSpaceConvert = stringToInputColourSpaceConvert(inputColourSpaceConvert, true);
   m_rgbFormat = (m_inputColourSpaceConvert == IPCOLOURSPACE_RGBtoGBR && m_chromaFormatIDC == CHROMA_444) ? true : false;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_STILL_PICTURE ||
       m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_12_444_STILL_PICTURE ||
       m_profile == Profile::MAIN_16_444 || m_profile == Profile::MAIN_16_444_INTRA || m_profile == Profile::MAIN_16_444_STILL_PICTURE)
@@ -2206,7 +2195,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     CHECK(m_framesToBeEncoded != 1, "FramesToBeEncoded setting must be 1 for Still Picture profiles")
   }
-#endif
 
   // Picture width and height must be multiples of 8 and minCuSize
   const int minResolutionMultiple = std::max(8, 1 << m_log2MinCuSize);
@@ -2956,7 +2944,6 @@ int EncAppCfg::xAutoDetermineProfile()
         m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10 : Profile::MAIN_10;
       }
     }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     else if (maxBitDepth <= 12)
     {
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_12_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_12_INTRA : Profile::MAIN_12;
@@ -2966,7 +2953,6 @@ int EncAppCfg::xAutoDetermineProfile()
       // Since there's no 16bit 420 profiles in VVC, we use 444 profiles.
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_16_444_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_16_444_INTRA : Profile::MAIN_16_444;
     }
-#endif
     break;
 
   case ChromaFormat::CHROMA_422:
@@ -2983,7 +2969,6 @@ int EncAppCfg::xAutoDetermineProfile()
         m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_444 : Profile::MAIN_10_444;
       }
     }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     else if (maxBitDepth <= 12)
     {
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_12_444_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_12_444_INTRA : Profile::MAIN_12_444;
@@ -2992,17 +2977,14 @@ int EncAppCfg::xAutoDetermineProfile()
     {
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_16_444_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_16_444_INTRA : Profile::MAIN_16_444;
     }
-#endif
     break;
 
   default: return 1;
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
     {
       m_generalLowerBitRateConstraintFlag = 1; // GeneralLowerBitRateConstraintFlag setting must be 1 for non-Intra/Still Picture operation range extension profiles.")
     }
-#endif
   return 0;
 }
 
@@ -3072,18 +3054,10 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(m_log2MaxTransformSkipBlockSize>=6, "Transform Skip Log2 Max Size must be less or equal to 5 for given profile.");
     xConfirmPara(m_transformSkipRotationEnabledFlag==true, "UseResidualRotation must not be enabled for given profile.");
     xConfirmPara(m_transformSkipContextEnabledFlag==true, "UseSingleSignificanceMapContext must not be enabled for given profile.");
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-    xConfirmPara(m_rrcRiceExtensionEnableFlag == true, "Extention of the Golomb-Rice parameter derivation for RRC must not be enabled for given profile.");
-    xConfirmPara(m_persistentRiceAdaptationEnabledFlag==true, "GolombRiceParameterAdaption must not be enabled for given profile.");
-    xConfirmPara(m_extendedPrecisionProcessingFlag==true, "UseExtendedPrecision must not be enabled for given profile.");
-    xConfirmPara(m_tsrcRicePresentFlag == true, "TSRCRicePresent must not be enabled for given profile.");
-    xConfirmPara(m_reverseLastSigCoeffEnabledFlag == true, "ReverseLastSigCoeff must not be enabled for given profile.");
-#endif
     xConfirmPara(m_highPrecisionOffsetsEnabledFlag==true, "UseHighPrecisionPredictionWeighting must not be enabled for given profile.");
     xConfirmPara(m_enableIntraReferenceSmoothing==false, "EnableIntraReferenceSmoothing must be enabled for given profile.");
     xConfirmPara(m_cabacBypassAlignmentEnabledFlag, "AlignCABACBeforeBypass cannot be enabled for given profile.");
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   if (m_profile != Profile::NONE && m_profile != Profile::MAIN_12_444 && m_profile != Profile::MAIN_16_444 && m_profile != Profile::MAIN_12_444_INTRA && m_profile != Profile::MAIN_16_444_INTRA && m_profile != Profile::MAIN_12_444_STILL_PICTURE && m_profile != Profile::MAIN_12_444_STILL_PICTURE && m_profile != Profile::MAIN_16_444_STILL_PICTURE)
   {
     xConfirmPara(m_rrcRiceExtensionEnableFlag == true, "Extention of the Golomb-Rice parameter derivation for RRC must not be enabled for given profile.");
@@ -3092,7 +3066,6 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(m_tsrcRicePresentFlag == true, "TSRCRicePresent must not be enabled for given profile.");
     xConfirmPara(m_reverseLastSigCoeffEnabledFlag == true, "ReverseLastSigCoeff must not be enabled for given profile.");
   }
-#endif
 
 
   // check range of parameters
@@ -4345,9 +4318,7 @@ void EncAppCfg::xPrintParameter()
   {
     msg( DETAILS, "Profile                                : %s\n", profileToString(m_profile) );
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   msg( DETAILS,"GeneralLowerBitRateConstraintFlag      : %d\n", m_generalLowerBitRateConstraintFlag );
-#endif
   msg(DETAILS, "CTU size / min CU size                 : %d / %d \n", m_uiMaxCUWidth, 1 << m_log2MinCuSize);
 
   msg(DETAILS, "subpicture info present flag           : %s\n", m_subPicInfoPresentFlag ? "Enabled" : "Disabled");

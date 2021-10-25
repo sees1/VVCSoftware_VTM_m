@@ -88,9 +88,7 @@ class ProfileLevelTierFeatures
     const ProfileFeatures   *m_pProfile;
     const LevelTierFeatures *m_pLevelTier;
     Level::Tier              m_tier;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     int                      m_hbrFactor;
-#endif
   public:
     ProfileLevelTierFeatures() : m_pProfile(nullptr), m_pLevelTier(nullptr), m_tier(Level::MAIN) {}
 
