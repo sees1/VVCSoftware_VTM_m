@@ -320,9 +320,7 @@ protected:
 
   void xUpdateRasInit(Slice* slice);
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   void xUpdateRPRtmvp    ( PicHeader* pcPicHeader, Slice* pcSlice );
-#endif
 
   void xWriteAccessUnitDelimiter (AccessUnit &accessUnit, Slice *slice);
 

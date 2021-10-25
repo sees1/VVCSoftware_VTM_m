@@ -820,13 +820,11 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIColourTransformInfo(seiCTI);
     seiMessages.push_back(seiCTI);
   }
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   if (m_pcCfg->getConstrainedRaslencoding())
   {
     SEIConstrainedRaslIndication* seiConstrainedRasl = new SEIConstrainedRaslIndication;
     seiMessages.push_back(seiConstrainedRasl);
   }
-#endif
 }
 
 void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice)
@@ -2917,14 +2915,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setBiDirPred( false, -1, -1 );
     }
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
     if( pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL && m_pcCfg->getRprRASLtoolSwitch() )
     {
       pcSlice->setDisableLmChromaCheck( true );
       picHeader->setDmvrDisabledFlag( true );
       xUpdateRPRtmvp( picHeader, pcSlice );
     }
-#endif
     
     double lambda            = 0.0;
     int actualHeadBits       = 0;
@@ -5516,7 +5512,6 @@ void EncGOP::xUpdateRasInit(Slice* slice)
   }
 }
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
 void EncGOP::xUpdateRPRtmvp( PicHeader* pcPicHeader, Slice* pcSlice )
 {
   if( pcPicHeader->getEnableTMVPFlag() )
@@ -5577,7 +5572,6 @@ void EncGOP::xUpdateRPRtmvp( PicHeader* pcPicHeader, Slice* pcSlice )
     }
   }
 }
-#endif
 
 double EncGOP::xCalculateRVM()
 {

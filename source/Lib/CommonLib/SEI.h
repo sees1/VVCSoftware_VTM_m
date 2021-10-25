@@ -90,9 +90,7 @@ public:
     ANNOTATED_REGIONS                    = 202,
     SCALABILITY_DIMENSION_INFO           = 205,
     EXTENDED_DRAP_INDICATION             = 206,
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
     CONSTRAINED_RASL_ENCODING            = 207,
-#endif
   };
 
   SEI() {}
@@ -988,7 +986,6 @@ public:
   std::vector<int>  m_edrapIndicationRefRapId;
 };
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
 class SEIConstrainedRaslIndication : public SEI
 {
 public:
@@ -997,7 +994,6 @@ public:
 
   virtual ~SEIConstrainedRaslIndication() { }
 };
-#endif
 //! \}
 
 

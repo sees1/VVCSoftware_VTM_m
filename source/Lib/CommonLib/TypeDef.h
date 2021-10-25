@@ -53,7 +53,6 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
-#define JVET_W0133_CONSTRAINED_RASL_ENCODING              1 // SEI message for Constrained RASL encoding for bitstream switching
 
 #define JVET_T0055_ITEM2                                  1 // JVET-T0055 item 2: Remove the step 9 of the general sub-bitstream extraction process.
 
