@@ -504,7 +504,6 @@ protected:
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping; ///< mapping from luma level to delta QP.
 #endif
   bool      m_smoothQPReductionEnable;
-#if JVET_W0043
   int       m_smoothQPReductionPeriodicity;
   double    m_smoothQPReductionThresholdIntra;
   double    m_smoothQPReductionModelScaleIntra;
@@ -514,13 +513,6 @@ protected:
   double    m_smoothQPReductionModelScaleInter;
   double    m_smoothQPReductionModelOffsetInter;
   int       m_smoothQPReductionLimitInter;
-#else
-  double    m_smoothQPReductionThreshold;
-  double    m_smoothQPReductionModelScale;
-  double    m_smoothQPReductionModelOffset;
-  int       m_smoothQPReductionPeriodicity;
-  int       m_smoothQPReductionLimit;
-#endif
   int*      m_aidQP;
   uint32_t      m_uiDeltaQpRD;
   bool      m_bFastDeltaQP;
@@ -1415,7 +1407,6 @@ public:
 #endif
   bool      getSmoothQPReductionEnable()                  const { return m_smoothQPReductionEnable; }
   void      setSmoothQPReductionEnable(bool value)        { m_smoothQPReductionEnable = value; }
-#if JVET_W0043
   int       getSmoothQPReductionPeriodicity()                 const { return m_smoothQPReductionPeriodicity; }
   void      setSmoothQPReductionPeriodicity(int value)        { m_smoothQPReductionPeriodicity = value; }
   double    getSmoothQPReductionThresholdIntra()              const { return m_smoothQPReductionThresholdIntra; }
@@ -1434,18 +1425,6 @@ public:
   void      setSmoothQPReductionModelOffsetInter(double value) { m_smoothQPReductionModelOffsetInter = value; }
   int       getSmoothQPReductionLimitInter()                   const { return m_smoothQPReductionLimitInter; }
   void      setSmoothQPReductionLimitInter(int value)          { m_smoothQPReductionLimitInter = value; }
-#else
-  double    getSmoothQPReductionThreshold()               const { return m_smoothQPReductionThreshold; }
-  void      setSmoothQPReductionThreshold(double value)   { m_smoothQPReductionThreshold = value; }
-  double    getSmoothQPReductionModelScale()              const { return m_smoothQPReductionModelScale; }
-  void      setSmoothQPReductionModelScale(double value)  { m_smoothQPReductionModelScale = value; }
-  double    getSmoothQPReductionModelOffset()             const { return m_smoothQPReductionModelOffset; }
-  void      setSmoothQPReductionModelOffset(double value) { m_smoothQPReductionModelOffset = value; }
-  int       getSmoothQPReductionPeriodicity()             const { return m_smoothQPReductionPeriodicity; }
-  void      setSmoothQPReductionPeriodicity(int value)    { m_smoothQPReductionPeriodicity = value; }
-  int       getSmoothQPReductionLimit()                   const { return m_smoothQPReductionLimit; }
-  void      setSmoothQPReductionLimit(int value)          { m_smoothQPReductionLimit = value; }
-#endif
   bool      getExtendedPrecisionProcessingFlag         ()         const { return m_extendedPrecisionProcessingFlag;  }
   void      setExtendedPrecisionProcessingFlag         (bool value)     { m_extendedPrecisionProcessingFlag = value; }
   bool      getTSRCRicePresentFlag         ()         const { return m_tsrcRicePresentFlag;  }

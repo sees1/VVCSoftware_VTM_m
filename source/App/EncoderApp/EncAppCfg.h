@@ -291,7 +291,6 @@ protected:
 #endif
   SEIMasteringDisplay m_masteringDisplay;
   bool      m_smoothQPReductionEnable;
-#if JVET_W0043
   double    m_smoothQPReductionThresholdIntra;
   double    m_smoothQPReductionModelScaleIntra;
   double    m_smoothQPReductionModelOffsetIntra;
@@ -300,12 +299,6 @@ protected:
   double    m_smoothQPReductionModelScaleInter;
   double    m_smoothQPReductionModelOffsetInter;
   int       m_smoothQPReductionLimitInter;
-#else
-  double    m_smoothQPReductionThreshold;
-  double    m_smoothQPReductionModelScale;
-  double    m_smoothQPReductionModelOffset;
-  int       m_smoothQPReductionLimit;
-#endif
   int       m_smoothQPReductionPeriodicity;
 
   bool      m_bUseAdaptiveQP;                                 ///< Flag for enabling QP adaptation based on a psycho-visual model
