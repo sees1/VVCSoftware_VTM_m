@@ -55,7 +55,6 @@
 //########### place macros to be removed in next cycle below this line ###############
 
 
-#define JVET_S0176_ITEM5                                  1 // JVET-S0176 #5: When an SLI SEI message is present for a CVS, the value of sps_num_subpics_minus1 shall be the same for all the SPSs referenced by the pictures in the layers with multiple subpictures per picture.
 
 #define JVET_W0078_MVP_SEI                                1 // JVET-W0078 Multiview view position SEI message
 

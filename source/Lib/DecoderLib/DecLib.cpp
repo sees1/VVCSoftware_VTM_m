@@ -475,9 +475,7 @@ DecLib::DecLib()
   std::fill_n(m_prevGDRInSameLayerRecoveryPOC, MAX_VPS_LAYERS, -MAX_INT);
   std::fill_n(m_firstSliceInSequence, MAX_VPS_LAYERS, true);
   std::fill_n(m_pocCRA, MAX_VPS_LAYERS, -MAX_INT);
-#if JVET_S0176_ITEM5
   std::fill_n(m_accessUnitSpsNumSubpic, MAX_VPS_LAYERS, 1);
-#endif
   for (int i = 0; i < MAX_VPS_LAYERS; i++)
   {
     m_associatedIRAPType[i] = NAL_UNIT_INVALID;
@@ -1119,20 +1117,8 @@ void DecLib::checkLayerIdIncludedInCvss()
     }
   }
 
-#if !JVET_S0176_ITEM5
-  // update the value of m_isFirstAuInCvs for the next AU according to NAL_UNIT_EOS in each layer
-  for (auto pic = m_accessUnitPicInfo.begin(); pic != m_accessUnitPicInfo.end(); pic++)
-  {
-    m_isFirstAuInCvs = m_accessUnitEos[pic->m_nuhLayerId] ? true : false;
-    if(!m_isFirstAuInCvs)
-    {
-      break;
-    }
-  }
-#endif
 }
 
-#if JVET_S0176_ITEM5
 void DecLib::resetIsFirstAuInCvs()
 {
   // update the value of m_isFirstAuInCvs for the next AU according to NAL_UNIT_EOS in each layer
@@ -1145,7 +1131,6 @@ void DecLib::resetIsFirstAuInCvs()
     }
   }
 }
-#endif
 
 void DecLib::CheckNoOutputPriorPicFlagsInAccessUnit()
 {
@@ -1210,10 +1195,8 @@ void DecLib::checkTidLayerIdInAccessUnit()
 
 void DecLib::checkSEIInAccessUnit()
 {
-#if JVET_S0176_ITEM5
   int olsIdxIncludeAllLayes = -1;
   bool isNonNestedSliFound = false;
-#endif
 
   bool bSdiPresentInAu = false;
 #if JVET_W0078_MVP_SEI 
@@ -1248,13 +1231,11 @@ void DecLib::checkSEIInAccessUnit()
         }
         if (olsIncludeAllLayersFind)
         {
-#if JVET_S0176_ITEM5
           olsIdxIncludeAllLayes = i;
           if (payloadType == SEI::SUBPICTURE_LEVEL_INFO)
           {
             isNonNestedSliFound = true;
           }
-#endif
           break;
         }
       }
@@ -1288,7 +1269,6 @@ void DecLib::checkSEIInAccessUnit()
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[1], "When an AU contains both an SDI SEI message with sdi_aux_id[i] equal to 1 for at least one value of i and an ACI SEI message, the SDI SEI message shall precede the ACI SEI message in decoding order.");
   CHECK(bSdiPresentInAu && bAuxSEIsBeforeSdiSEIPresent[2], "When an AU contains both an SDI SEI message with sdi_aux_id[i] equal to 2 for at least one value of i and a DRI SEI message, the SDI SEI message shall precede the DRI SEI message in decoding order.");
 
-#if JVET_S0176_ITEM5
   if (m_isFirstAuInCvs)
   {
     // when a non-nested SLI SEI shows up, check sps_num_subpics_minus1 for the OLS contains all layers with multiple subpictures per picture
@@ -1310,10 +1290,8 @@ void DecLib::checkSEIInAccessUnit()
       }
     }
   }
-#endif
 }
 
-#if JVET_S0176_ITEM5
 void DecLib::checkMultiSubpicNum(int olsIdx)
 {
   int multiSubpicNum = 0;
@@ -1330,7 +1308,6 @@ void DecLib::checkMultiSubpicNum(int olsIdx)
     }
   }
 }
-#endif
 
 #define SEI_REPETITION_CONSTRAINT_LIST_SIZE  21
 
@@ -2242,7 +2219,6 @@ void DecLib::xParsePrefixSEImessages()
     m_prefixSEINALUs.pop_front();
   }
   xCheckPrefixSEIMessages(m_SEIs);
-#if JVET_S0176_ITEM5
   SEIMessages scalableNestingSEIs = getSeisByType(m_SEIs, SEI::SCALABLE_NESTING);
   if (scalableNestingSEIs.size())
   {
@@ -2260,7 +2236,6 @@ void DecLib::xParsePrefixSEImessages()
       m_accessUnitNestedSliSeiInfo.push_back(sliSeiInfo);
     }
   }
-#endif
   xCheckDUISEIMessages(m_SEIs);
 }
 
@@ -3321,9 +3296,7 @@ void DecLib::xDecodeSPS( InputNALUnit& nalu )
   sps->setLayerId( nalu.m_nuhLayerId );
   DTRACE( g_trace_ctx, D_QP_PER_CTU, "CTU Size: %dx%d", sps->getMaxCUWidth(), sps->getMaxCUHeight() );
   m_parameterSetManager.storeSPS( sps, nalu.getBitstream().getFifo() );
-#if JVET_S0176_ITEM5
   m_accessUnitSpsNumSubpic[nalu.m_nuhLayerId] = sps->getNumSubPics();
-#endif
 }
 
 void DecLib::xDecodePPS( InputNALUnit& nalu )
