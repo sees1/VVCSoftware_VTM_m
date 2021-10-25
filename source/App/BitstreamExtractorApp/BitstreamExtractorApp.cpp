@@ -220,7 +220,6 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
   conf.setWindowTopOffset(subpicConfWinTopOffset);
   conf.setWindowBottomOffset(subpicConfWinBottomOffset);
 
-#if JVET_S0117_VB  // Virtual boundaries rewriting
   if (sourceSPS.getVirtualBoundariesEnabledFlag() && sourceSPS.getVirtualBoundariesPresentFlag())
   { 
     targetSPS.setNumVerVirtualBoundaries(0);
@@ -259,7 +258,6 @@ void BitstreamExtractorApp::xRewriteSPS (SPS &targetSPS, const SPS &sourceSPS, S
       targetSPS.setVirtualBoundariesEnabledFlag(0);
     }
   }
-#endif
 }
 
 void BitstreamExtractorApp::xRewritePPS(PPS &targetPPS, const PPS &sourcePPS, const SPS &sourceSPS, SubPic &subPic)
