@@ -2103,11 +2103,9 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
       sps_extension_flags[i] = uiCode!=0;
     }
 
-#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
     if (pcSPS->getBitDepth(CHANNEL_TYPE_LUMA) <= 10)
       CHECK(sps_extension_flags[SPS_EXT__REXT] == 1,
             "The value of sps_range_extension_flag shall be 0 when BitDepth is less than or equal to 10.");
-#endif
 
     bool bSkipTrailingExtensionBits=false;
     for(int i=0; i<NUM_SPS_EXTENSION_FLAGS; i++) // loop used so that the order is determined by the enum.

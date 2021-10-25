@@ -61,7 +61,6 @@
 
 
 
-#define JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS              1 // JVET-W0178: bitstream constraints on RExt tools for low bit-depth (bit-depth <=10)
 
 #define JVET_W0046_RLSCP                                  1 // JVET-W0046: CE1.1 reverse last significant coefficient position
 

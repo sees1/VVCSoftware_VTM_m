@@ -382,15 +382,10 @@ public:
     }
   }
 
-#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   void riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag)
-#else
-  void riceStatReset(int bitDepth)
-#endif
   {
     for (std::size_t k = 0; k < RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS; k++)
     {
-#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
       if (persistentRiceAdaptationEnabledFlag)
       {
           CHECK(bitDepth <= 10,"BitDepth shall be larger than 10.");
@@ -400,9 +395,6 @@ public:
       {
           m_GRAdaptStats[k] = 0;
       }
-#else
-      m_GRAdaptStats[k] = (bitDepth > 10) ? 2 * floorLog2(bitDepth - 10) : 0; 
-#endif
     }
   }
 
