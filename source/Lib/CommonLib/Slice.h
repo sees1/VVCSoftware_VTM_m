@@ -1307,9 +1307,7 @@ private:
   bool             m_highPrecisionOffsetsEnabledFlag;
   bool             m_rrcRiceExtensionEnableFlag;
   bool             m_persistentRiceAdaptationEnabledFlag;
-#if JVET_W0046_RLSCP
   bool             m_reverseLastSigCoeffEnabledFlag;
-#endif
   bool             m_cabacBypassAlignmentEnabledFlag;
 
 
@@ -1326,9 +1324,7 @@ public:
         || getHighPrecisionOffsetsEnabledFlag()
         || getRrcRiceExtensionEnableFlag()
         || getPersistentRiceAdaptationEnabledFlag()
-#if JVET_W0046_RLSCP
         || getReverseLastSigCoeffEnabledFlag()
-#endif
         || getCabacBypassAlignmentEnabledFlag();
   }
 
@@ -1357,10 +1353,8 @@ public:
   bool getPersistentRiceAdaptationEnabledFlag() const                                  { return m_persistentRiceAdaptationEnabledFlag;  }
   void setPersistentRiceAdaptationEnabledFlag(const bool value)                        { m_persistentRiceAdaptationEnabledFlag = value; }
 
-#if JVET_W0046_RLSCP
   bool getReverseLastSigCoeffEnabledFlag() const                                       { return m_reverseLastSigCoeffEnabledFlag;       }
   void setReverseLastSigCoeffEnabledFlag(bool value)                                   { m_reverseLastSigCoeffEnabledFlag = value;      }
-#endif
 
   bool getCabacBypassAlignmentEnabledFlag() const                                      { return m_cabacBypassAlignmentEnabledFlag;      }
   void setCabacBypassAlignmentEnabledFlag(const bool value)                            { m_cabacBypassAlignmentEnabledFlag = value;     }
@@ -1731,11 +1725,7 @@ public:
   void                    setEntropyCodingSyncEnabledFlag(bool val)                                       { m_entropyCodingSyncEnabledFlag = val;                                }
   bool                    getEntryPointsPresentFlag() const                                               { return m_entryPointPresentFlag;                                      }
   void                    setEntryPointsPresentFlag(bool val)                                             { m_entryPointPresentFlag = val;                                       }
-#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   int                     getMaxLog2TrDynamicRange(ChannelType channelType) const                         { return getSpsRangeExtension().getExtendedPrecisionProcessingFlag() ? std::min<int>(20, int(m_bitDepths.recon[channelType] + 6)) : 15; }
-#else
-  int                     getMaxLog2TrDynamicRange(ChannelType channelType) const                         { return getSpsRangeExtension().getExtendedPrecisionProcessingFlag() && int(m_bitDepths.recon[channelType]) > 10 ? std::min<int>(20, int(m_bitDepths.recon[channelType] + 6)) : 15; }
-#endif
   int                     getDifferentialLumaChromaBitDepth() const                                       { return int(m_bitDepths.recon[CHANNEL_TYPE_LUMA]) - int(m_bitDepths.recon[CHANNEL_TYPE_CHROMA]); }
   int                     getQpBDOffset(ChannelType type) const                                           { return m_qpBDOffset[type];                                           }
   void                    setQpBDOffset(ChannelType type, int i)                                          { m_qpBDOffset[type] = i;                                              }
@@ -2673,9 +2663,7 @@ private:
   int                        m_deblockingFilterCrTcOffsetDiv2;    //< tc offset for deblocking filter
   bool                       m_depQuantEnabledFlag;               //!< dependent quantization enabled flag
   int                        m_riceBaseLevelValue;    //< baseLevel value for abs_remainder 
-#if JVET_W0046_RLSCP
   bool                       m_reverseLastSigCoeffFlag;
-#endif
   bool                       m_signDataHidingEnabledFlag;         //!< sign data hiding enabled flag
   bool                       m_tsResidualCodingDisabledFlag;
   int                        m_list1IdxToList0Idx[MAX_NUM_REF];
@@ -2685,9 +2673,7 @@ private:
   bool                       m_bCheckLDC;
 
   bool                       m_biDirPred;
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   bool                       m_lmChromaCheckDisable;
-#endif
   int                        m_symRefIdx[2];
 
   //  Data
@@ -2758,9 +2744,7 @@ private:
   bool                       m_isLossless;
   int                        m_tsrc_index;
   unsigned                   m_riceBit[8];
-#if JVET_W0046_RLSCP
   int                        m_cnt_right_bottom;
-#endif
 public:
                               Slice();
   virtual                     ~Slice();
@@ -2878,10 +2862,8 @@ public:
   bool                        getDepQuantEnabledFlag() const                         { return m_depQuantEnabledFlag;                                                                }  
   void                        setRiceBaseLevel(int b) { m_riceBaseLevelValue = b; }
   int                         getRiceBaseLevel() const { return m_riceBaseLevelValue; }
-#if JVET_W0046_RLSCP
   void                        setReverseLastSigCoeffFlag( bool b )                   { m_reverseLastSigCoeffFlag = b;                                }
   bool                        getReverseLastSigCoeffFlag() const                     { return m_reverseLastSigCoeffFlag;                             }
-#endif
   void                        setSignDataHidingEnabledFlag( bool b )                 { m_signDataHidingEnabledFlag = b;                                                             }
   bool                        getSignDataHidingEnabledFlag() const                   { return m_signDataHidingEnabledFlag;                                                          }  
   void                        setTSResidualCodingDisabledFlag(bool b) { m_tsResidualCodingDisabledFlag = b; }
@@ -2900,10 +2882,8 @@ public:
 
   void                        setBiDirPred( bool b, int refIdx0, int refIdx1 ) { m_biDirPred = b; m_symRefIdx[0] = refIdx0; m_symRefIdx[1] = refIdx1; }
   bool                        getBiDirPred() const { return m_biDirPred; }
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   void                        setDisableLmChromaCheck( bool b )  { m_lmChromaCheckDisable = b; }
   bool                        getDisableLmChromaCheck() const { return m_lmChromaCheckDisable; }
-#endif
   int                         getSymRefIdx( int refList ) const { return m_symRefIdx[refList]; }
 
   bool                        isIntra() const                                        { return m_eSliceType == I_SLICE;                               }
@@ -3103,10 +3083,8 @@ public:
   int                         get_tsrc_index() const { return m_tsrc_index; }
   void                        setRiceBit(int idx, int i) { m_riceBit[idx] = i; }
   unsigned                    getRiceBit(int idx) const { return m_riceBit[idx]; }
-#if JVET_W0046_RLSCP
   void updateCntRightBottom(int v) { m_cnt_right_bottom += v; }
   int  getCntRightBottom() { return m_cnt_right_bottom; }
-#endif
 
 protected:
   Picture*              xGetRefPic( PicList& rcListPic, const int poc, const int layerId );

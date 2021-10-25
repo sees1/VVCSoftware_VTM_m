@@ -142,10 +142,8 @@ EncGOP::EncGOP()
   m_isUseLTRef = false;
   m_isPrepareLTRef = true;
   m_lastLTRefPoc = 0;
-#if JVET_W0046_RLSCP
   m_cnt_right_bottom = 0;
   m_cnt_right_bottom_i = 0;
-#endif
 }
 
 EncGOP::~EncGOP()
@@ -790,7 +788,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIMultiviewAcquisitionInfo(seiMultiviewAcquisitionInfo);
     seiMessages.push_back(seiMultiviewAcquisitionInfo);
   }
-#if JVET_W0078_MVP_SEI 
   // multiview view position
   if (m_pcCfg->getMvpSEIEnabled())
   {
@@ -798,7 +795,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIMultiviewViewPosition(seiMultiviewViewPosition);
     seiMessages.push_back(seiMultiviewViewPosition);
   }
-#endif
   // alpha channel information
   if (m_pcCfg->getAciSEIEnabled())
   {
@@ -820,13 +816,11 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     m_seiEncoder.initSEIColourTransformInfo(seiCTI);
     seiMessages.push_back(seiCTI);
   }
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   if (m_pcCfg->getConstrainedRaslencoding())
   {
     SEIConstrainedRaslIndication* seiConstrainedRasl = new SEIConstrainedRaslIndication;
     seiMessages.push_back(seiConstrainedRasl);
   }
-#endif
 }
 
 void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, Slice *slice)
@@ -2917,14 +2911,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setBiDirPred( false, -1, -1 );
     }
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
     if( pcSlice->getNalUnitType() == NAL_UNIT_CODED_SLICE_RASL && m_pcCfg->getRprRASLtoolSwitch() )
     {
       pcSlice->setDisableLmChromaCheck( true );
       picHeader->setDmvrDisabledFlag( true );
       xUpdateRPRtmvp( picHeader, pcSlice );
     }
-#endif
     
     double lambda            = 0.0;
     int actualHeadBits       = 0;
@@ -3023,7 +3015,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       m_pcSliceEncoder->setJointCbCrModes(*pcPic->cs, Position(0, 0), pcPic->cs->area.lumaSize());
     }
 
-#if JVET_W0046_RLSCP
     if (!pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag() || pcSlice->getSliceQp() > 12)
     {
       pcSlice->setReverseLastSigCoeffFlag(false);
@@ -3045,7 +3036,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       /*for RA serial and parallel alignment end*/
       pcSlice->setReverseLastSigCoeffFlag(m_cnt_right_bottom >= 0);
     }
-#endif
 
     if( encPic )
     // now compress (trial encode) the various slice segments (slices, and dependent slices)
@@ -3266,11 +3256,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       // SAO parameter estimation using non-deblocked pixels for CTU bottom and right boundary areas
       if( pcSlice->getSPS()->getSAOEnabledFlag() && m_pcCfg->getSaoCtuBoundary() )
       {
-#if JVET_W0129_ENABLE_ALF_TRUEORG
         m_pcSAO->getPreDBFStatistics( cs, m_pcCfg->getSaoTrueOrg() );
-#else
-        m_pcSAO->getPreDBFStatistics( cs, m_pcCfg->getAlfSaoTrueOrg() );
-#endif
       }
 
       //-- Loop filter
@@ -3305,19 +3291,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       {
         bool sliceEnabled[MAX_NUM_COMPONENT];
         m_pcSAO->initCABACEstimator( m_pcEncLib->getCABACEncoder(), m_pcEncLib->getCtxCache(), pcSlice );
-#if JVET_W0129_ENABLE_ALF_TRUEORG
         m_pcSAO->SAOProcess( cs, sliceEnabled, pcSlice->getLambdas(),
 #if ENABLE_QPA
                              (m_pcCfg->getUsePerceptQPA() && !m_pcCfg->getUseRateCtrl() && pcSlice->getPPS()->getUseDQP() ? m_pcEncLib->getRdCost ()->getChromaWeight() : 0.0),
 #endif
                              m_pcCfg->getTestSAODisableAtPictureLevel(), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma(), m_pcCfg->getSaoCtuBoundary(), m_pcCfg->getSaoGreedyMergeEnc(), m_pcCfg->getSaoTrueOrg() );
-#else
-        m_pcSAO->SAOProcess( cs, sliceEnabled, pcSlice->getLambdas(),
-#if ENABLE_QPA
-                             (m_pcCfg->getUsePerceptQPA() && !m_pcCfg->getUseRateCtrl() && pcSlice->getPPS()->getUseDQP() ? m_pcEncLib->getRdCost ()->getChromaWeight() : 0.0),
-#endif
-                             m_pcCfg->getTestSAODisableAtPictureLevel(), m_pcCfg->getSaoEncodingRate(), m_pcCfg->getSaoEncodingRateChroma(), m_pcCfg->getSaoCtuBoundary(), m_pcCfg->getSaoGreedyMergeEnc(), m_pcCfg->getAlfSaoTrueOrg() );
-#endif
         //assign SAO slice header
         for (int s = 0; s < uiNumSliceSegments; s++)
         {
@@ -4014,13 +3992,11 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       fflush( stdout );
     }
 
-#if JVET_W0046_RLSCP
     m_cnt_right_bottom = pcSlice->getCntRightBottom();
     if (m_pcCfg->getIntraPeriod() > 1 && pcSlice->isIntra())
     {
       m_cnt_right_bottom_i = m_cnt_right_bottom;
     }
-#endif
 
     DTRACE_UPDATE( g_trace_ctx, ( std::make_pair( "final", 0 ) ) );
 
@@ -4054,9 +4030,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR,
   const bool printSequenceMSE, const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR,
   const BitDepths &bitDepths
-#if JVET_W0134_UNIFORM_METRICS_LOG
                              , int layerId
-#endif
                              )
 {
 #if ENABLE_QPA
@@ -4094,7 +4068,6 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 #endif
 
 
-#if JVET_W0134_UNIFORM_METRICS_LOG
   std::string header,metrics;
   std::string id="a";
   if (layerId==0) id+=' ';
@@ -4105,24 +4078,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 #endif
                           );
   if( g_verbosity >= INFO ) std::cout<<header<<'\n'<<metrics<<std::endl;
-#else
-#if ENABLE_QPA
-  m_gcAnalyzeAll.printOut( 'a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr,
-    printRprPSNR, bitDepths, useWPSNR
-#if JVET_O0756_CALCULATE_HDRMETRICS
-                          , calculateHdrMetrics
-#endif
-                          );
-#else
-  m_gcAnalyzeAll.printOut('a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr, bitDepths
-#if JVET_O0756_CALCULATE_HDRMETRICS
-                          , calculateHdrMetrics
-#endif
-                          );
-#endif
-#endif
 
-#if JVET_W0134_UNIFORM_METRICS_LOG
   id="i";
   if (layerId==0) id+=' ';
   else            id+=std::to_string(layerId);
@@ -4152,27 +4108,6 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 
   }
 #endif
-#else
-  msg( DETAILS, "\n\nI Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeI.printOut( 'i', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-    printHexPsnr, printRprPSNR, bitDepths );
-  msg( DETAILS, "\n\nP Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeP.printOut( 'p', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-    printHexPsnr, printRprPSNR, bitDepths );
-
-  msg( DETAILS, "\n\nB Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeB.printOut( 'b', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-    printHexPsnr, printRprPSNR, bitDepths );
-
-#if WCG_WPSNR
-  if (useLumaWPSNR)
-  {
-    msg(DETAILS, "\nWPSNR SUMMARY --------------------------------------------------------\n");
-    m_gcAnalyzeWPSNR.printOut( 'w', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-      printHexPsnr, printRprPSNR, bitDepths, useLumaWPSNR );
-  }
-#endif
-#endif
 
 
   if (!m_pcCfg->getSummaryOutFilename().empty())
@@ -4199,22 +4134,11 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
     m_gcAnalyzeAll_in.setFrmRate( m_pcCfg->getFrameRate() / (double)m_pcCfg->getTemporalSubsampleRatio());
     m_gcAnalyzeAll_in.setBits(m_gcAnalyzeAll.getBits());
     // prior to the above statement, the interlace analyser does not contain the correct total number of bits.
-#if JVET_W0134_UNIFORM_METRICS_LOG
     id="a";
     if (layerId==0) id+=' ';
     else            id+=std::to_string(layerId);
     m_gcAnalyzeAll_in.printOut(header,metrics, id, chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr, printRprPSNR, bitDepths, useWPSNR );
     if( g_verbosity >= DETAILS ) std::cout<< "\n\nSUMMARY INTERLACED ---------------------------------------------\n"<<header<<'\n'<<metrics<<std::endl;
-#else
-    msg( INFO,"\n\nSUMMARY INTERLACED ---------------------------------------------\n" );
-#if ENABLE_QPA
-    m_gcAnalyzeAll_in.printOut( 'a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-      printHexPsnr, printRprPSNR, bitDepths, useWPSNR );
-#else
-    m_gcAnalyzeAll_in.printOut('a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-      printHexPsnr, bitDepths);
-#endif
-#endif
     if (!m_pcCfg->getSummaryOutFilename().empty())
     {
       m_gcAnalyzeAll_in.printSummary(chFmt, printSequenceMSE, printHexPsnr, bitDepths, m_pcCfg->getSummaryOutFilename());
@@ -5035,11 +4959,7 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
     }
     if (m_pcEncLib->isResChangeInClvsEnabled())
     {
-#if JVET_W0134_UNIFORM_METRICS_LOG
       msg( NOTICE, " [Y2 %6.4lf dB  U2 %6.4lf dB  V2 %6.4lf dB]", upscaledPSNR[COMPONENT_Y], upscaledPSNR[COMPONENT_Cb], upscaledPSNR[COMPONENT_Cr] );
-#else
-      msg( NOTICE, "\nPSNR2: [Y %6.4lf dB    U %6.4lf dB    V %6.4lf dB]", upscaledPSNR[COMPONENT_Y], upscaledPSNR[COMPONENT_Cb], upscaledPSNR[COMPONENT_Cr] );
-#endif
     }
   }
   else if( g_verbosity >= INFO )
@@ -5516,7 +5436,6 @@ void EncGOP::xUpdateRasInit(Slice* slice)
   }
 }
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
 void EncGOP::xUpdateRPRtmvp( PicHeader* pcPicHeader, Slice* pcSlice )
 {
   if( pcPicHeader->getEnableTMVPFlag() )
@@ -5577,7 +5496,6 @@ void EncGOP::xUpdateRPRtmvp( PicHeader* pcPicHeader, Slice* pcSlice )
     }
   }
 }
-#endif
 
 double EncGOP::xCalculateRVM()
 {

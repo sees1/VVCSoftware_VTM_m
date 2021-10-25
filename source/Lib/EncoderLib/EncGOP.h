@@ -134,10 +134,8 @@ private:
   unsigned                m_riceBit[8][2];
   int                     m_preQP[2];
   int                     m_preIPOC;
-#if JVET_W0046_RLSCP
   int                     m_cnt_right_bottom;
   int                     m_cnt_right_bottom_i;
-#endif
 
   //  Access channel
   EncLib*                 m_pcEncLib;
@@ -255,9 +253,7 @@ public:
 
   void  printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR, const bool printSequenceMSE, 
     const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR, const BitDepths &bitDepths
-#if JVET_W0134_UNIFORM_METRICS_LOG
                        , int layerId
-#endif
                        );
 #if W0038_DB_OPT
   uint64_t  preLoopFilterPicAndCalcDist( Picture* pcPic );
@@ -320,9 +316,7 @@ protected:
 
   void xUpdateRasInit(Slice* slice);
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   void xUpdateRPRtmvp    ( PicHeader* pcPicHeader, Slice* pcSlice );
-#endif
 
   void xWriteAccessUnitDelimiter (AccessUnit &accessUnit, Slice *slice);
 

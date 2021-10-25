@@ -220,19 +220,12 @@ void EncApp::xInitLibCfg()
   ptls[0].setTierFlag                                            ( m_levelTier );
   ptls[0].setFrameOnlyConstraintFlag                             ( m_frameOnlyConstraintFlag);
   ptls[0].setMultiLayerEnabledFlag                               ( m_multiLayerEnabledFlag);
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   CHECK((m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_10_444 || \
          m_profile == Profile::MAIN_10_STILL_PICTURE || m_profile == Profile::MAIN_10_444_STILL_PICTURE || \
          m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_STILL_PICTURE || \
          m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_12_444_STILL_PICTURE || \
          m_profile == Profile::MAIN_16_444 || m_profile == Profile::MAIN_16_444_INTRA || m_profile == Profile::MAIN_16_444_STILL_PICTURE) \
           && m_multiLayerEnabledFlag, "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#else
-  CHECK((m_profile == Profile::MAIN_10 || m_profile == Profile::MAIN_10_444
-         || m_profile == Profile::MAIN_10_STILL_PICTURE || m_profile == Profile::MAIN_10_444_STILL_PICTURE)
-          && m_multiLayerEnabledFlag,
-        "ptl_multilayer_enabled_flag shall be equal to 0 for non-multilayer profiles");
-#endif
   ptls[0].setNumSubProfile                                       ( m_numSubProfile );
   for (int i = 0; i < m_numSubProfile; i++)
   {
@@ -459,13 +452,11 @@ void EncApp::xInitLibCfg()
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     m_cEncLib.setGeneralLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
     if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
     {
       CHECK(m_generalLowerBitRateConstraintFlag==0, "generalLowerBitRateConstraintFlag shall be 1 when non-Intra/Still Picture operation range extension profiles are used");
     }
-#endif
   }
   else
   {
@@ -531,9 +522,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoActConstraintFlag(false);
     m_cEncLib.setNoLmcsConstraintFlag(false);
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     m_cEncLib.setGeneralLowerBitRateConstraintFlag(false);
-#endif
   }
 
   //====== Coding Structure ========
@@ -637,9 +626,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setExtendedPrecisionProcessingFlag                   ( m_extendedPrecisionProcessingFlag );
   m_cEncLib.setRrcRiceExtensionEnableFlag                        ( m_rrcRiceExtensionEnableFlag );
   m_cEncLib.setTSRCRicePresentFlag                               ( m_tsrcRicePresentFlag);
-#if JVET_W0046_RLSCP
   m_cEncLib.setReverseLastSigCoeffEnabledFlag                    ( m_reverseLastSigCoeffEnabledFlag );
-#endif
   m_cEncLib.setHighPrecisionOffsetsEnabledFlag                   ( m_highPrecisionOffsetsEnabledFlag );
 
   m_cEncLib.setWeightedPredictionMethod( m_weightedPredictionMethod );
@@ -649,7 +636,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setLumaLevelToDeltaQPControls                        ( m_lumaLevelToDeltaQPMapping );
 #endif
   m_cEncLib.setSmoothQPReductionEnable                           (m_smoothQPReductionEnable);
-#if JVET_W0043
   m_cEncLib.setSmoothQPReductionPeriodicity                      (m_smoothQPReductionPeriodicity);
   m_cEncLib.setSmoothQPReductionThresholdIntra                   (m_smoothQPReductionThresholdIntra);
   m_cEncLib.setSmoothQPReductionModelScaleIntra                  (m_smoothQPReductionModelScaleIntra);
@@ -659,13 +645,6 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setSmoothQPReductionModelScaleInter                  (m_smoothQPReductionModelScaleInter);
   m_cEncLib.setSmoothQPReductionModelOffsetInter                 (m_smoothQPReductionModelOffsetInter);
   m_cEncLib.setSmoothQPReductionLimitInter                       (m_smoothQPReductionLimitInter);
-#else
-  m_cEncLib.setSmoothQPReductionThreshold                        (m_smoothQPReductionThreshold);
-  m_cEncLib.setSmoothQPReductionModelScale                       (m_smoothQPReductionModelScale);
-  m_cEncLib.setSmoothQPReductionModelOffset                      (m_smoothQPReductionModelOffset);
-  m_cEncLib.setSmoothQPReductionPeriodicity                      (m_smoothQPReductionPeriodicity);
-  m_cEncLib.setSmoothQPReductionLimit                            (m_smoothQPReductionLimit);
-#endif
 #if X0038_LAMBDA_FROM_QP_CAPABILITY
   m_cEncLib.setDeltaQpRD( (m_costMode==COST_LOSSLESS_CODING) ? 0 : m_uiDeltaQpRD );
 #else
@@ -876,9 +855,7 @@ void EncApp::xInitLibCfg()
   //====== Sub-picture and Slices ========
   m_cEncLib.setSingleSlicePerSubPicFlagFlag                      ( m_singleSlicePerSubPicFlag );
   m_cEncLib.setUseSAO                                            ( m_bUseSAO );
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   m_cEncLib.setSaoTrueOrg                                        ( m_saoTrueOrg );
-#endif
   m_cEncLib.setTestSAODisableAtPictureLevel                      ( m_bTestSAODisableAtPictureLevel );
   m_cEncLib.setSaoEncodingRate                                   ( m_saoEncodingRate );
   m_cEncLib.setSaoEncodingRateChroma                             ( m_saoEncodingRateChroma );
@@ -1077,11 +1054,9 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setMaiSEIMantissaSkewFactor                          (m_maiSEIMantissaSkewFactor);
   m_cEncLib.setMaiSEIPrecRotationParam                           (m_maiSEIPrecRotationParam);
   m_cEncLib.setMaiSEIPrecTranslationParam                        (m_maiSEIPrecTranslationParam);
-#if JVET_W0078_MVP_SEI 
   m_cEncLib.setMvpSEIEnabled(m_mvpSEIEnabled);
   m_cEncLib.setMvpSEINumViewsMinus1(m_mvpSEINumViewsMinus1);
   m_cEncLib.setMvpSEIViewPosition(m_mvpSEIViewPosition);
-#endif
   // alpha channel information sei
   m_cEncLib.setAciSEIEnabled                                     (m_aciSEIEnabled);
   m_cEncLib.setAciSEICancelFlag                                  (m_aciSEICancelFlag);
@@ -1126,11 +1101,9 @@ void EncApp::xInitLibCfg()
   {
     m_cEncLib.setScalingMatrixDesignatedColourSpace(m_scalingMatrixDesignatedColourSpace);
   }
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   m_cEncLib.setConstrainedRaslencoding                           ( m_constrainedRaslEncoding );
   m_cEncLib.setCraAPSreset                                       ( m_craAPSreset );
   m_cEncLib.setRprRASLtoolSwitch                                 ( m_rprRASLtoolSwitch );
-#endif
   m_cEncLib.setDepQuantEnabledFlag                               ( m_depQuantEnabledFlag);
   m_cEncLib.setSignDataHidingEnabledFlag                         ( m_signDataHidingEnabledFlag);
   m_cEncLib.setUseRateCtrl                                       ( m_RCEnableRateControl );
@@ -1186,11 +1159,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setBs2ModPOCAndType                                  ( m_bs2ModPOCAndType );
   m_cEncLib.setDebugCTU                                          ( m_debugCTU );
   m_cEncLib.setUseALF                                            ( m_alf );
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   m_cEncLib.setAlfTrueOrg                                        ( m_alfTrueOrg );
-#else
-  m_cEncLib.setAlfSaoTrueOrg                                     ( m_alfSaoTrueOrg );
-#endif
   m_cEncLib.setALFStrengthLuma                                   (m_alfStrengthLuma);
   m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
   m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);

@@ -288,12 +288,10 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIMultiviewAcquisitionInfo;
       xParseSEIMultiviewAcquisitionInfo((SEIMultiviewAcquisitionInfo&) *sei, payloadSize, pDecodedMessageOutputStream );
       break;
-#if JVET_W0078_MVP_SEI 
     case SEI::MULTIVIEW_VIEW_POSITION:
       sei = new SEIMultiviewViewPosition;
       xParseSEIMultiviewViewPosition((SEIMultiviewViewPosition&)*sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#endif
     case SEI::ALPHA_CHANNEL_INFO:
       sei = new SEIAlphaChannelInfo;
       xParseSEIAlphaChannelInfo((SEIAlphaChannelInfo&) *sei, payloadSize, pDecodedMessageOutputStream );
@@ -334,12 +332,10 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       sei = new SEIColourTransformInfo;
       xParseSEIColourTransformInfo((SEIColourTransformInfo&)*sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
     case SEI::CONSTRAINED_RASL_ENCODING:
       sei = new SEIConstrainedRaslIndication;
       xParseSEIConstrainedRaslIndication((SEIConstrainedRaslIndication&) *sei, payloadSize, pDecodedMessageOutputStream);
       break;
-#endif
     default:
       for (uint32_t i = 0; i < payloadSize; i++)
       {
@@ -1789,7 +1785,6 @@ void SEIReader::xParseSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo& s
   }
 };
 
-#if JVET_W0078_MVP_SEI
 void SEIReader::xParseSEIMultiviewViewPosition(SEIMultiviewViewPosition& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
   uint32_t val;
@@ -1802,7 +1797,6 @@ void SEIReader::xParseSEIMultiviewViewPosition(SEIMultiviewViewPosition& sei, ui
     sei_read_uvlc(pDecodedMessageOutputStream, val, "view_position"); sei.m_mvpViewPosition[i] = val;
   }
 };
-#endif
 
 void SEIReader::xParseSEIAlphaChannelInfo(SEIAlphaChannelInfo& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream)
 {
@@ -2033,12 +2027,10 @@ void SEIReader::xParseSEIExtendedDrapIndication(SEIExtendedDrapIndication& sei, 
   }
 }
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
 void SEIReader::xParseSEIConstrainedRaslIndication( SEIConstrainedRaslIndication& sei, uint32_t payloadSize, std::ostream *pDecodedMessageOutputStream )
 {
   output_sei_message_header(sei, pDecodedMessageOutputStream, payloadSize);
 }
-#endif
 
 #if JVET_S0257_DUMP_360SEI_MESSAGE
 void SeiCfgFileDump::write360SeiDump (std::string decoded360MessageFileName, SEIMessages& seis, const SPS* sps)

@@ -97,9 +97,7 @@ private:
   SEIMessages             m_SEIs; ///< List of SEI messages that have been received before the first slice and between slices, excluding prefix SEIs...
   SEIScalabilityDimensionInfo* m_sdiSEIInFirstAU;
   SEIMultiviewAcquisitionInfo* m_maiSEIInFirstAU;
-#if JVET_W0078_MVP_SEI 
   SEIMultiviewViewPosition*    m_mvpSEIInFirstAU;
-#endif
 
   // functional classes
   IntraPrediction         m_cIntraPred;
@@ -177,7 +175,6 @@ private:
   };
   std::vector<AccessUnitPicInfo> m_accessUnitPicInfo;
   std::vector<AccessUnitPicInfo> m_firstAccessUnitPicInfo;
-#if JVET_S0176_ITEM5
   struct AccessUnitNestedSliSeiInfo
   {
     bool m_nestedSliPresent;
@@ -186,7 +183,6 @@ private:
   };
   std::vector<AccessUnitNestedSliSeiInfo> m_accessUnitNestedSliSeiInfo;
   int m_accessUnitSpsNumSubpic[MAX_VPS_LAYERS];
-#endif
   struct NalUnitInfo
   {
     NalUnitType     m_nalUnitType; ///< nal_unit_type
@@ -282,11 +278,9 @@ public:
   void checkLayerIdIncludedInCvss();
   void CheckNoOutputPriorPicFlagsInAccessUnit();
   void resetAccessUnitNoOutputPriorPicFlags() { m_accessUnitNoOutputPriorPicFlags.clear(); }
-#if JVET_S0176_ITEM5
   void checkMultiSubpicNum(int olsIdx);
   void resetAccessUnitNestedSliSeiInfo()  { m_accessUnitNestedSliSeiInfo.clear(); }
   void resetIsFirstAuInCvs();
-#endif
   void checkSeiInPictureUnit();
   void resetPictureSeiNalus();
   bool isSliceNaluFirstInAU( bool newPicture, InputNALUnit &nalu );

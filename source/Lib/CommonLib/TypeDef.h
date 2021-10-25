@@ -53,32 +53,6 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
-#define JVET_W0133_CONSTRAINED_RASL_ENCODING              1 // SEI message for Constrained RASL encoding for bitstream switching
-
-#define JVET_T0055_ITEM2                                  1 // JVET-T0055 item 2: Remove the step 9 of the general sub-bitstream extraction process.
-
-#define JVET_S0176_ITEM5                                  1 // JVET-S0176 #5: When an SLI SEI message is present for a CVS, the value of sps_num_subpics_minus1 shall be the same for all the SPSs referenced by the pictures in the layers with multiple subpictures per picture.
-
-#define JVET_W0078_MVP_SEI                                1 // JVET-W0078 Multiview view position SEI message
-
-#define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
-
-#define JVET_W0134_UNIFORM_METRICS_LOG                    1 // change metrics output for easy parsing
-
-#define JVET_W0070_W0121_SPSRE_CLEANUP                    1 // JVET-W0070 Proposal 3 & JVET-W0121 Option 1 : condition the signaling of sps_ts_residual_coding_rice_present_in_sh_flag
-
-#define JVET_W0043                                        1 // Alignment of smooth block QP control with adaptive QP in VTM
-
-#define JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS              1 // JVET-W0178: bitstream constraints on RExt tools for low bit-depth (bit-depth <=10)
-
-#define JVET_W0046_RLSCP                                  1 // JVET-W0046: CE1.1 reverse last significant coefficient position
-
-#define JVET_W2005_RANGE_EXTENSION_PROFILES               1 // JVET-W2005 (JVET-W0136 profile plus meeting decisions)
-
-#define JVET_S0154_ASPECT9_AND_S0158_ASPECT4              1 // JVET-S0154 #9:  In the subpicture sub-bitstream extraction process, insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
-                                                            // JVET-S0158 #4c: Insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
-
-#define JVET_S0117_VB                                     1 // sub-picture extraction VB rewriting
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
@@ -699,9 +673,7 @@ namespace Profile
   enum Name
   {
     NONE                                 = 0,
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     INTRA                                = 8,
-#endif
     STILL_PICTURE                        = 64,
     MAIN_10                              = 1,
     MAIN_10_STILL_PICTURE                = MAIN_10 | STILL_PICTURE,
@@ -711,7 +683,6 @@ namespace Profile
     MAIN_10_444_STILL_PICTURE            = MAIN_10_444 | STILL_PICTURE,
     MULTILAYER_MAIN_10_444               = 49,
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     MAIN_12                              = 2,
     MAIN_12_444                          = 34,
     MAIN_16_444                          = 36,
@@ -721,7 +692,6 @@ namespace Profile
     MAIN_12_STILL_PICTURE                = MAIN_12 | STILL_PICTURE,
     MAIN_12_444_STILL_PICTURE            = MAIN_12_444 | STILL_PICTURE,
     MAIN_16_444_STILL_PICTURE            = MAIN_16_444 | STILL_PICTURE,
-#endif
   };
 }
 

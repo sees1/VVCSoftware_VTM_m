@@ -118,11 +118,9 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::MULTIVIEW_ACQUISITION_INFO:
     xWriteSEIMultiviewAcquisitionInfo(*static_cast<const SEIMultiviewAcquisitionInfo*>(&sei));
     break;
-#if JVET_W0078_MVP_SEI 
   case SEI::MULTIVIEW_VIEW_POSITION:
     xWriteSEIMultiviewViewPosition(*static_cast<const SEIMultiviewViewPosition*>(&sei));
     break;
-#endif
   case SEI::ALPHA_CHANNEL_INFO:
     xWriteSEIAlphaChannelInfo(*static_cast<const SEIAlphaChannelInfo*>(&sei));
     break;
@@ -156,11 +154,9 @@ void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &h
   case SEI::ANNOTATED_REGIONS:
     xWriteSEIAnnotatedRegions(*static_cast<const SEIAnnotatedRegions*>(&sei));
     break;
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   case SEI::CONSTRAINED_RASL_ENCODING:
     xWriteSEIConstrainedRaslIndication(*static_cast<const SEIConstrainedRaslIndication*>(&sei));
     break;
-#endif
   default:
     THROW("Trying to write unhandled SEI message");
     break;
@@ -978,7 +974,6 @@ void SEIWriter::xWriteSEIMultiviewAcquisitionInfo(const SEIMultiviewAcquisitionI
   }
 };
 
-#if JVET_W0078_MVP_SEI 
 void SEIWriter::xWriteSEIMultiviewViewPosition(const SEIMultiviewViewPosition& sei)
 {
   WRITE_UVLC(sei.m_mvpNumViewsMinus1, "num_views_minus1");
@@ -987,7 +982,6 @@ void SEIWriter::xWriteSEIMultiviewViewPosition(const SEIMultiviewViewPosition& s
     WRITE_UVLC(sei.m_mvpViewPosition[i], "view_position");
   }
 };
-#endif
 
 void SEIWriter::xWriteSEIAlphaChannelInfo( const SEIAlphaChannelInfo& sei)
 {
@@ -1355,10 +1349,8 @@ void SEIWriter::xWriteSEIColourTransformInfo(const SEIColourTransformInfo& sei)
   }
 }
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
 void SEIWriter::xWriteSEIConstrainedRaslIndication(const SEIConstrainedRaslIndication& /*sei*/)
 {
   // intentionally empty
 }
-#endif
 //! \}

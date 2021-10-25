@@ -75,17 +75,13 @@ protected:
   void xWriteSEIGeneralizedCubemapProjection      (const SEIGeneralizedCubemapProjection &sei);
   void xWriteSEIScalabilityDimensionInfo          (const SEIScalabilityDimensionInfo& sei);
   void xWriteSEIMultiviewAcquisitionInfo          (const SEIMultiviewAcquisitionInfo& sei);
-#if JVET_W0078_MVP_SEI 
   void xWriteSEIMultiviewViewPosition             (const SEIMultiviewViewPosition& sei);
-#endif
   void xWriteSEIAlphaChannelInfo                  (const SEIAlphaChannelInfo& sei);
   void xWriteSEIDepthRepresentationInfo           (const SEIDepthRepresentationInfo& sei);
   void xWriteSEIDepthRepInfoElement               (double f);
   void xWriteSEISubpictureLevelInfo               (const SEISubpicureLevelInfo &sei);
   void xWriteSEISampleAspectRatioInfo             (const SEISampleAspectRatioInfo &sei);
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   void xWriteSEIConstrainedRaslIndication         (const SEIConstrainedRaslIndication &sei);
-#endif
   void xWriteSEIUserDataRegistered(const SEIUserDataRegistered& sei);
   void xWriteSEIFilmGrainCharacteristics(const SEIFilmGrainCharacteristics& sei);
   void xWriteSEIContentLightLevelInfo(const SEIContentLightLevelInfo& sei);

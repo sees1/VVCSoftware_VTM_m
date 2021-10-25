@@ -74,17 +74,13 @@ Slice::Slice()
 , m_deblockingFilterCrBetaOffsetDiv2( 0 )
 , m_deblockingFilterCrTcOffsetDiv2  ( 0 )
 , m_depQuantEnabledFlag             ( false )
-#if JVET_W0046_RLSCP
 , m_reverseLastSigCoeffFlag         ( false )
-#endif
 , m_signDataHidingEnabledFlag       ( false )
 , m_tsResidualCodingDisabledFlag  ( false )
 , m_pendingRasInit                ( false )
 , m_bCheckLDC                     ( false )
 , m_biDirPred                    ( false )
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
 , m_lmChromaCheckDisable          ( false )
-#endif
 , m_iSliceQpDelta                 ( 0 )
 , m_iDepth                        ( 0 )
 , m_pcSPS                         ( NULL )
@@ -115,9 +111,7 @@ Slice::Slice()
     m_riceBit[i] = 0;
   }
 
-#if JVET_W0046_RLSCP
   m_cnt_right_bottom = 0;
-#endif
 
   for(uint32_t i=0; i<NUM_REF_PIC_LIST_01; i++)
   {
@@ -187,9 +181,7 @@ void Slice::initSlice()
   m_bCheckLDC = false;
 
   m_biDirPred = false;
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   m_lmChromaCheckDisable = false;
-#endif
   m_symRefIdx[0] = -1;
   m_symRefIdx[1] = -1;
 
@@ -928,10 +920,8 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   {
     m_riceBit[i] = pSrc->m_riceBit[i];
   }
-#if JVET_W0046_RLSCP
   m_reverseLastSigCoeffFlag = pSrc->m_reverseLastSigCoeffFlag;
   m_cnt_right_bottom        = pSrc->m_cnt_right_bottom;
-#endif
 
   for (i = 0; i < NUM_REF_PIC_LIST_01; i++)
   {
@@ -947,9 +937,7 @@ void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
   m_iSliceQpDelta        = pSrc->m_iSliceQpDelta;
 
   m_biDirPred = pSrc->m_biDirPred;
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   m_lmChromaCheckDisable = pSrc->m_lmChromaCheckDisable;;
-#endif
   m_symRefIdx[0] = pSrc->m_symRefIdx[0];
   m_symRefIdx[1] = pSrc->m_symRefIdx[1];
 
@@ -2898,9 +2886,7 @@ SPSRExt::SPSRExt()
  , m_highPrecisionOffsetsEnabledFlag    (false)
  , m_rrcRiceExtensionEnableFlag(false)
  , m_persistentRiceAdaptationEnabledFlag(false)
-#if JVET_W0046_RLSCP
  , m_reverseLastSigCoeffEnabledFlag     (false)
-#endif
  , m_cabacBypassAlignmentEnabledFlag    (false)
 {
 }

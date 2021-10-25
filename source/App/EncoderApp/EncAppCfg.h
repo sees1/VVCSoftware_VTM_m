@@ -189,9 +189,7 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   bool      m_generalLowerBitRateConstraintFlag;
-#endif
 
   // profile/level
   Profile::Name m_profile;
@@ -291,7 +289,6 @@ protected:
 #endif
   SEIMasteringDisplay m_masteringDisplay;
   bool      m_smoothQPReductionEnable;
-#if JVET_W0043
   double    m_smoothQPReductionThresholdIntra;
   double    m_smoothQPReductionModelScaleIntra;
   double    m_smoothQPReductionModelOffsetIntra;
@@ -300,12 +297,6 @@ protected:
   double    m_smoothQPReductionModelScaleInter;
   double    m_smoothQPReductionModelOffsetInter;
   int       m_smoothQPReductionLimitInter;
-#else
-  double    m_smoothQPReductionThreshold;
-  double    m_smoothQPReductionModelScale;
-  double    m_smoothQPReductionModelOffset;
-  int       m_smoothQPReductionLimit;
-#endif
   int       m_smoothQPReductionPeriodicity;
 
   bool      m_bUseAdaptiveQP;                                 ///< Flag for enabling QP adaptation based on a psycho-visual model
@@ -433,9 +424,7 @@ protected:
   int       m_internalBitDepth[MAX_NUM_CHANNEL_TYPE];         ///< bit-depth codec operates at (input/output files will be converted)
   bool      m_extendedPrecisionProcessingFlag;
   bool      m_tsrcRicePresentFlag;
-#if JVET_W0046_RLSCP
   bool      m_reverseLastSigCoeffEnabledFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
 
   //coding tools (chroma format)
@@ -444,9 +433,7 @@ protected:
 
   // coding tool (SAO)
   bool      m_bUseSAO;
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   bool      m_saoTrueOrg;
-#endif
   bool      m_bTestSAODisableAtPictureLevel;
   double    m_saoEncodingRate;                                ///< When >0 SAO early picture termination is enabled for luma and chroma
   double    m_saoEncodingRateChroma;                          ///< The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma.
@@ -618,12 +605,10 @@ protected:
   std::vector<uint32_t>  m_maiSEIMantissaSkewFactor;
   int               m_maiSEIPrecRotationParam;
   int               m_maiSEIPrecTranslationParam;
-#if JVET_W0078_MVP_SEI 
   // multiview acquisition information sei
   bool              m_mvpSEIEnabled;
   int               m_mvpSEINumViewsMinus1;
   std::vector<uint32_t>  m_mvpSEIViewPosition;
-#endif
   // alpha channel information sei
   bool      m_aciSEIEnabled;
   bool      m_aciSEICancelFlag;
@@ -719,9 +704,7 @@ protected:
 
   CfgSEISubpictureLevel m_cfgSubpictureLevelInfoSEI;
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   bool                  m_constrainedRaslEncoding;
-#endif
 
   bool                  m_sampleAspectRatioInfoSEIEnabled;
   bool                  m_sariCancelFlag;
@@ -815,11 +798,7 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   bool        m_alfTrueOrg;
-#else
-  bool        m_alfSaoTrueOrg;
-#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
@@ -837,10 +816,8 @@ protected:
   double      m_fractionOfFrames;                             ///< encode a fraction of the frames as specified in FramesToBeEncoded
   int         m_switchPocPeriod;
   int         m_upscaledOutput;                               ////< Output upscaled (2), decoded cropped but in full resolution buffer (1) or decoded cropped (0, default) picture for RPR.
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   bool        m_craAPSreset;
   bool        m_rprRASLtoolSwitch;
-#endif
   bool        m_avoidIntraInDepLayer;
 
   bool                  m_gopBasedTemporalFilterEnabled;               ///< GOP-based Temporal Filter enable/disable

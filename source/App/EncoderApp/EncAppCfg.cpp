@@ -69,7 +69,6 @@ enum ExtendedProfileName   // this is used for determining profile strings, wher
   MULTILAYER_MAIN_10_STILL_PICTURE,
   MULTILAYER_MAIN_10_444,
   MULTILAYER_MAIN_10_444_STILL_PICTURE,
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   MAIN_12,
   MAIN_12_444,
   MAIN_16_444,
@@ -79,7 +78,6 @@ enum ExtendedProfileName   // this is used for determining profile strings, wher
   MAIN_12_STILL_PICTURE,
   MAIN_12_444_STILL_PICTURE,
   MAIN_16_444_STILL_PICTURE,
-#endif
   AUTO = -1
 };
 
@@ -190,7 +188,6 @@ static const struct MapStrToProfile
   { "multilayer_main_10_444", Profile::MULTILAYER_MAIN_10_444 },
   { "multilayer_main_10_still_picture", Profile::MULTILAYER_MAIN_10_STILL_PICTURE },
   { "multilayer_main_10_444_still_picture", Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE },
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   { "main_12", Profile::MAIN_12 },
   { "main_12_444", Profile::MAIN_12_444 },
   { "main_16_444", Profile::MAIN_16_444 },
@@ -200,7 +197,6 @@ static const struct MapStrToProfile
   { "main_12_still_picture", Profile::MAIN_12_STILL_PICTURE },
   { "main_12_444_still_picture", Profile::MAIN_12_444_STILL_PICTURE },
   { "main_16_444_still_picture", Profile::MAIN_16_444_STILL_PICTURE },
-#endif
 };
 
 static const struct MapStrToExtendedProfile
@@ -217,7 +213,6 @@ static const struct MapStrToExtendedProfile
   { "multilayer_main_10_444", MULTILAYER_MAIN_10_444 },
   { "multilayer_main_10_still_picture", MULTILAYER_MAIN_10_STILL_PICTURE },
   { "multilayer_main_10_444_still_picture", MULTILAYER_MAIN_10_444_STILL_PICTURE },
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   { "main_12", MAIN_12 },
   { "main_12_444", MAIN_12_444 },
   { "main_16_444", MAIN_16_444 },
@@ -227,7 +222,6 @@ static const struct MapStrToExtendedProfile
   { "main_12_still_picture", MAIN_12_STILL_PICTURE },
   { "main_12_444_still_picture", MAIN_12_444_STILL_PICTURE },
   { "main_16_444_still_picture", MAIN_16_444_STILL_PICTURE },
-#endif
   { "auto", AUTO },
 };
 
@@ -727,9 +721,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<bool>            cfg_maiSEISignSkewFactor           (0, 1,   0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_maiSEIExponentSkewFactor       (0, 63, 0, std::numeric_limits<uint32_t>::max());
   SMultiValueInput<uint32_t>        cfg_maiSEIMantissaSkewFactor       (0, std::numeric_limits<uint32_t>::max(), 0, std::numeric_limits<uint32_t>::max());
-#if JVET_W0078_MVP_SEI 
   SMultiValueInput<uint32_t>        cfg_mvpSEIViewPosition             (0, 63, 0, std::numeric_limits<uint32_t>::max());
-#endif
 
   SMultiValueInput<uint32_t>        cfg_driSEINonlinearModel           (0, 31, 0, std::numeric_limits<uint32_t>::max());
 #if LUMA_ADAPTIVE_DEBLOCKING_FILTER_QP_OFFSET
@@ -795,9 +787,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("MSBExtendedBitDepthC",                            m_MSBExtendedBitDepth[CHANNEL_TYPE_CHROMA],           0, "As per MSBExtendedBitDepth but for chroma component. (default:MSBExtendedBitDepth)")
   ("ExtendedPrecision",                               m_extendedPrecisionProcessingFlag,                false, "Increased internal accuracies to support high bit depths (not valid in V1 profiles)")
   ("TSRCRicePresent",                                 m_tsrcRicePresentFlag,                            false, "Indicate that TSRC Rice information is present in slice header (not valid in V1 profiles)")
-#if JVET_W0046_RLSCP
   ("ReverseLastSigCoeff",                             m_reverseLastSigCoeffEnabledFlag,                 false, "enable reverse last significant coefficient postion in RRC (not valid in V1 profiles)")  
-#endif
   ("HighPrecisionPredictionWeighting",                m_highPrecisionOffsetsEnabledFlag,                false, "Use high precision option for weighted prediction (not valid in V1 profiles)")
   ("InputColourSpaceConvert",                         inputColourSpaceConvert,                     string(""), "Colour space conversion to apply to input video. Permitted values are (empty string=UNCHANGED) " + getListOfColourSpaceConverts(true))
   ("SNRInternalColourSpace",                          m_snrInternalColourSpace,                         false, "If true, then no colour space conversion is applied prior to SNR, otherwise inverse of input is applied.")
@@ -932,9 +922,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoLmcsConstraintFlag",                            m_noLmcsConstraintFlag,                           false, "Indicate that LMCS is deactivated")
   ("NoLadfConstraintFlag",                            m_noLadfConstraintFlag,                          false, "Indicate that LADF is deactivated")
   ("NoVirtualBoundaryConstraintFlag",                 m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   ("GeneralLowerBitRateConstraintFlag",               m_generalLowerBitRateConstraintFlag,              false, "Indicate whether lower bitrate constraint is used")
-#endif
 
   ("CTUSize",                                         m_uiCTUSize,                                       128u, "CTUSize (specifies the CTU size if QTBT is on) [default: 128]")
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")
@@ -1138,7 +1126,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("LumaLevelToDeltaQPMappingDQP",                    cfg_lumaLeveltoDQPMappingQP,  cfg_lumaLeveltoDQPMappingQP, "Luma to Delta QP Mapping - DQP values")
 #endif
   ("SmoothQPReductionEnable",                         m_smoothQPReductionEnable,                         false, "Enable QP reduction for smooth blocks according to: Clip3(SmoothQPReductionLimit, 0, SmoothQPReductionModelScale*baseQP+SmoothQPReductionModelOffset)")
-#if JVET_W0043
   ("SmoothQPReductionPeriodicity",                    m_smoothQPReductionPeriodicity,                        0, "Periodicity parameter of the QP reduction model, 1: all frames, 0: only intra pictures, 2: every second frame, etc")
   ("SmoothQPReductionThresholdIntra",                 m_smoothQPReductionThresholdIntra,                   3.0, "Threshold parameter for smoothness for intra pictures (SmoothQPReductionThresholdIntra * number of samples in block)")
   ("SmoothQPReductionModelScaleIntra",                m_smoothQPReductionModelScaleIntra,                 -1.0, "Scale parameter of the QP reduction model for intra pictures ")
@@ -1148,13 +1135,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SmoothQPReductionModelScaleInter",                m_smoothQPReductionModelScaleInter,                 -1.0, "Scale parameter of the QP reduction model for inter pictures")
   ("SmoothQPReductionModelOffsetInter",               m_smoothQPReductionModelOffsetInter,                27.0, "Offset parameter of the QP reduction model for inter pictures")
   ("SmoothQPReductionLimitInter",                     m_smoothQPReductionLimitInter,                        -4, "Threshold parameter for controlling maximum amount of QP reduction by the QP reduction model for inter pictures")
-#else
-  ("SmoothQPReductionThreshold",                      m_smoothQPReductionThreshold,                        3.0, "Threshold parameter for smoothness (SmoothQPReductionThreshold * number of samples in block)")
-  ("SmoothQPReductionModelScale",                     m_smoothQPReductionModelScale,                      -1.0, "Scale parameter of the QP reduction model")
-  ("SmoothQPReductionModelOffset",                    m_smoothQPReductionModelOffset,                     27.0, "Offset parameter of the QP reduction model")
-  ("SmoothQPReductionLimit",                          m_smoothQPReductionLimit,                            -16, "Threshold parameter for controlling maximum amount of QP reduction by the QP reduction model")
-  ("SmoothQPReductionPeriodicity",                    m_smoothQPReductionPeriodicity,                        1, "Periodicity parameter of the QP reduction model, 1: all frames, 0: only intra pictures, 2: every second frame, etc")
-#endif
   ("UseIdentityTableForNon420Chroma",                 m_useIdentityTableForNon420Chroma,                  true, "True: Indicates that 422/444 chroma uses identity chroma QP mapping tables; False: explicit Qp table may be specified in config")
   ("SameCQPTablesForAllChroma",                       m_chromaQpMappingTableParams.m_sameCQPTableForAllChromaFlag,                        true, "0: Different tables for Cb, Cr and joint Cb-Cr components, 1 (default): Same tables for all three chroma components")
   ("QpInValCb",                                       cfg_qpInValCb,                            cfg_qpInValCb, "Input coordinates for the QP table for Cb component")
@@ -1227,9 +1207,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("GolombRiceParameterAdaptation",                   m_persistentRiceAdaptationEnabledFlag,            false, "Enable the adaptation of the Golomb-Rice parameter over the course of each slice")
   ("AlignCABACBeforeBypass",                          m_cabacBypassAlignmentEnabledFlag,                false, "Align the CABAC engine to a defined fraction of a bit prior to coding bypass data. Must be 1 in high bit rate profile, 0 otherwise")
   ("SAO",                                             m_bUseSAO,                                         true, "Enable Sample Adaptive Offset")
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   ("SaoTrueOrg",                                      m_saoTrueOrg,                                     false, "Using true original samples for SAO optimization when MCTF is enabled\n")
-#endif
   ("TestSAODisableAtPictureLevel",                    m_bTestSAODisableAtPictureLevel,                  false, "Enables the testing of disabling SAO at the picture level after having analysed all blocks")
   ("SaoEncodingRate",                                 m_saoEncodingRate,                                 0.75, "When >0 SAO early picture termination is enabled for luma and chroma")
   ("SaoEncodingRateChroma",                           m_saoEncodingRateChroma,                            0.5, "The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma")
@@ -1537,12 +1515,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIMAIMantissaSkewFactor",                        cfg_maiSEIMantissaSkewFactor, cfg_maiSEIMantissaSkewFactor, "List of the mantissa parts of the skew factor of the camera in the multiview acquisition information SEI message")
   ("SEIMAIPrecRotationParam",                         m_maiSEIPrecRotationParam,                            0, "Specifies the exponent of the maximum allowable truncation error for rotation in the multiview acquisition information SEI message")
   ("SEIMAIPrecTranslationParam",                      m_maiSEIPrecTranslationParam,                         0, "Specifies the exponent of the maximum allowable truncation error for translation in the multiview acquisition information SEI message")
-#if JVET_W0078_MVP_SEI 
 // multiview view position SEI
   ("SEIMVPEnabled",                                   m_mvpSEIEnabled,                                  false, "Control generation of multiview view position SEI message")
   ("SEIMVPNumViewsMinus1",                            m_mvpSEINumViewsMinus1,                               0, "Specifies the number of views minus 1 in the multiview view postion SEI message")
   ("SEIMVPViewPosition",                              cfg_mvpSEIViewPosition,           cfg_mvpSEIViewPosition, "List of View Positions in the multiview view postion SEI message")
-#endif
 // alpha channel information SEI
   ("SEIACIEnabled",                                   m_aciSEIEnabled,                                   false, "Control generation of alpha channel information SEI message")
   ("SEIACICancelFlag",                                m_aciSEICancelFlag,                                false, "Specifies the persistence of any previous alpha channel information SEI message in output order")
@@ -1567,9 +1543,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIDRIDisparityRefViewId",                        m_driSEIDisparityRefViewId,                            0, "Specifies the ViewId value against which the disparity values are derived in the depth representation information SEI message")
   ("SEIDRINonlinearNumMinus1",                        m_driSEINonlinearNumMinus1,                            0, "Specifies the number of piece-wise linear segments minus 2 for mapping of depth values to a scale that is uniformly quantized in terms of disparity  in the depth representation information SEI message")
   ("SEIDRINonlinearModel",                            cfg_driSEINonlinearModel,       cfg_driSEINonlinearModel, "List of the piece-wise linear segments for mapping of decoded luma sample values of an auxiliary picture to a scale that is uniformly quantized in terms of disparity in the depth representation information SEI message")
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   ("SEIConstrainedRASL",                              m_constrainedRaslEncoding,                         false, "Control generation of constrained RASL encoding SEI message")
-#endif
   
   ("DebugBitstream",                                  m_decodeBitstreams[0],             string( "" ), "Assume the frames up to POC DebugPOC will be the same as in this bitstream. Load those frames from the bitstream instead of encoding them." )
   ("DebugPOC",                                        m_switchPOC,                                 -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC, return to normal encoding." )
@@ -1583,11 +1557,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DecodeBitstream2ModPOCAndType",                   m_bs2ModPOCAndType,                       false, "Modify POC and NALU-type of second input bitstream, to use second BS as closing I-slice")
 
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   ("AlfTrueOrg",                                      m_alfTrueOrg,                              true, "Using true original samples for ALF optimization when MCTF is enabled\n")
-#else
-  ("AlfSaoTrueOrg",                                    m_alfSaoTrueOrg,                         false, "Using true original samples for ALF and SAO optimization when MCTF is enabled\n")
-#endif
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")
@@ -1663,7 +1633,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   m_resChangeInClvsEnabled = m_scalingRatioHor != 1.0 || m_scalingRatioVer != 1.0;
   m_resChangeInClvsEnabled = m_resChangeInClvsEnabled && m_rprEnabledFlag;
   
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   if( m_constrainedRaslEncoding )
   {
     m_craAPSreset            = true;
@@ -1674,7 +1643,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     m_craAPSreset            = false;
     m_rprRASLtoolSwitch      = false;
   }
-#endif
   
   if( m_fractionOfFrames != 1.0 )
   {
@@ -2162,7 +2130,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     case ExtendedProfileName::MULTILAYER_MAIN_10_444_STILL_PICTURE:
       m_profile = Profile::MULTILAYER_MAIN_10_444_STILL_PICTURE;
       break;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     case ExtendedProfileName::MAIN_12:
       m_profile = Profile::MAIN_12; break;
     case ExtendedProfileName::MAIN_12_444:
@@ -2181,7 +2148,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_profile = Profile::MAIN_12_444_STILL_PICTURE; break;
     case ExtendedProfileName::MAIN_16_444_STILL_PICTURE:
       m_profile = Profile::MAIN_16_444_STILL_PICTURE; break;
-#endif
     default: EXIT("Unable to determine profile from configured settings"); break;
     }
   }
@@ -2210,7 +2176,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   m_inputColourSpaceConvert = stringToInputColourSpaceConvert(inputColourSpaceConvert, true);
   m_rgbFormat = (m_inputColourSpaceConvert == IPCOLOURSPACE_RGBtoGBR && m_chromaFormatIDC == CHROMA_444) ? true : false;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_STILL_PICTURE ||
       m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_12_444_STILL_PICTURE ||
       m_profile == Profile::MAIN_16_444 || m_profile == Profile::MAIN_16_444_INTRA || m_profile == Profile::MAIN_16_444_STILL_PICTURE)
@@ -2230,7 +2195,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     CHECK(m_framesToBeEncoded != 1, "FramesToBeEncoded setting must be 1 for Still Picture profiles")
   }
-#endif
 
   // Picture width and height must be multiples of 8 and minCuSize
   const int minResolutionMultiple = std::max(8, 1 << m_log2MinCuSize);
@@ -2836,7 +2800,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       }
     }
   }
-#if JVET_W0078_MVP_SEI 
   if (m_mvpSEIEnabled)
   {
     int numViews = m_mvpSEINumViewsMinus1 + 1;
@@ -2846,7 +2809,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_mvpSEIViewPosition[i] = cfg_mvpSEIViewPosition.values[i];
     }
   }
-#endif
   if ( m_driSEIEnabled )
   {
     m_driSEINonlinearModel.resize(m_driSEINonlinearNumMinus1+1);
@@ -2982,7 +2944,6 @@ int EncAppCfg::xAutoDetermineProfile()
         m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10 : Profile::MAIN_10;
       }
     }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     else if (maxBitDepth <= 12)
     {
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_12_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_12_INTRA : Profile::MAIN_12;
@@ -2992,7 +2953,6 @@ int EncAppCfg::xAutoDetermineProfile()
       // Since there's no 16bit 420 profiles in VVC, we use 444 profiles.
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_16_444_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_16_444_INTRA : Profile::MAIN_16_444;
     }
-#endif
     break;
 
   case ChromaFormat::CHROMA_422:
@@ -3009,7 +2969,6 @@ int EncAppCfg::xAutoDetermineProfile()
         m_profile = m_maxLayers > 1 ? Profile::MULTILAYER_MAIN_10_444 : Profile::MAIN_10_444;
       }
     }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     else if (maxBitDepth <= 12)
     {
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_12_444_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_12_444_INTRA : Profile::MAIN_12_444;
@@ -3018,17 +2977,14 @@ int EncAppCfg::xAutoDetermineProfile()
     {
       m_profile = (m_level == Level::LEVEL15_5 && m_framesToBeEncoded == 1) ? Profile::MAIN_16_444_STILL_PICTURE : (m_iIntraPeriod == 1) ? Profile::MAIN_16_444_INTRA : Profile::MAIN_16_444;
     }
-#endif
     break;
 
   default: return 1;
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
     if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
     {
       m_generalLowerBitRateConstraintFlag = 1; // GeneralLowerBitRateConstraintFlag setting must be 1 for non-Intra/Still Picture operation range extension profiles.")
     }
-#endif
   return 0;
 }
 
@@ -3098,31 +3054,18 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara(m_log2MaxTransformSkipBlockSize>=6, "Transform Skip Log2 Max Size must be less or equal to 5 for given profile.");
     xConfirmPara(m_transformSkipRotationEnabledFlag==true, "UseResidualRotation must not be enabled for given profile.");
     xConfirmPara(m_transformSkipContextEnabledFlag==true, "UseSingleSignificanceMapContext must not be enabled for given profile.");
-#if !JVET_W2005_RANGE_EXTENSION_PROFILES
-    xConfirmPara(m_rrcRiceExtensionEnableFlag == true, "Extention of the Golomb-Rice parameter derivation for RRC must not be enabled for given profile.");
-    xConfirmPara(m_persistentRiceAdaptationEnabledFlag==true, "GolombRiceParameterAdaption must not be enabled for given profile.");
-    xConfirmPara(m_extendedPrecisionProcessingFlag==true, "UseExtendedPrecision must not be enabled for given profile.");
-    xConfirmPara(m_tsrcRicePresentFlag == true, "TSRCRicePresent must not be enabled for given profile.");
-#if JVET_W0046_RLSCP
-    xConfirmPara(m_reverseLastSigCoeffEnabledFlag == true, "ReverseLastSigCoeff must not be enabled for given profile.");
-#endif
-#endif
     xConfirmPara(m_highPrecisionOffsetsEnabledFlag==true, "UseHighPrecisionPredictionWeighting must not be enabled for given profile.");
     xConfirmPara(m_enableIntraReferenceSmoothing==false, "EnableIntraReferenceSmoothing must be enabled for given profile.");
     xConfirmPara(m_cabacBypassAlignmentEnabledFlag, "AlignCABACBeforeBypass cannot be enabled for given profile.");
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   if (m_profile != Profile::NONE && m_profile != Profile::MAIN_12_444 && m_profile != Profile::MAIN_16_444 && m_profile != Profile::MAIN_12_444_INTRA && m_profile != Profile::MAIN_16_444_INTRA && m_profile != Profile::MAIN_12_444_STILL_PICTURE && m_profile != Profile::MAIN_12_444_STILL_PICTURE && m_profile != Profile::MAIN_16_444_STILL_PICTURE)
   {
     xConfirmPara(m_rrcRiceExtensionEnableFlag == true, "Extention of the Golomb-Rice parameter derivation for RRC must not be enabled for given profile.");
     xConfirmPara(m_persistentRiceAdaptationEnabledFlag==true, "GolombRiceParameterAdaption must not be enabled for given profile.");
     xConfirmPara(m_extendedPrecisionProcessingFlag==true, "UseExtendedPrecision must not be enabled for given profile.");
     xConfirmPara(m_tsrcRicePresentFlag == true, "TSRCRicePresent must not be enabled for given profile.");
-#if JVET_W0046_RLSCP
     xConfirmPara(m_reverseLastSigCoeffEnabledFlag == true, "ReverseLastSigCoeff must not be enabled for given profile.");
-#endif
   }
-#endif
 
 
   // check range of parameters
@@ -3157,7 +3100,6 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( (m_MSBExtendedBitDepth[CHANNEL_TYPE_LUMA  ] < m_inputBitDepth[CHANNEL_TYPE_LUMA  ]), "MSB-extended bit depth for luma channel (--MSBExtendedBitDepth) must be greater than or equal to input bit depth for luma channel (--InputBitDepth)" );
   xConfirmPara( (m_MSBExtendedBitDepth[CHANNEL_TYPE_CHROMA] < m_inputBitDepth[CHANNEL_TYPE_CHROMA]), "MSB-extended bit depth for chroma channel (--MSBExtendedBitDepthC) must be greater than or equal to input bit depth for chroma channel (--InputBitDepthC)" );
 
-#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   bool check_sps_range_extension_flag = m_extendedPrecisionProcessingFlag || 
                                   m_rrcRiceExtensionEnableFlag ||
                                   m_persistentRiceAdaptationEnabledFlag || 
@@ -3165,7 +3107,6 @@ bool EncAppCfg::xCheckParameter()
   if (m_internalBitDepth[CHANNEL_TYPE_LUMA] <= 10)
     xConfirmPara( (check_sps_range_extension_flag == 1) ,
                  "RExt tools (Extended Precision Processing, RRC Rice Extension, Persistent Rice Adaptation and TSRC Rice Extension) must be disabled for BitDepth is less than or equal to 10 (the value of sps_range_extension_flag shall be 0 when BitDepth is less than or equal to 10.)");
-#endif
 
   xConfirmPara( m_chromaFormatIDC >= NUM_CHROMA_FORMAT,                                     "ChromaFormatIDC must be either 400, 420, 422 or 444" );
   std::string sTempIPCSC="InputColourSpaceConvert must be empty, "+getListOfColourSpaceConverts(true);
@@ -4377,9 +4318,7 @@ void EncAppCfg::xPrintParameter()
   {
     msg( DETAILS, "Profile                                : %s\n", profileToString(m_profile) );
   }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   msg( DETAILS,"GeneralLowerBitRateConstraintFlag      : %d\n", m_generalLowerBitRateConstraintFlag );
-#endif
   msg(DETAILS, "CTU size / min CU size                 : %d / %d \n", m_uiMaxCUWidth, 1 << m_log2MinCuSize);
 
   msg(DETAILS, "subpicture info present flag           : %s\n", m_subPicInfoPresentFlag ? "Enabled" : "Disabled");
@@ -4462,9 +4401,7 @@ void EncAppCfg::xPrintParameter()
   }
   msg( DETAILS, "extended_precision_processing_flag     : %s\n", (m_extendedPrecisionProcessingFlag         ? "Enabled" : "Disabled") );
   msg( DETAILS, "TSRC_Rice_present_flag                 : %s\n", (m_tsrcRicePresentFlag                     ? "Enabled" : "Disabled") );
-#if JVET_W0046_RLSCP
   msg( DETAILS, "reverse_last_sig_coeff_enabled_flag    : %s\n", (m_reverseLastSigCoeffEnabledFlag          ? "Enabled" : "Disabled") );
-#endif
   msg( DETAILS, "transform_skip_rotation_enabled_flag   : %s\n", (m_transformSkipRotationEnabledFlag        ? "Enabled" : "Disabled") );
   msg( DETAILS, "transform_skip_context_enabled_flag    : %s\n", (m_transformSkipContextEnabledFlag         ? "Enabled" : "Disabled") );
   msg( DETAILS, "high_precision_offsets_enabled_flag    : %s\n", (m_highPrecisionOffsetsEnabledFlag         ? "Enabled" : "Disabled") );
@@ -4668,12 +4605,10 @@ void EncAppCfg::xPrintParameter()
   m_ext360.outputConfigurationSummary();
 #endif
 
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   if( m_constrainedRaslEncoding )
   {
     msg(VERBOSE, "\n\nWarning: with SEIConstrainedRASL enabled, LMChroma estimation is skipped in RASL frames" );
   }
-#endif
 
   msg( VERBOSE, "\n\n");
 

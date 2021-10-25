@@ -235,9 +235,7 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   bool      m_generalLowerBitRateConstraintFlag;
-#endif
 
   /* profile & level */
   Profile::Name m_profile;
@@ -420,9 +418,7 @@ protected:
   bool      m_DeblockingFilterMetric;
 #endif
   bool      m_bUseSAO;
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   bool      m_saoTrueOrg;
-#endif
   bool      m_bTestSAODisableAtPictureLevel;
   double    m_saoEncodingRate;       // When non-0 SAO early picture termination is enabled for luma and chroma
   double    m_saoEncodingRateChroma; // The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma.
@@ -465,9 +461,7 @@ protected:
 
   bool      m_extendedPrecisionProcessingFlag;
   bool      m_tsrcRicePresentFlag;
-#if JVET_W0046_RLSCP
   bool      m_reverseLastSigCoeffEnabledFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
   bool      m_bUseAdaptiveQP;
   int       m_iQPAdaptationRange;
@@ -506,7 +500,6 @@ protected:
   LumaLevelToDeltaQPMapping m_lumaLevelToDeltaQPMapping; ///< mapping from luma level to delta QP.
 #endif
   bool      m_smoothQPReductionEnable;
-#if JVET_W0043
   int       m_smoothQPReductionPeriodicity;
   double    m_smoothQPReductionThresholdIntra;
   double    m_smoothQPReductionModelScaleIntra;
@@ -516,13 +509,6 @@ protected:
   double    m_smoothQPReductionModelScaleInter;
   double    m_smoothQPReductionModelOffsetInter;
   int       m_smoothQPReductionLimitInter;
-#else
-  double    m_smoothQPReductionThreshold;
-  double    m_smoothQPReductionModelScale;
-  double    m_smoothQPReductionModelOffset;
-  int       m_smoothQPReductionPeriodicity;
-  int       m_smoothQPReductionLimit;
-#endif
   int*      m_aidQP;
   uint32_t      m_uiDeltaQpRD;
   bool      m_bFastDeltaQP;
@@ -731,12 +717,10 @@ protected:
   std::vector<uint32_t>  m_maiSEIMantissaSkewFactor;
   int               m_maiSEIPrecRotationParam;
   int               m_maiSEIPrecTranslationParam;
-#if JVET_W0078_MVP_SEI 
   // mvp sei
   bool              m_mvpSEIEnabled;
   int               m_mvpSEINumViewsMinus1;
   std::vector<uint32_t>  m_mvpSEIViewPosition;
-#endif
   // aci sei
   bool      m_aciSEIEnabled;
   bool      m_aciSEICancelFlag;
@@ -762,9 +746,7 @@ protected:
   int       m_driSEINonlinearNumMinus1;
   std::vector<uint32_t> m_driSEINonlinearModel;
   std::string           m_arSEIFileRoot;  // Annotated region SEI - initialized from external file
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   bool      m_constrainedRaslEncoding;
-#endif
 
   //====== Weighted Prediction ========
   bool      m_useWeightedPred;       //< Use of Weighting Prediction (P_SLICE)
@@ -861,11 +843,7 @@ protected:
   CfgVPSParameters m_cfgVPSParameters;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   bool        m_alfTrueOrg;
-#else
-  bool        m_alfSaoTrueOrg;
-#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;
@@ -897,10 +875,8 @@ protected:
   int         m_upscaledOutput;
   int         m_numRefLayers[MAX_VPS_LAYERS];
   bool        m_avoidIntraInDepLayer;
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   bool        m_craAPSreset;
   bool        m_rprRASLtoolSwitch;
-#endif
 
 public:
   EncCfg()
@@ -1034,10 +1010,8 @@ public:
   void      setNoGdrConstraintFlag(bool val) { m_noGdrConstraintFlag = val; }
   bool      getNoApsConstraintFlag() const { return m_noApsConstraintFlag; }
   void      setNoApsConstraintFlag(bool val) { m_noApsConstraintFlag = val; }
-#if JVET_W2005_RANGE_EXTENSION_PROFILES
   bool      getGeneralLowerBitRateConstraintFlag() const { return m_generalLowerBitRateConstraintFlag; }
   void      setGeneralLowerBitRateConstraintFlag(bool val) { m_generalLowerBitRateConstraintFlag = val; }
-#endif
 
   void      setFrameRate                    ( int   i )      { m_iFrameRate = i; }
   void      setFrameSkip                    ( uint32_t  i )      { m_FrameSkip = i; }
@@ -1427,7 +1401,6 @@ public:
 #endif
   bool      getSmoothQPReductionEnable()                  const { return m_smoothQPReductionEnable; }
   void      setSmoothQPReductionEnable(bool value)        { m_smoothQPReductionEnable = value; }
-#if JVET_W0043
   int       getSmoothQPReductionPeriodicity()                 const { return m_smoothQPReductionPeriodicity; }
   void      setSmoothQPReductionPeriodicity(int value)        { m_smoothQPReductionPeriodicity = value; }
   double    getSmoothQPReductionThresholdIntra()              const { return m_smoothQPReductionThresholdIntra; }
@@ -1446,26 +1419,12 @@ public:
   void      setSmoothQPReductionModelOffsetInter(double value) { m_smoothQPReductionModelOffsetInter = value; }
   int       getSmoothQPReductionLimitInter()                   const { return m_smoothQPReductionLimitInter; }
   void      setSmoothQPReductionLimitInter(int value)          { m_smoothQPReductionLimitInter = value; }
-#else
-  double    getSmoothQPReductionThreshold()               const { return m_smoothQPReductionThreshold; }
-  void      setSmoothQPReductionThreshold(double value)   { m_smoothQPReductionThreshold = value; }
-  double    getSmoothQPReductionModelScale()              const { return m_smoothQPReductionModelScale; }
-  void      setSmoothQPReductionModelScale(double value)  { m_smoothQPReductionModelScale = value; }
-  double    getSmoothQPReductionModelOffset()             const { return m_smoothQPReductionModelOffset; }
-  void      setSmoothQPReductionModelOffset(double value) { m_smoothQPReductionModelOffset = value; }
-  int       getSmoothQPReductionPeriodicity()             const { return m_smoothQPReductionPeriodicity; }
-  void      setSmoothQPReductionPeriodicity(int value)    { m_smoothQPReductionPeriodicity = value; }
-  int       getSmoothQPReductionLimit()                   const { return m_smoothQPReductionLimit; }
-  void      setSmoothQPReductionLimit(int value)          { m_smoothQPReductionLimit = value; }
-#endif
   bool      getExtendedPrecisionProcessingFlag         ()         const { return m_extendedPrecisionProcessingFlag;  }
   void      setExtendedPrecisionProcessingFlag         (bool value)     { m_extendedPrecisionProcessingFlag = value; }
   bool      getTSRCRicePresentFlag         ()         const { return m_tsrcRicePresentFlag;  }
   void      setTSRCRicePresentFlag         (bool value)     { m_tsrcRicePresentFlag = value; }
-#if JVET_W0046_RLSCP
   bool      getReverseLastSigCoeffEnabledFlag         ()         const { return m_reverseLastSigCoeffEnabledFlag;  }
   void      setReverseLastSigCoeffEnabledFlag         (bool value)     { m_reverseLastSigCoeffEnabledFlag = value; }
-#endif
   bool      getHighPrecisionOffsetsEnabledFlag() const { return m_highPrecisionOffsetsEnabledFlag; }
   void      setHighPrecisionOffsetsEnabledFlag(bool value) { m_highPrecisionOffsetsEnabledFlag = value; }
 
@@ -1657,10 +1616,8 @@ public:
   bool      getSingleSlicePerSubPicFlagFlag( )                       { return m_singleSlicePerSubPicFlag;    }
   void      setUseSAO                  (bool bVal)                   { m_bUseSAO = bVal; }
   bool      getUseSAO                  ()                            { return m_bUseSAO; }
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   void      setSaoTrueOrg              (bool b)                      { m_saoTrueOrg = b; }
   bool      getSaoTrueOrg              () const                      { return m_saoTrueOrg; }
-#endif
   void  setTestSAODisableAtPictureLevel (bool bVal)                  { m_bTestSAODisableAtPictureLevel = bVal; }
   bool  getTestSAODisableAtPictureLevel ( ) const                    { return m_bTestSAODisableAtPictureLevel; }
 
@@ -2027,7 +1984,6 @@ public:
   int      getMaiSEIPrecRotationParam() const                        { return m_maiSEIPrecRotationParam; }
   void     setMaiSEIPrecTranslationParam(int i)                      { m_maiSEIPrecTranslationParam = i; }
   int      getMaiSEIPrecTranslationParam() const                     { return m_maiSEIPrecTranslationParam; }
-#if JVET_W0078_MVP_SEI 
   // multiview view position SEI
   void     setMvpSEIEnabled(bool b) { m_mvpSEIEnabled = b; }
   bool     getMvpSEIEnabled() const { return m_mvpSEIEnabled; }
@@ -2035,7 +1991,6 @@ public:
   int      getMvpSEINumViewsMinus1() const { return m_mvpSEINumViewsMinus1; }
   void     setMvpSEIViewPosition(const std::vector<uint32_t>& mvpSEIViewPosition) { m_mvpSEIViewPosition = mvpSEIViewPosition; }
   uint32_t      getMvpSEIViewPosition(int idx) const { return m_mvpSEIViewPosition[idx]; }
-#endif
   // alpha channel information SEI
   void     setAciSEIEnabled(bool b)                                  { m_aciSEIEnabled = b; }
   bool     getAciSEIEnabled() const                                  { return m_aciSEIEnabled; }
@@ -2082,14 +2037,12 @@ public:
   int      getDriSEINonlinearNumMinus1() const                       { return m_driSEINonlinearNumMinus1; }
   void     setDriSEINonlinearModel(const std::vector<uint32_t>& driSEINonLinearModel) { m_driSEINonlinearModel = driSEINonLinearModel; }
   uint32_t getDriSEINonlinearModel(int idx) const                                                    { return m_driSEINonlinearModel[idx]; }
-#if JVET_W0133_CONSTRAINED_RASL_ENCODING
   void     setConstrainedRaslencoding(bool b)                        { m_constrainedRaslEncoding = b; }
   bool     getConstrainedRaslencoding()                              { return m_constrainedRaslEncoding; }
   void     setCraAPSreset(bool b)                                    { m_craAPSreset = b; }
   bool     getCraAPSreset()                                    const { return m_craAPSreset; }
   void     setRprRASLtoolSwitch(bool b)                              { m_rprRASLtoolSwitch = b; }
   bool     getRprRASLtoolSwitch()                                    { return m_rprRASLtoolSwitch; }
-#endif
 
   void         setUseWP               ( bool b )                     { m_useWeightedPred   = b;    }
   void         setWPBiPred            ( bool b )                     { m_useWeightedBiPred = b;    }
@@ -2293,13 +2246,8 @@ public:
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   void         setAlfTrueOrg( bool b )                                { m_alfTrueOrg = b; }
   bool         getAlfTrueOrg()                                  const { return m_alfTrueOrg; }
-#else
-  void         setAlfSaoTrueOrg( bool b )                             { m_alfSaoTrueOrg = b; }
-  bool         getAlfSaoTrueOrg()                               const { return m_alfSaoTrueOrg; }
-#endif
   void         setALFStrengthLuma(double s)                     { m_alfStrengthLuma = s; }
   double       getALFStrengthLuma()                             const { return m_alfStrengthLuma; }
   void         setALFAllowPredefinedFilters(bool b)             { m_alfAllowPredefinedFilters = b; }
