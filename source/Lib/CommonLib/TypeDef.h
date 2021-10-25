@@ -54,7 +54,6 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-#define JVET_T0055_ITEM2                                  1 // JVET-T0055 item 2: Remove the step 9 of the general sub-bitstream extraction process.
 
 #define JVET_S0176_ITEM5                                  1 // JVET-S0176 #5: When an SLI SEI message is present for a CVS, the value of sps_num_subpics_minus1 shall be the same for all the SPSs referenced by the pictures in the layers with multiple subpictures per picture.
 

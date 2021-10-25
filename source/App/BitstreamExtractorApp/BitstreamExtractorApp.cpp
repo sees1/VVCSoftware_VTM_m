@@ -597,42 +597,6 @@ bool BitstreamExtractorApp::xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit
   return true;
 }
 
-#if !JVET_T0055_ITEM2
-bool BitstreamExtractorApp::xCheckScalableNestingSEI(SEIScalableNesting *seiNesting, InputNALUnit& nalu, VPS *vps)
-{
-  int nestingLayerId;
-  bool nestingAppliedInTargetOlsLayerId = false;
-  std::vector<int> layerIdInOls = vps->getLayerIdsInOls(m_targetOlsIdx);
-
-  if (seiNesting->m_snAllLayersFlag)
-  {
-    int nestingNumLayers = vps->getMaxLayers() - vps->getGeneralLayerIdx(nalu.m_nuhLayerId);
-    for (uint32_t i = 0; i < nestingNumLayers; i++)
-    {
-      nestingLayerId = vps->getLayerId(vps->getGeneralLayerIdx(nalu.m_nuhLayerId) + i);
-      nestingAppliedInTargetOlsLayerId = std::find(layerIdInOls.begin(), layerIdInOls.end(), nestingLayerId) != layerIdInOls.end();
-      if (nestingAppliedInTargetOlsLayerId)
-      {
-        break;
-      }
-    }
-  }
-  else
-  {
-    for (uint32_t i = 0; i <= seiNesting->m_snNumLayersMinus1; i++)
-    {
-      nestingLayerId = i == 0 ? nalu.m_nuhLayerId : seiNesting->m_snLayerId[i];
-      nestingAppliedInTargetOlsLayerId = std::find(layerIdInOls.begin(), layerIdInOls.end(), nestingLayerId) != layerIdInOls.end();
-      if (nestingAppliedInTargetOlsLayerId)
-      {
-        break;
-      }
-    }
-  }
-
-  return nestingAppliedInTargetOlsLayerId;
-}
-#endif
 
 #if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
 bool BitstreamExtractorApp::xIsTargetOlsIncludeAllVclLayers()
@@ -798,9 +762,7 @@ uint32_t BitstreamExtractorApp::decode()
       }
 
       VPS *vps = nullptr;
-#if JVET_T0055_ITEM2
       bool isIncludedInTargetOls = true;
-#endif
       if (m_targetOlsIdx >= 0 && m_vpsId >=0 )
       {
         // if there is no VPS nal unit, there shall be one OLS and one layer.
@@ -810,12 +772,8 @@ uint32_t BitstreamExtractorApp::decode()
         }
         // Remove NAL units with nal_unit_type not equal to any of VPS_NUT, DPS_NUT, and EOB_NUT and with nuh_layer_id not included in the list LayerIdInOls[targetOlsIdx].
         NalUnitType t = nalu.m_nalUnitType;
-#if JVET_T0055_ITEM2
         // remove from outBitstream all NAL units that have nuh_layer_id not included in the list LayerIdInOls[ targetOlsIdx ] and are not DCI, OPI, VPS, AUD, EOB or SEI NAL units
         bool isSpecialNalTypes = t == NAL_UNIT_OPI || t == NAL_UNIT_VPS || t == NAL_UNIT_DCI || t == NAL_UNIT_EOB || t == NAL_UNIT_PREFIX_SEI || t == NAL_UNIT_SUFFIX_SEI;
-#else
-        bool isSpecialNalTypes = t == NAL_UNIT_OPI || t == NAL_UNIT_VPS || t == NAL_UNIT_DCI || t == NAL_UNIT_EOB;
-#endif
         vps = m_parameterSetManager.getVPS(m_vpsId);
         if (m_vpsId == 0)
         {
@@ -826,11 +784,7 @@ uint32_t BitstreamExtractorApp::decode()
         CHECK(m_targetOlsIdx <0  || m_targetOlsIdx >= numOlss, "target Ols shall be in the range of OLSs specified by the VPS");
         CHECK(m_maxTemporalLayer < -1 || m_maxTemporalLayer > vps->getPtlMaxTemporalId(vps->getOlsPtlIdx(m_targetOlsIdx)), "MaxTemporalLayer shall either be equal -1 (for diabled) or in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive");
         std::vector<int> layerIdInOls = vps->getLayerIdsInOls(m_targetOlsIdx);
-#if JVET_T0055_ITEM2
         isIncludedInTargetOls = std::find(layerIdInOls.begin(), layerIdInOls.end(), nalu.m_nuhLayerId) != layerIdInOls.end();
-#else
-        bool isIncludedInTargetOls = std::find(layerIdInOls.begin(), layerIdInOls.end(), nalu.m_nuhLayerId) != layerIdInOls.end();
-#endif
         writeInpuNalUnitToStream &= (isSpecialNalTypes || isIncludedInTargetOls);
         writeInpuNalUnitToStream &= !xCheckNumSubLayers(nalu, vps);
         m_removeTimingSEI = !vps->getGeneralHrdParameters()->getGeneralSamePicTimingInAllOlsFlag();
@@ -967,7 +921,6 @@ uint32_t BitstreamExtractorApp::decode()
         {
           for (auto sei : SEIs)
           {
-#if JVET_T0055_ITEM2
             // remove from outBitstream all NAL units that have nuh_layer_id not included in the list LayerIdInOls[ targetOlsIdx ] and ( are SEI NAL units containing (scalable-nested SEI messages) or (non-scalable-nested SEI messages with PayloadType not equal to 0, 1, 130, or 203) )
             bool isNonNestedHRDSEI = false;
             if (sei->payloadType() == SEI::BUFFERING_PERIOD || sei->payloadType() == SEI::PICTURE_TIMING || sei->payloadType() == SEI::DECODING_UNIT_INFO || sei->payloadType() == SEI::SUBPICTURE_LEVEL_INFO)
@@ -975,7 +928,6 @@ uint32_t BitstreamExtractorApp::decode()
               isNonNestedHRDSEI = true;
             }
             writeInpuNalUnitToStream &= isIncludedInTargetOls || (sei->payloadType() != SEI::SCALABLE_NESTING && isNonNestedHRDSEI);
-#endif
             // remove unqualified scalable nesting SEI
             if (sei->payloadType() == SEI::SCALABLE_NESTING)
             {
@@ -993,12 +945,6 @@ uint32_t BitstreamExtractorApp::decode()
                 }
                 writeInpuNalUnitToStream &= targetOlsIdxInNestingAppliedOls;
               }
-#if !JVET_T0055_ITEM2
-              else
-              {
-                writeInpuNalUnitToStream &= xCheckScalableNestingSEI(seiNesting, nalu, vps);
-              }
-#endif
 #if JVET_S0154_ASPECT9_AND_S0158_ASPECT4
               // C.6 step 9.c
               if (writeInpuNalUnitToStream && !targetOlsIncludeAllVclLayers && !seiNesting->m_snSubpicFlag)
