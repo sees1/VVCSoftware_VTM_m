@@ -54,19 +54,6 @@
 
 //########### place macros to be removed in next cycle below this line ###############
 
-
-
-
-
-
-
-
-
-
-
-                                                            // JVET-S0158 #4c: Insert SEI NAL units to directly contain those SEI messages that were scalable-nested HRD-related SEI messages that apply to the output bitstream, and remove their original container SEI NAL units from the output bitstream. When the target OLS includes only one layer, apply the same for scalable-nested non-HRD-related SEI messages.
-
-
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
