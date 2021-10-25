@@ -59,7 +59,6 @@
 
 
 
-#define JVET_W0070_W0121_SPSRE_CLEANUP                    1 // JVET-W0070 Proposal 3 & JVET-W0121 Option 1 : condition the signaling of sps_ts_residual_coding_rice_present_in_sh_flag
 
 #define JVET_W0043                                        1 // Alignment of smooth block QP control with adaptive QP in VTM
 

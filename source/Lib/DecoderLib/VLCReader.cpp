@@ -2125,14 +2125,10 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
             READ_FLAG( uiCode, "transform_skip_context_enabled_flag");      spsRangeExtension.setTransformSkipContextEnabledFlag (uiCode != 0);
 #endif
             READ_FLAG( uiCode, "extended_precision_processing_flag");       spsRangeExtension.setExtendedPrecisionProcessingFlag (uiCode != 0);
-#if JVET_W0070_W0121_SPSRE_CLEANUP
             if (pcSPS->getTransformSkipEnabledFlag()) 
             {
               READ_FLAG( uiCode, "sps_ts_residual_coding_rice_present_in_sh_flag"); spsRangeExtension.setTSRCRicePresentFlag(uiCode != 0);
             }
-#else
-            READ_FLAG( uiCode, "sps_ts_residual_coding_rice_present_in_sh_flag"); spsRangeExtension.setTSRCRicePresentFlag(uiCode != 0);
-#endif
 #if !JVET_W2005_RANGE_EXTENSION_PROFILES
             READ_FLAG( uiCode, "intra_smoothing_disabled_flag");            spsRangeExtension.setIntraSmoothingDisabledFlag      (uiCode != 0);
             READ_FLAG( uiCode, "high_precision_offsets_enabled_flag");      spsRangeExtension.setHighPrecisionOffsetsEnabledFlag (uiCode != 0);

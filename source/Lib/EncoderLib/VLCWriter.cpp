@@ -1308,14 +1308,10 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
           WRITE_FLAG( (spsRangeExtension.getTransformSkipContextEnabledFlag() ? 1 : 0),       "transform_skip_context_enabled_flag");
 #endif
           WRITE_FLAG( (spsRangeExtension.getExtendedPrecisionProcessingFlag() ? 1 : 0),       "extended_precision_processing_flag" );
-#if JVET_W0070_W0121_SPSRE_CLEANUP
           if (pcSPS->getTransformSkipEnabledFlag())
           {
             WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                 "sps_ts_residual_coding_rice_present_in_sh_flag");
           }
-#else
-          WRITE_FLAG( (spsRangeExtension.getTSRCRicePresentFlag() ? 1 : 0),                   "sps_ts_residual_coding_rice_present_in_sh_flag");
-#endif
 #if !JVET_W2005_RANGE_EXTENSION_PROFILES
           WRITE_FLAG( (spsRangeExtension.getIntraSmoothingDisabledFlag() ? 1 : 0),            "intra_smoothing_disabled_flag" );
           WRITE_FLAG( (spsRangeExtension.getHighPrecisionOffsetsEnabledFlag() ? 1 : 0),       "high_precision_offsets_enabled_flag" );
