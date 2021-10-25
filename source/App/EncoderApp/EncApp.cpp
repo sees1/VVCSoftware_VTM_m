@@ -876,9 +876,7 @@ void EncApp::xInitLibCfg()
   //====== Sub-picture and Slices ========
   m_cEncLib.setSingleSlicePerSubPicFlagFlag                      ( m_singleSlicePerSubPicFlag );
   m_cEncLib.setUseSAO                                            ( m_bUseSAO );
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   m_cEncLib.setSaoTrueOrg                                        ( m_saoTrueOrg );
-#endif
   m_cEncLib.setTestSAODisableAtPictureLevel                      ( m_bTestSAODisableAtPictureLevel );
   m_cEncLib.setSaoEncodingRate                                   ( m_saoEncodingRate );
   m_cEncLib.setSaoEncodingRateChroma                             ( m_saoEncodingRateChroma );
@@ -1182,11 +1180,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setBs2ModPOCAndType                                  ( m_bs2ModPOCAndType );
   m_cEncLib.setDebugCTU                                          ( m_debugCTU );
   m_cEncLib.setUseALF                                            ( m_alf );
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   m_cEncLib.setAlfTrueOrg                                        ( m_alfTrueOrg );
-#else
-  m_cEncLib.setAlfSaoTrueOrg                                     ( m_alfSaoTrueOrg );
-#endif
   m_cEncLib.setALFStrengthLuma                                   (m_alfStrengthLuma);
   m_cEncLib.setCCALFStrength                                     (m_ccalfStrength);
   m_cEncLib.setALFAllowPredefinedFilters                         (m_alfAllowPredefinedFilters);

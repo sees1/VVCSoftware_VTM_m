@@ -444,9 +444,7 @@ protected:
 
   // coding tool (SAO)
   bool      m_bUseSAO;
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   bool      m_saoTrueOrg;
-#endif
   bool      m_bTestSAODisableAtPictureLevel;
   double    m_saoEncodingRate;                                ///< When >0 SAO early picture termination is enabled for luma and chroma
   double    m_saoEncodingRateChroma;                          ///< The SAO early picture termination rate to use for chroma (when m_SaoEncodingRate is >0). If <=0, use results for luma.
@@ -811,11 +809,7 @@ protected:
   bool        m_forceDecodeBitstream1;
 
   bool        m_alf;                                          ///< Adaptive Loop Filter
-#if JVET_W0129_ENABLE_ALF_TRUEORG
   bool        m_alfTrueOrg;
-#else
-  bool        m_alfSaoTrueOrg;
-#endif
   double      m_alfStrengthLuma;
   bool        m_alfAllowPredefinedFilters;
   double      m_ccalfStrength;

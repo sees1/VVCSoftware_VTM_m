@@ -57,7 +57,6 @@
 
 
 
-#define JVET_W0129_ENABLE_ALF_TRUEORG                    1 // Using true original samples for ALF as default setting
 
 #define JVET_W0134_UNIFORM_METRICS_LOG                    1 // change metrics output for easy parsing
 
