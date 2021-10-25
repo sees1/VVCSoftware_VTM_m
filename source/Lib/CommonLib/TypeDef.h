@@ -62,7 +62,6 @@
 
 
 
-#define JVET_W0046_RLSCP                                  1 // JVET-W0046: CE1.1 reverse last significant coefficient position
 
 #define JVET_W2005_RANGE_EXTENSION_PROFILES               1 // JVET-W2005 (JVET-W0136 profile plus meeting decisions)
 

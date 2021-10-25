@@ -1316,9 +1316,7 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
 #endif
           WRITE_FLAG( (spsRangeExtension.getRrcRiceExtensionEnableFlag() ? 1 : 0),                   "rrc_rice_extension_flag");
           WRITE_FLAG( (spsRangeExtension.getPersistentRiceAdaptationEnabledFlag() ? 1 : 0),   "persistent_rice_adaptation_enabled_flag" );
-#if JVET_W0046_RLSCP
           WRITE_FLAG( (spsRangeExtension.getReverseLastSigCoeffEnabledFlag() ? 1 : 0),        "reverse_last_sig_coeff_enabled_flag" );
-#endif
 #if !JVET_W2005_RANGE_EXTENSION_PROFILES
           WRITE_FLAG( (spsRangeExtension.getCabacBypassAlignmentEnabledFlag() ? 1 : 0),       "cabac_bypass_alignment_enabled_flag" );
 #endif
@@ -2621,12 +2619,10 @@ void HLSWriter::codeSliceHeader         ( Slice* pcSlice, PicHeader *picHeader )
   {
       WRITE_CODE(pcSlice->get_tsrc_index(), 3, "sh_ts_residual_coding_rice_idx_minus1");
   }
-#if JVET_W0046_RLSCP
   if (pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag()) 
   {
     WRITE_FLAG(pcSlice->getReverseLastSigCoeffFlag(), "sh_reverse_last_sig_coeff_flag");
   }
-#endif
   if(pcSlice->getPPS()->getSliceHeaderExtensionPresentFlag())
   {
     WRITE_UVLC(0,"sh_slice_header_extension_length");

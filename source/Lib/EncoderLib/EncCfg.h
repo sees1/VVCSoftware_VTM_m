@@ -463,9 +463,7 @@ protected:
 
   bool      m_extendedPrecisionProcessingFlag;
   bool      m_tsrcRicePresentFlag;
-#if JVET_W0046_RLSCP
   bool      m_reverseLastSigCoeffEnabledFlag;
-#endif
   bool      m_highPrecisionOffsetsEnabledFlag;
   bool      m_bUseAdaptiveQP;
   int       m_iQPAdaptationRange;
@@ -1429,10 +1427,8 @@ public:
   void      setExtendedPrecisionProcessingFlag         (bool value)     { m_extendedPrecisionProcessingFlag = value; }
   bool      getTSRCRicePresentFlag         ()         const { return m_tsrcRicePresentFlag;  }
   void      setTSRCRicePresentFlag         (bool value)     { m_tsrcRicePresentFlag = value; }
-#if JVET_W0046_RLSCP
   bool      getReverseLastSigCoeffEnabledFlag         ()         const { return m_reverseLastSigCoeffEnabledFlag;  }
   void      setReverseLastSigCoeffEnabledFlag         (bool value)     { m_reverseLastSigCoeffEnabledFlag = value; }
-#endif
   bool      getHighPrecisionOffsetsEnabledFlag() const { return m_highPrecisionOffsetsEnabledFlag; }
   void      setHighPrecisionOffsetsEnabledFlag(bool value) { m_highPrecisionOffsetsEnabledFlag = value; }
 

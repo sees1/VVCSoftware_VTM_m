@@ -134,10 +134,8 @@ private:
   unsigned                m_riceBit[8][2];
   int                     m_preQP[2];
   int                     m_preIPOC;
-#if JVET_W0046_RLSCP
   int                     m_cnt_right_bottom;
   int                     m_cnt_right_bottom_i;
-#endif
 
   //  Access channel
   EncLib*                 m_pcEncLib;

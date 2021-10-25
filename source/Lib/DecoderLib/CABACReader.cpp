@@ -3128,19 +3128,15 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
   unsigned PosLastX = 0, PosLastY = 0;
   unsigned maxLastPosX = cctx.maxLastPosX();
   unsigned maxLastPosY = cctx.maxLastPosY();
-#if JVET_W0046_RLSCP
   unsigned zoTbWdith  = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.width());
   unsigned zoTbHeight = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.height());
-#endif
 
   if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
   {
     maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
     maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;
-#if JVET_W0046_RLSCP
     zoTbWdith  = (tu.blocks[compID].width == 32) ? 16 : zoTbWdith;
     zoTbHeight = (tu.blocks[compID].height == 32) ? 16 : zoTbHeight;
-#endif
   }
 
   for( ; PosLastX < maxLastPosX; PosLastX++ )
@@ -3178,13 +3174,11 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
     PosLastY = g_minInGroup[PosLastY] + temp;
   }
 
-#if JVET_W0046_RLSCP
   if (tu.cu->slice->getReverseLastSigCoeffFlag())
   {
     PosLastX = zoTbWdith - 1 - PosLastX;
     PosLastY = zoTbHeight - 1 - PosLastY;
   }
-#endif
   int blkPos;
   blkPos = PosLastX + (PosLastY * cctx.width());
 
