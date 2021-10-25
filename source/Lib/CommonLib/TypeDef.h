@@ -58,7 +58,6 @@
 
 
 
-#define JVET_W0134_UNIFORM_METRICS_LOG                    1 // change metrics output for easy parsing
 
 #define JVET_W0070_W0121_SPSRE_CLEANUP                    1 // JVET-W0070 Proposal 3 & JVET-W0121 Option 1 : condition the signaling of sps_ts_residual_coding_rice_present_in_sh_flag
 

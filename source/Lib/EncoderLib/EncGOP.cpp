@@ -4036,9 +4036,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const bool printMSEBasedSNR,
   const bool printSequenceMSE, const bool printMSSSIM, const bool printHexPsnr, const bool printRprPSNR,
   const BitDepths &bitDepths
-#if JVET_W0134_UNIFORM_METRICS_LOG
                              , int layerId
-#endif
                              )
 {
 #if ENABLE_QPA
@@ -4076,7 +4074,6 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 #endif
 
 
-#if JVET_W0134_UNIFORM_METRICS_LOG
   std::string header,metrics;
   std::string id="a";
   if (layerId==0) id+=' ';
@@ -4087,24 +4084,7 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 #endif
                           );
   if( g_verbosity >= INFO ) std::cout<<header<<'\n'<<metrics<<std::endl;
-#else
-#if ENABLE_QPA
-  m_gcAnalyzeAll.printOut( 'a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr,
-    printRprPSNR, bitDepths, useWPSNR
-#if JVET_O0756_CALCULATE_HDRMETRICS
-                          , calculateHdrMetrics
-#endif
-                          );
-#else
-  m_gcAnalyzeAll.printOut('a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr, bitDepths
-#if JVET_O0756_CALCULATE_HDRMETRICS
-                          , calculateHdrMetrics
-#endif
-                          );
-#endif
-#endif
 
-#if JVET_W0134_UNIFORM_METRICS_LOG
   id="i";
   if (layerId==0) id+=' ';
   else            id+=std::to_string(layerId);
@@ -4134,27 +4114,6 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
 
   }
 #endif
-#else
-  msg( DETAILS, "\n\nI Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeI.printOut( 'i', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-    printHexPsnr, printRprPSNR, bitDepths );
-  msg( DETAILS, "\n\nP Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeP.printOut( 'p', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-    printHexPsnr, printRprPSNR, bitDepths );
-
-  msg( DETAILS, "\n\nB Slices--------------------------------------------------------\n" );
-  m_gcAnalyzeB.printOut( 'b', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-    printHexPsnr, printRprPSNR, bitDepths );
-
-#if WCG_WPSNR
-  if (useLumaWPSNR)
-  {
-    msg(DETAILS, "\nWPSNR SUMMARY --------------------------------------------------------\n");
-    m_gcAnalyzeWPSNR.printOut( 'w', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-      printHexPsnr, printRprPSNR, bitDepths, useLumaWPSNR );
-  }
-#endif
-#endif
 
 
   if (!m_pcCfg->getSummaryOutFilename().empty())
@@ -4181,22 +4140,11 @@ void EncGOP::printOutSummary( uint32_t uiNumAllPicCoded, bool isField, const boo
     m_gcAnalyzeAll_in.setFrmRate( m_pcCfg->getFrameRate() / (double)m_pcCfg->getTemporalSubsampleRatio());
     m_gcAnalyzeAll_in.setBits(m_gcAnalyzeAll.getBits());
     // prior to the above statement, the interlace analyser does not contain the correct total number of bits.
-#if JVET_W0134_UNIFORM_METRICS_LOG
     id="a";
     if (layerId==0) id+=' ';
     else            id+=std::to_string(layerId);
     m_gcAnalyzeAll_in.printOut(header,metrics, id, chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM, printHexPsnr, printRprPSNR, bitDepths, useWPSNR );
     if( g_verbosity >= DETAILS ) std::cout<< "\n\nSUMMARY INTERLACED ---------------------------------------------\n"<<header<<'\n'<<metrics<<std::endl;
-#else
-    msg( INFO,"\n\nSUMMARY INTERLACED ---------------------------------------------\n" );
-#if ENABLE_QPA
-    m_gcAnalyzeAll_in.printOut( 'a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-      printHexPsnr, printRprPSNR, bitDepths, useWPSNR );
-#else
-    m_gcAnalyzeAll_in.printOut('a', chFmt, printMSEBasedSNR, printSequenceMSE, printMSSSIM,
-      printHexPsnr, bitDepths);
-#endif
-#endif
     if (!m_pcCfg->getSummaryOutFilename().empty())
     {
       m_gcAnalyzeAll_in.printSummary(chFmt, printSequenceMSE, printHexPsnr, bitDepths, m_pcCfg->getSummaryOutFilename());
@@ -5017,11 +4965,7 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
     }
     if (m_pcEncLib->isResChangeInClvsEnabled())
     {
-#if JVET_W0134_UNIFORM_METRICS_LOG
       msg( NOTICE, " [Y2 %6.4lf dB  U2 %6.4lf dB  V2 %6.4lf dB]", upscaledPSNR[COMPONENT_Y], upscaledPSNR[COMPONENT_Cb], upscaledPSNR[COMPONENT_Cr] );
-#else
-      msg( NOTICE, "\nPSNR2: [Y %6.4lf dB    U %6.4lf dB    V %6.4lf dB]", upscaledPSNR[COMPONENT_Y], upscaledPSNR[COMPONENT_Cb], upscaledPSNR[COMPONENT_Cr] );
-#endif
     }
   }
   else if( g_verbosity >= INFO )
