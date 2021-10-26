@@ -1011,7 +1011,11 @@ void AdaptiveLoopFilter::deriveClassificationBlk(AlfClassifier **classifier, int
         d0 = sumD0;
         dirTempD = 2;
       }
+#if RExt__HIGH_BIT_DEPTH_SUPPORT
+      if( (uint64_t)d1 * (uint64_t)hv0 > (uint64_t)hv1 * (uint64_t)d0 )
+#else
       if( (uint32_t)d1 * (uint32_t)hv0 > (uint32_t)hv1 * (uint32_t)d0 )
+#endif
       {
         hvd1 = d1;
         hvd0 = d0;
