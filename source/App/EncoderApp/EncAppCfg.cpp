@@ -262,12 +262,21 @@ strToLevel[] =
 };
 
 #if U0132_TARGET_BITS_SATURATION
+#if JVET_X0079_MODIFIED_BITRATE
+uint32_t g_uiMaxCpbSize[2][28] =
+{
+  //            LEVEL1,          LEVEL2,  LEVEL2_1,      LEVEL3,  LEVEL3_1,       LEVEL4,   LEVEL4_1,       LEVEL5,    LEVEL5_1,  LEVEL5_2,     LEVEL6,    LEVEL6_1,  LEVEL6_2   LEVEL6_3
+  { 0, 0, 0, 0, 350000, 0, 0, 0, 1500000, 3000000, 0, 0, 6000000, 10000000, 0, 0, 12000000, 20000000, 0, 0,  25000000,  40000000,  60000000, 0,  80000000, 120000000, 240000000,  240000000 },
+  { 0, 0, 0, 0,      0, 0, 0, 0,       0,       0, 0, 0,       0,        0, 0, 0, 30000000, 50000000, 0, 0, 100000000, 160000000, 240000000, 0, 240000000, 480000000, 800000000, 1600000000 }
+};
+#else
 uint32_t g_uiMaxCpbSize[2][21] =
 {
   //         LEVEL1,        LEVEL2,LEVEL2_1,     LEVEL3, LEVEL3_1,      LEVEL4, LEVEL4_1,       LEVEL5,  LEVEL5_1,  LEVEL5_2,    LEVEL6,  LEVEL6_1,  LEVEL6_2
   { 0, 0, 0, 350000, 0, 0, 1500000, 3000000, 0, 6000000, 10000000, 0, 12000000, 20000000, 0,  25000000,  40000000,  60000000,  60000000, 120000000, 240000000 },
   { 0, 0, 0,      0, 0, 0,       0,       0, 0,       0,        0, 0, 30000000, 50000000, 0, 100000000, 160000000, 240000000, 240000000, 480000000, 800000000 }
 };
+#endif
 #endif
 
 static const struct MapStrToCostMode
@@ -922,7 +931,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoLmcsConstraintFlag",                            m_noLmcsConstraintFlag,                           false, "Indicate that LMCS is deactivated")
   ("NoLadfConstraintFlag",                            m_noLadfConstraintFlag,                          false, "Indicate that LADF is deactivated")
   ("NoVirtualBoundaryConstraintFlag",                 m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
+#if JVET_X0079_MODIFIED_BITRATE
+  ("AllRapPicturesFlag",                              m_allRapPicturesFlag,                             false, "Indicate that all pictures in OlsInScope are IRAP pictures or GDR pictures with ph_recovery_poc_cnt equal to 0")
+#else
   ("GeneralLowerBitRateConstraintFlag",               m_generalLowerBitRateConstraintFlag,              false, "Indicate whether lower bitrate constraint is used")
+#endif
 
   ("CTUSize",                                         m_uiCTUSize,                                       128u, "CTUSize (specifies the CTU size if QTBT is on) [default: 128]")
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")
@@ -2181,10 +2194,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_profile == Profile::MAIN_16_444 || m_profile == Profile::MAIN_16_444_INTRA || m_profile == Profile::MAIN_16_444_STILL_PICTURE)
   {
     m_gciPresentFlag = true;
+#if !JVET_X0079_MODIFIED_BITRATE
     if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
     {
       CHECK(m_generalLowerBitRateConstraintFlag == 0, "GeneralLowerBitRateConstraintFlag setting must be 1 for non-Intra/Still Picture operation range extension profiles.")
     }
+#endif
   }
   if (m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_16_444_INTRA)
   {
@@ -2981,10 +2996,18 @@ int EncAppCfg::xAutoDetermineProfile()
 
   default: return 1;
   }
+#if JVET_X0079_MODIFIED_BITRATE
+  if (m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_16_444_INTRA ||
+      m_profile == Profile::MAIN_12_STILL_PICTURE || m_profile == Profile::MAIN_12_444_STILL_PICTURE || m_profile == Profile::MAIN_16_444_STILL_PICTURE)
+  {
+    m_allRapPicturesFlag = 1;
+  }
+#else
     if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
     {
       m_generalLowerBitRateConstraintFlag = 1; // GeneralLowerBitRateConstraintFlag setting must be 1 for non-Intra/Still Picture operation range extension profiles.")
     }
+#endif
   return 0;
 }
 
@@ -4105,7 +4128,11 @@ bool EncAppCfg::xCheckParameter()
 #if U0132_TARGET_BITS_SATURATION
     if ((m_RCCpbSaturationEnabled) && (m_level!=Level::NONE) && (m_profile!=Profile::NONE))
     {
+#if JVET_X0079_MODIFIED_BITRATE
+      uint32_t uiLevelIdx = (m_level / 16) * 4 + (uint32_t)((m_level % 16) / 3);
+#else
       uint32_t uiLevelIdx = (m_level / 10) + (uint32_t)((m_level % 10) / 3);    // (m_level / 30)*3 + ((m_level % 10) / 3);
+#endif
       xConfirmPara(m_RCCpbSize > g_uiMaxCpbSize[m_levelTier][uiLevelIdx], "RCCpbSize should be smaller than or equal to Max CPB size according to tier and level");
       xConfirmPara(m_RCInitialCpbFullness > 1, "RCInitialCpbFullness should be smaller than or equal to 1");
     }
@@ -4318,7 +4345,11 @@ void EncAppCfg::xPrintParameter()
   {
     msg( DETAILS, "Profile                                : %s\n", profileToString(m_profile) );
   }
+#if JVET_X0079_MODIFIED_BITRATE
+  msg( DETAILS,"AllRapPicturesFlag                     : %d\n", m_allRapPicturesFlag );
+#else
   msg( DETAILS,"GeneralLowerBitRateConstraintFlag      : %d\n", m_generalLowerBitRateConstraintFlag );
+#endif
   msg(DETAILS, "CTU size / min CU size                 : %d / %d \n", m_uiMaxCUWidth, 1 << m_log2MinCuSize);
 
   msg(DETAILS, "subpicture info present flag           : %s\n", m_subPicInfoPresentFlag ? "Enabled" : "Disabled");

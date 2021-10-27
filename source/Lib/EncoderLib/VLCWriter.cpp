@@ -2703,13 +2703,23 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo, const Profil
         profile == Profile::MAIN_12_444 || profile == Profile::MAIN_12_444_INTRA || profile == Profile::MAIN_12_444_STILL_PICTURE ||
         profile == Profile::MAIN_16_444 || profile == Profile::MAIN_16_444_INTRA || profile == Profile::MAIN_16_444_STILL_PICTURE)
     {
+#if JVET_X0079_MODIFIED_BITRATE
+      int numAdditionalBits = 1;
+      WRITE_CODE(numAdditionalBits, 8, "gci_num_additional_bits");
+      WRITE_FLAG(cinfo->getAllRapPicturesFlag() ? 1 : 0, "gci_all_rap_pictures_flag");
+#else
       int numReservedBits = 1;
       WRITE_CODE(numReservedBits, 8, "gci_num_reserved_bits");
       WRITE_FLAG(cinfo->getLowerBitRateConstraintFlag() ? 1 : 0, "general_lower_bit_rate_constraint_flag");
+#endif
     }
     else
     {
+#if JVET_X0079_MODIFIED_BITRATE
+      WRITE_CODE(0, 8, "gci_num_additional_bits");
+#else
       WRITE_CODE(0, 8, "gci_num_reserved_bits");
+#endif
     }
   }
 
