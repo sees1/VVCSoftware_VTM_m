@@ -4574,10 +4574,17 @@ bool             operator == (const ConstraintInfo& op1, const ConstraintInfo& o
   {
     return false;
   }
+#if JVET_X0079_MODIFIED_BITRATE
+  if (op1.m_allRapPicturesFlag != op2.m_allRapPicturesFlag)
+  {
+    return false;
+  }
+#else
   if (op1.m_lowerBitRateConstraintFlag != op2.m_lowerBitRateConstraintFlag)
   {
     return false;
   }
+#endif
   if (op1.m_allLayersIndependentConstraintFlag != op2.m_allLayersIndependentConstraintFlag)
   {
     return false;

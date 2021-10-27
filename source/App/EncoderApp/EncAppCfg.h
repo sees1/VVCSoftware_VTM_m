@@ -189,7 +189,11 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
+#if JVET_X0079_MODIFIED_BITRATE
+  bool      m_allRapPicturesFlag;
+#else
   bool      m_generalLowerBitRateConstraintFlag;
+#endif
 
   // profile/level
   Profile::Name m_profile;

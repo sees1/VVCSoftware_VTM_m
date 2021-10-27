@@ -70,7 +70,11 @@ static const LevelTierFeatures mainLevelTierInfo[] =
     { Level::LEVEL6  , 35651584, {    80000,   240000 },      600,      440,       20, 1069547520ULL, {   60000,   240000 }, { 8, 4} },
     { Level::LEVEL6_1, 35651584, {   120000,   480000 },      600,      440,       20, 2139095040ULL, {  120000,   480000 }, { 8, 4} },
     { Level::LEVEL6_2, 35651584, {   180000,   800000 },      600,      440,       20, 4278190080ULL, {  240000,   800000 }, { 8, 4} },
+#if JVET_X0079_MODIFIED_BITRATE
+    { Level::LEVEL6_3, 80216064, {   240000,  1600000 },     1000,      990,       30, 4812963840ULL, {  320000,  1600000 }, { 8, 4} },
+#else
     { Level::LEVEL6_3, 80216064, {   240000,   800000 },     1000,      990,       30, 4812963840ULL, {  320000,   800000 }, { 8, 4} },
+#endif
     { Level::LEVEL15_5, MAX_UINT,{ MAX_UINT, MAX_UINT }, MAX_UINT, MAX_UINT, MAX_UINT, MAX_CNFUINT64, {MAX_UINT, MAX_UINT }, { 0, 0} },
     { Level::NONE    }
 };
@@ -92,6 +96,17 @@ static const ProfileFeatures validProfiles[] = {
   { Profile::MAIN_10_444, "Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75, mainLevelTierInfo, false },
   { Profile::MULTILAYER_MAIN_10_444, "Multilayer_Main_444_10", 10, CHROMA_444, false, 2500, 2750, 3750, 75,
     mainLevelTierInfo, false },
+#if JVET_X0079_MODIFIED_BITRATE
+  { Profile::MAIN_12, "Main_12", 12, CHROMA_420, true, 1200, 1320, 1875, 100, mainLevelTierInfo, false },
+  { Profile::MAIN_12_INTRA, "Main_12_Intra", 12, CHROMA_420, true, 2400, 2640, 1875, 100, mainLevelTierInfo, false },
+  { Profile::MAIN_12_STILL_PICTURE, "Main_12_Still_Picture", 12, CHROMA_420, true, 2400, 2640, 1875, 100, mainLevelTierInfo, false },
+  { Profile::MAIN_12_444, "Main_12_444", 12, CHROMA_444, true, 3000, 3300, 3750, 75, mainLevelTierInfo, false },
+  { Profile::MAIN_12_444_INTRA, "Main_12_444_Intra", 12, CHROMA_444, true, 6000, 6600, 3750, 75, mainLevelTierInfo, false },
+  { Profile::MAIN_12_444_STILL_PICTURE, "Main_12_444_Still_Picture", 12, CHROMA_444, true, 6000, 6600, 3750, 75, mainLevelTierInfo, false },
+  { Profile::MAIN_16_444, "Main_16_444", 16, CHROMA_444, true, 4000, 4400, 6000, 75, mainLevelTierInfo, false },
+  { Profile::MAIN_16_444_INTRA, "Main_16_444_Intra", 16, CHROMA_444, true, 8000, 8800, 6000, 75, mainLevelTierInfo, false },
+  { Profile::MAIN_16_444_STILL_PICTURE, "Main_16_444_Still_Picture", 16, CHROMA_444, true, 8000, 8800, 6000, 75, mainLevelTierInfo, false },
+#else
   { Profile::MAIN_12, "Main_12", 12, CHROMA_420, true, 1500, 1650, 2250, 100, mainLevelTierInfo, false },
   { Profile::MAIN_12_INTRA, "Main_12_Intra", 12, CHROMA_420, true, 1500, 1650, 2250, 100, mainLevelTierInfo, false },
   { Profile::MAIN_12_STILL_PICTURE, "Main_12_Still_Picture", 12, CHROMA_420, true, 1500, 1650, 2250, 100, mainLevelTierInfo, false },
@@ -101,6 +116,7 @@ static const ProfileFeatures validProfiles[] = {
   { Profile::MAIN_16_444, "Main_16_444", 16, CHROMA_444, true, 4000, 4400, 6000, 50, mainLevelTierInfo, false },
   { Profile::MAIN_16_444_INTRA, "Main_16_444_Intra", 16, CHROMA_444, true, 4000, 4400, 6000, 50, mainLevelTierInfo, false },
   { Profile::MAIN_16_444_STILL_PICTURE, "Main_16_444_Still_Picture", 16, CHROMA_444, true, 4000, 4400, 6000, 50, mainLevelTierInfo, false },
+#endif
   { Profile::NONE, 0 },
 };
 
@@ -156,6 +172,17 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
   if (m_pProfile)
   {
     Profile::Name profile = m_pProfile->profile;
+#if JVET_X0079_MODIFIED_BITRATE
+    if (profile == Profile::MAIN_10 || profile == Profile::MAIN_10_444 ||
+        profile == Profile::MULTILAYER_MAIN_10 || profile == Profile::MULTILAYER_MAIN_10_444)
+    {
+      m_hbrFactor = 1;
+    }
+    else
+    {
+      m_hbrFactor = 1 + sps.getProfileTierLevel()->getTierFlag();
+    }
+#else
     if (profile == Profile::MAIN_10 || profile == Profile::MAIN_10_444 ||
         profile == Profile::MULTILAYER_MAIN_10 || profile == Profile::MULTILAYER_MAIN_10_444 ||
         profile == Profile::MAIN_12 || profile == Profile::MAIN_12_444 || profile == Profile::MAIN_16_444)
@@ -166,6 +193,7 @@ ProfileLevelTierFeatures::extractPTLInformation(const SPS &sps)
     {
       m_hbrFactor = 2 - sps.getProfileTierLevel()->getConstraintInfo()->getLowerBitRateConstraintFlag();
     }
+#endif
   }
 }
 
