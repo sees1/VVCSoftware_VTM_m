@@ -203,6 +203,9 @@ void DecSlice::decompressSlice( Slice* slice, InputBitstream* bitstream, int deb
       {
         // Top is available, so use it.
         cabacReader.getCtx() = m_entropyCodingSyncContextState;
+#if JVET_X0128_V2_WPP
+        cabacReader.getCtx().riceStatReset(slice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA), slice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag());
+#endif
         cs.setPrevPLT(m_palettePredictorSyncState);
       }
       pic->m_prevQP[0] = pic->m_prevQP[1] = slice->getSliceQp();

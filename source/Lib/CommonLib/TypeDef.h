@@ -53,6 +53,9 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+
+#define JVET_X0128_V2_WPP                                 1 // JVET-X0128 method 2, VVC v2 WPP
+
 #define JVET_X0079_MODIFIED_BITRATE                       1 // JVET-X0079v3 (changes to JVET-W2005)
 
 #define JVET_X0106_INTRA_CONSTRAINT                       1 // JVET-X0106 Constraint on non I=frames in Intra profiles
