@@ -2096,6 +2096,87 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
   }
 }
 
+#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
+void EncGOP::computeSignalling(Picture* pcPic, Slice* pcSlice) const
+{
+  bool deriveETSRC = (!pcSlice->getTSResidualCodingDisabledFlag() && pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag());
+  bool deriveRLSCP = pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag();
+
+  if (deriveETSRC || deriveRLSCP)
+  {
+    int total = 0;
+    int ignored = 0;
+    uint32_t freq[128] = {};
+    static const int offsetRLSCP = 15; // Equivalent to 2.5 bits
+    for (ComponentID compID = COMPONENT_Y;
+                     compID <= (pcPic->chromaFormat == CHROMA_400 ? COMPONENT_Y : COMPONENT_Cr);
+                     compID = ComponentID(compID + 1))
+    {
+      int bitDepth = pcPic->cs->sps->getBitDepth(toChannelType(compID));
+      int qpBase = offsetRLSCP + 4 - (bitDepth - 8) * 6;
+      int qpOffs = pcSlice->getSliceQp() - qpBase;
+
+      const CPelBuf buffer = pcPic->getOrigBuf(compID);
+      const int stride = buffer.stride;
+      const int height = buffer.height;
+      const int width = buffer.width;
+      total += (height - 1) * (width - 1);
+
+      const Pel* buf = buffer.buf;
+      for (int h = 1; h < height; h++)
+      {
+        const Pel* above = buf;
+        buf += stride;
+        for (int w = 1; w < width; w++)
+        {
+          Pel residual = std::min(std::abs(buf[w] - buf[w - 1]), std::abs(buf[w] - above[w]));
+          if (residual > 0)
+          {
+            int resLevel = (int)std::round(6 * std::log2(residual)) - qpOffs;
+            freq[Clip3(0, 127, resLevel)]++;
+          }
+          else
+          {
+            ignored++;
+          }
+        }
+      }
+    }
+
+    if (deriveRLSCP)
+    {
+      pcSlice->setReverseLastSigCoeffFlag((freq[0] + ignored) < total / 2);
+    }
+
+    if (deriveETSRC)
+    {
+      total -= ignored;
+      int target[3] = { total / 6, total / 3, total / 2 };
+      int win[3];
+
+      int winCount = 0;
+      int totalFreq = 0;
+      for (int i = 0; i < 128 && winCount < 3; i++)
+      {
+        totalFreq += freq[i];
+        while (totalFreq >= target[winCount] && winCount < 3)
+        {
+           win[winCount++] = i;
+        }
+      }
+
+      int winCentre = ((win[0] + win[1] * 2 + win[2]) / 4) - offsetRLSCP;
+      int tsrcIndex = Clip3<int>(0, 7, winCentre / 6);
+      if (ignored > total)
+      {
+        tsrcIndex = std::min(tsrcIndex, std::max(0, pcPic->cs->sps->getBitDepth(CHANNEL_TYPE_LUMA) - 9));
+      }
+      pcSlice->set_tsrc_index(tsrcIndex);
+    }
+  }
+}
+
+#endif
 // ====================================================================================================================
 // Public member functions
 // ====================================================================================================================
@@ -3167,6 +3248,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           m_pcEncLib->getInterSearch()->setClipMvInSubPic(false);
         }
 
+#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
+        if ( pcSlice->isIntra() && (iPOCLast == 0 || m_pcCfg->getIntraPeriod() > 1))
+        {
+          computeSignalling(pcPic, pcSlice);
+        }
+#endif
         m_pcSliceEncoder->precompressSlice( pcPic );
         m_pcSliceEncoder->compressSlice   ( pcPic, false, false );
 
