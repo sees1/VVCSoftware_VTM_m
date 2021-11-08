@@ -625,6 +625,8 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
       readTokenValue(ar.objectCancelFlag, failed, fic, "SEIArObjCancelFlag[c]");
       ar.objectLabelValid=false;
       ar.boundingBoxValid=false;
+      ar.boundingBoxCancelFlag=false;
+
       if (!ar.objectCancelFlag)
       {
         if (seiAnnoRegion->m_hdr.m_objectLabelPresentFlag)
@@ -634,8 +636,12 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
           {
             readTokenValueAndValidate<uint32_t>(ar.objLabelIdx, failed, fic, "SEIArObjectLabelIdc[c]", uint32_t(0), uint32_t(255));
           }
-          readTokenValue(ar.boundingBoxValid, failed, fic, "SEIArBoundBoxUpdateFlag[c]");
-          if (ar.boundingBoxValid)
+        }
+        readTokenValue(ar.boundingBoxValid, failed, fic, "SEIArBoundBoxUpdateFlag[c]");
+        if (ar.boundingBoxValid)
+        {
+          readTokenValue(ar.boundingBoxCancelFlag, failed, fic, "SEIArBoundBoxCancelFlag[c]");
+          if (!ar.boundingBoxCancelFlag)
           {
             readTokenValueAndValidate<uint32_t>(ar.boundingBoxTop, failed, fic, "SEIArObjTop[c]", uint32_t(0), uint32_t(0x7fffffff));
             readTokenValueAndValidate<uint32_t>(ar.boundingBoxLeft, failed, fic, "SEIArObjLeft[c]", uint32_t(0), uint32_t(0x7fffffff));
@@ -650,29 +656,29 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
               readTokenValueAndValidate<uint32_t>(ar.objectConfidence, failed, fic, "SEIArObjDetConf[c]", uint32_t(0), uint32_t(1<<seiAnnoRegion->m_hdr.m_objectConfidenceLength)-1);
             }
           }
-          //Compare with existing attributes to decide whether it's a static object
-          //First check whether it's an existing object (or) new object
-          auto destIt = m_pcCfg->m_arObjects.find(it->first);
-          //New object
-          if (destIt == m_pcCfg->m_arObjects.end())
-          {
-            //New object arrived, needs to be appended to the map of tracked objects
-            m_pcCfg->m_arObjects[it->first] = ar;
-          }
-          //Existing object
-          else
-          {
-            // Size remains the same
-            if(m_pcCfg->m_arObjects[it->first].boundingBoxWidth == ar.boundingBoxWidth &&
-              m_pcCfg->m_arObjects[it->first].boundingBoxHeight == ar.boundingBoxHeight)
-              {
-                if(m_pcCfg->m_arObjects[it->first].boundingBoxTop == ar.boundingBoxTop &&
-                  m_pcCfg->m_arObjects[it->first].boundingBoxLeft == ar.boundingBoxLeft)
-                  {
-                    ar.boundingBoxValid = 0;
-                  }
-              }
-          }
+        }
+        //Compare with existing attributes to decide whether it's a static object
+        //First check whether it's an existing object (or) new object
+        auto destIt = m_pcCfg->m_arObjects.find(it->first);
+        //New object
+        if (destIt == m_pcCfg->m_arObjects.end())
+        {
+           //New object arrived, needs to be appended to the map of tracked objects
+           m_pcCfg->m_arObjects[it->first] = ar;
+        }
+        //Existing object
+        else
+        {
+          // Size remains the same
+          if(m_pcCfg->m_arObjects[it->first].boundingBoxWidth == ar.boundingBoxWidth &&
+            m_pcCfg->m_arObjects[it->first].boundingBoxHeight == ar.boundingBoxHeight)
+            {
+              if(m_pcCfg->m_arObjects[it->first].boundingBoxTop == ar.boundingBoxTop &&
+                m_pcCfg->m_arObjects[it->first].boundingBoxLeft == ar.boundingBoxLeft)
+                {
+                  ar.boundingBoxValid = 0;
+                }
+            }
         }
       }
     }

@@ -683,27 +683,28 @@ void SEIWriter::xWriteSEIAnnotatedRegions(const SEIAnnotatedRegions &sei)
         }
         WRITE_CODE('\0', 8, "ar_label_language");
       }
-    }
-    WRITE_UVLC((uint32_t)sei.m_annotatedLabels.size(), "ar_num_label_updates");
-    assert(sei.m_annotatedLabels.size()<256);
-    for(auto it=sei.m_annotatedLabels.begin(); it!=sei.m_annotatedLabels.end(); it++)
-    {
-      assert(it->first < 256);
-      WRITE_UVLC(it->first, "ar_label_idx[]");
-      const SEIAnnotatedRegions::AnnotatedRegionLabel &ar=it->second;
-      WRITE_FLAG(!ar.labelValid, "ar_label_cancel_flag");
-      if (ar.labelValid)
+      WRITE_UVLC((uint32_t)sei.m_annotatedLabels.size(), "ar_num_label_updates");
+      assert(sei.m_annotatedLabels.size()<256);
+      for(auto it=sei.m_annotatedLabels.begin(); it!=sei.m_annotatedLabels.end(); it++)
       {
-        xWriteByteAlign();
-        assert(ar.label.size()<256);
-        for (uint32_t j = 0; j < ar.label.size(); j++)
+        assert(it->first < 256);
+        WRITE_UVLC(it->first, "ar_label_idx[]");
+        const SEIAnnotatedRegions::AnnotatedRegionLabel &ar=it->second;
+        WRITE_FLAG(!ar.labelValid, "ar_label_cancel_flag");
+        if (ar.labelValid)
         {
-          char ch = ar.label[j];
-          WRITE_CODE(ch, 8, "ar_label[]");
+          xWriteByteAlign();
+          assert(ar.label.size()<256);
+          for (uint32_t j = 0; j < ar.label.size(); j++)
+          {
+            char ch = ar.label[j];
+            WRITE_CODE(ch, 8, "ar_label[]");
+          }
+          WRITE_CODE('\0', 8, "ar_label[]");
         }
-        WRITE_CODE('\0', 8, "ar_label[]");
       }
     }
+
     WRITE_UVLC((uint32_t)sei.m_annotatedRegions.size(), "ar_num_object_updates");
     assert(sei.m_annotatedRegions.size()<256);
     for (auto it=sei.m_annotatedRegions.begin(); it!=sei.m_annotatedRegions.end(); it++)
@@ -725,18 +726,22 @@ void SEIWriter::xWriteSEIAnnotatedRegions(const SEIAnnotatedRegions &sei)
         WRITE_FLAG(ar.boundingBoxValid, "ar_object_bounding_box_update_flag");
         if (ar.boundingBoxValid)
         {
-          WRITE_CODE(ar.boundingBoxTop,   16, "ar_bounding_box_top");
-          WRITE_CODE(ar.boundingBoxLeft,  16, "ar_bounding_box_left");
-          WRITE_CODE(ar.boundingBoxWidth, 16, "ar_bounding_box_width");
-          WRITE_CODE(ar.boundingBoxHeight,16, "ar_bounding_box_height");
-          if (sei.m_hdr.m_partialObjectFlagPresentFlag)
+          WRITE_FLAG(ar.boundingBoxCancelFlag, "ar_bounding_box_cancel_flag");
+          if (!ar.boundingBoxCancelFlag)
           {
-            WRITE_UVLC(ar.partialObjectFlag, "ar_partial_object_flag");
-          }
-          if (sei.m_hdr.m_objectConfidenceInfoPresentFlag)
-          {
-            assert(ar.objectConfidence < (1<<sei.m_hdr.m_objectConfidenceLength));
-            WRITE_CODE(ar.objectConfidence, sei.m_hdr.m_objectConfidenceLength, "ar_object_confidence");
+            WRITE_CODE(ar.boundingBoxTop,   16, "ar_bounding_box_top");
+            WRITE_CODE(ar.boundingBoxLeft,  16, "ar_bounding_box_left");
+            WRITE_CODE(ar.boundingBoxWidth, 16, "ar_bounding_box_width");
+            WRITE_CODE(ar.boundingBoxHeight,16, "ar_bounding_box_height");
+            if (sei.m_hdr.m_partialObjectFlagPresentFlag)
+            {
+              WRITE_UVLC(ar.partialObjectFlag, "ar_partial_object_flag");
+            }
+            if (sei.m_hdr.m_objectConfidenceInfoPresentFlag)
+            {
+              assert(ar.objectConfidence < (1<<sei.m_hdr.m_objectConfidenceLength));
+              WRITE_CODE(ar.objectConfidence, sei.m_hdr.m_objectConfidenceLength, "ar_object_confidence");
+            }
           }
         }
       }
