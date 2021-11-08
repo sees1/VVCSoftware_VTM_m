@@ -1072,38 +1072,38 @@ void SEIReader::xParseSEIAnnotatedRegions(SEIAnnotatedRegions& sei, uint32_t pay
           }
         } while (val != '\0');
       }
-    }
 
-    uint32_t numLabelUpdates;
-    sei_read_uvlc(pDecodedMessageOutputStream, numLabelUpdates, "ar_num_label_updates");
-    assert(numLabelUpdates<256);
+      uint32_t numLabelUpdates;
+      sei_read_uvlc(pDecodedMessageOutputStream, numLabelUpdates, "ar_num_label_updates");
+      assert(numLabelUpdates<256);
 
-    sei.m_annotatedLabels.clear();
-    sei.m_annotatedLabels.resize(numLabelUpdates);
-    for (auto it=sei.m_annotatedLabels.begin(); it!=sei.m_annotatedLabels.end(); it++)
-    {
-      SEIAnnotatedRegions::AnnotatedRegionLabel &ar = it->second;
-      sei_read_uvlc(pDecodedMessageOutputStream, val, "ar_label_idx[]");             it->first = val;
-      assert(val<256);
-      sei_read_flag(pDecodedMessageOutputStream, val, "ar_label_cancel_flag");       ar.labelValid = !val;
-      if (ar.labelValid)
+      sei.m_annotatedLabels.clear();
+      sei.m_annotatedLabels.resize(numLabelUpdates);
+      for (auto it=sei.m_annotatedLabels.begin(); it!=sei.m_annotatedLabels.end(); it++)
       {
-        ar.label.clear();
-        // byte alignment
-        while (m_pcBitstream->getNumBitsRead() % 8 != 0)
+        SEIAnnotatedRegions::AnnotatedRegionLabel &ar = it->second;
+        sei_read_uvlc(pDecodedMessageOutputStream, val, "ar_label_idx[]");             it->first = val;
+        assert(val<256);
+        sei_read_flag(pDecodedMessageOutputStream, val, "ar_label_cancel_flag");       ar.labelValid = !val;
+        if (ar.labelValid)
         {
-          uint32_t code;
-          sei_read_flag(pDecodedMessageOutputStream, code, "ar_bit_equal_to_zero");
-        }
-        do
-        {
-          sei_read_code(pDecodedMessageOutputStream, 8, val, "ar_label[]");
-          if (val)
+          ar.label.clear();
+          // byte alignment
+          while (m_pcBitstream->getNumBitsRead() % 8 != 0)
           {
-            assert(ar.label.size()<256);
-            ar.label.push_back((char)val);
+            uint32_t code;
+            sei_read_flag(pDecodedMessageOutputStream, code, "ar_bit_equal_to_zero");
           }
-        } while (val != '\0');
+          do
+          {
+            sei_read_code(pDecodedMessageOutputStream, 8, val, "ar_label[]");
+            if (val)
+            {
+              assert(ar.label.size()<256);
+              ar.label.push_back((char)val);
+            }
+          } while (val != '\0');
+        }
       }
     }
 
@@ -1120,6 +1120,7 @@ void SEIReader::xParseSEIAnnotatedRegions(SEIAnnotatedRegions& sei, uint32_t pay
       sei_read_flag(pDecodedMessageOutputStream, val, "ar_object_cancel_flag");                           ar.objectCancelFlag = val;
       ar.objectLabelValid=false;
       ar.boundingBoxValid=false;
+      ar.boundingBoxCancelFlag=true;
 
       if (!ar.objectCancelFlag)
       {
@@ -1135,17 +1136,21 @@ void SEIReader::xParseSEIAnnotatedRegions(SEIAnnotatedRegions& sei, uint32_t pay
         sei_read_flag(pDecodedMessageOutputStream, val, "ar_bounding_box_update_flag");              ar.boundingBoxValid = val;
         if (ar.boundingBoxValid)
         {
-          sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_top");                      ar.boundingBoxTop = val;
-          sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_left");                     ar.boundingBoxLeft = val;
-          sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_width");                    ar.boundingBoxWidth = val;
-          sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_height");                   ar.boundingBoxHeight = val;
-          if (sei.m_hdr.m_partialObjectFlagPresentFlag)
+          sei_read_flag(pDecodedMessageOutputStream, val, "ar_bounding_box_cancel_flag");             ar.boundingBoxCancelFlag = val;
+          if (!ar.boundingBoxCancelFlag)
           {
-            sei_read_flag(pDecodedMessageOutputStream, val, "ar_partial_object_flag");                ar.partialObjectFlag = val;
-          }
-          if (sei.m_hdr.m_objectConfidenceInfoPresentFlag)
-          {
-            sei_read_code(pDecodedMessageOutputStream, sei.m_hdr.m_objectConfidenceLength, val, "ar_object_confidence"); ar.objectConfidence = val;
+            sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_top");                      ar.boundingBoxTop = val;
+            sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_left");                     ar.boundingBoxLeft = val;
+            sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_width");                    ar.boundingBoxWidth = val;
+            sei_read_code(pDecodedMessageOutputStream, 16, val, "ar_bounding_box_height");                   ar.boundingBoxHeight = val;
+            if (sei.m_hdr.m_partialObjectFlagPresentFlag)
+            {
+              sei_read_flag(pDecodedMessageOutputStream, val, "ar_partial_object_flag");                ar.partialObjectFlag = val;
+            }
+            if (sei.m_hdr.m_objectConfidenceInfoPresentFlag)
+            {
+              sei_read_code(pDecodedMessageOutputStream, sei.m_hdr.m_objectConfidenceLength, val, "ar_object_confidence"); ar.objectConfidence = val;
+            }
           }
         }
       }

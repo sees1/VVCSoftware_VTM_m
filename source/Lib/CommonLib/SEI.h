@@ -934,6 +934,7 @@ public:
     uint32_t objLabelIdx;            // only valid if bObjectLabelValid
 
     bool boundingBoxValid;
+    bool boundingBoxCancelFlag;
     uint32_t boundingBoxTop;         // only valid if bBoundingBoxValid
     uint32_t boundingBoxLeft;
     uint32_t boundingBoxWidth;
