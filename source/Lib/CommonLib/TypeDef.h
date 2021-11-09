@@ -62,6 +62,8 @@
 
 #define JVET_X0137_ETSRC_RLSCP_DETERMINATION              1 // JVET-X0137 Determine signalled parameters for ETSRC and RLSCP using estimated residual
 
+#define JVET_X0076_X0095_V2_GCI                           1 // JVET-X0076/X0095 GCI flags for VVC V2 tools
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 

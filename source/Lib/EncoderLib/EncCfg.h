@@ -240,6 +240,13 @@ protected:
 #else
   bool      m_generalLowerBitRateConstraintFlag;
 #endif
+#if JVET_X0076_X0095_V2_GCI
+  bool      m_noExtendedPrecisionProcessingConstraintFlag;
+  bool      m_noTsResidualCodingRiceConstraintFlag;
+  bool      m_noRrcRiceExtensionConstraintFlag;
+  bool      m_noPersistentRiceAdaptationConstraintFlag;
+  bool      m_noReverseLastSigCoeffConstraintFlag;
+#endif
 
   /* profile & level */
   Profile::Name m_profile;
@@ -1020,6 +1027,18 @@ public:
 #else
   bool      getGeneralLowerBitRateConstraintFlag() const { return m_generalLowerBitRateConstraintFlag; }
   void      setGeneralLowerBitRateConstraintFlag(bool val) { m_generalLowerBitRateConstraintFlag = val; }
+#endif
+#if JVET_X0076_X0095_V2_GCI
+  bool      getNoExtendedPrecisionProcessingConstraintFlag() const { return m_noExtendedPrecisionProcessingConstraintFlag; }
+  void      setNoExtendedPrecisionProcessingConstraintFlag(bool val) { m_noExtendedPrecisionProcessingConstraintFlag = val; }
+  bool      getNoTsResidualCodingRiceConstraintFlag() const { return m_noTsResidualCodingRiceConstraintFlag; }
+  void      setNoTsResidualCodingRiceConstraintFlag(bool val) { m_noTsResidualCodingRiceConstraintFlag = val; }
+  bool      getNoRrcRiceExtensionConstraintFlag() const { return m_noRrcRiceExtensionConstraintFlag; }
+  void      setNoRrcRiceExtensionConstraintFlag(bool val) { m_noRrcRiceExtensionConstraintFlag = val; }
+  bool      getNoPersistentRiceAdaptationConstraintFlag() const { return m_noPersistentRiceAdaptationConstraintFlag; }
+  void      setNoPersistentRiceAdaptationConstraintFlag(bool val) { m_noPersistentRiceAdaptationConstraintFlag = val; }
+  bool      getNoReverseLastSigCoeffConstraintFlag() const { return m_noReverseLastSigCoeffConstraintFlag; }
+  void      setNoReverseLastSigCoeffConstraintFlag(bool val) { m_noReverseLastSigCoeffConstraintFlag = val; }
 #endif
 
   void      setFrameRate                    ( int   i )      { m_iFrameRate = i; }
