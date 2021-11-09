@@ -4600,7 +4600,16 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo, const ProfileTie
     if (numAdditionalBits > 0)
     {
       READ_FLAG(symbol, "gci_all_rap_pictures_flag");                    cinfo->setAllRapPicturesFlag(symbol > 0 ? true : false);
+#if JVET_X0076_X0095_V2_GCI
+      READ_FLAG(symbol, "gci_no_extended_precision_processing_constraint_flag");  cinfo->setNoExtendedPrecisionProcessingConstraintFlag(symbol > 0 ? true : false);
+      READ_FLAG(symbol, "gci_no_ts_residual_coding_rice_constraint_flag");        cinfo->setNoTsResidualCodingRiceConstraintFlag(symbol > 0 ? true : false);
+      READ_FLAG(symbol, "gci_no_rrc_rice_extension_constraint_flag");             cinfo->setNoRrcRiceExtensionConstraintFlag(symbol > 0 ? true : false);
+      READ_FLAG(symbol, "gci_no_persistent_rice_adaptation_constraint_flag");     cinfo->setNoPersistentRiceAdaptationConstraintFlag(symbol > 0 ? true : false);
+      READ_FLAG(symbol, "gci_no_reverse_last_sig_coeff_constraint_flag");         cinfo->setNoReverseLastSigCoeffConstraintFlag(symbol > 0 ? true : false);
+      numAdditionalBitsUsed = 6;
+#else
       numAdditionalBitsUsed = 1;
+#endif
     }
     else
     {

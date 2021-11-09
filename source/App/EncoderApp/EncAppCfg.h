@@ -194,6 +194,13 @@ protected:
 #else
   bool      m_generalLowerBitRateConstraintFlag;
 #endif
+#if JVET_X0076_X0095_V2_GCI
+  bool      m_noExtendedPrecisionProcessingConstraintFlag;
+  bool      m_noTsResidualCodingRiceConstraintFlag;
+  bool      m_noRrcRiceExtensionConstraintFlag;
+  bool      m_noPersistentRiceAdaptationConstraintFlag;
+  bool      m_noReverseLastSigCoeffConstraintFlag;
+#endif
 
   // profile/level
   Profile::Name m_profile;
