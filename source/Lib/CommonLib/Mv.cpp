@@ -55,7 +55,11 @@ void (*clipMv) ( Mv& rcMv, const struct Position& pos, const struct Size& size, 
 
 void clipMvInPic ( Mv& rcMv, const struct Position& pos, const struct Size& size, const class SPS& sps, const class PPS& pps )
 {
+#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
+  if (pps.getWrapAroundEnabledFlag())
+#else
   if (sps.getWrapAroundEnabledFlag())
+#endif
   {
     wrapClipMv(rcMv, pos, size, &sps, &pps);
     return;
@@ -75,7 +79,11 @@ void clipMvInPic ( Mv& rcMv, const struct Position& pos, const struct Size& size
 
 void clipMvInSubpic ( Mv& rcMv, const struct Position& pos, const struct Size& size, const class SPS& sps, const class PPS& pps )
 {
+#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
+  if (pps.getWrapAroundEnabledFlag())
+#else
   if (sps.getWrapAroundEnabledFlag())
+#endif
   {
     wrapClipMv(rcMv, pos, size, &sps, &pps);
     return;

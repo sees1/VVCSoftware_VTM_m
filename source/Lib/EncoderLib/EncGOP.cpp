@@ -368,6 +368,9 @@ int EncGOP::xWritePPS( AccessUnit &accessUnit, const PPS *pps, const int layerId
   OutputNALUnit nalu(NAL_UNIT_PPS);
   m_HLSWriter->setBitstream( &nalu.m_Bitstream );
   nalu.m_nuhLayerId = layerId;
+#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
+  nalu.m_temporalId = accessUnit.temporalId;
+#endif
   CHECK( nalu.m_temporalId < accessUnit.temporalId, "TemporalId shall be greater than or equal to the TemporalId of the layer access unit containing the NAL unit" );
   m_HLSWriter->codePPS( pps );
   accessUnit.push_back(new NALUnitEBSP(nalu));
@@ -2280,7 +2283,19 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
                 iNumPicRcvd, iTimeOffset, pcPic, pocCurr, isField );
     picHeader = pcPic->cs->picHeader;
     picHeader->setSPSId( pcPic->cs->pps->getSPSId() );
+#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
+    if( getNalUnitType(pocCurr, m_iLastIDR, isField) == NAL_UNIT_CODED_SLICE_RASL && m_pcCfg->getRprRASLtoolSwitch() && m_pcCfg->getUseWrapAround() )
+    {
+      picHeader->setPPSId( 4 );
+      pcPic->cs->pps = m_pcEncLib->getPPS( 4 );
+    }
+    else
+    {
+      picHeader->setPPSId( pcPic->cs->pps->getPPSId() );
+    }
+#else
     picHeader->setPPSId( pcPic->cs->pps->getPPSId() );
+#endif
     picHeader->setSplitConsOverrideFlag(false);
     // initial two flags to be false
     picHeader->setPicInterSliceAllowedFlag(false);
@@ -2997,6 +3012,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setDisableLmChromaCheck( true );
       picHeader->setDmvrDisabledFlag( true );
       xUpdateRPRtmvp( picHeader, pcSlice );
+#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
+      CHECK( pcSlice->getPPS()->getWrapAroundEnabledFlag(), "pps_ref_wraparound_enabled_flag should be 0 with constrained RASL encoding" );
+#endif
     }
     
     double lambda            = 0.0;
