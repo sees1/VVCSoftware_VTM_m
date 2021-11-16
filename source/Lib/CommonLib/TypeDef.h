@@ -53,6 +53,10 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_X0143_ALF_APS_CHANGES                           1
+#define JVET_X0143_ALF_APS_ID_OFFSET                         0 // A value between 0 to 7 inclusive. This macro should be kept, or to be defined as a configuration parameter if possible.
+#define JVET_X0143_MERGER_FIXES                              1
+#define JVET_X0143_EXTRACTOR_FIXES                           1
 
 #define JVET_X0128_V2_WPP                                 1 // JVET-X0128 method 2, VVC v2 WPP
 

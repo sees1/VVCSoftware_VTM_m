@@ -853,6 +853,10 @@ protected:
 
   CfgVPSParameters m_cfgVPSParameters;
 
+#if JVET_X0143_ALF_APS_CHANGES
+  int         m_maxNumAlfAps;
+  bool        m_constantJointCbCrSignFlag;
+#endif
   bool        m_alf;                                          ///< Adaptive Loop Filter
   bool        m_alfTrueOrg;
   double      m_alfStrengthLuma;
@@ -2271,6 +2275,13 @@ public:
   bool         getBs2ModPOCAndType()                           const { return m_bs2ModPOCAndType; }
   void         setDebugCTU( int i )                                  { m_debugCTU = i; }
   int          getDebugCTU()                                   const { return m_debugCTU; }
+
+#if JVET_X0143_ALF_APS_CHANGES
+  void         setMaxNumALFAPS(int n)                                 { m_maxNumAlfAps = n; }
+  int          getMaxNumALFAPS()                                const { return m_maxNumAlfAps; }
+  void         setConstantJointCbCrSignFlag(bool b)                   { m_constantJointCbCrSignFlag = b; }
+  int          getConstantJointCbCrSignFlag()                   const { return m_constantJointCbCrSignFlag; }
+#endif
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }
