@@ -884,7 +884,11 @@ void EncAdaptiveLoopFilter::ALFProcess(CodingStructure& cs, const double *lambda
   if( !layerIdx && ( cs.slice->getPendingRasInit() || cs.slice->isIDRorBLA() || ( cs.slice->getNalUnitType() == NAL_UNIT_CODED_SLICE_CRA && m_encCfg->getCraAPSreset() ) ) )
   {
     memset(cs.slice->getAlfAPSs(), 0, sizeof(*cs.slice->getAlfAPSs())*ALF_CTB_MAX_NUM_APS);
+#if JVET_X0143_ALF_APS_CHANGES
+    m_apsIdStart = m_encCfg->getMaxNumALFAPS();
+#else
     m_apsIdStart = ALF_CTB_MAX_NUM_APS;
+#endif
 
     m_apsMap->clearActive();
     for (int i = 0; i < ALF_CTB_MAX_NUM_APS; i++)
@@ -1017,7 +1021,11 @@ void EncAdaptiveLoopFilter::ALFProcess(CodingStructure& cs, const double *lambda
             );
 
   // derive filter (chroma)
+#if JVET_X0143_ALF_APS_CHANGES
+  if (!(m_encCfg->getMaxNumALFAPS() == 0) && isChromaEnabled(cs.pcv->chrFormat)) // Find ALF parameters for chroma if ALF APS is enabled
+#else
   if (isChromaEnabled(cs.pcv->chrFormat))
+#endif
   {
     alfEncoder( cs, alfParam, orgYuv, recYuv, cs.getRecoBuf(), CHANNEL_TYPE_CHROMA
 #if ENABLE_QPA
@@ -2547,17 +2555,30 @@ void EncAdaptiveLoopFilter::setCtuEnableFlag( uint8_t** ctuFlags, ChannelType ch
 std::vector<int> EncAdaptiveLoopFilter::getAvaiApsIdsLuma(CodingStructure& cs, int &newApsId)
 {
   APS** apss = cs.slice->getAlfAPSs();
+#if JVET_X0143_ALF_APS_CHANGES
+  for (int i = 0; i < m_encCfg->getMaxNumALFAPS(); i++)
+#else
   for (int i = 0; i < ALF_CTB_MAX_NUM_APS; i++)
+#endif
   {
     apss[i] = m_apsMap->getPS((i << NUM_APS_TYPE_LEN) + ALF_APS);
   }
 
   std::vector<int> result;
   int apsIdChecked = 0, curApsId = m_apsIdStart;
+#if JVET_X0143_ALF_APS_CHANGES
+  if (curApsId < m_encCfg->getMaxNumALFAPS())
+#else
   if (curApsId < ALF_CTB_MAX_NUM_APS)
+#endif
   {
+#if JVET_X0143_ALF_APS_CHANGES
+    while ((apsIdChecked < m_encCfg->getMaxNumALFAPS()) && !cs.slice->isIRAP() && (result.size() < m_encCfg->getMaxNumALFAPS())
+           && !cs.slice->getPendingRasInit())
+#else
     while (apsIdChecked < ALF_CTB_MAX_NUM_APS && !cs.slice->isIRAP() && result.size() < ALF_CTB_MAX_NUM_APS
            && !cs.slice->getPendingRasInit())
+#endif
     {
       APS* curAPS = cs.slice->getAlfAPSs()[curApsId];
 
@@ -2566,7 +2587,11 @@ std::vector<int> EncAdaptiveLoopFilter::getAvaiApsIdsLuma(CodingStructure& cs, i
         result.push_back(curApsId);
       }
       apsIdChecked++;
+#if JVET_X0143_ALF_APS_CHANGES
+      curApsId = (curApsId + 1) % m_encCfg->getMaxNumALFAPS();
+#else
       curApsId = (curApsId + 1) % ALF_CTB_MAX_NUM_APS;
+#endif
     }
   }
   cs.slice->setNumAlfApsIdsLuma((int)result.size());
@@ -2574,9 +2599,17 @@ std::vector<int> EncAdaptiveLoopFilter::getAvaiApsIdsLuma(CodingStructure& cs, i
   newApsId = m_apsIdStart - 1;
   if (newApsId < 0)
   {
+#if JVET_X0143_ALF_APS_CHANGES
+    newApsId = m_encCfg->getMaxNumALFAPS() - 1;
+#else
     newApsId = ALF_CTB_MAX_NUM_APS - 1;
+#endif
   }
+#if JVET_X0143_ALF_APS_CHANGES
+  CHECK(newApsId >= m_encCfg->getMaxNumALFAPS(), "Wrong APS index assignment in getAvaiApsIdsLuma");
+#else
   CHECK(newApsId >= ALF_CTB_MAX_NUM_APS, "Wrong APS index assignment in getAvaiApsIdsLuma");
+#endif
   return result;
 }
 void  EncAdaptiveLoopFilter::initDistortion()
@@ -2651,7 +2684,17 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
     int numIter = useNewFilter ? 2 : 1;
     for (int numTemporalAps = 0; numTemporalAps <= apsIds.size(); numTemporalAps++)
     {
+#if JVET_X0143_ALF_APS_CHANGES
+      if ((m_encCfg->getMaxNumALFAPS()==0) && ((numTemporalAps + useNewFilter) > 0))
+      {
+        continue;
+      }
+#endif
+#if JVET_X0143_ALF_APS_CHANGES
+      if (numTemporalAps + useNewFilter > std::min(ALF_CTB_MAX_NUM_APS - 1, m_encCfg->getMaxNumALFAPS()))
+#else
       if (numTemporalAps + useNewFilter >= ALF_CTB_MAX_NUM_APS)
+#endif
       {
         continue;
       }
@@ -2896,7 +2939,11 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
   }
 
   //chroma
+#if JVET_X0143_ALF_APS_CHANGES
+  if (!(m_encCfg->getMaxNumALFAPS() == 0) && isChromaEnabled(cs.pcv->chrFormat))   //  Find ALF parameters for chroma if ALF APS is enabled.
+#else
   if (isChromaEnabled(cs.pcv->chrFormat))
+#endif
   {
     m_alfParamTemp = alfParamNewFiltersBest;
     if (m_alfParamTemp.numAlternativesChroma < 1)
@@ -2919,12 +2966,23 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
     else if (alfParamNewFiltersBest.enabledFlag[COMPONENT_Cb] || alfParamNewFiltersBest.enabledFlag[COMPONENT_Cr])
     {
       int curId = m_apsIdStart;
+// Do not assign ALF APS for chroma if any new APS ID is not avaiable
+
+#if JVET_X0143_ALF_APS_CHANGES
+      int counter = m_encCfg->getMaxNumALFAPS();
+      while ((newApsIdChroma < 0) && ((counter--)))
+#else
       while (newApsIdChroma < 0)
+#endif
       {
         curId--;
         if (curId < 0)
         {
+#if JVET_X0143_ALF_APS_CHANGES
+          curId = m_encCfg->getMaxNumALFAPS() - 1;
+#else
           curId = ALF_CTB_MAX_NUM_APS - 1;
+#endif
         }
         if (std::find(bestApsIds.begin(), bestApsIds.end(), curId) == bestApsIds.end())
         {
@@ -2932,7 +2990,11 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
         }
       }
     }
+#if JVET_X0143_ALF_APS_CHANGES
+    for (int curApsId = 0; curApsId < m_encCfg->getMaxNumALFAPS(); curApsId++)
+#else
     for (int curApsId = 0; curApsId < ALF_CTB_MAX_NUM_APS; curApsId++)
+#endif
     {
       const bool reuseExistingAPS = curApsId != newApsIdChroma;
 
@@ -3581,17 +3643,28 @@ void EncAdaptiveLoopFilter::determineControlIdcValues(CodingStructure &cs, const
 std::vector<int> EncAdaptiveLoopFilter::getAvailableCcAlfApsIds(CodingStructure& cs, ComponentID compID)
 {
   APS** apss = cs.slice->getAlfAPSs();
+#if JVET_X0143_ALF_APS_CHANGES
+  for (int i = 0; i < m_encCfg->getMaxNumALFAPS(); i++)
+#else
   for (int i = 0; i < ALF_CTB_MAX_NUM_APS; i++)
+#endif
   {
     apss[i] = m_apsMap->getPS((i << NUM_APS_TYPE_LEN) + ALF_APS);
   }
 
   std::vector<int> result;
   int apsIdChecked = 0, curApsId = m_apsIdStart;
+#if JVET_X0143_ALF_APS_CHANGES
+  if (curApsId < m_encCfg->getMaxNumALFAPS())
+  {
+    while ((apsIdChecked < m_encCfg->getMaxNumALFAPS()) && !cs.slice->isIRAP() && (result.size() < m_encCfg->getMaxNumALFAPS())
+           && !cs.slice->getPendingRasInit())
+#else
   if (curApsId < ALF_CTB_MAX_NUM_APS)
   {
     while (apsIdChecked < ALF_CTB_MAX_NUM_APS && !cs.slice->isIRAP() && result.size() < ALF_CTB_MAX_NUM_APS
            && !cs.slice->getPendingRasInit())
+#endif
     {
       APS* curAPS = cs.slice->getAlfAPSs()[curApsId];
       if (curAPS && curAPS->getLayerId() == cs.slice->getPic()->layerId
@@ -3600,7 +3673,11 @@ std::vector<int> EncAdaptiveLoopFilter::getAvailableCcAlfApsIds(CodingStructure&
         result.push_back(curApsId);
       }
       apsIdChecked++;
+#if JVET_X0143_ALF_APS_CHANGES
+      curApsId = (curApsId + 1) % m_encCfg->getMaxNumALFAPS();
+#else
       curApsId = (curApsId + 1) % ALF_CTB_MAX_NUM_APS;
+#endif
     }
   }
   return result;

@@ -274,7 +274,10 @@ void BitstreamExtractorApp::xRewritePPS(PPS &targetPPS, const PPS &sourcePPS, co
   targetPPS.setPicWidthInLumaSamples(subPic.getSubPicWidthInLumaSample());
   targetPPS.setPicHeightInLumaSamples(subPic.getSubPicHeightInLumaSample());
   // todo: Conformance window (conf window rewriting is not needed per JVET-S0117)
-
+#if JVET_X0143_EXTRACTOR_FIXES
+  if (sourcePPS.getScalingWindow().getWindowEnabledFlag())
+  {
+#endif
   int subWidthC = SPS::getWinUnitX(sourceSPS.getChromaFormatIdc());
   int subHeightC = SPS::getWinUnitY(sourceSPS.getChromaFormatIdc());
   int subpicScalWinLeftOffset = sourcePPS.getScalingWindow().getWindowLeftOffset() - (int)subPic.getSubPicCtuTopLeftX() * sourceSPS.getCTUSize() / subWidthC;
@@ -286,7 +289,9 @@ void BitstreamExtractorApp::xRewritePPS(PPS &targetPPS, const PPS &sourcePPS, co
   Window scalingWindow;
   scalingWindow.setWindow(subpicScalWinLeftOffset, subpicScalWinRightOffset, subpicScalWinTopOffset, subpicScalWinBotOffset);
   targetPPS.setScalingWindow(scalingWindow);
-
+#if JVET_X0143_EXTRACTOR_FIXES
+  }
+#endif
   // Tiles
   int                   numTileCols = 1;
   int                   numTileRows = 1;
