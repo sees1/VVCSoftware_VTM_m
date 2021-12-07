@@ -3529,6 +3529,7 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( m_fastLocalDualTreeMode < 0 || m_fastLocalDualTreeMode > 2, "FastLocalDualTreeMode must be in range [0..2]" );
 
   int extraRPLs = 0;
+  bool hasFutureRef = false;
   //start looping through frames in coding order until we can verify that the GOP structure is correct.
   while (!verifiedGOP && !errorGOP)
   {
@@ -3738,6 +3739,7 @@ bool EncAppCfg::xCheckParameter()
       for (int i = 0; i< m_RPLList0[curGOP].m_numRefPics; i++)
       {
         int absPOC = curPOC - m_RPLList0[curGOP].m_deltaRefPics[i];
+        hasFutureRef |= (m_RPLList0[curGOP].m_deltaRefPics[i] < 0);
         if (absPOC >= 0)
         {
           refList[numRefs] = absPOC;
@@ -3747,6 +3749,7 @@ bool EncAppCfg::xCheckParameter()
       for (int i = 0; i< m_RPLList1[curGOP].m_numRefPics; i++)
       {
         int absPOC = curPOC - m_RPLList1[curGOP].m_deltaRefPics[i];
+        hasFutureRef |= (m_RPLList1[curGOP].m_deltaRefPics[i] < 0);
         if (absPOC >= 0)
         {
           bool alreadyExist = false;
@@ -3769,6 +3772,7 @@ bool EncAppCfg::xCheckParameter()
     }
     checkGOP++;
   }
+  m_isLowDelay = !hasFutureRef && m_iIntraPeriod != 1;
   xConfirmPara(errorGOP, "Invalid GOP structure given");
 
   m_maxTempLayer = 1;
