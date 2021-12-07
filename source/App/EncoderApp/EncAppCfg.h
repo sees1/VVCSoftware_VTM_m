@@ -317,6 +317,7 @@ protected:
   bool      m_bUseWPSNR;                                      ///< Flag to output perceptually weighted peak SNR (WPSNR) instead of PSNR
 #endif
   int       m_maxTempLayer;                                   ///< Max temporal layer
+  bool      m_isLowDelay;
 
   // coding unit (CU) definition
   unsigned  m_uiCTUSize;

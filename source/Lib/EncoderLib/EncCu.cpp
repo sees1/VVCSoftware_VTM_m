@@ -4243,7 +4243,7 @@ void EncCu::xCheckRDCostInter( CodingStructure *&tempCS, CodingStructure *&bestC
 
     if (m_pcEncCfg->getUseBcwFast())
     {
-      if (isEqualUni == true && m_pcEncCfg->getIntraPeriod() == -1)
+      if (isEqualUni == true && m_pcEncCfg->getIsLowDelay())
       {
         break;
       }
@@ -4498,7 +4498,7 @@ bool EncCu::xCheckRDCostInterIMV(CodingStructure *&tempCS, CodingStructure *&bes
 
   if( m_pcEncCfg->getUseBcwFast() )
   {
-    if( isEqualUni == true && m_pcEncCfg->getIntraPeriod() == -1 )
+    if( isEqualUni == true && m_pcEncCfg->getIsLowDelay())
     {
       break;
     }

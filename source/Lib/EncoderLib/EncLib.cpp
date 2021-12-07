@@ -2019,7 +2019,7 @@ void EncLib::xInitRPL(SPS &sps)
 
 void EncLib::getActiveRefPicListNumForPOC(const SPS *sps, int POCCurr, int GOPid, uint32_t *activeL0, uint32_t *activeL1)
 {
-  if (m_intraPeriod < 0)  //Only for RA
+  if (m_isLowDelay)  //Only for RA
   {
     *activeL0 = *activeL1 = 0;
     return;
@@ -2030,7 +2030,7 @@ void EncLib::getActiveRefPicListNumForPOC(const SPS *sps, int POCCurr, int GOPid
   int fullListNum = m_iGOPSize;
   int partialListNum = getRPLCandidateSize(0) - m_iGOPSize;
   int extraNum = fullListNum;
-  if (m_intraPeriod < 0)
+  if (m_isLowDelay)
   {
     if (POCCurr < (2 * m_iGOPSize + 2))
     {
@@ -2093,11 +2093,12 @@ void EncLib::selectReferencePictureList(Slice* slice, int POCCurr, int GOPid, in
     }
   }
 
-  if (rplPeriod < 0)
+  if (m_isLowDelay)
   {
-    if (POCCurr < (2 * m_iGOPSize + 2))
+    const int currPOCsinceLastIDR = POCCurr - slice->getLastIDR();
+    if (currPOCsinceLastIDR < (2 * m_iGOPSize + 2))
     {
-      int candidateIdx = (POCCurr + m_iGOPSize - 1 >= fullListNum + partialListNum) ? GOPid : POCCurr + m_iGOPSize - 1;
+      int candidateIdx = (currPOCsinceLastIDR + m_iGOPSize - 1 >= fullListNum + partialListNum) ? GOPid : currPOCsinceLastIDR + m_iGOPSize - 1;
       slice->setRPL0idx(candidateIdx);
       slice->setRPL1idx(candidateIdx);
     }

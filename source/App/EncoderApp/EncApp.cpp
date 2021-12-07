@@ -597,6 +597,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setEnablePictureHeaderInSliceHeader                  ( m_enablePictureHeaderInSliceHeader );
 
   m_cEncLib.setMaxTempLayer                                      ( m_maxTempLayer );
+  m_cEncLib.setIsLowDelay                                        ( m_isLowDelay );
 
   //===== Slice ========
 
