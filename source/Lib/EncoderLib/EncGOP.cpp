@@ -207,6 +207,12 @@ void  EncGOP::destroy()
     delete m_picOrig;
     m_picOrig = NULL;
   }
+#if JVET_X0048_X0103_FILM_GRAIN
+  if (m_pcCfg->getFilmGrainAnalysisEnabled())
+  {
+    m_FGAnalyser.destroy();
+  }
+#endif
 }
 
 void EncGOP::init ( EncLib* pcEncLib )
@@ -226,6 +232,13 @@ void EncGOP::init ( EncLib* pcEncLib )
   m_HRD                = pcEncLib->getHRD();
 
   m_AUWriterIf = pcEncLib->getAUWriterIf();
+
+  #if JVET_X0048_X0103_FILM_GRAIN
+  if (m_pcCfg->getFilmGrainAnalysisEnabled())
+  {
+    m_FGAnalyser.init(m_pcCfg->getSourceWidth(), m_pcCfg->getSourceHeight(), m_pcCfg->getChromaFormatIdc(), *(BitDepths *) pcEncLib->getBitDepth(), m_pcCfg->getFGCSEICompModelPresent());
+  }
+#endif
 
 #if WCG_EXT
   if (m_pcCfg->getLmcs())
@@ -739,10 +752,27 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     seiMessages.push_back(seiSampleAspectRatioInfo);
   }
   // film grain
+#if JVET_X0048_X0103_FILM_GRAIN
+  if (m_pcCfg->getFilmGrainCharactersticsSEIEnabled() && !m_pcCfg->getFilmGrainCharactersticsSEIPerPictureSEI())
+#else
   if (m_pcCfg->getFilmGrainCharactersticsSEIEnabled())
+#endif
   {
     SEIFilmGrainCharacteristics *sei = new SEIFilmGrainCharacteristics;
     m_seiEncoder.initSEIFilmGrainCharacteristics(sei);
+#if JVET_X0048_X0103_FILM_GRAIN
+    if (m_pcCfg->getFilmGrainAnalysisEnabled())
+    {
+      sei->m_log2ScaleFactor = m_FGAnalyser.getLog2scaleFactor();
+      for (int compIdx = 0; compIdx < getNumberValidComponents(m_pcCfg->getChromaFormatIdc()); compIdx++)
+      {
+        if (sei->m_compModel[compIdx].presentFlag)
+        {   // higher importance of presentFlag is from cfg file
+          sei->m_compModel[compIdx] = m_FGAnalyser.getCompModel(compIdx);
+        }
+      }
+    }
+#endif
     seiMessages.push_back(sei);
   }
 
@@ -885,6 +915,26 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
       delete seiAnnotatedRegions;
     }
   }
+
+#if JVET_X0048_X0103_FILM_GRAIN
+  if (m_pcCfg->getFilmGrainCharactersticsSEIEnabled() && m_pcCfg->getFilmGrainCharactersticsSEIPerPictureSEI())
+  {
+    SEIFilmGrainCharacteristics *fgcSEI = new SEIFilmGrainCharacteristics;
+    m_seiEncoder.initSEIFilmGrainCharacteristics(fgcSEI);
+    if (m_pcCfg->getFilmGrainAnalysisEnabled())
+    {
+      fgcSEI->m_log2ScaleFactor = m_FGAnalyser.getLog2scaleFactor();
+      for (int compIdx = 0; compIdx < getNumberValidComponents(m_pcCfg->getChromaFormatIdc()); compIdx++)
+      {
+        if (fgcSEI->m_compModel[compIdx].presentFlag)
+        {   // higher importance of presentFlag is from cfg file
+          fgcSEI->m_compModel[compIdx] = m_FGAnalyser.getCompModel(compIdx);
+        }
+      }
+    }
+    seiMessages.push_back(fgcSEI);
+  }
+#endif
 }
 
 void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t>& subpicIDs, uint16_t maxSubpicIdInPic)
@@ -3613,6 +3663,38 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         }
       }
     }
+
+#if JVET_X0048_X0103_FILM_GRAIN
+    if (m_pcCfg->getFilmGrainAnalysisEnabled())
+    {
+      int picPoc        = pcPic->getPOC();
+      int filteredFrame = 0;
+
+      if (m_pcCfg->getIntraPeriod() < 1)
+      {
+        filteredFrame = 2 * m_pcCfg->getFrameRate();
+      }
+      else
+      {
+        filteredFrame = m_pcCfg->getIntraPeriod();
+      }
+
+      if (picPoc % filteredFrame == 0)
+      {
+        pcPic->m_isMctfFiltered = true;
+      }
+      else
+      {
+        pcPic->m_isMctfFiltered = false;
+      }
+
+      if (pcPic->m_isMctfFiltered)
+      {
+        m_FGAnalyser.initBufs(pcPic);
+        m_FGAnalyser.estimate_grain(pcPic);
+      }
+    }
+#endif
 
     if( encPic || decPic )
     {

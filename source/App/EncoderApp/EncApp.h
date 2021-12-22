@@ -102,6 +102,10 @@ private:
   TExt360AppEncTop*      m_ext360;
 #endif
   EncTemporalFilter      m_temporalFilter;
+#if JVET_X0048_X0103_FILM_GRAIN
+  PelStorage*            m_filteredOrgPicForFG;
+  EncTemporalFilter      m_temporalFilterForFG;
+#endif
   bool m_flush;
 
 public:

@@ -208,13 +208,24 @@ public:
   // -------------------------------------------------------------------------------------------------------------------
 
   /// encode several number of pictures until end-of-sequence
+#if JVET_X0048_X0103_FILM_GRAIN
   bool encodePrep( bool bEos,
-               PelStorage* pcPicYuvOrg,
-               PelStorage* pcPicYuvTrueOrg,
-               PelStorage* pcPicYuvFilteredOrg,
-               const InputColourSpaceConversion snrCSC, // used for SNR calculations. Picture in original colour space.
-               std::list<PelUnitBuf*>& rcListPicYuvRecOut,
-               int& iNumEncoded );
+                PelStorage* pcPicYuvOrg,
+                PelStorage* pcPicYuvTrueOrg,
+                PelStorage* pcPicYuvFilteredOrg,
+                PelStorage* pcPicYuvFilteredOrgForFG,
+                const InputColourSpaceConversion snrCSC, // used for SNR calculations. Picture in original colour space.
+                std::list<PelUnitBuf*>& rcListPicYuvRecOut,
+                int& iNumEncoded );
+#else
+  bool encodePrep( bool bEos,
+                 PelStorage* pcPicYuvOrg,
+                 PelStorage* pcPicYuvTrueOrg,
+                 PelStorage* pcPicYuvFilteredOrg,
+                 const InputColourSpaceConversion snrCSC, // used for SNR calculations. Picture in original colour space.
+                 std::list<PelUnitBuf*>& rcListPicYuvRecOut,
+                 int& iNumEncoded );
+#endif
 
   bool encode( const InputColourSpaceConversion snrCSC, // used for SNR calculations. Picture in original colour space.
                std::list<PelUnitBuf*>& rcListPicYuvRecOut,

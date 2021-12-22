@@ -801,6 +801,9 @@ public:
   {
     bool  presentFlag;
     uint8_t numModelValues;
+#if JVET_X0048_X0103_FILM_GRAIN
+    uint8_t numIntensityIntervals;
+#endif
     std::vector<CompModelIntensityValues> intensityValues;
   };
 

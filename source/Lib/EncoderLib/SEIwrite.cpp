@@ -1219,14 +1219,22 @@ void SEIWriter::xWriteSEIFilmGrainCharacteristics(const SEIFilmGrainCharacterist
     for (int c = 0; c<3; c++)
     {
       const SEIFilmGrainCharacteristics::CompModel &cm = sei.m_compModel[c];
-      const uint32_t numIntensityIntervals = (uint32_t)cm.intensityValues.size();
+#if JVET_X0048_X0103_FILM_GRAIN
+      const uint32_t numIntensityIntervals = (uint32_t) cm.numIntensityIntervals;
+#else
+      const uint32_t numIntensityIntervals = (uint32_t) cm.intensityValues.size();
+#endif
       const uint32_t numModelValues = cm.numModelValues;
       WRITE_FLAG(sei.m_compModel[c].presentFlag && numIntensityIntervals>0 && numModelValues>0, "fg_comp_model_present_flag[c]");
     }
     for (uint32_t c = 0; c<3; c++)
     {
       const SEIFilmGrainCharacteristics::CompModel &cm = sei.m_compModel[c];
-      const uint32_t numIntensityIntervals = (uint32_t)cm.intensityValues.size();
+#if JVET_X0048_X0103_FILM_GRAIN
+      const uint32_t numIntensityIntervals = (uint32_t) cm.numIntensityIntervals;
+#else
+      const uint32_t numIntensityIntervals = (uint32_t) cm.intensityValues.size();
+#endif
       const uint32_t numModelValues = cm.numModelValues;
       if (cm.presentFlag && numIntensityIntervals>0 && numModelValues>0)
       {
@@ -1239,7 +1247,9 @@ void SEIWriter::xWriteSEIFilmGrainCharacteristics(const SEIFilmGrainCharacterist
           const SEIFilmGrainCharacteristics::CompModelIntensityValues &cmiv = cm.intensityValues[interval];
           WRITE_CODE(cmiv.intensityIntervalLowerBound, 8,     "fg_intensity_interval_lower_bound[c][i]");
           WRITE_CODE(cmiv.intensityIntervalUpperBound, 8,     "fg_intensity_interval_upper_bound[c][i]");
+#if !JVET_X0048_X0103_FILM_GRAIN
           assert(cmiv.compModelValue.size() == numModelValues);
+#endif
           for (uint32_t j = 0; j<cm.numModelValues; j++)
           {
             WRITE_SVLC(cmiv.compModelValue[j],                "fg_comp_model_value[c][i]");

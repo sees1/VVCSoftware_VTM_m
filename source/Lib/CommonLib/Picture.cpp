@@ -75,9 +75,18 @@ Picture::Picture()
   layerId = NOT_VALID;
   numSlices = 1;
   unscaledPic = nullptr;
+#if JVET_X0048_X0103_FILM_GRAIN
+  m_isMctfFiltered      = false;
+  m_grainCharacteristic = NULL;
+  m_grainBuf            = NULL;
+#endif
 }
 
+#if JVET_X0048_X0103_FILM_GRAIN
+void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId, const bool gopBasedTemporalFilterEnabled, const bool fgcSEIAnalysisEnabled )
+#else
 void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId, const bool gopBasedTemporalFilterEnabled )
+#endif
 {
   layerId = _layerId;
   UnitArea::operator=( UnitArea( _chromaFormat, Area( Position{ 0, 0 }, size ) ) );
@@ -94,6 +103,12 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
     {
       M_BUFS( 0, PIC_FILTERED_ORIGINAL ). create( _chromaFormat, a );
     }
+#if JVET_X0048_X0103_FILM_GRAIN
+    if ( fgcSEIAnalysisEnabled )
+    {
+      M_BUFS( 0, PIC_FILTERED_ORIGINAL_FG ).create( _chromaFormat, a );
+    }
+#endif
   }
 #if !KEEP_PRED_AND_RESI_SIGNALS
   m_ctuArea = UnitArea( _chromaFormat, Area( Position{ 0, 0 }, Size( _maxCUSize, _maxCUSize ) ) );
@@ -140,6 +155,9 @@ void Picture::destroy()
     m_spliceIdx = NULL;
   }
   m_invColourTransfBuf = NULL;
+#if JVET_X0048_X0103_FILM_GRAIN
+  m_grainBuf           = NULL;
+#endif
 }
 
 void Picture::createTempBuffers( const unsigned _maxCUSize )
@@ -1221,6 +1239,69 @@ void Picture::addPictureToHashMapForInter()
     }
   }
 }
+
+#if JVET_X0048_X0103_FILM_GRAIN
+void Picture::createGrainSynthesizer(bool firstPictureInSequence, SEIFilmGrainSynthesizer *grainCharacteristics, PelStorage *grainBuf, int width, int height, ChromaFormat fmt, int bitDepth)
+{
+  m_grainCharacteristic = grainCharacteristics;
+  m_grainBuf            = grainBuf;
+
+  // Padding to make wd and ht multiple of max fgs window size(64)
+  int paddedWdFGS = ((width - 1) | 0x3F) + 1 - width;
+  int paddedHtFGS = ((height - 1) | 0x3F) + 1 - height;
+  m_padValue      = (paddedWdFGS > paddedHtFGS) ? paddedWdFGS : paddedHtFGS;
+
+  if (firstPictureInSequence)
+  {
+    // Create and initialize the Film Grain Synthesizer
+    m_grainCharacteristic->create(width, height, fmt, bitDepth, 1);
+
+    // Frame level PelStorage buffer created to blend Film Grain Noise into it
+    m_grainBuf->create(chromaFormat, Area(0, 0, width, height), 0, m_padValue, 0, false);
+	
+    m_grainCharacteristic->fgsInit();
+  }
+}
+
+PelUnitBuf Picture::getDisplayBufFG(bool wrap)
+{
+  int                        payloadType = 0;
+  std::list<SEI *>::iterator message;
+
+  for (message = SEIs.begin(); message != SEIs.end(); ++message)
+  {
+    payloadType = (*message)->payloadType();
+    if (payloadType == SEI::FILM_GRAIN_CHARACTERISTICS)
+    {
+      m_grainCharacteristic->m_errorCode       = -1;
+      *m_grainCharacteristic->m_fgcParameters = *static_cast<SEIFilmGrainCharacteristics *>(*message);
+      /* Validation of Film grain characteristic parameters for the constrains of SMPTE-RDD5*/
+      m_grainCharacteristic->m_errorCode = m_grainCharacteristic->grainValidateParams();
+      break;
+    }
+  }
+
+  if (FGS_SUCCESS == m_grainCharacteristic->m_errorCode)
+  {
+    m_grainBuf->copyFrom(getRecoBuf());
+    m_grainBuf->extendBorderPel(m_padValue); // Padding to make wd and ht multiple of max fgs window size(64)
+	
+    m_grainCharacteristic->m_poc = getPOC();
+    m_grainCharacteristic->grainSynthesizeAndBlend(m_grainBuf, slices[0]->getIdrPicFlag());
+
+    return *m_grainBuf;
+  }
+  else
+  {
+    if (payloadType == SEI::FILM_GRAIN_CHARACTERISTICS)
+    {
+      msg(WARNING, "Film Grain synthesis is not performed. Error code: 0x%x \n", m_grainCharacteristic->m_errorCode);
+    }
+    return M_BUFS(scheduler.getSplitPicId(), wrap ? PIC_RECON_WRAP : PIC_RECONSTRUCTION);
+  }
+}
+#endif
+
 void Picture::createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
 {
   m_colourTranfParams = ctiCharacteristics;
