@@ -38,12 +38,43 @@
 
 #define JVET_O0549_ENCODER_ONLY_FILTER_POL 1 // JVET-O0549: Encoder-only GOP-based temporal filter. Program Options Lite related changes.
 
+#define JVET_X0048_X0103_FILM_GRAIN 1 // JVET-X0048-X0103: SMPTE RDD-5 based film grain analysis and synthesis model for film grain characterstics (FGC) SEI
+#if JVET_X0048_X0103_FILM_GRAIN
+#include <vector>
+#endif
+
 #ifndef __PROGRAM_OPTIONS_LITE__
 #define __PROGRAM_OPTIONS_LITE__
 
 //! \ingroup TAppCommon
 //! \{
+#if JVET_X0048_X0103_FILM_GRAIN
+using namespace std;
 
+template <class T>
+struct SMultiValueInput
+{
+  static_assert(!std::is_same<T, uint8_t>::value, "SMultiValueInput<uint8_t> is not supported");
+  static_assert(!std::is_same<T, int8_t>::value, "SMultiValueInput<int8_t> is not supported");
+  const T              minValIncl;
+  const T              maxValIncl;
+  const std::size_t    minNumValuesIncl;
+  const std::size_t    maxNumValuesIncl; // Use 0 for unlimited
+  std::vector<T> values;
+  SMultiValueInput() : minValIncl(0), maxValIncl(0), minNumValuesIncl(0), maxNumValuesIncl(0), values() { }
+  SMultiValueInput(std::vector<T> &defaults) : minValIncl(0), maxValIncl(0), minNumValuesIncl(0), maxNumValuesIncl(0), values(defaults) { }
+  SMultiValueInput(const T &minValue, const T &maxValue, std::size_t minNumberValues = 0, std::size_t maxNumberValues = 0)
+    : minValIncl(minValue), maxValIncl(maxValue), minNumValuesIncl(minNumberValues), maxNumValuesIncl(maxNumberValues), values() { }
+  SMultiValueInput(const T &minValue, const T &maxValue, std::size_t minNumberValues, std::size_t maxNumberValues, const T* defValues, const uint32_t numDefValues)
+    : minValIncl(minValue), maxValIncl(maxValue), minNumValuesIncl(minNumberValues), maxNumValuesIncl(maxNumberValues), values(defValues, defValues + numDefValues) { }
+  SMultiValueInput<T> &operator=(const std::vector<T> &userValues) { values = userValues; return *this; }
+  SMultiValueInput<T> &operator=(const SMultiValueInput<T> &userValues) { values = userValues.values; return *this; }
+
+  T readValue(const char *&pStr, bool &bSuccess);
+
+  istream& readValues(std::istream &in);
+};
+#endif
 
 namespace df
 {

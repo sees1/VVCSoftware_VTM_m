@@ -430,6 +430,10 @@ DecLib::DecLib()
   , m_prevTid0POC(0)
   , m_bFirstSliceInPicture(true)
   , m_firstPictureInSequence(true)
+#if JVET_X0048_X0103_FILM_GRAIN
+  , m_grainCharacteristic()
+  , m_grainBuf()
+#endif
   , m_colourTranfParams()
   , m_firstSliceInBitstream(true)
   , m_isFirstAuInCvs( true )
@@ -1752,6 +1756,9 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
     m_pcPic->finalInit(vps, *sps, *pps, picHeader, apss, lmcsAPS, scalinglistAPS);
 #else
     m_pcPic->finalInit( vps, *sps, *pps, &m_picHeader, apss, lmcsAPS, scalinglistAPS );
+#endif
+#if JVET_X0048_X0103_FILM_GRAIN
+    m_pcPic->createGrainSynthesizer(m_firstPictureInSequence, &m_grainCharacteristic, &m_grainBuf, pps->getPicWidthInLumaSamples(), pps->getPicHeightInLumaSamples(), sps->getChromaFormatIdc(), sps->getBitDepth(CHANNEL_TYPE_LUMA));
 #endif
     m_pcPic->createColourTransfProcessor(m_firstPictureInSequence, &m_colourTranfParams, &m_invColourTransfBuf, pps->getPicWidthInLumaSamples(), pps->getPicHeightInLumaSamples(), sps->getChromaFormatIdc(), sps->getBitDepth(CHANNEL_TYPE_LUMA));
     m_firstPictureInSequence = false;

@@ -370,6 +370,7 @@ static inline istream& operator >> (istream &in, ScalingListMode &mode)
   return readStrToEnum(strToScalingListMode, sizeof(strToScalingListMode)/sizeof(*strToScalingListMode), in, mode);
 }
 
+#if !JVET_X0048_X0103_FILM_GRAIN
 template <class T>
 struct SMultiValueInput
 {
@@ -393,6 +394,7 @@ struct SMultiValueInput
 
   istream& readValues(std::istream &in);
 };
+#endif
 
 template <class T>
 static inline istream& operator >> (std::istream &in, SMultiValueInput<T> &values)
@@ -758,6 +760,18 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<Level::Name>  cfg_sliRefLevels(Level::NONE, Level::LEVEL15_5, 0, 8 * MAX_VPS_SUBLAYERS);
 
   int warnUnknowParameter = 0;
+
+#if JVET_X0048_X0103_FILM_GRAIN
+  SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp0 (0, 255, 0, 256);
+  SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp1 (0, 255, 0, 256);
+  SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp2 (0, 255, 0, 256);
+  SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalUpperBoundComp0 (0, 255, 0, 256);
+  SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalUpperBoundComp1 (0, 255, 0, 256);
+  SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalUpperBoundComp2 (0, 255, 0, 256);
+  SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp0              (0, 65535,  0, 256 * 6);
+  SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp1              (0, 65535,  0, 256 * 6);
+  SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp2              (0, 65535,  0, 256 * 6);
+#endif
 
 #if ENABLE_TRACING
   string sTracingRule;
@@ -1453,7 +1467,25 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIFGCCompModelPresentComp0",                     m_fgcSEICompModelPresent[0],                       false, "Specifies the presence of film grain modelling on colour component 0.")
   ("SEIFGCCompModelPresentComp1",                     m_fgcSEICompModelPresent[1],                       false, "Specifies the presence of film grain modelling on colour component 1.")
   ("SEIFGCCompModelPresentComp2",                     m_fgcSEICompModelPresent[2],                       false, "Specifies the presence of film grain modelling on colour component 2.")
-
+#if JVET_X0048_X0103_FILM_GRAIN
+  ("SEIFGCAnalysisEnabled",                           m_fgcSEIAnalysisEnabled,                           false, "Control adaptive film grain parameter estimation - film grain analysis")
+  ("SEIFGCPerPictureSEI",                             m_fgcSEIPerPictureSEI,                             false, "Film Grain SEI is added for each picture as speciffied in RDD5 to ensure bit accurate synthesis in tricky mode")
+  ("SEIFGCNumIntensityIntervalMinus1Comp0",           m_fgcSEINumIntensityIntervalMinus1[0],                0u, "Specifies the number of intensity intervals minus1 on colour component 0.")
+  ("SEIFGCNumIntensityIntervalMinus1Comp1",           m_fgcSEINumIntensityIntervalMinus1[1],                0u, "Specifies the number of intensity intervals minus1 on colour component 1.")
+  ("SEIFGCNumIntensityIntervalMinus1Comp2",           m_fgcSEINumIntensityIntervalMinus1[2],                0u, "Specifies the number of intensity intervals minus1 on colour component 2.")
+  ("SEIFGCNumModelValuesMinus1Comp0",                 m_fgcSEINumModelValuesMinus1[0],                      0u, "Specifies the number of component model values minus1 on colour component 0.")
+  ("SEIFGCNumModelValuesMinus1Comp1",                 m_fgcSEINumModelValuesMinus1[1],                      0u, "Specifies the number of component model values minus1 on colour component 1.")
+  ("SEIFGCNumModelValuesMinus1Comp2",                 m_fgcSEINumModelValuesMinus1[2],                      0u, "Specifies the number of component model values minus1 on colour component 2.")
+  ("SEIFGCIntensityIntervalLowerBoundComp0", cfg_FgcSEIIntensityIntervalLowerBoundComp0, cfg_FgcSEIIntensityIntervalLowerBoundComp0, "Specifies the lower bound for the intensity intervals on colour component 0.")
+  ("SEIFGCIntensityIntervalLowerBoundComp1", cfg_FgcSEIIntensityIntervalLowerBoundComp1, cfg_FgcSEIIntensityIntervalLowerBoundComp1, "Specifies the lower bound for the intensity intervals on colour component 1.")
+  ("SEIFGCIntensityIntervalLowerBoundComp2", cfg_FgcSEIIntensityIntervalLowerBoundComp2, cfg_FgcSEIIntensityIntervalLowerBoundComp2, "Specifies the lower bound for the intensity intervals on colour component 2.")
+  ("SEIFGCIntensityIntervalUpperBoundComp0", cfg_FgcSEIIntensityIntervalUpperBoundComp0, cfg_FgcSEIIntensityIntervalUpperBoundComp0, "Specifies the upper bound for the intensity intervals on colour component 0.")
+  ("SEIFGCIntensityIntervalUpperBoundComp1", cfg_FgcSEIIntensityIntervalUpperBoundComp1, cfg_FgcSEIIntensityIntervalUpperBoundComp1, "Specifies the upper bound for the intensity intervals on colour component 1.")
+  ("SEIFGCIntensityIntervalUpperBoundComp2", cfg_FgcSEIIntensityIntervalUpperBoundComp2, cfg_FgcSEIIntensityIntervalUpperBoundComp2, "Specifies the upper bound for the intensity intervals on colour component 2.")
+  ("SEIFGCCompModelValuesComp0",             cfg_FgcSEICompModelValueComp0,              cfg_FgcSEICompModelValueComp0,              "Specifies the component model values on colour component 0.")
+  ("SEIFGCCompModelValuesComp1",             cfg_FgcSEICompModelValueComp1,              cfg_FgcSEICompModelValueComp1,              "Specifies the component model values on colour component 1.")
+  ("SEIFGCCompModelValuesComp2",             cfg_FgcSEICompModelValueComp2,              cfg_FgcSEICompModelValueComp2,              "Specifies the component model values on colour component 2.")
+#endif
 // content light level SEI
   ("SEICLLEnabled",                                   m_cllSEIEnabled,                                   false, "Control generation of the content light level SEI message")
   ("SEICLLMaxContentLightLevel",                      m_cllSEIMaxContentLevel,                              0u, "When not equal to 0, specifies an upper bound on the maximum light level among all individual samples in a 4:4:4 representation "
@@ -2608,6 +2640,91 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_masteringDisplay.whitePoint[idx] = uint16_t((cfg_DisplayWhitePointCode.values.size() > idx) ? cfg_DisplayWhitePointCode.values[idx] : 0);
     }
   }
+#if JVET_X0048_X0103_FILM_GRAIN
+  // set sei film grain parameters.
+  CHECK(!m_fgcSEIEnabled && m_fgcSEIAnalysisEnabled, "FGC SEI must be enabled in order to perform film grain analysis!");
+  if (m_fgcSEIEnabled)
+  {
+    if (m_iQP < 17 && m_fgcSEIAnalysisEnabled == true) {
+      msg(WARNING, "*************************************************************************\n");
+      msg(WARNING, "* WARNING: Film Grain Estimation is disabled for Qp<17! FGC SEI will use default parameters for film grain! *\n");
+      msg(WARNING, "*************************************************************************\n");
+      m_fgcSEIAnalysisEnabled = false;
+    }
+    if (m_iIntraPeriod < 1) { // low delay configuration
+      msg(WARNING, "*************************************************************************\n");
+      msg(WARNING, "* WARNING: For low delay configuration, FGC SEI is inserted for first frame only!*\n");
+      msg(WARNING, "*************************************************************************\n");
+      m_fgcSEIPerPictureSEI   = false;
+      m_fgcSEIPersistenceFlag = true;
+    }
+    else if (m_iIntraPeriod == 1) { // all intra configuration
+        msg(WARNING, "*************************************************************************\n");
+        msg(WARNING, "* WARNING: For Intra Period = 1, FGC SEI is inserted per frame!*\n");
+        msg(WARNING, "*************************************************************************\n");
+        m_fgcSEIPerPictureSEI   = true;
+        m_fgcSEIPersistenceFlag = false;
+    }
+    if (!m_fgcSEIPerPictureSEI && !m_fgcSEIPersistenceFlag) {
+      msg(WARNING, "*************************************************************************\n");
+      msg(WARNING, "* WARNING: SEIPerPictureSEI is set to 0, SEIPersistenceFlag needs to be set to 1! *\n");
+      msg(WARNING, "*************************************************************************\n");
+      m_fgcSEIPersistenceFlag = true;
+    }
+    else if (m_fgcSEIPerPictureSEI && m_fgcSEIPersistenceFlag) {
+      msg(WARNING, "*************************************************************************\n");
+      msg(WARNING, "* WARNING: SEIPerPictureSEI is set to 1, SEIPersistenceFlag needs to be set to 0! *\n");
+      msg(WARNING, "*************************************************************************\n");
+      m_fgcSEIPersistenceFlag = false;
+    }
+    uint32_t numModelCtr;
+    if (m_fgcSEICompModelPresent[0])
+    {
+      numModelCtr = 0;
+      for (uint8_t i = 0; i <= m_fgcSEINumIntensityIntervalMinus1[0]; i++)
+      {
+        m_fgcSEIIntensityIntervalLowerBound[0][i] = uint32_t((cfg_FgcSEIIntensityIntervalLowerBoundComp0.values.size() > i) ? cfg_FgcSEIIntensityIntervalLowerBoundComp0.values[i] : 10);
+        m_fgcSEIIntensityIntervalUpperBound[0][i] = uint32_t((cfg_FgcSEIIntensityIntervalUpperBoundComp0.values.size() > i) ? cfg_FgcSEIIntensityIntervalUpperBoundComp0.values[i] : 250);
+        for (uint8_t j = 0; j <= m_fgcSEINumModelValuesMinus1[0]; j++)
+        {
+          m_fgcSEICompModelValue[0][i][j] = uint32_t((cfg_FgcSEICompModelValueComp0.values.size() > numModelCtr) ? cfg_FgcSEICompModelValueComp0.values[numModelCtr] : 24);
+          numModelCtr++;
+        }
+      }
+    }
+    if (m_fgcSEICompModelPresent[1])
+    {
+      numModelCtr = 0;
+      for (uint8_t i = 0; i <= m_fgcSEINumIntensityIntervalMinus1[1]; i++)
+      {
+        m_fgcSEIIntensityIntervalLowerBound[1][i] = uint32_t((cfg_FgcSEIIntensityIntervalLowerBoundComp1.values.size() > i) ? cfg_FgcSEIIntensityIntervalLowerBoundComp1.values[i] : 60);
+        m_fgcSEIIntensityIntervalUpperBound[1][i] = uint32_t((cfg_FgcSEIIntensityIntervalUpperBoundComp1.values.size() > i) ? cfg_FgcSEIIntensityIntervalUpperBoundComp1.values[i] : 200);
+
+        for (uint8_t j = 0; j <= m_fgcSEINumModelValuesMinus1[1]; j++)
+        {
+          m_fgcSEICompModelValue[1][i][j] = uint32_t((cfg_FgcSEICompModelValueComp1.values.size() > numModelCtr) ? cfg_FgcSEICompModelValueComp1.values[numModelCtr] : 16);
+          numModelCtr++;
+        }
+      }
+    }
+    if (m_fgcSEICompModelPresent[2])
+    {
+      numModelCtr = 0;
+      for (uint8_t i = 0; i <= m_fgcSEINumIntensityIntervalMinus1[2]; i++)
+      {
+        m_fgcSEIIntensityIntervalLowerBound[2][i] = uint32_t((cfg_FgcSEIIntensityIntervalLowerBoundComp2.values.size() > i) ? cfg_FgcSEIIntensityIntervalLowerBoundComp2.values[i] : 60);
+        m_fgcSEIIntensityIntervalUpperBound[2][i] = uint32_t((cfg_FgcSEIIntensityIntervalUpperBoundComp2.values.size() > i) ? cfg_FgcSEIIntensityIntervalUpperBoundComp2.values[i] : 250);
+
+        for (uint8_t j = 0; j <= m_fgcSEINumModelValuesMinus1[2]; j++)
+        {
+          m_fgcSEICompModelValue[2][i][j] = uint32_t((cfg_FgcSEICompModelValueComp2.values.size() > numModelCtr) ? cfg_FgcSEICompModelValueComp2.values[numModelCtr] : 12);
+          numModelCtr++;
+        }
+      }
+    }
+    m_fgcSEILog2ScaleFactor = m_fgcSEILog2ScaleFactor ? m_fgcSEILog2ScaleFactor : 2;
+  }
+#endif
   if (m_ctiSEIEnabled) 
   {
     CHECK(!m_ctiSEICrossComponentFlag && m_ctiSEICrossComponentInferred, "CTI CrossComponentFlag is 0, but CTI CrossComponentInferred is 1 (must be 0 for CrossComponentFlag 0)");

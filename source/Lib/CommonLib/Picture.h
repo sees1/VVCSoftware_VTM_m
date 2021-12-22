@@ -50,7 +50,9 @@
 #include "MCTS.h"
 #include "SEIColourTransform.h"
 #include <deque>
-
+#if JVET_X0048_X0103_FILM_GRAIN
+#include "SEIFilmGrainSynthesizer.h"
+#endif
 
 class SEI;
 class AQpLayer;
@@ -64,11 +66,25 @@ struct Picture : public UnitArea
   uint32_t margin;
   Picture();
 
-  void create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned margin, const bool bDecoder, const int layerId, const bool gopBasedTemporalFilterEnabled = false );
+#if JVET_X0048_X0103_FILM_GRAIN
+  void create(const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned margin, const bool bDecoder, const int layerId, const bool gopBasedTemporalFilterEnabled = false, const bool fgcSEIAnalysisEnabled = false);
+#else
+  void create(const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned margin, const bool bDecoder, const int layerId, const bool gopBasedTemporalFilterEnabled = false);
+#endif
   void destroy();
 
   void createTempBuffers( const unsigned _maxCUSize );
   void destroyTempBuffers();
+
+#if JVET_X0048_X0103_FILM_GRAIN
+  int                       m_padValue;
+  bool                      m_isMctfFiltered;
+  SEIFilmGrainSynthesizer*  m_grainCharacteristic;
+  PelStorage*               m_grainBuf;
+  void              createGrainSynthesizer(bool firstPictureInSequence, SEIFilmGrainSynthesizer* grainCharacteristics, PelStorage* grainBuf, int width, int height, ChromaFormat fmt, int bitDepth);
+  PelUnitBuf        getDisplayBufFG       (bool wrap = false);
+#endif
+
   SEIColourTransformApply* m_colourTranfParams;
   PelStorage*              m_invColourTransfBuf;
   void              createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth);

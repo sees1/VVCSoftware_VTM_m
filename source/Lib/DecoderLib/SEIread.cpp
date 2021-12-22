@@ -1343,11 +1343,20 @@ void SEIReader::xParseSEIFilmGrainCharacteristics(SEIFilmGrainCharacteristics& s
       SEIFilmGrainCharacteristics::CompModel &cm = sei.m_compModel[c];
       if (cm.presentFlag)
       {
+#if JVET_X0048_X0103_FILM_GRAIN
+        sei_read_code(pDecodedMessageOutputStream, 8, code, "fg_num_intensity_intervals_minus1[c]"); cm.numIntensityIntervals = code + 1;
+#else
         uint32_t numIntensityIntervals;
         sei_read_code(pDecodedMessageOutputStream, 8, code, "fg_num_intensity_intervals_minus1[c]"); numIntensityIntervals = code + 1;
+#endif
         sei_read_code(pDecodedMessageOutputStream, 3, code, "fg_num_model_values_minus1[c]");        cm.numModelValues = code + 1;
+#if JVET_X0048_X0103_FILM_GRAIN
+        cm.intensityValues.resize(cm.numIntensityIntervals);
+        for (uint32_t interval = 0; interval < cm.numIntensityIntervals; interval++)
+#else
         cm.intensityValues.resize(numIntensityIntervals);
-        for (uint32_t interval = 0; interval<numIntensityIntervals; interval++)
+        for (uint32_t interval = 0; interval < numIntensityIntervals; interval++)
+#endif
         {
           SEIFilmGrainCharacteristics::CompModelIntensityValues &cmiv = cm.intensityValues[interval];
           sei_read_code(pDecodedMessageOutputStream, 8, code, "fg_intensity_interval_lower_bound[c][i]"); cmiv.intensityIntervalLowerBound = code;

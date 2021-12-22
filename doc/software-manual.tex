@@ -3659,7 +3659,11 @@ SEI messages.
 \begin{OptionTableNoShorthand}{Film grain characteristics SEI message encoder parameters}{tab:sei-film-grain}
 \Option{SEIFGCEnabled} &
 \Default{0} &
-Enables or disables the insertion of the film grain characteristics SEI message.
+Control generation of the film grain characteristics SEI message.
+\\
+\Option{SEIFGCAnalysisEnabled} &
+\Default{0} &
+Control adaptive film grain parameter estimation - film grain analysis.
 \\
 \Option{SEIFGCCancelFlag} &
 \Default{0} &
@@ -3668,6 +3672,10 @@ Specifies the persistence of any previous film grain characteristics SEI message
 \Option{SEIFGCPersistenceFlag} &
 \Default{1} &
 Specifies the persistence of the film grain characteristics SEI message for the current layer.
+\\
+\Option{SEIFGCPerPictureSEI} &
+\Default{0} &
+Film Grain SEI is added for each picture as speciffied in RDD5 to ensure bit accurate synthesis in tricky mode.
 \\
 \Option{SEIFGCModelID} &
 \Default{0} &
@@ -3706,6 +3714,66 @@ Specifies the presence of film grain modelling on colour component 1.
 \Option{SEIFGCCompModelPresentComp2} &
 \Default{0} &
 Specifies the presence of film grain modelling on colour component 2.
+\\
+\Option{SEIFGCNumIntensityIntervalMinus1Comp0} &
+\Default{0} &
+Specifies the number of intensity intervals minus1 on colour component 0.
+\\
+\Option{SEIFGCNumIntensityIntervalMinus1Comp1} &
+\Default{0} &
+Specifies the number of intensity intervals minus1 on colour component 1.
+\\
+\Option{SEIFGCNumIntensityIntervalMinus1Comp2} &
+\Default{0} &
+Specifies the number of intensity intervals minus1 on colour component 2.
+\\
+\Option{SEIFGCNumModelValuesMinus1Comp0} &
+\Default{0} &
+Specifies the number of component model values minus1 on colour component 0.
+\\
+\Option{SEIFGCNumModelValuesMinus1Comp1} &
+\Default{0} &
+Specifies the number of component model values minus1 on colour component 1.
+\\
+\Option{SEIFGCNumModelValuesMinus1Comp2} &
+\Default{0} &
+Specifies the number of component model values minus1 on colour component 2.
+\\
+\Option{SEIFGCIntensityIntervalLowerBoundComp0} &
+\Default{0} &
+Specifies the lower bound for the intensity intervals on colour component 0.
+\\
+\Option{SEIFGCIntensityIntervalLowerBoundComp1} &
+\Default{0} &
+Specifies the lower bound for the intensity intervals on colour component 1.
+\\
+\Option{SEIFGCIntensityIntervalLowerBoundComp2} &
+\Default{0} &
+Specifies the lower bound for the intensity intervals on colour component 2.
+\\
+\Option{SEIFGCIntensityIntervalUpperBoundComp0} &
+\Default{0} &
+Specifies the upper bound for the intensity intervals on colour component 0.
+\\
+\Option{SEIFGCIntensityIntervalUpperBoundComp1} &
+\Default{0} &
+Specifies the upper bound for the intensity intervals on colour component 1.
+\\
+\Option{SEIFGCIntensityIntervalUpperBoundComp2} &
+\Default{0} &
+Specifies the upper bound for the intensity intervals on colour component 2.
+\\
+\Option{SEIFGCCompModelValuesComp0} &
+\Default{0} &
+Specifies the component model values on colour component 0.
+\\
+\Option{SEIFGCCompModelValuesComp1} &
+\Default{0} &
+Specifies the component model values on colour component 1.
+\\
+\Option{SEIFGCCompModelValuesComp2} &
+\Default{0} &
+Specifies the component model values on colour component 2.
 \\
 \end{OptionTableNoShorthand}
 

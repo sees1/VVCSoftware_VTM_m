@@ -48,7 +48,6 @@
 #endif
 #include "CommonLib/dtrace_codingstruct.h"
 
-
 //! \ingroup DecoderApp
 //! \{
 
@@ -410,6 +409,56 @@ uint32_t DecApp::decode()
           m_cVideoIOYuvReconFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
         }
       }
+
+#if JVET_X0048_X0103_FILM_GRAIN
+      if (!m_SEIFGSFileName.empty() && !m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].isOpen())
+      {
+        const BitDepths &bitDepths = pcListPic->front()->cs->sps->getBitDepths();   // use bit depths of first reconstructed picture.
+        for (uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++)
+        {
+          if (m_outputBitDepth[channelType] == 0)
+          {
+            m_outputBitDepth[channelType] = bitDepths.recon[channelType];
+          }
+        }
+
+        if (m_packedYUVMode && (m_outputBitDepth[CH_L] != 10 && m_outputBitDepth[CH_L] != 12))
+        {
+          EXIT("Invalid output bit-depth for packed YUV output, aborting\n");
+        }
+
+        std::string SEIFGSFileName = m_SEIFGSFileName;
+        if (m_SEIFGSFileName.compare("/dev/null") && m_cDecLib.getVPS() != nullptr && m_cDecLib.getVPS()->getMaxLayers() > 1 && xIsNaluWithinTargetOutputLayerIdSet(&nalu))
+        {
+          size_t      pos         = SEIFGSFileName.find_last_of('.');
+          std::string layerString = std::string(".layer") + std::to_string(nalu.m_nuhLayerId);
+          if (pos != string::npos)
+          {
+            SEIFGSFileName.insert(pos, layerString);
+          }
+          else
+          {
+            SEIFGSFileName.append(layerString);
+          }
+        }
+        if ((m_cDecLib.getVPS() != nullptr && (m_cDecLib.getVPS()->getMaxLayers() == 1 || xIsNaluWithinTargetOutputLayerIdSet(&nalu))) || m_cDecLib.getVPS() == nullptr)
+        {
+          m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].open(SEIFGSFileName, true, m_outputBitDepth, m_outputBitDepth, bitDepths.recon);   // write mode
+        }
+      }
+      // update file bitdepth shift if recon bitdepth changed between sequences
+      for (uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++)
+      {
+        int reconBitdepth = pcListPic->front()->cs->sps->getBitDepth((ChannelType) channelType);
+        int fileBitdepth  = m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].getFileBitdepth(channelType);
+        int bitdepthShift = m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].getBitdepthShift(channelType);
+        if (fileBitdepth + bitdepthShift != reconBitdepth)
+        {
+          m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
+        }
+      }
+#endif
+
       if (!m_SEICTIFileName.empty() && !m_cVideoIOYuvSEICTIFile[nalu.m_nuhLayerId].isOpen())
       {
         const BitDepths& bitDepths = pcListPic->front()->cs->sps->getBitDepths(); // use bit depths of first reconstructed picture.
@@ -606,6 +655,15 @@ void DecApp::xDestroyDecLib()
       recFile.second.close();
     }
   }
+#if JVET_X0048_X0103_FILM_GRAIN
+  if (!m_SEIFGSFileName.empty())
+  {
+    for (auto &recFile: m_videoIOYuvSEIFGSFile)
+    {
+      recFile.second.close();
+    }
+  }
+#endif
   if (!m_SEICTIFileName.empty())
   {
     for (auto& recFile : m_cVideoIOYuvSEICTIFile)
@@ -771,6 +829,29 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
             }
         }
+#if JVET_X0048_X0103_FILM_GRAIN
+        // Perform FGS on decoded frame and write to output FGS file
+        if (!m_SEIFGSFileName.empty())
+        {
+          const Window& conf            = pcPic->getConformanceWindow();
+          const SPS* sps                = pcPic->cs->sps;
+          ChromaFormat chromaFormatIDC  = sps->getChromaFormatIdc();
+          if (m_upscaledOutput)
+          {
+            m_videoIOYuvSEIFGSFile[pcPic->layerId].writeUpscaledPicture(*sps, *pcPic->cs->pps, pcPic->getDisplayBufFG(), m_outputColourSpaceConvert, m_packedYUVMode, m_upscaledOutput, NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+          }
+          else
+          {
+            m_videoIOYuvSEIFGSFile[pcPic->layerId].write(pcPic->getRecoBuf().get(COMPONENT_Y).width, pcPic->getRecoBuf().get(COMPONENT_Y).height, pcPic->getDisplayBufFG(),
+                                    m_outputColourSpaceConvert, m_packedYUVMode,
+                                    conf.getWindowLeftOffset()   * SPS::getWinUnitX(chromaFormatIDC),
+                                    conf.getWindowRightOffset()  * SPS::getWinUnitX(chromaFormatIDC),
+                                    conf.getWindowTopOffset()    * SPS::getWinUnitY(chromaFormatIDC),
+                                    conf.getWindowBottomOffset() * SPS::getWinUnitY(chromaFormatIDC),
+                                    NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+          }
+        }
+#endif
         // Perform CTI on decoded frame and write to output CTI file
         if (!m_SEICTIFileName.empty())
         {
@@ -924,6 +1005,29 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
               }
           }
+#if JVET_X0048_X0103_FILM_GRAIN
+          // Perform FGS on decoded frame and write to output FGS file
+          if (!m_SEIFGSFileName.empty())
+          {
+            const Window&           conf = pcPic->getConformanceWindow();
+            const SPS*               sps = pcPic->cs->sps;
+            ChromaFormat chromaFormatIDC = sps->getChromaFormatIdc();
+            if (m_upscaledOutput)
+            {
+              m_videoIOYuvSEIFGSFile[pcPic->layerId].writeUpscaledPicture(*sps, *pcPic->cs->pps, pcPic->getDisplayBufFG(), m_outputColourSpaceConvert, m_packedYUVMode, m_upscaledOutput, NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+            }
+            else
+            {
+              m_videoIOYuvSEIFGSFile[pcPic->layerId].write(pcPic->getRecoBuf().get(COMPONENT_Y).width, pcPic->getRecoBuf().get(COMPONENT_Y).height, pcPic->getDisplayBufFG(),
+                                      m_outputColourSpaceConvert, m_packedYUVMode,
+                                      conf.getWindowLeftOffset()   * SPS::getWinUnitX(chromaFormatIDC),
+                                      conf.getWindowRightOffset()  * SPS::getWinUnitX(chromaFormatIDC),
+                                      conf.getWindowTopOffset()    * SPS::getWinUnitY(chromaFormatIDC),
+                                      conf.getWindowBottomOffset() * SPS::getWinUnitY(chromaFormatIDC),
+                                      NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
+            }
+          }
+#endif
           // Perform CTI on decoded frame and write to output CTI file
           if (!m_SEICTIFileName.empty())
           {
