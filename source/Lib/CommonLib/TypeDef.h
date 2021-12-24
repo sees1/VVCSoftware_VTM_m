@@ -59,6 +59,7 @@
 #define JVET_X0143_EXTRACTOR_FIXES                           1
 
 #define JVET_X0128_V2_WPP                                 1 // JVET-X0128 method 2, VVC v2 WPP
+#define JVET_X0073_V2_PROFILE_IDC                         1 // JVET-X0073 decrease profile_idc for 16 bit profiles by 1
 
 #define JVET_X0079_MODIFIED_BITRATE                       1 // JVET-X0079v3 (changes to JVET-W2005)
 
@@ -703,7 +704,11 @@ namespace Profile
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
     MAIN_12                              = 2,
     MAIN_12_444                          = 34,
+#if JVET_X0073_V2_PROFILE_IDC
+    MAIN_16_444                          = 35,
+#else
     MAIN_16_444                          = 36,
+#endif
     MAIN_12_INTRA                        = MAIN_12 | INTRA,
     MAIN_12_444_INTRA                    = MAIN_12_444 | INTRA,
     MAIN_16_444_INTRA                    = MAIN_16_444 | INTRA,
