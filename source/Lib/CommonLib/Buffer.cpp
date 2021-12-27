@@ -216,7 +216,7 @@ void calcBlkGradientCore(int sx, int sy, int     *arraysGx2, int     *arraysGxGy
   }
 }
 
-#if ENABLE_SIMD_OPT_BCW
+#if ENABLE_SIMD_OPT_BCW && defined(TARGET_SIMD_X86)
 void removeWeightHighFreq(int16_t* dst, int dstStride, const int16_t* src, int srcStride, int width, int height, int shift, int bcwWeight)
 {
   int normalizer = ((1 << 16) + (bcwWeight > 0 ? (bcwWeight >> 1) : -(bcwWeight >> 1))) / bcwWeight;
@@ -332,7 +332,7 @@ PelBufferOps::PelBufferOps()
 
   copyBuffer = copyBufferCore;
   padding = paddingCore;
-#if ENABLE_SIMD_OPT_BCW
+#if ENABLE_SIMD_OPT_BCW && defined(TARGET_SIMD_X86)
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
   removeWeightHighFreq8 = removeWeightHighFreq_HBD;
   removeWeightHighFreq4 = removeWeightHighFreq_HBD;

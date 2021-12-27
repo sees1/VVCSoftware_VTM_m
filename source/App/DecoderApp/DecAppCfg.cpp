@@ -67,7 +67,7 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
   string sTracingFile;
   bool   bTracingChannelsList = false;
 #endif
-#if ENABLE_SIMD_OPT
+#if ENABLE_SIMD_OPT && defined(TARGET_SIMD_X86)
   std::string ignore;
 #endif
   po::Options opts;
@@ -79,7 +79,7 @@ bool DecAppCfg::parseCfg( int argc, char* argv[] )
 
   ("OplFile,-opl",              m_oplFilename ,                        string(""), "opl-file name without extension for conformance testing\n")
 
-#if ENABLE_SIMD_OPT
+#if ENABLE_SIMD_OPT && defined(TARGET_SIMD_X86)
   ("SIMD",                      ignore,                                string(""), "SIMD extension to use (SCALAR, SSE41, SSE42, AVX, AVX2, AVX512), default: the highest supported extension\n")
 #endif
 

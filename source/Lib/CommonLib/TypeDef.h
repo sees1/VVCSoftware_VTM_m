@@ -182,11 +182,7 @@ typedef std::pair<int, int>  TrCost;
 
 // SIMD optimizations
 #define SIMD_ENABLE                                       1
-#ifdef TARGET_SIMD_X86
 #define ENABLE_SIMD_OPT                                   SIMD_ENABLE                                       ///< SIMD optimizations, no impact on RD performance
-#else
-#define ENABLE_SIMD_OPT                                   0                                                 ///< SIMD optimizations, no impact on RD performance
-#endif
 #define ENABLE_SIMD_OPT_MCIF                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the interpolation filter, no impact on RD performance
 #define ENABLE_SIMD_OPT_BUFFER                          ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the buffer operations, no impact on RD performance
 #define ENABLE_SIMD_OPT_DIST                            ( 1 && ENABLE_SIMD_OPT )                            ///< SIMD optimization for the distortion calculations(SAD,SSE,HADAMARD), no impact on RD performance
