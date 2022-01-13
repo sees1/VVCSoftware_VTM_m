@@ -1608,9 +1608,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     ;
 
   opts.addOptions()
-    ("TemporalFilter",                                m_gopBasedTemporalFilterEnabled,          false,            "Enable GOP based temporal filter. Disabled per default")
-    ("TemporalFilterFutureReference",                 m_gopBasedTemporalFilterFutureReference,   true,            "Enable referencing of future frames in the GOP based temporal filter. This is typically disabled for Low Delay configurations.")
-    ("TemporalFilterStrengthFrame*",                  m_gopBasedTemporalFilterStrengths, std::map<int, double>(), "Strength for every * frame in GOP based temporal filter, where * is an integer."
+    ("TemporalFilterPastRefs",       m_gopBasedTemporalFilterPastRefs,                        0, "Number of past references for temporal prefilter")
+    ("TemporalFilterFutureRefs",     m_gopBasedTemporalFilterFutureRefs,                      0, "Number of future references for temporal prefilter")
+    ("FirstValidFrame",              m_firstValidFrame,                                       0, "First valid frame")
+    ("LastValidFrame",               m_lastValidFrame,                                  MAX_INT, "Last valid frame")
+    ("TemporalFilterStrengthFrame*", m_gopBasedTemporalFilterStrengths, std::map<int, double>(), "Strength for every * frame in GOP based temporal filter, where * is an integer."
                                                                                                                   " E.g. --TemporalFilterStrengthFrame8 0.95 will enable GOP based temporal filter at every 8th frame with strength 0.95");
   // clang-format on
 
@@ -1863,6 +1865,15 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     inputPathPrefix += "/";
   }
   m_inputFileName   = inputPathPrefix + m_inputFileName;
+
+  if (m_firstValidFrame < 0)
+  {
+    m_firstValidFrame = m_FrameSkip;
+  }
+  if (m_lastValidFrame < 0)
+  {
+    m_lastValidFrame = m_firstValidFrame + m_framesToBeEncoded - 1;
+  }
 
   if( m_temporalSubsampleRatio < 1)
   {
@@ -4355,7 +4366,7 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( m_decodeBitstreams[0] == m_bitstreamFileName, "Debug bitstream and the output bitstream cannot be equal.\n" );
   xConfirmPara( m_decodeBitstreams[1] == m_bitstreamFileName, "Decode2 bitstream and the output bitstream cannot be equal.\n" );
   xConfirmPara(unsigned(m_LMChroma) > 1, "LMMode exceeds range (0 to 1)");
-  if (m_gopBasedTemporalFilterEnabled)
+  if (m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0)
   {
     xConfirmPara(m_temporalSubsampleRatio != 1, "GOP Based Temporal Filter only support Temporal sub-sample ratio 1");
   }
@@ -4718,7 +4729,7 @@ void EncAppCfg::xPrintParameter()
   {
     msg( VERBOSE, "RPR:%d ", 0 );
   }
-  msg(VERBOSE, "TemporalFilter:%d ", m_gopBasedTemporalFilterEnabled);
+  msg(VERBOSE, "TemporalFilter:%d/%d ", m_gopBasedTemporalFilterPastRefs, m_gopBasedTemporalFilterFutureRefs);
   msg(VERBOSE, "SEI CTI:%d ", m_ctiSEIEnabled);
 #if EXTENSION_360_VIDEO
   m_ext360.outputConfigurationSummary();

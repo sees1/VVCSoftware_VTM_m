@@ -104,33 +104,24 @@ public:
   EncTemporalFilter();
   ~EncTemporalFilter() {}
 
-  void init(const int frameSkip,
-    const int inputBitDepth[MAX_NUM_CHANNEL_TYPE],
-    const int msbExtendedBitDepth[MAX_NUM_CHANNEL_TYPE],
-    const int internalBitDepth[MAX_NUM_CHANNEL_TYPE],
-    const int width,
-    const int height,
-    const int *pad,
-    const bool rec709,
-    const std::string &filename,
-    const ChromaFormat inputChroma,
-    const InputColourSpaceConversion colorSpaceConv,
-    const int qp,
-    const std::map<int, double> &temporalFilterStrengths,
-    const bool gopBasedTemporalFilterFutureReference);
+  void init(const int frameSkip, const int inputBitDepth[MAX_NUM_CHANNEL_TYPE],
+            const int msbExtendedBitDepth[MAX_NUM_CHANNEL_TYPE], const int internalBitDepth[MAX_NUM_CHANNEL_TYPE],
+            const int width, const int height, const int *pad, const bool rec709, const std::string &filename,
+            const ChromaFormat inputChroma, const InputColourSpaceConversion colorSpaceConv, const int qp,
+            const std::map<int, double> &temporalFilterStrengths, const int pastRefs, const int futureRefs,
+            const int firstValidFrame, const int lastValidFrame);
 
   bool filter(PelStorage *orgPic, int frame);
 
 private:
   // Private static member variables
-  static const int m_range;
   static const double m_chromaFactor;
   static const double m_sigmaMultiplier;
   static const double m_sigmaZeroPoint;
   static const int m_motionVectorFactor;
   static const int m_padding;
   static const int m_interpolationFilter[16][8];
-  static const double m_refStrengths[3][4];
+  static const double m_refStrengths[2][4];
 
   // Private member variables
   int m_FrameSkip;
@@ -147,7 +138,11 @@ private:
   bool m_clipInputVideoToRec709Range;
   InputColourSpaceConversion m_inputColourSpaceConvert;
   Area m_area;
-  bool m_gopBasedTemporalFilterFutureReference;
+
+  int m_pastRefs;
+  int m_futureRefs;
+  int m_firstValidFrame;
+  int m_lastValidFrame;
 
   // Private functions
   void subsampleLuma(const PelStorage &input, PelStorage &output, const int factor = 2) const;

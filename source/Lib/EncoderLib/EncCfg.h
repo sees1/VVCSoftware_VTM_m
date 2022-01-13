@@ -160,12 +160,15 @@ protected:
   //==== File I/O ========
   int       m_iFrameRate;
   int       m_FrameSkip;
-  uint32_t      m_temporalSubsampleRatio;
+  uint32_t  m_temporalSubsampleRatio;
   int       m_sourceWidth;
   int       m_sourceHeight;
   Window    m_conformanceWindow;
   int       m_sourcePadding[2];
   int       m_framesToBeEncoded;
+  int       m_firstValidFrame;
+  int       m_lastValidFrame;
+
   double    m_adLambdaModifier[ MAX_TLAYER ];
   std::vector<double> m_adIntraLambdaModifier;
   double    m_dIntraQpFactor;                                 ///< Intra Q Factor. If negative, use a default equation: 0.57*(1.0 - Clip3( 0.0, 0.5, 0.05*(double)(isField ? (GopSize-1)/2 : GopSize-1) ))
@@ -524,9 +527,11 @@ protected:
   bool      m_bFastUDIUseMPMEnabled;
   bool      m_bFastMEForGenBLowDelayEnabled;
   bool      m_bUseBLambdaForNonKeyLowDelayPictures;
-  bool      m_gopBasedTemporalFilterEnabled;
+  int       m_gopBasedTemporalFilterPastRefs;
+  int       m_gopBasedTemporalFilterFutureRefs;
   bool      m_noPicPartitionFlag;                             ///< no picture partitioning flag (single tile, single slice)
   bool      m_mixedLossyLossless;                             ///< enable mixed lossy/lossless coding
+
   std::vector<uint16_t> m_sliceLosslessArray;                      ///< Slice lossless array
   std::vector<uint32_t> m_tileColumnWidth;                    ///< tile column widths in units of CTUs (last column width will be repeated uniformly to cover any remaining picture width)
   std::vector<uint32_t> m_tileRowHeight;                      ///< tile row heights in units of CTUs (last row height will be repeated uniformly to cover any remaining picture height)
@@ -1048,6 +1053,12 @@ public:
   void      setConformanceWindow (int confLeft, int confRight, int confTop, int confBottom ) { m_conformanceWindow.setWindow (confLeft, confRight, confTop, confBottom); }
 
   void      setFramesToBeEncoded            ( int   i )      { m_framesToBeEncoded = i; }
+
+  void setValidFrames(const int first, const int last)
+  {
+    m_firstValidFrame = first;
+    m_lastValidFrame  = last;
+  }
 
   bool      getPrintMSEBasedSequencePSNR    ()         const { return m_printMSEBasedSequencePSNR;  }
   void      setPrintMSEBasedSequencePSNR    (bool value)     { m_printMSEBasedSequencePSNR = value; }
@@ -1575,8 +1586,16 @@ public:
   bool      getFastUDIUseMPMEnabled         ()      { return m_bFastUDIUseMPMEnabled; }
   bool      getFastMEForGenBLowDelayEnabled ()      { return m_bFastMEForGenBLowDelayEnabled; }
   bool      getUseBLambdaForNonKeyLowDelayPictures () { return m_bUseBLambdaForNonKeyLowDelayPictures; }
-  void  setGopBasedTemporalFilterEnabled(bool flag) { m_gopBasedTemporalFilterEnabled = flag; }
-  bool  getGopBasedTemporalFilterEnabled()          { return m_gopBasedTemporalFilterEnabled; }
+
+  void setGopBasedTemporalFilterRefs(const int pastRefs, const int futureRefs)
+  {
+    m_gopBasedTemporalFilterPastRefs   = pastRefs;
+    m_gopBasedTemporalFilterFutureRefs = futureRefs;
+  }
+  bool getGopBasedTemporalFilterEnabled() const
+  {
+    return m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0;
+  }
 
   bool      getUseReconBasedCrossCPredictionEstimate ()                const { return m_reconBasedCrossCPredictionEstimate;  }
   void      setUseReconBasedCrossCPredictionEstimate (const bool value)      { m_reconBasedCrossCPredictionEstimate = value; }
