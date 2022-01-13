@@ -6290,7 +6290,8 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   Picture* pic = slice->getPic();
   const VPS* vps = slice->getPic()->cs->vps;
   int layerIdx = vps == nullptr ? 0 : vps->getGeneralLayerIdx( pic->layerId );
-  bool isIntraLayerPredAllowed = (vps->getIndependentLayerFlag(layerIdx) || (vps->getPredDirection(slice->getTLayer()) != 1)) && !slice->isIRAP();
+  bool isIntraLayerPredAllowed = (vps->getIndependentLayerFlag(layerIdx) || (vps->getPredDirection(slice->getTLayer()) != 1))
+    && (!slice->isIRAP() || (m_pcEncLib->getAvoidIntraInDepLayer() && layerIdx));
   bool isInterLayerPredAllowed = !vps->getIndependentLayerFlag(layerIdx) && (vps->getPredDirection(slice->getTLayer()) != 2);
 
   auto localRPL0 = ReferencePictureList( slice->getSPS()->getInterLayerPresentFlag() );
@@ -6344,7 +6345,11 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
 
       if (isAvailable)
       {
-        if (hasHigherTId)
+        if (slice->isIRAP())
+        {
+          inactiveRefs.push_back(ii);
+        }
+        else if (hasHigherTId)
         {
           higherTLayerRefs.push_back(ii);
         }
@@ -6510,7 +6515,11 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
 
       if (isAvailable)
       {
-        if (hasHigherTId)
+        if (slice->isIRAP())
+        {
+          inactiveRefs.push_back(ii);
+        }
+        else if (hasHigherTId)
         {
           higherTLayerRefs.push_back(ii);
         }
@@ -6618,7 +6627,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL0->setNumberOfLongtermPictures( numOfLTRPL0 );
   pLocalRPL0->setNumberOfShorttermPictures( numOfSTRPL0 );
   pLocalRPL0->setNumberOfInterLayerPictures( numOfILRPL0 );
-  int numPics = numOfLTRPL0 + numOfSTRPL0;
+  int numPics = (slice->isIRAP()) ? 0 : numOfLTRPL0 + numOfSTRPL0;
 
   pLocalRPL0->setNumberOfActivePictures( ( numPics < rpl0->getNumberOfActivePictures() ? numPics : rpl0->getNumberOfActivePictures() ) + numOfILRPL0 );
   pLocalRPL0->setLtrpInSliceHeaderFlag( 1 );
@@ -6662,7 +6671,7 @@ void EncGOP::xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicL
   pLocalRPL1->setNumberOfLongtermPictures( numOfLTRPL1 );
   pLocalRPL1->setNumberOfShorttermPictures( numOfSTRPL1 );
   pLocalRPL1->setNumberOfInterLayerPictures( numOfILRPL1 );
-  numPics = numOfLTRPL1 + numOfSTRPL1;
+  numPics = (slice->isIRAP()) ? 0 : numOfLTRPL1 + numOfSTRPL1;
 
   pLocalRPL1->setNumberOfActivePictures( ( isDisallowMixedRefPic ? numPics : ( numPics < rpl1->getNumberOfActivePictures() ? numPics : rpl1->getNumberOfActivePictures() ) ) + numOfILRPL1 );
   pLocalRPL1->setLtrpInSliceHeaderFlag( 1 );
