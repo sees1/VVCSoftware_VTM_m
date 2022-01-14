@@ -2306,13 +2306,15 @@ unsigned Slice::getMinPictureDistance() const
     const int currPOC  = getPOC();
     for (int refIdx = 0; refIdx < getNumRefIdx(REF_PIC_LIST_0); refIdx++)
     {
-      minPicDist = std::min( minPicDist, std::abs(currPOC - getRefPic(REF_PIC_LIST_0, refIdx)->getPOC()));
+      if (getRefPic(REF_PIC_LIST_0, refIdx)->layerId == getNalUnitLayerId())
+        minPicDist = std::min( minPicDist, std::abs(currPOC - getRefPic(REF_PIC_LIST_0, refIdx)->getPOC()));
     }
     if( getSliceType() == B_SLICE )
     {
       for (int refIdx = 0; refIdx < getNumRefIdx(REF_PIC_LIST_1); refIdx++)
       {
-        minPicDist = std::min(minPicDist, std::abs(currPOC - getRefPic(REF_PIC_LIST_1, refIdx)->getPOC()));
+        if (getRefPic(REF_PIC_LIST_1, refIdx)->layerId == getNalUnitLayerId())
+          minPicDist = std::min(minPicDist, std::abs(currPOC - getRefPic(REF_PIC_LIST_1, refIdx)->getPOC()));
       }
     }
   }
