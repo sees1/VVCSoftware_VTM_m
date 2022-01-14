@@ -242,6 +242,7 @@ uint32_t DecApp::decode()
                 m_cDecLib.resetAccessUnitPicInfo();
               }
               bPicSkipped = false;
+              nuhSkippedLayerId = -1;
             }
           }
 
@@ -275,6 +276,7 @@ uint32_t DecApp::decode()
               m_cDecLib.resetAccessUnitPicInfo();
             }
             bPicSkipped = true;
+            nuhSkippedLayerId = nalu.m_nuhLayerId;
             m_iSkipFrame++;   // skipFrame count restore, the real decrement occur at the begin of next frame
           }
 
@@ -296,6 +298,11 @@ uint32_t DecApp::decode()
         else
         {
           bPicSkipped = true;
+          nuhSkippedLayerId = nalu.m_nuhLayerId;
+          if (nalu.isSlice())
+          {
+            m_cDecLib.setFirstSliceInPicture(false);
+          }
         }
       }
 
@@ -343,7 +350,7 @@ uint32_t DecApp::decode()
       }
     }
     else if ( (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS ) &&
-      m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId))
+      m_cDecLib.getFirstSliceInSequence(!bPicSkipped ? nalu.m_nuhLayerId : nuhSkippedLayerId))
     {
       m_cDecLib.setFirstSliceInPicture (true);
     }
