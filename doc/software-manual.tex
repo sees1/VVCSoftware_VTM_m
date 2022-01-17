@@ -3129,6 +3129,26 @@ Enables or disables the use of Bi-prediction with CU-level Weights (BCW).
 \Default{false} &
 Enables or disables the fast encoding of Bi-prediction with CU-level Weights (BCW).
 \\
+
+\Option{MTS} &
+%\ShortOption{\None} &
+\Default{0} &
+Enables explicit mutiple transform set (MTS).
+0: disable,
+1: enable explicit intra MTS,
+2: enable implicit intra and explicit inter MTS,
+3: enable explicit intra and explicit inter MTS,
+4: enable implicit intra MTS.
+\\
+
+\Option{MTSImplicit} &
+%\ShortOption{\None} &
+\Default{0} &
+Enables implicit multiple transform set (MTS).
+0: disable,
+1: enable implicit intra MTS.
+Must be 0 when MTS is nonzero. Setting MTS to 0 and MTSImplicit to 1 is equivalent to setting MTS to 4 and MTSImplicit to 0.
+\\
  
 \Option{BDOF} &
 %\ShortOption{\None} &

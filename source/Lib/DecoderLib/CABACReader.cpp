@@ -2976,7 +2976,7 @@ void CABACReader::residual_coding( TransformUnit& tu, ComponentID compID, CUCtx&
   {
     cctx.initSubblock(subSetId);
 
-    if (tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[compID].height <= 32
+    if (tu.cs->sps->getMtsEnabled() && tu.cu->sbtInfo != 0 && tu.blocks[compID].height <= 32
         && tu.blocks[compID].width <= 32 && compID == COMPONENT_Y)
     {
       if ((tu.blocks[compID].height == 32 && cctx.cgPosY() >= (16 >> cctx.log2CGHeight()))
@@ -3131,7 +3131,8 @@ int CABACReader::last_sig_coeff( CoeffCodingContext& cctx, TransformUnit& tu, Co
   unsigned zoTbWdith  = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.width());
   unsigned zoTbHeight = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.height());
 
-  if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
+  if (tu.cs->sps->getMtsEnabled() && tu.cu->sbtInfo != 0 && tu.blocks[compID].width <= 32
+      && tu.blocks[compID].height <= 32 && compID == COMPONENT_Y)
   {
     maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
     maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;

@@ -849,7 +849,8 @@ int TransformUnit::getTbAreaAfterCoefZeroOut(ComponentID compID) const
   int tbZeroOutWidth = blocks[compID].width;
   int tbZeroOutHeight = blocks[compID].height;
 
-  if ( cs->sps->getUseMTS() && cu->sbtInfo != 0 && blocks[compID].width <= 32 && blocks[compID].height <= 32 && compID == COMPONENT_Y )
+  if (cs->sps->getMtsEnabled() && cu->sbtInfo != 0 && blocks[compID].width <= 32 && blocks[compID].height <= 32
+      && compID == COMPONENT_Y)
   {
     tbZeroOutWidth = (blocks[compID].width == 32) ? 16 : tbZeroOutWidth;
     tbZeroOutHeight = (blocks[compID].height == 32) ? 16 : tbZeroOutHeight;

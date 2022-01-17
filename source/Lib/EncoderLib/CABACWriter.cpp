@@ -2721,7 +2721,8 @@ void CABACWriter::residual_coding( const TransformUnit& tu, ComponentID compID, 
   {
     cctx.initSubblock       ( subSetId, sigGroupFlags[subSetId] );
 
-    if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].height <= 32 && tu.blocks[ compID ].width <= 32 && compID == COMPONENT_Y )
+    if (tu.cs->sps->getMtsEnabled() && tu.cu->sbtInfo != 0 && tu.blocks[compID].height <= 32
+        && tu.blocks[compID].width <= 32 && compID == COMPONENT_Y)
     {
       if( ( tu.blocks[ compID ].height == 32 && cctx.cgPosY() >= ( 16 >> cctx.log2CGHeight() ) )
        || ( tu.blocks[ compID ].width  == 32 && cctx.cgPosX() >= ( 16 >> cctx.log2CGWidth()  ) ) )
@@ -2875,7 +2876,8 @@ void CABACWriter::last_sig_coeff( CoeffCodingContext& cctx, const TransformUnit&
   unsigned zoTbWdith  = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.width());
   unsigned zoTbHeight = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.height());
 
-  if( tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[ compID ].width <= 32 && tu.blocks[ compID ].height <= 32 && compID == COMPONENT_Y )
+  if (tu.cs->sps->getMtsEnabled() && tu.cu->sbtInfo != 0 && tu.blocks[compID].width <= 32
+      && tu.blocks[compID].height <= 32 && compID == COMPONENT_Y)
   {
     maxLastPosX = (tu.blocks[compID].width == 32) ? g_groupIdx[15] : maxLastPosX;
     maxLastPosY = (tu.blocks[compID].height == 32) ? g_groupIdx[15] : maxLastPosY;

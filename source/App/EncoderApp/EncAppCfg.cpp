@@ -1011,14 +1011,15 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("VerCollocatedChroma",                             m_verCollocatedChromaFlag,                        false, "Specifies location of a chroma sample relatively to the luma sample in vertical direction in the cross-component linear model intra prediction and the reference picture resampling\n"
                                                                                                                "\t0:  horizontally co-sited, vertically shifted by 0.5 units of luma samples\n"
                                                                                                                "\t1:  collocated\n")
-  ("MTS",                                             m_MTS,                                                0, "Multiple Transform Set (MTS)\n"
+  ("MTS",                                             m_mtsMode,                                            0, "Multiple Transform Set (MTS)\n"
     "\t0:  Disable MTS\n"
-    "\t1:  Enable only Intra MTS\n"
-    "\t2:  Enable only Inter MTS\n"
-    "\t3:  Enable both Intra & Inter MTS\n")
+    "\t1:  Enable explicit Intra MTS\n"
+    "\t2:  Enable implicit Intra and explicit Inter MTS\n"
+    "\t3:  Enable explicit Intra and explicit Inter MTS\n"
+    "\t4:  Enable implicit Intra MTS\n")
   ("MTSIntraMaxCand",                                 m_MTSIntraMaxCand,                                    3, "Number of additional candidates to test in encoder search for MTS in intra slices\n")
   ("MTSInterMaxCand",                                 m_MTSInterMaxCand,                                    4, "Number of additional candidates to test in encoder search for MTS in inter slices\n")
-  ("MTSImplicit",                                     m_MTSImplicit,                                        0, "Enable implicit MTS (when explicit MTS is off)\n")
+  ("MTSImplicit",                                     m_mtsImplicitIntra,                                   0, "Enable implicit Intra MTS (when MTS is 0)\n")
   ( "SBT",                                            m_SBT,                                            false, "Enable Sub-Block Transform for inter blocks\n" )
   ( "SBTFast64WidthTh",                               m_SBTFast64WidthTh,                                1920, "Picture width threshold for testing size-64 SBT in RDO (now for HD and above sequences)\n")
   ( "ISP",                                            m_ISP,                                            false, "Enable Intra Sub-Partitions\n" )
@@ -3504,10 +3505,10 @@ bool EncAppCfg::xCheckParameter()
     m_PROF = false;
   }
 
-  xConfirmPara( m_MTS < 0 || m_MTS > 3, "MTS must be greater than 0 smaller than 4" );
+  xConfirmPara(m_mtsMode < 0 || m_mtsMode > 4, "MTS must in the range 0..4");
   xConfirmPara( m_MTSIntraMaxCand < 0 || m_MTSIntraMaxCand > 5, "m_MTSIntraMaxCand must be greater than 0 and smaller than 6" );
   xConfirmPara( m_MTSInterMaxCand < 0 || m_MTSInterMaxCand > 5, "m_MTSInterMaxCand must be greater than 0 and smaller than 6" );
-  xConfirmPara( m_MTS != 0 && m_MTSImplicit != 0, "Both explicit and implicit MTS cannot be enabled at the same time" );
+  xConfirmPara(m_mtsMode != 0 && m_mtsImplicitIntra != 0, "MTSImplicit may be enabled only when MTS is 0");
 
   if (m_useBDPCM)
   {
@@ -4688,7 +4689,22 @@ void EncAppCfg::xPrintParameter()
     msg( VERBOSE, "LMChroma:%d ", m_LMChroma );
     msg( VERBOSE, "HorCollocatedChroma:%d ", m_horCollocatedChromaFlag );
     msg( VERBOSE, "VerCollocatedChroma:%d ", m_verCollocatedChromaFlag );
-    msg( VERBOSE, "MTS: %1d(intra) %1d(inter) ", m_MTS & 1, ( m_MTS >> 1 ) & 1 );
+
+    {
+      std::string s;
+      const int   m = m_mtsMode + 4 * m_mtsImplicitIntra;
+      if (m != 0)
+      {
+        s = "(";
+        s += (m & 1) != 0 ? "explicit intra" : "implicit intra";
+        if (m & 2)
+        {
+          s += ", explicit inter";
+        }
+        s += ")";
+      }
+      msg(VERBOSE, "MTS:%d%s ", m != 0, s.c_str());
+    }
     msg( VERBOSE, "SBT:%d ", m_SBT );
     msg( VERBOSE, "ISP:%d ", m_ISP );
     msg( VERBOSE, "SMVD:%d ", m_SMVD );
@@ -4754,7 +4770,10 @@ void EncAppCfg::xPrintParameter()
   msg( VERBOSE, "FastMrg:%d ", m_useFastMrg );
   msg( VERBOSE, "PBIntraFast:%d ", m_usePbIntraFast );
   if( m_ImvMode ) msg( VERBOSE, "IMV4PelFast:%d ", m_Imv4PelFast );
-  if( m_MTS ) msg( VERBOSE, "MTSMaxCand: %1d(intra) %1d(inter) ", m_MTSIntraMaxCand, m_MTSInterMaxCand );
+  if (m_mtsMode)
+  {
+    msg(VERBOSE, "MTSMaxCand: %1d(intra) %1d(inter) ", m_MTSIntraMaxCand, m_MTSInterMaxCand);
+  }
   if( m_ISP ) msg( VERBOSE, "ISPFast:%d ", m_useFastISP );
   if( m_LFNST ) msg( VERBOSE, "FastLFNST:%d ", m_useFastLFNST );
   msg( VERBOSE, "AMaxBT:%d ", m_useAMaxBT );

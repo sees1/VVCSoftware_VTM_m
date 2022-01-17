@@ -336,11 +336,11 @@ protected:
   int       m_LMChroma;
   bool      m_horCollocatedChromaFlag;
   bool      m_verCollocatedChromaFlag;
-  int       m_IntraMTS;
-  int       m_InterMTS;
+  int       m_explicitMtsIntra;
+  int       m_explicitMtsInter;
   int       m_MTSIntraMaxCand;
   int       m_MTSInterMaxCand;
-  int       m_ImplicitMTS;
+  int       m_implicitMtsIntra;
   bool      m_SBT;                                ///< Sub-Block Transform for inter blocks
   int       m_SBTFast64WidthTh;                   ///< Enable size-64 SBT in encoder RDO check for HD and above sequences
 
@@ -1238,12 +1238,9 @@ public:
   unsigned  getMTSIntraMaxCand              ()         const { return m_MTSIntraMaxCand; }
   void      setMTSInterMaxCand              ( unsigned u )   { m_MTSInterMaxCand = u; }
   unsigned  getMTSInterMaxCand              ()         const { return m_MTSInterMaxCand; }
-  void      setIntraMTS                     ( bool b )       { m_IntraMTS = b; }
-  bool      getIntraMTS                     ()         const { return m_IntraMTS; }
-  void      setInterMTS                     ( bool b )       { m_InterMTS = b; }
-  bool      getInterMTS                     ()         const { return m_InterMTS; }
-  void      setImplicitMTS                  ( bool b )       { m_ImplicitMTS = b; }
-  bool      getImplicitMTS                  ()         const { return m_ImplicitMTS; }
+  void      setExplicitMtsIntraEnabled(bool b) { m_explicitMtsIntra = b; }
+  void      setExplicitMtsInterEnabled(bool b) { m_explicitMtsInter = b; }
+  void      setImplicitMtsIntraEnabled(bool b) { m_implicitMtsIntra = b; }
   void      setUseSBT                       ( bool b )       { m_SBT = b; }
   bool      getUseSBT                       ()         const { return m_SBT; }
 

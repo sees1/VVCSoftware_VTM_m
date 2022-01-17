@@ -1543,9 +1543,9 @@ private:
   bool              m_LMChroma;
   bool              m_horCollocatedChromaFlag;
   bool              m_verCollocatedChromaFlag;
-  bool              m_MTS;
-  bool              m_IntraMTS;                   // 18
-  bool              m_InterMTS;                   // 19
+  bool              m_mtsEnabled{ false };
+  bool              m_explicitMtsIntra{ false };
+  bool              m_explicitMtsInter{ false };
   bool              m_LFNST;
   bool              m_SMVD;
   bool              m_Affine;
@@ -1897,13 +1897,13 @@ void                    setCCALFEnabledFlag( bool b )                           
   void      setVerCollocatedChromaFlag( bool b )                                    { m_verCollocatedChromaFlag = b;    }
   bool      getVerCollocatedChromaFlag()                                  const     { return m_verCollocatedChromaFlag; }
   bool      getCclmCollocatedChromaFlag()                                 const     { return m_verCollocatedChromaFlag; }
-  void      setUseMTS             ( bool b )                                        { m_MTS = b; }
-  bool      getUseMTS             ()                                      const     { return m_MTS; }
-  bool      getUseImplicitMTS     ()                                      const     { return m_MTS && !m_IntraMTS; }
-  void      setUseIntraMTS        ( bool b )                                        { m_IntraMTS = b; }
-  bool      getUseIntraMTS        ()                                      const     { return m_IntraMTS; }
-  void      setUseInterMTS        ( bool b )                                        { m_InterMTS = b; }
-  bool      getUseInterMTS        ()                                      const     { return m_InterMTS; }
+  void      setMtsEnabled(bool b) { m_mtsEnabled = b; }
+  bool      getMtsEnabled() const { return m_mtsEnabled; }
+  bool      getImplicitMTSIntraEnabled() const { return m_mtsEnabled && !m_explicitMtsIntra; }
+  void      setExplicitMtsIntraEnabled(bool b) { m_explicitMtsIntra = b; }
+  bool      getExplicitMtsIntraEnabled() const { return m_explicitMtsIntra; }
+  void      setExplicitMtsInterEnabled(bool b) { m_explicitMtsInter = b; }
+  bool      getExplicitMtsInterEnabled() const { return m_explicitMtsInter; }
   void      setUseLFNST           ( bool b )                                        { m_LFNST = b; }
   bool      getUseLFNST           ()                                      const     { return m_LFNST; }
   void      setUseSMVD(bool b)                                                      { m_SMVD = b; }

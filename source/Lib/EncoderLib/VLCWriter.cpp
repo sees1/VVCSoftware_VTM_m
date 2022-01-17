@@ -969,11 +969,11 @@ void HLSWriter::codeSPS( const SPS* pcSPS )
   {
     CHECK(pcSPS->getBDPCMEnabledFlag(), "BDPCM cannot be used when transform skip is disabled");
   }
-  WRITE_FLAG(pcSPS->getUseMTS() ? 1 : 0, "sps_mts_enabled_flag");
-  if (pcSPS->getUseMTS())
+  WRITE_FLAG(pcSPS->getMtsEnabled() ? 1 : 0, "sps_mts_enabled_flag");
+  if (pcSPS->getMtsEnabled())
   {
-    WRITE_FLAG(pcSPS->getUseIntraMTS() ? 1 : 0, "sps_explicit_mts_intra_enabled_flag");
-    WRITE_FLAG(pcSPS->getUseInterMTS() ? 1 : 0, "sps_explicit_mts_inter_enabled_flag");
+    WRITE_FLAG(pcSPS->getExplicitMtsIntraEnabled() ? 1 : 0, "sps_explicit_mts_intra_enabled_flag");
+    WRITE_FLAG(pcSPS->getExplicitMtsInterEnabled() ? 1 : 0, "sps_explicit_mts_inter_enabled_flag");
   }
   WRITE_FLAG(pcSPS->getUseLFNST() ? 1 : 0, "sps_lfnst_enabled_flag");
 

@@ -640,7 +640,8 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   }
 #endif
 
-  if( partitioner.currQtDepth == 0 && partitioner.currMtDepth == 0 && !tempCS->slice->isIntra() && ( sps.getUseSBT() || sps.getUseInterMTS() ) )
+  if (partitioner.currQtDepth == 0 && partitioner.currMtDepth == 0 && !tempCS->slice->isIntra()
+      && (sps.getUseSBT() || sps.getExplicitMtsInterEnabled()))
   {
     auto slsSbt = dynamic_cast<SaveLoadEncInfoSbt*>( m_modeCtrl );
     int maxSLSize = sps.getUseSBT() ? tempCS->slice->getSPS()->getMaxTbSize() : MTS_INTER_MAX_CU_SIZE;
@@ -1471,7 +1472,11 @@ bool EncCu::xCheckRDCostIntra(CodingStructure *&tempCS, CodingStructure *&bestCS
   bool            skipSecondMtsPass         = m_modeCtrl->getSkipSecondMTSPass();
   const SPS&      sps                       = *tempCS->sps;
   const int       maxSizeMTS                = MTS_INTRA_MAX_CU_SIZE;
-  uint8_t         considerMtsSecondPass     = ( sps.getUseIntraMTS() && isLuma( partitioner.chType ) && partitioner.currArea().lwidth() <= maxSizeMTS && partitioner.currArea().lheight() <= maxSizeMTS ) ? 1 : 0;
+  uint8_t         considerMtsSecondPass =
+    (sps.getExplicitMtsIntraEnabled() && isLuma(partitioner.chType) && partitioner.currArea().lwidth() <= maxSizeMTS
+     && partitioner.currArea().lheight() <= maxSizeMTS)
+              ? 1
+              : 0;
 
   bool   useIntraSubPartitions   = false;
   double maxCostAllowedForChroma = MAX_DOUBLE;
@@ -4801,7 +4806,9 @@ void EncCu::xEncodeInterResidual(   CodingStructure *&tempCS
       }
     }
   }
-  const bool mtsAllowed = tempCS->sps->getUseInterMTS() && CU::isInter( *cu ) && partitioner.currArea().lwidth() <= MTS_INTER_MAX_CU_SIZE && partitioner.currArea().lheight() <= MTS_INTER_MAX_CU_SIZE;
+  const bool mtsAllowed = tempCS->sps->getExplicitMtsInterEnabled() && CU::isInter(*cu)
+                          && partitioner.currArea().lwidth() <= MTS_INTER_MAX_CU_SIZE
+                          && partitioner.currArea().lheight() <= MTS_INTER_MAX_CU_SIZE;
   uint8_t sbtAllowed = cu->checkAllowedSbt();
   //SBT resolution-dependent fast algorithm: not try size-64 SBT in RDO for low-resolution sequences (now resolution below HD)
   if( tempCS->pps->getPicWidthInLumaSamples() < (uint32_t)m_pcEncCfg->getSBTFast64WidthTh() )
