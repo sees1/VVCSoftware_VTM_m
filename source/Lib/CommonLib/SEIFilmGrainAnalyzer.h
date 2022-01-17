@@ -101,7 +101,6 @@ private:
   static const int  m_gauss5x5[5][5];                         // Gauss 5x5 kernel, integer approximation
 
   unsigned int      m_convWidthS = 3, m_convHeightS = 3;		  // Pixel's row and col positions for Sobel filtering
-  double            m_sigma      = 1.0;                       // Gaussian filter sigma
 
   double            m_lowThresholdRatio   = 0.1;               // low threshold rato
   int               m_highThresholdRatio  = 3;                 // high threshold rato
