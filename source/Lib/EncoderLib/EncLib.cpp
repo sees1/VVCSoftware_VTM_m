@@ -1232,9 +1232,9 @@ void EncLib::xInitSPS( SPS& sps )
   sps.setUseLMChroma           ( m_LMChroma ? true : false );
   sps.setHorCollocatedChromaFlag( m_horCollocatedChromaFlag );
   sps.setVerCollocatedChromaFlag( m_verCollocatedChromaFlag );
-  sps.setUseMTS                ( m_IntraMTS || m_InterMTS || m_ImplicitMTS );
-  sps.setUseIntraMTS           ( m_IntraMTS );
-  sps.setUseInterMTS           ( m_InterMTS );
+  sps.setMtsEnabled(m_explicitMtsIntra || m_explicitMtsInter || m_implicitMtsIntra);
+  sps.setExplicitMtsIntraEnabled(m_explicitMtsIntra);
+  sps.setExplicitMtsInterEnabled(m_explicitMtsInter);
   sps.setUseSBT                             ( m_SBT );
   sps.setUseSMVD                ( m_SMVD );
   sps.setUseBcw                ( m_bcw );

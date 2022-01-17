@@ -1557,7 +1557,9 @@ namespace DQIntern
     bool zeroOut = false;
     bool zeroOutforThres = false;
     int effWidth = tuPars.m_width, effHeight = tuPars.m_height;
-    if( ( tu.mtsIdx[compID] > MTS_SKIP || (tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tuPars.m_height <= 32 && tuPars.m_width <= 32)) && compID == COMPONENT_Y)
+    if ((tu.mtsIdx[compID] > MTS_SKIP
+         || (tu.cs->sps->getMtsEnabled() && tu.cu->sbtInfo != 0 && tuPars.m_height <= 32 && tuPars.m_width <= 32))
+        && compID == COMPONENT_Y)
     {
       effHeight = (tuPars.m_height == 32) ? 16 : tuPars.m_height;
       effWidth = (tuPars.m_width == 32) ? 16 : tuPars.m_width;

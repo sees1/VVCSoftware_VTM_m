@@ -621,8 +621,11 @@ std::vector<int> TrQuant::selectICTCandidates( const TransformUnit &tu, CompStor
 
 void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &trTypeHor, int &trTypeVer)
 {
-  const bool isExplicitMTS = (CU::isIntra(*tu.cu) ? tu.cs->sps->getUseIntraMTS() : tu.cs->sps->getUseInterMTS() && CU::isInter(*tu.cu)) && isLuma(compID);
-  const bool isImplicitMTS = CU::isIntra(*tu.cu) && tu.cs->sps->getUseImplicitMTS() && isLuma(compID) && tu.cu->lfnstIdx == 0 && tu.cu->mipFlag == 0;
+  const bool isExplicitMTS = (CU::isIntra(*tu.cu) ? tu.cs->sps->getExplicitMtsIntraEnabled()
+                                                  : tu.cs->sps->getExplicitMtsInterEnabled() && CU::isInter(*tu.cu))
+                             && isLuma(compID);
+  const bool isImplicitMTS = CU::isIntra(*tu.cu) && tu.cs->sps->getImplicitMTSIntraEnabled() && isLuma(compID)
+                             && tu.cu->lfnstIdx == 0 && tu.cu->mipFlag == 0;
   const bool isISP = CU::isIntra(*tu.cu) && tu.cu->ispMode && isLuma(compID);
   const bool isSBT = CU::isInter(*tu.cu) && tu.cu->sbtInfo && isLuma(compID);
 
@@ -634,7 +637,7 @@ void TrQuant::getTrTypes(const TransformUnit tu, const ComponentID compID, int &
     return;
   }
 
-  if (!tu.cs->sps->getUseMTS())
+  if (!tu.cs->sps->getMtsEnabled())
   {
     return;
   }

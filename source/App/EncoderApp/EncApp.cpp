@@ -371,7 +371,8 @@ void EncApp::xInitLibCfg()
     CHECK(m_noCclmConstraintFlag && m_LMChroma, "CCLM shall be deactivated when m_bNoCclmConstraintFlag is equal to 1");
 
     m_cEncLib.setNoMtsConstraintFlag(m_noMtsConstraintFlag);
-    CHECK(m_noMtsConstraintFlag && (m_MTS || m_MTSImplicit), "MTS shall be deactivated when m_bNoMtsConstraintFlag is equal to 1");
+    CHECK(m_noMtsConstraintFlag && (m_mtsMode || m_mtsImplicitIntra),
+          "MTS shall be deactivated when m_bNoMtsConstraintFlag is equal to 1");
 
     m_cEncLib.setNoSbtConstraintFlag(m_noSbtConstraintFlag);
     CHECK(m_noSbtConstraintFlag && m_SBT, "SBT shall be deactivated when mm_noSbtConstraintFlag_nonPackedConstraintFlag is equal to 1");
@@ -732,11 +733,11 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseLMChroma                                       ( m_LMChroma );
   m_cEncLib.setHorCollocatedChromaFlag                           ( m_horCollocatedChromaFlag );
   m_cEncLib.setVerCollocatedChromaFlag                           ( m_verCollocatedChromaFlag );
-  m_cEncLib.setIntraMTS                                          ( m_MTS & 1 );
-  m_cEncLib.setInterMTS                                          ( ( m_MTS >> 1 ) & 1 );
+  m_cEncLib.setExplicitMtsIntraEnabled((m_mtsMode & 1) != 0);
+  m_cEncLib.setExplicitMtsInterEnabled((m_mtsMode & 2) != 0);
   m_cEncLib.setMTSIntraMaxCand                                   ( m_MTSIntraMaxCand );
   m_cEncLib.setMTSInterMaxCand                                   ( m_MTSInterMaxCand );
-  m_cEncLib.setImplicitMTS                                       ( m_MTSImplicit );
+  m_cEncLib.setImplicitMtsIntraEnabled(m_mtsImplicitIntra || (m_mtsMode & 4) != 0);
   m_cEncLib.setUseSBT                                            ( m_SBT );
   m_cEncLib.setSBTFast64WidthTh                                  ( m_SBTFast64WidthTh );
   m_cEncLib.setUseCompositeRef                                   ( m_compositeRefEnabled );

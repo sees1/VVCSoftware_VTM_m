@@ -352,10 +352,12 @@ protected:
   int       m_LMChroma;
   bool      m_horCollocatedChromaFlag;
   bool      m_verCollocatedChromaFlag;
-  int       m_MTS;                                            ///< XZ: Multiple Transform Set
+
+  int       m_mtsMode;                                        ///< XZ: Multiple Transform Set
   int       m_MTSIntraMaxCand;                                ///< XZ: Number of additional candidates to test
   int       m_MTSInterMaxCand;                                ///< XZ: Number of additional candidates to test
-  int       m_MTSImplicit;
+  int       m_mtsImplicitIntra;
+
   bool      m_SBT;                                            ///< Sub-Block Transform for inter blocks
   int       m_SBTFast64WidthTh;
   bool      m_SMVD;

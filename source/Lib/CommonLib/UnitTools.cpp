@@ -4826,7 +4826,8 @@ bool CU::isMTSAllowed(const CodingUnit &cu, const ComponentID compID)
   const int cuHeight = cu.blocks[0].lumaSize().height;
   bool mtsAllowed    = cu.chType == CHANNEL_TYPE_LUMA && compID == COMPONENT_Y;
 
-  mtsAllowed &= CU::isIntra( cu ) ? cu.cs->sps->getUseIntraMTS() : cu.cs->sps->getUseInterMTS() && CU::isInter( cu );
+  mtsAllowed &= CU::isIntra(cu) ? cu.cs->sps->getExplicitMtsIntraEnabled()
+                                : cu.cs->sps->getExplicitMtsInterEnabled() && CU::isInter(cu);
   mtsAllowed &= cuWidth <= maxSize && cuHeight <= maxSize;
   mtsAllowed &= !cu.ispMode;
   mtsAllowed &= !cu.sbtInfo;

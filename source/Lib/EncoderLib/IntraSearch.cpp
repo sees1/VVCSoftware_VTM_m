@@ -545,7 +545,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
   bool LFNSTLoadFlag = sps.getUseLFNST() && cu.lfnstIdx != 0;
   bool LFNSTSaveFlag = sps.getUseLFNST() && cu.lfnstIdx == 0;
 
-  LFNSTSaveFlag &= sps.getUseIntraMTS() ? cu.mtsFlag == 0 : true;
+  LFNSTSaveFlag &= sps.getExplicitMtsIntraEnabled() ? cu.mtsFlag == 0 : true;
 
   const uint32_t lfnstIdx = cu.lfnstIdx;
   double costInterCU = findInterCUCost( cu );
@@ -559,7 +559,7 @@ bool IntraSearch::estIntraPredLumaQT(CodingUnit &cu, Partitioner &partitioner, c
   // 2: MTS is being checked for current CU. Stored results of DCT2 can be utilized for speedup
   uint8_t mtsUsageFlag = 0;
   const int maxSizeEMT = MTS_INTRA_MAX_CU_SIZE;
-  if( width <= maxSizeEMT && height <= maxSizeEMT && sps.getUseIntraMTS() )
+  if (width <= maxSizeEMT && height <= maxSizeEMT && sps.getExplicitMtsIntraEnabled())
   {
     mtsUsageFlag = ( sps.getUseLFNST() && cu.mtsFlag == 1 ) ? 2 : 1;
   }

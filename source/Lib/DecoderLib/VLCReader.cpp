@@ -1677,11 +1677,14 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     pcSPS->setLog2MaxTransformSkipBlockSize(uiCode + 2);
     READ_FLAG(uiCode, "sps_bdpcm_enabled_flag"); pcSPS->setBDPCMEnabledFlag(uiCode ? true : false);
   }
-  READ_FLAG(uiCode, "sps_mts_enabled_flag");                       pcSPS->setUseMTS(uiCode != 0);
-  if (pcSPS->getUseMTS())
+  READ_FLAG(uiCode, "sps_mts_enabled_flag");
+  pcSPS->setMtsEnabled(uiCode != 0);
+  if (pcSPS->getMtsEnabled())
   {
-    READ_FLAG(uiCode, "sps_explicit_mts_intra_enabled_flag");               pcSPS->setUseIntraMTS(uiCode != 0);
-    READ_FLAG(uiCode, "sps_explicit_mts_inter_enabled_flag");               pcSPS->setUseInterMTS(uiCode != 0);
+    READ_FLAG(uiCode, "sps_explicit_mts_intra_enabled_flag");
+    pcSPS->setExplicitMtsIntraEnabled(uiCode != 0);
+    READ_FLAG(uiCode, "sps_explicit_mts_inter_enabled_flag");
+    pcSPS->setExplicitMtsInterEnabled(uiCode != 0);
   }
   READ_FLAG(uiCode, "sps_lfnst_enabled_flag");                    pcSPS->setUseLFNST(uiCode != 0);
 

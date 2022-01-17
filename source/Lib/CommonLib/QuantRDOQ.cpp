@@ -982,8 +982,8 @@ void QuantRDOQ::xRateDistOptQuant(TransformUnit &tu, const ComponentID &compID, 
 
   unsigned zoTbWdith  = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.width());
   unsigned zoTbHeight = std::min<unsigned>(JVET_C0024_ZERO_OUT_TH, cctx.height());
-  if (tu.cs->sps->getUseMTS() && tu.cu->sbtInfo != 0 && tu.blocks[compID].width <= 32 && tu.blocks[compID].height <= 32
-      && compID == COMPONENT_Y)
+  if (tu.cs->sps->getMtsEnabled() && tu.cu->sbtInfo != 0 && tu.blocks[compID].width <= 32
+      && tu.blocks[compID].height <= 32 && compID == COMPONENT_Y)
   {
     zoTbWdith  = (tu.blocks[compID].width == 32) ? 16 : zoTbWdith;
     zoTbHeight = (tu.blocks[compID].height == 32) ? 16 : zoTbHeight;
