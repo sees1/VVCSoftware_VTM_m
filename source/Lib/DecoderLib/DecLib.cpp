@@ -3284,8 +3284,8 @@ void DecLib::xDecodeSPS( InputNALUnit& nalu )
   m_HLSReader.parseSPS( sps );
   sps->setLayerId( nalu.m_nuhLayerId );
   DTRACE( g_trace_ctx, D_QP_PER_CTU, "CTU Size: %dx%d", sps->getMaxCUWidth(), sps->getMaxCUHeight() );
-  m_parameterSetManager.storeSPS( sps, nalu.getBitstream().getFifo() );
   m_accessUnitSpsNumSubpic[nalu.m_nuhLayerId] = sps->getNumSubPics();
+  m_parameterSetManager.storeSPS( sps, nalu.getBitstream().getFifo() );
 }
 
 void DecLib::xDecodePPS( InputNALUnit& nalu )
