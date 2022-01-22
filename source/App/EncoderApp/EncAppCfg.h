@@ -840,6 +840,7 @@ protected:
   bool        m_rprRASLtoolSwitch;
   bool        m_avoidIntraInDepLayer;
 
+  bool                  m_gopBasedTemporalFilterEnabled;
   int                   m_gopBasedTemporalFilterPastRefs;
   int                   m_gopBasedTemporalFilterFutureRefs;
   std::map<int, double> m_gopBasedTemporalFilterStrengths;             ///< Filter strength per frame for the GOP-based Temporal Filter

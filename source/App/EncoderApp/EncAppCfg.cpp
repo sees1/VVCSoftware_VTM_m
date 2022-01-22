@@ -81,6 +81,8 @@ enum ExtendedProfileName   // this is used for determining profile strings, wher
   AUTO = -1
 };
 
+constexpr int TF_DEFAULT_REFS = 4;
+
 //! \ingroup EncoderApp
 //! \{
 
@@ -1608,8 +1610,9 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     ;
 
   opts.addOptions()
-    ("TemporalFilterPastRefs",       m_gopBasedTemporalFilterPastRefs,                        0, "Number of past references for temporal prefilter")
-    ("TemporalFilterFutureRefs",     m_gopBasedTemporalFilterFutureRefs,                      0, "Number of future references for temporal prefilter")
+    ("TemporalFilter",               m_gopBasedTemporalFilterEnabled,                     false, "Enable GOP based temporal filter. Disabled per default")
+    ("TemporalFilterPastRefs",       m_gopBasedTemporalFilterPastRefs,          TF_DEFAULT_REFS, "Number of past references for temporal prefilter")
+    ("TemporalFilterFutureRefs",     m_gopBasedTemporalFilterFutureRefs,        TF_DEFAULT_REFS, "Number of future references for temporal prefilter")
     ("FirstValidFrame",              m_firstValidFrame,                                       0, "First valid frame")
     ("LastValidFrame",               m_lastValidFrame,                                  MAX_INT, "Last valid frame")
     ("TemporalFilterStrengthFrame*", m_gopBasedTemporalFilterStrengths, std::map<int, double>(), "Strength for every * frame in GOP based temporal filter, where * is an integer."
@@ -4366,9 +4369,18 @@ bool EncAppCfg::xCheckParameter()
   xConfirmPara( m_decodeBitstreams[0] == m_bitstreamFileName, "Debug bitstream and the output bitstream cannot be equal.\n" );
   xConfirmPara( m_decodeBitstreams[1] == m_bitstreamFileName, "Decode2 bitstream and the output bitstream cannot be equal.\n" );
   xConfirmPara(unsigned(m_LMChroma) > 1, "LMMode exceeds range (0 to 1)");
-  if (m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     xConfirmPara(m_temporalSubsampleRatio != 1, "GOP Based Temporal Filter only support Temporal sub-sample ratio 1");
+    xConfirmPara(
+      m_gopBasedTemporalFilterPastRefs <= 0 && m_gopBasedTemporalFilterFutureRefs <= 0,
+      "Either TemporalFilterPastRefs or TemporalFilterFutureRefs must be larger than 0 when TemporalFilter is enabled");
+
+    if ((m_gopBasedTemporalFilterPastRefs != 0 && m_gopBasedTemporalFilterPastRefs != TF_DEFAULT_REFS)
+        || (m_gopBasedTemporalFilterFutureRefs != 0 && m_gopBasedTemporalFilterFutureRefs != TF_DEFAULT_REFS))
+    {
+      msg(WARNING, "Number of frames used for temporal prefilter is different from default.\n");
+    }
   }
 #if EXTENSION_360_VIDEO
   check_failed |= m_ext360.verifyParameters();

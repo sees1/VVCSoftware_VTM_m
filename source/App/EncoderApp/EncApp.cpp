@@ -1235,7 +1235,7 @@ void EncApp::xInitLibCfg()
     }
   }
 
-  m_cEncLib.setGopBasedTemporalFilterRefs(m_gopBasedTemporalFilterPastRefs, m_gopBasedTemporalFilterFutureRefs);
+  m_cEncLib.setGopBasedTemporalFilterEnabled(m_gopBasedTemporalFilterEnabled);
   m_cEncLib.setNumRefLayers                                       ( m_numRefLayers );
 
   m_cEncLib.setVPSParameters(m_cfgVPSParameters);
@@ -1318,7 +1318,7 @@ void EncApp::createLib( const int layerIdx )
   m_trueOrgPic = new PelStorage;
   m_orgPic->create( unitArea );
   m_trueOrgPic->create( unitArea );
-  if (m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     m_filteredOrgPic = new PelStorage;
     m_filteredOrgPic->create( unitArea );
@@ -1350,7 +1350,7 @@ void EncApp::createLib( const int layerIdx )
   m_ext360 = new TExt360AppEncTop( *this, m_cEncLib.getGOPEncoder()->getExt360Data(), *( m_cEncLib.getGOPEncoder() ), *m_orgPic );
 #endif
 
-  if (m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     m_temporalFilter.init(m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth,
                           sourceHeight, m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName,
@@ -1403,7 +1403,7 @@ void EncApp::destroyLib()
   m_trueOrgPic->destroy();
   delete m_trueOrgPic;
   delete m_orgPic;
-  if (m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     m_filteredOrgPic->destroy();
     delete m_filteredOrgPic;
@@ -1445,7 +1445,7 @@ bool EncApp::encodePrep( bool& eos )
   {
     m_filteredOrgPicForFG->copyFrom(*m_orgPic);
   }
-  if (m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     m_temporalFilter.filter(m_orgPic, m_iFrameRcvd);
     m_filteredOrgPic->copyFrom(*m_orgPic);

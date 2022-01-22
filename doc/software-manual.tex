@@ -937,16 +937,21 @@ Picture output options: output upscaled (2), decoded but in full resolution buff
 
 \begin{OptionTableNoShorthand}{GOP based temporal filter parameters}{tab:gop-based-temporal-filter}
 
-\Option{TemporalFilterPastRefs} &
+\Option{TemporalFilter} &
 %\ShortOption{\None} &
 \Default{0} &
-Number of past frames used by the temporal filter. If TemporalFilterPastRefs and TemporalFilterFutureRefs are 0, the filter is
-disabled.
+Enable motion-compensated temporal pre-filter. When enabled, at least one of TemporalFilterPastRefs and TemporalFilterFutureRefs
+must be larger than 0.
+\\
+\Option{TemporalFilterPastRefs} &
+%\ShortOption{\None} &
+\Default{4} &
+Number of past frames used by the temporal filter.
 \\
 \Option{TemporalFilterFutureRefs} &
 %\ShortOption{\None} &
-\Default{0} &
-Number of future frames used by the temporal filter.
+\Default{4} &
+Number of future frames used by the temporal filter. This may be set to 0 to avoid using future frames.
 \\
 \Option{FirstValidFrame} &
 %\ShortOption{\None} &

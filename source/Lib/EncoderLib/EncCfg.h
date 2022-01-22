@@ -527,8 +527,7 @@ protected:
   bool      m_bFastUDIUseMPMEnabled;
   bool      m_bFastMEForGenBLowDelayEnabled;
   bool      m_bUseBLambdaForNonKeyLowDelayPictures;
-  int       m_gopBasedTemporalFilterPastRefs;
-  int       m_gopBasedTemporalFilterFutureRefs;
+  bool      m_gopBasedTemporalFilterEnabled;
   bool      m_noPicPartitionFlag;                             ///< no picture partitioning flag (single tile, single slice)
   bool      m_mixedLossyLossless;                             ///< enable mixed lossy/lossless coding
 
@@ -1587,15 +1586,8 @@ public:
   bool      getFastMEForGenBLowDelayEnabled ()      { return m_bFastMEForGenBLowDelayEnabled; }
   bool      getUseBLambdaForNonKeyLowDelayPictures () { return m_bUseBLambdaForNonKeyLowDelayPictures; }
 
-  void setGopBasedTemporalFilterRefs(const int pastRefs, const int futureRefs)
-  {
-    m_gopBasedTemporalFilterPastRefs   = pastRefs;
-    m_gopBasedTemporalFilterFutureRefs = futureRefs;
-  }
-  bool getGopBasedTemporalFilterEnabled() const
-  {
-    return m_gopBasedTemporalFilterPastRefs != 0 || m_gopBasedTemporalFilterFutureRefs != 0;
-  }
+  void setGopBasedTemporalFilterEnabled(const bool b) { m_gopBasedTemporalFilterEnabled = b; }
+  bool getGopBasedTemporalFilterEnabled() const { return m_gopBasedTemporalFilterEnabled; }
 
   bool      getUseReconBasedCrossCPredictionEstimate ()                const { return m_reconBasedCrossCPredictionEstimate;  }
   void      setUseReconBasedCrossCPredictionEstimate (const bool value)      { m_reconBasedCrossCPredictionEstimate = value; }
