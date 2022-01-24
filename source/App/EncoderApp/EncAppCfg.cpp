@@ -1726,6 +1726,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   {
     m_iDecodingRefreshType = 3;
     m_intraQPOffset = 0;
+    for (int i = 1; i < m_iGOPSize; i++)
+    {
+      m_GOPList[i].m_POC = -1;
+    }
     m_iGOPSize = 1;
 
     int8_t sliceType = m_GOPList[0].m_sliceType;
