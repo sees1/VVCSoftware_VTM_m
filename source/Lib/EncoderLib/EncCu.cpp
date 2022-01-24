@@ -565,12 +565,13 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
     {
       int gdrPocStart = m_pcEncCfg->getGdrPocStart();
       int gdrInterval = m_pcEncCfg->getGdrInterval();
+      int gdrPeriod = m_pcEncCfg->getGdrPeriod();
 
       int picWidth = slice.getPPS()->getPicWidthInLumaSamples();
       int m1, m2, n1;
 
       int curPoc = slice.getPOC();
-      int gdrPoc = (curPoc - gdrPocStart) % gdrInterval;
+      int gdrPoc = (curPoc - gdrPocStart) % gdrPeriod;
 
       int begGdrX = 0;
       int endGdrX = 0;
