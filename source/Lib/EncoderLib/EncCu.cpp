@@ -3654,7 +3654,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
     cu.geoFlag = false;
     PU::getIBCMergeCandidates(pu, mergeCtx);
 #if GDR_ENABLED
-    gdrClean = tempCS->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA) || tempCS->picHeader->getNumVerVirtualBoundaries() == 0;
+    gdrClean = tempCS->isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA);
 #endif
   }
 #if GDR_ENABLED
