@@ -3151,7 +3151,7 @@ bool PU::isBipredRestriction(const PredictionUnit &pu)
   return false;
 }
 
-void PU::getAffineControlPointCand(const PredictionUnit &pu, MotionInfo mi[4], bool isAvailable[4], int verIdx[4], int8_t bcwIdx, int modelIdx, int verNum, AffineMergeCtx& affMrgType)
+void PU::getAffineControlPointCand(const PredictionUnit &pu, MotionInfo mi[4], bool isAvailable[4], int verIdx[4], int8_t bcwIdx, int modelIdx, int verNum, AffineMergeCtx& affMrgType, bool isEncodeGdrClean, bool modelSolid[6])
 {
   int cuW = pu.Y().width;
   int cuH = pu.Y().height;
@@ -3279,6 +3279,11 @@ void PU::getAffineControlPointCand(const PredictionUnit &pu, MotionInfo mi[4], b
 
     affMrgType.mvFieldNeighbours[(affMrgType.numValidMergeCand << 1) + 1][i].mv = cMv[1][i];
     affMrgType.mvFieldNeighbours[(affMrgType.numValidMergeCand << 1) + 1][i].refIdx = refIdx[1];
+    if (isEncodeGdrClean)
+    {
+      affMrgType.mvSolid[(affMrgType.numValidMergeCand << 1) + 0][i] = modelSolid[modelIdx];
+      affMrgType.mvSolid[(affMrgType.numValidMergeCand << 1) + 1][i] = modelSolid[modelIdx];
+    }
   }
   affMrgType.interDirNeighbours[affMrgType.numValidMergeCand] = dir;
   affMrgType.affineType[affMrgType.numValidMergeCand] = curType;
@@ -3726,20 +3731,7 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
       for ( int idx = startIdx; idx < modelNum; idx++ )
       {
         int modelIdx = order[idx];
-#if GDR_ENABLED
-        int affinNumValidCand = affMrgCtx.numValidMergeCand;
-#endif
-        getAffineControlPointCand(pu, mi, isAvailable, model[modelIdx], ((modelIdx == 3) ? neighBcw[1] : neighBcw[0]), modelIdx, verNum[modelIdx], affMrgCtx);
-#if GDR_ENABLED
-        if (isEncodeGdrClean)
-        {
-          for (int i = 0; i < 3; i++)
-          {
-            affMrgCtx.mvSolid[(affinNumValidCand << 1) + 0][i] = modelSolid[modelIdx];
-            affMrgCtx.mvSolid[(affinNumValidCand << 1) + 1][i] = modelSolid[modelIdx];
-          }
-        }
-#endif
+        getAffineControlPointCand(pu, mi, isAvailable, model[modelIdx], ((modelIdx == 3) ? neighBcw[1] : neighBcw[0]), modelIdx, verNum[modelIdx], affMrgCtx, isEncodeGdrClean, modelSolid);
         if ( affMrgCtx.numValidMergeCand != 0 && affMrgCtx.numValidMergeCand - 1 == mrgCandIdx )
         {
           return;
