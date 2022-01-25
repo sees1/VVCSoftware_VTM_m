@@ -1612,10 +1612,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
   ("AlfTrueOrg",                                      m_alfTrueOrg,                              true, "Using true original samples for ALF optimization when MCTF is enabled\n")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
-#if JVET_X0143_ALF_APS_CHANGES
   ("MaxNumALFAPS",                                    m_maxNumAlfAps,                           8, "Maximum number of ALF APSs" )
   ("ConstantJointCbCrSignFlag",                       m_constantJointCbCrSignFlag,              0, "Constant JointCbCr sign flag" )
-#endif
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")
   ("CCALFStrength",                                    m_ccalfStrength,                           1.0, "Cross-component Adaptive Loop Filter strength. The parameter scales the magnitudes of the CCALF filter coefficients. Valid range is 0.0 <= CCALFStrength <= 1.0")
@@ -3167,9 +3165,7 @@ bool EncAppCfg::xCheckParameter()
   bool check_failed = false; /* abort if there is a fatal configuration problem */
 #define xConfirmPara(a,b) check_failed |= confirmPara(a,b)
 
-#if JVET_X0143_ALF_APS_CHANGES
   xConfirmPara(m_maxNumAlfAps > ALF_CTB_MAX_NUM_APS, "The number of ALF APSs should not be more than ALF_CTB_MAX_NUM_APS");
-#endif
 
   if( m_depQuantEnabledFlag )
   {
@@ -3525,12 +3521,10 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara( m_ccalf, "CCALF cannot be enabled when ALF is disabled" );
   }
 
-#if JVET_X0143_ALF_APS_CHANGES
   if (m_maxNumAlfAps == 0) 
   {
     xConfirmPara(m_ccalf, "CCALF cannot be enabled when ALF APS is disabled");
   }
-#endif
 
   xConfirmPara( m_sourceWidth  % SPS::getWinUnitX(m_chromaFormatIDC) != 0, "Picture width must be an integer multiple of the specified chroma subsampling");
   xConfirmPara( m_sourceHeight % SPS::getWinUnitY(m_chromaFormatIDC) != 0, "Picture height must be an integer multiple of the specified chroma subsampling");
@@ -4657,10 +4651,8 @@ void EncAppCfg::xPrintParameter()
   msg( VERBOSE, "SAO:%d ", (m_bUseSAO)?(1):(0));
   msg( VERBOSE, "ALF:%d ", m_alf ? 1 : 0 );
   msg( VERBOSE, "CCALF:%d ", m_ccalf ? 1 : 0 );
-#if JVET_X0143_ALF_APS_CHANGES
   msg(VERBOSE, "MaxNumALFAPS", m_maxNumAlfAps);
   msg(VERBOSE, "ConstantJointCbCrSignFlag", m_constantJointCbCrSignFlag);
-#endif
   msg( VERBOSE, "WPP:%d ", (int)m_useWeightedPred);
   msg( VERBOSE, "WPB:%d ", (int)m_useWeightedBiPred);
   msg( VERBOSE, "PME:%d ", m_log2ParallelMergeLevel);

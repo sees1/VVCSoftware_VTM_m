@@ -3161,11 +3161,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     }
     if (pcSlice->getSPS()->getJointCbCrEnabledFlag())
     {
-#if JVET_X0143_ALF_APS_CHANGES
       if (m_pcCfg->getConstantJointCbCrSignFlag()) 
         pcPic->cs->picHeader->setJointCbCrSignFlag(m_pcCfg->getConstantJointCbCrSignFlag()-1);
       else
-#endif
         m_pcSliceEncoder->setJointCbCrModes(*pcPic->cs, Position(0, 0), pcPic->cs->area.lumaSize());
     }
     if (!pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag() || pcSlice->getSliceQp() > 12)
@@ -3566,20 +3564,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             // Get active ALF APSs from picture/slice header
             const std::vector<int> sliceApsIdsLuma = pcSlice->getAlfApsIdsLuma();
 
-#if JVET_X0143_ALF_APS_CHANGES
             m_pcALF->setApsIdStart(m_pcCfg->getMaxNumALFAPS());
-#else
-            m_pcALF->setApsIdStart( ALF_CTB_MAX_NUM_APS );
-#endif
 
             ParameterSetMap<APS>* apsMap = m_pcEncLib->getApsMap();
             apsMap->clearActive();
 
-#if JVET_X0143_ALF_APS_CHANGES
            for (int apsId = 0; apsId < m_pcCfg->getMaxNumALFAPS(); apsId++)
-#else
-           for( int apsId = 0; apsId < ALF_CTB_MAX_NUM_APS; apsId++ )
-#endif
            {
               int psId = ( apsId << NUM_APS_TYPE_LEN ) + ALF_APS;
               APS* aps = apsMap->getPS( psId );
@@ -3621,11 +3611,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
         // Assign tne correct APS to slice and emulate the setting of ALF start APS ID
         int changedApsId = -1;
-#if JVET_X0143_ALF_APS_CHANGES
         for (int apsId = m_pcCfg->getMaxNumALFAPS() - 1; apsId >= 0; apsId--)
-#else
-        for (int apsId = ALF_CTB_MAX_NUM_APS - 1; apsId >= 0; apsId--)
-#endif
         {
           ParameterSetMap<APS>* apsMap = m_pcEncLib->getApsMap();
           int psId = ( apsId << NUM_APS_TYPE_LEN ) + ALF_APS;
@@ -3796,11 +3782,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
       if (pcSlice->getSPS()->getALFEnabledFlag() && (pcSlice->getAlfEnabledFlag(COMPONENT_Y) || pcSlice->getCcAlfCbEnabledFlag() || pcSlice->getCcAlfCrEnabledFlag()))
       {
-#if JVET_X0143_ALF_APS_CHANGES
         for (int apsId = 0; apsId < m_pcCfg->getMaxNumALFAPS(); apsId++)
-#else
-        for (int apsId = 0; apsId < ALF_CTB_MAX_NUM_APS; apsId++)
-#endif
         {
           ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
 

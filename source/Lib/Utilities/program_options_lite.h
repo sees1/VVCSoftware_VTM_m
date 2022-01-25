@@ -39,16 +39,13 @@
 #define JVET_O0549_ENCODER_ONLY_FILTER_POL 1 // JVET-O0549: Encoder-only GOP-based temporal filter. Program Options Lite related changes.
 
 #define JVET_X0048_X0103_FILM_GRAIN 1 // JVET-X0048-X0103: SMPTE RDD-5 based film grain analysis and synthesis model for film grain characterstics (FGC) SEI
-#if JVET_X0048_X0103_FILM_GRAIN
 #include <vector>
-#endif
 
 #ifndef __PROGRAM_OPTIONS_LITE__
 #define __PROGRAM_OPTIONS_LITE__
 
 //! \ingroup TAppCommon
 //! \{
-#if JVET_X0048_X0103_FILM_GRAIN
 using namespace std;
 
 template <class T>
@@ -74,7 +71,6 @@ struct SMultiValueInput
 
   istream& readValues(std::istream &in);
 };
-#endif
 
 namespace df
 {

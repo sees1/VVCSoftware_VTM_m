@@ -820,10 +820,8 @@ protected:
   bool        m_bs2ModPOCAndType;
   bool        m_forceDecodeBitstream1;
 
-#if JVET_X0143_ALF_APS_CHANGES
   int         m_maxNumAlfAps;
   int         m_constantJointCbCrSignFlag;
-#endif
   bool        m_alf;                                       ///< Adaptive Loop Filter
   bool        m_alfTrueOrg;
   double      m_alfStrengthLuma;
