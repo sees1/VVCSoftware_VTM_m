@@ -51,7 +51,6 @@
 int main(int argc, char* argv[])
 {
   int returnCode = EXIT_SUCCESS;
-#if JVET_X0048_X0103_FILM_GRAIN
   // print information
   fprintf( stdout, "\n" );
   fprintf( stdout, "VVCSoftware: SEIFilmGrainApp Version %s ", VTM_VERSION );
@@ -112,7 +111,6 @@ int main(int argc, char* argv[])
   printf("\n Total Time: %12.3f sec.\n", dResult);
 
   delete pcSEIApp;
-#endif
   return returnCode;
 }
 

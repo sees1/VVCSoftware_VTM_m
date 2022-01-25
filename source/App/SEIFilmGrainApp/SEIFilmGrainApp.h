@@ -56,7 +56,6 @@
 
 using namespace std;
 
-#if JVET_X0048_X0103_FILM_GRAIN
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
@@ -82,7 +81,6 @@ protected:
   void      setSEIFilmGrainCharacteristics  ( SEIFilmGrainCharacteristics *pFgcParameters );
   void      printSEIFilmGrainCharacteristics( SEIFilmGrainCharacteristics *pFgcParameters );
 };
-#endif
 
 #endif // __SEIFILMGRAINAPP__
 

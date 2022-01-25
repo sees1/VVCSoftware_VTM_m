@@ -410,7 +410,6 @@ uint32_t DecApp::decode()
         }
       }
 
-#if JVET_X0048_X0103_FILM_GRAIN
       if (!m_SEIFGSFileName.empty() && !m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].isOpen())
       {
         const BitDepths &bitDepths = pcListPic->front()->cs->sps->getBitDepths();   // use bit depths of first reconstructed picture.
@@ -457,7 +456,6 @@ uint32_t DecApp::decode()
           m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
         }
       }
-#endif
 
       if (!m_SEICTIFileName.empty() && !m_cVideoIOYuvSEICTIFile[nalu.m_nuhLayerId].isOpen())
       {
@@ -655,7 +653,6 @@ void DecApp::xDestroyDecLib()
       recFile.second.close();
     }
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   if (!m_SEIFGSFileName.empty())
   {
     for (auto &recFile: m_videoIOYuvSEIFGSFile)
@@ -663,7 +660,6 @@ void DecApp::xDestroyDecLib()
       recFile.second.close();
     }
   }
-#endif
   if (!m_SEICTIFileName.empty())
   {
     for (auto& recFile : m_cVideoIOYuvSEICTIFile)
@@ -829,7 +825,6 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
             }
         }
-#if JVET_X0048_X0103_FILM_GRAIN
         // Perform FGS on decoded frame and write to output FGS file
         if (!m_SEIFGSFileName.empty())
         {
@@ -851,7 +846,6 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
                                     NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
           }
         }
-#endif
         // Perform CTI on decoded frame and write to output CTI file
         if (!m_SEICTIFileName.empty())
         {
@@ -1005,7 +999,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                         NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range );
               }
           }
-#if JVET_X0048_X0103_FILM_GRAIN
           // Perform FGS on decoded frame and write to output FGS file
           if (!m_SEIFGSFileName.empty())
           {
@@ -1027,7 +1020,6 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
                                       NUM_CHROMA_FORMAT, m_bClipOutputVideoToRec709Range);
             }
           }
-#endif
           // Perform CTI on decoded frame and write to output CTI file
           if (!m_SEICTIFileName.empty())
           {

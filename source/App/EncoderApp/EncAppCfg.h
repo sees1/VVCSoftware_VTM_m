@@ -542,7 +542,6 @@ protected:
   uint32_t  m_fgcSEIBlendingModeID;
   uint32_t  m_fgcSEILog2ScaleFactor;
   bool      m_fgcSEICompModelPresent[MAX_NUM_COMPONENT];
-#if JVET_X0048_X0103_FILM_GRAIN
   bool      m_fgcSEIAnalysisEnabled;
   bool      m_fgcSEIPerPictureSEI;
   uint32_t  m_fgcSEINumModelValuesMinus1          [MAX_NUM_COMPONENT];
@@ -550,7 +549,6 @@ protected:
   uint32_t  m_fgcSEIIntensityIntervalLowerBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint32_t  m_fgcSEIIntensityIntervalUpperBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint32_t  m_fgcSEICompModelValue                [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES][MAX_NUM_MODEL_VALUES];
-#endif
   // content light level SEI
   bool      m_cllSEIEnabled;
   uint32_t  m_cllSEIMaxContentLevel;

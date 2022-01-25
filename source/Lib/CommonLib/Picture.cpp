@@ -75,18 +75,12 @@ Picture::Picture()
   layerId = NOT_VALID;
   numSlices = 1;
   unscaledPic = nullptr;
-#if JVET_X0048_X0103_FILM_GRAIN
   m_isMctfFiltered      = false;
   m_grainCharacteristic = NULL;
   m_grainBuf            = NULL;
-#endif
 }
 
-#if JVET_X0048_X0103_FILM_GRAIN
 void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId, const bool gopBasedTemporalFilterEnabled, const bool fgcSEIAnalysisEnabled )
-#else
-void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId, const bool gopBasedTemporalFilterEnabled )
-#endif
 {
   layerId = _layerId;
   UnitArea::operator=( UnitArea( _chromaFormat, Area( Position{ 0, 0 }, size ) ) );
@@ -103,12 +97,10 @@ void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const
     {
       M_BUFS( 0, PIC_FILTERED_ORIGINAL ). create( _chromaFormat, a );
     }
-#if JVET_X0048_X0103_FILM_GRAIN
     if ( fgcSEIAnalysisEnabled )
     {
       M_BUFS( 0, PIC_FILTERED_ORIGINAL_FG ).create( _chromaFormat, a );
     }
-#endif
   }
 #if !KEEP_PRED_AND_RESI_SIGNALS
   m_ctuArea = UnitArea( _chromaFormat, Area( Position{ 0, 0 }, Size( _maxCUSize, _maxCUSize ) ) );
@@ -155,9 +147,7 @@ void Picture::destroy()
     m_spliceIdx = NULL;
   }
   m_invColourTransfBuf = NULL;
-#if JVET_X0048_X0103_FILM_GRAIN
   m_grainBuf           = NULL;
-#endif
 }
 
 void Picture::createTempBuffers( const unsigned _maxCUSize )
@@ -1240,7 +1230,6 @@ void Picture::addPictureToHashMapForInter()
   }
 }
 
-#if JVET_X0048_X0103_FILM_GRAIN
 void Picture::createGrainSynthesizer(bool firstPictureInSequence, SEIFilmGrainSynthesizer *grainCharacteristics, PelStorage *grainBuf, int width, int height, ChromaFormat fmt, int bitDepth)
 {
   m_grainCharacteristic = grainCharacteristics;
@@ -1300,7 +1289,6 @@ PelUnitBuf Picture::getDisplayBufFG(bool wrap)
     return M_BUFS(scheduler.getSplitPicId(), wrap ? PIC_RECON_WRAP : PIC_RECONSTRUCTION);
   }
 }
-#endif
 
 void Picture::createColourTransfProcessor(bool firstPictureInSequence, SEIColourTransformApply* ctiCharacteristics, PelStorage* ctiBuf, int width, int height, ChromaFormat fmt, int bitDepth)
 {

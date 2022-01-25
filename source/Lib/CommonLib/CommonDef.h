@@ -473,7 +473,6 @@ static const int DELTA_QP_ACT[4] =                  { -5, 1, 3, 1 };
 static const int MAX_TSRC_RICE =                                  8;  ///<Maximum supported TSRC Rice parameter
 static const int MIN_TSRC_RICE =                                  1;  ///<Minimum supported TSRC Rice parameter
 static const int MAX_CTI_LUT_SIZE =                              64;  ///<Maximum colour transform LUT size for CTI SEI
-#if JVET_X0048_X0103_FILM_GRAIN
 static const int MAX_NUM_INTENSITIES =                          256;  ///<Maximum number of intensity intervals supported in FGC SEI
 static const int MAX_NUM_MODEL_VALUES =                           6;  ///<Maximum number of model values supported in FGC SEI
 static const int MAX_ALLOWED_MODEL_VALUES =                       3;
@@ -484,7 +483,6 @@ static const int BLK_8 =                                          8;
 static const int BLK_16 =                                        16;
 static const int BLK_32 =                                        32;
 static const int BIT_DEPTH_8 =                                    8;
-#endif
 // ====================================================================================================================
 // Macro functions
 // ====================================================================================================================

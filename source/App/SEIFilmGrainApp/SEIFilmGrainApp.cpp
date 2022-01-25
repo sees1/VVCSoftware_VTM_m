@@ -44,7 +44,6 @@
 #include "DecoderLib/AnnexBread.h"
 #include "EncoderLib/AnnexBwrite.h"
 
-#if JVET_X0048_X0103_FILM_GRAIN
 //! \ingroup SEIFilmGrainApp
 //! \{
 
@@ -279,4 +278,3 @@ uint32_t SEIFilmGrainApp::process()
 }
 
 //! \}
-#endif

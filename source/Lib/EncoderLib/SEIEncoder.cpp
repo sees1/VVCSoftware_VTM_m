@@ -742,7 +742,6 @@ void SEIEncoder::initSEIFilmGrainCharacteristics(SEIFilmGrainCharacteristics *se
   for (int i = 0; i < MAX_NUM_COMPONENT; i++)
   {
     seiFilmGrain->m_compModel[i].presentFlag = m_pcCfg->getFGCSEICompModelPresent(i);
-#if JVET_X0048_X0103_FILM_GRAIN
     if (seiFilmGrain->m_compModel[i].presentFlag)
     {
       seiFilmGrain->m_compModel[i].numModelValues = 1 + m_pcCfg->getFGCSEINumModelValuesMinus1(i);
@@ -759,7 +758,6 @@ void SEIEncoder::initSEIFilmGrainCharacteristics(SEIFilmGrainCharacteristics *se
         }
       }
     }
-#endif
   }
 }
 

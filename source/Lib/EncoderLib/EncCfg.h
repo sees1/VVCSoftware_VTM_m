@@ -652,7 +652,6 @@ protected:
   uint8_t   m_fgcSEIBlendingModeID;
   uint8_t   m_fgcSEILog2ScaleFactor;
   bool      m_fgcSEICompModelPresent[MAX_NUM_COMPONENT];
-#if JVET_X0048_X0103_FILM_GRAIN
   bool      m_fgcSEIAnalysisEnabled;
   bool      m_fgcSEIPerPictureSEI;
   uint8_t   m_fgcSEINumModelValuesMinus1          [MAX_NUM_COMPONENT];
@@ -660,7 +659,6 @@ protected:
   uint8_t   m_fgcSEIIntensityIntervalLowerBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint8_t   m_fgcSEIIntensityIntervalUpperBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint32_t  m_fgcSEICompModelValue                [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES][MAX_NUM_MODEL_VALUES];
-#endif
 // cll SEI
   bool      m_cllSEIEnabled;
   uint16_t  m_cllSEIMaxContentLevel;
@@ -1875,7 +1873,6 @@ public:
   uint8_t getFilmGrainCharactersticsSEILog2ScaleFactor()             { return m_fgcSEILog2ScaleFactor; }
   void  setFGCSEICompModelPresent(bool b, int index)                 { m_fgcSEICompModelPresent[index] = b; }
   bool  getFGCSEICompModelPresent(int index)                         { return m_fgcSEICompModelPresent[index]; }
-#if JVET_X0048_X0103_FILM_GRAIN
   bool*     getFGCSEICompModelPresent                 ()                        { return m_fgcSEICompModelPresent; }
   void      setFilmGrainAnalysisEnabled               (bool b)                  { m_fgcSEIAnalysisEnabled = b; }
   bool      getFilmGrainAnalysisEnabled               ()                        { return m_fgcSEIAnalysisEnabled; }
@@ -1891,7 +1888,6 @@ public:
   uint8_t   getFGCSEIIntensityIntervalUpperBound(int index, int ctr)            { return m_fgcSEIIntensityIntervalUpperBound[index][ctr]; }
   void      setFGCSEICompModelValue             (uint32_t v, int index, int ctr, int modelCtr)  { m_fgcSEICompModelValue[index][ctr][modelCtr] = v; }
   uint32_t  getFGCSEICompModelValue             (int index, int ctr, int modelCtr)              { return m_fgcSEICompModelValue[index][ctr][modelCtr]; }
-#endif
   // cll SEI
   void  setCLLSEIEnabled(bool b)                                     { m_cllSEIEnabled = b; }
   bool  getCLLSEIEnabled()                                           { return m_cllSEIEnabled; }

@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <cmath>
 
-#if JVET_X0048_X0103_FILM_GRAIN
 
 /* static look up table definitions */
 static const int8_t gaussianLUT[2048] =
@@ -1265,4 +1264,3 @@ uint32_t SEIFilmGrainSynthesizer::fgsSimulationBlending_32x32(fgsProcessArgs *in
   return FGS_SUCCESS;
 }
 
-#endif

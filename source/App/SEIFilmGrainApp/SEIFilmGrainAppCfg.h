@@ -45,7 +45,6 @@
 #include "CommonLib/CommonDef.h"
 #include <vector>
 
-#if JVET_X0048_X0103_FILM_GRAIN
 //! \ingroup SEIFilmGrainApp
 //! \{
 
@@ -86,7 +85,6 @@ public:
 };
 
 //! \}
-#endif
 
 #endif  // __SEIFILMGRAINAPPCFG__
 

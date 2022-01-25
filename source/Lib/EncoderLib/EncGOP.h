@@ -56,9 +56,7 @@
 #if EXTENSION_360_VIDEO
 #include "AppEncHelper360/TExt360EncGop.h"
 #endif
-#if JVET_X0048_X0103_FILM_GRAIN
 #include "CommonLib/SEIFilmGrainAnalyzer.h"
-#endif
 
 #include "Analyze.h"
 #include "RateCtrl.h"
@@ -151,9 +149,7 @@ private:
 
   SEIWriter               m_seiWriter;
 
-#if JVET_X0048_X0103_FILM_GRAIN
   FGAnalyser              m_FGAnalyser;
-#endif
 
   Picture *               m_picBg;
   Picture *               m_picOrig;

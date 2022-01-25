@@ -45,7 +45,6 @@
 
 #include "TrQuant_EMT.h"
 
-#if JVET_X0048_X0103_FILM_GRAIN
 
 //! \ingroup SEIFilmGrainSynthesizer
 //! \{
@@ -229,7 +228,6 @@ private:
 };// END CLASS DEFINITION SEIFilmGrainSynthesizer
 
 //! \}
-#endif
 
 #endif // __SEIFILMGRAINSYNTHESIZER__
 

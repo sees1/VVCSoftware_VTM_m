@@ -361,31 +361,6 @@ static inline istream& operator >> (istream &in, ScalingListMode &mode)
   return readStrToEnum(strToScalingListMode, sizeof(strToScalingListMode)/sizeof(*strToScalingListMode), in, mode);
 }
 
-#if !JVET_X0048_X0103_FILM_GRAIN
-template <class T>
-struct SMultiValueInput
-{
-  static_assert(!std::is_same<T, uint8_t>::value, "SMultiValueInput<uint8_t> is not supported");
-  static_assert(!std::is_same<T, int8_t>::value, "SMultiValueInput<int8_t> is not supported");
-  const T              minValIncl;
-  const T              maxValIncl;
-  const std::size_t    minNumValuesIncl;
-  const std::size_t    maxNumValuesIncl; // Use 0 for unlimited
-        std::vector<T> values;
-  SMultiValueInput() : minValIncl(0), maxValIncl(0), minNumValuesIncl(0), maxNumValuesIncl(0), values() { }
-  SMultiValueInput(std::vector<T> &defaults) : minValIncl(0), maxValIncl(0), minNumValuesIncl(0), maxNumValuesIncl(0), values(defaults) { }
-  SMultiValueInput(const T &minValue, const T &maxValue, std::size_t minNumberValues=0, std::size_t maxNumberValues=0)
-    : minValIncl(minValue), maxValIncl(maxValue), minNumValuesIncl(minNumberValues), maxNumValuesIncl(maxNumberValues), values()  { }
-  SMultiValueInput(const T &minValue, const T &maxValue, std::size_t minNumberValues, std::size_t maxNumberValues, const T* defValues, const uint32_t numDefValues)
-    : minValIncl(minValue), maxValIncl(maxValue), minNumValuesIncl(minNumberValues), maxNumValuesIncl(maxNumberValues), values(defValues, defValues+numDefValues)  { }
-  SMultiValueInput<T> &operator=(const std::vector<T> &userValues) { values=userValues; return *this; }
-  SMultiValueInput<T> &operator=(const SMultiValueInput<T> &userValues) { values=userValues.values; return *this; }
-
-  T readValue(const char *&pStr, bool &bSuccess);
-
-  istream& readValues(std::istream &in);
-};
-#endif
 
 template <class T>
 static inline istream& operator >> (std::istream &in, SMultiValueInput<T> &values)
@@ -752,7 +727,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   int warnUnknowParameter = 0;
 
-#if JVET_X0048_X0103_FILM_GRAIN
   SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp0 (0, 255, 0, 256);
   SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp1 (0, 255, 0, 256);
   SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp2 (0, 255, 0, 256);
@@ -762,7 +736,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp0              (0, 65535,  0, 256 * 6);
   SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp1              (0, 65535,  0, 256 * 6);
   SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp2              (0, 65535,  0, 256 * 6);
-#endif
 
 #if ENABLE_TRACING
   string sTracingRule;
@@ -1453,7 +1426,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIFGCCompModelPresentComp0",                     m_fgcSEICompModelPresent[0],                       false, "Specifies the presence of film grain modelling on colour component 0.")
   ("SEIFGCCompModelPresentComp1",                     m_fgcSEICompModelPresent[1],                       false, "Specifies the presence of film grain modelling on colour component 1.")
   ("SEIFGCCompModelPresentComp2",                     m_fgcSEICompModelPresent[2],                       false, "Specifies the presence of film grain modelling on colour component 2.")
-#if JVET_X0048_X0103_FILM_GRAIN
   ("SEIFGCAnalysisEnabled",                           m_fgcSEIAnalysisEnabled,                           false, "Control adaptive film grain parameter estimation - film grain analysis")
   ("SEIFGCPerPictureSEI",                             m_fgcSEIPerPictureSEI,                             false, "Film Grain SEI is added for each picture as speciffied in RDD5 to ensure bit accurate synthesis in tricky mode")
   ("SEIFGCNumIntensityIntervalMinus1Comp0",           m_fgcSEINumIntensityIntervalMinus1[0],                0u, "Specifies the number of intensity intervals minus1 on colour component 0.")
@@ -1471,7 +1443,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIFGCCompModelValuesComp0",             cfg_FgcSEICompModelValueComp0,              cfg_FgcSEICompModelValueComp0,              "Specifies the component model values on colour component 0.")
   ("SEIFGCCompModelValuesComp1",             cfg_FgcSEICompModelValueComp1,              cfg_FgcSEICompModelValueComp1,              "Specifies the component model values on colour component 1.")
   ("SEIFGCCompModelValuesComp2",             cfg_FgcSEICompModelValueComp2,              cfg_FgcSEICompModelValueComp2,              "Specifies the component model values on colour component 2.")
-#endif
 // content light level SEI
   ("SEICLLEnabled",                                   m_cllSEIEnabled,                                   false, "Control generation of the content light level SEI message")
   ("SEICLLMaxContentLightLevel",                      m_cllSEIMaxContentLevel,                              0u, "When not equal to 0, specifies an upper bound on the maximum light level among all individual samples in a 4:4:4 representation "
@@ -2618,7 +2589,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_masteringDisplay.whitePoint[idx] = uint16_t((cfg_DisplayWhitePointCode.values.size() > idx) ? cfg_DisplayWhitePointCode.values[idx] : 0);
     }
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   // set sei film grain parameters.
   CHECK(!m_fgcSEIEnabled && m_fgcSEIAnalysisEnabled, "FGC SEI must be enabled in order to perform film grain analysis!");
   if (m_fgcSEIEnabled)
@@ -2702,7 +2672,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     }
     m_fgcSEILog2ScaleFactor = m_fgcSEILog2ScaleFactor ? m_fgcSEILog2ScaleFactor : 2;
   }
-#endif
   if (m_ctiSEIEnabled) 
   {
     CHECK(!m_ctiSEICrossComponentFlag && m_ctiSEICrossComponentInferred, "CTI CrossComponentFlag is 0, but CTI CrossComponentInferred is 1 (must be 0 for CrossComponentFlag 0)");

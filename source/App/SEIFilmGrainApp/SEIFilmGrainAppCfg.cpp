@@ -47,7 +47,6 @@
 using namespace std;
 namespace po = df::program_options_lite;
 
-#if JVET_X0048_X0103_FILM_GRAIN
 //! \ingroup SEIFilmGrainApp
 //! \{
 
@@ -329,4 +328,3 @@ SEIFilmGrainAppCfg::~SEIFilmGrainAppCfg()
 }
 
 //! \}
-#endif

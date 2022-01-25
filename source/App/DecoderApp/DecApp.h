@@ -61,9 +61,7 @@ private:
   // class interface
   DecLib          m_cDecLib;                     ///< decoder class
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvReconFile;        ///< reconstruction YUV class
-#if JVET_X0048_X0103_FILM_GRAIN
   std::unordered_map<int, VideoIOYuv>      m_videoIOYuvSEIFGSFile;       ///< reconstruction YUV with FGS class
-#endif
   std::unordered_map<int, VideoIOYuv>      m_cVideoIOYuvSEICTIFile;       ///< reconstruction YUV with CTI class
 
   // for output control

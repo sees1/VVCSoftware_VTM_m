@@ -61,7 +61,6 @@
 
 
 
-#define JVET_X0048_X0103_FILM_GRAIN                       1 // JVET-X0048-X0103: SMPTE RDD-5 based film grain analysis and synthesis model for film grain characterstics (FGC) SEI
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
@@ -898,9 +897,7 @@ private:
 
 struct BitDepths
 {
-#if JVET_X0048_X0103_FILM_GRAIN
   const int &operator[](const ChannelType ch) const { return recon[ch]; }
-#endif
   int recon[MAX_NUM_CHANNEL_TYPE]; ///< the bit depth as indicated in the SPS
 };
 
