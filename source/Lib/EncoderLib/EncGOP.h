@@ -360,9 +360,7 @@ protected:
 #endif
   void xCreateExplicitReferencePictureSetFromReference( Slice* slice, PicList& rcListPic, const ReferencePictureList *rpl0, const ReferencePictureList *rpl1 );
   bool xCheckMaxTidILRefPics(int layerIdx, Picture* refPic, bool currentPicIsIRAP);
-#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
   void computeSignalling(Picture* pcPic, Slice* pcSlice) const;
-#endif
 };// END CLASS DEFINITION EncGOP
 
 //! \}

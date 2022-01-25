@@ -2149,7 +2149,6 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
   }
 }
 
-#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
 void EncGOP::computeSignalling(Picture* pcPic, Slice* pcSlice) const
 {
   bool deriveETSRC = (!pcSlice->getTSResidualCodingDisabledFlag() && pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag());
@@ -2229,7 +2228,6 @@ void EncGOP::computeSignalling(Picture* pcPic, Slice* pcSlice) const
   }
 }
 
-#endif
 // ====================================================================================================================
 // Public member functions
 // ====================================================================================================================
@@ -3318,12 +3316,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           m_pcEncLib->getInterSearch()->setClipMvInSubPic(false);
         }
 
-#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
         if ( pcSlice->isIntra() && (iPOCLast == 0 || m_pcCfg->getIntraPeriod() > 1))
         {
           computeSignalling(pcPic, pcSlice);
         }
-#endif
         m_pcSliceEncoder->precompressSlice( pcPic );
         m_pcSliceEncoder->compressSlice   ( pcPic, false, false );
 
