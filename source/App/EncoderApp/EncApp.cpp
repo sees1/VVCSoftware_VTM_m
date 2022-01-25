@@ -454,7 +454,6 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
     m_cEncLib.setAllRapPicturesFlag(m_allRapPicturesFlag);
-#if JVET_X0076_X0095_V2_GCI
     m_cEncLib.setNoExtendedPrecisionProcessingConstraintFlag(m_noExtendedPrecisionProcessingConstraintFlag);
     CHECK(m_noExtendedPrecisionProcessingConstraintFlag && m_extendedPrecisionProcessingFlag, "ExtendedPrecision shall be deactivated when m_noExtendedPrecisionProcessingConstraintFlag is equal to 1");
     m_cEncLib.setNoTsResidualCodingRiceConstraintFlag(m_noTsResidualCodingRiceConstraintFlag);
@@ -465,7 +464,6 @@ void EncApp::xInitLibCfg()
     CHECK(m_noPersistentRiceAdaptationConstraintFlag && m_persistentRiceAdaptationEnabledFlag, "GolombRiceParameterAdaptation shall be deactivated when m_noPersistentRiceAdaptationConstraintFlag is equal to 1");
     m_cEncLib.setNoReverseLastSigCoeffConstraintFlag(m_noReverseLastSigCoeffConstraintFlag);
     CHECK(m_noReverseLastSigCoeffConstraintFlag && m_reverseLastSigCoeffEnabledFlag, "ReverseLastSigCoeff shall be deactivated when m_noReverseLastSigCoeffConstraintFlag is equal to 1");
-#endif
   }
   else
   {
@@ -532,13 +530,11 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoLmcsConstraintFlag(false);
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
     m_cEncLib.setAllRapPicturesFlag(false);
-#if JVET_X0076_X0095_V2_GCI
     m_cEncLib.setNoExtendedPrecisionProcessingConstraintFlag(false);
     m_cEncLib.setNoTsResidualCodingRiceConstraintFlag(false);
     m_cEncLib.setNoRrcRiceExtensionConstraintFlag(false);
     m_cEncLib.setNoPersistentRiceAdaptationConstraintFlag(false);
     m_cEncLib.setNoReverseLastSigCoeffConstraintFlag(false);
-#endif
   }
 
   //====== Coding Structure ========

@@ -937,13 +937,11 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoLadfConstraintFlag",                            m_noLadfConstraintFlag,                          false, "Indicate that LADF is deactivated")
   ("NoVirtualBoundaryConstraintFlag",                 m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
   ("AllRapPicturesFlag",                              m_allRapPicturesFlag,                             false, "Indicate that all pictures in OlsInScope are IRAP pictures or GDR pictures with ph_recovery_poc_cnt equal to 0")
-#if JVET_X0076_X0095_V2_GCI
   ("NoExtendedPrecisionProcessingConstraintFlag",     m_noExtendedPrecisionProcessingConstraintFlag,    false, "Indicate that ExtendedPrecision is deactivated")
   ("NoTsResidualCodingRiceConstraintFlag",            m_noTsResidualCodingRiceConstraintFlag,           false, "Indicate that TSRCRicePresent is deactivated")
   ("NoRrcRiceExtensionConstraintFlag",                m_noRrcRiceExtensionConstraintFlag,               false, "Indicate that ExtendedRiceRRC is deactivated")
   ("NoPersistentRiceAdaptationConstraintFlag",        m_noPersistentRiceAdaptationConstraintFlag,       false, "Indicate that GolombRiceParameterAdaptation is deactivated")
   ("NoReverseLastSigCoeffConstraintFlag",             m_noReverseLastSigCoeffConstraintFlag,            false, "Indicate that ReverseLastSigCoeff is deactivated")
-#endif
 
   ("CTUSize",                                         m_uiCTUSize,                                       128u, "CTUSize (specifies the CTU size if QTBT is on) [default: 128]")
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")

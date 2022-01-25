@@ -59,7 +59,6 @@
 
 
 
-#define JVET_X0076_X0095_V2_GCI                           1 // JVET-X0076/X0095 GCI flags for VVC V2 tools
 
 #define JVET_X0101_ADD_WRAPAROUND_CONSTRAINT              1 // JVET-X0101 add WrapAround constraint for Constrained RASL Encoding SEI message
 

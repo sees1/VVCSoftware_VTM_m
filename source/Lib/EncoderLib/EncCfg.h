@@ -236,13 +236,11 @@ protected:
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
   bool      m_allRapPicturesFlag;
-#if JVET_X0076_X0095_V2_GCI
   bool      m_noExtendedPrecisionProcessingConstraintFlag;
   bool      m_noTsResidualCodingRiceConstraintFlag;
   bool      m_noRrcRiceExtensionConstraintFlag;
   bool      m_noPersistentRiceAdaptationConstraintFlag;
   bool      m_noReverseLastSigCoeffConstraintFlag;
-#endif
 
   /* profile & level */
   Profile::Name m_profile;
@@ -1031,7 +1029,6 @@ public:
   void      setNoApsConstraintFlag(bool val) { m_noApsConstraintFlag = val; }
   bool      getAllRapPicturesFlag() const { return m_allRapPicturesFlag; }
   void      setAllRapPicturesFlag(bool val) { m_allRapPicturesFlag = val; }
-#if JVET_X0076_X0095_V2_GCI
   bool      getNoExtendedPrecisionProcessingConstraintFlag() const { return m_noExtendedPrecisionProcessingConstraintFlag; }
   void      setNoExtendedPrecisionProcessingConstraintFlag(bool val) { m_noExtendedPrecisionProcessingConstraintFlag = val; }
   bool      getNoTsResidualCodingRiceConstraintFlag() const { return m_noTsResidualCodingRiceConstraintFlag; }
@@ -1042,7 +1039,6 @@ public:
   void      setNoPersistentRiceAdaptationConstraintFlag(bool val) { m_noPersistentRiceAdaptationConstraintFlag = val; }
   bool      getNoReverseLastSigCoeffConstraintFlag() const { return m_noReverseLastSigCoeffConstraintFlag; }
   void      setNoReverseLastSigCoeffConstraintFlag(bool val) { m_noReverseLastSigCoeffConstraintFlag = val; }
-#endif
 
   void      setFrameRate                    ( int   i )      { m_iFrameRate = i; }
   void      setFrameSkip                    ( uint32_t  i )      { m_FrameSkip = i; }

@@ -304,13 +304,11 @@ class ConstraintInfo
   bool              m_noGdrConstraintFlag;
   bool              m_noApsConstraintFlag;
   bool              m_allRapPicturesFlag;
-#if JVET_X0076_X0095_V2_GCI
   bool              m_noExtendedPrecisionProcessingConstraintFlag;
   bool              m_noTsResidualCodingRiceConstraintFlag;
   bool              m_noRrcRiceExtensionConstraintFlag;
   bool              m_noPersistentRiceAdaptationConstraintFlag;
   bool              m_noReverseLastSigCoeffConstraintFlag;
-#endif
 
 public:
   ConstraintInfo()
@@ -382,13 +380,11 @@ public:
     , m_noGdrConstraintFlag (false)
     , m_noApsConstraintFlag (false)
     , m_allRapPicturesFlag (false)
-#if JVET_X0076_X0095_V2_GCI
     , m_noExtendedPrecisionProcessingConstraintFlag (false)
     , m_noTsResidualCodingRiceConstraintFlag (false)
     , m_noRrcRiceExtensionConstraintFlag (false)
     , m_noPersistentRiceAdaptationConstraintFlag (false)
     , m_noReverseLastSigCoeffConstraintFlag (false)
-#endif
   {}
 
 
@@ -543,7 +539,6 @@ public:
   void          setNoApsConstraintFlag(bool bVal) { m_noApsConstraintFlag = bVal; }
   bool          getAllRapPicturesFlag() const { return m_allRapPicturesFlag; }
   void          setAllRapPicturesFlag(bool bVal) { m_allRapPicturesFlag = bVal; }
-#if JVET_X0076_X0095_V2_GCI
   bool          getNoExtendedPrecisionProcessingConstraintFlag() const { return m_noExtendedPrecisionProcessingConstraintFlag; }
   void          setNoExtendedPrecisionProcessingConstraintFlag(bool val) { m_noExtendedPrecisionProcessingConstraintFlag = val; }
   bool          getNoTsResidualCodingRiceConstraintFlag() const { return m_noTsResidualCodingRiceConstraintFlag; }
@@ -554,7 +549,6 @@ public:
   void          setNoPersistentRiceAdaptationConstraintFlag(bool val) { m_noPersistentRiceAdaptationConstraintFlag = val; }
   bool          getNoReverseLastSigCoeffConstraintFlag() const { return m_noReverseLastSigCoeffConstraintFlag; }
   void          setNoReverseLastSigCoeffConstraintFlag(bool val) { m_noReverseLastSigCoeffConstraintFlag = val; }
-#endif
 
   friend bool             operator == (const ConstraintInfo& op1, const ConstraintInfo& op2);
   friend bool             operator != (const ConstraintInfo& op1, const ConstraintInfo& op2);
