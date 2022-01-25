@@ -293,7 +293,6 @@ void EncLib::init(AUWriterIf *auWriterIf)
     xInitPPS(pps2, sps0);
     xInitPPSforLT(pps2);
   }
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
   if( this->m_rprRASLtoolSwitch && m_wrapAround )
   {
     PPS &pps4 = *(m_ppsMap.allocatePS(4));
@@ -304,7 +303,6 @@ void EncLib::init(AUWriterIf *auWriterIf)
     pps4.setPicWidthMinusWrapAroundOffset( 0 );
     pps4.setWrapAroundOffset             ( 0 );
   }
-#endif
   xInitPicHeader(m_picHeader, sps0, pps0);
 
   // initialize processing unit classes

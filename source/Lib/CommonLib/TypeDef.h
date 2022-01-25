@@ -60,7 +60,6 @@
 
 
 
-#define JVET_X0101_ADD_WRAPAROUND_CONSTRAINT              1 // JVET-X0101 add WrapAround constraint for Constrained RASL Encoding SEI message
 
 #define JVET_X0048_X0103_FILM_GRAIN                       1 // JVET-X0048-X0103: SMPTE RDD-5 based film grain analysis and synthesis model for film grain characterstics (FGC) SEI
 

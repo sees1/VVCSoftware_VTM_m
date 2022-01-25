@@ -4758,12 +4758,10 @@ void EncAppCfg::xPrintParameter()
   if( m_constrainedRaslEncoding )
   {
     msg(VERBOSE, "\n\nWarning: with SEIConstrainedRASL enabled, LMChroma estimation is skipped in RASL frames" );
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
     if( m_wrapAround )
     {
       msg(VERBOSE,   "\n         and wrap-around motion compensation is disabled in RASL frames" );
     }
-#endif
   }
 
   msg( VERBOSE, "\n\n");
