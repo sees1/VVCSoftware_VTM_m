@@ -53,25 +53,8 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
-#define JVET_X0143_ALF_APS_CHANGES                           1
+
 #define JVET_X0143_ALF_APS_ID_OFFSET                         0 // A value between 0 to 7 inclusive. This macro should be kept, or to be defined as a configuration parameter if possible.
-#define JVET_X0143_MERGER_FIXES                              1
-#define JVET_X0143_EXTRACTOR_FIXES                           1
-
-#define JVET_X0128_V2_WPP                                 1 // JVET-X0128 method 2, VVC v2 WPP
-#define JVET_X0073_V2_PROFILE_IDC                         1 // JVET-X0073 decrease profile_idc for 16 bit profiles by 1
-
-#define JVET_X0079_MODIFIED_BITRATE                       1 // JVET-X0079v3 (changes to JVET-W2005)
-
-#define JVET_X0106_INTRA_CONSTRAINT                       1 // JVET-X0106 Constraint on non I=frames in Intra profiles
-
-#define JVET_X0137_ETSRC_RLSCP_DETERMINATION              1 // JVET-X0137 Determine signalled parameters for ETSRC and RLSCP using estimated residual
-
-#define JVET_X0076_X0095_V2_GCI                           1 // JVET-X0076/X0095 GCI flags for VVC V2 tools
-
-#define JVET_X0101_ADD_WRAPAROUND_CONSTRAINT              1 // JVET-X0101 add WrapAround constraint for Constrained RASL Encoding SEI message
-
-#define JVET_X0048_X0103_FILM_GRAIN                       1 // JVET-X0048-X0103: SMPTE RDD-5 based film grain analysis and synthesis model for film grain characterstics (FGC) SEI
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
@@ -704,11 +687,7 @@ namespace Profile
     MULTILAYER_MAIN_10_444_STILL_PICTURE = MULTILAYER_MAIN_10_444 | STILL_PICTURE,
     MAIN_12                              = 2,
     MAIN_12_444                          = 34,
-#if JVET_X0073_V2_PROFILE_IDC
     MAIN_16_444                          = 35,
-#else
-    MAIN_16_444                          = 36,
-#endif
     MAIN_12_INTRA                        = MAIN_12 | INTRA,
     MAIN_12_444_INTRA                    = MAIN_12_444 | INTRA,
     MAIN_16_444_INTRA                    = MAIN_16_444 | INTRA,
@@ -912,9 +891,7 @@ private:
 
 struct BitDepths
 {
-#if JVET_X0048_X0103_FILM_GRAIN
   const int &operator[](const ChannelType ch) const { return recon[ch]; }
-#endif
   int recon[MAX_NUM_CHANNEL_TYPE]; ///< the bit depth as indicated in the SPS
 };
 

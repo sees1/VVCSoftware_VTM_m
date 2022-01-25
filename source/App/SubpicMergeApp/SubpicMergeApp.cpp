@@ -521,11 +521,7 @@ void SubpicMergeApp::generateMergedStreamSPSes(std::vector<SPS*> &spsList)
   {
     for (auto spsId : subpic.spsIds)
     {
-#if JVET_X0143_MERGER_FIXES
       CHECK(subpic.psManager.getSPS(spsId)->getSubPicInfoPresentFlag() && subpic.psManager.getSPS(spsId)->getNumSubPics() > 1, "Input streams containing subpictures not supported");
-#else
-      CHECK(subpic.psManager.getSPS(spsId)->getSubPicInfoPresentFlag(), "Input streams containing subpictures not supported")
-#endif
     }
   }
 
@@ -1011,9 +1007,7 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
   updateSliceHeadersForMergedStream(psManager);
 
   // Code merged stream prefix APS NAL units
-#if JVET_X0143_MERGER_FIXES
   std::vector<int> usedApsIds;
-#endif
   for (auto &subpic : *m_subpics)
   {
     auto apsIdIt = subpic.apsIds.begin();
@@ -1021,19 +1015,15 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
     {
       if (nalu.m_nalUnitType == NAL_UNIT_PREFIX_APS)
       {
-#if JVET_X0143_MERGER_FIXES
         if (std::find(usedApsIds.begin(), usedApsIds.end(), apsIdIt->first) == usedApsIds.end())
         {
-#endif
         OutputNALUnit naluOut(NAL_UNIT_PREFIX_APS, nalu.m_nuhLayerId, nalu.m_temporalId);
         hlsWriter.setBitstream( &naluOut.m_Bitstream );
         hlsWriter.codeAPS(subpic.psManager.getAPS(apsIdIt->first, apsIdIt->second));
         accessUnit.push_back(new NALUnitEBSP(naluOut));
         apsIdIt++;
-#if JVET_X0143_MERGER_FIXES
           usedApsIds.push_back(apsIdIt->first);
         }
-#endif
       }
     }
   }

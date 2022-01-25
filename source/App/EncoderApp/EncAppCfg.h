@@ -189,18 +189,12 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
-#if JVET_X0079_MODIFIED_BITRATE
   bool      m_allRapPicturesFlag;
-#else
-  bool      m_generalLowerBitRateConstraintFlag;
-#endif
-#if JVET_X0076_X0095_V2_GCI
   bool      m_noExtendedPrecisionProcessingConstraintFlag;
   bool      m_noTsResidualCodingRiceConstraintFlag;
   bool      m_noRrcRiceExtensionConstraintFlag;
   bool      m_noPersistentRiceAdaptationConstraintFlag;
   bool      m_noReverseLastSigCoeffConstraintFlag;
-#endif
 
   // profile/level
   Profile::Name m_profile;
@@ -548,7 +542,6 @@ protected:
   uint32_t  m_fgcSEIBlendingModeID;
   uint32_t  m_fgcSEILog2ScaleFactor;
   bool      m_fgcSEICompModelPresent[MAX_NUM_COMPONENT];
-#if JVET_X0048_X0103_FILM_GRAIN
   bool      m_fgcSEIAnalysisEnabled;
   bool      m_fgcSEIPerPictureSEI;
   uint32_t  m_fgcSEINumModelValuesMinus1          [MAX_NUM_COMPONENT];
@@ -556,7 +549,6 @@ protected:
   uint32_t  m_fgcSEIIntensityIntervalLowerBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint32_t  m_fgcSEIIntensityIntervalUpperBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint32_t  m_fgcSEICompModelValue                [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES][MAX_NUM_MODEL_VALUES];
-#endif
   // content light level SEI
   bool      m_cllSEIEnabled;
   uint32_t  m_cllSEIMaxContentLevel;
@@ -820,10 +812,8 @@ protected:
   bool        m_bs2ModPOCAndType;
   bool        m_forceDecodeBitstream1;
 
-#if JVET_X0143_ALF_APS_CHANGES
   int         m_maxNumAlfAps;
   int         m_constantJointCbCrSignFlag;
-#endif
   bool        m_alf;                                       ///< Adaptive Loop Filter
   bool        m_alfTrueOrg;
   double      m_alfStrengthLuma;

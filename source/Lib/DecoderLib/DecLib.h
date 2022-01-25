@@ -131,10 +131,8 @@ private:
   int                     m_prevTid0POC;
   bool                    m_bFirstSliceInPicture;
   bool                    m_firstPictureInSequence;
-#if JVET_X0048_X0103_FILM_GRAIN
   SEIFilmGrainSynthesizer m_grainCharacteristic;
   PelStorage              m_grainBuf;
-#endif
   SEIColourTransformApply m_colourTranfParams;
   PelStorage              m_invColourTransfBuf;
   bool                    m_firstSliceInSequence[MAX_VPS_LAYERS];

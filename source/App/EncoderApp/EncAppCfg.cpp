@@ -262,21 +262,12 @@ strToLevel[] =
 };
 
 #if U0132_TARGET_BITS_SATURATION
-#if JVET_X0079_MODIFIED_BITRATE
 uint32_t g_uiMaxCpbSize[2][28] =
 {
   //            LEVEL1,          LEVEL2,  LEVEL2_1,      LEVEL3,  LEVEL3_1,       LEVEL4,   LEVEL4_1,       LEVEL5,    LEVEL5_1,  LEVEL5_2,     LEVEL6,    LEVEL6_1,  LEVEL6_2   LEVEL6_3
   { 0, 0, 0, 0, 350000, 0, 0, 0, 1500000, 3000000, 0, 0, 6000000, 10000000, 0, 0, 12000000, 20000000, 0, 0,  25000000,  40000000,  60000000, 0,  80000000, 120000000, 240000000,  240000000 },
   { 0, 0, 0, 0,      0, 0, 0, 0,       0,       0, 0, 0,       0,        0, 0, 0, 30000000, 50000000, 0, 0, 100000000, 160000000, 240000000, 0, 240000000, 480000000, 800000000, 1600000000 }
 };
-#else
-uint32_t g_uiMaxCpbSize[2][21] =
-{
-  //         LEVEL1,        LEVEL2,LEVEL2_1,     LEVEL3, LEVEL3_1,      LEVEL4, LEVEL4_1,       LEVEL5,  LEVEL5_1,  LEVEL5_2,    LEVEL6,  LEVEL6_1,  LEVEL6_2
-  { 0, 0, 0, 350000, 0, 0, 1500000, 3000000, 0, 6000000, 10000000, 0, 12000000, 20000000, 0,  25000000,  40000000,  60000000,  60000000, 120000000, 240000000 },
-  { 0, 0, 0,      0, 0, 0,       0,       0, 0,       0,        0, 0, 30000000, 50000000, 0, 100000000, 160000000, 240000000, 240000000, 480000000, 800000000 }
-};
-#endif
 #endif
 
 static const struct MapStrToCostMode
@@ -370,31 +361,6 @@ static inline istream& operator >> (istream &in, ScalingListMode &mode)
   return readStrToEnum(strToScalingListMode, sizeof(strToScalingListMode)/sizeof(*strToScalingListMode), in, mode);
 }
 
-#if !JVET_X0048_X0103_FILM_GRAIN
-template <class T>
-struct SMultiValueInput
-{
-  static_assert(!std::is_same<T, uint8_t>::value, "SMultiValueInput<uint8_t> is not supported");
-  static_assert(!std::is_same<T, int8_t>::value, "SMultiValueInput<int8_t> is not supported");
-  const T              minValIncl;
-  const T              maxValIncl;
-  const std::size_t    minNumValuesIncl;
-  const std::size_t    maxNumValuesIncl; // Use 0 for unlimited
-        std::vector<T> values;
-  SMultiValueInput() : minValIncl(0), maxValIncl(0), minNumValuesIncl(0), maxNumValuesIncl(0), values() { }
-  SMultiValueInput(std::vector<T> &defaults) : minValIncl(0), maxValIncl(0), minNumValuesIncl(0), maxNumValuesIncl(0), values(defaults) { }
-  SMultiValueInput(const T &minValue, const T &maxValue, std::size_t minNumberValues=0, std::size_t maxNumberValues=0)
-    : minValIncl(minValue), maxValIncl(maxValue), minNumValuesIncl(minNumberValues), maxNumValuesIncl(maxNumberValues), values()  { }
-  SMultiValueInput(const T &minValue, const T &maxValue, std::size_t minNumberValues, std::size_t maxNumberValues, const T* defValues, const uint32_t numDefValues)
-    : minValIncl(minValue), maxValIncl(maxValue), minNumValuesIncl(minNumberValues), maxNumValuesIncl(maxNumberValues), values(defValues, defValues+numDefValues)  { }
-  SMultiValueInput<T> &operator=(const std::vector<T> &userValues) { values=userValues; return *this; }
-  SMultiValueInput<T> &operator=(const SMultiValueInput<T> &userValues) { values=userValues.values; return *this; }
-
-  T readValue(const char *&pStr, bool &bSuccess);
-
-  istream& readValues(std::istream &in);
-};
-#endif
 
 template <class T>
 static inline istream& operator >> (std::istream &in, SMultiValueInput<T> &values)
@@ -761,7 +727,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
 
   int warnUnknowParameter = 0;
 
-#if JVET_X0048_X0103_FILM_GRAIN
   SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp0 (0, 255, 0, 256);
   SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp1 (0, 255, 0, 256);
   SMultiValueInput<uint32_t>   cfg_FgcSEIIntensityIntervalLowerBoundComp2 (0, 255, 0, 256);
@@ -771,7 +736,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp0              (0, 65535,  0, 256 * 6);
   SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp1              (0, 65535,  0, 256 * 6);
   SMultiValueInput<uint32_t>   cfg_FgcSEICompModelValueComp2              (0, 65535,  0, 256 * 6);
-#endif
 
 #if ENABLE_TRACING
   string sTracingRule;
@@ -945,18 +909,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("NoLmcsConstraintFlag",                            m_noLmcsConstraintFlag,                           false, "Indicate that LMCS is deactivated")
   ("NoLadfConstraintFlag",                            m_noLadfConstraintFlag,                          false, "Indicate that LADF is deactivated")
   ("NoVirtualBoundaryConstraintFlag",                 m_noVirtualBoundaryConstraintFlag,                false, "Indicate that virtual boundary is deactivated")
-#if JVET_X0079_MODIFIED_BITRATE
   ("AllRapPicturesFlag",                              m_allRapPicturesFlag,                             false, "Indicate that all pictures in OlsInScope are IRAP pictures or GDR pictures with ph_recovery_poc_cnt equal to 0")
-#else
-  ("GeneralLowerBitRateConstraintFlag",               m_generalLowerBitRateConstraintFlag,              false, "Indicate whether lower bitrate constraint is used")
-#endif
-#if JVET_X0076_X0095_V2_GCI
   ("NoExtendedPrecisionProcessingConstraintFlag",     m_noExtendedPrecisionProcessingConstraintFlag,    false, "Indicate that ExtendedPrecision is deactivated")
   ("NoTsResidualCodingRiceConstraintFlag",            m_noTsResidualCodingRiceConstraintFlag,           false, "Indicate that TSRCRicePresent is deactivated")
   ("NoRrcRiceExtensionConstraintFlag",                m_noRrcRiceExtensionConstraintFlag,               false, "Indicate that ExtendedRiceRRC is deactivated")
   ("NoPersistentRiceAdaptationConstraintFlag",        m_noPersistentRiceAdaptationConstraintFlag,       false, "Indicate that GolombRiceParameterAdaptation is deactivated")
   ("NoReverseLastSigCoeffConstraintFlag",             m_noReverseLastSigCoeffConstraintFlag,            false, "Indicate that ReverseLastSigCoeff is deactivated")
-#endif
 
   ("CTUSize",                                         m_uiCTUSize,                                       128u, "CTUSize (specifies the CTU size if QTBT is on) [default: 128]")
   ("Log2MinCuSize",                                   m_log2MinCuSize,                                     2u, "Log2 min CU size")
@@ -1468,7 +1426,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIFGCCompModelPresentComp0",                     m_fgcSEICompModelPresent[0],                       false, "Specifies the presence of film grain modelling on colour component 0.")
   ("SEIFGCCompModelPresentComp1",                     m_fgcSEICompModelPresent[1],                       false, "Specifies the presence of film grain modelling on colour component 1.")
   ("SEIFGCCompModelPresentComp2",                     m_fgcSEICompModelPresent[2],                       false, "Specifies the presence of film grain modelling on colour component 2.")
-#if JVET_X0048_X0103_FILM_GRAIN
   ("SEIFGCAnalysisEnabled",                           m_fgcSEIAnalysisEnabled,                           false, "Control adaptive film grain parameter estimation - film grain analysis")
   ("SEIFGCPerPictureSEI",                             m_fgcSEIPerPictureSEI,                             false, "Film Grain SEI is added for each picture as speciffied in RDD5 to ensure bit accurate synthesis in tricky mode")
   ("SEIFGCNumIntensityIntervalMinus1Comp0",           m_fgcSEINumIntensityIntervalMinus1[0],                0u, "Specifies the number of intensity intervals minus1 on colour component 0.")
@@ -1486,7 +1443,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("SEIFGCCompModelValuesComp0",             cfg_FgcSEICompModelValueComp0,              cfg_FgcSEICompModelValueComp0,              "Specifies the component model values on colour component 0.")
   ("SEIFGCCompModelValuesComp1",             cfg_FgcSEICompModelValueComp1,              cfg_FgcSEICompModelValueComp1,              "Specifies the component model values on colour component 1.")
   ("SEIFGCCompModelValuesComp2",             cfg_FgcSEICompModelValueComp2,              cfg_FgcSEICompModelValueComp2,              "Specifies the component model values on colour component 2.")
-#endif
 // content light level SEI
   ("SEICLLEnabled",                                   m_cllSEIEnabled,                                   false, "Control generation of the content light level SEI message")
   ("SEICLLMaxContentLightLevel",                      m_cllSEIMaxContentLevel,                              0u, "When not equal to 0, specifies an upper bound on the maximum light level among all individual samples in a 4:4:4 representation "
@@ -1612,10 +1568,8 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("DebugCTU",                                        m_debugCTU,                                  -1, "If DebugBitstream is present, load frames up to this POC from this bitstream. Starting with DebugPOC-frame at CTUline containin debug CTU.")
   ("AlfTrueOrg",                                      m_alfTrueOrg,                              true, "Using true original samples for ALF optimization when MCTF is enabled\n")
   ( "ALF",                                             m_alf,                                    true, "Adaptive Loop Filter\n" )
-#if JVET_X0143_ALF_APS_CHANGES
   ("MaxNumALFAPS",                                    m_maxNumAlfAps,                           8, "Maximum number of ALF APSs" )
   ("ConstantJointCbCrSignFlag",                       m_constantJointCbCrSignFlag,              0, "Constant JointCbCr sign flag" )
-#endif
   ("ALFStrengthLuma",                                  m_alfStrengthLuma,                         1.0, "Adaptive Loop Filter strength for luma. The parameter scales the magnitudes of the ALF filter coefficients for luma. Valid range is 0.0 <= ALFStrengthLuma <= 1.0")
   ("ALFAllowPredefinedFilters",                        m_alfAllowPredefinedFilters,              true, "Allow use of predefined filters for ALF")
   ("CCALFStrength",                                    m_ccalfStrength,                           1.0, "Cross-component Adaptive Loop Filter strength. The parameter scales the magnitudes of the CCALF filter coefficients. Valid range is 0.0 <= CCALFStrength <= 1.0")
@@ -2238,12 +2192,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_profile == Profile::MAIN_16_444 || m_profile == Profile::MAIN_16_444_INTRA || m_profile == Profile::MAIN_16_444_STILL_PICTURE)
   {
     m_gciPresentFlag = true;
-#if !JVET_X0079_MODIFIED_BITRATE
-    if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
-    {
-      CHECK(m_generalLowerBitRateConstraintFlag == 0, "GeneralLowerBitRateConstraintFlag setting must be 1 for non-Intra/Still Picture operation range extension profiles.")
-    }
-#endif
   }
   if (m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_16_444_INTRA)
   {
@@ -2641,7 +2589,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
       m_masteringDisplay.whitePoint[idx] = uint16_t((cfg_DisplayWhitePointCode.values.size() > idx) ? cfg_DisplayWhitePointCode.values[idx] : 0);
     }
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   // set sei film grain parameters.
   CHECK(!m_fgcSEIEnabled && m_fgcSEIAnalysisEnabled, "FGC SEI must be enabled in order to perform film grain analysis!");
   if (m_fgcSEIEnabled)
@@ -2725,7 +2672,6 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     }
     m_fgcSEILog2ScaleFactor = m_fgcSEILog2ScaleFactor ? m_fgcSEILog2ScaleFactor : 2;
   }
-#endif
   if (m_ctiSEIEnabled) 
   {
     CHECK(!m_ctiSEICrossComponentFlag && m_ctiSEICrossComponentInferred, "CTI CrossComponentFlag is 0, but CTI CrossComponentInferred is 1 (must be 0 for CrossComponentFlag 0)");
@@ -3125,18 +3071,11 @@ int EncAppCfg::xAutoDetermineProfile()
 
   default: return 1;
   }
-#if JVET_X0079_MODIFIED_BITRATE
   if (m_profile == Profile::MAIN_12_INTRA || m_profile == Profile::MAIN_12_444_INTRA || m_profile == Profile::MAIN_16_444_INTRA ||
       m_profile == Profile::MAIN_12_STILL_PICTURE || m_profile == Profile::MAIN_12_444_STILL_PICTURE || m_profile == Profile::MAIN_16_444_STILL_PICTURE)
   {
     m_allRapPicturesFlag = 1;
   }
-#else
-    if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
-    {
-      m_generalLowerBitRateConstraintFlag = 1; // GeneralLowerBitRateConstraintFlag setting must be 1 for non-Intra/Still Picture operation range extension profiles.")
-    }
-#endif
   return 0;
 }
 
@@ -3167,9 +3106,7 @@ bool EncAppCfg::xCheckParameter()
   bool check_failed = false; /* abort if there is a fatal configuration problem */
 #define xConfirmPara(a,b) check_failed |= confirmPara(a,b)
 
-#if JVET_X0143_ALF_APS_CHANGES
   xConfirmPara(m_maxNumAlfAps > ALF_CTB_MAX_NUM_APS, "The number of ALF APSs should not be more than ALF_CTB_MAX_NUM_APS");
-#endif
 
   if( m_depQuantEnabledFlag )
   {
@@ -3525,12 +3462,10 @@ bool EncAppCfg::xCheckParameter()
     xConfirmPara( m_ccalf, "CCALF cannot be enabled when ALF is disabled" );
   }
 
-#if JVET_X0143_ALF_APS_CHANGES
   if (m_maxNumAlfAps == 0) 
   {
     xConfirmPara(m_ccalf, "CCALF cannot be enabled when ALF APS is disabled");
   }
-#endif
 
   xConfirmPara( m_sourceWidth  % SPS::getWinUnitX(m_chromaFormatIDC) != 0, "Picture width must be an integer multiple of the specified chroma subsampling");
   xConfirmPara( m_sourceHeight % SPS::getWinUnitY(m_chromaFormatIDC) != 0, "Picture height must be an integer multiple of the specified chroma subsampling");
@@ -4270,11 +4205,7 @@ bool EncAppCfg::xCheckParameter()
 #if U0132_TARGET_BITS_SATURATION
     if ((m_RCCpbSaturationEnabled) && (m_level!=Level::NONE) && (m_profile!=Profile::NONE))
     {
-#if JVET_X0079_MODIFIED_BITRATE
       uint32_t uiLevelIdx = (m_level / 16) * 4 + (uint32_t)((m_level % 16) / 3);
-#else
-      uint32_t uiLevelIdx = (m_level / 10) + (uint32_t)((m_level % 10) / 3);    // (m_level / 30)*3 + ((m_level % 10) / 3);
-#endif
       xConfirmPara(m_RCCpbSize > g_uiMaxCpbSize[m_levelTier][uiLevelIdx], "RCCpbSize should be smaller than or equal to Max CPB size according to tier and level");
       xConfirmPara(m_RCInitialCpbFullness > 1, "RCInitialCpbFullness should be smaller than or equal to 1");
     }
@@ -4487,11 +4418,7 @@ void EncAppCfg::xPrintParameter()
   {
     msg( DETAILS, "Profile                                : %s\n", profileToString(m_profile) );
   }
-#if JVET_X0079_MODIFIED_BITRATE
   msg( DETAILS,"AllRapPicturesFlag                     : %d\n", m_allRapPicturesFlag );
-#else
-  msg( DETAILS,"GeneralLowerBitRateConstraintFlag      : %d\n", m_generalLowerBitRateConstraintFlag );
-#endif
   msg(DETAILS, "CTU size / min CU size                 : %d / %d \n", m_uiMaxCUWidth, 1 << m_log2MinCuSize);
 
   msg(DETAILS, "subpicture info present flag           : %s\n", m_subPicInfoPresentFlag ? "Enabled" : "Disabled");
@@ -4657,10 +4584,8 @@ void EncAppCfg::xPrintParameter()
   msg( VERBOSE, "SAO:%d ", (m_bUseSAO)?(1):(0));
   msg( VERBOSE, "ALF:%d ", m_alf ? 1 : 0 );
   msg( VERBOSE, "CCALF:%d ", m_ccalf ? 1 : 0 );
-#if JVET_X0143_ALF_APS_CHANGES
   msg(VERBOSE, "MaxNumALFAPS", m_maxNumAlfAps);
   msg(VERBOSE, "ConstantJointCbCrSignFlag", m_constantJointCbCrSignFlag);
-#endif
   msg( VERBOSE, "WPP:%d ", (int)m_useWeightedPred);
   msg( VERBOSE, "WPB:%d ", (int)m_useWeightedBiPred);
   msg( VERBOSE, "PME:%d ", m_log2ParallelMergeLevel);
@@ -4802,12 +4727,10 @@ void EncAppCfg::xPrintParameter()
   if( m_constrainedRaslEncoding )
   {
     msg(VERBOSE, "\n\nWarning: with SEIConstrainedRASL enabled, LMChroma estimation is skipped in RASL frames" );
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
     if( m_wrapAround )
     {
       msg(VERBOSE,   "\n         and wrap-around motion compensation is disabled in RASL frames" );
     }
-#endif
   }
 
   msg( VERBOSE, "\n\n");

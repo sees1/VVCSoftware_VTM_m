@@ -207,12 +207,10 @@ void  EncGOP::destroy()
     delete m_picOrig;
     m_picOrig = NULL;
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   if (m_pcCfg->getFilmGrainAnalysisEnabled())
   {
     m_FGAnalyser.destroy();
   }
-#endif
 }
 
 void EncGOP::init ( EncLib* pcEncLib )
@@ -233,12 +231,10 @@ void EncGOP::init ( EncLib* pcEncLib )
 
   m_AUWriterIf = pcEncLib->getAUWriterIf();
 
-  #if JVET_X0048_X0103_FILM_GRAIN
   if (m_pcCfg->getFilmGrainAnalysisEnabled())
   {
     m_FGAnalyser.init(m_pcCfg->getSourceWidth(), m_pcCfg->getSourceHeight(), m_pcCfg->getChromaFormatIdc(), *(BitDepths *) pcEncLib->getBitDepth(), m_pcCfg->getFGCSEICompModelPresent());
   }
-#endif
 
 #if WCG_EXT
   if (m_pcCfg->getLmcs())
@@ -381,9 +377,7 @@ int EncGOP::xWritePPS( AccessUnit &accessUnit, const PPS *pps, const int layerId
   OutputNALUnit nalu(NAL_UNIT_PPS);
   m_HLSWriter->setBitstream( &nalu.m_Bitstream );
   nalu.m_nuhLayerId = layerId;
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
   nalu.m_temporalId = accessUnit.temporalId;
-#endif
   CHECK( nalu.m_temporalId < accessUnit.temporalId, "TemporalId shall be greater than or equal to the TemporalId of the layer access unit containing the NAL unit" );
   m_HLSWriter->codePPS( pps );
   accessUnit.push_back(new NALUnitEBSP(nalu));
@@ -752,15 +746,10 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
     seiMessages.push_back(seiSampleAspectRatioInfo);
   }
   // film grain
-#if JVET_X0048_X0103_FILM_GRAIN
   if (m_pcCfg->getFilmGrainCharactersticsSEIEnabled() && !m_pcCfg->getFilmGrainCharactersticsSEIPerPictureSEI())
-#else
-  if (m_pcCfg->getFilmGrainCharactersticsSEIEnabled())
-#endif
   {
     SEIFilmGrainCharacteristics *sei = new SEIFilmGrainCharacteristics;
     m_seiEncoder.initSEIFilmGrainCharacteristics(sei);
-#if JVET_X0048_X0103_FILM_GRAIN
     if (m_pcCfg->getFilmGrainAnalysisEnabled())
     {
       sei->m_log2ScaleFactor = m_FGAnalyser.getLog2scaleFactor();
@@ -772,7 +761,6 @@ void EncGOP::xCreateIRAPLeadingSEIMessages (SEIMessages& seiMessages, const SPS 
         }
       }
     }
-#endif
     seiMessages.push_back(sei);
   }
 
@@ -916,7 +904,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
     }
   }
 
-#if JVET_X0048_X0103_FILM_GRAIN
   if (m_pcCfg->getFilmGrainCharactersticsSEIEnabled() && m_pcCfg->getFilmGrainCharactersticsSEIPerPictureSEI())
   {
     SEIFilmGrainCharacteristics *fgcSEI = new SEIFilmGrainCharacteristics;
@@ -934,7 +921,6 @@ void EncGOP::xCreatePerPictureSEIMessages (int picInGOP, SEIMessages& seiMessage
     }
     seiMessages.push_back(fgcSEI);
   }
-#endif
 }
 
 void EncGOP::xCreateScalableNestingSEI(SEIMessages& seiMessages, SEIMessages& nestedSeiMessages, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t>& subpicIDs, uint16_t maxSubpicIdInPic)
@@ -2149,7 +2135,6 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
   }
 }
 
-#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
 void EncGOP::computeSignalling(Picture* pcPic, Slice* pcSlice) const
 {
   bool deriveETSRC = (!pcSlice->getTSResidualCodingDisabledFlag() && pcSlice->getSPS()->getSpsRangeExtension().getTSRCRicePresentFlag());
@@ -2229,7 +2214,6 @@ void EncGOP::computeSignalling(Picture* pcPic, Slice* pcSlice) const
   }
 }
 
-#endif
 // ====================================================================================================================
 // Public member functions
 // ====================================================================================================================
@@ -2333,7 +2317,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
                 iNumPicRcvd, iTimeOffset, pcPic, pocCurr, isField );
     picHeader = pcPic->cs->picHeader;
     picHeader->setSPSId( pcPic->cs->pps->getSPSId() );
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
     if( getNalUnitType(pocCurr, m_iLastIDR, isField) == NAL_UNIT_CODED_SLICE_RASL && m_pcCfg->getRprRASLtoolSwitch() && m_pcCfg->getUseWrapAround() )
     {
       picHeader->setPPSId( 4 );
@@ -2343,9 +2326,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     {
       picHeader->setPPSId( pcPic->cs->pps->getPPSId() );
     }
-#else
-    picHeader->setPPSId( pcPic->cs->pps->getPPSId() );
-#endif
     picHeader->setSplitConsOverrideFlag(false);
     // initial two flags to be false
     picHeader->setPicInterSliceAllowedFlag(false);
@@ -3062,9 +3042,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       pcSlice->setDisableLmChromaCheck( true );
       picHeader->setDmvrDisabledFlag( true );
       xUpdateRPRtmvp( picHeader, pcSlice );
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
       CHECK( pcSlice->getPPS()->getWrapAroundEnabledFlag(), "pps_ref_wraparound_enabled_flag should be 0 with constrained RASL encoding" );
-#endif
     }
     
     double lambda            = 0.0;
@@ -3161,11 +3139,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     }
     if (pcSlice->getSPS()->getJointCbCrEnabledFlag())
     {
-#if JVET_X0143_ALF_APS_CHANGES
       if (m_pcCfg->getConstantJointCbCrSignFlag()) 
         pcPic->cs->picHeader->setJointCbCrSignFlag(m_pcCfg->getConstantJointCbCrSignFlag()-1);
       else
-#endif
         m_pcSliceEncoder->setJointCbCrModes(*pcPic->cs, Position(0, 0), pcPic->cs->area.lumaSize());
     }
     if (!pcSlice->getSPS()->getSpsRangeExtension().getReverseLastSigCoeffEnabledFlag() || pcSlice->getSliceQp() > 12)
@@ -3320,12 +3296,10 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
           m_pcEncLib->getInterSearch()->setClipMvInSubPic(false);
         }
 
-#if JVET_X0137_ETSRC_RLSCP_DETERMINATION
         if ( pcSlice->isIntra() && (iPOCLast == 0 || m_pcCfg->getIntraPeriod() > 1))
         {
           computeSignalling(pcPic, pcSlice);
         }
-#endif
         m_pcSliceEncoder->precompressSlice( pcPic );
         m_pcSliceEncoder->compressSlice   ( pcPic, false, false );
 
@@ -3566,20 +3540,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
             // Get active ALF APSs from picture/slice header
             const std::vector<int> sliceApsIdsLuma = pcSlice->getAlfApsIdsLuma();
 
-#if JVET_X0143_ALF_APS_CHANGES
             m_pcALF->setApsIdStart(m_pcCfg->getMaxNumALFAPS());
-#else
-            m_pcALF->setApsIdStart( ALF_CTB_MAX_NUM_APS );
-#endif
 
             ParameterSetMap<APS>* apsMap = m_pcEncLib->getApsMap();
             apsMap->clearActive();
 
-#if JVET_X0143_ALF_APS_CHANGES
            for (int apsId = 0; apsId < m_pcCfg->getMaxNumALFAPS(); apsId++)
-#else
-           for( int apsId = 0; apsId < ALF_CTB_MAX_NUM_APS; apsId++ )
-#endif
            {
               int psId = ( apsId << NUM_APS_TYPE_LEN ) + ALF_APS;
               APS* aps = apsMap->getPS( psId );
@@ -3621,11 +3587,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
         // Assign tne correct APS to slice and emulate the setting of ALF start APS ID
         int changedApsId = -1;
-#if JVET_X0143_ALF_APS_CHANGES
         for (int apsId = m_pcCfg->getMaxNumALFAPS() - 1; apsId >= 0; apsId--)
-#else
-        for (int apsId = ALF_CTB_MAX_NUM_APS - 1; apsId >= 0; apsId--)
-#endif
         {
           ParameterSetMap<APS>* apsMap = m_pcEncLib->getApsMap();
           int psId = ( apsId << NUM_APS_TYPE_LEN ) + ALF_APS;
@@ -3664,7 +3626,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
       }
     }
 
-#if JVET_X0048_X0103_FILM_GRAIN
     if (m_pcCfg->getFilmGrainAnalysisEnabled())
     {
       int picPoc        = pcPic->getPOC();
@@ -3694,7 +3655,6 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         m_FGAnalyser.estimate_grain(pcPic);
       }
     }
-#endif
 
     if( encPic || decPic )
     {
@@ -3796,11 +3756,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
       if (pcSlice->getSPS()->getALFEnabledFlag() && (pcSlice->getAlfEnabledFlag(COMPONENT_Y) || pcSlice->getCcAlfCbEnabledFlag() || pcSlice->getCcAlfCrEnabledFlag()))
       {
-#if JVET_X0143_ALF_APS_CHANGES
         for (int apsId = 0; apsId < m_pcCfg->getMaxNumALFAPS(); apsId++)
-#else
-        for (int apsId = 0; apsId < ALF_CTB_MAX_NUM_APS; apsId++)
-#endif
         {
           ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
 

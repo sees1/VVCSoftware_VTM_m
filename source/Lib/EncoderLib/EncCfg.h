@@ -235,18 +235,12 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
-#if JVET_X0079_MODIFIED_BITRATE
   bool      m_allRapPicturesFlag;
-#else
-  bool      m_generalLowerBitRateConstraintFlag;
-#endif
-#if JVET_X0076_X0095_V2_GCI
   bool      m_noExtendedPrecisionProcessingConstraintFlag;
   bool      m_noTsResidualCodingRiceConstraintFlag;
   bool      m_noRrcRiceExtensionConstraintFlag;
   bool      m_noPersistentRiceAdaptationConstraintFlag;
   bool      m_noReverseLastSigCoeffConstraintFlag;
-#endif
 
   /* profile & level */
   Profile::Name m_profile;
@@ -658,7 +652,6 @@ protected:
   uint8_t   m_fgcSEIBlendingModeID;
   uint8_t   m_fgcSEILog2ScaleFactor;
   bool      m_fgcSEICompModelPresent[MAX_NUM_COMPONENT];
-#if JVET_X0048_X0103_FILM_GRAIN
   bool      m_fgcSEIAnalysisEnabled;
   bool      m_fgcSEIPerPictureSEI;
   uint8_t   m_fgcSEINumModelValuesMinus1          [MAX_NUM_COMPONENT];
@@ -666,7 +659,6 @@ protected:
   uint8_t   m_fgcSEIIntensityIntervalLowerBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint8_t   m_fgcSEIIntensityIntervalUpperBound   [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES];
   uint32_t  m_fgcSEICompModelValue                [MAX_NUM_COMPONENT][MAX_NUM_INTENSITIES][MAX_NUM_MODEL_VALUES];
-#endif
 // cll SEI
   bool      m_cllSEIEnabled;
   uint16_t  m_cllSEIMaxContentLevel;
@@ -863,10 +855,8 @@ protected:
 
   CfgVPSParameters m_cfgVPSParameters;
 
-#if JVET_X0143_ALF_APS_CHANGES
   int         m_maxNumAlfAps;
   bool        m_constantJointCbCrSignFlag;
-#endif
   bool        m_alf;                                          ///< Adaptive Loop Filter
   bool        m_alfTrueOrg;
   double      m_alfStrengthLuma;
@@ -1035,14 +1025,8 @@ public:
   void      setNoGdrConstraintFlag(bool val) { m_noGdrConstraintFlag = val; }
   bool      getNoApsConstraintFlag() const { return m_noApsConstraintFlag; }
   void      setNoApsConstraintFlag(bool val) { m_noApsConstraintFlag = val; }
-#if JVET_X0079_MODIFIED_BITRATE
   bool      getAllRapPicturesFlag() const { return m_allRapPicturesFlag; }
   void      setAllRapPicturesFlag(bool val) { m_allRapPicturesFlag = val; }
-#else
-  bool      getGeneralLowerBitRateConstraintFlag() const { return m_generalLowerBitRateConstraintFlag; }
-  void      setGeneralLowerBitRateConstraintFlag(bool val) { m_generalLowerBitRateConstraintFlag = val; }
-#endif
-#if JVET_X0076_X0095_V2_GCI
   bool      getNoExtendedPrecisionProcessingConstraintFlag() const { return m_noExtendedPrecisionProcessingConstraintFlag; }
   void      setNoExtendedPrecisionProcessingConstraintFlag(bool val) { m_noExtendedPrecisionProcessingConstraintFlag = val; }
   bool      getNoTsResidualCodingRiceConstraintFlag() const { return m_noTsResidualCodingRiceConstraintFlag; }
@@ -1053,7 +1037,6 @@ public:
   void      setNoPersistentRiceAdaptationConstraintFlag(bool val) { m_noPersistentRiceAdaptationConstraintFlag = val; }
   bool      getNoReverseLastSigCoeffConstraintFlag() const { return m_noReverseLastSigCoeffConstraintFlag; }
   void      setNoReverseLastSigCoeffConstraintFlag(bool val) { m_noReverseLastSigCoeffConstraintFlag = val; }
-#endif
 
   void      setFrameRate                    ( int   i )      { m_iFrameRate = i; }
   void      setFrameSkip                    ( uint32_t  i )      { m_FrameSkip = i; }
@@ -1890,7 +1873,6 @@ public:
   uint8_t getFilmGrainCharactersticsSEILog2ScaleFactor()             { return m_fgcSEILog2ScaleFactor; }
   void  setFGCSEICompModelPresent(bool b, int index)                 { m_fgcSEICompModelPresent[index] = b; }
   bool  getFGCSEICompModelPresent(int index)                         { return m_fgcSEICompModelPresent[index]; }
-#if JVET_X0048_X0103_FILM_GRAIN
   bool*     getFGCSEICompModelPresent                 ()                        { return m_fgcSEICompModelPresent; }
   void      setFilmGrainAnalysisEnabled               (bool b)                  { m_fgcSEIAnalysisEnabled = b; }
   bool      getFilmGrainAnalysisEnabled               ()                        { return m_fgcSEIAnalysisEnabled; }
@@ -1906,7 +1888,6 @@ public:
   uint8_t   getFGCSEIIntensityIntervalUpperBound(int index, int ctr)            { return m_fgcSEIIntensityIntervalUpperBound[index][ctr]; }
   void      setFGCSEICompModelValue             (uint32_t v, int index, int ctr, int modelCtr)  { m_fgcSEICompModelValue[index][ctr][modelCtr] = v; }
   uint32_t  getFGCSEICompModelValue             (int index, int ctr, int modelCtr)              { return m_fgcSEICompModelValue[index][ctr][modelCtr]; }
-#endif
   // cll SEI
   void  setCLLSEIEnabled(bool b)                                     { m_cllSEIEnabled = b; }
   bool  getCLLSEIEnabled()                                           { return m_cllSEIEnabled; }
@@ -2303,12 +2284,10 @@ public:
   void         setDebugCTU( int i )                                  { m_debugCTU = i; }
   int          getDebugCTU()                                   const { return m_debugCTU; }
 
-#if JVET_X0143_ALF_APS_CHANGES
   void         setMaxNumALFAPS(int n)                                 { m_maxNumAlfAps = n; }
   int          getMaxNumALFAPS()                                const { return m_maxNumAlfAps; }
   void         setConstantJointCbCrSignFlag(bool b)                   { m_constantJointCbCrSignFlag = b; }
   int          getConstantJointCbCrSignFlag()                   const { return m_constantJointCbCrSignFlag; }
-#endif
 
   void         setUseALF( bool b ) { m_alf = b; }
   bool         getUseALF()                                      const { return m_alf; }

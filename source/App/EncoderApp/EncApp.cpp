@@ -453,16 +453,7 @@ void EncApp::xInitLibCfg()
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
-#if JVET_X0079_MODIFIED_BITRATE
     m_cEncLib.setAllRapPicturesFlag(m_allRapPicturesFlag);
-#else
-    m_cEncLib.setGeneralLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
-    if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
-    {
-      CHECK(m_generalLowerBitRateConstraintFlag==0, "generalLowerBitRateConstraintFlag shall be 1 when non-Intra/Still Picture operation range extension profiles are used");
-    }
-#endif
-#if JVET_X0076_X0095_V2_GCI
     m_cEncLib.setNoExtendedPrecisionProcessingConstraintFlag(m_noExtendedPrecisionProcessingConstraintFlag);
     CHECK(m_noExtendedPrecisionProcessingConstraintFlag && m_extendedPrecisionProcessingFlag, "ExtendedPrecision shall be deactivated when m_noExtendedPrecisionProcessingConstraintFlag is equal to 1");
     m_cEncLib.setNoTsResidualCodingRiceConstraintFlag(m_noTsResidualCodingRiceConstraintFlag);
@@ -473,7 +464,6 @@ void EncApp::xInitLibCfg()
     CHECK(m_noPersistentRiceAdaptationConstraintFlag && m_persistentRiceAdaptationEnabledFlag, "GolombRiceParameterAdaptation shall be deactivated when m_noPersistentRiceAdaptationConstraintFlag is equal to 1");
     m_cEncLib.setNoReverseLastSigCoeffConstraintFlag(m_noReverseLastSigCoeffConstraintFlag);
     CHECK(m_noReverseLastSigCoeffConstraintFlag && m_reverseLastSigCoeffEnabledFlag, "ReverseLastSigCoeff shall be deactivated when m_noReverseLastSigCoeffConstraintFlag is equal to 1");
-#endif
   }
   else
   {
@@ -539,18 +529,12 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoActConstraintFlag(false);
     m_cEncLib.setNoLmcsConstraintFlag(false);
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
-#if JVET_X0079_MODIFIED_BITRATE
     m_cEncLib.setAllRapPicturesFlag(false);
-#else
-    m_cEncLib.setGeneralLowerBitRateConstraintFlag(false);
-#endif
-#if JVET_X0076_X0095_V2_GCI
     m_cEncLib.setNoExtendedPrecisionProcessingConstraintFlag(false);
     m_cEncLib.setNoTsResidualCodingRiceConstraintFlag(false);
     m_cEncLib.setNoRrcRiceExtensionConstraintFlag(false);
     m_cEncLib.setNoPersistentRiceAdaptationConstraintFlag(false);
     m_cEncLib.setNoReverseLastSigCoeffConstraintFlag(false);
-#endif
   }
 
   //====== Coding Structure ========
@@ -1001,13 +985,10 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setFilmGrainCharactersticsSEISepColourDescPresent    (m_fgcSEISepColourDescPresentFlag);
   m_cEncLib.setFilmGrainCharactersticsSEIBlendingModeID          ((uint8_t)m_fgcSEIBlendingModeID);
   m_cEncLib.setFilmGrainCharactersticsSEILog2ScaleFactor         ((uint8_t)m_fgcSEILog2ScaleFactor);
-#if JVET_X0048_X0103_FILM_GRAIN
   m_cEncLib.setFilmGrainAnalysisEnabled                          (m_fgcSEIAnalysisEnabled);
   m_cEncLib.setFilmGrainCharactersticsSEIPerPictureSEI           (m_fgcSEIPerPictureSEI);
-#endif
   for (int i = 0; i < MAX_NUM_COMPONENT; i++) {
     m_cEncLib.setFGCSEICompModelPresent                          (m_fgcSEICompModelPresent[i], i);
-#if JVET_X0048_X0103_FILM_GRAIN
     if (m_fgcSEICompModelPresent[i]) {
       m_cEncLib.setFGCSEINumIntensityIntervalMinus1              ((uint8_t)m_fgcSEINumIntensityIntervalMinus1[i], i);
       m_cEncLib.setFGCSEINumModelValuesMinus1                    ((uint8_t)m_fgcSEINumModelValuesMinus1[i], i);
@@ -1019,7 +1000,6 @@ void EncApp::xInitLibCfg()
         }
       }
     }
-#endif
   }
   // content light level
   m_cEncLib.setCLLSEIEnabled                                     (m_cllSEIEnabled);
@@ -1220,10 +1200,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setReshapeIntraCMD                                   ( m_intraCMD );
   m_cEncLib.setReshapeCW                                         ( m_reshapeCW );
   m_cEncLib.setReshapeCSoffset                                   ( m_CSoffset );
-#if JVET_X0143_ALF_APS_CHANGES
   m_cEncLib.setMaxNumALFAPS                                      (m_maxNumAlfAps);
   m_cEncLib.setConstantJointCbCrSignFlag                         (m_constantJointCbCrSignFlag);
-#endif
 #if JVET_O0756_CALCULATE_HDRMETRICS
   for (int i=0; i<hdrtoolslib::NB_REF_WHITE; i++)
   {
@@ -1344,13 +1322,11 @@ void EncApp::createLib( const int layerIdx )
     m_filteredOrgPic = new PelStorage;
     m_filteredOrgPic->create( unitArea );
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   if ( m_fgcSEIAnalysisEnabled )
   {
     m_filteredOrgPicForFG = new PelStorage;
     m_filteredOrgPicForFG->create( unitArea );
   }
-#endif
 
   if( !m_bitstream.is_open() )
   {
@@ -1380,7 +1356,6 @@ void EncApp::createLib( const int layerIdx )
       m_inputColourSpaceConvert, m_iQP, m_gopBasedTemporalFilterStrengths,
       m_gopBasedTemporalFilterFutureReference );
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   if ( m_fgcSEIAnalysisEnabled )
   {
     bool temporalFilterFutureReference = 1;
@@ -1398,7 +1373,6 @@ void EncApp::createLib( const int layerIdx )
                                 m_chromaFormatIDC, m_inputColourSpaceConvert, m_iQP, filteredFramesAndStrengths,
                                 temporalFilterFutureReference );
   }
-  #endif
 }
 
 void EncApp::destroyLib()
@@ -1432,14 +1406,12 @@ void EncApp::destroyLib()
     m_filteredOrgPic->destroy();
     delete m_filteredOrgPic;
   }
-#if JVET_X0048_X0103_FILM_GRAIN
   if (m_fgcSEIAnalysisEnabled)
   {
     m_filteredOrgPicForFG->destroy();
     delete m_filteredOrgPicForFG;
     m_filteredOrgPicForFG = nullptr;
   }
-#endif
 #if EXTENSION_360_VIDEO
   delete m_ext360;
 #endif
@@ -1467,7 +1439,6 @@ bool EncApp::encodePrep( bool& eos )
   m_cVideoIOYuvInputFile.read( *m_orgPic, *m_trueOrgPic, ipCSC, m_sourcePadding, m_InputChromaFormatIDC, m_bClipInputVideoToRec709Range );
 #endif
 
-#if JVET_X0048_X0103_FILM_GRAIN
   if (m_fgcSEIAnalysisEnabled)
   {
     m_filteredOrgPicForFG->copyFrom(*m_orgPic);
@@ -1481,13 +1452,6 @@ bool EncApp::encodePrep( bool& eos )
   {
     m_temporalFilterForFG.filter(m_filteredOrgPicForFG, m_iFrameRcvd);
   }
-#else
-  if (m_gopBasedTemporalFilterEnabled)
-  {
-    m_temporalFilter.filter(m_orgPic, m_iFrameRcvd);
-    m_filteredOrgPic->copyFrom(*m_orgPic);
-  }
-#endif
 
   // increase number of received frames
   m_iFrameRcvd++;
@@ -1512,11 +1476,7 @@ bool EncApp::encodePrep( bool& eos )
   }
   else
   {
-#if JVET_X0048_X0103_FILM_GRAIN
     keepDoing = m_cEncLib.encodePrep( eos, m_flush ? 0 : m_orgPic, m_flush ? 0 : m_trueOrgPic, m_flush ? 0 : m_filteredOrgPic, m_flush ? 0 : m_filteredOrgPicForFG, snrCSC, m_recBufList, m_numEncoded );
-#else
-    keepDoing = m_cEncLib.encodePrep( eos, m_flush ? 0 : m_orgPic, m_flush ? 0 : m_trueOrgPic, m_flush ? 0 : m_filteredOrgPic, snrCSC, m_recBufList, m_numEncoded );
-#endif
   }
 
   return keepDoing;

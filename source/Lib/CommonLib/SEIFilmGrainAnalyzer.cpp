@@ -37,7 +37,6 @@
 
 #include "SEIFilmGrainAnalyzer.h"
 
-#if JVET_X0048_X0103_FILM_GRAIN
 
 // ====================================================================================================================
 // Edge detection - Canny
@@ -1870,4 +1869,3 @@ void FGAnalyser::extend_points(std::vector<int> &data_x, std::vector<int> &data_
   }
 }
 
-#endif

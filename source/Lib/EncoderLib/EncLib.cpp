@@ -293,7 +293,6 @@ void EncLib::init(AUWriterIf *auWriterIf)
     xInitPPS(pps2, sps0);
     xInitPPSforLT(pps2);
   }
-#if JVET_X0101_ADD_WRAPAROUND_CONSTRAINT
   if( this->m_rprRASLtoolSwitch && m_wrapAround )
   {
     PPS &pps4 = *(m_ppsMap.allocatePS(4));
@@ -304,7 +303,6 @@ void EncLib::init(AUWriterIf *auWriterIf)
     pps4.setPicWidthMinusWrapAroundOffset( 0 );
     pps4.setWrapAroundOffset             ( 0 );
   }
-#endif
   xInitPicHeader(m_picHeader, sps0, pps0);
 
   // initialize processing unit classes
@@ -476,11 +474,7 @@ void EncLib::deletePicBuffer()
   m_cListPic.clear();
 }
 
-#if JVET_X0048_X0103_FILM_GRAIN
 bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYuvTrueOrg, PelStorage* pcPicYuvFilteredOrg, PelStorage* pcPicYuvFilteredOrgForFG, const InputColourSpaceConversion snrCSC, std::list<PelUnitBuf*>& rcListPicYuvRecOut, int& iNumEncoded )
-#else
-bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYuvTrueOrg, PelStorage* pcPicYuvFilteredOrg, const InputColourSpaceConversion snrCSC, std::list<PelUnitBuf*>& rcListPicYuvRecOut, int& iNumEncoded )
-#endif
 {
   if( m_compositeRefEnabled && m_cGOPEncoder.getPicBg()->getSpliceFull() && m_iPOCLast >= 10 && m_iNumPicRcvd == 0 && m_cGOPEncoder.getEncodedLTRef() == false )
   {
@@ -613,12 +607,10 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
       {
         pcPicCurr->M_BUFS( 0, PIC_FILTERED_ORIGINAL ).swap( *pcPicYuvFilteredOrg );
       }
-#if JVET_X0048_X0103_FILM_GRAIN
       if (m_fgcSEIAnalysisEnabled)
       {
         pcPicCurr->M_BUFS( 0, PIC_FILTERED_ORIGINAL_FG ).swap( *pcPicYuvFilteredOrgForFG );
       }
-#endif
     }
 #if GDR_ENABLED
     PicHeader *picHeader = new PicHeader();
@@ -901,9 +893,7 @@ void EncLib::xGetNewPicBuffer ( std::list<PelUnitBuf*>& rcListPicYuvRecOut, Pict
   {
     rpcPic = new Picture;
     rpcPic->create( sps.getChromaFormatIdc(), Size( pps.getPicWidthInLumaSamples(), pps.getPicHeightInLumaSamples() ), sps.getMaxCUWidth(), sps.getMaxCUWidth() + 16, false, m_layerId, m_gopBasedTemporalFilterEnabled
-#if JVET_X0048_X0103_FILM_GRAIN
                    , m_fgcSEIAnalysisEnabled
-#endif
     );
     if (m_resChangeInClvsEnabled)
     {
@@ -1144,18 +1134,12 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoCraConstraintFlag(m_noCraConstraintFlag);
   cinfo->setNoGdrConstraintFlag(m_noGdrConstraintFlag);
   cinfo->setNoApsConstraintFlag(m_noApsConstraintFlag);
-#if JVET_X0079_MODIFIED_BITRATE
   cinfo->setAllRapPicturesFlag(m_allRapPicturesFlag);
-#else
-  cinfo->setLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
-#endif
-#if JVET_X0076_X0095_V2_GCI
   cinfo->setNoExtendedPrecisionProcessingConstraintFlag(m_noExtendedPrecisionProcessingConstraintFlag);
   cinfo->setNoTsResidualCodingRiceConstraintFlag(m_noTsResidualCodingRiceConstraintFlag);
   cinfo->setNoRrcRiceExtensionConstraintFlag(m_noRrcRiceExtensionConstraintFlag);
   cinfo->setNoPersistentRiceAdaptationConstraintFlag(m_noPersistentRiceAdaptationConstraintFlag);
   cinfo->setNoReverseLastSigCoeffConstraintFlag(m_noReverseLastSigCoeffConstraintFlag);
-#endif
 
   profileTierLevel->setLevelIdc                    (m_level);
   profileTierLevel->setTierFlag                    (m_levelTier);

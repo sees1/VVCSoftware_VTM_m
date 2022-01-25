@@ -51,7 +51,6 @@
 #include <cmath>
 #include <algorithm>
 
-#if JVET_X0048_X0103_FILM_GRAIN
 
 static const int      MAX_REAL_SCALE                =     32;
 static const double   PI                            =     3.14159265358979323846;
@@ -199,7 +198,6 @@ private:
 }; // END CLASS DEFINITION
 
 //! \}
-#endif
 
 #endif // __SEIFILMGRAINANALYZER__
 
