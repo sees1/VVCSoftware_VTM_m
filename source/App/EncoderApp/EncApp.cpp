@@ -453,15 +453,7 @@ void EncApp::xInitLibCfg()
     CHECK(m_noVirtualBoundaryConstraintFlag && m_virtualBoundariesEnabledFlag, "Virtuall boundaries shall be deactivated when m_noVirtualBoundaryConstraintFlag is equal to 1");
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(m_noChromaQpOffsetConstraintFlag);
     CHECK(m_noChromaQpOffsetConstraintFlag && m_cuChromaQpOffsetSubdiv, "Chroma Qp offset shall be 0 when m_noChromaQpOffsetConstraintFlag is equal to 1");
-#if JVET_X0079_MODIFIED_BITRATE
     m_cEncLib.setAllRapPicturesFlag(m_allRapPicturesFlag);
-#else
-    m_cEncLib.setGeneralLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
-    if (m_profile == Profile::MAIN_12 || m_profile == Profile::MAIN_12_444 || m_profile == Profile::MAIN_16_444)
-    {
-      CHECK(m_generalLowerBitRateConstraintFlag==0, "generalLowerBitRateConstraintFlag shall be 1 when non-Intra/Still Picture operation range extension profiles are used");
-    }
-#endif
 #if JVET_X0076_X0095_V2_GCI
     m_cEncLib.setNoExtendedPrecisionProcessingConstraintFlag(m_noExtendedPrecisionProcessingConstraintFlag);
     CHECK(m_noExtendedPrecisionProcessingConstraintFlag && m_extendedPrecisionProcessingFlag, "ExtendedPrecision shall be deactivated when m_noExtendedPrecisionProcessingConstraintFlag is equal to 1");
@@ -539,11 +531,7 @@ void EncApp::xInitLibCfg()
     m_cEncLib.setNoActConstraintFlag(false);
     m_cEncLib.setNoLmcsConstraintFlag(false);
     m_cEncLib.setNoChromaQpOffsetConstraintFlag(false);
-#if JVET_X0079_MODIFIED_BITRATE
     m_cEncLib.setAllRapPicturesFlag(false);
-#else
-    m_cEncLib.setGeneralLowerBitRateConstraintFlag(false);
-#endif
 #if JVET_X0076_X0095_V2_GCI
     m_cEncLib.setNoExtendedPrecisionProcessingConstraintFlag(false);
     m_cEncLib.setNoTsResidualCodingRiceConstraintFlag(false);

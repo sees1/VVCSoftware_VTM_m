@@ -1144,11 +1144,7 @@ void EncLib::xInitSPS( SPS& sps )
   cinfo->setNoCraConstraintFlag(m_noCraConstraintFlag);
   cinfo->setNoGdrConstraintFlag(m_noGdrConstraintFlag);
   cinfo->setNoApsConstraintFlag(m_noApsConstraintFlag);
-#if JVET_X0079_MODIFIED_BITRATE
   cinfo->setAllRapPicturesFlag(m_allRapPicturesFlag);
-#else
-  cinfo->setLowerBitRateConstraintFlag(m_generalLowerBitRateConstraintFlag);
-#endif
 #if JVET_X0076_X0095_V2_GCI
   cinfo->setNoExtendedPrecisionProcessingConstraintFlag(m_noExtendedPrecisionProcessingConstraintFlag);
   cinfo->setNoTsResidualCodingRiceConstraintFlag(m_noTsResidualCodingRiceConstraintFlag);

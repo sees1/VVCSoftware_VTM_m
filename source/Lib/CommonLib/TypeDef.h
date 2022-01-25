@@ -56,7 +56,6 @@
 #define JVET_X0143_ALF_APS_ID_OFFSET                         0 // A value between 0 to 7 inclusive. This macro should be kept, or to be defined as a configuration parameter if possible.
 
 
-#define JVET_X0079_MODIFIED_BITRATE                       1 // JVET-X0079v3 (changes to JVET-W2005)
 
 #define JVET_X0106_INTRA_CONSTRAINT                       1 // JVET-X0106 Constraint on non I=frames in Intra profiles
 

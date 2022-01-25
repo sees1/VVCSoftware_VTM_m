@@ -235,11 +235,7 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
-#if JVET_X0079_MODIFIED_BITRATE
   bool      m_allRapPicturesFlag;
-#else
-  bool      m_generalLowerBitRateConstraintFlag;
-#endif
 #if JVET_X0076_X0095_V2_GCI
   bool      m_noExtendedPrecisionProcessingConstraintFlag;
   bool      m_noTsResidualCodingRiceConstraintFlag;
@@ -1033,13 +1029,8 @@ public:
   void      setNoGdrConstraintFlag(bool val) { m_noGdrConstraintFlag = val; }
   bool      getNoApsConstraintFlag() const { return m_noApsConstraintFlag; }
   void      setNoApsConstraintFlag(bool val) { m_noApsConstraintFlag = val; }
-#if JVET_X0079_MODIFIED_BITRATE
   bool      getAllRapPicturesFlag() const { return m_allRapPicturesFlag; }
   void      setAllRapPicturesFlag(bool val) { m_allRapPicturesFlag = val; }
-#else
-  bool      getGeneralLowerBitRateConstraintFlag() const { return m_generalLowerBitRateConstraintFlag; }
-  void      setGeneralLowerBitRateConstraintFlag(bool val) { m_generalLowerBitRateConstraintFlag = val; }
-#endif
 #if JVET_X0076_X0095_V2_GCI
   bool      getNoExtendedPrecisionProcessingConstraintFlag() const { return m_noExtendedPrecisionProcessingConstraintFlag; }
   void      setNoExtendedPrecisionProcessingConstraintFlag(bool val) { m_noExtendedPrecisionProcessingConstraintFlag = val; }

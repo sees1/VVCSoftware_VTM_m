@@ -2594,7 +2594,6 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     picHeader->setRecoveryPocCnt( -1 );
   }
 
-#if JVET_X0079_MODIFIED_BITRATE || JVET_X0106_INTRA_CONSTRAINT
   bool isIrapOrGdrWRecoveryPocCnt0 = (picHeader->getGdrOrIrapPicFlag() && !picHeader->getGdrPicFlag()) ||
                                      (picHeader->getGdrPicFlag() && picHeader->getRecoveryPocCnt() == 0);
 
@@ -2608,12 +2607,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
     CHECK(isIntraProfile && !isIrapOrGdrWRecoveryPocCnt0,
           "Invalid non-irap pictures or gdr pictures with ph_recovery_poc_cnt!=0 for Intra profile");
 #endif
-#if JVET_X0079_MODIFIED_BITRATE
     CHECK(sps->getProfileTierLevel()->getConstraintInfo()->getAllRapPicturesFlag() == 1 && !isIrapOrGdrWRecoveryPocCnt0,
           "gci_all_rap_pictures_flag equal to 1 specifies that all pictures in OlsInScope are IRAP pictures or GDR pictures with ph_recovery_poc_cnt equal to 0");
   }
-#endif
-#endif
 
   std::vector<bool> phExtraBitsPresent = sps->getExtraPHBitPresentFlags();
   for (int i=0; i< sps->getNumExtraPHBytes() * 8; i++)
@@ -4596,7 +4592,6 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo, const ProfileTie
     READ_FLAG(symbol, "gci_no_lmcs_constraint_flag");                    cinfo->setNoLmcsConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_ladf_constraint_flag");                    cinfo->setNoLadfConstraintFlag(symbol > 0 ? true : false);
     READ_FLAG(symbol, "gci_no_virtual_boundaries_constraint_flag");      cinfo->setNoVirtualBoundaryConstraintFlag(symbol > 0 ? true : false);
-#if JVET_X0079_MODIFIED_BITRATE
     READ_CODE(8, symbol, "gci_num_additional_bits");
     uint32_t const numAdditionalBits = symbol;
     int numAdditionalBitsUsed;
@@ -4619,24 +4614,6 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo, const ProfileTie
       numAdditionalBitsUsed = 0;
     }
     for (int i = 0; i < numAdditionalBits - numAdditionalBitsUsed; i++)
-#else
-    READ_CODE(8, symbol, "gci_num_reserved_bits");
-    uint32_t const numReservedBits = symbol;
-    int numReservedBitsUsed;
-    if (numReservedBits > 0)
-    {
-      READ_FLAG(symbol, "general_lower_bit_rate_constraint_flag");       cinfo->setLowerBitRateConstraintFlag(symbol > 0 ? true : false);
-      numReservedBitsUsed = 1;
-      Profile::Name profile = ptl->getProfileIdc();
-      CHECK((profile == Profile::MAIN_12 || profile == Profile::MAIN_12_444 || profile == Profile::MAIN_16_444) &&
-        symbol == 0, "general_lower_bitrate_constraint_flag shall be equal to 1 for non-Intra/Still Picture operation range extension profiles.");
-    }
-    else
-    {
-      numReservedBitsUsed = 0;
-    }
-    for (int i = 0; i < numReservedBits - numReservedBitsUsed; i++)
-#endif
     {
       READ_FLAG(symbol, "gci_reserved_zero_bit");                    CHECK(symbol != 0, "gci_reserved_zero_bit not equal to zero");
     }

@@ -2726,7 +2726,6 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo, const Profil
         profile == Profile::MAIN_12_444 || profile == Profile::MAIN_12_444_INTRA || profile == Profile::MAIN_12_444_STILL_PICTURE ||
         profile == Profile::MAIN_16_444 || profile == Profile::MAIN_16_444_INTRA || profile == Profile::MAIN_16_444_STILL_PICTURE)
     {
-#if JVET_X0079_MODIFIED_BITRATE
 #if JVET_X0076_X0095_V2_GCI
       int numAdditionalBits = 6;
 #else
@@ -2741,19 +2740,10 @@ void  HLSWriter::codeConstraintInfo  ( const ConstraintInfo* cinfo, const Profil
       WRITE_FLAG(cinfo->getNoPersistentRiceAdaptationConstraintFlag() ? 1 : 0, "gci_no_persistent_rice_adaptation_constraint_flag");
       WRITE_FLAG(cinfo->getNoReverseLastSigCoeffConstraintFlag() ? 1 : 0, "gci_no_reverse_last_sig_coeff_constraint_flag");
 #endif
-#else
-      int numReservedBits = 1;
-      WRITE_CODE(numReservedBits, 8, "gci_num_reserved_bits");
-      WRITE_FLAG(cinfo->getLowerBitRateConstraintFlag() ? 1 : 0, "general_lower_bit_rate_constraint_flag");
-#endif
     }
     else
     {
-#if JVET_X0079_MODIFIED_BITRATE
       WRITE_CODE(0, 8, "gci_num_additional_bits");
-#else
-      WRITE_CODE(0, 8, "gci_num_reserved_bits");
-#endif
     }
   }
 

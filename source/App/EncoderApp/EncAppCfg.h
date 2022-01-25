@@ -189,11 +189,7 @@ protected:
   bool      m_noCraConstraintFlag;
   bool      m_noGdrConstraintFlag;
   bool      m_noApsConstraintFlag;
-#if JVET_X0079_MODIFIED_BITRATE
   bool      m_allRapPicturesFlag;
-#else
-  bool      m_generalLowerBitRateConstraintFlag;
-#endif
 #if JVET_X0076_X0095_V2_GCI
   bool      m_noExtendedPrecisionProcessingConstraintFlag;
   bool      m_noTsResidualCodingRiceConstraintFlag;

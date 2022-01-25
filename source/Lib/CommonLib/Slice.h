@@ -249,9 +249,6 @@ class ConstraintInfo
   uint32_t          m_maxBitDepthConstraintIdc;
   int               m_maxChromaFormatConstraintIdc;
   bool              m_onePictureOnlyConstraintFlag;
-#if !JVET_X0079_MODIFIED_BITRATE
-  bool              m_lowerBitRateConstraintFlag;
-#endif
   bool              m_allLayersIndependentConstraintFlag;
   bool              m_noMrlConstraintFlag;
   bool              m_noIspConstraintFlag;
@@ -306,9 +303,7 @@ class ConstraintInfo
   bool              m_noCraConstraintFlag;
   bool              m_noGdrConstraintFlag;
   bool              m_noApsConstraintFlag;
-#if JVET_X0079_MODIFIED_BITRATE
   bool              m_allRapPicturesFlag;
-#endif
 #if JVET_X0076_X0095_V2_GCI
   bool              m_noExtendedPrecisionProcessingConstraintFlag;
   bool              m_noTsResidualCodingRiceConstraintFlag;
@@ -333,9 +328,6 @@ public:
     , m_maxBitDepthConstraintIdc  (  16)
     , m_maxChromaFormatConstraintIdc(CHROMA_444)
     , m_onePictureOnlyConstraintFlag (false)
-#if !JVET_X0079_MODIFIED_BITRATE
-    , m_lowerBitRateConstraintFlag (false )
-#endif
     , m_allLayersIndependentConstraintFlag(false)
     , m_noMrlConstraintFlag(false)
     , m_noIspConstraintFlag(false)
@@ -389,9 +381,7 @@ public:
     , m_noCraConstraintFlag (false)
     , m_noGdrConstraintFlag (false)
     , m_noApsConstraintFlag (false)
-#if JVET_X0079_MODIFIED_BITRATE
     , m_allRapPicturesFlag (false)
-#endif
 #if JVET_X0076_X0095_V2_GCI
     , m_noExtendedPrecisionProcessingConstraintFlag (false)
     , m_noTsResidualCodingRiceConstraintFlag (false)
@@ -445,10 +435,6 @@ public:
   bool          getOnePictureOnlyConstraintFlag() const { return m_onePictureOnlyConstraintFlag; }
   void          setOnePictureOnlyConstraintFlag(bool b) { m_onePictureOnlyConstraintFlag = b; }
 
-#if !JVET_X0079_MODIFIED_BITRATE
-  bool          getLowerBitRateConstraintFlag() const { return m_lowerBitRateConstraintFlag; }
-  void          setLowerBitRateConstraintFlag(bool b) { m_lowerBitRateConstraintFlag = b; }
-#endif
   bool          getAllLayersIndependentConstraintFlag() const { return m_allLayersIndependentConstraintFlag; }
   void          setAllLayersIndependentConstraintFlag(bool b) { m_allLayersIndependentConstraintFlag = b; }
   bool          getNoMrlConstraintFlag() const { return m_noMrlConstraintFlag; }
@@ -555,10 +541,8 @@ public:
   void          setNoGdrConstraintFlag(bool bVal) { m_noGdrConstraintFlag = bVal; }
   bool          getNoApsConstraintFlag() const { return m_noApsConstraintFlag; }
   void          setNoApsConstraintFlag(bool bVal) { m_noApsConstraintFlag = bVal; }
-#if JVET_X0079_MODIFIED_BITRATE
   bool          getAllRapPicturesFlag() const { return m_allRapPicturesFlag; }
   void          setAllRapPicturesFlag(bool bVal) { m_allRapPicturesFlag = bVal; }
-#endif
 #if JVET_X0076_X0095_V2_GCI
   bool          getNoExtendedPrecisionProcessingConstraintFlag() const { return m_noExtendedPrecisionProcessingConstraintFlag; }
   void          setNoExtendedPrecisionProcessingConstraintFlag(bool val) { m_noExtendedPrecisionProcessingConstraintFlag = val; }
