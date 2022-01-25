@@ -2599,14 +2599,12 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 
   if (!isIrapOrGdrWRecoveryPocCnt0)
   {
-#if JVET_X0106_INTRA_CONSTRAINT
     const Profile::Name profile = sps->getProfileTierLevel()->getProfileIdc();
     bool isIntraProfile = profile == Profile::MAIN_12_INTRA || profile == Profile::MAIN_12_444_INTRA ||
                           profile == Profile::MAIN_16_444_INTRA;
 
     CHECK(isIntraProfile && !isIrapOrGdrWRecoveryPocCnt0,
           "Invalid non-irap pictures or gdr pictures with ph_recovery_poc_cnt!=0 for Intra profile");
-#endif
     CHECK(sps->getProfileTierLevel()->getConstraintInfo()->getAllRapPicturesFlag() == 1 && !isIrapOrGdrWRecoveryPocCnt0,
           "gci_all_rap_pictures_flag equal to 1 specifies that all pictures in OlsInScope are IRAP pictures or GDR pictures with ph_recovery_poc_cnt equal to 0");
   }

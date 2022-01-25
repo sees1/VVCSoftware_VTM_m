@@ -57,7 +57,6 @@
 
 
 
-#define JVET_X0106_INTRA_CONSTRAINT                       1 // JVET-X0106 Constraint on non I=frames in Intra profiles
 
 #define JVET_X0137_ETSRC_RLSCP_DETERMINATION              1 // JVET-X0137 Determine signalled parameters for ETSRC and RLSCP using estimated residual
 
