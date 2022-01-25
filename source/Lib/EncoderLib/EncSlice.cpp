@@ -1774,11 +1774,9 @@ void EncSlice::encodeCtus( Picture* pcPic, const bool bCompressEntireSlice, cons
       {
         // Top is available, we use it.
         pCABACWriter->getCtx() = pEncLib->m_entropyCodingSyncContextState;
-#if JVET_X0128_V2_WPP
         pCABACWriter->getCtx().riceStatReset(
           pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA),
           pcSlice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag());
-#endif
         cs.setPrevPLT(pEncLib->m_palettePredictorSyncState);
       }
       prevQP[0] = prevQP[1] = pcSlice->getSliceQp();
@@ -2059,11 +2057,9 @@ void EncSlice::encodeSlice   ( Picture* pcPic, OutputBitstream* pcSubstreams, ui
       {
         // Top is available, so use it.
         m_CABACWriter->getCtx() = m_entropyCodingSyncContextState;
-#if JVET_X0128_V2_WPP
         m_CABACWriter->getCtx().riceStatReset(
           pcSlice->getSPS()->getBitDepth(CHANNEL_TYPE_LUMA),
           pcSlice->getSPS()->getSpsRangeExtension().getPersistentRiceAdaptationEnabledFlag());
-#endif
         cs.setPrevPLT(m_palettePredictorSyncState);
       }
     }

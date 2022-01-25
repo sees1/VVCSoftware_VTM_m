@@ -55,7 +55,6 @@
 //########### place macros to be removed in next cycle below this line ###############
 #define JVET_X0143_ALF_APS_ID_OFFSET                         0 // A value between 0 to 7 inclusive. This macro should be kept, or to be defined as a configuration parameter if possible.
 
-#define JVET_X0128_V2_WPP                                 1 // JVET-X0128 method 2, VVC v2 WPP
 #define JVET_X0073_V2_PROFILE_IDC                         1 // JVET-X0073 decrease profile_idc for 16 bit profiles by 1
 
 #define JVET_X0079_MODIFIED_BITRATE                       1 // JVET-X0079v3 (changes to JVET-W2005)
