@@ -1103,7 +1103,12 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
   m_CABACEstimator->split_cu_mode( split, *tempCS, partitioner );
   m_CABACEstimator->mode_constraint( split, *tempCS, partitioner, modeTypeChild );
 
+#if JVET_Y0126_PERFORMANCE == 1
+  const double factor = ( tempCS->currQP[partitioner.chType] > 30 ? 1.1 : 1.075 )
+                      + ( isChroma( partitioner.chType ) ? 0.2 : 0.0 );
+#else
   const double factor = ( tempCS->currQP[partitioner.chType] > 30 ? 1.1 : 1.075 );
+#endif
   tempCS->useDbCost = m_pcEncCfg->getUseEncDbOpt();
   if (!tempCS->useDbCost)
     CHECK(bestCS->costDbOffset != 0, "error");

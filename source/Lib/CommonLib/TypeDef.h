@@ -53,7 +53,7 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
-
+#define JVET_Y0126_PERFORMANCE                               1  // JVET-Y0126 SW changes and configuration for improved performacnce
 #define JVET_X0143_ALF_APS_ID_OFFSET                         0 // A value between 0 to 7 inclusive. This macro should be kept, or to be defined as a configuration parameter if possible.
 
 //########### place macros to be be kept below this line ###############
