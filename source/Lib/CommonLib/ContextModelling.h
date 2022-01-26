@@ -176,11 +176,24 @@ public:
       {
         sum += abs(pData[2]);
       }
+      else
+      {
+        sum += m_histValue;
+      }
       if (posY < m_height - 1)
       {
         sum += abs(pData[m_width + 1]);
       }
+      else
+      {
+        sum += m_histValue;
+      }
     }
+    else
+    {
+      sum += 2 * m_histValue;
+    }
+
     if (posY < m_height - 1)
     {
       sum += abs(pData[m_width]);
@@ -188,6 +201,14 @@ public:
       {
         sum += abs(pData[m_width << 1]);
       }
+      else
+      {
+        sum += m_histValue;
+      }
+    }
+    else
+    {
+      sum += m_histValue;
     }
     return unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
   }
