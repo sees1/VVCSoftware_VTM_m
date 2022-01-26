@@ -935,18 +935,35 @@ Picture output options: output upscaled (2), decoded but in full resolution buff
 %% GOP based temporal filter parameters
 %%
 
-\begin{OptionTableNoShorthand}{GOP based temporal filter paramters}{tab:gop-based-temporal-filter}
+\begin{OptionTableNoShorthand}{GOP based temporal filter parameters}{tab:gop-based-temporal-filter}
 
 \Option{TemporalFilter} &
 %\ShortOption{\None} &
-\Default{false} &
-Enables or disables GOP based temporal filter.
+\Default{0} &
+Enable motion-compensated temporal pre-filter. When enabled, at least one of TemporalFilterPastRefs and TemporalFilterFutureRefs
+must be larger than 0.
 \\
-\Option{TemporalFilterFutureReference} &
+\Option{TemporalFilterPastRefs} &
 %\ShortOption{\None} &
-\Default{true} &
-Enables or disable referencing future frames in the GOP based temporal filter. Can be used to disable future referencing for
-low delay configurations.
+\Default{4} &
+Number of past frames used by the temporal filter.
+\\
+\Option{TemporalFilterFutureRefs} &
+%\ShortOption{\None} &
+\Default{4} &
+Number of future frames used by the temporal filter. This may be set to 0 to avoid using future frames.
+\\
+\Option{FirstValidFrame} &
+%\ShortOption{\None} &
+\Default{0} &
+Index of first frame in video sequence that may be used by the temporal filter. If a negative value is given, the index defaults to the value
+of FrameSkip.
+\\
+\Option{LastValidFrame} &
+%\ShortOption{\None} &
+\Default{MAX_INT} &
+Index of last frame in video sequence that may be used by the temporal filter. If a negative value is given, the index defaults to the value
+of FrameSkip + FramesToBeEncoded - 1.
 \\
 \Option{TemporalFilterStrengthFrame*} &
 %\ShortOption{\None} &

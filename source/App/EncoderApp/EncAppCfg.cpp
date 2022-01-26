@@ -81,6 +81,8 @@ enum ExtendedProfileName   // this is used for determining profile strings, wher
   AUTO = -1
 };
 
+constexpr int TF_DEFAULT_REFS = 4;
+
 //! \ingroup EncoderApp
 //! \{
 
@@ -1608,9 +1610,12 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     ;
 
   opts.addOptions()
-    ("TemporalFilter",                                m_gopBasedTemporalFilterEnabled,          false,            "Enable GOP based temporal filter. Disabled per default")
-    ("TemporalFilterFutureReference",                 m_gopBasedTemporalFilterFutureReference,   true,            "Enable referencing of future frames in the GOP based temporal filter. This is typically disabled for Low Delay configurations.")
-    ("TemporalFilterStrengthFrame*",                  m_gopBasedTemporalFilterStrengths, std::map<int, double>(), "Strength for every * frame in GOP based temporal filter, where * is an integer."
+    ("TemporalFilter",               m_gopBasedTemporalFilterEnabled,                     false, "Enable GOP based temporal filter. Disabled per default")
+    ("TemporalFilterPastRefs",       m_gopBasedTemporalFilterPastRefs,          TF_DEFAULT_REFS, "Number of past references for temporal prefilter")
+    ("TemporalFilterFutureRefs",     m_gopBasedTemporalFilterFutureRefs,        TF_DEFAULT_REFS, "Number of future references for temporal prefilter")
+    ("FirstValidFrame",              m_firstValidFrame,                                       0, "First valid frame")
+    ("LastValidFrame",               m_lastValidFrame,                                  MAX_INT, "Last valid frame")
+    ("TemporalFilterStrengthFrame*", m_gopBasedTemporalFilterStrengths, std::map<int, double>(), "Strength for every * frame in GOP based temporal filter, where * is an integer."
                                                                                                                   " E.g. --TemporalFilterStrengthFrame8 0.95 will enable GOP based temporal filter at every 8th frame with strength 0.95");
   // clang-format on
 
@@ -1863,6 +1868,15 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
     inputPathPrefix += "/";
   }
   m_inputFileName   = inputPathPrefix + m_inputFileName;
+
+  if (m_firstValidFrame < 0)
+  {
+    m_firstValidFrame = m_FrameSkip;
+  }
+  if (m_lastValidFrame < 0)
+  {
+    m_lastValidFrame = m_firstValidFrame + m_framesToBeEncoded - 1;
+  }
 
   if( m_temporalSubsampleRatio < 1)
   {
@@ -4358,6 +4372,15 @@ bool EncAppCfg::xCheckParameter()
   if (m_gopBasedTemporalFilterEnabled)
   {
     xConfirmPara(m_temporalSubsampleRatio != 1, "GOP Based Temporal Filter only support Temporal sub-sample ratio 1");
+    xConfirmPara(
+      m_gopBasedTemporalFilterPastRefs <= 0 && m_gopBasedTemporalFilterFutureRefs <= 0,
+      "Either TemporalFilterPastRefs or TemporalFilterFutureRefs must be larger than 0 when TemporalFilter is enabled");
+
+    if ((m_gopBasedTemporalFilterPastRefs != 0 && m_gopBasedTemporalFilterPastRefs != TF_DEFAULT_REFS)
+        || (m_gopBasedTemporalFilterFutureRefs != 0 && m_gopBasedTemporalFilterFutureRefs != TF_DEFAULT_REFS))
+    {
+      msg(WARNING, "Number of frames used for temporal prefilter is different from default.\n");
+    }
   }
 #if EXTENSION_360_VIDEO
   check_failed |= m_ext360.verifyParameters();
@@ -4718,7 +4741,7 @@ void EncAppCfg::xPrintParameter()
   {
     msg( VERBOSE, "RPR:%d ", 0 );
   }
-  msg(VERBOSE, "TemporalFilter:%d ", m_gopBasedTemporalFilterEnabled);
+  msg(VERBOSE, "TemporalFilter:%d/%d ", m_gopBasedTemporalFilterPastRefs, m_gopBasedTemporalFilterFutureRefs);
   msg(VERBOSE, "SEI CTI:%d ", m_ctiSEIEnabled);
 #if EXTENSION_360_VIDEO
   m_ext360.outputConfigurationSummary();

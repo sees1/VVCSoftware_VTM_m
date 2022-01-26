@@ -267,7 +267,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setSwitchPocPeriod                                   ( m_switchPocPeriod );
   m_cEncLib.setUpscaledOutput                                    ( m_upscaledOutput );
   m_cEncLib.setFramesToBeEncoded                                 ( m_framesToBeEncoded );
-
+  m_cEncLib.setValidFrames(m_firstValidFrame, m_lastValidFrame);
   m_cEncLib.setAvoidIntraInDepLayer                              ( m_avoidIntraInDepLayer );
 
   //====== SPS constraint flags =======
@@ -1234,6 +1234,7 @@ void EncApp::xInitLibCfg()
       m_cEncLib.setTargetOlsIdx                                   (m_targetOlsIdx);
     }
   }
+
   m_cEncLib.setGopBasedTemporalFilterEnabled(m_gopBasedTemporalFilterEnabled);
   m_cEncLib.setNumRefLayers                                       ( m_numRefLayers );
 
@@ -1317,7 +1318,7 @@ void EncApp::createLib( const int layerIdx )
   m_trueOrgPic = new PelStorage;
   m_orgPic->create( unitArea );
   m_trueOrgPic->create( unitArea );
-  if(m_gopBasedTemporalFilterEnabled)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     m_filteredOrgPic = new PelStorage;
     m_filteredOrgPic->create( unitArea );
@@ -1349,16 +1350,16 @@ void EncApp::createLib( const int layerIdx )
   m_ext360 = new TExt360AppEncTop( *this, m_cEncLib.getGOPEncoder()->getExt360Data(), *( m_cEncLib.getGOPEncoder() ), *m_orgPic );
 #endif
 
-  if( m_gopBasedTemporalFilterEnabled )
+  if (m_gopBasedTemporalFilterEnabled)
   {
-    m_temporalFilter.init( m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth, sourceHeight,
-      m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName, m_chromaFormatIDC,
-      m_inputColourSpaceConvert, m_iQP, m_gopBasedTemporalFilterStrengths,
-      m_gopBasedTemporalFilterFutureReference );
+    m_temporalFilter.init(m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth,
+                          sourceHeight, m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName,
+                          m_chromaFormatIDC, m_inputColourSpaceConvert, m_iQP, m_gopBasedTemporalFilterStrengths,
+                          m_gopBasedTemporalFilterPastRefs, m_gopBasedTemporalFilterFutureRefs, m_firstValidFrame,
+                          m_lastValidFrame);
   }
   if ( m_fgcSEIAnalysisEnabled )
   {
-    bool temporalFilterFutureReference = 1;
     int  filteredFrame                 = 0;
 
     if ( m_iIntraPeriod < 1 )
@@ -1368,10 +1369,11 @@ void EncApp::createLib( const int layerIdx )
 
     map<int, double> filteredFramesAndStrengths = { { filteredFrame, 1.5 } };   // TODO: adjust MCTF and MCTF strenght
 
-    m_temporalFilterForFG.init( m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth,
-                                sourceHeight, m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName,
-                                m_chromaFormatIDC, m_inputColourSpaceConvert, m_iQP, filteredFramesAndStrengths,
-                                temporalFilterFutureReference );
+    m_temporalFilterForFG.init(m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth,
+                               sourceHeight, m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName,
+                               m_chromaFormatIDC, m_inputColourSpaceConvert, m_iQP, filteredFramesAndStrengths,
+                               m_gopBasedTemporalFilterPastRefs, m_gopBasedTemporalFilterFutureRefs, m_firstValidFrame,
+                               m_lastValidFrame);
   }
 }
 
@@ -1401,7 +1403,7 @@ void EncApp::destroyLib()
   m_trueOrgPic->destroy();
   delete m_trueOrgPic;
   delete m_orgPic;
-  if(m_gopBasedTemporalFilterEnabled)
+  if (m_gopBasedTemporalFilterEnabled)
   {
     m_filteredOrgPic->destroy();
     delete m_filteredOrgPic;

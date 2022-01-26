@@ -114,9 +114,12 @@ protected:
   int       m_confWinTop;
   int       m_confWinBottom;
   int       m_sourcePadding[2];                                       ///< number of padded pixels for width and height
+  int       m_firstValidFrame;
+  int       m_lastValidFrame;
   int       m_framesToBeEncoded;                              ///< number of encoded frames
   bool      m_AccessUnitDelimiter;                            ///< add Access Unit Delimiter NAL units
   bool      m_enablePictureHeaderInSliceHeader;               ///< Enable Picture Header in Slice Header
+
   InputColourSpaceConversion m_inputColourSpaceConvert;       ///< colour space conversion to apply to input video
   bool      m_snrInternalColourSpace;                       ///< if true, then no colour space conversion is applied for snr calculation, otherwise inverse of input is applied.
   bool      m_outputInternalColourSpace;                    ///< if true, then no colour space conversion is applied for reconstructed video, otherwise inverse of input is applied.
@@ -837,8 +840,9 @@ protected:
   bool        m_rprRASLtoolSwitch;
   bool        m_avoidIntraInDepLayer;
 
-  bool                  m_gopBasedTemporalFilterEnabled;               ///< GOP-based Temporal Filter enable/disable
-  bool                  m_gopBasedTemporalFilterFutureReference;       ///< Enable/disable future frame references in the GOP-based Temporal Filter
+  bool                  m_gopBasedTemporalFilterEnabled;
+  int                   m_gopBasedTemporalFilterPastRefs;
+  int                   m_gopBasedTemporalFilterFutureRefs;
   std::map<int, double> m_gopBasedTemporalFilterStrengths;             ///< Filter strength per frame for the GOP-based Temporal Filter
 
   int         m_maxLayers;
