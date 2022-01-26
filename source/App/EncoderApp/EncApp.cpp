@@ -1360,7 +1360,6 @@ void EncApp::createLib( const int layerIdx )
   }
   if ( m_fgcSEIAnalysisEnabled )
   {
-    bool temporalFilterFutureReference = 1;
     int  filteredFrame                 = 0;
 
     if ( m_iIntraPeriod < 1 )
@@ -1370,10 +1369,11 @@ void EncApp::createLib( const int layerIdx )
 
     map<int, double> filteredFramesAndStrengths = { { filteredFrame, 1.5 } };   // TODO: adjust MCTF and MCTF strenght
 
-    m_temporalFilterForFG.init( m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth,
-                                sourceHeight, m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName,
-                                m_chromaFormatIDC, m_inputColourSpaceConvert, m_iQP, filteredFramesAndStrengths,
-                                temporalFilterFutureReference );
+    m_temporalFilterForFG.init(m_FrameSkip, m_inputBitDepth, m_MSBExtendedBitDepth, m_internalBitDepth, m_sourceWidth,
+                               sourceHeight, m_sourcePadding, m_bClipInputVideoToRec709Range, m_inputFileName,
+                               m_chromaFormatIDC, m_inputColourSpaceConvert, m_iQP, filteredFramesAndStrengths,
+                               m_gopBasedTemporalFilterPastRefs, m_gopBasedTemporalFilterFutureRefs, m_firstValidFrame,
+                               m_lastValidFrame);
   }
 }
 
