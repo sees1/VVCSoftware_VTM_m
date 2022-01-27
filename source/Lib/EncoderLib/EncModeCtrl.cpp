@@ -1380,14 +1380,7 @@ bool EncModeCtrlMTnoRQT::tryMode( const EncTestMode& encTestmode, const CodingSt
   // Fast checks, partitioning depended
   if (cuECtx.isHashPerfectMatch && encTestmode.type != ETM_MERGE_SKIP && encTestmode.type != ETM_INTER_ME && encTestmode.type != ETM_AFFINE && encTestmode.type != ETM_MERGE_GEO)
   {
-#if GDR_ENABLED // disable hash perfect match when GDR is on
-    if (!m_encCfg.getGdrEnabled())
-    {
-      return false;
-    }
-#else
     return false;
-#endif
   }
 
   // if early skip detected, skip all modes checking but the splits
