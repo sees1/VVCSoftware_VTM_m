@@ -66,8 +66,7 @@ if( XCODE )
                             -Wno-deprecated-register
                             -Wno-pessimizing-move
                             -Wno-absolute-value
-                            -Wno-unused-const-variable
-                            -Wno-unused-command-line-argument )
+                            -Wno-unused-const-variable )
 else()
   bb_enable_warnings( clang warnings-as-errors
                             -Wno-unknown-attributes

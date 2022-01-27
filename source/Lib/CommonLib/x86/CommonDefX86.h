@@ -43,8 +43,6 @@
 //! \ingroup CommonLib
 //! \{
 
-#ifdef TARGET_SIMD_X86
-
 #include <immintrin.h>
 
 #ifdef USE_AVX512
@@ -359,8 +357,6 @@ static void _printReg( const R var, const char* varname, uint8_t count = sizeof(
 #else
 #define PREG( var, t, cnt )
 #endif
-
-#endif // TARGET_SIMD_X86
 
 #endif // __COMMONDEFX86__
 
