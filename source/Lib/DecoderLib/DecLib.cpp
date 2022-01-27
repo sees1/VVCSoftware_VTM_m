@@ -466,7 +466,7 @@ DecLib::DecLib()
   , m_dci(NULL)
   , m_apsMapEnc( nullptr )
 {
-#if ENABLE_SIMD_OPT_BUFFER && defined(TARGET_SIMD_X86)
+#if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
 #endif
   memset(m_prevEOS, false, sizeof(m_prevEOS));

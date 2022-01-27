@@ -75,7 +75,7 @@ EncLib::EncLib( EncLibCommon* encLibCommon )
 
   m_iMaxRefPicNum     = 0;
 
-#if ENABLE_SIMD_OPT_BUFFER && defined(TARGET_SIMD_X86)
+#if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
 #endif
 

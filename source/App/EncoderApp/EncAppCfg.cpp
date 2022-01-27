@@ -744,7 +744,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   string sTracingFile;
   bool   bTracingChannelsList = false;
 #endif
-#if ENABLE_SIMD_OPT && defined(TARGET_SIMD_X86)
+#if ENABLE_SIMD_OPT
   std::string ignore;
 #endif
 
@@ -757,7 +757,7 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("c",    po::parseConfigFile, "configuration file name")
   ("WarnUnknowParameter,w",                           warnUnknowParameter,                                  0, "warn for unknown configuration parameters instead of failing")
   ("isSDR",                                           sdr,                                              false, "compatibility")
-#if ENABLE_SIMD_OPT && defined(TARGET_SIMD_X86)
+#if ENABLE_SIMD_OPT
   ("SIMD",                                            ignore,                                      string(""), "SIMD extension to use (SCALAR, SSE41, SSE42, AVX, AVX2, AVX512), default: the highest supported extension\n")
 #endif
   // File, I/O and source parameters
