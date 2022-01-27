@@ -2660,6 +2660,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
   {
     int iMaxPOClsb = 1 << sps->getBitsForPOC();
     m_apcSlicePilot->setPOC( m_apcSlicePilot->getPOC() & (iMaxPOClsb - 1) );
+    m_lastPOCNoOutputPriorPics = m_apcSlicePilot->getPOC();
     xUpdatePreviousTid0POC(m_apcSlicePilot);
   }
 
