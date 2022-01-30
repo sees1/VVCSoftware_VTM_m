@@ -2022,7 +2022,7 @@ bool EncModeCtrlMTnoRQT::useModeResult( const EncTestMode& encTestmode, CodingSt
     cuECtx.set( MAX_QT_SUB_DEPTH, maxQtD );
   }
 #if JVET_Y0126_PERFORMANCE
-  if ( m_pcEncCfg->getUseFastDecisionTT() ) {
+  if ( !m_pcEncCfg->getUseFastDecisionTT() ) {
 #endif
 	  int maxMtD = tempCS->pcv->getMaxBtDepth(*tempCS->slice, partitioner.chType) + partitioner.currImplicitBtDepth;
 
