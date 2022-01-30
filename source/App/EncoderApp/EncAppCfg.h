@@ -255,6 +255,10 @@ protected:
   bool      m_cabacBypassAlignmentEnabledFlag;
   bool      m_ISP;
   bool      m_useFastISP;                                    ///< flag for enabling fast methods for ISP
+#if JVET_Y0126_PERFORMANCE
+  bool      m_useChromaCostFactorOffset;                     ///< flag for enabling chroma cost factor offset for partitioning 
+  bool      m_useFastDecisionTT;                             ///< flag for enabling fast decision for TT from BT
+#endif
 
   // coding quality
 #if QP_SWITCHING_FOR_PARALLEL

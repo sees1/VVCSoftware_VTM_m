@@ -1046,6 +1046,10 @@ bool EncAppCfg::parseCfg( int argc, char* argv[] )
   ("MIP",                                             m_MIP,                                             true,  "Enable MIP (matrix-based intra prediction)")
   ("FastMIP",                                         m_useFastMIP,                                     false,  "Fast encoder search for MIP (matrix-based intra prediction)")
   ("FastLocalDualTreeMode",                           m_fastLocalDualTreeMode,                              0,  "Fast intra pass coding for local dual-tree in intra coding region, 0: off, 1: use threshold, 2: one intra mode only")
+#if JVET_Y0126_PERFORMANCE
+  ("UseChromaCostFactorOffset",                       m_useChromaCostFactorOffset,                      false,  "Enable offset for calculation chroma cost factor in partitioning")
+  ("UseFastDecisionTT",                               m_useFastDecisionTT,                              false,  "Enable fast decision for TT from BT")
+#endif
   // Unit definition parameters
   ("MaxCUWidth",                                      m_uiMaxCUWidth,                                     64u)
   ("MaxCUHeight",                                     m_uiMaxCUHeight,                                    64u)

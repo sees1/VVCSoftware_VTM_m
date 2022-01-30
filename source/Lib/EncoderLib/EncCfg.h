@@ -410,6 +410,10 @@ protected:
   bool      m_MIP;
   bool      m_useFastMIP;
   int       m_fastLocalDualTreeMode;
+#if JVET_Y0126_PERFORMANCE
+  bool       m_useChromaCostFactorOffset;
+  bool       m_useFastDecisionTT;
+#endif
   uint32_t  m_log2MaxTbSize;
 
   //====== Loop/Deblock Filter ========
@@ -1368,6 +1372,12 @@ public:
   bool      getUseFastMIP                   () const         { return m_useFastMIP; }
   void     setFastLocalDualTreeMode         ( int i )        { m_fastLocalDualTreeMode = i; }
   int      getFastLocalDualTreeMode         () const         { return m_fastLocalDualTreeMode; }
+#if JVET_Y0126_PERFORMANCE
+  void     setUseChromaCostFactorOffset     (bool i) { m_useChromaCostFactorOffset = i; }
+  bool     getUseChromaCostFactorOffset     () const { return m_useChromaCostFactorOffset; }
+  void     setUseFastDecisionTT             (bool i) { m_useFastDecisionTT = i; }
+  bool     getUseFastDecisionTT             () const { return m_useFastDecisionTT; }
+#endif
 
   void      setLog2MaxTbSize                ( uint32_t  u )   { m_log2MaxTbSize = u; }
 

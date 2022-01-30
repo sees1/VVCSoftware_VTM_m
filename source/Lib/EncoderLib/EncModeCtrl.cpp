@@ -2021,31 +2021,34 @@ bool EncModeCtrlMTnoRQT::useModeResult( const EncTestMode& encTestmode, CodingSt
     }
     cuECtx.set( MAX_QT_SUB_DEPTH, maxQtD );
   }
+#if JVET_Y0126_PERFORMANCE
+  if ( m_pcEncCfg->getUseFastDecisionTT() ) {
+#endif
+	  int maxMtD = tempCS->pcv->getMaxBtDepth(*tempCS->slice, partitioner.chType) + partitioner.currImplicitBtDepth;
 
-#if !JVET_Y0126_PERFORMANCE
-  int maxMtD = tempCS->pcv->getMaxBtDepth( *tempCS->slice, partitioner.chType ) + partitioner.currImplicitBtDepth;
+	  if (encTestmode.type == ETM_SPLIT_BT_H)
+	  {
+		  if (tempCS->cus.size() > 2)
+		  {
+			  int h_2 = tempCS->area.blocks[partitioner.chType].height / 2;
+			  int cu1_h = tempCS->cus.front()->blocks[partitioner.chType].height;
+			  int cu2_h = tempCS->cus.back()->blocks[partitioner.chType].height;
 
-  if( encTestmode.type == ETM_SPLIT_BT_H )
-  {
-    if( tempCS->cus.size() > 2 )
-    {
-      int h_2   = tempCS->area.blocks[partitioner.chType].height / 2;
-      int cu1_h = tempCS->cus.front()->blocks[partitioner.chType].height;
-      int cu2_h = tempCS->cus.back() ->blocks[partitioner.chType].height;
+			  cuECtx.set(DO_TRIH_SPLIT, cu1_h < h_2 || cu2_h < h_2 || partitioner.currMtDepth + 1 == maxMtD);
+		  }
+	  }
+	  else if (encTestmode.type == ETM_SPLIT_BT_V)
+	  {
+		  if (tempCS->cus.size() > 2)
+		  {
+			  int w_2 = tempCS->area.blocks[partitioner.chType].width / 2;
+			  int cu1_w = tempCS->cus.front()->blocks[partitioner.chType].width;
+			  int cu2_w = tempCS->cus.back()->blocks[partitioner.chType].width;
 
-      cuECtx.set( DO_TRIH_SPLIT, cu1_h < h_2 || cu2_h < h_2 || partitioner.currMtDepth + 1 == maxMtD );
-    }
-  }
-  else if( encTestmode.type == ETM_SPLIT_BT_V )
-  {
-    if( tempCS->cus.size() > 2 )
-    {
-      int w_2   = tempCS->area.blocks[partitioner.chType].width / 2;
-      int cu1_w = tempCS->cus.front()->blocks[partitioner.chType].width;
-      int cu2_w = tempCS->cus.back() ->blocks[partitioner.chType].width;
-
-      cuECtx.set( DO_TRIV_SPLIT, cu1_w < w_2 || cu2_w < w_2 || partitioner.currMtDepth + 1 == maxMtD );
-    }
+			  cuECtx.set(DO_TRIV_SPLIT, cu1_w < w_2 || cu2_w < w_2 || partitioner.currMtDepth + 1 == maxMtD);
+		  }
+	  }
+#if JVET_Y0126_PERFORMANCE
   }
 #endif
   // for now just a simple decision based on RD-cost or choose tempCS if bestCS is not yet coded
