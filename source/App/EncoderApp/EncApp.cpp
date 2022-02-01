@@ -821,8 +821,8 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setUseISP                                            ( m_ISP );
   m_cEncLib.setUseFastISP                                        ( m_useFastISP );
 #if JVET_Y0126_PERFORMANCE
-  m_cEncLib.setUseChromaCostFactorOffset                         (m_useChromaCostFactorOffset);
-  m_cEncLib.setUseFastDecisionTT                                 (m_useFastDecisionTT);
+  m_cEncLib.setFastAdaptCostPredMode                             (m_fastAdaptCostPredMode);
+  m_cEncLib.setDisableFastDecisionTT                             (m_disableFastDecisionTT);
 #endif
 
   // set internal bit-depth and constants

@@ -1105,17 +1105,40 @@ void EncCu::xCheckModeSplit(CodingStructure *&tempCS, CodingStructure *&bestCS, 
   m_CABACEstimator->mode_constraint( split, *tempCS, partitioner, modeTypeChild );
 
 #if JVET_Y0126_PERFORMANCE
-  double factor = (tempCS->currQP[partitioner.chType] > 30 ? 1.1 : 1.075);
-  if ( m_pcEncCfg->getUseChromaCostFactorOffset() ) {
-	  factor += (isChroma(partitioner.chType) ? 0.2 : 0.0);
+  double costTemp = 0;
+  if( m_pcEncCfg->getFastAdaptCostPredMode() == 2 )
+  {
+    int numChild = 3;
+    if( split == CU_VERT_SPLIT || split == CU_HORZ_SPLIT )
+      numChild--;
+    else if( split == CU_QUAD_SPLIT )
+      numChild++;
+
+    int64_t approxBits = numChild << SCALE_BITS;
+
+    const double factor = ( tempCS->currQP[partitioner.chType] > 30 ? 1.11 : 1.085 )
+      + ( isChroma( partitioner.chType ) ? 0.2 : 0.0 );
+
+    costTemp = m_pcRdCost->calcRdCost( uint64_t( m_CABACEstimator->getEstFracBits() + approxBits + ( ( bestCS->fracBits ) / factor ) ), Distortion( bestCS->dist / factor ) ) + bestCS->costDbOffset / factor;
   }
-#else
-  const double factor = ( tempCS->currQP[partitioner.chType] > 30 ? 1.1 : 1.075 );
+  else if ( m_pcEncCfg->getFastAdaptCostPredMode() == 1) 
+  {
+    const double factor = ( tempCS->currQP[partitioner.chType] > 30 ? 1.1 : 1.075 )
+    + (isChroma(partitioner.chType) ? 0.2 : 0.0);
+    costTemp = m_pcRdCost->calcRdCost( uint64_t( m_CABACEstimator->getEstFracBits() + ( ( bestCS->fracBits ) / factor ) ), Distortion( bestCS->dist / factor ) ) + bestCS->costDbOffset / factor;
+  }
+  else
+  {
 #endif
+    const double factor = ( tempCS->currQP[partitioner.chType] > 30 ? 1.1 : 1.075 );
+    costTemp = m_pcRdCost->calcRdCost( uint64_t( m_CABACEstimator->getEstFracBits() + ( ( bestCS->fracBits ) / factor ) ), Distortion( bestCS->dist / factor ) ) + bestCS->costDbOffset / factor;
+#if JVET_Y0126_PERFORMANCE
+  }
   tempCS->useDbCost = m_pcEncCfg->getUseEncDbOpt();
-  if (!tempCS->useDbCost)
-    CHECK(bestCS->costDbOffset != 0, "error");
-  const double cost   = m_pcRdCost->calcRdCost( uint64_t( m_CABACEstimator->getEstFracBits() + ( ( bestCS->fracBits ) / factor ) ), Distortion( bestCS->dist / factor ) ) + bestCS->costDbOffset / factor;
+  if( !tempCS->useDbCost )
+    CHECK( bestCS->costDbOffset != 0, "error" );
+  const double cost = costTemp;	
+#endif
 
   m_CABACEstimator->getCtx() = SubCtx( Ctx::SplitFlag,   ctxStartSP );
   m_CABACEstimator->getCtx() = SubCtx( Ctx::SplitQtFlag, ctxStartQt );

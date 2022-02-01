@@ -2070,6 +2070,25 @@ Controls intra coding speedup introducted with local dual tree mode.
 \end{tabular}
 \\
 
+\Option{SplitPredictAdaptMode} &
+%\ShortOption{\None} &
+\Default{0} &
+Control mode for split cost prediction, 0..2 (Default: 0)" 
+\par
+\begin{tabular}{cp{0.45\textwidth}}
+ 0 & QP based cost prediction.\\
+ 1 & QP and component type (luma/chroma) based cost prediction.\\
+ 2 & Cost prediction based on QP, component type and split type.\\
+\end{tabular}
+\\
+
+\Option{DisableFastTTfromBT} &
+%\ShortOption{\None} &
+\Default{false} &
+Disable fast decision for TT from BT." 
+\par
+\\
+
 
 \end{OptionTableNoShorthand}
 
