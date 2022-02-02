@@ -1941,7 +1941,16 @@ void DecLib::xCheckParameterSetConstraints(const int layerId)
 
   if (sps->getVPSId() && (vps != nullptr))
   {
-    if ((layerId == vps->getLayerId(0)) && m_firstSliceInSequence[layerId])
+    bool setVpsId = true;
+    int checkLayer = 0;
+    while (checkLayer <= layerId)
+    {
+      if (!m_firstSliceInSequence[checkLayer++])
+      {
+        setVpsId = false;
+      }
+    }
+    if (setVpsId)
     {
       m_clsVPSid = sps->getVPSId();
     }

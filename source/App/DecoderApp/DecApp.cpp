@@ -163,6 +163,8 @@ uint32_t DecApp::decode()
 
   bool gdrRecoveryPeriod[MAX_NUM_LAYER_IDS] = { false };
   bool prevPicSkipped = true;
+  int lastNaluLayerId = -1;
+  bool decodedSliceInAU = false;
 
   while (!!bitstreamFile)
   {
@@ -171,7 +173,7 @@ uint32_t DecApp::decode()
 
     // determine if next NAL unit will be the first one from a new picture
     bool bNewPicture = m_cDecLib.isNewPicture(&bitstreamFile, &bytestream);
-    bool bNewAccessUnit = bNewPicture && m_cDecLib.isNewAccessUnit( bNewPicture, &bitstreamFile, &bytestream );
+    bool bNewAccessUnit = bNewPicture && decodedSliceInAU && m_cDecLib.isNewAccessUnit( bNewPicture, &bitstreamFile, &bytestream );
     if(!bNewPicture)
     {
       AnnexBStats stats = AnnexBStats();
@@ -235,7 +237,7 @@ uint32_t DecApp::decode()
           {
             if ((nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR))
             {
-              if (m_cDecLib.isSliceNaluFirstInAU(true, nalu))
+              if (decodedSliceInAU && m_cDecLib.isSliceNaluFirstInAU(true, nalu))
               {
                 m_cDecLib.resetAccessUnitNals();
                 m_cDecLib.resetAccessUnitApsNals();
@@ -261,7 +263,7 @@ uint32_t DecApp::decode()
           if ( m_iSkipFrame < skipFrameCounter  &&
               ((nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_TRAIL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_STSA) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_RASL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_RADL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA) || (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR)))
           {
-            if (m_cDecLib.isSliceNaluFirstInAU(true, nalu))
+            if (decodedSliceInAU && m_cDecLib.isSliceNaluFirstInAU(true, nalu))
             {
               m_cDecLib.checkSeiInPictureUnit();
               m_cDecLib.resetPictureSeiNalus();
@@ -292,10 +294,18 @@ uint32_t DecApp::decode()
             m_targetDecLayerIdSet = m_cDecLib.getVPS()->m_targetLayerIdSet;
             m_targetOutputLayerIdSet = m_cDecLib.getVPS()->m_targetOutputLayerIdSet;
           }
+          if (nalu.isSlice())
+          {
+            decodedSliceInAU = true;
+          }
         }
         else
         {
           bPicSkipped = true;
+          if (nalu.isSlice())
+          {
+            m_cDecLib.setFirstSliceInPicture(false);
+          }
         }
       }
 
@@ -315,6 +325,11 @@ uint32_t DecApp::decode()
       {
         CHECK(nalu.m_nalUnitType != NAL_UNIT_EOS && nalu.m_nalUnitType != NAL_UNIT_EOB, "When an EOS NAL unit is present in a PU, it shall be the last NAL unit among all NAL units within the PU other than other EOS NAL units or an EOB NAL unit");
       }
+      lastNaluLayerId = nalu.m_nuhLayerId;
+    }
+    else
+    {
+      nalu.m_nuhLayerId = lastNaluLayerId;
     }
 
     if ((bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS) && !m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId) && !bPicSkipped)
@@ -342,8 +357,7 @@ uint32_t DecApp::decode()
         }
       }
     }
-    else if ( (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS ) &&
-      m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId))
+    else if ( (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS ) )
     {
       m_cDecLib.setFirstSliceInPicture (true);
     }
@@ -545,6 +559,7 @@ uint32_t DecApp::decode()
     }
     if(bNewAccessUnit)
     {
+      decodedSliceInAU = false;
       m_cDecLib.checkTidLayerIdInAccessUnit();
       m_cDecLib.resetAccessUnitSeiTids();
       m_cDecLib.resetAccessUnitSeiPayLoadTypes();
