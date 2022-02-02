@@ -2089,6 +2089,30 @@ Disable fast decision for TT from BT."
 \par
 \\
 
+\Option{TTFastSkip} &
+%\ShortOption{\None} &
+\Default{31} &
+TT speedup option. Combination is allowed by bitwise OR.
+\par
+\begin{tabular}{cp{0.45\textwidth}}
+ 0x00 & Disable TT partition search speedup\\
+ 0x01 & Enable TT partition search speedup\\
+ 0x02 & Enable TT partition search speedup by using RD cost comparison between BT vertical split and BT horizontal split\\
+ 0x04 & Enable TT partition search speedup by using RD cost comparison between non-split and BT split\\
+ 0x08 & Enable TT partition search speedup for B-slice\\
+ 0x10 & Enable TT partition search speedup for I-slice\\
+ 0x1F & All enable for TT partition search speedup\\
+\end{tabular}
+\\
+
+\Option{TTFastSkipThr} &
+%\ShortOption{\None} &
+\Default{1.075} &
+Controls the strength value of TT partition search skip rate. 
+The default value is 1.075 and the recommended setting value should be between 1.000 and 1.200. 
+The lower value has higher speedup and also has higher coding loss.
+\\
+
 
 \end{OptionTableNoShorthand}
 
