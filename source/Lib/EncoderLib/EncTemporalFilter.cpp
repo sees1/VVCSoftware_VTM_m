@@ -74,6 +74,10 @@ const double EncTemporalFilter::m_refStrengths[2][4] = {
   { 0.85, 0.57, 0.41, 0.33 },   // random access
   { 1.13, 0.97, 0.81, 0.57 },   // low delay
 };
+#if JVET_Y0077_BIM
+const int EncTemporalFilter::m_cuTreeThresh[4] =
+  { 75, 60, 30, 15 };
+#endif
 
 EncTemporalFilter::EncTemporalFilter() :
   m_FrameSkip(0),
@@ -91,7 +95,11 @@ void EncTemporalFilter::init(const int frameSkip, const int inputBitDepth[MAX_NU
                              const int *pad, const bool rec709, const std::string &filename,
                              const ChromaFormat inputChromaFormatIDC, const InputColourSpaceConversion colorSpaceConv,
                              const int qp, const std::map<int, double> &temporalFilterStrengths, const int pastRefs,
-                             const int futureRefs, const int firstValidFrame, const int lastValidFrame)
+                             const int futureRefs, const int firstValidFrame, const int lastValidFrame
+#if JVET_Y0077_BIM
+                             , const bool mctfEnabled, std::map<int, int*> *adaptQPmap, const bool bimEnabled, const int ctuSize
+#endif
+                             )
 {
   m_FrameSkip = frameSkip;
   for (int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++)
@@ -119,6 +127,13 @@ void EncTemporalFilter::init(const int frameSkip, const int inputBitDepth[MAX_NU
   m_futureRefs      = futureRefs;
   m_firstValidFrame = firstValidFrame;
   m_lastValidFrame  = lastValidFrame;
+#if JVET_Y0077_BIM
+  m_mctfEnabled = mctfEnabled;
+  m_bimEnabled = bimEnabled;
+  m_numCtu = ((width + ctuSize - 1) / ctuSize) * ((height + ctuSize - 1) / ctuSize);
+  m_ctuSize = ctuSize;
+  m_ctuAdaptedQP = adaptQPmap;
+#endif
 }
 
 // ====================================================================================================================
@@ -206,11 +221,85 @@ bool EncTemporalFilter::filter(PelStorage *orgPic, int receivedPoc)
         overallStrength = strength;
       }
     }
+#if JVET_Y0077_BIM
+    const int numRefs = int(srcFrameInfo.size());
+    if ( m_bimEnabled && ( numRefs > 0 ) )
+    {
+      const int bimFirstFrame = std::max(currentFilePoc - 2, firstFrame);
+      const int bimLastFrame  = std::min(currentFilePoc + 2, lastFrame);
+      std::vector<double> sumError(m_numCtu * 2, 0);
+      std::vector<int>    blkCount(m_numCtu * 2, 0);
 
-    bilateralFilter(origPadded, srcFrameInfo, newOrgPic, overallStrength);
+      int frameIndex = bimFirstFrame - firstFrame;
 
-    // move filtered to orgPic
-    orgPic->copyFrom(newOrgPic);
+      int distFactor[2] = {3,3};
+
+      int* qpMap = new int[m_numCtu];
+      for (int poc = bimFirstFrame; poc <= bimLastFrame; poc++)
+      {
+        if ((poc < 0) || (poc == currentFilePoc))
+        {
+          continue; // frame not available or frame that is being filtered
+        }
+        int dist = abs(poc - currentFilePoc) - 1;
+        distFactor[dist]--;
+        TemporalFilterSourcePicInfo &srcPic = srcFrameInfo.at(frameIndex);
+        for (int y = 0; y < srcPic.mvs.h() / 2; y++) // going over in 8x8 block steps
+        {
+          for (int x = 0; x < srcPic.mvs.w() / 2; x++)
+          {
+            int blocksPerRow = (srcPic.mvs.w() / 2 + (m_ctuSize / 8 - 1)) / (m_ctuSize / 8);
+            int ctuX = x / (m_ctuSize / 8);
+            int ctuY = y / (m_ctuSize / 8);
+            int ctuId = ctuY * blocksPerRow + ctuX;
+            sumError[dist * m_numCtu + ctuId] += srcPic.mvs.get(x, y).error;
+            blkCount[dist * m_numCtu + ctuId] += 1;
+          }
+        }
+        frameIndex++;
+      }
+      double weight = (receivedPoc % 16) ? 0.6 : 1;
+      const double center = 45.0;
+      for (int i = 0; i < m_numCtu; i++)
+      {
+        int avgErrD1 = (int)((sumError[i] / blkCount[i]) * distFactor[0]);
+        int avgErrD2 = (int)((sumError[i + m_numCtu] / blkCount[i + m_numCtu]) * distFactor[1]);
+        int weightedErr = std::max(avgErrD1, avgErrD2) + abs(avgErrD2 - avgErrD1) * 3;
+        weightedErr = (int)(weightedErr * weight + (1 - weight) * center);
+        if (weightedErr > m_cuTreeThresh[0])
+        {
+          qpMap[i] = 2;
+        }
+        else if (weightedErr > m_cuTreeThresh[1])
+        {
+          qpMap[i] = 1;
+        }
+        else if (weightedErr < m_cuTreeThresh[3])
+        {
+          qpMap[i] = -2;
+        }
+        else if (weightedErr < m_cuTreeThresh[2])
+        {
+          qpMap[i] = -1;
+        }
+        else
+        {
+          qpMap[i] = 0;
+        }
+      }
+      m_ctuAdaptedQP->insert({ receivedPoc, qpMap });
+    }
+#endif
+
+#if JVET_Y0077_BIM
+    if ( m_mctfEnabled && ( numRefs > 0 ) )
+#endif
+    {
+      bilateralFilter(origPadded, srcFrameInfo, newOrgPic, overallStrength);
+
+      // move filtered to orgPic
+      orgPic->copyFrom(newOrgPic);
+    }
 
     yuvFrames.close();
     return true;

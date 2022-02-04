@@ -59,6 +59,7 @@
 #define JVET_Y0273_GCI_BUGFIX                                1 // JVET-Y0273 option C bugfix for GCI signalling
 #define JVET_X0143_ALF_APS_ID_OFFSET                         0 // A value between 0 to 7 inclusive. This macro should be kept, or to be defined as a configuration parameter if possible.
 #define JVET_Y0105_SW_AND_QDF                                1 // An adaptive smooth window (SW) size and extension of quality dependency factor (QDF) to low frame rate in rate control 
+#define JVET_Y0077_BIM                                       1 // JVET-Y0077: Block Importance Mapping
 
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1

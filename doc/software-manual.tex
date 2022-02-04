@@ -2361,6 +2361,11 @@ Threshold parameter for controlling amount of QP reduction by the QP reduction m
 Periodicity parameter for application of the QP reduction model. 1: all frames, 0: only intra pictures, 2: every second frame, etc.
 \\
 
+\Option{BIM} &
+\Default{false} &
+Enable or disable Block Importance Mapping, QP adaptation depending on estimated propagation of reference samples. Depends on future and past reference frames configured for temporal filter.
+\\
+
 \Option{SliceChromaQPOffsetPeriodicity} &
 \Default{0} &
 Defines the periodicity for inter slices that use the slice-level chroma QP offsets, as defined by SliceCbQpOffsetIntraOrPeriodic and SliceCrQpOffsetIntraOrPeriodic. A value of 0 disables the periodicity. It is intended to be used in low-delay configurations where an regular intra period is not defined.
