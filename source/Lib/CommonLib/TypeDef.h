@@ -53,6 +53,7 @@
 // clang-format off
 
 //########### place macros to be removed in next cycle below this line ###############
+#define JVET_Y0056_MINCR                                     1 // JVET-Y0056 clear MinCR definition for high tier for levels below 4.0
 #define JVET_Y0126_PERFORMANCE                               1  // JVET-Y0126 SW changes and configuration for improved performacnce
 #define JVET_Y0152_TT_ENC_SPEEDUP                            1 // TT encoding speedup based on ABT_ENC_SPEEDUP in ECM-2.0
 #define JVET_Y0273_GCI_BUGFIX                                1 // JVET-Y0273 option C bugfix for GCI signalling
