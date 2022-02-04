@@ -1338,6 +1338,11 @@ void EncApp::createLib( const int layerIdx )
     m_filteredOrgPic = new PelStorage;
     m_filteredOrgPic->create( unitArea );
   }
+  if ( m_fgcSEIAnalysisEnabled )
+  {
+    m_filteredOrgPicForFG = new PelStorage;
+    m_filteredOrgPicForFG->create( unitArea );
+  }
 #if JVET_Y0077_BIM
   if ( m_cEncLib.getBIM() )
   {
