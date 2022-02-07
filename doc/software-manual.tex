@@ -3221,6 +3221,32 @@ Must be 0 when MTS is nonzero. Setting MTS to 0 and MTSImplicit to 1 is equivale
 Enables or disables the use of bi-directional optical flow (BDOF).
 \\
 
+\Option{Affine} &
+%\ShortOption{\None} &
+\Default{false} &
+Enables or disables the use of affine inter mode.
+0: disable,
+1: enable affine inter mode
+\\
+
+\Option{AffineAmvr} &
+%\ShortOption{\None} &
+\Default{false} &
+Enables or disables the use of AMVR for affine inter mode.
+\\
+
+\Option{AffineAmvrEncOpt} &
+%\ShortOption{\None} &
+\Default{false} &
+Enables or disables the encoder optimization of affine AMVR. 
+\\
+
+\Option{AffineAmvp} &
+%\ShortOption{\None} &
+\Default{true} &
+Enables or disables the use of AMVP for affine inter mode when affine inter mode is used (enabled).
+\\
+
 \Option{LMCSEnable} &
 %\ShortOption{\None} &
 \Default{true} &
