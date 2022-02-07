@@ -399,7 +399,9 @@ void CU::saveMotionInHMVP( const CodingUnit& cu, const bool isToBeDone )
     bool enableHmvp = ((xBr >> log2ParallelMergeLevel) > (pu.cu->Y().x >> log2ParallelMergeLevel)) && ((yBr >> log2ParallelMergeLevel) > (pu.cu->Y().y >> log2ParallelMergeLevel));
     bool enableInsertion = CU::isIBC(cu) || enableHmvp;
     if (enableInsertion)
-    cu.cs->addMiToLut(CU::isIBC(cu) ? cu.cs->motionLut.lutIbc : cu.cs->motionLut.lut, mi);
+    {
+      cu.cs->addMiToLut(CU::isIBC(cu) ? cu.cs->motionLut.lutIbc : cu.cs->motionLut.lut, mi);
+    }
   }
 }
 
@@ -416,17 +418,14 @@ PartSplit CU::getSplitAtDepth( const CodingUnit& cu, const unsigned depth )
   {
     return CU_QUAD_SPLIT;
   }
-
   else if (cuSplitType == CU_HORZ_SPLIT)
   {
     return CU_HORZ_SPLIT;
   }
-
   else if (cuSplitType == CU_VERT_SPLIT)
   {
     return CU_VERT_SPLIT;
   }
-
   else if (cuSplitType == CU_TRIH_SPLIT)
   {
     return CU_TRIH_SPLIT;
@@ -449,14 +448,11 @@ ModeType CU::getModeTypeAtDepth( const CodingUnit& cu, const unsigned depth )
   return modeType;
 }
 
-
-
 bool CU::divideTuInRows( const CodingUnit &cu )
 {
   CHECK( cu.ispMode != HOR_INTRA_SUBPARTITIONS && cu.ispMode != VER_INTRA_SUBPARTITIONS, "Intra Subpartitions type not recognized!" );
   return cu.ispMode == HOR_INTRA_SUBPARTITIONS ? true : false;
 }
-
 
 PartSplit CU::getISPType( const CodingUnit &cu, const ComponentID compID )
 {
@@ -1053,13 +1049,8 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
   {
 #if GDR_ENABLED
     bool allCandSolidInAbove = true;
-    bool bFound = addMergeHMVPCand(cs, mrgCtx, mrgCandIdx, maxNumMergeCand, cnt
-      , isAvailableA1, miLeft, isAvailableB1, miAbove
-      , true
-      , isGt4x4
-      , pu
-      , allCandSolidInAbove
-    );
+    bool bFound = addMergeHMVPCand(cs, mrgCtx, mrgCandIdx, maxNumMergeCand, cnt, isAvailableA1, miLeft, isAvailableB1,
+                                   miAbove, true, isGt4x4, pu, allCandSolidInAbove);
 #else
     bool bFound = addMergeHMVPCand(cs, mrgCtx, mrgCandIdx, maxNumMergeCand, cnt, isAvailableA1, miLeft, isAvailableB1,
                                    miAbove, true, isGt4x4);
@@ -1071,24 +1062,24 @@ void PU::getIBCMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const
     }
   }
 
-    while (cnt < maxNumMergeCand)
-    {
-      mrgCtx.mvFieldNeighbours[cnt * 2].setMvField(Mv(0, 0), MAX_NUM_REF);
-      mrgCtx.interDirNeighbours[cnt] = 1;
+  while (cnt < maxNumMergeCand)
+  {
+    mrgCtx.mvFieldNeighbours[cnt * 2].setMvField(Mv(0, 0), MAX_NUM_REF);
+    mrgCtx.interDirNeighbours[cnt] = 1;
 #if GDR_ENABLED
-      // GDR: zero mv(0,0)
-      if (isEncodeGdrClean)
-      {
-        mrgCtx.mvSolid[cnt << 1] = true && allCandSolidInAbove;
-        allCandSolidInAbove       = true && allCandSolidInAbove;
-      }
-#endif
-      if (mrgCandIdx == cnt)
-      {
-        return;
-      }
-      cnt++;
+    // GDR: zero mv(0,0)
+    if (isEncodeGdrClean)
+    {
+      mrgCtx.mvSolid[cnt << 1] = true && allCandSolidInAbove;
+      allCandSolidInAbove      = true && allCandSolidInAbove;
     }
+#endif
+    if (mrgCandIdx == cnt)
+    {
+      return;
+    }
+    cnt++;
+  }
 
   mrgCtx.numValidMergeCand = cnt;
 }
@@ -1877,6 +1868,7 @@ void PU::getInterMMVDMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx,
     }
   }
 }
+
 bool PU::getColocatedMVP(const PredictionUnit &pu, const RefPicList &eRefPicList, const Position &_pos, Mv& rcMv, const int &refIdx, bool sbFlag)
 {
   // don't perform MV compression when generally disabled or subPuMvp is used
@@ -2216,7 +2208,6 @@ void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const in
     if( !bAdded )
     {
       bAdded = addMVPCandUnscaled( pu, eRefPicList, refIdx, posLB, MD_LEFT, *pInfo );
-
     }
   }
 
@@ -2446,6 +2437,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
 
   return false;
 }
+
 #if GDR_ENABLED
 void PU::xInheritedAffineMv(const PredictionUnit &pu, const PredictionUnit* puNeighbour, RefPicList eRefPicList, Mv rcMv[3], bool rcMvSolid[3], MvpType rcMvType[3], Position rcMvPos[3])
 {
@@ -3073,7 +3065,6 @@ bool PU::addMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &eRefPic
   return false;
 }
 
-
 void PU::addAMVPHMVPCand(const PredictionUnit &pu, const RefPicList eRefPicList, const int currRefPOC, AMVPInfo &info)
 {
   const Slice &slice = *(*pu.cs).slice;
@@ -3089,7 +3080,6 @@ void PU::addAMVPHMVPCand(const PredictionUnit &pu, const RefPicList eRefPicList,
   const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
   bool &allCandSolidInAbove = info.allCandSolidInAbove;
 #endif
-
 
 #if GDR_ENABLED
   bool vbOnCtuBoundary = true;
@@ -4805,18 +4795,16 @@ bool CU::bdpcmAllowed( const CodingUnit& cu, const ComponentID compID )
 {
   SizeType transformSkipMaxSize = 1 << cu.cs->sps->getLog2MaxTransformSkipBlockSize();
 
-  bool bdpcmAllowed = cu.cs->sps->getBDPCMEnabledFlag();
-       bdpcmAllowed &= CU::isIntra( cu );
-       if (isLuma(compID))
-       {
-         bdpcmAllowed &= (cu.lwidth() <= transformSkipMaxSize && cu.lheight() <= transformSkipMaxSize);
-       }
-       else
-       {
-         bdpcmAllowed &=
-           (cu.chromaSize().width <= transformSkipMaxSize && cu.chromaSize().height <= transformSkipMaxSize)
-           && !cu.colorTransform;
-       }
+  bool bdpcmAllowed = cu.cs->sps->getBDPCMEnabledFlag() && CU::isIntra(cu);
+  if (isLuma(compID))
+  {
+    bdpcmAllowed &= (cu.lwidth() <= transformSkipMaxSize && cu.lheight() <= transformSkipMaxSize);
+  }
+  else
+  {
+    bdpcmAllowed &= (cu.chromaSize().width <= transformSkipMaxSize && cu.chromaSize().height <= transformSkipMaxSize)
+                    && !cu.colorTransform;
+  }
   return bdpcmAllowed;
 }
 
@@ -4956,7 +4944,6 @@ int getMipSizeId(const Size& block)
   {
     return 2;
   }
-
 }
 
 bool allowLfnstWithMip(const Size& block)
