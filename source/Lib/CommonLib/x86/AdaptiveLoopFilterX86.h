@@ -437,6 +437,12 @@ static void simdFilter5x5Blk_HBD_AVX2(AlfClassifier **classifier, const PelUnitB
   constexpr size_t step_x = 8;
   constexpr size_t step_y = 4;
 
+  if (width % step_x != 0)
+  {
+    simdFilter5x5Blk_HBD(classifier, recDst, recSrc, blkDst, blk, compId, filterSet, fClipSet, clpRng, cs, vbCTUHeight,
+                         vbPos);
+    return;
+  }
   CHECK(blk.y % step_y, "Wrong startHeight in filtering");
   CHECK(blk.x % step_x, "Wrong startWidth in filtering");
   CHECK(height % step_y, "Wrong endHeight in filtering");
