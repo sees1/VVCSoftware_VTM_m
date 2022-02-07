@@ -260,9 +260,13 @@ void EncLib::init(AUWriterIf *auWriterIf)
       if (sps0.getPPSValidFlag(i))
       {
         if ((scaledWidth * curSeqMaxPicWidthY) < sps0.getScalingWindowSizeInPPS(i).width * (curPicWidthY - max8MinCbSizeY))
+        {
           printf("Potential violation: (curScaledWIdth * curSeqMaxPicWidthY) should be greater than or equal to refScaledWidth * (curPicWidthY - max(8, MinCbSizeY)\n");
+        }
         if ((scaledHeight * curSeqMaxPicHeightY) < sps0.getScalingWindowSizeInPPS(i).height * (curPicHeightY - max8MinCbSizeY))
+        {
           printf("Potential violation: (curScaledHeight * curSeqMaxPicHeightY) should be greater than or equal to refScaledHeight * (curPicHeightY - max(8, MinCbSizeY)\n");
+        }
       }
     }
 
@@ -328,23 +332,11 @@ void EncLib::init(AUWriterIf *auWriterIf)
 
   // initialize encoder search class
   CABACWriter* cabacEstimator = m_CABACEncoder.getCABACEstimator(&sps0);
-  m_cIntraSearch.init( this,
-                       &m_cTrQuant,
-                       &m_cRdCost,
-                       cabacEstimator,
-                       getCtxCache(), m_maxCUWidth, m_maxCUHeight, floorLog2(m_maxCUWidth) - m_log2MinCUSize
-                     , &m_cReshaper
-                     , sps0.getBitDepth(CHANNEL_TYPE_LUMA)
-  );
-  m_cInterSearch.init( this,
-                       &m_cTrQuant,
-                       m_iSearchRange,
-                       m_bipredSearchRange,
-                       m_motionEstimationSearchMethod,
-                       getUseCompositeRef(),
-    m_maxCUWidth, m_maxCUHeight, floorLog2(m_maxCUWidth) - m_log2MinCUSize, &m_cRdCost, cabacEstimator, getCtxCache()
-                     , &m_cReshaper
-  );
+  m_cIntraSearch.init(this, &m_cTrQuant, &m_cRdCost, cabacEstimator, getCtxCache(), m_maxCUWidth, m_maxCUHeight,
+                      floorLog2(m_maxCUWidth) - m_log2MinCUSize, &m_cReshaper, sps0.getBitDepth(CHANNEL_TYPE_LUMA));
+  m_cInterSearch.init(this, &m_cTrQuant, m_iSearchRange, m_bipredSearchRange, m_motionEstimationSearchMethod,
+                      getUseCompositeRef(), m_maxCUWidth, m_maxCUHeight, floorLog2(m_maxCUWidth) - m_log2MinCUSize,
+                      &m_cRdCost, cabacEstimator, getCtxCache(), &m_cReshaper);
 
   // link temporary buffets from intra search with inter search to avoid unneccessary memory overhead
   m_cInterSearch.setTempBuffers( m_cIntraSearch.getSplitCSBuf(), m_cIntraSearch.getFullCSBuf(), m_cIntraSearch.getSaveCSBuf() );
@@ -511,8 +503,8 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
       m_cRateCtrl.initRCGOP( m_iNumPicRcvd );
     }
 
-    m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false,
-      snrCSC, m_printFrameMSE, m_printMSSSIM, true, 0 );
+    m_cGOPEncoder.compressGOP(m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false, snrCSC,
+                              m_printFrameMSE, m_printMSSSIM, true, 0);
 
 #if JVET_O0756_CALCULATE_HDRMETRICS
     m_metricTime = m_cGOPEncoder.getMetricTime();
@@ -598,14 +590,18 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
       int yScale = ( ( refPicHeight << SCALE_RATIO_BITS ) + ( curPicHeight >> 1 ) ) / curPicHeight;
       std::pair<int, int> scalingRatio = std::pair<int, int>( xScale, yScale );
 
-      Picture::rescalePicture( scalingRatio, *pcPicYuvOrg, refPPS->getScalingWindow(), pcPicCurr->getOrigBuf(), pPPS->getScalingWindow(), chromaFormatIDC, pSPS->getBitDepths(), true, true,
-        pSPS->getHorCollocatedChromaFlag(), pSPS->getVerCollocatedChromaFlag() );
-      Picture::rescalePicture( scalingRatio, *cPicYuvTrueOrg, refPPS->getScalingWindow(), pcPicCurr->getTrueOrigBuf(), pPPS->getScalingWindow(), chromaFormatIDC, pSPS->getBitDepths(), true, true,
-        pSPS->getHorCollocatedChromaFlag(), pSPS->getVerCollocatedChromaFlag() );
+      Picture::rescalePicture(scalingRatio, *pcPicYuvOrg, refPPS->getScalingWindow(), pcPicCurr->getOrigBuf(),
+                              pPPS->getScalingWindow(), chromaFormatIDC, pSPS->getBitDepths(), true, true,
+                              pSPS->getHorCollocatedChromaFlag(), pSPS->getVerCollocatedChromaFlag());
+      Picture::rescalePicture(scalingRatio, *cPicYuvTrueOrg, refPPS->getScalingWindow(), pcPicCurr->getTrueOrigBuf(),
+                              pPPS->getScalingWindow(), chromaFormatIDC, pSPS->getBitDepths(), true, true,
+                              pSPS->getHorCollocatedChromaFlag(), pSPS->getVerCollocatedChromaFlag());
       if (getGopBasedTemporalFilterEnabled())
       {
-        Picture::rescalePicture( scalingRatio, *pcPicYuvFilteredOrg, refPPS->getScalingWindow(), pcPicCurr->getFilteredOrigBuf(), pPPS->getScalingWindow(), chromaFormatIDC, pSPS->getBitDepths(), true, true,
-          pSPS->getHorCollocatedChromaFlag(), pSPS->getVerCollocatedChromaFlag() );
+        Picture::rescalePicture(scalingRatio, *pcPicYuvFilteredOrg, refPPS->getScalingWindow(),
+                                pcPicCurr->getFilteredOrigBuf(), pPPS->getScalingWindow(), chromaFormatIDC,
+                                pSPS->getBitDepths(), true, true, pSPS->getHorCollocatedChromaFlag(),
+                                pSPS->getVerCollocatedChromaFlag());
       }
     }
     else
@@ -671,8 +667,8 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
 bool EncLib::encode( const InputColourSpaceConversion snrCSC, std::list<PelUnitBuf*>& rcListPicYuvRecOut, int& iNumEncoded )
 {
   // compress GOP
-  m_cGOPEncoder.compressGOP( m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut,
-    false, false, snrCSC, m_printFrameMSE, m_printMSSSIM, false, m_picIdInGOP );
+  m_cGOPEncoder.compressGOP(m_iPOCLast, m_iNumPicRcvd, m_cListPic, rcListPicYuvRecOut, false, false, snrCSC,
+                            m_printFrameMSE, m_printMSSSIM, false, m_picIdInGOP);
 
   m_picIdInGOP++;
 
@@ -1601,9 +1597,13 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     pps.setQpOffset(COMPONENT_Cb, Clip3( -12, 12, min(0, cbQP) + m_chromaCbQpOffset ));
     pps.setQpOffset(COMPONENT_Cr, Clip3( -12, 12, min(0, crQP) + m_chromaCrQpOffset));
     if(pps.getJointCbCrQpOffsetPresentFlag())
+    {
       pps.setQpOffset(JOINT_CbCr, Clip3(-12, 12, (min(0, cbQP) + min(0, crQP)) / 2 + m_chromaCbCrQpOffset));
+    }
     else
+    {
       pps.setQpOffset(JOINT_CbCr, 0);
+    }
   }
   else
   {
@@ -1611,9 +1611,13 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
   pps.setQpOffset(COMPONENT_Cb, m_chromaCbQpOffset );
   pps.setQpOffset(COMPONENT_Cr, m_chromaCrQpOffset );
   if (pps.getJointCbCrQpOffsetPresentFlag())
+  {
     pps.setQpOffset(JOINT_CbCr, m_chromaCbCrQpOffset);
+  }
   else
+  {
     pps.setQpOffset(JOINT_CbCr, 0);
+  }
 #if ER_CHROMA_QP_WCG_PPS
   }
 #endif
@@ -1641,9 +1645,7 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
  #endif
   pps.setSliceChromaQpFlag(bChromaDeltaQPEnabled);
 #endif
-  if (
-    !pps.getSliceChromaQpFlag() && sps.getUseDualITree()
-    && (getChromaFormatIdc() != CHROMA_400))
+  if (!pps.getSliceChromaQpFlag() && sps.getUseDualITree() && (getChromaFormatIdc() != CHROMA_400))
   {
     pps.setSliceChromaQpFlag(m_chromaCbQpOffsetDualTree != 0 || m_chromaCrQpOffsetDualTree != 0 || m_chromaCbCrQpOffsetDualTree != 0);
   }
@@ -1799,7 +1801,7 @@ void EncLib::xInitPPS(PPS &pps, const SPS &sps)
     }
   }
   CHECK(!(bestPos <= 15), "Unspecified error");
-    pps.setNumRefIdxL0DefaultActive(bestPos);
+  pps.setNumRefIdxL0DefaultActive(bestPos);
   pps.setNumRefIdxL1DefaultActive(bestPos);
   pps.setPictureHeaderExtensionPresentFlag(false);
 
@@ -1887,7 +1889,8 @@ void EncLib::xInitPicHeader(PicHeader &picHeader, const SPS &sps, const PPS &pps
     picHeader.setVirtualBoundariesPresentFlag( sps.getVirtualBoundariesPresentFlag() );
     picHeader.setNumVerVirtualBoundaries(sps.getNumVerVirtualBoundaries());
     picHeader.setNumHorVirtualBoundaries(sps.getNumHorVirtualBoundaries());
-    for(i=0; i<3; i++) {
+    for (i = 0; i < 3; i++)
+    {
       picHeader.setVirtualBoundariesPosX(sps.getVirtualBoundariesPosX(i), i);
       picHeader.setVirtualBoundariesPosY(sps.getVirtualBoundariesPosY(i), i);
     }
