@@ -790,7 +790,7 @@ void TrQuant::xT( const TransformUnit &tu, const ComponentID &compID, const CPel
     CHECKD( ( transformWidthIndex < 0 ), "There is a problem with the width." );
     fastFwdTrans[trTypeHor][transformWidthIndex]( block, dstCoeff.buf, shift, 1, 0, skipWidth );
   }
-  else //if (iWidth == 1) //1-D vertical transform
+  else   // if (width == 1) //1-D vertical transform
   {
     int shift = ( ( floorLog2(height) ) + bitDepth + TRANSFORM_MATRIX_SHIFT ) - maxLog2TrDynamicRange + COM16_C806_TRANS_PREC;
     CHECK( shift < 0, "Negative shift" );
@@ -852,7 +852,7 @@ void TrQuant::xIT( const TransformUnit &tu, const ComponentID &compID, const CCo
     CHECK( ( transformHeightIndex < 0 ), "There is a problem with the height." );
     fastInvTrans[trTypeVer][transformHeightIndex]( pCoeff.buf, block, shift + 1, 1, 0, skipHeight, pelMinimum, pelMaximum );
   }
-  else //if(iHeight == 1) //1-D horizontal transform
+  else   // if(height == 1) //1-D horizontal transform
   {
     const int      shift              = ( TRANSFORM_MATRIX_SHIFT + maxLog2TrDynamicRange - 1 ) - bitDepth + COM16_C806_TRANS_PREC;
     CHECK( shift < 0, "Negative shift" );

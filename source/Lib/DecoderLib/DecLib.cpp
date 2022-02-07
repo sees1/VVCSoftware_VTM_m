@@ -548,9 +548,9 @@ void DecLib::init(
 void DecLib::deletePicBuffer ( )
 {
   PicList::iterator  iterPic   = m_cListPic.begin();
-  int iSize = int( m_cListPic.size() );
+  int                size      = int(m_cListPic.size());
 
-  for (int i = 0; i < iSize; i++ )
+  for (int i = 0; i < size; i++)
   {
     Picture* pcPic = *(iterPic++);
     pcPic->destroy();

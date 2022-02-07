@@ -712,7 +712,6 @@ int64_t xCalcSADvalueWP(const int   bitDepth,
                       const int   offset,
                       const bool  useHighPrecision)
 {
-  //const int64_t iSize          = iWidth*iHeight;
   const int64_t realLog2Denom = useHighPrecision ? log2Denom : (log2Denom + (bitDepth - 8));
   const int64_t realOffset    = ((int64_t)offset)<<realLog2Denom;
 
@@ -727,7 +726,6 @@ int64_t xCalcSADvalueWP(const int   bitDepth,
     pRefPel += refStride;
   }
 
-  //return (iSAD/iSize);
   return SAD;
 }
 
@@ -767,7 +765,6 @@ int64_t xCalcSADvalueWPOptionalClip(const int   bitDepth,
   }
   else
   {
-    //const int64_t iSize          = iWidth*iHeight;
     const int64_t realLog2Denom = useHighPrecision ? log2Denom : (log2Denom + (bitDepth - 8));
     const int64_t realOffset    = ((int64_t)offset)<<realLog2Denom;
 

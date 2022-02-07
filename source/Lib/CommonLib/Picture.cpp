@@ -233,8 +233,8 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   clearSliceBuffer();
 
   const ChromaFormat chromaFormatIDC = sps.getChromaFormatIdc();
-  const int          iWidth = pps.getPicWidthInLumaSamples();
-  const int          iHeight = pps.getPicHeightInLumaSamples();
+  const int          width           = pps.getPicWidthInLumaSamples();
+  const int          height          = pps.getPicHeightInLumaSamples();
 
   if( cs )
   {
@@ -244,7 +244,7 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   {
     cs = new CodingStructure( g_globalUnitCache.cuCache, g_globalUnitCache.puCache, g_globalUnitCache.tuCache );
     cs->sps = &sps;
-    cs->create(chromaFormatIDC, Area(0, 0, iWidth, iHeight), true, (bool)sps.getPLTMode());
+    cs->create(chromaFormatIDC, Area(0, 0, width, height), true, (bool) sps.getPLTMode());
   }
 
   cs->vps = vps;

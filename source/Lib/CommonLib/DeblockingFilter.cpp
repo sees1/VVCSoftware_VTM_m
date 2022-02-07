@@ -939,7 +939,7 @@ void DeblockingFilter::xEdgeFilterLuma( const CodingUnit& cu, const DeblockEdgeD
 
   PelBuf        picYuvRec = m_enc ? m_encPicYuvBuffer.getBuf( lumaArea ) : cu.cs->getRecoBuf( lumaArea );
   Pel           *piSrc    = picYuvRec.buf;
-  const int     iStride   = picYuvRec.stride;
+  const int      stride                         = picYuvRec.stride;
   Pel           *piTmpSrc = piSrc;
   const PPS     &pps      = *(cu.cs->pps);
   const SPS     &sps      = *(cu.cs->sps);
@@ -967,7 +967,7 @@ void DeblockingFilter::xEdgeFilterLuma( const CodingUnit& cu, const DeblockEdgeD
     xoffset   = 0;
     yoffset   = pelsInPart;
     iOffset   = 1;
-    iSrcStep  = iStride;
+    iSrcStep  = stride;
     piTmpSrc += iEdge * pelsInPart;
     pos       = Position{ lumaArea.x + iEdge * pelsInPart, lumaArea.y - yoffset };
   }
@@ -975,9 +975,9 @@ void DeblockingFilter::xEdgeFilterLuma( const CodingUnit& cu, const DeblockEdgeD
   {
     xoffset   = pelsInPart;
     yoffset   = 0;
-    iOffset   = iStride;
+    iOffset   = stride;
     iSrcStep  = 1;
-    piTmpSrc += iEdge*pelsInPart*iStride;
+    piTmpSrc += iEdge * pelsInPart * stride;
     pos       = Position{ lumaArea.x - xoffset, lumaArea.y + iEdge * pelsInPart };
   }
 
@@ -1031,7 +1031,7 @@ void DeblockingFilter::xEdgeFilterLuma( const CodingUnit& cu, const DeblockEdgeD
       if ( sps.getLadfEnabled() )
       {
         int iShift = 0;
-        deriveLADFShift( piTmpSrc + iSrcStep * (iIdx*pelsInPart), iStride, iShift, edgeDir, sps );
+        deriveLADFShift(piTmpSrc + iSrcStep * (iIdx * pelsInPart), stride, iShift, edgeDir, sps);
         iQP += iShift;
       }
 #endif
@@ -1191,7 +1191,7 @@ void DeblockingFilter::xEdgeFilterChroma(const CodingUnit& cu, const DeblockEdge
   PelBuf     picYuvRecCr = m_enc ? m_encPicYuvBuffer.getBuf(cu.block(COMPONENT_Cr)) : cu.cs->getRecoBuf(cu.block(COMPONENT_Cr));
   Pel       *piSrcCb       = picYuvRecCb.buf;
   Pel       *piSrcCr       = picYuvRecCr.buf;
-  const int  iStride       = picYuvRecCb.stride;
+  const int          stride              = picYuvRecCb.stride;
   const SPS &sps           = *cu.cs->sps;
   const PPS &pps           = *cu.cs->pps;
   const Slice  &slice      = *cu.slice;
@@ -1236,7 +1236,7 @@ void DeblockingFilter::xEdgeFilterChroma(const CodingUnit& cu, const DeblockEdge
     xoffset      = 0;
     yoffset      = uiNumPelsLuma;
     iOffset      = 1;
-    iSrcStep     = iStride;
+    iSrcStep     = stride;
     piTmpSrcCb  += iEdge*uiPelsInPartChromaH;
     piTmpSrcCr  += iEdge*uiPelsInPartChromaH;
     uiLoopLength = uiPelsInPartChromaV;
@@ -1246,10 +1246,10 @@ void DeblockingFilter::xEdgeFilterChroma(const CodingUnit& cu, const DeblockEdge
   {
     xoffset      = uiNumPelsLuma;
     yoffset      = 0;
-    iOffset      = iStride;
+    iOffset      = stride;
     iSrcStep     = 1;
-    piTmpSrcCb  += iEdge*iStride*uiPelsInPartChromaV;
-    piTmpSrcCr  += iEdge*iStride*uiPelsInPartChromaV;
+    piTmpSrcCb += iEdge * stride * uiPelsInPartChromaV;
+    piTmpSrcCr += iEdge * stride * uiPelsInPartChromaV;
     uiLoopLength = uiPelsInPartChromaH;
     pos          = Position{ lumaPos.x - xoffset, lumaPos.y + iEdge*uiNumPelsLuma };
   }

@@ -462,9 +462,9 @@ void EncLib::xInitPPSforLT(PPS& pps)
 void EncLib::deletePicBuffer()
 {
   PicList::iterator iterPic = m_cListPic.begin();
-  int iSize = int( m_cListPic.size() );
+  int               size    = int(m_cListPic.size());
 
-  for ( int i = 0; i < iSize; i++ )
+  for (int i = 0; i < size; i++)
   {
     Picture* pcPic = *(iterPic++);
 
@@ -871,8 +871,8 @@ void EncLib::xGetNewPicBuffer ( std::list<PelUnitBuf*>& rcListPicYuvRecOut, Pict
   if( m_cListPic.size() >= (uint32_t)( m_iGOPSize + maxDecPicBuffering + 2 ) )
   {
     PicList::iterator iterPic = m_cListPic.begin();
-    int iSize = int( m_cListPic.size() );
-    for( int i = 0; i < iSize; i++ )
+    int               size    = int(m_cListPic.size());
+    for (int i = 0; i < size; i++)
     {
       rpcPic = *iterPic;
       if( !rpcPic->referenced && rpcPic->layerId == m_layerId )

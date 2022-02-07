@@ -216,14 +216,14 @@ void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf &piPred, co
 {
   const ComponentID    compID       = MAP_CHROMA( compId );
   const ChannelType    channelType  = toChannelType( compID );
-  const int            iWidth       = piPred.width;
-  const int            iHeight      = piPred.height;
-  CHECK(iWidth == 2, "Width of 2 is not supported");
+  const int            width        = piPred.width;
+  const int            height       = piPred.height;
+  CHECK(width == 2, "Width of 2 is not supported");
   CHECK(PU::isMIP(pu, toChannelType(compId)), "We should not get here for MIP.");
   const uint32_t       uiDirMode    = isLuma( compId ) && pu.cu->bdpcmMode ? BDPCM_IDX : !isLuma(compId) && pu.cu->bdpcmModeChroma ? BDPCM_IDX : PU::getFinalIntraMode(pu, channelType);
 
-  CHECK( floorLog2(iWidth) < 2 && pu.cs->pcv->noChroma2x2, "Size not allowed" );
-  CHECK( floorLog2(iWidth) > 7, "Size not allowed" );
+  CHECK(floorLog2(width) < 2 && pu.cs->pcv->noChroma2x2, "Size not allowed");
+  CHECK(floorLog2(width) > 7, "Size not allowed");
 
   const int srcStride  = m_refBufferStride[compID];
   const int srcHStride = 2;
@@ -242,16 +242,16 @@ void IntraPrediction::predIntraAng( const ComponentID compId, PelBuf &piPred, co
   if (m_ipaParam.applyPDPC)
   {
     PelBuf dstBuf = piPred;
-    const int scale = ((floorLog2(iWidth) - 2 + floorLog2(iHeight) - 2 + 2) >> 2);
+    const int scale  = ((floorLog2(width) - 2 + floorLog2(height) - 2 + 2) >> 2);
     CHECK(scale < 0 || scale > 31, "PDPC: scale < 0 || scale > 31");
 
     if (uiDirMode == PLANAR_IDX || uiDirMode == DC_IDX)
     {
-      for (int y = 0; y < iHeight; y++)
+      for (int y = 0; y < height; y++)
       {
         const int wT   = 32 >> std::min(31, ((y << 1) >> scale));
         const Pel left = srcBuf.at(y + 1, 1);
-        for (int x = 0; x < iWidth; x++)
+        for (int x = 0; x < width; x++)
         {
           const int wL    = 32 >> std::min(31, ((x << 1) >> scale));
           const Pel top   = srcBuf.at(x + 1, 0);

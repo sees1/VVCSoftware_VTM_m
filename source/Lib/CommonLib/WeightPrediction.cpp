@@ -178,17 +178,17 @@ void WeightPrediction::addWeightBi(const CPelUnitBuf          &pcYuvSrc0,
     const int  shift    = wp0[compID].shift + shiftNum;
     const int  round    = (enableRounding[compID] && (shift > 0)) ? (1 << (shift - 1)) : 0;
     const int  w1       = wp1[compID].w;
-    const int  iHeight  = rpcYuvDst.bufs[compID].height;
-    const int  iWidth   = rpcYuvDst.bufs[compID].width;
+    const int     height   = rpcYuvDst.bufs[compID].height;
+    const int     width    = rpcYuvDst.bufs[compID].width;
 
     const uint32_t iSrc0Stride = pcYuvSrc0.bufs[compID].stride;
     const uint32_t iSrc1Stride = pcYuvSrc1.bufs[compID].stride;
     const uint32_t iDstStride =  rpcYuvDst.bufs[compID].stride;
 
-    for (int y = iHeight - 1; y >= 0; y--)
+    for (int y = height - 1; y >= 0; y--)
     {
       // do it in batches of 4 (partial unroll)
-      int x = iWidth - 1;
+      int x = width - 1;
 
       for (; x >= 3; )
       {
@@ -296,15 +296,15 @@ void  WeightPrediction::addWeightUni(const CPelUnitBuf          &pcYuvSrc0,
     const int  shift        = wp0[compID].shift + shiftNum;
     const uint32_t iSrc0Stride  = pcYuvSrc0.bufs[compID].stride;
     const uint32_t iDstStride   = rpcYuvDst.bufs[compID].stride;
-    const int  iHeight      = rpcYuvDst.bufs[compID].height;
-    const int  iWidth       = rpcYuvDst.bufs[compID].width;
+    const int      height        = rpcYuvDst.bufs[compID].height;
+    const int      width         = rpcYuvDst.bufs[compID].width;
 
     if (w0 != 1 << wp0[compID].shift)
     {
       const int  round = (shift > 0) ? (1 << (shift - 1)) : 0;
-      for (int y = iHeight - 1; y >= 0; y--)
+      for (int y = height - 1; y >= 0; y--)
       {
-        int x = iWidth - 1;
+        int x = width - 1;
         for (; x >= 3; )
         {
           pDst[x] = weightUnidir(w0, pSrc0[x], round, shift, offset, clpRng); x--;
@@ -325,9 +325,9 @@ void  WeightPrediction::addWeightUni(const CPelUnitBuf          &pcYuvSrc0,
       const int  round = (shiftNum > 0) ? (1 << (shiftNum - 1)) : 0;
       if (offset == 0)
       {
-        for (int y = iHeight - 1; y >= 0; y--)
+        for (int y = height - 1; y >= 0; y--)
         {
-          int x = iWidth - 1;
+          int x = width - 1;
           for (; x >= 3; )
           {
             pDst[x] = noWeightOffsetUnidir(pSrc0[x], round, shiftNum, clpRng); x--;
@@ -345,9 +345,9 @@ void  WeightPrediction::addWeightUni(const CPelUnitBuf          &pcYuvSrc0,
       }
       else
       {
-        for (int y = iHeight - 1; y >= 0; y--)
+        for (int y = height - 1; y >= 0; y--)
         {
-          int x = iWidth - 1;
+          int x = width - 1;
           for (; x >= 3; )
           {
             pDst[x] = noWeightUnidir(pSrc0[x], round, shiftNum, offset, clpRng); x--;

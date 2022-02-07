@@ -67,7 +67,8 @@ EncSlice::~EncSlice()
   destroy();
 }
 
-void EncSlice::create( int iWidth, int iHeight, ChromaFormat chromaFormat, uint32_t iMaxCUWidth, uint32_t iMaxCUHeight, uint8_t uhTotalDepth )
+void EncSlice::create(int width, int height, ChromaFormat chromaFormat, uint32_t iMaxCUWidth, uint32_t iMaxCUHeight,
+                      uint8_t uhTotalDepth)
 {
 }
 
@@ -148,20 +149,19 @@ static inline int lumaDQPOffset (const uint32_t avgLumaValue, const int bitDepth
   return (1 - int ((3 * uint64_t (avgLumaValue * avgLumaValue)) >> uint64_t (2 * bitDepth - 1)));
 }
 
-static void filterAndCalculateAverageEnergies (const Pel* pSrc, const int  iSrcStride,
-                                               double &hpEner,  const int  iHeight,    const int iWidth,
-                                               const uint32_t uBitDepth /* luma bit-depth (4-16) */)
+static void filterAndCalculateAverageEnergies(const Pel *pSrc, const int iSrcStride, double &hpEner, const int height,
+                                              const int width, const uint32_t uBitDepth /* luma bit-depth (4-16) */)
 {
   uint64_t saAct = 0;
 
   // skip first row as there may be a black border frame
   pSrc += iSrcStride;
   // center rows
-  for (int y = 1; y < iHeight - 1; y++)
+  for (int y = 1; y < height - 1; y++)
   {
     // skip column as there may be a black border frame
 
-    for (int x = 1; x < iWidth - 1; x++) // and columns
+    for (int x = 1; x < width - 1; x++)   // and columns
     {
       const int f = 12 * (int)pSrc[x  ] - 2 * ((int)pSrc[x-1] + (int)pSrc[x+1] + (int)pSrc[x  -iSrcStride] + (int)pSrc[x  +iSrcStride])
                        - (int)pSrc[x-1-iSrcStride] - (int)pSrc[x+1-iSrcStride] - (int)pSrc[x-1+iSrcStride] - (int)pSrc[x+1+iSrcStride];
@@ -172,7 +172,7 @@ static void filterAndCalculateAverageEnergies (const Pel* pSrc, const int  iSrcS
   }
   // skip last row as there may be a black border frame
 
-  hpEner = double(saAct) / double((iWidth - 2) * (iHeight - 2));
+  hpEner = double(saAct) / double((width - 2) * (height - 2));
 
   // lower limit, compensate for highpass amplification
   if (hpEner < double(1 << (uBitDepth - 4)))
