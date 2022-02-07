@@ -61,6 +61,8 @@
 #define JVET_Y0105_SW_AND_QDF                                1 // An adaptive smooth window (SW) size and extension of quality dependency factor (QDF) to low frame rate in rate control 
 #define JVET_Y0077_BIM                                       1 // JVET-Y0077: Block Importance Mapping
 
+#define JVET_Y0060_ADD_AFFINE_AMVP_MODE                   1 // JVET-Y0060: Add AffineAmvp mode to enable/disable separate from AffineMerge mode
+
 //########### place macros to be be kept below this line ###############
 #define GDR_ENABLED   1
 
