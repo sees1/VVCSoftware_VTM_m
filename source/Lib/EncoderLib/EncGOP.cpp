@@ -2787,18 +2787,18 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
     {
       bool bLowDelay = true;
       int  iCurrPOC  = pcSlice->getPOC();
-      int iRefIdx = 0;
+      int  refIdx    = 0;
 
-      for (iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_0) && bLowDelay; iRefIdx++)
+      for (refIdx = 0; refIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_0) && bLowDelay; refIdx++)
       {
-        if ( pcSlice->getRefPic(REF_PIC_LIST_0, iRefIdx)->getPOC() > iCurrPOC )
+        if (pcSlice->getRefPic(REF_PIC_LIST_0, refIdx)->getPOC() > iCurrPOC)
         {
           bLowDelay = false;
         }
       }
-      for (iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_1) && bLowDelay; iRefIdx++)
+      for (refIdx = 0; refIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_1) && bLowDelay; refIdx++)
       {
-        if ( pcSlice->getRefPic(REF_PIC_LIST_1, iRefIdx)->getPOC() > iCurrPOC )
+        if (pcSlice->getRefPic(REF_PIC_LIST_1, refIdx)->getPOC() > iCurrPOC)
         {
           bLowDelay = false;
         }
@@ -4326,7 +4326,7 @@ uint64_t EncGOP::preLoopFilterPicAndCalcDist( Picture* pcPic )
   const CPelUnitBuf picOrg = pcPic->getRecoBuf();
   const CPelUnitBuf picRec = cs.getRecoBuf();
 
-  uint64_t uiDist = 0;
+  uint64_t dist = 0;
   for( uint32_t comp = 0; comp < (uint32_t)picRec.bufs.size(); comp++)
   {
     const ComponentID compID = ComponentID(comp);
@@ -4334,9 +4334,9 @@ uint64_t EncGOP::preLoopFilterPicAndCalcDist( Picture* pcPic )
 #if ENABLE_QPA
     CHECK( rshift >= 8, "shifts greater than 7 are not supported." );
 #endif
-    uiDist += xFindDistortionPlane( picOrg.get(compID), picRec.get(compID), rshift );
+    dist += xFindDistortionPlane(picOrg.get(compID), picRec.get(compID), rshift);
   }
-  return uiDist;
+  return dist;
 }
 #endif
 

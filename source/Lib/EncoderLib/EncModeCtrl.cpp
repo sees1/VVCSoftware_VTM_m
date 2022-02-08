@@ -470,30 +470,31 @@ bool CacheBlkInfoCtrl::isMMVDSkip(const UnitArea& area)
   return m_codedCUInfo[idx1][idx2][idx3][idx4]->isMMVDSkip;
 }
 
-void CacheBlkInfoCtrl::setMv( const UnitArea& area, const RefPicList refPicList, const int iRefIdx, const Mv& rMv )
+void CacheBlkInfoCtrl::setMv(const UnitArea &area, const RefPicList refPicList, const int refIdx, const Mv &rMv)
 {
-  if( iRefIdx >= MAX_STORED_CU_INFO_REFS ) return;
+  if (refIdx >= MAX_STORED_CU_INFO_REFS)
+    return;
 
   unsigned idx1, idx2, idx3, idx4;
   getAreaIdx( area.Y(), *m_slice_chblk->getPPS()->pcv, idx1, idx2, idx3, idx4 );
 
-  m_codedCUInfo[idx1][idx2][idx3][idx4]->saveMv [refPicList][iRefIdx] = rMv;
-  m_codedCUInfo[idx1][idx2][idx3][idx4]->validMv[refPicList][iRefIdx] = true;
+  m_codedCUInfo[idx1][idx2][idx3][idx4]->saveMv[refPicList][refIdx]  = rMv;
+  m_codedCUInfo[idx1][idx2][idx3][idx4]->validMv[refPicList][refIdx] = true;
 }
 
-bool CacheBlkInfoCtrl::getMv( const UnitArea& area, const RefPicList refPicList, const int iRefIdx, Mv& rMv ) const
+bool CacheBlkInfoCtrl::getMv(const UnitArea &area, const RefPicList refPicList, const int refIdx, Mv &rMv) const
 {
   unsigned idx1, idx2, idx3, idx4;
   getAreaIdx( area.Y(), *m_slice_chblk->getPPS()->pcv, idx1, idx2, idx3, idx4 );
 
-  if( iRefIdx >= MAX_STORED_CU_INFO_REFS )
+  if (refIdx >= MAX_STORED_CU_INFO_REFS)
   {
     rMv = m_codedCUInfo[idx1][idx2][idx3][idx4]->saveMv[refPicList][0];
     return false;
   }
 
-  rMv = m_codedCUInfo[idx1][idx2][idx3][idx4]->saveMv[refPicList][iRefIdx];
-  return m_codedCUInfo[idx1][idx2][idx3][idx4]->validMv[refPicList][iRefIdx];
+  rMv = m_codedCUInfo[idx1][idx2][idx3][idx4]->saveMv[refPicList][refIdx];
+  return m_codedCUInfo[idx1][idx2][idx3][idx4]->validMv[refPicList][refIdx];
 }
 
 void SaveLoadEncInfoSbt::init( const Slice &slice )

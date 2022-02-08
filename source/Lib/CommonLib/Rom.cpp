@@ -205,14 +205,14 @@ const int8_t g_BcwSearchOrder[BCW_NUM] = { BCW_DEFAULT, BCW_DEFAULT - 2, BCW_DEF
 int8_t g_BcwCodingOrder[BCW_NUM];
 int8_t g_BcwParsingOrder[BCW_NUM];
 
-int8_t getBcwWeight(uint8_t bcwIdx, uint8_t uhRefFrmList)
+int8_t getBcwWeight(uint8_t bcwIdx, uint8_t refFrameList)
 {
-  // Weghts for the model: P0 + w * (P1 - P0) = (1-w) * P0 + w * P1
-  // Retuning  1-w for P0 or w for P1
-  return (uhRefFrmList == REF_PIC_LIST_0 ? g_BcwWeightBase - g_BcwWeights[bcwIdx] : g_BcwWeights[bcwIdx]);
+  // Weights for the model: p0 + w * (p1 - p0) = (1-w) * p0 + w * p1
+  // Retuning  1-w for p0 or w for p1
+  return (refFrameList == REF_PIC_LIST_0 ? g_BcwWeightBase - g_BcwWeights[bcwIdx] : g_BcwWeights[bcwIdx]);
 }
 
-void resetBcwCodingOrder(bool bRunDecoding, const CodingStructure &cs)
+void resetBcwCodingOrder(bool runDecoding, const CodingStructure &cs)
 {
   // Form parsing order: { BCW_DEFAULT, BCW_DEFAULT+1, BCW_DEFAULT-1, BCW_DEFAULT+2, BCW_DEFAULT-2, ... }
   g_BcwParsingOrder[0] = BCW_DEFAULT;
@@ -223,7 +223,7 @@ void resetBcwCodingOrder(bool bRunDecoding, const CodingStructure &cs)
   }
 
   // Form encoding order
-  if (!bRunDecoding)
+  if (!runDecoding)
   {
     for (int i = 0; i < BCW_NUM; ++i)
     {

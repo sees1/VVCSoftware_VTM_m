@@ -1760,8 +1760,8 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit &cu, Partitioner &partitioner
         }
 
         uint64_t fracBits   = xGetIntraFracBitsQT( cs, partitioner, false, true, -1, ispType );
-        Distortion uiDist = cs.dist;
-        double    dCost   = m_pcRdCost->calcRdCost( fracBits, uiDist - baseDist );
+        Distortion dist       = cs.dist;
+        double     dCost      = m_pcRdCost->calcRdCost(fracBits, dist - baseDist);
 
         //----- compare -----
 #if GDR_ENABLED
@@ -1800,7 +1800,7 @@ void IntraSearch::estIntraPredChromaQT( CodingUnit &cu, Partitioner &partitioner
           }
 
           dBestCost  = dCost;
-          uiBestDist = uiDist;
+          uiBestDist    = dist;
           uiBestMode = chromaIntraMode;
           bestBDPCMMode = cu.bdpcmModeChroma;
         }
@@ -3312,7 +3312,9 @@ uint64_t IntraSearch::xGetIntraFracBitsQTChroma(TransformUnit& currTU, const Com
   return fracBits;
 }
 
-void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID &compID, Distortion& ruiDist, const int &default0Save1Load2, uint32_t* numSig, std::vector<TrMode>* trModes, const bool loadTr)
+void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID &compID, Distortion &dist,
+                                      const int &default0Save1Load2, uint32_t *numSig, std::vector<TrMode> *trModes,
+                                      const bool loadTr)
 {
   if (!tu.blocks[compID].valid())
   {
@@ -3498,7 +3500,7 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID &comp
     if (tu.cu->ispMode && isLuma(compID) && CU::isISPLast(*tu.cu, area, area.compID) && CU::allLumaCBFsAreZero(*tu.cu))
     {
       // ISP has to have at least one non-zero CBF
-      ruiDist = MAX_INT;
+      dist = MAX_INT;
       return;
     }
     if ((m_pcEncCfg->getCostMode() == COST_LOSSLESS_CODING && slice.isLossless() && tu.mtsIdx[compID] == 0)
@@ -3575,7 +3577,7 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID &comp
       }
       if( tu.jointCbCr != codedCbfMask )
       {
-        ruiDist = std::numeric_limits<Distortion>::max();
+        dist = std::numeric_limits<Distortion>::max();
         return;
       }
       m_pcTrQuant->invTransformICT( tu, piResi, crResi );
@@ -3622,29 +3624,31 @@ void IntraSearch::xIntraCodingTUBlock(TransformUnit &tu, const ComponentID &comp
       PelBuf tmpRecLuma = m_tmpStorageLCU.getBuf(tmpArea1);
       tmpRecLuma.copyFrom(piReco);
       tmpRecLuma.rspSignal(m_pcReshape->getInvLUT());
-      ruiDist += m_pcRdCost->getDistPart(piOrg, tmpRecLuma, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE_WTD, &orgLuma);
+      dist += m_pcRdCost->getDistPart(piOrg, tmpRecLuma, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE_WTD,
+                                      &orgLuma);
     }
     else
     {
-      ruiDist += m_pcRdCost->getDistPart(piOrg, piReco, bitDepth, compID, DF_SSE_WTD, &orgLuma);
+      dist += m_pcRdCost->getDistPart(piOrg, piReco, bitDepth, compID, DF_SSE_WTD, &orgLuma);
       if( jointCbCr )
       {
-        ruiDist += m_pcRdCost->getDistPart(crOrg, crReco, bitDepth, COMPONENT_Cr, DF_SSE_WTD, &orgLuma);
+        dist += m_pcRdCost->getDistPart(crOrg, crReco, bitDepth, COMPONENT_Cr, DF_SSE_WTD, &orgLuma);
       }
     }
   }
   else
 #endif
   {
-    ruiDist += m_pcRdCost->getDistPart( piOrg, piReco, bitDepth, compID, DF_SSE );
+    dist += m_pcRdCost->getDistPart(piOrg, piReco, bitDepth, compID, DF_SSE);
     if( jointCbCr )
     {
-      ruiDist += m_pcRdCost->getDistPart( crOrg, crReco, bitDepth, COMPONENT_Cr, DF_SSE );
+      dist += m_pcRdCost->getDistPart(crOrg, crReco, bitDepth, COMPONENT_Cr, DF_SSE);
     }
   }
 }
 
-void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &compID, Distortion& ruiDist, std::vector<TrMode>* trModes, const bool loadTr)
+void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &compID, Distortion &dist,
+                                         std::vector<TrMode> *trModes, const bool loadTr)
 {
   if (!tu.blocks[compID].valid())
   {
@@ -3776,7 +3780,7 @@ void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &c
       }
       if (tu.jointCbCr != codedCbfMask)
       {
-        ruiDist = std::numeric_limits<Distortion>::max();
+        dist = std::numeric_limits<Distortion>::max();
         if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
         m_pcTrQuant->lambdaAdjustColorTrans(false);
         return;
@@ -3789,10 +3793,11 @@ void IntraSearch::xIntraCodingACTTUBlock(TransformUnit &tu, const ComponentID &c
   if (m_pcEncCfg->getCostMode() != COST_LOSSLESS_CODING || !slice.isLossless())
   m_pcTrQuant->lambdaAdjustColorTrans(false);
 
-  ruiDist += m_pcRdCost->getDistPart(piOrgResi, piResi, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE);
+  dist += m_pcRdCost->getDistPart(piOrgResi, piResi, sps.getBitDepth(toChannelType(compID)), compID, DF_SSE);
   if (jointCbCr)
   {
-    ruiDist += m_pcRdCost->getDistPart(crOrgResi, crResi, sps.getBitDepth(toChannelType(COMPONENT_Cr)), COMPONENT_Cr, DF_SSE);
+    dist +=
+      m_pcRdCost->getDistPart(crOrgResi, crResi, sps.getBitDepth(toChannelType(COMPONENT_Cr)), COMPONENT_Cr, DF_SSE);
   }
 }
 

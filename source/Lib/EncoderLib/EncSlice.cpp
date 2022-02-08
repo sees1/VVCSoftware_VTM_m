@@ -1307,12 +1307,12 @@ void EncSlice::setSearchRange( Slice* pcSlice )
   for (int iDir = 0; iDir < iNumPredDir; iDir++)
   {
     RefPicList  e = ( iDir ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
-    for (int iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(e); iRefIdx++)
+    for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(e); refIdx++)
     {
-      iRefPOC = pcSlice->getRefPic(e, iRefIdx)->getPOC();
+      iRefPOC            = pcSlice->getRefPic(e, refIdx)->getPOC();
       int newSearchRange = Clip3(m_pcCfg->getMinSearchWindow(), iMaxSR,
                                  (iMaxSR * ADAPT_SR_SCALE * abs(iCurrPOC - iRefPOC) + offset) / iGOPSize);
-      m_pcInterSearch->setAdaptiveSearchRange(iDir, iRefIdx, newSearchRange);
+      m_pcInterSearch->setAdaptiveSearchRange(iDir, refIdx, newSearchRange);
     }
   }
 }
