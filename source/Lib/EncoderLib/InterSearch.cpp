@@ -239,15 +239,15 @@ void InterSearch::init( EncCfg*        pcEncCfg,
   // initialize motion cost
   for( int iNum = 0; iNum < AMVP_MAX_NUM_CANDS + 1; iNum++ )
   {
-    for( int iIdx = 0; iIdx < AMVP_MAX_NUM_CANDS; iIdx++ )
+    for (int idx = 0; idx < AMVP_MAX_NUM_CANDS; idx++)
     {
-      if( iIdx < iNum )
+      if (idx < iNum)
       {
-        m_auiMVPIdxCost[iIdx][iNum] = xGetMvpIdxBits( iIdx, iNum );
+        m_auiMVPIdxCost[idx][iNum] = xGetMvpIdxBits(idx, iNum);
       }
       else
       {
-        m_auiMVPIdxCost[iIdx][iNum] = MAX_UINT;
+        m_auiMVPIdxCost[idx][iNum] = MAX_UINT;
       }
     }
   }
@@ -4639,9 +4639,9 @@ void InterSearch::xEstimateMvPredAMVP( PredictionUnit& pu, PelUnitBuf& origBuf, 
   return;
 }
 
-uint32_t InterSearch::xGetMvpIdxBits(int iIdx, int iNum)
+uint32_t InterSearch::xGetMvpIdxBits(int idx, int iNum)
 {
-  CHECK(iIdx < 0 || iNum < 0 || iIdx >= iNum, "Invalid parameters");
+  CHECK(idx < 0 || iNum < 0 || idx >= iNum, "Invalid parameters");
 
   if (iNum == 1)
   {
@@ -4649,15 +4649,15 @@ uint32_t InterSearch::xGetMvpIdxBits(int iIdx, int iNum)
   }
 
   uint32_t uiLength = 1;
-  int iTemp = iIdx;
-  if ( iTemp == 0 )
+  int      temp     = idx;
+  if (temp == 0)
   {
     return uiLength;
   }
 
-  bool bCodeLast = ( iNum-1 > iTemp );
+  bool bCodeLast = (iNum - 1 > temp);
 
-  uiLength += (iTemp-1);
+  uiLength += (temp - 1);
 
   if( bCodeLast )
   {
@@ -6022,8 +6022,8 @@ void InterSearch::xPatternSearchFracDIF(
 {
 
   //  Reference pattern initialization (integer scale)
-  int         iOffset    = rcMvInt.getHor() + rcMvInt.getVer() * cStruct.iRefStride;
-  CPelBuf cPatternRoi(cStruct.piRefY + iOffset, cStruct.iRefStride, *cStruct.pcPatternKey);
+  int     offset = rcMvInt.getHor() + rcMvInt.getVer() * cStruct.iRefStride;
+  CPelBuf cPatternRoi(cStruct.piRefY + offset, cStruct.iRefStride, *cStruct.pcPatternKey);
   if (m_skipFracME)
   {
     Mv baseRefMv(0, 0);
@@ -6042,7 +6042,9 @@ void InterSearch::xPatternSearchFracDIF(
 
   if (cStruct.imvShift > IMV_FPEL || (m_useCompositeRef && cStruct.zeroMV))
   {
-    m_pcRdCost->setDistParam(m_cDistParam, *cStruct.pcPatternKey, cStruct.piRefY + iOffset, cStruct.iRefStride, m_lumaClpRng.bd, COMPONENT_Y, 0, 1, m_pcEncCfg->getUseHADME() && !pu.cs->slice->getDisableSATDForRD());
+    m_pcRdCost->setDistParam(m_cDistParam, *cStruct.pcPatternKey, cStruct.piRefY + offset, cStruct.iRefStride,
+                             m_lumaClpRng.bd, COMPONENT_Y, 0, 1,
+                             m_pcEncCfg->getUseHADME() && !pu.cs->slice->getDisableSATDForRD());
     ruiCost = m_cDistParam.distFunc( m_cDistParam );
     ruiCost += m_pcRdCost->getCostOfVectorWithPredictor( rcMvInt.getHor(), rcMvInt.getVer(), cStruct.imvShift );
     return;
@@ -9342,7 +9344,7 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
     int strideOrg  = orgPel.stride;
     int stridePred = predPel.stride;
     uint32_t   uiShift = DISTORTION_PRECISION_ADJUSTMENT( ( *cs.sps.getBitDepth( toChannelType( compID ) ) - 8 ) << 1 );
-    Intermediate_Int iTemp;
+    Intermediate_Int  temp;
 
     //calc distY of 16 sub parts
     for( int j = 0; j < numPartY; j++ )
@@ -9358,8 +9360,8 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
         {
           for( int m = 0; m < lengthX; m++ )
           {
-            iTemp = ptrOrg[m] - ptrPred[m];
-            uiSum += Distortion( ( iTemp * iTemp ) >> uiShift );
+            temp = ptrOrg[m] - ptrPred[m];
+            uiSum += Distortion((temp * temp) >> uiShift);
           }
           ptrOrg += strideOrg;
           ptrPred += stridePred;

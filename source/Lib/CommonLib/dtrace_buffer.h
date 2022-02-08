@@ -45,12 +45,12 @@
 #include "CommonLib/Buffer.h"
 #include "CommonLib/Unit.h"
 
-inline unsigned calcCheckSum( const int iWidth, const int iHeight,  const Pel* p,  const uint32_t stride,  const int bitdepth )
+inline unsigned calcCheckSum(const int width, const int height, const Pel *p, const uint32_t stride, const int bitdepth)
 {
   unsigned checksum = 0;
-  for( unsigned y = 0; y < iHeight; y++)
+  for (unsigned y = 0; y < height; y++)
   {
-    for( unsigned  x = 0; x < iWidth; x++)
+    for (unsigned x = 0; x < width; x++)
     {
       uint8_t xor_mask = (x & 0xff) ^ (y & 0xff) ^ (x >> 8) ^ (y >> 8);
       checksum = (checksum + ((p[y*stride+x] & 0xff) ^ xor_mask)) & 0xffffffff;

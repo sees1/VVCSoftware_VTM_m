@@ -4567,8 +4567,8 @@ uint64_t EncGOP::xFindDistortionPlane(const CPelBuf& pic0, const CPelBuf& pic1, 
     {
       for (int x = 0; x < pic0.width; x++)
       {
-        Intermediate_Int iTemp = pSrc0[x] - pSrc1[x];
-        uiTotalDiff += uint64_t((iTemp * iTemp) >> rshift);
+        Intermediate_Int temp = pSrc0[x] - pSrc1[x];
+        uiTotalDiff += uint64_t((temp * temp) >> rshift);
       }
       pSrc0 += pic0.stride;
       pSrc1 += pic1.stride;
@@ -4581,8 +4581,8 @@ uint64_t EncGOP::xFindDistortionPlane(const CPelBuf& pic0, const CPelBuf& pic1, 
     {
       for (int x = 0; x < pic0.width; x++)
       {
-        Intermediate_Int iTemp = pSrc0[x] - pSrc1[x];
-        uiTotalDiff += uint64_t(iTemp * iTemp);
+        Intermediate_Int temp = pSrc0[x] - pSrc1[x];
+        uiTotalDiff += uint64_t(temp * temp);
       }
       pSrc0 += pic0.stride;
       pSrc1 += pic1.stride;
@@ -4615,9 +4615,9 @@ double EncGOP::xFindDistortionPlaneWPSNR(const CPelBuf& pic0, const CPelBuf& pic
     {
       for (int x = 0; x < pic0.width; x++)
       {
-        Intermediate_Int iTemp = pSrc0[x] - pSrc1[x];
+        Intermediate_Int temp = pSrc0[x] - pSrc1[x];
         double dW = m_pcEncLib->getRdCost()->getWPSNRLumaLevelWeight(pSrcLuma[(x << getComponentScaleX(compID, chfmt))]);
-        uiTotalDiffWPSNR += ((dW * (double)iTemp * (double)iTemp)) * (double)(1 >> rshift);
+        uiTotalDiffWPSNR += ((dW * (double) temp * (double) temp)) * (double) (1 >> rshift);
       }
       pSrc0 += pic0.stride;
       pSrc1 += pic1.stride;
@@ -4631,9 +4631,9 @@ double EncGOP::xFindDistortionPlaneWPSNR(const CPelBuf& pic0, const CPelBuf& pic
     {
       for (int x = 0; x < pic0.width; x++)
       {
-        Intermediate_Int iTemp = pSrc0[x] - pSrc1[x];
+        Intermediate_Int temp = pSrc0[x] - pSrc1[x];
         double dW = m_pcEncLib->getRdCost()->getWPSNRLumaLevelWeight(pSrcLuma[x << getComponentScaleX(compID, chfmt)]);
-        uiTotalDiffWPSNR += dW * (double)iTemp * (double)iTemp;
+        uiTotalDiffWPSNR += dW * (double) temp * (double) temp;
       }
       pSrc0 += pic0.stride;
       pSrc1 += pic1.stride;

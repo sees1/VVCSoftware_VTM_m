@@ -1105,13 +1105,15 @@ void EncCu::updateLambda(Slice *slice, const int dQP,
     return;
   }
 #endif
-  int iQP = dQP;
+  int          qp        = dQP;
   const double oldQP     = (double)slice->getSliceQpBase();
 #if ENABLE_QPA_SUB_CTU
-  const double oldLambda = (m_pcEncCfg->getUsePerceptQPA() && !m_pcEncCfg->getUseRateCtrl() && slice->getPPS()->getUseDQP()) ? slice->getLambdas()[0] :
-                           m_pcSliceEncoder->calculateLambda (slice, m_pcSliceEncoder->getGopId(), oldQP, oldQP, iQP);
+  const double oldLambda =
+    (m_pcEncCfg->getUsePerceptQPA() && !m_pcEncCfg->getUseRateCtrl() && slice->getPPS()->getUseDQP())
+      ? slice->getLambdas()[0]
+      : m_pcSliceEncoder->calculateLambda(slice, m_pcSliceEncoder->getGopId(), oldQP, oldQP, qp);
 #else
-  const double oldLambda = m_pcSliceEncoder->calculateLambda (slice, m_pcSliceEncoder->getGopId(), oldQP, oldQP, iQP);
+  const double oldLambda = m_pcSliceEncoder->calculateLambda(slice, m_pcSliceEncoder->getGopId(), oldQP, oldQP, qp);
 #endif
   const double newLambda = oldLambda * pow (2.0, ((double)dQP - oldQP) / 3.0);
 #if RDOQ_CHROMA_LAMBDA

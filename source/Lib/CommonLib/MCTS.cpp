@@ -78,14 +78,14 @@ Area MCTSHelper::getTileAreaRestricted( const Area& tileArea, const int offLT, c
 
 void MCTSHelper::clipMvToArea( Mv& rcMv, const Area& block, const Area& clipArea, const SPS& sps, const int mvFracBits )
 {
-  const int iHorMax = ( clipArea.x + clipArea.width - (int)block.x - (int)block.width ) << mvFracBits;
-  const int iHorMin = ( clipArea.x - (int)block.x ) << mvFracBits;
+  const int horMax = (clipArea.x + clipArea.width - (int) block.x - (int) block.width) << mvFracBits;
+  const int horMin = (clipArea.x - (int) block.x) << mvFracBits;
 
-  const int iVerMax = ( clipArea.y + clipArea.height - (int)block.y - (int)block.height ) << mvFracBits;
-  const int iVerMin = ( clipArea.y - (int)block.y ) << mvFracBits;
+  const int verMax = (clipArea.y + clipArea.height - (int) block.y - (int) block.height) << mvFracBits;
+  const int verMin = (clipArea.y - (int) block.y) << mvFracBits;
 
-  rcMv.setHor( Clip3( iHorMin, iHorMax, rcMv.getHor() ) );
-  rcMv.setVer( Clip3( iVerMin, iVerMax, rcMv.getVer() ) );
+  rcMv.setHor(Clip3(horMin, horMax, rcMv.getHor()));
+  rcMv.setVer(Clip3(verMin, verMax, rcMv.getVer()));
 }
 
 Area MCTSHelper::getTileArea( const CodingStructure* cs, const int ctuAddr )

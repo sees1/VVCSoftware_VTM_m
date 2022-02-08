@@ -101,9 +101,9 @@ public:
   double  initializeLambda(const Slice* slice, const int GOPid, const int refQP, const double dQP); // called by calculateLambda() and updateLambda()
 #if SHARP_LUMA_DELTA_QP || ENABLE_QPA_SUB_CTU
   int     getGopId() const { return m_gopID; }
-  double  calculateLambda( const Slice* slice, const int GOPid, const double refQP, const double dQP, int &iQP );
+  double  calculateLambda(const Slice *slice, const int GOPid, const double refQP, const double dQP, int &qp);
 #endif
-  void    setUpLambda( Slice* slice, const double dLambda, int iQP );
+  void setUpLambda(Slice *slice, const double dLambda, int qp);
 
 #if ENABLE_QPA
   int                     m_adaptedLumaQP;
@@ -112,7 +112,8 @@ public:
   EncSlice();
   virtual ~EncSlice();
 
-  void    create              ( int iWidth, int iHeight, ChromaFormat chromaFormat, uint32_t iMaxCUWidth, uint32_t iMaxCUHeight, uint8_t uhTotalDepth );
+  void    create(int width, int height, ChromaFormat chromaFormat, uint32_t iMaxCUWidth, uint32_t iMaxCUHeight,
+                 uint8_t uhTotalDepth);
   void    destroy             ();
   void    init                ( EncLib* pcEncLib, const SPS& sps );
 

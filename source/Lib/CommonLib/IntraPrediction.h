@@ -139,7 +139,9 @@ protected:
 
   void destroy                    ();
 
-  void xGetLMParameters(const PredictionUnit &pu, const ComponentID compID, const CompArea& chromaArea, int& a, int& b, int& iShift);
+  void xGetLMParameters(const PredictionUnit &pu, const ComponentID compID, const CompArea &chromaArea, int &a, int &b,
+                        int &shift);
+
 public:
   IntraPrediction();
   virtual ~IntraPrediction();

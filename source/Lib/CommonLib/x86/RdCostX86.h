@@ -127,9 +127,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
   return uiRet;
 }
 
-
-template<int iWidth, X86_VEXT vext >
-Distortion RdCost::xGetSSE_NxN_SIMD( const DistParam &rcDtParam )
+template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const DistParam &rcDtParam)
 {
   if( rcDtParam.bitDepth > 10 || rcDtParam.applyWeight )
     return RdCost::xGetSSE( rcDtParam );
@@ -143,7 +141,7 @@ Distortion RdCost::xGetSSE_NxN_SIMD( const DistParam &rcDtParam )
   const uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   unsigned int uiRet = 0;
 
-  if( 4 == iWidth )
+  if (4 == width)
   {
     __m128i Sum = _mm_setzero_si128();
     for( int iY = 0; iY < iRows; iY++ )
@@ -161,13 +159,13 @@ Distortion RdCost::xGetSSE_NxN_SIMD( const DistParam &rcDtParam )
   }
   else
   {
-    if( vext >= AVX2 && iWidth >= 16 )
+    if (vext >= AVX2 && width >= 16)
     {
 #ifdef USE_AVX2
       __m256i Sum = _mm256_setzero_si256();
       for( int iY = 0; iY < iRows; iY++ )
       {
-        for( int iX = 0; iX < iWidth; iX+=16 )
+        for (int iX = 0; iX < width; iX += 16)
         {
           __m256i Src1 = ( sizeof( Torg ) > 1 ) ? ( _mm256_lddqu_si256( ( __m256i* )( &pSrc1[iX] ) ) ) : ( _mm256_unpacklo_epi8( _mm256_permute4x64_epi64( _mm256_castsi128_si256( _mm_lddqu_si128( ( __m128i* )( &pSrc1[iX] ) ) ), 0xD8 ), _mm256_setzero_si256() ) );
           __m256i Src2 = ( sizeof( Tcur ) > 1 ) ? ( _mm256_lddqu_si256( ( __m256i* )( &pSrc2[iX] ) ) ) : ( _mm256_unpacklo_epi8( _mm256_permute4x64_epi64( _mm256_castsi128_si256( _mm_lddqu_si128( ( __m128i* )( &pSrc2[iX] ) ) ), 0xD8 ), _mm256_setzero_si256() ) );
@@ -188,7 +186,7 @@ Distortion RdCost::xGetSSE_NxN_SIMD( const DistParam &rcDtParam )
       __m128i Sum = _mm_setzero_si128();
       for( int iY = 0; iY < iRows; iY++ )
       {
-        for( int iX = 0; iX < iWidth; iX+=8 )
+        for (int iX = 0; iX < width; iX += 8)
         {
           __m128i Src1 = ( sizeof( Torg ) > 1 ) ? ( _mm_loadu_si128( ( const __m128i* )( &pSrc1[iX] ) ) ) : ( _mm_unpacklo_epi8( _mm_loadl_epi64( ( const __m128i* )( &pSrc1[iX] ) ), _mm_setzero_si128() ) );
           __m128i Src2 = ( sizeof( Tcur ) > 1 ) ? ( _mm_lddqu_si128( ( const __m128i* )( &pSrc2[iX] ) ) ) : ( _mm_unpacklo_epi8( _mm_loadl_epi64( ( const __m128i* )( &pSrc2[iX] ) ), _mm_setzero_si128() ) );
@@ -338,13 +336,12 @@ Distortion RdCost::xGetSAD_IBD_SIMD(const DistParam &rcDtParam)
   return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
-template< int iWidth, X86_VEXT vext >
-Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
+template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const DistParam &rcDtParam)
 {
   if( rcDtParam.bitDepth > 10 || rcDtParam.applyWeight )
     return RdCost::xGetSAD( rcDtParam );
 
-  //  assert( rcDtParam.iCols == iWidth);
+  //  assert( rcDtParam.iCols == width);
   const short* pSrc1   = (const short*)rcDtParam.org.buf;
   const short* pSrc2   = (const short*)rcDtParam.cur.buf;
   int  iRows           = rcDtParam.org.height;
@@ -355,7 +352,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
 
   uint32_t uiSum = 0;
 
-  if( iWidth == 4 )
+  if (width == 4)
   {
     if( iRows == 4 && iSubShift == 0 )
     {
@@ -401,7 +398,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
   }
   else
   {
-    if( vext >= AVX2 && iWidth >= 16 )
+    if (vext >= AVX2 && width >= 16)
     {
 #ifdef USE_AVX2
       // Do for width that multiple of 16
@@ -410,7 +407,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
       for( int iY = 0; iY < iRows; iY+=iSubStep )
       {
         __m256i vsum16 = vzero;
-        for( int iX = 0; iX < iWidth; iX+=16 )
+        for (int iX = 0; iX < width; iX += 16)
         {
           __m256i vsrc1 = _mm256_lddqu_si256( ( __m256i* )( &pSrc1[iX] ) );
           __m256i vsrc2 = _mm256_lddqu_si256( ( __m256i* )( &pSrc2[iX] ) );
@@ -434,7 +431,7 @@ Distortion RdCost::xGetSAD_NxN_SIMD( const DistParam &rcDtParam )
       for( int iY = 0; iY < iRows; iY+=iSubStep )
       {
         __m128i vsum16 = vzero;
-        for( int iX = 0; iX < iWidth; iX+=8 )
+        for (int iX = 0; iX < width; iX += 8)
         {
           __m128i vsrc1 = _mm_loadu_si128( ( const __m128i* )( &pSrc1[iX] ) );
           __m128i vsrc2 = _mm_lddqu_si128( ( const __m128i* )( &pSrc2[iX] ) );
@@ -4308,13 +4305,13 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
     }
     else
     {
-      Intermediate_Int iTemp;
+      Intermediate_Int temp;
       for (int iY = 0; iY < iRows; iY++)
       {
         for (int iX = 0; iX < iCols; iX++)
         {
-          iTemp = piOrg[iX] - piCur[iX];
-          uiSum += Distortion(iTemp * iTemp);
+          temp = piOrg[iX] - piCur[iX];
+          uiSum += Distortion(temp * temp);
         }
         piOrg += iStrideOrg;
         piCur += iStrideCur;
