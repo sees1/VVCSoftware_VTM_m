@@ -539,11 +539,12 @@ void Slice::initEqualRef()
 {
   for (int iDir = 0; iDir < NUM_REF_PIC_LIST_01; iDir++)
   {
-    for (int iRefIdx1 = 0; iRefIdx1 < MAX_NUM_REF; iRefIdx1++)
+    for (int refIdx1 = 0; refIdx1 < MAX_NUM_REF; refIdx1++)
     {
-      for (int iRefIdx2 = iRefIdx1; iRefIdx2 < MAX_NUM_REF; iRefIdx2++)
+      for (int refIdx2 = refIdx1; refIdx2 < MAX_NUM_REF; refIdx2++)
       {
-        m_abEqualRef[iDir][iRefIdx1][iRefIdx2] = m_abEqualRef[iDir][iRefIdx2][iRefIdx1] = (iRefIdx1 == iRefIdx2? true : false);
+        m_abEqualRef[iDir][refIdx1][refIdx2] = m_abEqualRef[iDir][refIdx2][refIdx1] =
+          (refIdx1 == refIdx2 ? true : false);
       }
     }
   }

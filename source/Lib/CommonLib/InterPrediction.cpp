@@ -453,7 +453,7 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
 {
   const SPS &sps = *pu.cs->sps;
 
-  int iRefIdx = pu.refIdx[eRefPicList];
+  int  refIdx = pu.refIdx[eRefPicList];
   Mv mv[3];
   bool isIBC = false;
   CHECK( !CU::isIBC( *pu.cu ) && pu.lwidth() == 4 && pu.lheight() == 4, "invalid 4x4 inter blocks" );
@@ -463,7 +463,7 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
   }
   if( pu.cu->affine )
   {
-    CHECK( iRefIdx < 0, "iRefIdx incorrect." );
+    CHECK(refIdx < 0, "refIdx incorrect.");
 
     mv[0] = pu.mvAffi[eRefPicList][0];
     mv[1] = pu.mvAffi[eRefPicList][1];
@@ -476,7 +476,7 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
 
   if( !pu.cu->affine )
   {
-    if( !isIBC && pu.cu->slice->getRefPic( eRefPicList, iRefIdx )->isRefScaled( pu.cs->pps ) == false )
+    if (!isIBC && pu.cu->slice->getRefPic(eRefPicList, refIdx)->isRefScaled(pu.cs->pps) == false)
     {
       if( !pu.cs->pps->getWrapAroundEnabledFlag() )
       {
@@ -501,7 +501,8 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
       CHECK( bioApplied, "BIO is not allowed with affine" );
       m_iRefListIdx = eRefPicList;
       bool genChromaMv = (!luma && chroma && compID == COMPONENT_Cb);
-      xPredAffineBlk( compID, pu, pu.cu->slice->getRefPic( eRefPicList, iRefIdx )->unscaledPic, mv, pcYuvPred, bi, pu.cu->slice->clpRng( compID ), genChromaMv, pu.cu->slice->getScalingRatio( eRefPicList, iRefIdx ));
+      xPredAffineBlk(compID, pu, pu.cu->slice->getRefPic(eRefPicList, refIdx)->unscaledPic, mv, pcYuvPred, bi,
+                     pu.cu->slice->clpRng(compID), genChromaMv, pu.cu->slice->getScalingRatio(eRefPicList, refIdx));
     }
     else
     {
@@ -512,7 +513,9 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
       }
       else
       {
-        xPredInterBlk( compID, pu, pu.cu->slice->getRefPic( eRefPicList, iRefIdx )->unscaledPic, mv[0], pcYuvPred, bi, pu.cu->slice->clpRng( compID ), bioApplied, isIBC, pu.cu->slice->getScalingRatio( eRefPicList, iRefIdx ) );
+        xPredInterBlk(compID, pu, pu.cu->slice->getRefPic(eRefPicList, refIdx)->unscaledPic, mv[0], pcYuvPred, bi,
+                      pu.cu->slice->clpRng(compID), bioApplied, isIBC,
+                      pu.cu->slice->getScalingRatio(eRefPicList, refIdx));
       }
     }
   }
@@ -1418,10 +1421,10 @@ void InterPrediction::xWeightedAverage(const PredictionUnit& pu, const CPelUnitB
 {
   CHECK( (chromaOnly && lumaOnly), "should not happen" );
 
-  const int iRefIdx0 = pu.refIdx[0];
-  const int iRefIdx1 = pu.refIdx[1];
+  const int refIdx0 = pu.refIdx[0];
+  const int refIdx1 = pu.refIdx[1];
 
-  if( iRefIdx0 >= 0 && iRefIdx1 >= 0 )
+  if (refIdx0 >= 0 && refIdx1 >= 0)
   {
     if( pu.cu->BcwIdx != BCW_DEFAULT && (yuvDstTmp || !pu.ciipFlag) )
     {
@@ -1441,7 +1444,7 @@ void InterPrediction::xWeightedAverage(const PredictionUnit& pu, const CPelUnitB
       bool bioEnabled = true;
       if (bioEnabled)
       {
-        applyBiOptFlow(pu, pcYuvSrc0, pcYuvSrc1, iRefIdx0, iRefIdx1, pcYuvDst, clipBitDepths);
+        applyBiOptFlow(pu, pcYuvSrc0, pcYuvSrc1, refIdx0, refIdx1, pcYuvDst, clipBitDepths);
         if (yuvDstTmp)
           yuvDstTmp->bufs[0].addAvg(CPelBuf(pSrcY0, src0Stride, pu.lumaSize()), CPelBuf(pSrcY1, src1Stride, pu.lumaSize()), clpRngs.comp[0]);
       }
@@ -1476,7 +1479,7 @@ void InterPrediction::xWeightedAverage(const PredictionUnit& pu, const CPelUnitB
       }
     }
   }
-  else if( iRefIdx0 >= 0 && iRefIdx1 < 0 )
+  else if (refIdx0 >= 0 && refIdx1 < 0)
   {
     if( pu.cu->geoFlag )
     {
@@ -1491,7 +1494,7 @@ void InterPrediction::xWeightedAverage(const PredictionUnit& pu, const CPelUnitB
       yuvDstTmp->copyFrom( pcYuvDst, lumaOnly, chromaOnly );
     }
   }
-  else if( iRefIdx0 < 0 && iRefIdx1 >= 0 )
+  else if (refIdx0 < 0 && refIdx1 >= 0)
   {
     if( pu.cu->geoFlag )
     {

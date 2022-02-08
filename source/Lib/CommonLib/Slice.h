@@ -2838,8 +2838,8 @@ public:
   int                         getNumRefIdx( RefPicList e ) const                     { return m_aiNumRefIdx[e];                                      }
   Picture*                    getPic()                                               { return m_pcPic;                                               }
   const Picture*              getPic() const                                         { return m_pcPic;                                               }
-        Picture*              getRefPic( RefPicList e, int iRefIdx) const            { return m_apcRefPicList[e][iRefIdx];                           }
-  int                         getRefPOC( RefPicList e, int iRefIdx) const            { return m_aiRefPOCList[e][iRefIdx];                            }
+  Picture *                   getRefPic(RefPicList e, int refIdx) const { return m_apcRefPicList[e][refIdx]; }
+  int                         getRefPOC(RefPicList e, int refIdx) const { return m_aiRefPOCList[e][refIdx]; }
   int                         getDepth() const                                       { return m_iDepth;                                              }
   bool                        getColFromL0Flag() const                               { return m_colFromL0Flag;                                       }
   uint32_t                    getColRefIdx() const                                   { return m_colRefIdx;                                           }
@@ -2952,23 +2952,23 @@ public:
   uint32_t                    getCuQpDeltaSubdiv() const                             { return this->isIntra() ? m_pcPicHeader->getCuQpDeltaSubdivIntra() : m_pcPicHeader->getCuQpDeltaSubdivInter(); }
   uint32_t                    getCuChromaQpOffsetSubdiv() const                      { return this->isIntra() ? m_pcPicHeader->getCuChromaQpOffsetSubdivIntra() : m_pcPicHeader->getCuChromaQpOffsetSubdivInter(); }
   void                        initEqualRef();
-  bool                        isEqualRef( RefPicList e, int iRefIdx1, int iRefIdx2 )
+  bool                        isEqualRef(RefPicList e, int refIdx1, int refIdx2)
   {
     CHECK(e>=NUM_REF_PIC_LIST_01, "Invalid reference picture list");
-    if (iRefIdx1 < 0 || iRefIdx2 < 0)
+    if (refIdx1 < 0 || refIdx2 < 0)
     {
       return false;
     }
     else
     {
-      return m_abEqualRef[e][iRefIdx1][iRefIdx2];
+      return m_abEqualRef[e][refIdx1][refIdx2];
     }
   }
 
-  void                        setEqualRef( RefPicList e, int iRefIdx1, int iRefIdx2, bool b)
+  void setEqualRef(RefPicList e, int refIdx1, int refIdx2, bool b)
   {
     CHECK( e >= NUM_REF_PIC_LIST_01, "Invalid reference picture list" );
-    m_abEqualRef[e][iRefIdx1][iRefIdx2] = m_abEqualRef[e][iRefIdx2][iRefIdx1] = b;
+    m_abEqualRef[e][refIdx1][refIdx2] = m_abEqualRef[e][refIdx2][refIdx1] = b;
   }
 
   static void                 sortPicList( PicList& rcListPic );

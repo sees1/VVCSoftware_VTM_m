@@ -55,7 +55,7 @@ class WeightPrediction
 public:
   WeightPrediction();
 
-  void getWpScaling(Slice *slice, const int &iRefIdx0, const int &iRefIdx1, WPScalingParam *&wp0, WPScalingParam *&wp1,
+  void getWpScaling(Slice *slice, const int &refIdx0, const int &refIdx1, WPScalingParam *&wp0, WPScalingParam *&wp1,
                     const ComponentID maxNumComp = MAX_NUM_COMPONENT);
 
   void addWeightBi(const CPelUnitBuf &pcYuvSrc0, const CPelUnitBuf &pcYuvSrc1, const ClpRngs &clpRngs,
@@ -76,15 +76,10 @@ public:
                                 , bool                      chromaOnly = false
                                 );
 
-  void  xWeightedPredictionUni( const PredictionUnit       &pu,
-                                const CPelUnitBuf          &pcYuvSrc,
-                                const RefPicList           &eRefPicList,
-                                      PelUnitBuf           &pcYuvPred,
-                                const int                   iRefIdx=-1,
-                                const ComponentID           maxNumComp = MAX_NUM_COMPONENT
-                                , bool                      lumaOnly = false
-                                , bool                      chromaOnly = false
-                                );
+  void xWeightedPredictionUni(const PredictionUnit &pu, const CPelUnitBuf &pcYuvSrc, const RefPicList &eRefPicList,
+                              PelUnitBuf &pcYuvPred, const int refIdx = -1,
+                              const ComponentID maxNumComp = MAX_NUM_COMPONENT, bool lumaOnly = false,
+                              bool chromaOnly = false);
 
   void  xWeightedPredictionBi(  const PredictionUnit       &pu,
                                 const CPelUnitBuf          &pcYuvSrc0,

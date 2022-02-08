@@ -1439,15 +1439,15 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
     }
 
     Mv        cColMv;
-    int       iRefIdx     = 0;
+    int       refIdx      = 0;
     int       dir         = 0;
-    unsigned  uiArrayAddr = cnt;
-    bool      bExistMV    = ( C0Avail && getColocatedMVP(pu, REF_PIC_LIST_0, posC0, cColMv, iRefIdx, false ) )
-                              || getColocatedMVP( pu, REF_PIC_LIST_0, posC1, cColMv, iRefIdx, false );
-    if (bExistMV)
+    unsigned  arrayAddr   = cnt;
+    bool      existMV     = (C0Avail && getColocatedMVP(pu, REF_PIC_LIST_0, posC0, cColMv, refIdx, false))
+                   || getColocatedMVP(pu, REF_PIC_LIST_0, posC1, cColMv, refIdx, false);
+    if (existMV)
     {
       dir     |= 1;
-      mrgCtx.mvFieldNeighbours[2 * uiArrayAddr].setMvField(cColMv, iRefIdx);
+      mrgCtx.mvFieldNeighbours[2 * arrayAddr].setMvField(cColMv, refIdx);
 #if GDR_ENABLED
       if (isEncodeGdrClean)
       {
@@ -1455,27 +1455,28 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
 
         posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
         posC1inCurPicSolid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
-        posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_0, iRefIdx);
-        posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_0, iRefIdx);
+        posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_0, refIdx);
+        posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_0, refIdx);
 
-        bool isMVP0exist = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_0, posC0, ccMv, iRefIdx, false);
+        bool isMVP0exist = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_0, posC0, ccMv, refIdx, false);
 
         Position pos = isMVP0exist ? posC0 : posC1;
-        mrgCtx.mvPos[2 * uiArrayAddr] = pos;
-        mrgCtx.mvSolid[2 * uiArrayAddr] = isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
-        mrgCtx.mvValid[2 * uiArrayAddr] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_0, iRefIdx);
+        mrgCtx.mvPos[2 * arrayAddr] = pos;
+        mrgCtx.mvSolid[2 * arrayAddr] =
+          isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
+        mrgCtx.mvValid[2 * arrayAddr] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_0, refIdx);
       }
 #endif
     }
 
     if (slice.isInterB())
     {
-      bExistMV = ( C0Avail && getColocatedMVP(pu, REF_PIC_LIST_1, posC0, cColMv, iRefIdx, false ) )
-                   || getColocatedMVP( pu, REF_PIC_LIST_1, posC1, cColMv, iRefIdx, false );
-      if (bExistMV)
+      existMV = (C0Avail && getColocatedMVP(pu, REF_PIC_LIST_1, posC0, cColMv, refIdx, false))
+                || getColocatedMVP(pu, REF_PIC_LIST_1, posC1, cColMv, refIdx, false);
+      if (existMV)
       {
         dir     |= 2;
-        mrgCtx.mvFieldNeighbours[2 * uiArrayAddr + 1].setMvField(cColMv, iRefIdx);
+        mrgCtx.mvFieldNeighbours[2 * arrayAddr + 1].setMvField(cColMv, refIdx);
 #if GDR_ENABLED
         if (isEncodeGdrClean)
         {
@@ -1483,15 +1484,16 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
 
           posC0inCurPicSolid = cs.isClean(posC0, CHANNEL_TYPE_LUMA);
           posC1inCurPicSolid = cs.isClean(posC1, CHANNEL_TYPE_LUMA);
-          posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_1, iRefIdx);
-          posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_1, iRefIdx);
+          posC0inRefPicSolid = cs.isClean(posC0, REF_PIC_LIST_1, refIdx);
+          posC1inRefPicSolid = cs.isClean(posC1, REF_PIC_LIST_1, refIdx);
 
-          bool isMVP0exist = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_1, posC0, ccMv, iRefIdx, false);
+          bool isMVP0exist = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_1, posC0, ccMv, refIdx, false);
 
           Position pos = isMVP0exist ? posC0 : posC1;
-          mrgCtx.mvPos[2 * uiArrayAddr + 1] = pos;
-          mrgCtx.mvSolid[2 * uiArrayAddr + 1] = isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
-          mrgCtx.mvValid[2 * uiArrayAddr + 1] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_1, iRefIdx);
+          mrgCtx.mvPos[2 * arrayAddr + 1] = pos;
+          mrgCtx.mvSolid[2 * arrayAddr + 1] =
+            isMVP0exist ? (posC0inCurPicSolid && posC0inRefPicSolid) : (posC1inCurPicSolid && posC1inRefPicSolid);
+          mrgCtx.mvValid[2 * arrayAddr + 1] = cs.isClean(pu.Y().bottomRight(), ccMv, REF_PIC_LIST_1, refIdx);
         }
 #endif
       }
@@ -1502,9 +1504,9 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       bool addTMvp = true;
       if( addTMvp )
       {
-        mrgCtx.interDirNeighbours[uiArrayAddr] = dir;
-        mrgCtx.BcwIdx[uiArrayAddr] = BCW_DEFAULT;
-        mrgCtx.useAltHpelIf[uiArrayAddr] = false;
+        mrgCtx.interDirNeighbours[arrayAddr] = dir;
+        mrgCtx.BcwIdx[arrayAddr]             = BCW_DEFAULT;
+        mrgCtx.useAltHpelIf[arrayAddr]       = false;
         if (mrgCandIdx == cnt)
         {
           return;
@@ -1646,51 +1648,54 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
     }
   }
 
-  uint32_t uiArrayAddr = cnt;
+  uint32_t arrayAddr = cnt;
 
   int iNumRefIdx = slice.isInterB() ? std::min(slice.getNumRefIdx(REF_PIC_LIST_0), slice.getNumRefIdx(REF_PIC_LIST_1)) : slice.getNumRefIdx(REF_PIC_LIST_0);
 
   int r = 0;
   int refcnt = 0;
-  while (uiArrayAddr < maxNumMergeCand)
+  while (arrayAddr < maxNumMergeCand)
   {
-    mrgCtx.interDirNeighbours [uiArrayAddr     ] = 1;
-    mrgCtx.BcwIdx             [uiArrayAddr     ] = BCW_DEFAULT;
-    mrgCtx.mvFieldNeighbours  [uiArrayAddr << 1].setMvField(Mv(0, 0), r);
-    mrgCtx.useAltHpelIf[uiArrayAddr] = false;
+    mrgCtx.interDirNeighbours[arrayAddr] = 1;
+    mrgCtx.BcwIdx[arrayAddr]             = BCW_DEFAULT;
+    mrgCtx.mvFieldNeighbours[arrayAddr << 1].setMvField(Mv(0, 0), r);
+    mrgCtx.useAltHpelIf[arrayAddr] = false;
 
 #if GDR_ENABLED
     // GDR: zero mv(0,0)
     if (isEncodeGdrClean)
     {
-      mrgCtx.mvPos[uiArrayAddr << 1] = Position(0, 0);
-      mrgCtx.mvSolid[uiArrayAddr << 1] = true && allCandSolidInAbove;
-      mrgCtx.mvValid[uiArrayAddr << 1] = cs.isClean(pu.Y().bottomRight(), Mv(0, 0), REF_PIC_LIST_0, r);
+      mrgCtx.mvPos[arrayAddr << 1]   = Position(0, 0);
+      mrgCtx.mvSolid[arrayAddr << 1] = true && allCandSolidInAbove;
+      mrgCtx.mvValid[arrayAddr << 1] = cs.isClean(pu.Y().bottomRight(), Mv(0, 0), REF_PIC_LIST_0, r);
       allCandSolidInAbove = true && allCandSolidInAbove;
     }
 #endif
     if (slice.isInterB())
     {
-      mrgCtx.interDirNeighbours [ uiArrayAddr          ] = 3;
-      mrgCtx.mvFieldNeighbours  [(uiArrayAddr << 1) + 1].setMvField(Mv(0, 0), r);
+      mrgCtx.interDirNeighbours[arrayAddr] = 3;
+      mrgCtx.mvFieldNeighbours[(arrayAddr << 1) + 1].setMvField(Mv(0, 0), r);
 #if GDR_ENABLED
       // GDR: zero mv(0,0)
       if (isEncodeGdrClean)
       {
-        mrgCtx.mvPos[(uiArrayAddr << 1) + 1] = Position(0, 0);
-        mrgCtx.mvSolid[(uiArrayAddr << 1) + 1] = true && allCandSolidInAbove;
-        mrgCtx.mvValid[(uiArrayAddr << 1) + 1] = cs.isClean(pu.Y().bottomRight(), Mv(0, 0), (RefPicList)REF_PIC_LIST_1, r);
+        mrgCtx.mvPos[(arrayAddr << 1) + 1]   = Position(0, 0);
+        mrgCtx.mvSolid[(arrayAddr << 1) + 1] = true && allCandSolidInAbove;
+        mrgCtx.mvValid[(arrayAddr << 1) + 1] =
+          cs.isClean(pu.Y().bottomRight(), Mv(0, 0), (RefPicList) REF_PIC_LIST_1, r);
         allCandSolidInAbove = true && allCandSolidInAbove;
       }
 #endif
     }
 
-    if ( mrgCtx.interDirNeighbours[uiArrayAddr] == 1 && pu.cs->slice->getRefPic(REF_PIC_LIST_0, mrgCtx.mvFieldNeighbours[uiArrayAddr << 1].refIdx)->getPOC() == pu.cs->slice->getPOC())
+    if (mrgCtx.interDirNeighbours[arrayAddr] == 1
+        && pu.cs->slice->getRefPic(REF_PIC_LIST_0, mrgCtx.mvFieldNeighbours[arrayAddr << 1].refIdx)->getPOC()
+             == pu.cs->slice->getPOC())
     {
-      mrgCtx.mrgTypeNeighbours[uiArrayAddr] = MRG_TYPE_IBC;
+      mrgCtx.mrgTypeNeighbours[arrayAddr] = MRG_TYPE_IBC;
     }
 
-    uiArrayAddr++;
+    arrayAddr++;
 
     if (refcnt == iNumRefIdx - 1)
     {
@@ -1702,7 +1707,7 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
       ++refcnt;
     }
   }
-  mrgCtx.numValidMergeCand = uiArrayAddr;
+  mrgCtx.numValidMergeCand = arrayAddr;
 }
 
 bool PU::checkDMVRCondition(const PredictionUnit& pu)
@@ -2172,14 +2177,9 @@ void PU::fillIBCMvpCand(PredictionUnit &pu, AMVPInfo &amvpInfo)
   }
 }
 
-
-/** Constructs a list of candidates for AMVP (See specification, section "Derivation process for motion vector predictor candidates")
-* \param uiPartIdx
-* \param uiPartAddr
-* \param eRefPicList
-* \param iRefIdx
-* \param pInfo
-*/
+/** Constructs a list of candidates for AMVP (See specification, section "Derivation process for motion vector predictor
+ * candidates") \param uiPartIdx \param uiPartAddr \param eRefPicList \param refIdx \param pInfo
+ */
 void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const int &refIdx, AMVPInfo &amvpInfo)
 {
   CodingStructure &cs = *pu.cs;
@@ -2994,7 +2994,8 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
   }
 }
 
-bool PU::addMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &eRefPicList, const int &iRefIdx, const Position &pos, const MvpDir &eDir, AMVPInfo &info )
+bool PU::addMVPCandUnscaled(const PredictionUnit &pu, const RefPicList &eRefPicList, const int &refIdx,
+                            const Position &pos, const MvpDir &eDir, AMVPInfo &info)
 {
         CodingStructure &cs    = *pu.cs;
   const PredictionUnit *neibPU = NULL;
@@ -3035,7 +3036,7 @@ bool PU::addMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &eRefPic
 
   const MotionInfo& neibMi        = neibPU->getMotionInfo( neibPos );
 
-  const int        currRefPOC     = cs.slice->getRefPic( eRefPicList, iRefIdx )->getPOC();
+  const int        currRefPOC     = cs.slice->getRefPic(eRefPicList, refIdx)->getPOC();
   const RefPicList eRefPicList2nd = ( eRefPicList == REF_PIC_LIST_0 ) ? REF_PIC_LIST_1 : REF_PIC_LIST_0;
 
   for( int predictorSource = 0; predictorSource < 2; predictorSource++ ) // examine the indicated reference picture list, then if not available, examine the other list.
@@ -3659,8 +3660,8 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
 
         Mv        cColMv;
         int       refIdx = 0;
-        bool      bExistMV = C0Avail && getColocatedMVP( pu, REF_PIC_LIST_0, posC0, cColMv, refIdx, false );
-        if ( bExistMV )
+        bool      existMV = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_0, posC0, cColMv, refIdx, false);
+        if (existMV)
         {
           mi[3].mv[0] = cColMv;
           mi[3].refIdx[0] = refIdx;
@@ -3679,8 +3680,8 @@ void PU::getAffineMergeCand( const PredictionUnit &pu, AffineMergeCtx& affMrgCtx
 
         if ( slice.isInterB() )
         {
-          bExistMV = C0Avail && getColocatedMVP( pu, REF_PIC_LIST_1, posC0, cColMv, refIdx, false );
-          if ( bExistMV )
+          existMV = C0Avail && getColocatedMVP(pu, REF_PIC_LIST_1, posC0, cColMv, refIdx, false);
+          if (existMV)
           {
             mi[3].mv[1] = cColMv;
             mi[3].refIdx[1] = refIdx;

@@ -2527,19 +2527,21 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     bool pocIsSet = false;
     for(auto auNALit=m_accessUnitPicInfo.begin(); auNALit != m_accessUnitPicInfo.end();auNALit++)
     {
-      for (int iRefIdx = 0; iRefIdx < m_apcSlicePilot->getNumRefIdx(REF_PIC_LIST_0) && !pocIsSet; iRefIdx++)
+      for (int refIdx = 0; refIdx < m_apcSlicePilot->getNumRefIdx(REF_PIC_LIST_0) && !pocIsSet; refIdx++)
       {
-        if (m_apcSlicePilot->getRefPic(REF_PIC_LIST_0, iRefIdx) && m_apcSlicePilot->getRefPic(REF_PIC_LIST_0, iRefIdx)->getPOC() == (*auNALit).m_POC)
+        if (m_apcSlicePilot->getRefPic(REF_PIC_LIST_0, refIdx)
+            && m_apcSlicePilot->getRefPic(REF_PIC_LIST_0, refIdx)->getPOC() == (*auNALit).m_POC)
         {
-          m_apcSlicePilot->setPOC(m_apcSlicePilot->getRefPic(REF_PIC_LIST_0, iRefIdx)->getPOC());
+          m_apcSlicePilot->setPOC(m_apcSlicePilot->getRefPic(REF_PIC_LIST_0, refIdx)->getPOC());
           pocIsSet = true;
         }
       }
-      for (int iRefIdx = 0; iRefIdx < m_apcSlicePilot->getNumRefIdx(REF_PIC_LIST_1) && !pocIsSet; iRefIdx++)
+      for (int refIdx = 0; refIdx < m_apcSlicePilot->getNumRefIdx(REF_PIC_LIST_1) && !pocIsSet; refIdx++)
       {
-        if (m_apcSlicePilot->getRefPic(REF_PIC_LIST_1, iRefIdx) && m_apcSlicePilot->getRefPic(REF_PIC_LIST_1, iRefIdx)->getPOC() == (*auNALit).m_POC)
+        if (m_apcSlicePilot->getRefPic(REF_PIC_LIST_1, refIdx)
+            && m_apcSlicePilot->getRefPic(REF_PIC_LIST_1, refIdx)->getPOC() == (*auNALit).m_POC)
         {
-          m_apcSlicePilot->setPOC(m_apcSlicePilot->getRefPic(REF_PIC_LIST_1, iRefIdx)->getPOC());
+          m_apcSlicePilot->setPOC(m_apcSlicePilot->getRefPic(REF_PIC_LIST_1, refIdx)->getPOC());
           pocIsSet = true;
         }
       }
@@ -2889,20 +2891,20 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
     {
       bool bLowDelay = true;
       int  iCurrPOC  = pcSlice->getPOC();
-      int iRefIdx = 0;
+      int  refIdx    = 0;
 
-      for (iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_0) && bLowDelay; iRefIdx++)
+      for (refIdx = 0; refIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_0) && bLowDelay; refIdx++)
       {
-        if ( pcSlice->getRefPic(REF_PIC_LIST_0, iRefIdx)->getPOC() > iCurrPOC )
+        if (pcSlice->getRefPic(REF_PIC_LIST_0, refIdx)->getPOC() > iCurrPOC)
         {
           bLowDelay = false;
         }
       }
       if (pcSlice->isInterB())
       {
-        for (iRefIdx = 0; iRefIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_1) && bLowDelay; iRefIdx++)
+        for (refIdx = 0; refIdx < pcSlice->getNumRefIdx(REF_PIC_LIST_1) && bLowDelay; refIdx++)
         {
-          if ( pcSlice->getRefPic(REF_PIC_LIST_1, iRefIdx)->getPOC() > iCurrPOC )
+          if (pcSlice->getRefPic(REF_PIC_LIST_1, refIdx)->getPOC() > iCurrPOC)
           {
             bLowDelay = false;
           }

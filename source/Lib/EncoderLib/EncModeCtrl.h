@@ -837,8 +837,8 @@ public:
 
   bool isSkip ( const UnitArea& area );
   bool isMMVDSkip(const UnitArea& area);
-  bool getMv  ( const UnitArea& area, const RefPicList refPicList, const int iRefIdx,       Mv& rMv ) const;
-  void setMv  ( const UnitArea& area, const RefPicList refPicList, const int iRefIdx, const Mv& rMv );
+  bool getMv(const UnitArea &area, const RefPicList refPicList, const int refIdx, Mv &rMv) const;
+  void setMv(const UnitArea &area, const RefPicList refPicList, const int refIdx, const Mv &rMv);
 
   bool  getInter( const UnitArea& area );
   void  setBcwIdx( const UnitArea& area, uint8_t gBiIdx );

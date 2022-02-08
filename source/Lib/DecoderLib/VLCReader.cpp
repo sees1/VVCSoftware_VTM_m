@@ -4103,9 +4103,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       for ( int iNumRef=0 ; iNumRef<((pcSlice->getSliceType() == B_SLICE )?2:1); iNumRef++ )
       {
         RefPicList  eRefPicList = ( iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
-        for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+        for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
         {
-          WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+          WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
 
           wp[0].presentFlag = false;
           wp[1].presentFlag = false;
@@ -4771,9 +4771,9 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
   for ( int iNumRef=0 ; iNumRef<iNbRef ; iNumRef++ ) // loop over l0 and l1 syntax elements
   {
     RefPicList  eRefPicList = ( iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
-    for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+    for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
     {
-      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
 
       wp[COMPONENT_Y].log2WeightDenom = uiLog2WeightDenomLuma;
       for(int j=1; j<numValidComp; j++)
@@ -4789,9 +4789,9 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
     if ( bChroma )
     {
       uint32_t  uiCode;
-      for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+      for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
       {
-        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
         READ_FLAG( uiCode, iNumRef==0?"chroma_weight_l0_flag[i]":"chroma_weight_l1_flag[i]" );
         for(int j=1; j<numValidComp; j++)
         {
@@ -4802,17 +4802,17 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
     }
     else
     {
-      for ( int iRefIdx=0; iRefIdx<MAX_NUM_REF; iRefIdx++ )
+      for (int refIdx = 0; refIdx < MAX_NUM_REF; refIdx++)
       {
-        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
 
         wp[COMPONENT_Cb].presentFlag = false;
         wp[COMPONENT_Cr].presentFlag = false;
       }
     }
-    for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+    for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
     {
-      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
       if (wp[COMPONENT_Y].presentFlag)
       {
         int iDeltaWeight;
@@ -4862,9 +4862,9 @@ void HLSyntaxReader::parsePredWeightTable( Slice* pcSlice, const SPS *sps )
       }
     }
 
-    for ( int iRefIdx=pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx<MAX_NUM_REF ; iRefIdx++ )
+    for (int refIdx = pcSlice->getNumRefIdx(eRefPicList); refIdx < MAX_NUM_REF; refIdx++)
     {
-      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+      WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
 
       wp[COMPONENT_Y].presentFlag  = false;
       wp[COMPONENT_Cb].presentFlag = false;

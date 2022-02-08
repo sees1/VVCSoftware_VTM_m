@@ -2858,9 +2858,9 @@ void HLSWriter::xCodePredWeightTable( Slice* pcSlice )
 
       // NOTE: wp[].log2WeightDenom and wp[].presentFlag are actually per-channel-type settings.
 
-      for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+      for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
       {
-        wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+        wp = pcSlice->getWpScaling(eRefPicList, refIdx);
         if ( !bDenomCoded )
         {
           int iDeltaDenom;
@@ -2880,9 +2880,9 @@ void HLSWriter::xCodePredWeightTable( Slice* pcSlice )
       }
       if (bChroma)
       {
-        for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+        for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
         {
-          wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+          wp = pcSlice->getWpScaling(eRefPicList, refIdx);
           CHECK(wp[COMPONENT_Cb].presentFlag != wp[COMPONENT_Cr].presentFlag,
                 "Inconsistent settings for chroma channels");
           WRITE_FLAG(wp[COMPONENT_Cb].presentFlag,
@@ -2891,9 +2891,9 @@ void HLSWriter::xCodePredWeightTable( Slice* pcSlice )
         }
       }
 
-      for ( int iRefIdx=0 ; iRefIdx<pcSlice->getNumRefIdx(eRefPicList) ; iRefIdx++ )
+      for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
       {
-        wp = pcSlice->getWpScaling(eRefPicList, iRefIdx);
+        wp = pcSlice->getWpScaling(eRefPicList, refIdx);
         if (wp[COMPONENT_Y].presentFlag)
         {
           int iDeltaWeight = (wp[COMPONENT_Y].codedWeight - (1 << wp[COMPONENT_Y].log2WeightDenom));
