@@ -277,12 +277,12 @@ void IntraPrediction::predIntraChromaLM(const ComponentID compID, PelBuf &piPred
     iLumaStride = MAX_CU_SIZE + 1;
     Temp = PelBuf(m_piTemp + iLumaStride + 1, iLumaStride, Size(chromaArea));
   }
-  int a, b, iShift;
-  xGetLMParameters(pu, compID, chromaArea, a, b, iShift);
+  int a, b, shift;
+  xGetLMParameters(pu, compID, chromaArea, a, b, shift);
 
   ////// final prediction
   piPred.copyFrom(Temp);
-  piPred.linearTransform(a, iShift, b, true, pu.cs->slice->clpRng(compID));
+  piPred.linearTransform(a, shift, b, true, pu.cs->slice->clpRng(compID));
 }
 
 /** Function for deriving planar intra prediction. This function derives the prediction samples for planar mode (intra coding).
@@ -1327,18 +1327,19 @@ int isBelowLeftAvailable(const CodingUnit &cu, const ChannelType &chType, const 
 // LumaRecPixels
 void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chromaArea)
 {
-  int iDstStride = 0;
-  Pel* pDst0 = 0;
+  int  dstStride = 0;
+  Pel *pDst0     = nullptr;
+
   int curChromaMode = pu.intraDir[1];
   if ((curChromaMode == MDLM_L_IDX) || (curChromaMode == MDLM_T_IDX))
   {
-    iDstStride = 2 * MAX_CU_SIZE + 1;
-    pDst0 = m_pMdlmTemp + iDstStride + 1;
+    dstStride = 2 * MAX_CU_SIZE + 1;
+    pDst0     = m_pMdlmTemp + dstStride + 1;
   }
   else
   {
-    iDstStride = MAX_CU_SIZE + 1;
-    pDst0 = m_piTemp + iDstStride + 1; //MMLM_SAMPLE_NEIGHBOR_LINES;
+    dstStride = MAX_CU_SIZE + 1;
+    pDst0     = m_piTemp + dstStride + 1;   // MMLM_SAMPLE_NEIGHBOR_LINES;
   }
   //assert 420 chroma subsampling
   CompArea lumaArea = CompArea( COMPONENT_Y, pu.chromaFormat, chromaArea.lumaPos(), recalcSize( pu.chromaFormat, CHANNEL_TYPE_CHROMA, CHANNEL_TYPE_LUMA, chromaArea.size() ) );//needed for correct pos/size (4x4 Tus)
@@ -1413,13 +1414,14 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
   }
 
   Pel*       pDst  = nullptr;
-  Pel const* piSrc = nullptr;
+  Pel const *src   = nullptr;
 
   bool isFirstRowOfCtu = (lumaArea.y & ((pu.cs->sps)->getCTUSize() - 1)) == 0;
 
   if (aboveIsAvailable)
   {
-    pDst  = pDst0    - iDstStride;
+    pDst = pDst0 - dstStride;
+
     int addedAboveRight = 0;
     if ((curChromaMode == MDLM_L_IDX) || (curChromaMode == MDLM_T_IDX))
     {
@@ -1430,46 +1432,46 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
       const bool leftPadding = i == 0 && !leftIsAvailable;
       if (pu.chromaFormat == CHROMA_444)
       {
-        piSrc = pRecSrc0 - iRecStride;
-        pDst[i] = piSrc[i];
+        src     = pRecSrc0 - iRecStride;
+        pDst[i] = src[i];
       }
       else if (isFirstRowOfCtu)
       {
-        piSrc   = pRecSrc0 - iRecStride;
-        pDst[i] = (piSrc[2 * i] * 2 + piSrc[2 * i - (leftPadding ? 0 : 1)] + piSrc[2 * i + 1] + 2) >> 2;
+        src     = pRecSrc0 - iRecStride;
+        pDst[i] = (src[2 * i] * 2 + src[2 * i - (leftPadding ? 0 : 1)] + src[2 * i + 1] + 2) >> 2;
       }
       else if (pu.chromaFormat == CHROMA_422)
       {
-        piSrc = pRecSrc0 - iRecStride2;
+        src = pRecSrc0 - iRecStride2;
 
         int s = 2;
-        s += piSrc[2 * i] * 2;
-        s += piSrc[2 * i - (leftPadding ? 0 : 1)];
-        s += piSrc[2 * i + 1];
+        s += src[2 * i] * 2;
+        s += src[2 * i - (leftPadding ? 0 : 1)];
+        s += src[2 * i + 1];
         pDst[i] = s >> 2;
       }
       else if (pu.cs->sps->getCclmCollocatedChromaFlag())
       {
-        piSrc = pRecSrc0 - iRecStride2;
+        src = pRecSrc0 - iRecStride2;
 
         int s = 4;
-        s += piSrc[2 * i - iRecStride];
-        s += piSrc[2 * i] * 4;
-        s += piSrc[2 * i - (leftPadding ? 0 : 1)];
-        s += piSrc[2 * i + 1];
-        s += piSrc[2 * i + iRecStride];
+        s += src[2 * i - iRecStride];
+        s += src[2 * i] * 4;
+        s += src[2 * i - (leftPadding ? 0 : 1)];
+        s += src[2 * i + 1];
+        s += src[2 * i + iRecStride];
         pDst[i] = s >> 3;
       }
       else
       {
-        piSrc = pRecSrc0 - iRecStride2;
+        src   = pRecSrc0 - iRecStride2;
         int s = 4;
-        s += piSrc[2 * i] * 2;
-        s += piSrc[2 * i + 1];
-        s += piSrc[2 * i - (leftPadding ? 0 : 1)];
-        s += piSrc[2 * i + iRecStride] * 2;
-        s += piSrc[2 * i + 1 + iRecStride];
-        s += piSrc[2 * i + iRecStride - (leftPadding ? 0 : 1)];
+        s += src[2 * i] * 2;
+        s += src[2 * i + 1];
+        s += src[2 * i - (leftPadding ? 0 : 1)];
+        s += src[2 * i + iRecStride] * 2;
+        s += src[2 * i + 1 + iRecStride];
+        s += src[2 * i + iRecStride - (leftPadding ? 0 : 1)];
         pDst[i] = s >> 3;
       }
     }
@@ -1478,7 +1480,7 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
   if (leftIsAvailable)
   {
     pDst  = pDst0    - 1;
-    piSrc = pRecSrc0 - 1 - logSubWidthC;
+    src   = pRecSrc0 - 1 - logSubWidthC;
 
     int addedLeftBelow = 0;
     if ((curChromaMode == MDLM_L_IDX) || (curChromaMode == MDLM_T_IDX))
@@ -1490,14 +1492,14 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
     {
       if (pu.chromaFormat == CHROMA_444)
       {
-        pDst[0] = piSrc[0];
+        pDst[0] = src[0];
       }
       else if (pu.chromaFormat == CHROMA_422)
       {
         int s = 2;
-        s += piSrc[0] * 2;
-        s += piSrc[-1];
-        s += piSrc[1];
+        s += src[0] * 2;
+        s += src[-1];
+        s += src[1];
         pDst[0] = s >> 2;
       }
       else if (pu.cs->sps->getCclmCollocatedChromaFlag())
@@ -1505,27 +1507,27 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
         const bool abovePadding = j == 0 && !aboveIsAvailable;
 
         int s = 4;
-        s += piSrc[-(abovePadding ? 0 : iRecStride)];
-        s += piSrc[0] * 4;
-        s += piSrc[-1];
-        s += piSrc[1];
-        s += piSrc[iRecStride];
+        s += src[-(abovePadding ? 0 : iRecStride)];
+        s += src[0] * 4;
+        s += src[-1];
+        s += src[1];
+        s += src[iRecStride];
         pDst[0] = s >> 3;
       }
       else
       {
         int s = 4;
-        s += piSrc[0] * 2;
-        s += piSrc[1];
-        s += piSrc[-1];
-        s += piSrc[iRecStride] * 2;
-        s += piSrc[iRecStride + 1];
-        s += piSrc[iRecStride - 1];
+        s += src[0] * 2;
+        s += src[1];
+        s += src[-1];
+        s += src[iRecStride] * 2;
+        s += src[iRecStride + 1];
+        s += src[iRecStride - 1];
         pDst[0] = s >> 3;
       }
 
-      piSrc += iRecStride2;
-      pDst  += iDstStride;
+      src += iRecStride2;
+      pDst += dstStride;
     }
   }
 
@@ -1577,13 +1579,12 @@ void IntraPrediction::xGetLumaRecPixels(const PredictionUnit &pu, CompArea chrom
       }
     }
 
-    pDst0    += iDstStride;
+    pDst0 += dstStride;
     pRecSrc0 += iRecStride2;
   }
 }
-void IntraPrediction::xGetLMParameters(const PredictionUnit &pu, const ComponentID compID,
-                                              const CompArea &chromaArea,
-                                              int &a, int &b, int &iShift)
+void IntraPrediction::xGetLMParameters(const PredictionUnit &pu, const ComponentID compID, const CompArea &chromaArea,
+                                       int &a, int &b, int &shift)
 {
   CHECK(compID == COMPONENT_Y, "");
 
@@ -1784,19 +1785,19 @@ void IntraPrediction::xGetLMParameters(const PredictionUnit &pu, const Component
       int y = floorLog2( abs( diffC ) ) + 1;
       int add = 1 << y >> 1;
       a = (diffC * v + add) >> y;
-      iShift = 3 + x - y;
-      if ( iShift < 1 )
+      shift   = 3 + x - y;
+      if (shift < 1)
       {
-        iShift = 1;
+        shift = 1;
         a = ( (a == 0)? 0: (a < 0)? -15 : 15 );   // a=Sign(a)*15
       }
-      b = minLuma[1] - ((a * minLuma[0]) >> iShift);
+      b = minLuma[1] - ((a * minLuma[0]) >> shift);
     }
     else
     {
       a = 0;
       b = minLuma[1];
-      iShift = 0;
+      shift = 0;
     }
   }
   else
@@ -1805,7 +1806,7 @@ void IntraPrediction::xGetLMParameters(const PredictionUnit &pu, const Component
 
     b = 1 << (internalBitDepth - 1);
 
-    iShift = 0;
+    shift = 0;
   }
 }
 

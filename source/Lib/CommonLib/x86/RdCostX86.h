@@ -4305,13 +4305,13 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
     }
     else
     {
-      Intermediate_Int iTemp;
+      Intermediate_Int temp;
       for (int iY = 0; iY < iRows; iY++)
       {
         for (int iX = 0; iX < iCols; iX++)
         {
-          iTemp = piOrg[iX] - piCur[iX];
-          uiSum += Distortion(iTemp * iTemp);
+          temp = piOrg[iX] - piCur[iX];
+          uiSum += Distortion(temp * temp);
         }
         piOrg += iStrideOrg;
         piCur += iStrideCur;

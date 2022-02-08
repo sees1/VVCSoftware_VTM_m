@@ -1362,7 +1362,7 @@ public:
   void setTSRCRicePresentFlag(bool b)                                                  { m_tsrcRicePresentFlag = b;                     }
 
   bool getIntraSmoothingDisabledFlag() const                                           { return m_intraSmoothingDisabledFlag;           }
-  void setIntraSmoothingDisabledFlag(bool bValue)                                      { m_intraSmoothingDisabledFlag=bValue;           }
+  void setIntraSmoothingDisabledFlag(bool value) { m_intraSmoothingDisabledFlag = value; }
 
   bool getHighPrecisionOffsetsEnabledFlag() const                                      { return m_highPrecisionOffsetsEnabledFlag;      }
   void setHighPrecisionOffsetsEnabledFlag(bool value)                                  { m_highPrecisionOffsetsEnabledFlag = value;     }
@@ -1790,7 +1790,7 @@ void                    setCCALFEnabledFlag( bool b )                           
   bool                    getSubLayerDpbParamsFlag()  const                                               { return m_SubLayerDpbParamsFlag;          }
   void                    setSubLayerDpbParamsFlag(bool b)                                                {        m_SubLayerDpbParamsFlag = b;      }
   bool                    getTemporalIdNestingFlag() const                                                { return m_bTemporalIdNestingFlag;                                     }
-  void                    setTemporalIdNestingFlag( bool bValue )                                         { m_bTemporalIdNestingFlag = bValue;                                   }
+  void                    setTemporalIdNestingFlag(bool value) { m_bTemporalIdNestingFlag = value; }
 
   bool                    getScalingListFlag() const                                                      { return m_scalingListEnabledFlag;                                     }
   void                    setScalingListFlag( bool b )                                                    { m_scalingListEnabledFlag  = b;                                       }
@@ -3005,9 +3005,9 @@ public:
   void                        setFinalized( bool uiVal )                             { m_bFinalized = uiVal;                                         }
   bool                        getFinalized() const                                   { return m_bFinalized;                                          }
   bool                        testWeightPred( ) const                                { return m_bTestWeightPred;                                     }
-  void                        setTestWeightPred( bool bValue )                       { m_bTestWeightPred = bValue;                                   }
+  void                            setTestWeightPred(bool value) { m_bTestWeightPred = value; }
   bool                        testWeightBiPred( ) const                              { return m_bTestWeightBiPred;                                   }
-  void                        setTestWeightBiPred( bool bValue )                     { m_bTestWeightBiPred = bValue;                                 }
+  void                            setTestWeightBiPred(bool value) { m_bTestWeightBiPred = value; }
   void                        setWpScaling( WPScalingParam  wp[NUM_REF_PIC_LIST_01][MAX_NUM_REF][MAX_NUM_COMPONENT] )
   {
     memcpy(m_weightPredTable, wp, sizeof(WPScalingParam)*NUM_REF_PIC_LIST_01*MAX_NUM_REF*MAX_NUM_COMPONENT);

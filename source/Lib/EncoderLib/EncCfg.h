@@ -1653,7 +1653,7 @@ public:
   uint32_t getLog2MaxTransformSkipBlockSize                () const      { return m_log2MaxTransformSkipBlockSize;     }
   void setLog2MaxTransformSkipBlockSize                ( uint32_t u )    { m_log2MaxTransformSkipBlockSize  = u;       }
   bool getIntraSmoothingDisabledFlag               ()      const { return m_intraSmoothingDisabledFlag; }
-  void setIntraSmoothingDisabledFlag               (bool bValue) { m_intraSmoothingDisabledFlag=bValue; }
+  void     setIntraSmoothingDisabledFlag(bool value) { m_intraSmoothingDisabledFlag = value; }
   bool getUseFastISP                                   () const   { return m_useFastISP;    }
   void setUseFastISP                                   ( bool b ) { m_useFastISP  = b;   }
 

@@ -105,36 +105,37 @@ bool wrapClipMv( Mv& rcMv, const Position& pos, const struct Size& size, const S
 {
   bool wrapRef = true;
   int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  int iOffset = 8;
-  int iHorMax = ( pps->getPicWidthInLumaSamples() + sps->getMaxCUWidth() - size.width + iOffset - (int)pos.x - 1 ) << iMvShift;
-  int iHorMin = ( -( int ) sps->getMaxCUWidth()                                      - iOffset - ( int ) pos.x + 1 ) << iMvShift;
+  int  offset   = 8;
+  int  horMax   = (pps->getPicWidthInLumaSamples() + sps->getMaxCUWidth() - size.width + offset - (int) pos.x - 1)
+               << iMvShift;
+  int horMin = (-(int) sps->getMaxCUWidth() - offset - (int) pos.x + 1) << iMvShift;
 
-  int iVerMax = ( pps->getPicHeightInLumaSamples() + iOffset - ( int ) pos.y - 1 ) << iMvShift;
-  int iVerMin = ( -( int ) sps->getMaxCUHeight() - iOffset - ( int ) pos.y + 1 ) << iMvShift;
+  int verMax = (pps->getPicHeightInLumaSamples() + offset - (int) pos.y - 1) << iMvShift;
+  int verMin = (-(int) sps->getMaxCUHeight() - offset - (int) pos.y + 1) << iMvShift;
 
   const SubPic& curSubPic = pps->getSubPicFromPos( pos );
   if( curSubPic.getTreatedAsPicFlag() )
   {
-    iVerMax = ( ( curSubPic.getSubPicBottom() + 1 ) + iOffset - ( int ) pos.y - 1 ) << iMvShift;
-    iVerMin = ( -( int ) sps->getMaxCUHeight() - iOffset - ( ( int ) pos.y - curSubPic.getSubPicTop() ) + 1 ) << iMvShift;
+    verMax = ((curSubPic.getSubPicBottom() + 1) + offset - (int) pos.y - 1) << iMvShift;
+    verMin = (-(int) sps->getMaxCUHeight() - offset - ((int) pos.y - curSubPic.getSubPicTop()) + 1) << iMvShift;
   }
   int mvX = rcMv.getHor();
 
-  if(mvX > iHorMax)
+  if (mvX > horMax)
   {
     mvX -= ( pps->getWrapAroundOffset() << iMvShift );
-    mvX = std::min( iHorMax, std::max( iHorMin, mvX ) );
+    mvX     = std::min(horMax, std::max(horMin, mvX));
     wrapRef = false;
   }
-  if(mvX < iHorMin)
+  if (mvX < horMin)
   {
     mvX += ( pps->getWrapAroundOffset() << iMvShift );
-    mvX = std::min( iHorMax, std::max( iHorMin, mvX ) );
+    mvX     = std::min(horMax, std::max(horMin, mvX));
     wrapRef = false;
   }
 
   rcMv.setHor( mvX );
-  rcMv.setVer( std::min( iVerMax, std::max( iVerMin, rcMv.getVer() ) ) );
+  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())));
   return wrapRef;
 }
 
