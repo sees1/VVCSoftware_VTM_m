@@ -541,10 +541,10 @@ void Slice::initEqualRef()
   {
     for (int refIdx1 = 0; refIdx1 < MAX_NUM_REF; refIdx1++)
     {
-      for (int iRefIdx2 = refIdx1; iRefIdx2 < MAX_NUM_REF; iRefIdx2++)
+      for (int refIdx2 = refIdx1; refIdx2 < MAX_NUM_REF; refIdx2++)
       {
-        m_abEqualRef[iDir][refIdx1][iRefIdx2] = m_abEqualRef[iDir][iRefIdx2][refIdx1] =
-          (refIdx1 == iRefIdx2 ? true : false);
+        m_abEqualRef[iDir][refIdx1][refIdx2] = m_abEqualRef[iDir][refIdx2][refIdx1] =
+          (refIdx1 == refIdx2 ? true : false);
       }
     }
   }
