@@ -3336,9 +3336,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
           }
 
           enforceBcwPred = (bcwIdx != BCW_DEFAULT);
-          for (int iIter = 0; iIter < numIter; iIter++)
+          for (int iter = 0; iter < numIter; iter++)
           {
-            int refList = iIter % 2;
+            int refList = iter % 2;
 
             if (m_pcEncCfg->getFastInterSearchMode() == FASTINTERSEARCH_MODE1
                 || m_pcEncCfg->getFastInterSearchMode() == FASTINTERSEARCH_MODE2)
@@ -3376,11 +3376,11 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                   (abs(getBcwWeight(bcwIdx, REF_PIC_LIST_0)) > abs(getBcwWeight(bcwIdx, REF_PIC_LIST_1)) ? 1 : 0);
               }
             }
-            else if (iIter == 0)
+            else if (iter == 0)
             {
               refList = 0;
             }
-            if (iIter == 0 && !cs.picHeader->getMvdL1ZeroFlag())
+            if (iter == 0 && !cs.picHeader->getMvdL1ZeroFlag())
             {
               pu.mv[1 - refList]     = cMv[1 - refList];
               pu.refIdx[1 - refList] = refIdx[1 - refList];
@@ -7408,10 +7408,10 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       numIter = 1;
     }
 
-    for (int iIter = 0; iIter < numIter; iIter++)
+    for (int iter = 0; iter < numIter; iter++)
     {
       // Set RefList
-      int refList = iIter % 2;
+      int refList = iter % 2;
       if ( m_pcEncCfg->getFastInterSearchMode()==FASTINTERSEARCH_MODE1 || m_pcEncCfg->getFastInterSearchMode()==FASTINTERSEARCH_MODE2 )
       {
 #if GDR_ENABLED
@@ -7447,13 +7447,13 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
           refList = (abs(getBcwWeight(bcwIdx, REF_PIC_LIST_0)) > abs(getBcwWeight(bcwIdx, REF_PIC_LIST_1)) ? 1 : 0);
         }
       }
-      else if ( iIter == 0 )
+      else if (iter == 0)
       {
         refList = 0;
       }
 
       // First iterate, get prediction block of opposite direction
-      if( iIter == 0 && !slice.getPicHeader()->getMvdL1ZeroFlag() )
+      if (iter == 0 && !slice.getPicHeader()->getMvdL1ZeroFlag())
       {
         PU::setAllAffineMv(pu, aacMv[1 - refList][0], aacMv[1 - refList][1], aacMv[1 - refList][2],
                            RefPicList(1 - refList));
