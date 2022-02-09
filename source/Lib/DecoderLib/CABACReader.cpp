@@ -2512,10 +2512,10 @@ void CABACReader::mvp_flag( PredictionUnit& pu, RefPicList eRefList )
 {
   RExt__DECODER_DEBUG_BIT_STATISTICS_CREATE_SET( STATS__CABAC_BITS__MVP_IDX );
 
-  unsigned mvp_idx = m_BinDecoder.decodeBin( Ctx::MVPIdx() );
-  DTRACE( g_trace_ctx, D_SYNTAX, "mvp_flag() value=%d pos=(%d,%d)\n", mvp_idx, pu.lumaPos().x, pu.lumaPos().y );
-  pu.mvpIdx [eRefList] = mvp_idx;
-  DTRACE( g_trace_ctx, D_SYNTAX, "mvpIdx(refList:%d)=%d\n", eRefList, mvp_idx );
+  unsigned mvpIdx = m_BinDecoder.decodeBin(Ctx::MVPIdx());
+  DTRACE(g_trace_ctx, D_SYNTAX, "mvp_flag() value=%d pos=(%d,%d)\n", mvpIdx, pu.lumaPos().x, pu.lumaPos().y);
+  pu.mvpIdx[eRefList] = mvpIdx;
+  DTRACE(g_trace_ctx, D_SYNTAX, "mvpIdx(refList:%d)=%d\n", eRefList, mvpIdx);
 }
 
 void CABACReader::Ciip_flag(PredictionUnit& pu)

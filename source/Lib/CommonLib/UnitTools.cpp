@@ -4183,7 +4183,7 @@ void PU::applyImv( PredictionUnit& pu, MergeCtx &mrgCtx, InterPrediction *interP
     if( pu.interDir != 2 /* PRED_L1 */ )
     {
       pu.mvd[0].changeTransPrecAmvr2Internal(pu.cu->imv);
-      unsigned mvp_idx = pu.mvpIdx[0];
+      unsigned mvpIdx = pu.mvpIdx[0];
       AMVPInfo amvpInfo;
       if (CU::isIBC(*pu.cu))
       {
@@ -4192,8 +4192,8 @@ void PU::applyImv( PredictionUnit& pu, MergeCtx &mrgCtx, InterPrediction *interP
       else
       PU::fillMvpCand(pu, REF_PIC_LIST_0, pu.refIdx[0], amvpInfo);
       pu.mvpNum[0] = amvpInfo.numCand;
-      pu.mvpIdx[0] = mvp_idx;
-      pu.mv    [0] = amvpInfo.mvCand[mvp_idx] + pu.mvd[0];
+      pu.mvpIdx[0] = mvpIdx;
+      pu.mv[0]     = amvpInfo.mvCand[mvpIdx] + pu.mvd[0];
       pu.mv[0].mvCliptoStorageBitDepth();
     }
 
@@ -4203,12 +4203,12 @@ void PU::applyImv( PredictionUnit& pu, MergeCtx &mrgCtx, InterPrediction *interP
       {
         pu.mvd[1].changeTransPrecAmvr2Internal(pu.cu->imv);
       }
-      unsigned mvp_idx = pu.mvpIdx[1];
+      unsigned mvpIdx = pu.mvpIdx[1];
       AMVPInfo amvpInfo;
       PU::fillMvpCand(pu, REF_PIC_LIST_1, pu.refIdx[1], amvpInfo);
       pu.mvpNum[1] = amvpInfo.numCand;
-      pu.mvpIdx[1] = mvp_idx;
-      pu.mv    [1] = amvpInfo.mvCand[mvp_idx] + pu.mvd[1];
+      pu.mvpIdx[1] = mvpIdx;
+      pu.mv[1]     = amvpInfo.mvCand[mvpIdx] + pu.mvd[1];
       pu.mv[1].mvCliptoStorageBitDepth();
     }
   }

@@ -3011,9 +3011,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
               if (isEncodeGdrClean)
               {
-                int mvp_idx                        = aaiMvpIdx[refList][iRefIdxTemp];
-                cMvPredSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
-                cMvTempSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
+                int mvpIdx                         = aaiMvpIdx[refList][iRefIdxTemp];
+                cMvPredSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
+                cMvTempSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
                 cMvTempValid[refList][iRefIdxTemp] =
                   cs.isClean(pu.Y().bottomRight(), cMvTemp[refList][iRefIdxTemp], (RefPicList) refList, iRefIdxTemp);
 
@@ -3047,9 +3047,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
             if (isEncodeGdrClean)
             {
-              int mvp_idx                        = aaiMvpIdx[refList][iRefIdxTemp];
-              cMvPredSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
-              cMvTempSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
+              int mvpIdx                         = aaiMvpIdx[refList][iRefIdxTemp];
+              cMvPredSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
+              cMvTempSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
               cMvTempValid[refList][iRefIdxTemp] =
                 cs.isClean(pu.Y().bottomRight(), cMvTemp[refList][iRefIdxTemp], (RefPicList) refList, iRefIdxTemp);
               if (cMvTempValid[refList][iRefIdxTemp])
@@ -3085,10 +3085,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
           if (isEncodeGdrClean)
           {
-            int mvp_idx = aaiMvpIdx[refList][iRefIdxTemp];
+            int mvpIdx = aaiMvpIdx[refList][iRefIdxTemp];
 
-            cMvPredSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
-            cMvTempSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
+            cMvPredSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
+            cMvTempSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
             cMvTempValid[refList][iRefIdxTemp] =
               cs.isClean(pu.Y().bottomRight(), cMvTemp[refList][iRefIdxTemp], (RefPicList) refList, iRefIdxTemp);
             if (cMvTempValid[refList][iRefIdxTemp])
@@ -3449,9 +3449,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
               if (isEncodeGdrClean)
               {
-                int mvp_idx                          = aaiMvpIdxBi[refList][iRefIdxTemp];
-                cMvPredBiSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
-                cMvTempSolid[refList][iRefIdxTemp]   = amvp[eRefPicList].mvSolid[mvp_idx];
+                int mvpIdx                           = aaiMvpIdxBi[refList][iRefIdxTemp];
+                cMvPredBiSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
+                cMvTempSolid[refList][iRefIdxTemp]   = amvp[eRefPicList].mvSolid[mvpIdx];
                 cMvTempValid[refList][iRefIdxTemp] =
                   cs.isClean(pu.Y().bottomRight(), cMvTemp[refList][iRefIdxTemp], (RefPicList) refList, iRefIdxTemp);
                 if (cMvTempValid[refList][iRefIdxTemp])
@@ -3474,10 +3474,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
               if (isEncodeGdrClean)
               {
-                int mvp_idx = aaiMvpIdxBi[refList][iRefIdxTemp];
+                int mvpIdx = aaiMvpIdxBi[refList][iRefIdxTemp];
 
-                cMvPredBiSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvp_idx];
-                cMvTempSolid[refList][iRefIdxTemp]   = amvp[eRefPicList].mvSolid[mvp_idx];
+                cMvPredBiSolid[refList][iRefIdxTemp] = amvp[eRefPicList].mvSolid[mvpIdx];
+                cMvTempSolid[refList][iRefIdxTemp]   = amvp[eRefPicList].mvSolid[mvpIdx];
                 cMvTempValid[refList][iRefIdxTemp] =
                   cs.isClean(pu.Y().bottomRight(), cMvTemp[refList][iRefIdxTemp], (RefPicList) refList, iRefIdxTemp);
                 if (cMvTempValid[refList][iRefIdxTemp])
@@ -3588,10 +3588,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
                 if (isEncodeGdrClean)
                 {
-                  int mvp_idx = aaiMvpIdxBi[0][iRefIdxBi[0]];
+                  int mvpIdx = aaiMvpIdxBi[0][iRefIdxBi[0]];
 
-                  cMvPredBiSolid[0][iRefIdxBi[0]] = amvp[0].mvSolid[mvp_idx];
-                  cMvBiSolid[0] = amvp[0].mvSolid[mvp_idx];
+                  cMvPredBiSolid[0][iRefIdxBi[0]] = amvp[0].mvSolid[mvpIdx];
+                  cMvBiSolid[0]                   = amvp[0].mvSolid[mvpIdx];
                   cMvBiValid[0] = cs.isClean(pu.Y().bottomRight(), cMvBi[0], (RefPicList)0, iRefIdxBi[0]);
                   if (cMvBiValid[0])
                   {
@@ -3617,10 +3617,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
                   if (isEncodeGdrClean)
                   {
-                    int mvp_idx = aaiMvpIdxBi[1][iRefIdxBi[1]];
+                    int mvpIdx = aaiMvpIdxBi[1][iRefIdxBi[1]];
 
                     cMvPredBiSolid[1][iRefIdxBi[1]] = aaiMvpIdxBi[1][iRefIdxBi[1]];
-                    cMvBiSolid[1] = amvp[REF_PIC_LIST_1].mvSolid[mvp_idx];
+                    cMvBiSolid[1]                   = amvp[REF_PIC_LIST_1].mvSolid[mvpIdx];
                     cMvBiValid[1] = cs.isClean(pu.Y().bottomRight(), cMvBi[1], (RefPicList)1, iRefIdxBi[1]);
                     if (cMvBiValid[1])
                     {
@@ -6972,13 +6972,13 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
           if (isEncodeGdrClean)
           {
-            int            mvp_idx = aaiMvpIdx[refList][iRefIdxTemp];
+            int            mvpIdx  = aaiMvpIdx[refList][iRefIdxTemp];
             PelUnitBuf     tmpBuf = m_tmpAffiStorage.getBuf(UnitAreaRelative(*pu.cu, pu));
             const Picture *refPic  = pu.cu->slice->getRefPic((RefPicList) refList, iRefIdxTemp);
 
-            cMvPredSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvp_idx];
-            cMvPredSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvp_idx];
-            cMvPredSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvp_idx];
+            cMvPredSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvpIdx];
+            cMvPredSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvpIdx];
+            cMvPredSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvpIdx];
 
             cMvTempSolid[refList][iRefIdxTemp][0] = cMvPredSolid[refList][iRefIdxTemp][0];
             cMvTempSolid[refList][iRefIdxTemp][1] = cMvPredSolid[refList][iRefIdxTemp][1];
@@ -7024,13 +7024,13 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
         if (isEncodeGdrClean)
         {
-          int            mvp_idx = aaiMvpIdx[refList][iRefIdxTemp];
+          int            mvpIdx  = aaiMvpIdx[refList][iRefIdxTemp];
           PelUnitBuf     tmpBuf = m_tmpAffiStorage.getBuf(UnitAreaRelative(*pu.cu, pu));
           const Picture *refPic  = pu.cu->slice->getRefPic((RefPicList) refList, iRefIdxTemp);
 
-          cMvPredSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvp_idx];
-          cMvPredSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvp_idx];
-          cMvPredSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvp_idx];
+          cMvPredSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvpIdx];
+          cMvPredSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvpIdx];
+          cMvPredSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvpIdx];
 
           cMvTempSolid[refList][iRefIdxTemp][0] = cMvPredSolid[refList][iRefIdxTemp][0];
           cMvTempSolid[refList][iRefIdxTemp][1] = cMvPredSolid[refList][iRefIdxTemp][1];
@@ -7088,11 +7088,11 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
                             cMvPred[refList][iRefIdxTemp], aaiMvpIdx[refList][iRefIdxTemp], uiBitsTemp, uiCostTemp);
         if (isEncodeGdrClean)
         {
-          int mvp_idx = aaiMvpIdx[refList][iRefIdxTemp];
+          int mvpIdx = aaiMvpIdx[refList][iRefIdxTemp];
 
-          cMvPredSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvp_idx];
-          cMvPredSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvp_idx];
-          cMvPredSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvp_idx];
+          cMvPredSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvpIdx];
+          cMvPredSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvpIdx];
+          cMvPredSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvpIdx];
 
           cMvTempSolid[refList][iRefIdxTemp][0] = cMvPredSolid[refList][iRefIdxTemp][0];
           cMvTempSolid[refList][iRefIdxTemp][1] = cMvPredSolid[refList][iRefIdxTemp][0];
@@ -7546,13 +7546,13 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
         if (isEncodeGdrClean)
         {
-          int            mvp_idx = aaiMvpIdx[refList][iRefIdxTemp];
+          int            mvpIdx  = aaiMvpIdx[refList][iRefIdxTemp];
           PelUnitBuf     tmpBuf = m_tmpAffiStorage.getBuf(UnitAreaRelative(*pu.cu, pu));
           const Picture *refPic  = pu.cu->slice->getRefPic((RefPicList) refList, iRefIdxTemp);
 
-          cMvPredBiSolid[refList][iRefIdxTemp][0] = aacAffineAMVPInfo[refList][iRefIdxTemp].mvSolidLT[mvp_idx];
-          cMvPredBiSolid[refList][iRefIdxTemp][1] = aacAffineAMVPInfo[refList][iRefIdxTemp].mvSolidRT[mvp_idx];
-          cMvPredBiSolid[refList][iRefIdxTemp][2] = aacAffineAMVPInfo[refList][iRefIdxTemp].mvSolidLB[mvp_idx];
+          cMvPredBiSolid[refList][iRefIdxTemp][0] = aacAffineAMVPInfo[refList][iRefIdxTemp].mvSolidLT[mvpIdx];
+          cMvPredBiSolid[refList][iRefIdxTemp][1] = aacAffineAMVPInfo[refList][iRefIdxTemp].mvSolidRT[mvpIdx];
+          cMvPredBiSolid[refList][iRefIdxTemp][2] = aacAffineAMVPInfo[refList][iRefIdxTemp].mvSolidLB[mvpIdx];
 
           cMvTempSolid[refList][iRefIdxTemp][0] = cMvPredBiSolid[refList][iRefIdxTemp][0];
           cMvTempSolid[refList][iRefIdxTemp][1] = cMvPredSolid[refList][iRefIdxTemp][1];
@@ -7589,11 +7589,11 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
                               uiCostTemp);
           if (isEncodeGdrClean)
           {
-            int mvp_idx = aaiMvpIdxBi[refList][iRefIdxTemp];
+            int mvpIdx = aaiMvpIdxBi[refList][iRefIdxTemp];
 
-            cMvPredBiSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvp_idx];
-            cMvPredBiSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvp_idx];
-            cMvPredBiSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvp_idx];
+            cMvPredBiSolid[refList][iRefIdxTemp][0] = affiAMVPInfoTemp[eRefPicList].mvSolidLT[mvpIdx];
+            cMvPredBiSolid[refList][iRefIdxTemp][1] = affiAMVPInfoTemp[eRefPicList].mvSolidRT[mvpIdx];
+            cMvPredBiSolid[refList][iRefIdxTemp][2] = affiAMVPInfoTemp[eRefPicList].mvSolidLB[mvpIdx];
 
             cMvTempSolid[refList][iRefIdxTemp][0] = cMvPredBiSolid[refList][iRefIdxTemp][0];
             cMvTempSolid[refList][iRefIdxTemp][1] = cMvPredBiSolid[refList][iRefIdxTemp][1];
@@ -7739,11 +7739,11 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
           if (isEncodeGdrClean)
           {
-            int mvp_idx = aaiMvpIdxBi[0][iRefIdxBi[0]];
+            int mvpIdx = aaiMvpIdxBi[0][iRefIdxBi[0]];
 
-            cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][0] = affiAMVPInfoTemp[REF_PIC_LIST_0].mvSolidLT[mvp_idx];
-            cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][1] = affiAMVPInfoTemp[REF_PIC_LIST_0].mvSolidRT[mvp_idx];
-            cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][2] = affiAMVPInfoTemp[REF_PIC_LIST_0].mvSolidLB[mvp_idx];
+            cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][0] = affiAMVPInfoTemp[REF_PIC_LIST_0].mvSolidLT[mvpIdx];
+            cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][1] = affiAMVPInfoTemp[REF_PIC_LIST_0].mvSolidRT[mvpIdx];
+            cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][2] = affiAMVPInfoTemp[REF_PIC_LIST_0].mvSolidLB[mvpIdx];
 
             cMvBiSolid[REF_PIC_LIST_0][0] = cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][0];
             cMvBiSolid[REF_PIC_LIST_0][1] = cMvPredBiSolid[REF_PIC_LIST_0][iRefIdxBi[0]][1];
@@ -7771,11 +7771,11 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
             if (isEncodeGdrClean)
             {
-              int mvp_idx = aaiMvpIdxBi[1][iRefIdxBi[1]];
+              int mvpIdx = aaiMvpIdxBi[1][iRefIdxBi[1]];
 
-              cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][0] = affiAMVPInfoTemp[REF_PIC_LIST_1].mvSolidLT[mvp_idx];
-              cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][1] = affiAMVPInfoTemp[REF_PIC_LIST_1].mvSolidRT[mvp_idx];
-              cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][2] = affiAMVPInfoTemp[REF_PIC_LIST_1].mvSolidLB[mvp_idx];
+              cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][0] = affiAMVPInfoTemp[REF_PIC_LIST_1].mvSolidLT[mvpIdx];
+              cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][1] = affiAMVPInfoTemp[REF_PIC_LIST_1].mvSolidRT[mvpIdx];
+              cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][2] = affiAMVPInfoTemp[REF_PIC_LIST_1].mvSolidLB[mvpIdx];
 
               cMvBiSolid[REF_PIC_LIST_1][0] = cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][0];
               cMvBiSolid[REF_PIC_LIST_1][1] = cMvPredBiSolid[REF_PIC_LIST_1][iRefIdxBi[1]][1];
