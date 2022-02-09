@@ -72,9 +72,7 @@ public:
                     const uint32_t uiMaxTrSize,
                     const bool bUseRDOQ,
                     const bool bUseRDOQTS,
-#if T0196_SELECTIVE_RDOQ
                     const bool useSelectiveRDOQ,
-#endif
                     const bool bEnc
   );
   void getTrTypes(const TransformUnit tu, const ComponentID compID, int &trTypeHor, int &trTypeVer);

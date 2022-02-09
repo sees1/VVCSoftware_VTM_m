@@ -324,9 +324,7 @@ void EncLib::init(AUWriterIf *auWriterIf)
                    1 << m_log2MaxTbSize,
                    m_useRDOQ,
                    m_useRDOQTS,
-#if T0196_SELECTIVE_RDOQ
                    m_useSelectiveRDOQ,
-#endif
                    true
   );
 

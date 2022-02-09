@@ -483,9 +483,7 @@ void Quant::dequant(const TransformUnit &tu,
 void Quant::init( uint32_t uiMaxTrSize,
                   bool bUseRDOQ,
                   bool bUseRDOQTS,
-#if T0196_SELECTIVE_RDOQ
                   bool useSelectiveRDOQ
-#endif
                   )
 {
 
@@ -495,9 +493,7 @@ void Quant::init( uint32_t uiMaxTrSize,
   m_uiMaxTrSize  = uiMaxTrSize;
   m_useRDOQ      = bUseRDOQ;
   m_useRDOQTS    = bUseRDOQTS;
-#if T0196_SELECTIVE_RDOQ
   m_useSelectiveRDOQ     = useSelectiveRDOQ;
-#endif
   m_resetStore = true;
 }
 
