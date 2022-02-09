@@ -783,39 +783,42 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
          pcSlice->getSliceQp() );
   msg( msgl, "[DT %6.3f] ", pcSlice->getProcessingTime() );
 
-  for (int iRefList = 0; iRefList < 2; iRefList++)
+  for (int refList = 0; refList < 2; refList++)
   {
-    msg( msgl, "[L%d", iRefList);
-    for (int iRefIndex = 0; iRefIndex < pcSlice->getNumRefIdx(RefPicList(iRefList)); iRefIndex++)
+    msg(msgl, "[L%d", refList);
+    for (int iRefIndex = 0; iRefIndex < pcSlice->getNumRefIdx(RefPicList(refList)); iRefIndex++)
     {
-      const std::pair<int, int>& scaleRatio = pcSlice->getScalingRatio( RefPicList( iRefList ), iRefIndex );
+      const std::pair<int, int> &scaleRatio = pcSlice->getScalingRatio(RefPicList(refList), iRefIndex);
 
-      if( pcSlice->getPicHeader()->getEnableTMVPFlag() && pcSlice->getColFromL0Flag() == bool(1 - iRefList) && pcSlice->getColRefIdx() == iRefIndex )
+      if (pcSlice->getPicHeader()->getEnableTMVPFlag() && pcSlice->getColFromL0Flag() == bool(1 - refList)
+          && pcSlice->getColRefIdx() == iRefIndex)
       {
         if( scaleRatio.first != 1 << SCALE_RATIO_BITS || scaleRatio.second != 1 << SCALE_RATIO_BITS )
         {
-          msg( msgl, " %dc(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC( RefPicList( iRefList ), iRefIndex ), double( scaleRatio.first ) / ( 1 << SCALE_RATIO_BITS ), double( scaleRatio.second ) / ( 1 << SCALE_RATIO_BITS ) );
+          msg(msgl, " %dc(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC(RefPicList(refList), iRefIndex),
+              double(scaleRatio.first) / (1 << SCALE_RATIO_BITS), double(scaleRatio.second) / (1 << SCALE_RATIO_BITS));
         }
         else
         {
-          msg( msgl, " %dc", pcSlice->getRefPOC( RefPicList( iRefList ), iRefIndex ) );
+          msg(msgl, " %dc", pcSlice->getRefPOC(RefPicList(refList), iRefIndex));
         }
       }
       else
       {
         if( scaleRatio.first != 1 << SCALE_RATIO_BITS || scaleRatio.second != 1 << SCALE_RATIO_BITS )
         {
-          msg( msgl, " %d(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC( RefPicList( iRefList ), iRefIndex ), double( scaleRatio.first ) / ( 1 << SCALE_RATIO_BITS ), double( scaleRatio.second ) / ( 1 << SCALE_RATIO_BITS ) );
+          msg(msgl, " %d(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC(RefPicList(refList), iRefIndex),
+              double(scaleRatio.first) / (1 << SCALE_RATIO_BITS), double(scaleRatio.second) / (1 << SCALE_RATIO_BITS));
         }
         else
         {
-          msg( msgl, " %d", pcSlice->getRefPOC( RefPicList( iRefList ), iRefIndex ) );
+          msg(msgl, " %d", pcSlice->getRefPOC(RefPicList(refList), iRefIndex));
         }
       }
 
-      if( pcSlice->getRefPOC( RefPicList( iRefList ), iRefIndex ) == pcSlice->getPOC() )
+      if (pcSlice->getRefPOC(RefPicList(refList), iRefIndex) == pcSlice->getPOC())
       {
-        msg( msgl, ".%d", pcSlice->getRefPic( RefPicList( iRefList ), iRefIndex )->layerId );
+        msg(msgl, ".%d", pcSlice->getRefPic(RefPicList(refList), iRefIndex)->layerId);
       }
     }
     msg( msgl, "] ");
