@@ -8068,20 +8068,20 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
   }
 }
 
-void solveEqual(double dEqualCoeff[7][7], int iOrder, double *dAffinePara)
+void solveEqual(double dEqualCoeff[7][7], int order, double *dAffinePara)
 {
-  for ( int k = 0; k < iOrder; k++ )
+  for (int k = 0; k < order; k++)
   {
     dAffinePara[k] = 0.;
   }
 
   // row echelon
-  for ( int i = 1; i < iOrder; i++ )
+  for (int i = 1; i < order; i++)
   {
     // find column max
     double temp = fabs(dEqualCoeff[i][i-1]);
     int tempIdx = i;
-    for ( int j = i+1; j < iOrder+1; j++ )
+    for (int j = i + 1; j < order + 1; j++)
     {
       if ( fabs(dEqualCoeff[j][i-1]) > temp )
       {
@@ -8093,7 +8093,7 @@ void solveEqual(double dEqualCoeff[7][7], int iOrder, double *dAffinePara)
     // swap line
     if ( tempIdx != i )
     {
-      for ( int j = 0; j < iOrder+1; j++ )
+      for (int j = 0; j < order + 1; j++)
       {
         dEqualCoeff[0][j] = dEqualCoeff[i][j];
         dEqualCoeff[i][j] = dEqualCoeff[tempIdx][j];
@@ -8106,36 +8106,36 @@ void solveEqual(double dEqualCoeff[7][7], int iOrder, double *dAffinePara)
     {
       return;
     }
-    for ( int j = i+1; j < iOrder+1; j++ )
+    for (int j = i + 1; j < order + 1; j++)
     {
-      for ( int k = i; k < iOrder+1; k++ )
+      for (int k = i; k < order + 1; k++)
       {
         dEqualCoeff[j][k] = dEqualCoeff[j][k] - dEqualCoeff[i][k] * dEqualCoeff[j][i-1] / dEqualCoeff[i][i-1];
       }
     }
   }
 
-  if ( dEqualCoeff[iOrder][iOrder - 1] == 0. )
+  if (dEqualCoeff[order][order - 1] == 0.)
   {
     return;
   }
-  dAffinePara[iOrder-1] = dEqualCoeff[iOrder][iOrder] / dEqualCoeff[iOrder][iOrder-1];
-  for ( int i = iOrder-2; i >= 0; i-- )
+  dAffinePara[order - 1] = dEqualCoeff[order][order] / dEqualCoeff[order][order - 1];
+  for (int i = order - 2; i >= 0; i--)
   {
     if ( dEqualCoeff[i + 1][i] == 0. )
     {
-      for ( int k = 0; k < iOrder; k++ )
+      for (int k = 0; k < order; k++)
       {
         dAffinePara[k] = 0.;
       }
       return;
     }
     double temp = 0;
-    for ( int j = i+1; j < iOrder; j++ )
+    for (int j = i + 1; j < order; j++)
     {
       temp += dEqualCoeff[i+1][j] * dAffinePara[j];
     }
-    dAffinePara[i] = ( dEqualCoeff[i+1][iOrder] - temp ) / dEqualCoeff[i+1][i];
+    dAffinePara[i] = (dEqualCoeff[i + 1][order] - temp) / dEqualCoeff[i + 1][i];
   }
 }
 
