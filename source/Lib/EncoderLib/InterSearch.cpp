@@ -2863,7 +2863,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
     Distortion   uiAffineCost = std::numeric_limits<Distortion>::max();
     Distortion   uiCost[2] = { std::numeric_limits<Distortion>::max(), std::numeric_limits<Distortion>::max() };
     Distortion   uiCostBi  =   std::numeric_limits<Distortion>::max();
-    Distortion   uiCostTemp;
+    Distortion   costTemp;
 
 #if GDR_ENABLED
     memset(uiCostTempL0Ok, init_value, sizeof(uiCostTempL0Ok));
@@ -2980,7 +2980,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                                                          cs.slice->getList1IdxToList0Idx(refIdxTemp));
               }
 #endif
-              uiCostTemp = uiCostTempL0[cs.slice->getList1IdxToList0Idx(refIdxTemp)];
+              costTemp = uiCostTempL0[cs.slice->getList1IdxToList0Idx(refIdxTemp)];
               /*first subtract the bit-rate part of the cost of the other list*/
 #if GDR_ENABLED
               if (isEncodeGdrClean)
@@ -2988,13 +2988,13 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                 uiCostTempOk = uiCostTempL0Ok[cs.slice->getList1IdxToList0Idx(refIdxTemp)];
               }
 #endif
-              uiCostTemp -= m_pcRdCost->getCost(uiBitsTempL0[cs.slice->getList1IdxToList0Idx(refIdxTemp)]);
+              costTemp -= m_pcRdCost->getCost(uiBitsTempL0[cs.slice->getList1IdxToList0Idx(refIdxTemp)]);
               /*correct the bit-rate part of the current ref*/
               m_pcRdCost->setPredictor(cMvPred[refList][refIdxTemp]);
               bitsTemp += m_pcRdCost->getBitsOfVectorWithPredictor(
                 cMvTemp[1][refIdxTemp].getHor(), cMvTemp[1][refIdxTemp].getVer(), imvShift + MV_FRACTIONAL_BITS_DIFF);
               /*calculate the correct cost*/
-              uiCostTemp += m_pcRdCost->getCost(bitsTemp);
+              costTemp += m_pcRdCost->getCost(bitsTemp);
             }
             else
             {
@@ -3002,11 +3002,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               bCleanCandExist = false;
               xMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
                                 cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp],
-                                aaiMvpIdx[refList][refIdxTemp], bitsTemp, uiCostTemp, amvp[eRefPicList],
-                                bCleanCandExist);
+                                aaiMvpIdx[refList][refIdxTemp], bitsTemp, costTemp, amvp[eRefPicList], bCleanCandExist);
 #else
               xMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
-                                cMvTemp[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, uiCostTemp,
+                                cMvTemp[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, costTemp,
                                 amvp[eRefPicList]);
 #endif
 
@@ -3038,10 +3037,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
             bCleanCandExist = false;
             xMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
                               cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp],
-                              aaiMvpIdx[refList][refIdxTemp], bitsTemp, uiCostTemp, amvp[eRefPicList], bCleanCandExist);
+                              aaiMvpIdx[refList][refIdxTemp], bitsTemp, costTemp, amvp[eRefPicList], bCleanCandExist);
 #else
             xMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
-                              cMvTemp[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, uiCostTemp,
+                              cMvTemp[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, costTemp,
                               amvp[eRefPicList]);
 #endif
 
@@ -3071,10 +3070,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
             m_uniMotions.setReadMode(checkIdentical, (uint32_t) refList, (uint32_t) refIdxTemp);
 #if GDR_ENABLED
             m_uniMotions.copyFrom(cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp],
-                                  uiCostTemp - m_pcRdCost->getCost(bitsTemp), (uint32_t) refList,
-                                  (uint32_t) refIdxTemp);
+                                  costTemp - m_pcRdCost->getCost(bitsTemp), (uint32_t) refList, (uint32_t) refIdxTemp);
 #else
-            m_uniMotions.copyFrom(cMvTemp[refList][refIdxTemp], uiCostTemp - m_pcRdCost->getCost(bitsTemp),
+            m_uniMotions.copyFrom(cMvTemp[refList][refIdxTemp], costTemp - m_pcRdCost->getCost(bitsTemp),
                                   (uint32_t) refList, (uint32_t) refIdxTemp);
 #endif
           }
@@ -3082,7 +3080,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                         &aacAMVPInfo[refList][refIdxTemp]);   // must always be done ( also when AMVP_MODE = AM_NONE )
 #if GDR_ENABLED
           xCheckBestMVP(pu, eRefPicList, cMvTemp[refList][refIdxTemp], cMvPred[refList][refIdxTemp],
-                        aaiMvpIdx[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, uiCostTemp, pu.cu->imv);
+                        aaiMvpIdx[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, costTemp, pu.cu->imv);
 
           if (isEncodeGdrClean)
           {
@@ -3104,11 +3102,11 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
           }
 #else
           xCheckBestMVP(eRefPicList, cMvTemp[refList][refIdxTemp], cMvPred[refList][refIdxTemp],
-                        aaiMvpIdx[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, uiCostTemp, pu.cu->imv);
+                        aaiMvpIdx[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, costTemp, pu.cu->imv);
 #endif
           if (refList == 0)
           {
-            uiCostTempL0[refIdxTemp] = uiCostTemp;
+            uiCostTempL0[refIdxTemp] = costTemp;
             uiBitsTempL0[refIdxTemp] = bitsTemp;
           }
 #if GDR_ENABLED
@@ -3119,12 +3117,12 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #endif
 
 #if GDR_ENABLED
-          allOk = (uiCostTemp < uiCost[refList]);
+          allOk = (costTemp < uiCost[refList]);
           if (isEncodeGdrClean)
           {
             if (uiCostTempOk)
             {
-              allOk = (uiCostOk[refList]) ? (uiCostTemp < uiCost[refList]) : true;
+              allOk = (uiCostOk[refList]) ? (costTemp < uiCost[refList]) : true;
             }
             else
             {
@@ -3139,10 +3137,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
           if (allOk)
 #else
-          if (uiCostTemp < uiCost[refList])
+          if (costTemp < uiCost[refList])
 #endif
           {
-            uiCost[refList] = uiCostTemp;
+            uiCost[refList] = costTemp;
             uiBits[refList] = bitsTemp;   // storing for bi-prediction
 
             // set motion
@@ -3161,14 +3159,14 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
 
 #if GDR_ENABLED
-          allOk = (refList == 1 && uiCostTemp < costValidList1 && cs.slice->getList1IdxToList0Idx(refIdxTemp) < 0);
+          allOk = (refList == 1 && costTemp < costValidList1 && cs.slice->getList1IdxToList0Idx(refIdxTemp) < 0);
           if (isEncodeGdrClean)
           {
             if (uiCostTempOk)
             {
-              allOk = (costValidList1Ok) ? (refList == 1 && uiCostTemp < costValidList1
-                                            && cs.slice->getList1IdxToList0Idx(refIdxTemp) < 0)
-                                         : true;
+              allOk = (costValidList1Ok)
+                        ? (refList == 1 && costTemp < costValidList1 && cs.slice->getList1IdxToList0Idx(refIdxTemp) < 0)
+                        : true;
             }
             else
             {
@@ -3180,10 +3178,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
           if (allOk)
 #else
-          if (refList == 1 && uiCostTemp < costValidList1 && cs.slice->getList1IdxToList0Idx(refIdxTemp) < 0)
+          if (refList == 1 && costTemp < costValidList1 && cs.slice->getList1IdxToList0Idx(refIdxTemp) < 0)
 #endif
           {
-            costValidList1 = uiCostTemp;
+            costValidList1 = costTemp;
             bitsValidList1 = bitsTemp;
 
             // set motion
@@ -3440,11 +3438,11 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               bCleanCandExist = false;
               xMotionEstimation(pu, origBuf, eRefPicList, cMvPredBi[refList][refIdxTemp], refIdxTemp,
                                 cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp],
-                                aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, uiCostTemp, amvp[eRefPicList],
+                                aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, costTemp, amvp[eRefPicList],
                                 bCleanCandExist, true);
 #else
               xMotionEstimation(pu, origBuf, eRefPicList, cMvPredBi[refList][refIdxTemp], refIdxTemp,
-                                cMvTemp[refList][refIdxTemp], aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, uiCostTemp,
+                                cMvTemp[refList][refIdxTemp], aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, costTemp,
                                 amvp[eRefPicList], true);
 #endif
 #if GDR_ENABLED
@@ -3468,10 +3466,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #endif
 
 #if GDR_ENABLED
-              // note : uiCostTemp is the new Best MVP cost,
+              // note : costTemp is the new Best MVP cost,
               //        solid info will be at amvp[eRefPicList].mvSolid[aaiMvpIdx[refList][refIdxTemp]];
               xCheckBestMVP(pu, eRefPicList, cMvTemp[refList][refIdxTemp], cMvPredBi[refList][refIdxTemp],
-                            aaiMvpIdxBi[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, uiCostTemp, pu.cu->imv);
+                            aaiMvpIdxBi[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, costTemp, pu.cu->imv);
 
               if (isEncodeGdrClean)
               {
@@ -3494,15 +3492,15 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #else
 
               xCheckBestMVP(eRefPicList, cMvTemp[refList][refIdxTemp], cMvPredBi[refList][refIdxTemp],
-                            aaiMvpIdxBi[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, uiCostTemp, pu.cu->imv);
+                            aaiMvpIdxBi[refList][refIdxTemp], amvp[eRefPicList], bitsTemp, costTemp, pu.cu->imv);
 #endif
 #if GDR_ENABLED
-              allOk = (uiCostTemp < uiCostBi);
+              allOk = (costTemp < uiCostBi);
               if (isEncodeGdrClean)
               {
                 if (uiCostTempOk)
                 {
-                  allOk = (uiCostBiOk) ? (uiCostTemp < uiCostBi) : true;
+                  allOk = (uiCostBiOk) ? (costTemp < uiCostBi) : true;
                 }
                 else
                 {
@@ -3513,7 +3511,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
               if (allOk)
 #else
-              if (uiCostTemp < uiCostBi)
+              if (costTemp < uiCostBi)
 #endif
               {
                 bChanged = true;
@@ -3529,7 +3527,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #endif
                 iRefIdxBi[refList] = refIdxTemp;
 
-                uiCostBi            = uiCostTemp;
+                uiCostBi = costTemp;
 #if GDR_ENABLED
                 if (isEncodeGdrClean)
                 {
@@ -6465,7 +6463,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 
   Distortion    uiCost[2] = { std::numeric_limits<Distortion>::max(), std::numeric_limits<Distortion>::max() };
   Distortion    uiCostBi  = std::numeric_limits<Distortion>::max();
-  Distortion    uiCostTemp;
+  Distortion    costTemp;
 #if GDR_ENABLED
   bool uiCostOk[2] = { init_value, init_value };
   bool uiCostBiOk = init_value;
@@ -6950,23 +6948,23 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
             uiCostTempOk = uiCostTempL0Ok[iList1ToList0Idx];
           }
 #endif
-          uiCostTemp = uiCostTempL0[iList1ToList0Idx];
+          costTemp = uiCostTempL0[iList1ToList0Idx];
 
-          uiCostTemp -= m_pcRdCost->getCost( uiBitsTempL0[iList1ToList0Idx] );
+          costTemp -= m_pcRdCost->getCost(uiBitsTempL0[iList1ToList0Idx]);
           bitsTemp += xCalcAffineMVBits(pu, cMvTemp[refList][refIdxTemp], cMvPred[refList][refIdxTemp]);
           /*calculate the correct cost*/
-          uiCostTemp += m_pcRdCost->getCost(bitsTemp);
-          DTRACE( g_trace_ctx, D_COMMON, " (%d) uiCostTemp=%d\n", DTRACE_GET_COUNTER(g_trace_ctx,D_COMMON), uiCostTemp );
+          costTemp += m_pcRdCost->getCost(bitsTemp);
+          DTRACE(g_trace_ctx, D_COMMON, " (%d) costTemp=%d\n", DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), costTemp);
         }
         else
         {
 #if GDR_ENABLED
           xAffineMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
-                                  cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp], bitsTemp, uiCostTemp,
+                                  cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp], bitsTemp, costTemp,
                                   aaiMvpIdx[refList][refIdxTemp], affiAMVPInfoTemp[eRefPicList], bAnyClean
 #else
           xAffineMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
-                                  cMvTemp[refList][refIdxTemp], bitsTemp, uiCostTemp, aaiMvpIdx[refList][refIdxTemp],
+                                  cMvTemp[refList][refIdxTemp], bitsTemp, costTemp, aaiMvpIdx[refList][refIdxTemp],
                                   affiAMVPInfoTemp[eRefPicList]
 #endif
           );
@@ -7012,11 +7010,11 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       {
 #if GDR_ENABLED
         xAffineMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
-                                cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp], bitsTemp, uiCostTemp,
+                                cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp], bitsTemp, costTemp,
                                 aaiMvpIdx[refList][refIdxTemp], affiAMVPInfoTemp[eRefPicList], bAnyClean);
 #else
         xAffineMotionEstimation(pu, origBuf, eRefPicList, cMvPred[refList][refIdxTemp], refIdxTemp,
-                                cMvTemp[refList][refIdxTemp], bitsTemp, uiCostTemp, aaiMvpIdx[refList][refIdxTemp],
+                                cMvTemp[refList][refIdxTemp], bitsTemp, costTemp, aaiMvpIdx[refList][refIdxTemp],
                                 affiAMVPInfoTemp[eRefPicList]);
 #endif
 
@@ -7063,17 +7061,17 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         if (isEncodeGdrClean)
         {
           m_uniMotions.copyAffineMvFrom(cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp],
-                                        uiCostTemp - m_pcRdCost->getCost(bitsTemp), (uint8_t) refList,
+                                        costTemp - m_pcRdCost->getCost(bitsTemp), (uint8_t) refList,
                                         (uint8_t) refIdxTemp, pu.cu->affineType, aaiMvpIdx[refList][refIdxTemp]);
         }
         else
         {
-          m_uniMotions.copyAffineMvFrom(cMvTemp[refList][refIdxTemp], uiCostTemp - m_pcRdCost->getCost(bitsTemp),
+          m_uniMotions.copyAffineMvFrom(cMvTemp[refList][refIdxTemp], costTemp - m_pcRdCost->getCost(bitsTemp),
                                         (uint8_t) refList, (uint8_t) refIdxTemp, pu.cu->affineType,
                                         aaiMvpIdx[refList][refIdxTemp]);
         }
 #else
-        m_uniMotions.copyAffineMvFrom(cMvTemp[refList][refIdxTemp], uiCostTemp - m_pcRdCost->getCost(bitsTemp),
+        m_uniMotions.copyAffineMvFrom(cMvTemp[refList][refIdxTemp], costTemp - m_pcRdCost->getCost(bitsTemp),
                                       (uint8_t) refList, (uint8_t) refIdxTemp, pu.cu->affineType,
                                       aaiMvpIdx[refList][refIdxTemp]);
 #endif
@@ -7084,7 +7082,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       if ( pu.cu->imv != 2 || !m_pcEncCfg->getUseAffineAmvrEncOpt() )
       {
         xCheckBestAffineMVP(pu, affiAMVPInfoTemp[eRefPicList], eRefPicList, cMvTemp[refList][refIdxTemp],
-                            cMvPred[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, uiCostTemp);
+                            cMvPred[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, costTemp);
         if (isEncodeGdrClean)
         {
           int mvpIdx = aaiMvpIdx[refList][refIdxTemp];
@@ -7118,13 +7116,13 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       if ( pu.cu->imv != 2 || !m_pcEncCfg->getUseAffineAmvrEncOpt() )
       {
         xCheckBestAffineMVP(pu, affiAMVPInfoTemp[eRefPicList], eRefPicList, cMvTemp[refList][refIdxTemp],
-                            cMvPred[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, uiCostTemp);
+                            cMvPred[refList][refIdxTemp], aaiMvpIdx[refList][refIdxTemp], bitsTemp, costTemp);
       }
 #endif
 
       if (refList == 0)
       {
-        uiCostTempL0[refIdxTemp] = uiCostTemp;
+        uiCostTempL0[refIdxTemp] = costTemp;
         uiBitsTempL0[refIdxTemp] = bitsTemp;
 #if GDR_ENABLED
         if (isEncodeGdrClean)
@@ -7133,16 +7131,16 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         }
 #endif
       }
-      DTRACE(g_trace_ctx, D_COMMON, " (%d) uiCostTemp=%d, uiCost[refList]=%d\n",
-             DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), uiCostTemp, uiCost[refList]);
+      DTRACE(g_trace_ctx, D_COMMON, " (%d) costTemp=%d, uiCost[refList]=%d\n",
+             DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), costTemp, uiCost[refList]);
 #if GDR_ENABLED
-      allOk = (uiCostTemp < uiCost[refList]);
+      allOk = (costTemp < uiCost[refList]);
 
       if (isEncodeGdrClean)
       {
         if (uiCostTempOk)
         {
-          allOk = (uiCostOk[refList]) ? (uiCostTemp < uiCost[refList]) : true;
+          allOk = (uiCostOk[refList]) ? (costTemp < uiCost[refList]) : true;
         }
         else
         {
@@ -7154,10 +7152,10 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
       if (allOk)
 #else
-      if (uiCostTemp < uiCost[refList])
+      if (costTemp < uiCost[refList])
 #endif
       {
-        uiCost[refList] = uiCostTemp;
+        uiCost[refList] = costTemp;
         uiBits[refList] = bitsTemp;   // storing for bi-prediction
 
 #if GDR_ENABLED
@@ -7180,14 +7178,14 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 
 
 #if GDR_ENABLED
-      allOk = (refList == 1 && uiCostTemp < costValidList1 && slice.getList1IdxToList0Idx(refIdxTemp) < 0);
+      allOk = (refList == 1 && costTemp < costValidList1 && slice.getList1IdxToList0Idx(refIdxTemp) < 0);
 
       if (isEncodeGdrClean)
       {
         if (uiCostTempOk)
         {
           allOk = (costValidList1Ok)
-                    ? (refList == 1 && uiCostTemp < costValidList1 && slice.getList1IdxToList0Idx(refIdxTemp) < 0)
+                    ? (refList == 1 && costTemp < costValidList1 && slice.getList1IdxToList0Idx(refIdxTemp) < 0)
                     : true;
         }
         else
@@ -7201,10 +7199,10 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
       if (allOk)
 #else
-      if (refList == 1 && uiCostTemp < costValidList1 && slice.getList1IdxToList0Idx(refIdxTemp) < 0)
+      if (refList == 1 && costTemp < costValidList1 && slice.getList1IdxToList0Idx(refIdxTemp) < 0)
 #endif
       {
-        costValidList1 = uiCostTemp;
+        costValidList1 = costTemp;
         bitsValidList1 = bitsTemp;
 
         // set motion
@@ -7533,12 +7531,12 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         // call Affine ME
 #if GDR_ENABLED
         xAffineMotionEstimation(pu, origBuf, eRefPicList, cMvPredBi[refList][refIdxTemp], refIdxTemp,
-                                cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp], bitsTemp, uiCostTemp,
+                                cMvTemp[refList][refIdxTemp], cMvTempSolid[refList][refIdxTemp], bitsTemp, costTemp,
                                 aaiMvpIdxBi[refList][refIdxTemp], aacAffineAMVPInfo[refList][refIdxTemp], bAnyClean,
                                 true);
 #else
         xAffineMotionEstimation(pu, origBuf, eRefPicList, cMvPredBi[refList][refIdxTemp], refIdxTemp,
-                                cMvTemp[refList][refIdxTemp], bitsTemp, uiCostTemp, aaiMvpIdxBi[refList][refIdxTemp],
+                                cMvTemp[refList][refIdxTemp], bitsTemp, costTemp, aaiMvpIdxBi[refList][refIdxTemp],
                                 aacAffineAMVPInfo[refList][refIdxTemp], true);
 #endif
 
@@ -7584,7 +7582,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         if ( pu.cu->imv != 2 || !m_pcEncCfg->getUseAffineAmvrEncOpt() )
         {
           xCheckBestAffineMVP(pu, affiAMVPInfoTemp[eRefPicList], eRefPicList, cMvTemp[refList][refIdxTemp],
-                              cMvPredBi[refList][refIdxTemp], aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, uiCostTemp);
+                              cMvPredBi[refList][refIdxTemp], aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, costTemp);
           if (isEncodeGdrClean)
           {
             int mvpIdx = aaiMvpIdxBi[refList][refIdxTemp];
@@ -7619,18 +7617,18 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         if ( pu.cu->imv != 2 || !m_pcEncCfg->getUseAffineAmvrEncOpt() )
         {
           xCheckBestAffineMVP(pu, affiAMVPInfoTemp[eRefPicList], eRefPicList, cMvTemp[refList][refIdxTemp],
-                              cMvPredBi[refList][refIdxTemp], aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, uiCostTemp);
+                              cMvPredBi[refList][refIdxTemp], aaiMvpIdxBi[refList][refIdxTemp], bitsTemp, costTemp);
         }
 #endif
 
 #if GDR_ENABLED
-        allOk = (uiCostTemp < uiCostBi);
+        allOk = (costTemp < uiCostBi);
 
         if (isEncodeGdrClean)
         {
           if (uiCostTempOk)
           {
-            allOk = (uiCostBiOk) ? (uiCostTemp < uiCostBi) : true;
+            allOk = (uiCostBiOk) ? (costTemp < uiCostBi) : true;
           }
           else
           {
@@ -7644,7 +7642,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #if GDR_ENABLED
         if (allOk)
 #else
-        if ( uiCostTemp < uiCostBi )
+        if (costTemp < uiCostBi)
 #endif
         {
           bChanged = true;
@@ -7658,7 +7656,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #endif
           iRefIdxBi[refList] = refIdxTemp;
 
-          uiCostBi            = uiCostTemp;
+          uiCostBi = costTemp;
 #if GDR_ENABLED
           if (isEncodeGdrClean)
           {
@@ -8587,8 +8585,9 @@ void InterSearch::xAffineMotionEstimation( PredictionUnit& pu,
 #endif
 
     // get error
-    Distortion uiCostTemp = m_pcRdCost->getDistPart(predBuf.Y(), pBuf->Y(), pu.cs->sps->getBitDepth(CHANNEL_TYPE_LUMA), COMPONENT_Y, distFunc);
-    DTRACE( g_trace_ctx, D_COMMON, " (%d) uiCostTemp=%d\n", DTRACE_GET_COUNTER(g_trace_ctx,D_COMMON), uiCostTemp );
+    Distortion costTemp = m_pcRdCost->getDistPart(predBuf.Y(), pBuf->Y(), pu.cs->sps->getBitDepth(CHANNEL_TYPE_LUMA),
+                                                  COMPONENT_Y, distFunc);
+    DTRACE(g_trace_ctx, D_COMMON, " (%d) costTemp=%d\n", DTRACE_GET_COUNTER(g_trace_ctx, D_COMMON), costTemp);
 
     // get cost with mv
     m_pcRdCost->setCostScale(0);
@@ -8622,16 +8621,16 @@ void InterSearch::xAffineMotionEstimation( PredictionUnit& pu,
     }
 #endif
 
-    uiCostTemp = (Distortion) (floor(fWeight * (double) uiCostTemp) + (double) m_pcRdCost->getCost(bitsTemp));
+    costTemp = (Distortion) (floor(fWeight * (double) costTemp) + (double) m_pcRdCost->getCost(bitsTemp));
 
     // store best cost and mv
 #if GDR_ENABLED
-    allOk = (uiCostTemp < uiCostBest);
+    allOk = (costTemp < uiCostBest);
     if (isEncodeGdrClean)
     {
       if (uiCostTempOk)
       {
-        allOk = (uiCostBestOk) ? (uiCostTemp < uiCostBest) : true;
+        allOk = (uiCostBestOk) ? (costTemp < uiCostBest) : true;
       }
       else
       {
@@ -8641,10 +8640,10 @@ void InterSearch::xAffineMotionEstimation( PredictionUnit& pu,
 
     if (allOk)
 #else
-    if ( uiCostTemp < uiCostBest )
+    if (costTemp < uiCostBest)
 #endif
     {
-      uiCostBest = uiCostTemp;
+      uiCostBest = costTemp;
 #if GDR_ENABLED
       if (isEncodeGdrClean)
       {
