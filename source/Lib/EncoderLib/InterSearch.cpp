@@ -3404,7 +3404,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               eRefPicList = REF_PIC_LIST_0;
             }
 
-            bool bChanged = false;
+            bool changed = false;
 
             iRefStart = 0;
             iRefEnd   = cs.slice->getNumRefIdx(eRefPicList) - 1;
@@ -3514,7 +3514,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               if (costTemp < uiCostBi)
 #endif
               {
-                bChanged = true;
+                changed = true;
 
                 cMvBi[refList] = cMvTemp[refList][refIdxTemp];
 #if GDR_ENABLED
@@ -3556,7 +3556,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               }
             }   // for loop-refIdxTemp
 
-            if (!bChanged)
+            if (!changed)
             {
 #if GDR_ENABLED
               allOk = ((uiCostBi <= uiCost[0] && uiCostBi <= uiCost[1]) || enforceBcwPred);
@@ -7498,7 +7498,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         eRefPicList = REF_PIC_LIST_0;
       }
 
-      bool bChanged = false;
+      bool changed = false;
 
       iRefStart = 0;
       iRefEnd   = slice.getNumRefIdx(eRefPicList) - 1;
@@ -7645,7 +7645,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         if (costTemp < uiCostBi)
 #endif
         {
-          bChanged = true;
+          changed = true;
           ::memcpy(cMvBi[refList], cMvTemp[refList][refIdxTemp], sizeof(Mv) * 3);
 #if GDR_ENABLED
           if (isEncodeGdrClean)
@@ -7703,7 +7703,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         }
       }   // for loop-refIdxTemp
 
-      if ( !bChanged )
+      if (!changed)
       {
 #if GDR_ENABLED
         allOk = ((uiCostBi <= uiCost[0] && uiCostBi <= uiCost[1]) || enforceBcwPred);

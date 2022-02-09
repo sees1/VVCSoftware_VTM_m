@@ -39,7 +39,8 @@
 #include "Slice.h"
 #include <map>
 
-void calculateParameterSetChangedFlag(bool &bChanged, const std::vector<uint8_t> *pOldData, const std::vector<uint8_t> *pNewData);
+void calculateParameterSetChangedFlag(bool &changed, const std::vector<uint8_t> *pOldData,
+                                      const std::vector<uint8_t> *pNewData);
 
 template <class T> class ParameterSetMap
 {
@@ -47,7 +48,7 @@ public:
   template <class Tm>
   struct MapData
   {
-    bool                  bChanged;
+    bool                    changed;
     std::vector<uint8_t>   *pNaluData; // Can be null
     Tm*                   parameterSet;
   };
@@ -74,7 +75,7 @@ public:
     CHECK( psId >= m_maxId, "Invalid PS id" );
     if ( m_paramsetMap.find(psId) == m_paramsetMap.end() )
     {
-      m_paramsetMap[psId].bChanged = true;
+      m_paramsetMap[psId].changed      = true;
       m_paramsetMap[psId].pNaluData=0;
       m_paramsetMap[psId].parameterSet = new T;
       setID(m_paramsetMap[psId].parameterSet, psId);
@@ -94,7 +95,7 @@ public:
       delete m_paramsetMap[psId].parameterSet;
     }
     m_paramsetMap[psId].parameterSet = ps;
-    m_paramsetMap[psId].bChanged = true;
+    m_paramsetMap[psId].changed      = true;
   }
   void storePS(int psId, T *ps, const std::vector<uint8_t> *pNaluData)
   {
@@ -104,9 +105,9 @@ public:
       MapData<T> &mapData=m_paramsetMap[psId];
 
       // work out changed flag
-      calculateParameterSetChangedFlag(mapData.bChanged, mapData.pNaluData, pNaluData);
+      calculateParameterSetChangedFlag(mapData.changed, mapData.pNaluData, pNaluData);
 
-      if( ! mapData.bChanged )
+      if (!mapData.changed)
       {
         // just keep the old one
         delete ps;
@@ -125,7 +126,7 @@ public:
     else
     {
       m_paramsetMap[psId].parameterSet = ps;
-      m_paramsetMap[psId].bChanged = false;
+      m_paramsetMap[psId].changed      = false;
     }
     if (pNaluData != 0)
     {
@@ -171,12 +172,11 @@ public:
     }
   }
 
-
-  void setChangedFlag(int psId, bool bChanged=true)
+  void setChangedFlag(int psId, bool changed = true)
   {
     if ( m_paramsetMap.find(psId) != m_paramsetMap.end() )
     {
-      m_paramsetMap[psId].bChanged=bChanged;
+      m_paramsetMap[psId].changed = changed;
     }
   }
 
@@ -184,7 +184,7 @@ public:
   {
     if ( m_paramsetMap.find(psId) != m_paramsetMap.end() )
     {
-      m_paramsetMap[psId].bChanged=false;
+      m_paramsetMap[psId].changed = false;
     }
   }
 
@@ -193,7 +193,7 @@ public:
     const typename std::map<int,MapData<T> >::const_iterator constit=m_paramsetMap.find(psId);
     if ( constit != m_paramsetMap.end() )
     {
-      return constit->second.bChanged;
+      return constit->second.changed;
     }
     return false;
   }
