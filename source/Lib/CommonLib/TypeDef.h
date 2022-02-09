@@ -206,8 +206,6 @@ typedef std::pair<int, int>  TrCost;
 // End of SIMD optimizations
 
 
-#define ME_ENABLE_ROUNDING_OF_MVS                         1 ///< 0 (default) = disables rounding of motion vectors when right shifted,  1 = enables rounding
-
 #define RDOQ_CHROMA_LAMBDA                                1 ///< F386: weighting of chroma for RDOQ
 
 #define U0132_TARGET_BITS_SATURATION                      1 ///< Rate control with target bits saturation method
