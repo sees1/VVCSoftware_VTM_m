@@ -50,7 +50,9 @@ template<X86_VEXT vext >
 Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
 {
   if( rcDtParam.bitDepth > 10 )
+  {
     return RdCost::xGetSSE( rcDtParam );
+  }
 
   const Torg* pSrc1     = (const Torg*)rcDtParam.org.buf;
   const Tcur* pSrc2     = (const Tcur*)rcDtParam.cur.buf;
@@ -130,7 +132,9 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
 template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const DistParam &rcDtParam)
 {
   if( rcDtParam.bitDepth > 10 || rcDtParam.applyWeight )
+  {
     return RdCost::xGetSSE( rcDtParam );
+  }
 
   const Torg* pSrc1     = (const Torg*)rcDtParam.org.buf;
   const Tcur* pSrc2     = (const Tcur*)rcDtParam.cur.buf;
@@ -209,7 +213,9 @@ template< X86_VEXT vext >
 Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
 {
   if( rcDtParam.org.width < 4 || rcDtParam.bitDepth > 10 || rcDtParam.applyWeight )
+  {
     return RdCost::xGetSAD( rcDtParam );
+  }
 
   const short* pSrc1   = (const short*)rcDtParam.org.buf;
   const short* pSrc2   = (const short*)rcDtParam.cur.buf;
@@ -302,7 +308,9 @@ template< X86_VEXT vext >
 Distortion RdCost::xGetSAD_IBD_SIMD(const DistParam &rcDtParam)
 {
   if (rcDtParam.org.width < 4 || rcDtParam.bitDepth > 10 || rcDtParam.applyWeight)
+  {
     return RdCost::xGetSAD(rcDtParam);
+  }
 
   const short* src0 = (const short*)rcDtParam.org.buf;
   const short* src1 = (const short*)rcDtParam.cur.buf;
@@ -339,7 +347,9 @@ Distortion RdCost::xGetSAD_IBD_SIMD(const DistParam &rcDtParam)
 template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const DistParam &rcDtParam)
 {
   if( rcDtParam.bitDepth > 10 || rcDtParam.applyWeight )
+  {
     return RdCost::xGetSAD( rcDtParam );
+  }
 
   //  assert( rcDtParam.iCols == width);
   const short* pSrc1   = (const short*)rcDtParam.org.buf;
@@ -1077,7 +1087,9 @@ static Distortion xCalcHAD16x8_HBD_SSE(const Torg *piOrg, const Tcur *piCur, con
 
 #if JVET_R0164_MEAN_SCALED_SATD
     if (l == 0)
+    {
       absDc = _mm_cvtsi128_si32(n1[0]);
+    }
 #endif
 
     // sum up
@@ -1272,7 +1284,9 @@ static Distortion xCalcHAD8x16_HBD_SSE(const Torg *piOrg, const Tcur *piCur, con
 
 #if JVET_R0164_MEAN_SCALED_SATD
       if (l + i == 0)
+      {
         absDc = _mm_cvtsi128_si32(n1[i][0]);
+      }
 #endif
     }
 
@@ -2763,7 +2777,9 @@ static uint32_t xCalcHAD8x16_SSE( const Torg *piOrg, const Tcur *piCur, const in
 
 #if JVET_R0164_MEAN_SCALED_SATD
       if ( l + i == 0 )
+      {
         absDc = _mm_cvtsi128_si32( n1[i][0] );
+      }
 #endif
     }
 
@@ -3908,7 +3924,9 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
         }
         else
 #endif
+        {
           uiSum += xCalcHAD8x16_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+        }
       }
       piOrg += iStrideOrg * 16;
       piCur += iStrideCur * 16;
@@ -3927,7 +3945,9 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
         }
         else
 #endif
+        {
           uiSum += xCalcHAD8x4_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+        }
       }
       piOrg += iStrideOrg * 4;
       piCur += iStrideCur * 4;
@@ -3946,7 +3966,9 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
         }
         else
 #endif
+        {
           uiSum += xCalcHAD4x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+        }
       }
       piOrg += iStrideOrg * 8;
       piCur += iStrideCur * 8;
@@ -3967,7 +3989,9 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
         }
         else
 #endif
+        {
           uiSum += xCalcHAD8x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+        }
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -3989,7 +4013,9 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
         }
         else
 #endif
+        {
           uiSum += xCalcHAD4x4_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+        }
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -4347,9 +4373,13 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
       for( x = 0; x < iCols; x += 16 )
       {
         if( vext >= AVX2 )
+        {
           uiSum += xCalcHAD16x8_AVX2( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        }
         else
+        {
           uiSum += xCalcHAD16x8_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        }
       }
       piOrg += iStrideOrg * 8;
       piCur += iStrideCur * 8;
@@ -4362,9 +4392,13 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
       for( x = 0; x < iCols; x += 8 )
       {
         if( vext >= AVX2 )
+        {
           uiSum += xCalcHAD8x16_AVX2( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        }
         else
+        {
           uiSum += xCalcHAD8x16_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        }
       }
       piOrg += iStrideOrg * 16;
       piCur += iStrideCur * 16;

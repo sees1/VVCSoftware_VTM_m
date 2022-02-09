@@ -204,13 +204,14 @@ static inline __m128i _mm_clip_epi8(__m128i v, __m128i low, __m128i hi)
 \
   for (int _i_=0; _i_ < 16; _i_++)\
     ADDCLIPAVX2(&D[_i_*stride], T[_i_], min, max);\
-}\
+}
 
-
-static inline void TRANSPOSE16x16_AVX2(__m256i T[16]){
+static inline void TRANSPOSE16x16_AVX2(__m256i T[16])
+{
   __m256i T_03[8];
   __m256i T_47[8];
-  for (int i=0; i<8; i++){
+  for (int i = 0; i < 8; i++)
+  {
     T_03[i] = _mm256_unpacklo_epi16(T[2*i], T[2*i+1]);
     T_47[i] = _mm256_unpackhi_epi16(T[2*i], T[2*i+1]);
   }
@@ -219,7 +220,8 @@ static inline void TRANSPOSE16x16_AVX2(__m256i T[16]){
   __m256i T_23[4];
   __m256i T_45[4];
   __m256i T_67[4];
-  for (int i=0; i<4; i++){
+  for (int i = 0; i < 4; i++)
+  {
     T_01[i] = _mm256_unpacklo_epi32(T_03[2*i], T_03[2*i+1]);
     T_23[i] = _mm256_unpackhi_epi32(T_03[2*i], T_03[2*i+1]);
     T_45[i] = _mm256_unpacklo_epi32(T_47[2*i], T_47[2*i+1]);
@@ -227,7 +229,8 @@ static inline void TRANSPOSE16x16_AVX2(__m256i T[16]){
   }
   __m256i TR[8][2];
 
-  for (int i=0; i<2; i++){
+  for (int i = 0; i < 2; i++)
+  {
     TR[0][i] = _mm256_unpacklo_epi64(T_01[2*i], T_01[2*i+1]);
     TR[1][i] = _mm256_unpackhi_epi64(T_01[2*i], T_01[2*i+1]);
     TR[2][i] = _mm256_unpacklo_epi64(T_23[2*i], T_23[2*i+1]);
@@ -237,17 +240,19 @@ static inline void TRANSPOSE16x16_AVX2(__m256i T[16]){
     TR[6][i] = _mm256_unpacklo_epi64(T_67[2*i], T_67[2*i+1]);
     TR[7][i] = _mm256_unpackhi_epi64(T_67[2*i], T_67[2*i+1]);
   }
-  for (int i=0; i<8; i++){
+  for (int i = 0; i < 8; i++)
+  {
     T[i] = _mm256_permute2x128_si256(TR[i][0], TR[i][1], 0x20);
     T[i+8] = _mm256_permute2x128_si256(TR[i][0], TR[i][1], 0x31);
   }
 }
 
-
-static inline void TRANSPOSE16x8_AVX2(__m256i T[8]){
+static inline void TRANSPOSE16x8_AVX2(__m256i T[8])
+{
   __m256i T_03[4];
   __m256i T_47[4];
-  for (int i=0; i<4; i++){
+  for (int i = 0; i < 4; i++)
+  {
     T_03[i] = _mm256_unpacklo_epi16(T[2*i], T[2*i+1]);
     T_47[i] = _mm256_unpackhi_epi16(T[2*i], T[2*i+1]);
   }
@@ -256,7 +261,8 @@ static inline void TRANSPOSE16x8_AVX2(__m256i T[8]){
   __m256i T_23[2];
   __m256i T_45[2];
   __m256i T_67[2];
-  for (int i=0; i<2; i++){
+  for (int i = 0; i < 2; i++)
+  {
     T_01[i] = _mm256_unpacklo_epi32(T_03[2*i], T_03[2*i+1]);
     T_23[i] = _mm256_unpackhi_epi32(T_03[2*i], T_03[2*i+1]);
     T_45[i] = _mm256_unpacklo_epi32(T_47[2*i], T_47[2*i+1]);
@@ -272,7 +278,6 @@ static inline void TRANSPOSE16x8_AVX2(__m256i T[8]){
   T[7] = _mm256_unpackhi_epi64(T_67[0], T_67[1]);
 }
 
-
 static inline void TRANSPOSE8x8_32b_AVX2(__m256i T[8])
 {
   __m256i T_03[4];
@@ -285,7 +290,8 @@ static inline void TRANSPOSE8x8_32b_AVX2(__m256i T[8])
   __m256i T_23[2];
   __m256i T_45[2];
   __m256i T_67[2];
-  for (int i=0; i<2; i++){
+  for (int i = 0; i < 2; i++)
+  {
     T_01[i] = _mm256_unpacklo_epi64(T_03[2*i], T_03[2*i+1]);
     T_23[i] = _mm256_unpackhi_epi64(T_03[2*i], T_03[2*i+1]);
     T_45[i] = _mm256_unpacklo_epi64(T_47[2*i], T_47[2*i+1]);
