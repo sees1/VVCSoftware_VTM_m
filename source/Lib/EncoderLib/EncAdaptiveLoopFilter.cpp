@@ -1271,11 +1271,12 @@ void EncAdaptiveLoopFilter::alfEncoder( CodingStructure& cs, AlfParam& alfParam,
       }
     }
 
-     const int nonLinearFlagMax =
-      ( isLuma( channel ) ? m_encCfg->getUseNonLinearAlfLuma() : m_encCfg->getUseNonLinearAlfChroma()) // For Chroma non linear flag is check for each alternative filter
-      ? 2 : 1;
+    // For chroma, nonlinear flag is checked for each alternative filter
+    const bool useNonlinearAlf =
+      isLuma(channel) ? m_encCfg->getUseNonLinearAlfLuma() : m_encCfg->getUseNonLinearAlfChroma();
+    const int nonLinearFlagMax = useNonlinearAlf ? 1 : 0;
 
-    for( int nonLinearFlag = 0; nonLinearFlag < nonLinearFlagMax; nonLinearFlag++ )
+    for (int nonLinearFlag = 0; nonLinearFlag <= nonLinearFlagMax; nonLinearFlag++)
     {
       for (int numAlternatives = isLuma(channel) ? 1 : getMaxNumAlternativesChroma(); numAlternatives > 0;
            numAlternatives--)
@@ -1411,9 +1412,9 @@ double EncAdaptiveLoopFilter::getFilterCoeffAndCost( CodingStructure& cs, double
       double bestCost = MAX_DOUBLE;
       double bestDist = MAX_DOUBLE;
       int bestCoeffBits = 0;
-      const int nonLinearFlagMax = m_encCfg->getUseNonLinearAlfChroma() ? 2 : 1;
+      const int nonLinearFlagMax = m_encCfg->getUseNonLinearAlfChroma() ? 1 : 0;
 
-      for( int nonLinearFlag = 0; nonLinearFlag < nonLinearFlagMax; nonLinearFlag++ )
+      for (int nonLinearFlag = 0; nonLinearFlag <= nonLinearFlagMax; nonLinearFlag++)
       {
         int currentNonLinearFlag = m_alfParamTemp.nonLinearFlag[channel] ? 1 : 0;
         if (nonLinearFlag != currentNonLinearFlag)
@@ -1477,7 +1478,9 @@ int EncAdaptiveLoopFilter::getChromaCoeffRate( AlfParam& alfParam, int altIdx )
   {
     iBits += lengthUvlc( abs( alfParam.chromaCoeff[ altIdx ][ i ] ) );  // alf_coeff_chroma[altIdx][i]
     if( ( alfParam.chromaCoeff[ altIdx ][ i ] ) != 0 )
+    {
       iBits += 1;
+    }
   }
   if( m_alfParamTemp.nonLinearFlag[CHANNEL_TYPE_CHROMA] )
   {
@@ -1726,7 +1729,9 @@ double EncAdaptiveLoopFilter::getDistForce0( AlfFilterShape& alfShape, const int
     {
       bitsVarBin[ ind ] += lengthUvlc( abs( m_filterCoeffSet[ ind ][ i ] ) );
       if( abs( m_filterCoeffSet[ ind ][ i ] ) != 0 )
+      {
         bitsVarBin[ ind ] += 1;
+      }
     }
   }
 
@@ -1753,6 +1758,7 @@ double EncAdaptiveLoopFilter::getDistForce0( AlfFilterShape& alfShape, const int
 
   return distForce0;
 }
+
 double EncAdaptiveLoopFilter::getDistCoeffForce0( bool* codedVarBins, double errorForce0CoeffTab[MAX_NUM_ALF_CLASSES][2], int* bitsVarBin, int zeroBitsVarBin, const int numFilters)
 {
   double distForce0 = 0;
@@ -2923,7 +2929,7 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
     else if (alfParamNewFiltersBest.enabledFlag[COMPONENT_Cb] || alfParamNewFiltersBest.enabledFlag[COMPONENT_Cr])
     {
       int curId = m_apsIdStart;
-// Do not assign ALF APS for chroma if any new APS ID is not avaiable
+      // Do not assign ALF APS for chroma if any new APS ID is not avaiable
 
       int counter = m_encCfg->getMaxNumALFAPS();
       while ((newApsIdChroma < 0) && ((counter--)))
@@ -3284,14 +3290,18 @@ void EncAdaptiveLoopFilter::initCtuAlternativeChroma( uint8_t* ctuAlts[MAX_NUM_C
   {
     ctuAlts[COMPONENT_Cb][ctuIdx] = altIdx;
     if( (ctuIdx+1) * m_alfParamTemp.numAlternativesChroma >= (altIdx+1)*m_numCTUsInPic )
+    {
       ++altIdx;
+    }
   }
   altIdx = 0;
   for( int ctuIdx = 0; ctuIdx < m_numCTUsInPic; ++ctuIdx )
   {
     ctuAlts[COMPONENT_Cr][ctuIdx] = altIdx;
     if( (ctuIdx+1) * m_alfParamTemp.numAlternativesChroma >= (altIdx+1)*m_numCTUsInPic )
+    {
       ++altIdx;
+    }
   }
 }
 
@@ -3395,7 +3405,9 @@ void EncAdaptiveLoopFilter::deriveCcAlfFilterCoeff( ComponentID compID, const Pe
         }
         CHECK( org_idx < 0, "this is wrong, does not find coeff from forward_tab");
         if ( (org_idx - delta < 0) || (org_idx - delta >= CCALF_CANDS_COEFF_NR * 2 - 1) )
+        {
           continue;
+        }
 
         filterCoeffInt[k] = forward_tab[org_idx - delta];
         double error = m_alfCovarianceFrameCcAlf[compID - 1][0][filterIdx].calcErrorForCcAlfCoeffs(filterCoeffInt, size, (m_scaleBits+1));
