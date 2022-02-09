@@ -3326,17 +3326,17 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
         if( doBiPred )
         {
           // 4-times iteration (default)
-          int iNumIter = 4;
+          int numIter = 4;
 
           // fast encoder setting: only one iteration
           if (m_pcEncCfg->getFastInterSearchMode() == FASTINTERSEARCH_MODE1
               || m_pcEncCfg->getFastInterSearchMode() == FASTINTERSEARCH_MODE2 || cs.picHeader->getMvdL1ZeroFlag())
           {
-            iNumIter = 1;
+            numIter = 1;
           }
 
           enforceBcwPred = (bcwIdx != BCW_DEFAULT);
-          for (int iIter = 0; iIter < iNumIter; iIter++)
+          for (int iIter = 0; iIter < numIter; iIter++)
           {
             int refList = iIter % 2;
 
@@ -3538,7 +3538,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                 uiMotBits[refList] -= ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
                 uiBits[2] = bitsTemp;
 
-                if (iNumIter != 1)
+                if (numIter != 1)
                 {
                   //  Set motion
                   pu.mv[eRefPicList]     = cMvBi[refList];
@@ -7407,14 +7407,14 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
     if( doBiPred )
     {
     // 4-times iteration (default)
-    int iNumIter = 4;
+    int numIter = 4;
     // fast encoder setting or GPB: only one iteration
     if ( m_pcEncCfg->getFastInterSearchMode()==FASTINTERSEARCH_MODE1 || m_pcEncCfg->getFastInterSearchMode()==FASTINTERSEARCH_MODE2 || slice.getPicHeader()->getMvdL1ZeroFlag() )
     {
-      iNumIter = 1;
+      numIter = 1;
     }
 
-    for ( int iIter = 0; iIter < iNumIter; iIter++ )
+    for (int iIter = 0; iIter < numIter; iIter++)
     {
       // Set RefList
       int refList = iIter % 2;
@@ -7667,7 +7667,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
           uiMotBits[refList] -= ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
           uiBits[2] = bitsTemp;
 
-          if ( iNumIter != 1 ) // MC for next iter
+          if (numIter != 1)   // MC for next iter
           {
             //  Set motion
             PU::setAllAffineMv(pu, cMvBi[refList][0], cMvBi[refList][1], cMvBi[refList][2], eRefPicList);
