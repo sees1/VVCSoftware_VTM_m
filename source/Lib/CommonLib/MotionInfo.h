@@ -129,7 +129,7 @@ struct MvField
 
   void setMvField(Mv const &cMv, const int _refIdx)
   {
-    CHECK(refIdx == -1 && cMv != Mv(0, 0), "Must not happen.");
+    CHECK(_refIdx == -1 && cMv != Mv(0, 0), "Must not happen.");
     mv     = cMv;
     refIdx = _refIdx;
   }
