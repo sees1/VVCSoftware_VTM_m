@@ -50,6 +50,8 @@
 // disable bool coercion "performance warning"
 #pragma warning( disable : 4800 )
 #endif // _MSC_VER > 1000
+
+#include "CommonSimdCfg.h"
 #include "TypeDef.h"
 #include "version.h"
 
@@ -603,9 +605,7 @@ T* aligned_malloc(size_t len, size_t alignement) {
 #endif
 
 #if ENABLE_SIMD_OPT
-
-#if defined(__i386__) || defined(i386) || defined(__x86_64__) || defined(_M_X64) || defined (_WIN32) || defined (_MSC_VER)
-#define TARGET_SIMD_X86
+#ifdef TARGET_SIMD_X86
 typedef enum{
   SCALAR = 0,
   SSE41,
@@ -614,17 +614,10 @@ typedef enum{
   AVX2,
   AVX512
 } X86_VEXT;
-#elif defined (__ARM_NEON__)
-#define TARGET_SIMD_ARM 1
-#else
-#error no simd target
-#endif
 
-#ifdef TARGET_SIMD_X86
 X86_VEXT read_x86_extension_flags(const std::string &extStrId = std::string());
 const char* read_x86_extension(const std::string &extStrId);
-#endif
-
+#endif //TARGET_SIMD_X86
 #endif //ENABLE_SIMD_OPT
 
 template <typename ValueType> inline ValueType leftShift       (const ValueType value, const int shift) { return (shift >= 0) ? ( value                                  << shift) : ( value                                   >> -shift); }
