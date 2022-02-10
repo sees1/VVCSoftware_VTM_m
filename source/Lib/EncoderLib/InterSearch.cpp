@@ -9398,22 +9398,22 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
         int posY = j * lengthY;
         const Pel* ptrOrg  = orgPel.bufAt( posX, posY );
         const Pel* ptrPred = predPel.bufAt( posX, posY );
-        Distortion uiSum = 0;
+        Distortion sum     = 0;
         for( int n = 0; n < lengthY; n++ )
         {
           for( int m = 0; m < lengthX; m++ )
           {
             temp = ptrOrg[m] - ptrPred[m];
-            uiSum += Distortion((temp * temp) >> uiShift);
+            sum += Distortion((temp * temp) >> uiShift);
           }
           ptrOrg += strideOrg;
           ptrPred += stridePred;
         }
         if( isChroma( compID ) )
         {
-          uiSum = (Distortion)( uiSum * m_pcRdCost->getChromaWeight() );
+          sum = (Distortion) (sum * m_pcRdCost->getChromaWeight());
         }
-        dist[j][i] += uiSum;
+        dist[j][i] += sum;
       }
     }
   }
