@@ -1247,7 +1247,7 @@ void EncAdaptiveLoopFilter::alfEncoder( CodingStructure& cs, AlfParam& alfParam,
   std::vector<AlfFilterShape>& alfFilterShape = alfParam.filterShapes[channel];
   m_bitsNewFilter[channel] = 0;
   const int numClasses = isLuma( channel ) ? MAX_NUM_ALF_CLASSES : 1;
-  int uiCoeffBits = 0;
+  int coeffBits = 0;
 
   for (int shapeIdx = 0; shapeIdx < alfFilterShape.size(); shapeIdx++)
   {
@@ -1297,11 +1297,11 @@ void EncAdaptiveLoopFilter::alfEncoder( CodingStructure& cs, AlfParam& alfParam,
         {
           initCtuAlternativeChroma(m_ctuAlternative);
         }
-        cost = getFilterCoeffAndCost(cs, 0, channel, true, shapeIdx, uiCoeffBits);
+        cost = getFilterCoeffAndCost(cs, 0, channel, true, shapeIdx, coeffBits);
 
         if (cost < costMin)
         {
-          m_bitsNewFilter[channel] = uiCoeffBits;
+          m_bitsNewFilter[channel] = coeffBits;
           costMin                  = cost;
           copyAlfParam(alfParam, m_alfParamTemp, channel);
           ctxBest = AlfCtx(m_CABACEstimator->getCtx());
@@ -1322,7 +1322,7 @@ void EncAdaptiveLoopFilter::alfEncoder( CodingStructure& cs, AlfParam& alfParam,
           if ((iter & 0x01) == 0)
           {
             m_CABACEstimator->getCtx() = AlfCtx(ctxStart);
-            cost                       = m_lambda[channel] * uiCoeffBits;
+            cost                       = m_lambda[channel] * coeffBits;
             cost += deriveCtbAlfEnableFlags(cs, shapeIdx, channel,
 #if ENABLE_QPA
                                             lambdaChromaWeight,
@@ -1330,7 +1330,7 @@ void EncAdaptiveLoopFilter::alfEncoder( CodingStructure& cs, AlfParam& alfParam,
                                             numClasses, alfFilterShape[shapeIdx].numCoeff, distUnfilter);
             if (cost < costMin)
             {
-              m_bitsNewFilter[channel] = uiCoeffBits;
+              m_bitsNewFilter[channel] = coeffBits;
               costMin                  = cost;
               ctxBest                  = AlfCtx(m_CABACEstimator->getCtx());
               copyCtuEnableFlag(m_ctuEnableFlagTmp, m_ctuEnableFlag, channel);
@@ -1350,8 +1350,8 @@ void EncAdaptiveLoopFilter::alfEncoder( CodingStructure& cs, AlfParam& alfParam,
           else
           {
             // unfiltered distortion is added due to some CTBs may not use filter
-            // no need to reset CABAC here, since uiCoeffBits is not affected
-            /*cost = */ getFilterCoeffAndCost(cs, distUnfilter, channel, true, shapeIdx, uiCoeffBits);
+            // no need to reset CABAC here, since coeffBits is not affected
+            /*cost = */ getFilterCoeffAndCost(cs, distUnfilter, channel, true, shapeIdx, coeffBits);
           }
         }   // for iter
         // Decrease number of alternatives and reset ctu params and filters
@@ -1384,7 +1384,7 @@ void EncAdaptiveLoopFilter::copyAlfParam( AlfParam& alfParamDst, AlfParam& alfPa
 }
 
 double EncAdaptiveLoopFilter::getFilterCoeffAndCost(CodingStructure &cs, double distUnfilter, ChannelType channel,
-                                                    bool bReCollectStat, int shapeIdx, int &uiCoeffBits,
+                                                    bool bReCollectStat, int shapeIdx, int &coeffBits,
                                                     bool onlyFilterCost)
 {
   //collect stat based on CTU decision
@@ -1394,7 +1394,7 @@ double EncAdaptiveLoopFilter::getFilterCoeffAndCost(CodingStructure &cs, double 
   }
 
   double dist = distUnfilter;
-  uiCoeffBits = 0;
+  coeffBits = 0;
   AlfFilterShape &alfFilterShape = m_alfParamTemp.filterShapes[channel][shapeIdx];
   //get filter coeff
   if( isLuma( channel ) )
@@ -1406,7 +1406,7 @@ double EncAdaptiveLoopFilter::getFilterCoeffAndCost(CodingStructure &cs, double 
     m_alfCovarianceMerged[shapeIdx][MAX_NUM_ALF_CLASSES + 1].reset(AlfNumClippingValues[channel]);
     //distortion
     dist += mergeFiltersAndCost(m_alfParamTemp, alfFilterShape, m_alfCovarianceFrame[channel][shapeIdx],
-                                m_alfCovarianceMerged[shapeIdx], m_alfClipMerged[shapeIdx], uiCoeffBits);
+                                m_alfCovarianceMerged[shapeIdx], m_alfClipMerged[shapeIdx], coeffBits);
   }
   else
   {
@@ -1448,18 +1448,18 @@ double EncAdaptiveLoopFilter::getFilterCoeffAndCost(CodingStructure &cs, double 
           bestSliceParam = m_alfParamTemp;
         }
       }
-      uiCoeffBits += bestCoeffBits;
+      coeffBits += bestCoeffBits;
       dist += bestDist;
       m_alfParamTemp = bestSliceParam;
     }
-    uiCoeffBits += lengthUvlc( m_alfParamTemp.numAlternativesChroma-1 );
-    uiCoeffBits++;
+    coeffBits += lengthUvlc( m_alfParamTemp.numAlternativesChroma-1 );
+    coeffBits++;
   }
   if (onlyFilterCost)
   {
-    return dist + m_lambda[channel] * uiCoeffBits;
+    return dist + m_lambda[channel] * coeffBits;
   }
-  double rate = uiCoeffBits;
+  double rate = coeffBits;
   m_CABACEstimator->resetBits();
   m_CABACEstimator->codeAlfCtuEnableFlags( cs, channel, &m_alfParamTemp);
   for( int ctuIdx = 0; ctuIdx < m_numCTUsInPic; ctuIdx++ )
@@ -1541,7 +1541,9 @@ double EncAdaptiveLoopFilter::getFilteredDistortion( AlfCovariance* cov, const i
   return dist;
 }
 
-double EncAdaptiveLoopFilter::mergeFiltersAndCost( AlfParam& alfParam, AlfFilterShape& alfShape, AlfCovariance* covFrame, AlfCovariance* covMerged, int clipMerged[MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_LUMA_COEFF], int& uiCoeffBits )
+double EncAdaptiveLoopFilter::mergeFiltersAndCost(
+  AlfParam &alfParam, AlfFilterShape &alfShape, AlfCovariance *covFrame, AlfCovariance *covMerged,
+  int clipMerged[MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_LUMA_COEFF], int &coeffBitsFinal)
 {
   int numFiltersBest = 0;
   int numFilters = MAX_NUM_ALF_CLASSES;
@@ -1591,13 +1593,13 @@ double EncAdaptiveLoopFilter::mergeFiltersAndCost( AlfParam& alfParam, AlfFilter
   {
     distReturn = dist;
     alfParam.alfLumaCoeffDeltaFlag = 0;
-    uiCoeffBits = coeffBits;
+    coeffBitsFinal                 = coeffBits;
   }
   else
   {
     distReturn = distForce0;
     alfParam.alfLumaCoeffDeltaFlag = 1;
-    uiCoeffBits = coeffBitsForce0;
+    coeffBitsFinal                 = coeffBitsForce0;
     memcpy( alfParam.alfLumaCoeffFlag, codedVarBins, sizeof( codedVarBins ) );
 
     for( int varInd = 0; varInd < numFiltersBest; varInd++ )
@@ -1620,7 +1622,7 @@ double EncAdaptiveLoopFilter::mergeFiltersAndCost( AlfParam& alfParam, AlfFilter
   }
 
   memcpy( alfParam.filterCoeffDeltaIdx, m_filterIndices[numFiltersBest - 1], sizeof( short ) * MAX_NUM_ALF_CLASSES );
-  uiCoeffBits += getNonFilterCoeffRate( alfParam );
+  coeffBitsFinal += getNonFilterCoeffRate(alfParam);
   return distReturn;
 }
 
