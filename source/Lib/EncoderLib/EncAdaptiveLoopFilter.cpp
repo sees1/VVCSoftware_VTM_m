@@ -101,7 +101,7 @@ void AlfCovariance::reduceClipCost(const AlfFilterShape& alfShape, int *clip) co
   }
 }
 
-double AlfCovariance::optimizeFilter(const AlfFilterShape& alfShape, int* clip, double *f, bool optimize_clip) const
+double AlfCovariance::optimizeFilter(const AlfFilterShape &alfShape, int *clip, double *f, bool optimizeClip) const
 {
   const int size = alfShape.numCoeff;
   int clip_max[MAX_NUM_ALF_LUMA_COEFF];
@@ -111,7 +111,7 @@ double AlfCovariance::optimizeFilter(const AlfFilterShape& alfShape, int* clip, 
   TE kE;
   Ty ky;
 
-  if( optimize_clip )
+  if (optimizeClip)
   {
     // Start by looking for min clipping that has no impact => max_clipping
     getClipMax(alfShape, clip_max);
@@ -127,7 +127,7 @@ double AlfCovariance::optimizeFilter(const AlfFilterShape& alfShape, int* clip, 
   gnsSolveByChol( kE, ky, f, size );
   err_best = calculateError( clip, f, size );
 
-  int step = optimize_clip ? (numBins+1)/2 : 0;
+  int step = optimizeClip ? (numBins + 1) / 2 : 0;
 
   while( step > 0 )
   {
@@ -205,7 +205,7 @@ double AlfCovariance::optimizeFilter(const AlfFilterShape& alfShape, int* clip, 
     }
   }
 
-  if (optimize_clip)
+  if (optimizeClip)
   {
     // test all max
     for( int k = 0; k < size-1; ++k )

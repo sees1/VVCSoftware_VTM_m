@@ -192,7 +192,7 @@ struct AlfCovariance
     return calculateError( clip, f );
   }
 
-  double optimizeFilter(const AlfFilterShape& alfShape, int* clip, double *f, bool optimize_clip) const;
+  double optimizeFilter(const AlfFilterShape &alfShape, int *clip, double *f, bool optimizeClip) const;
   double optimizeFilterClip(const AlfFilterShape& alfShape, int* clip) const
   {
     Ty f;
