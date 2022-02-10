@@ -78,10 +78,10 @@ public:
 
   // interface for encoding
   /**
-   * append uiNumberOfBits least significant bits of bits to
+   * append numberOfBits least significant bits of bits to
    * the current bitstream
    */
-  void write(uint32_t bits, uint32_t uiNumberOfBits);
+  void write(uint32_t bits, uint32_t numberOfBits);
 
   /** insert one bits until the bitstream is byte-aligned */
   void        writeAlignOne   ();
@@ -167,8 +167,8 @@ public:
   void resetToStart();
 
   // interface for decoding
-  void        pseudoRead      ( uint32_t uiNumberOfBits, uint32_t& ruiBits );
-  void        read            ( uint32_t uiNumberOfBits, uint32_t& ruiBits );
+  void        pseudoRead(uint32_t numberOfBits, uint32_t &ruiBits);
+  void        read(uint32_t numberOfBits, uint32_t &ruiBits);
   void        readByte        ( uint32_t &ruiBits )
   {
     CHECK( m_fifo_idx >= m_fifo.size(), "FIFO exceeded" );
