@@ -107,10 +107,10 @@ void OutputBitstream::clear()
   m_num_held_bits = 0;
 }
 
-void OutputBitstream::write   ( uint32_t uiBits, uint32_t uiNumberOfBits )
+void OutputBitstream::write(uint32_t bits, uint32_t uiNumberOfBits)
 {
   CHECK( uiNumberOfBits > 32, "Number of bits is exceeds '32'" );
-  CHECK( uiNumberOfBits != 32 && (uiBits & (~0 << uiNumberOfBits)) != 0, "Unsupported parameters" );
+  CHECK(uiNumberOfBits != 32 && (bits & (~0 << uiNumberOfBits)) != 0, "Unsupported parameters");
 
   /* any modulo 8 remainder of num_total_bits cannot be written this time,
    * and will be held until next time. */
@@ -123,7 +123,7 @@ void OutputBitstream::write   ( uint32_t uiBits, uint32_t uiNumberOfBits )
    * len(H)=7, len(V)=1: ... ---- HHHH HHHV . 0000 0000, next_num_held_bits=0
    * len(H)=7, len(V)=2: ... ---- HHHH HHHV . V000 0000, next_num_held_bits=1
    * if total_bits < 8, the value of v_ is not used */
-  uint8_t next_held_bits = uiBits << (8 - next_num_held_bits);
+  uint8_t next_held_bits = bits << (8 - next_num_held_bits);
 
   if (!(num_total_bits >> 3))
   {
@@ -135,9 +135,9 @@ void OutputBitstream::write   ( uint32_t uiBits, uint32_t uiNumberOfBits )
     return;
   }
 
-  /* topword serves to justify held_bits to align with the msb of uiBits */
+  /* topword serves to justify held_bits to align with the msb of bits */
   uint32_t topword = (uiNumberOfBits - next_num_held_bits) & ~((1 << 3) -1);
-  uint32_t write_bits = (m_held_bits << topword) | (uiBits >> next_num_held_bits);
+  uint32_t write_bits = (m_held_bits << topword) | (bits >> next_num_held_bits);
 
   switch (num_total_bits >> 3)
   {
@@ -328,12 +328,12 @@ void OutputBitstream::insertAt(const OutputBitstream& src, uint32_t pos)
 uint32_t InputBitstream::readOutTrailingBits ()
 {
   uint32_t count=0;
-  uint32_t uiBits = 0;
+  uint32_t bits = 0;
 
   while ( ( getNumBitsLeft() > 0 ) && (getNumBitsUntilByteAligned()!=0) )
   {
     count++;
-    read ( 1, uiBits );
+    read(1, bits);
   }
   return count;
 }

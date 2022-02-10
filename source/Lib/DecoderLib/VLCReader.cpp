@@ -185,25 +185,25 @@ void VLCReader::xReadSvlc( int& riVal, const char *pSymbolName)
 void VLCReader::xReadSvlc( int& riVal)
 #endif
 {
-  uint32_t uiBits = 0;
-  m_pcBitstream->read( 1, uiBits );
+  uint32_t bits = 0;
+  m_pcBitstream->read(1, bits);
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
   uint32_t totalLen=1;
 #endif
-  if( 0 == uiBits )
+  if (0 == bits)
   {
     uint32_t uiLength = 0;
 
-    while( ! ( uiBits & 1 ))
+    while (!(bits & 1))
     {
-      m_pcBitstream->read( 1, uiBits );
+      m_pcBitstream->read(1, bits);
       uiLength++;
     }
 
-    m_pcBitstream->read( uiLength, uiBits );
+    m_pcBitstream->read(uiLength, bits);
 
-    uiBits += (1 << uiLength);
-    riVal = ( uiBits & 1) ? -(int)(uiBits>>1) : (int)(uiBits>>1);
+    bits += (1 << uiLength);
+    riVal = (bits & 1) ? -(int) (bits >> 1) : (int) (bits >> 1);
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
     totalLen+=uiLength+uiLength;
 #endif
@@ -213,7 +213,7 @@ void VLCReader::xReadSvlc( int& riVal)
     riVal = 0;
   }
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
-  CodingStatistics::IncrementStatisticEP(pSymbolName, int(totalLen), uiBits);
+  CodingStatistics::IncrementStatisticEP(pSymbolName, int(totalLen), bits);
 #endif
 }
 
