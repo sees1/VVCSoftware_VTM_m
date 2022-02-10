@@ -59,9 +59,9 @@ void SEIReader::sei_read_scode(std::ostream *pOS, uint32_t length, int& code, co
   }
 }
 
-void SEIReader::sei_read_code(std::ostream *pOS, uint32_t uiLength, uint32_t& ruiCode, const char *pSymbolName)
+void SEIReader::sei_read_code(std::ostream *pOS, uint32_t length, uint32_t &ruiCode, const char *pSymbolName)
 {
-  READ_CODE(uiLength, ruiCode, pSymbolName);
+  READ_CODE(length, ruiCode, pSymbolName);
   if (pOS)
   {
     (*pOS) << "  " << std::setw(55) << pSymbolName << ": " << ruiCode << "\n";

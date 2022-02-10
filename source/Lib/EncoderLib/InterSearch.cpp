@@ -4677,23 +4677,23 @@ uint32_t InterSearch::xGetMvpIdxBits(int idx, int iNum)
     return 0;
   }
 
-  uint32_t uiLength = 1;
+  uint32_t length   = 1;
   int      temp     = idx;
   if (temp == 0)
   {
-    return uiLength;
+    return length;
   }
 
   bool bCodeLast = (iNum - 1 > temp);
 
-  uiLength += (temp - 1);
+  length += (temp - 1);
 
   if( bCodeLast )
   {
-    uiLength++;
+    length++;
   }
 
-  return uiLength;
+  return length;
 }
 
 void InterSearch::xGetBlkBits( bool bPSlice, int iPartIdx, uint32_t uiLastMode, uint32_t uiBlkBit[3])

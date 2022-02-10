@@ -79,7 +79,7 @@ protected:
   void  setBitstream          ( OutputBitstream* p )  { m_pcBitIf = p;  }
   OutputBitstream* getBitstream( )                    { return m_pcBitIf; }
   void  xWriteSCode           ( int  code,  uint32_t length );
-  void  xWriteCode            ( uint32_t uiCode, uint32_t uiLength );
+  void             xWriteCode(uint32_t uiCode, uint32_t length);
   void  xWriteUvlc            ( uint32_t uiCode );
   void  xWriteSvlc            ( int  iCode   );
   void  xWriteFlag            ( uint32_t uiCode );
