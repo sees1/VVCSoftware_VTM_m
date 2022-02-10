@@ -9386,7 +9386,7 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
     int lengthY = compArea.height / numPartY;
     int strideOrg  = orgPel.stride;
     int stridePred = predPel.stride;
-    uint32_t   uiShift = DISTORTION_PRECISION_ADJUSTMENT( ( *cs.sps.getBitDepth( toChannelType( compID ) ) - 8 ) << 1 );
+    uint32_t          shift = DISTORTION_PRECISION_ADJUSTMENT((*cs.sps.getBitDepth(toChannelType(compID)) - 8) << 1);
     Intermediate_Int  temp;
 
     //calc distY of 16 sub parts
@@ -9404,7 +9404,7 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
           for( int m = 0; m < lengthX; m++ )
           {
             temp = ptrOrg[m] - ptrPred[m];
-            sum += Distortion((temp * temp) >> uiShift);
+            sum += Distortion((temp * temp) >> shift);
           }
           ptrOrg += strideOrg;
           ptrPred += stridePred;

@@ -61,7 +61,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
   const int iStrideSrc1 = rcDtParam.org.stride;
   const int iStrideSrc2 = rcDtParam.cur.stride;
 
-  const uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  const uint32_t shift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   unsigned int uiRet = 0;
 
   if( vext >= AVX2 && ( iCols & 15 ) == 0 )
@@ -83,7 +83,9 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
     }
     Sum = _mm256_hadd_epi32( Sum, Sum );
     Sum = _mm256_hadd_epi32( Sum, Sum );
-    uiRet = ( _mm_cvtsi128_si32( _mm256_castsi256_si128( Sum ) ) + _mm_cvtsi128_si32( _mm256_castsi256_si128( _mm256_permute2x128_si256( Sum, Sum, 0x11 ) ) ) ) >> uiShift;
+    uiRet = (_mm_cvtsi128_si32(_mm256_castsi256_si128(Sum))
+             + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(Sum, Sum, 0x11))))
+            >> shift;
 #endif
   }
   else if( ( iCols & 7 ) == 0 )
@@ -104,7 +106,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
     }
     Sum = _mm_hadd_epi32( Sum, Sum );
     Sum = _mm_hadd_epi32( Sum, Sum );
-    uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+    uiRet = _mm_cvtsi128_si32(Sum) >> shift;
   }
   else
   {
@@ -123,7 +125,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
       pSrc2   += iStrideSrc2;
     }
     Sum = _mm_hadd_epi32( Sum, Sum );
-    uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+    uiRet = _mm_cvtsi128_si32(Sum) >> shift;
   }
 
   return uiRet;
@@ -142,7 +144,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
   const int iStrideSrc1 = rcDtParam.org.stride;
   const int iStrideSrc2 = rcDtParam.cur.stride;
 
-  const uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  const uint32_t shift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   unsigned int uiRet = 0;
 
   if (4 == width)
@@ -159,7 +161,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
       Sum = _mm_add_epi32( Sum, Res );
     }
     Sum = _mm_hadd_epi32( Sum, Sum );
-    uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+    uiRet = _mm_cvtsi128_si32(Sum) >> shift;
   }
   else
   {
@@ -182,7 +184,9 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
       }
       Sum = _mm256_hadd_epi32( Sum, Sum );
       Sum = _mm256_hadd_epi32( Sum, Sum );
-      uiRet = ( _mm_cvtsi128_si32( _mm256_castsi256_si128( Sum ) ) + _mm_cvtsi128_si32( _mm256_castsi256_si128( _mm256_permute2x128_si256( Sum, Sum, 0x11 ) ) ) ) >> uiShift;
+      uiRet = (_mm_cvtsi128_si32(_mm256_castsi256_si128(Sum))
+               + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(Sum, Sum, 0x11))))
+              >> shift;
 #endif
     }
     else
@@ -203,7 +207,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
       }
       Sum = _mm_hadd_epi32( Sum, Sum );
       Sum = _mm_hadd_epi32( Sum, Sum );
-      uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+      uiRet = _mm_cvtsi128_si32(Sum) >> shift;
     }
   }
   return uiRet;

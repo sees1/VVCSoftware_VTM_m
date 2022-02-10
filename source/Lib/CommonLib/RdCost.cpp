@@ -1782,7 +1782,7 @@ Distortion RdCost::xGetSSE( const DistParam &rcDtParam )
   int  iStrideOrg       = rcDtParam.org.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
@@ -1791,7 +1791,7 @@ Distortion RdCost::xGetSSE( const DistParam &rcDtParam )
     for (int n = 0; n < iCols; n++ )
     {
       temp = piOrg[n] - piCur[n];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
     }
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -1815,20 +1815,20 @@ Distortion RdCost::xGetSSE4( const DistParam &rcDtParam )
   int  iStrideCur    = rcDtParam.cur.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
   for( ; iRows != 0; iRows-- )
   {
     temp = piOrg[0] - piCur[0];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[1] - piCur[1];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[2] - piCur[2];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[3] - piCur[3];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
 
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -1852,28 +1852,28 @@ Distortion RdCost::xGetSSE8( const DistParam &rcDtParam )
   int  iStrideCur    = rcDtParam.cur.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
   for( ; iRows != 0; iRows-- )
   {
     temp = piOrg[0] - piCur[0];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[1] - piCur[1];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[2] - piCur[2];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[3] - piCur[3];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[4] - piCur[4];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[5] - piCur[5];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[6] - piCur[6];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[7] - piCur[7];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
 
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -1897,44 +1897,44 @@ Distortion RdCost::xGetSSE16( const DistParam &rcDtParam )
   int  iStrideCur    = rcDtParam.cur.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
   for( ; iRows != 0; iRows-- )
   {
     temp = piOrg[0] - piCur[0];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[1] - piCur[1];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[2] - piCur[2];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[3] - piCur[3];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[4] - piCur[4];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[5] - piCur[5];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[6] - piCur[6];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[7] - piCur[7];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[8] - piCur[8];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[9] - piCur[9];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[10] - piCur[10];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[11] - piCur[11];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[12] - piCur[12];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[13] - piCur[13];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[14] - piCur[14];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[15] - piCur[15];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
 
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -1957,7 +1957,7 @@ Distortion RdCost::xGetSSE16N( const DistParam &rcDtParam )
   int  iStrideCur    = rcDtParam.cur.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
@@ -1966,37 +1966,37 @@ Distortion RdCost::xGetSSE16N( const DistParam &rcDtParam )
     for (int n = 0; n < iCols; n+=16 )
     {
       temp = piOrg[n + 0] - piCur[n + 0];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 1] - piCur[n + 1];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 2] - piCur[n + 2];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 3] - piCur[n + 3];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 4] - piCur[n + 4];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 5] - piCur[n + 5];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 6] - piCur[n + 6];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 7] - piCur[n + 7];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 8] - piCur[n + 8];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 9] - piCur[n + 9];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 10] - piCur[n + 10];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 11] - piCur[n + 11];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 12] - piCur[n + 12];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 13] - piCur[n + 13];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 14] - piCur[n + 14];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
       temp = piOrg[n + 15] - piCur[n + 15];
-      sum += Distortion((temp * temp) >> uiShift);
+      sum += Distortion((temp * temp) >> shift);
     }
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -2020,76 +2020,76 @@ Distortion RdCost::xGetSSE32( const DistParam &rcDtParam )
   int  iStrideCur    = rcDtParam.cur.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
   for( ; iRows != 0; iRows-- )
   {
     temp = piOrg[0] - piCur[0];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[1] - piCur[1];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[2] - piCur[2];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[3] - piCur[3];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[4] - piCur[4];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[5] - piCur[5];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[6] - piCur[6];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[7] - piCur[7];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[8] - piCur[8];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[9] - piCur[9];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[10] - piCur[10];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[11] - piCur[11];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[12] - piCur[12];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[13] - piCur[13];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[14] - piCur[14];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[15] - piCur[15];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[16] - piCur[16];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[17] - piCur[17];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[18] - piCur[18];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[19] - piCur[19];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[20] - piCur[20];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[21] - piCur[21];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[22] - piCur[22];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[23] - piCur[23];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[24] - piCur[24];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[25] - piCur[25];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[26] - piCur[26];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[27] - piCur[27];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[28] - piCur[28];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[29] - piCur[29];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[30] - piCur[30];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[31] - piCur[31];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
 
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -2113,140 +2113,140 @@ Distortion RdCost::xGetSSE64( const DistParam &rcDtParam )
   int  iStrideCur    = rcDtParam.cur.stride;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
 
   Intermediate_Int temp;
 
   for( ; iRows != 0; iRows-- )
   {
     temp = piOrg[0] - piCur[0];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[1] - piCur[1];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[2] - piCur[2];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[3] - piCur[3];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[4] - piCur[4];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[5] - piCur[5];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[6] - piCur[6];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[7] - piCur[7];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[8] - piCur[8];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[9] - piCur[9];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[10] - piCur[10];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[11] - piCur[11];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[12] - piCur[12];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[13] - piCur[13];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[14] - piCur[14];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[15] - piCur[15];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[16] - piCur[16];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[17] - piCur[17];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[18] - piCur[18];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[19] - piCur[19];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[20] - piCur[20];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[21] - piCur[21];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[22] - piCur[22];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[23] - piCur[23];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[24] - piCur[24];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[25] - piCur[25];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[26] - piCur[26];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[27] - piCur[27];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[28] - piCur[28];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[29] - piCur[29];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[30] - piCur[30];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[31] - piCur[31];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[32] - piCur[32];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[33] - piCur[33];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[34] - piCur[34];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[35] - piCur[35];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[36] - piCur[36];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[37] - piCur[37];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[38] - piCur[38];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[39] - piCur[39];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[40] - piCur[40];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[41] - piCur[41];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[42] - piCur[42];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[43] - piCur[43];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[44] - piCur[44];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[45] - piCur[45];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[46] - piCur[46];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[47] - piCur[47];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[48] - piCur[48];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[49] - piCur[49];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[50] - piCur[50];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[51] - piCur[51];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[52] - piCur[52];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[53] - piCur[53];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[54] - piCur[54];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[55] - piCur[55];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[56] - piCur[56];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[57] - piCur[57];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[58] - piCur[58];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[59] - piCur[59];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[60] - piCur[60];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[61] - piCur[61];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[62] - piCur[62];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
     temp = piOrg[63] - piCur[63];
-    sum += Distortion((temp * temp) >> uiShift);
+    sum += Distortion((temp * temp) >> shift);
 
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -3177,7 +3177,7 @@ void RdCost::updateReshapeLumaLevelToWeightTable(SliceReshapeInfo &sliceReshape,
   }
 }
 
-Distortion RdCost::getWeightedMSE(int compIdx, const Pel org, const Pel cur, const uint32_t uiShift, const Pel orgLuma)
+Distortion RdCost::getWeightedMSE(int compIdx, const Pel org, const Pel cur, const uint32_t shift, const Pel orgLuma)
 {
   Distortion distortionVal = 0;
   Intermediate_Int temp          = org - cur;
@@ -3206,7 +3206,7 @@ Distortion RdCost::getWeightedMSE(int compIdx, const Pel org, const Pel cur, con
   }
   int64_t fixedPTweight = (int64_t)(weight * (double)(1 << 16));
   Intermediate_Int mse           = Intermediate_Int((fixedPTweight * (temp * temp) + (1 << 15)) >> 16);
-  distortionVal = Distortion( mse >> uiShift);
+  distortionVal                  = Distortion(mse >> shift);
   return distortionVal;
 }
 
@@ -3228,12 +3228,12 @@ Distortion RdCost::xGetSSE_WTD( const DistParam &rcDtParam )
   const size_t  cShiftY = rcDtParam.cShiftY;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
     for (int n = 0; n < iCols; n++ )
     {
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n], piCur[n], uiShift, piOrgLuma[n << cShift]);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n], piCur[n], shift, piOrgLuma[n << cShift]);
     }
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -3262,15 +3262,15 @@ Distortion RdCost::xGetSSE2_WTD( const DistParam &rcDtParam )
   const size_t  cShiftY = rcDtParam.cShiftY;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[0], piCur[0], uiShift,
-      piOrgLuma[size_t(0) << cShift]);   // piOrg[0] - piCur[0]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[0], piCur[0], shift,
+      piOrgLuma[size_t(0) << cShift]);   // piOrg[0] - piCur[0]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[1], piCur[1], uiShift,
-      piOrgLuma[size_t(1) << cShift]);   // piOrg[1] - piCur[1]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[1], piCur[1], shift,
+      piOrgLuma[size_t(1) << cShift]);   // piOrg[1] - piCur[1]; sum += Distortion(( temp * temp ) >> shift);
     piOrg += iStrideOrg;
     piCur += iStrideCur;
     piOrgLuma += iStrideOrgLuma<<cShiftY;
@@ -3297,21 +3297,21 @@ Distortion RdCost::xGetSSE4_WTD( const DistParam &rcDtParam )
   const size_t  cShiftY = rcDtParam.cShiftY;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[0], piCur[0], uiShift,
-      piOrgLuma[size_t(0) << cShift]);   // piOrg[0] - piCur[0]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[0], piCur[0], shift,
+      piOrgLuma[size_t(0) << cShift]);   // piOrg[0] - piCur[0]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[1], piCur[1], uiShift,
-      piOrgLuma[size_t(1) << cShift]);   // piOrg[1] - piCur[1]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[1], piCur[1], shift,
+      piOrgLuma[size_t(1) << cShift]);   // piOrg[1] - piCur[1]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[2], piCur[2], uiShift,
-      piOrgLuma[size_t(2) << cShift]);   // piOrg[2] - piCur[2]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[2], piCur[2], shift,
+      piOrgLuma[size_t(2) << cShift]);   // piOrg[2] - piCur[2]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[3], piCur[3], uiShift,
-      piOrgLuma[size_t(3) << cShift]);   // piOrg[3] - piCur[3]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[3], piCur[3], shift,
+      piOrgLuma[size_t(3) << cShift]);   // piOrg[3] - piCur[3]; sum += Distortion(( temp * temp ) >> shift);
     piOrg += iStrideOrg;
     piCur += iStrideCur;
     piOrgLuma += iStrideOrgLuma<<cShiftY;
@@ -3338,32 +3338,32 @@ Distortion RdCost::xGetSSE8_WTD( const DistParam &rcDtParam )
   const size_t  cShiftY = rcDtParam.cShiftY;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[0], piCur[0], uiShift,
-                          piOrgLuma[0]);   // piOrg[0] - piCur[0]; sum += Distortion(( temp * temp ) >> uiShift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[0], piCur[0], shift,
+                          piOrgLuma[0]);   // piOrg[0] - piCur[0]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[1], piCur[1], uiShift,
-      piOrgLuma[size_t(1) << cShift]);   // piOrg[1] - piCur[1]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[1], piCur[1], shift,
+      piOrgLuma[size_t(1) << cShift]);   // piOrg[1] - piCur[1]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[2], piCur[2], uiShift,
-      piOrgLuma[size_t(2) << cShift]);   // piOrg[2] - piCur[2]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[2], piCur[2], shift,
+      piOrgLuma[size_t(2) << cShift]);   // piOrg[2] - piCur[2]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[3], piCur[3], uiShift,
-      piOrgLuma[size_t(3) << cShift]);   // piOrg[3] - piCur[3]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[3], piCur[3], shift,
+      piOrgLuma[size_t(3) << cShift]);   // piOrg[3] - piCur[3]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[4], piCur[4], uiShift,
-      piOrgLuma[size_t(4) << cShift]);   // piOrg[4] - piCur[4]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[4], piCur[4], shift,
+      piOrgLuma[size_t(4) << cShift]);   // piOrg[4] - piCur[4]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[5], piCur[5], uiShift,
-      piOrgLuma[size_t(5) << cShift]);   // piOrg[5] - piCur[5]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[5], piCur[5], shift,
+      piOrgLuma[size_t(5) << cShift]);   // piOrg[5] - piCur[5]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[6], piCur[6], uiShift,
-      piOrgLuma[size_t(6) << cShift]);   // piOrg[6] - piCur[6]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[6], piCur[6], shift,
+      piOrgLuma[size_t(6) << cShift]);   // piOrg[6] - piCur[6]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[7], piCur[7], uiShift,
-      piOrgLuma[size_t(7) << cShift]);   // piOrg[7] - piCur[7]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[7], piCur[7], shift,
+      piOrgLuma[size_t(7) << cShift]);   // piOrg[7] - piCur[7]; sum += Distortion(( temp * temp ) >> shift);
     piOrg += iStrideOrg;
     piCur += iStrideCur;
     piOrgLuma += iStrideOrgLuma<<cShiftY;
@@ -3388,56 +3388,56 @@ Distortion RdCost::xGetSSE16_WTD( const DistParam &rcDtParam )
   const size_t  cShift  = rcDtParam.cShiftX;
   const size_t  cShiftY = rcDtParam.cShiftY;
   Distortion    sum              = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t      shift            = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[0], piCur[0], uiShift,
-                          piOrgLuma[0]);   // piOrg[ 0] - piCur[ 0]; sum += Distortion(( temp * temp ) >> uiShift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[0], piCur[0], shift,
+                          piOrgLuma[0]);   // piOrg[ 0] - piCur[ 0]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[1], piCur[1], uiShift,
-      piOrgLuma[size_t(1) << cShift]);   // piOrg[ 1] - piCur[ 1]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[1], piCur[1], shift,
+      piOrgLuma[size_t(1) << cShift]);   // piOrg[ 1] - piCur[ 1]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[2], piCur[2], uiShift,
-      piOrgLuma[size_t(2) << cShift]);   // piOrg[ 2] - piCur[ 2]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[2], piCur[2], shift,
+      piOrgLuma[size_t(2) << cShift]);   // piOrg[ 2] - piCur[ 2]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[3], piCur[3], uiShift,
-      piOrgLuma[size_t(3) << cShift]);   // piOrg[ 3] - piCur[ 3]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[3], piCur[3], shift,
+      piOrgLuma[size_t(3) << cShift]);   // piOrg[ 3] - piCur[ 3]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[4], piCur[4], uiShift,
-      piOrgLuma[size_t(4) << cShift]);   // piOrg[ 4] - piCur[ 4]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[4], piCur[4], shift,
+      piOrgLuma[size_t(4) << cShift]);   // piOrg[ 4] - piCur[ 4]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[5], piCur[5], uiShift,
-      piOrgLuma[size_t(5) << cShift]);   // piOrg[ 5] - piCur[ 5]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[5], piCur[5], shift,
+      piOrgLuma[size_t(5) << cShift]);   // piOrg[ 5] - piCur[ 5]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[6], piCur[6], uiShift,
-      piOrgLuma[size_t(6) << cShift]);   // piOrg[ 6] - piCur[ 6]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[6], piCur[6], shift,
+      piOrgLuma[size_t(6) << cShift]);   // piOrg[ 6] - piCur[ 6]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[7], piCur[7], uiShift,
-      piOrgLuma[size_t(7) << cShift]);   // piOrg[ 7] - piCur[ 7]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[7], piCur[7], shift,
+      piOrgLuma[size_t(7) << cShift]);   // piOrg[ 7] - piCur[ 7]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[8], piCur[8], uiShift,
-      piOrgLuma[size_t(8) << cShift]);   // piOrg[ 8] - piCur[ 8]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[8], piCur[8], shift,
+      piOrgLuma[size_t(8) << cShift]);   // piOrg[ 8] - piCur[ 8]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[9], piCur[9], uiShift,
-      piOrgLuma[size_t(9) << cShift]);   // piOrg[ 9] - piCur[ 9]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[9], piCur[9], shift,
+      piOrgLuma[size_t(9) << cShift]);   // piOrg[ 9] - piCur[ 9]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[10], piCur[10], uiShift,
-      piOrgLuma[size_t(10) << cShift]);   // piOrg[10] - piCur[10]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[10], piCur[10], shift,
+      piOrgLuma[size_t(10) << cShift]);   // piOrg[10] - piCur[10]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[11], piCur[11], uiShift,
-      piOrgLuma[size_t(11) << cShift]);   // piOrg[11] - piCur[11]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[11], piCur[11], shift,
+      piOrgLuma[size_t(11) << cShift]);   // piOrg[11] - piCur[11]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[12], piCur[12], uiShift,
-      piOrgLuma[size_t(12) << cShift]);   // piOrg[12] - piCur[12]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[12], piCur[12], shift,
+      piOrgLuma[size_t(12) << cShift]);   // piOrg[12] - piCur[12]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[13], piCur[13], uiShift,
-      piOrgLuma[size_t(13) << cShift]);   // piOrg[13] - piCur[13]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[13], piCur[13], shift,
+      piOrgLuma[size_t(13) << cShift]);   // piOrg[13] - piCur[13]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[14], piCur[14], uiShift,
-      piOrgLuma[size_t(14) << cShift]);   // piOrg[14] - piCur[14]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[14], piCur[14], shift,
+      piOrgLuma[size_t(14) << cShift]);   // piOrg[14] - piCur[14]; sum += Distortion(( temp * temp ) >> shift);
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[15], piCur[15], uiShift,
-      piOrgLuma[size_t(15) << cShift]);   // piOrg[15] - piCur[15]; sum += Distortion(( temp * temp ) >> uiShift);
+      rcDtParam.compID, piOrg[15], piCur[15], shift,
+      piOrgLuma[size_t(15) << cShift]);   // piOrg[15] - piCur[15]; sum += Distortion(( temp * temp ) >> shift);
     piOrg += iStrideOrg;
     piCur += iStrideCur;
 
@@ -3463,59 +3463,59 @@ Distortion RdCost::xGetSSE16N_WTD( const DistParam &rcDtParam )
   const size_t  cShift  = rcDtParam.cShiftX;
   const size_t  cShiftY = rcDtParam.cShiftY;
   Distortion    sum              = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t      shift            = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
     for (int n = 0; n < iCols; n+=16 )
     {
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 0], piCur[n + 0], uiShift,
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 0], piCur[n + 0], shift,
                             piOrgLuma[size_t(n + 0) << cShift]);   // temp = piOrg[n+ 0] - piCur[n+ 0]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 1], piCur[n + 1], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 1], piCur[n + 1], shift,
                             piOrgLuma[size_t(n + 1) << cShift]);   // temp = piOrg[n+ 1] - piCur[n+ 1]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 2], piCur[n + 2], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 2], piCur[n + 2], shift,
                             piOrgLuma[size_t(n + 2) << cShift]);   // temp = piOrg[n+ 2] - piCur[n+ 2]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 3], piCur[n + 3], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 3], piCur[n + 3], shift,
                             piOrgLuma[size_t(n + 3) << cShift]);   // temp = piOrg[n+ 3] - piCur[n+ 3]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 4], piCur[n + 4], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 4], piCur[n + 4], shift,
                             piOrgLuma[size_t(n + 4) << cShift]);   // temp = piOrg[n+ 4] - piCur[n+ 4]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 5], piCur[n + 5], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 5], piCur[n + 5], shift,
                             piOrgLuma[size_t(n + 5) << cShift]);   // temp = piOrg[n+ 5] - piCur[n+ 5]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 6], piCur[n + 6], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 6], piCur[n + 6], shift,
                             piOrgLuma[size_t(n + 6) << cShift]);   // temp = piOrg[n+ 6] - piCur[n+ 6]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 7], piCur[n + 7], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 7], piCur[n + 7], shift,
                             piOrgLuma[size_t(n + 7) << cShift]);   // temp = piOrg[n+ 7] - piCur[n+ 7]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 8], piCur[n + 8], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 8], piCur[n + 8], shift,
                             piOrgLuma[size_t(n + 8) << cShift]);   // temp = piOrg[n+ 8] - piCur[n+ 8]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 9], piCur[n + 9], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 9], piCur[n + 9], shift,
                             piOrgLuma[size_t(n + 9) << cShift]);   // temp = piOrg[n+ 9] - piCur[n+ 9]; sum +=
-                                                                   // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 10], piCur[n + 10], uiShift,
+                                                                   // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 10], piCur[n + 10], shift,
                             piOrgLuma[size_t(n + 10) << cShift]);   // temp = piOrg[n+10] - piCur[n+10]; sum +=
-                                                                    // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 11], piCur[n + 11], uiShift,
+                                                                    // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 11], piCur[n + 11], shift,
                             piOrgLuma[size_t(n + 11) << cShift]);   // temp = piOrg[n+11] - piCur[n+11]; sum +=
-                                                                    // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 12], piCur[n + 12], uiShift,
+                                                                    // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 12], piCur[n + 12], shift,
                             piOrgLuma[size_t(n + 12) << cShift]);   // temp = piOrg[n+12] - piCur[n+12]; sum +=
-                                                                    // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 13], piCur[n + 13], uiShift,
+                                                                    // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 13], piCur[n + 13], shift,
                             piOrgLuma[size_t(n + 13) << cShift]);   // temp = piOrg[n+13] - piCur[n+13]; sum +=
-                                                                    // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 14], piCur[n + 14], uiShift,
+                                                                    // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 14], piCur[n + 14], shift,
                             piOrgLuma[size_t(n + 14) << cShift]);   // temp = piOrg[n+14] - piCur[n+14]; sum +=
-                                                                    // Distortion(( temp * temp ) >> uiShift);
-      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 15], piCur[n + 15], uiShift,
+                                                                    // Distortion(( temp * temp ) >> shift);
+      sum += getWeightedMSE(rcDtParam.compID, piOrg[n + 15], piCur[n + 15], shift,
                             piOrgLuma[size_t(n + 15) << cShift]);   // temp = piOrg[n+15] - piCur[n+15]; sum +=
-                                                                    // Distortion(( temp * temp ) >> uiShift);
+                                                                    // Distortion(( temp * temp ) >> shift);
     }
     piOrg += iStrideOrg;
     piCur += iStrideCur;
@@ -3542,105 +3542,105 @@ Distortion RdCost::xGetSSE32_WTD( const DistParam &rcDtParam )
   const size_t  cShiftY = rcDtParam.cShiftY;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   for( ; iRows != 0; iRows-- )
   {
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[0], piCur[0], uiShift,
-      piOrgLuma[size_t(0)]);   // temp = piOrg[ 0] - piCur[ 0]; sum += Distortion(( temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[1], piCur[1], uiShift,
+      rcDtParam.compID, piOrg[0], piCur[0], shift,
+      piOrgLuma[size_t(0)]);   // temp = piOrg[ 0] - piCur[ 0]; sum += Distortion(( temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[1], piCur[1], shift,
                           piOrgLuma[size_t(1) << cShift]);   // temp = piOrg[ 1] - piCur[ 1]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[2], piCur[2], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[2], piCur[2], shift,
                           piOrgLuma[size_t(2) << cShift]);   // temp = piOrg[ 2] - piCur[ 2]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[3], piCur[3], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[3], piCur[3], shift,
                           piOrgLuma[size_t(3) << cShift]);   // temp = piOrg[ 3] - piCur[ 3]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[4], piCur[4], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[4], piCur[4], shift,
                           piOrgLuma[size_t(4) << cShift]);   // temp = piOrg[ 4] - piCur[ 4]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[5], piCur[5], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[5], piCur[5], shift,
                           piOrgLuma[size_t(5) << cShift]);   // temp = piOrg[ 5] - piCur[ 5]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[6], piCur[6], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[6], piCur[6], shift,
                           piOrgLuma[size_t(6) << cShift]);   // temp = piOrg[ 6] - piCur[ 6]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[7], piCur[7], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[7], piCur[7], shift,
                           piOrgLuma[size_t(7) << cShift]);   // temp = piOrg[ 7] - piCur[ 7]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[8], piCur[8], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[8], piCur[8], shift,
                           piOrgLuma[size_t(8) << cShift]);   // temp = piOrg[ 8] - piCur[ 8]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[9], piCur[9], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[9], piCur[9], shift,
                           piOrgLuma[size_t(9) << cShift]);   // temp = piOrg[ 9] - piCur[ 9]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[10], piCur[10], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[10], piCur[10], shift,
                           piOrgLuma[size_t(10) << cShift]);   // temp = piOrg[10] - piCur[10]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[11], piCur[11], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[11], piCur[11], shift,
                           piOrgLuma[size_t(11) << cShift]);   // temp = piOrg[11] - piCur[11]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[12], piCur[12], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[12], piCur[12], shift,
                           piOrgLuma[size_t(12) << cShift]);   // temp = piOrg[12] - piCur[12]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[13], piCur[13], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[13], piCur[13], shift,
                           piOrgLuma[size_t(13) << cShift]);   // temp = piOrg[13] - piCur[13]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[14], piCur[14], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[14], piCur[14], shift,
                           piOrgLuma[size_t(14) << cShift]);   // temp = piOrg[14] - piCur[14]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[15], piCur[15], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[15], piCur[15], shift,
                           piOrgLuma[size_t(15) << cShift]);   // temp = piOrg[15] - piCur[15]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[16], piCur[16], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[16], piCur[16], shift,
                           piOrgLuma[size_t(16) << cShift]);   //  temp = piOrg[16] - piCur[16]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[17], piCur[17], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[17], piCur[17], shift,
                           piOrgLuma[size_t(17) << cShift]);   //  temp = piOrg[17] - piCur[17]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[18], piCur[18], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[18], piCur[18], shift,
                           piOrgLuma[size_t(18) << cShift]);   //  temp = piOrg[18] - piCur[18]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[19], piCur[19], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[19], piCur[19], shift,
                           piOrgLuma[size_t(19) << cShift]);   //  temp = piOrg[19] - piCur[19]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[20], piCur[20], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[20], piCur[20], shift,
                           piOrgLuma[size_t(20) << cShift]);   //  temp = piOrg[20] - piCur[20]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[21], piCur[21], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[21], piCur[21], shift,
                           piOrgLuma[size_t(21) << cShift]);   //  temp = piOrg[21] - piCur[21]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[22], piCur[22], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[22], piCur[22], shift,
                           piOrgLuma[size_t(22) << cShift]);   //  temp = piOrg[22] - piCur[22]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[23], piCur[23], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[23], piCur[23], shift,
                           piOrgLuma[size_t(23) << cShift]);   //  temp = piOrg[23] - piCur[23]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[24], piCur[24], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[24], piCur[24], shift,
                           piOrgLuma[size_t(24) << cShift]);   //  temp = piOrg[24] - piCur[24]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[25], piCur[25], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[25], piCur[25], shift,
                           piOrgLuma[size_t(25) << cShift]);   //  temp = piOrg[25] - piCur[25]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[26], piCur[26], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[26], piCur[26], shift,
                           piOrgLuma[size_t(26) << cShift]);   //  temp = piOrg[26] - piCur[26]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[27], piCur[27], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[27], piCur[27], shift,
                           piOrgLuma[size_t(27) << cShift]);   //  temp = piOrg[27] - piCur[27]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[28], piCur[28], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[28], piCur[28], shift,
                           piOrgLuma[size_t(28) << cShift]);   //  temp = piOrg[28] - piCur[28]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[29], piCur[29], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[29], piCur[29], shift,
                           piOrgLuma[size_t(29) << cShift]);   //  temp = piOrg[29] - piCur[29]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[30], piCur[30], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[30], piCur[30], shift,
                           piOrgLuma[size_t(30) << cShift]);   //  temp = piOrg[30] - piCur[30]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[31], piCur[31], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[31], piCur[31], shift,
                           piOrgLuma[size_t(31) << cShift]);   //  temp = piOrg[31] - piCur[31]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
+                                                              //  temp * temp ) >> shift);
     piOrg += iStrideOrg;
     piCur += iStrideCur;
     piOrgLuma += iStrideOrgLuma<<cShiftY;
@@ -3666,201 +3666,201 @@ Distortion RdCost::xGetSSE64_WTD( const DistParam &rcDtParam )
   const size_t  cShiftY = rcDtParam.cShiftY;
 
   Distortion sum     = 0;
-  uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT((rcDtParam.bitDepth)) << 1;
+  uint32_t   shift   = DISTORTION_PRECISION_ADJUSTMENT((rcDtParam.bitDepth)) << 1;
   for( ; iRows != 0; iRows-- )
   {
     sum += getWeightedMSE(
-      rcDtParam.compID, piOrg[0], piCur[0], uiShift,
-      piOrgLuma[size_t(0)]);   // temp = piOrg[ 0] - piCur[ 0]; sum += Distortion(( temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[1], piCur[1], uiShift,
+      rcDtParam.compID, piOrg[0], piCur[0], shift,
+      piOrgLuma[size_t(0)]);   // temp = piOrg[ 0] - piCur[ 0]; sum += Distortion(( temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[1], piCur[1], shift,
                           piOrgLuma[size_t(1) << cShift]);   // temp = piOrg[ 1] - piCur[ 1]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[2], piCur[2], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[2], piCur[2], shift,
                           piOrgLuma[size_t(2) << cShift]);   // temp = piOrg[ 2] - piCur[ 2]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[3], piCur[3], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[3], piCur[3], shift,
                           piOrgLuma[size_t(3) << cShift]);   // temp = piOrg[ 3] - piCur[ 3]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[4], piCur[4], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[4], piCur[4], shift,
                           piOrgLuma[size_t(4) << cShift]);   // temp = piOrg[ 4] - piCur[ 4]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[5], piCur[5], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[5], piCur[5], shift,
                           piOrgLuma[size_t(5) << cShift]);   // temp = piOrg[ 5] - piCur[ 5]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[6], piCur[6], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[6], piCur[6], shift,
                           piOrgLuma[size_t(6) << cShift]);   // temp = piOrg[ 6] - piCur[ 6]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[7], piCur[7], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[7], piCur[7], shift,
                           piOrgLuma[size_t(7) << cShift]);   // temp = piOrg[ 7] - piCur[ 7]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[8], piCur[8], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[8], piCur[8], shift,
                           piOrgLuma[size_t(8) << cShift]);   // temp = piOrg[ 8] - piCur[ 8]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[9], piCur[9], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[9], piCur[9], shift,
                           piOrgLuma[size_t(9) << cShift]);   // temp = piOrg[ 9] - piCur[ 9]; sum += Distortion((
-                                                             // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[10], piCur[10], uiShift,
+                                                             // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[10], piCur[10], shift,
                           piOrgLuma[size_t(10) << cShift]);   // temp = piOrg[10] - piCur[10]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[11], piCur[11], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[11], piCur[11], shift,
                           piOrgLuma[size_t(11) << cShift]);   // temp = piOrg[11] - piCur[11]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[12], piCur[12], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[12], piCur[12], shift,
                           piOrgLuma[size_t(12) << cShift]);   // temp = piOrg[12] - piCur[12]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[13], piCur[13], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[13], piCur[13], shift,
                           piOrgLuma[size_t(13) << cShift]);   // temp = piOrg[13] - piCur[13]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[14], piCur[14], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[14], piCur[14], shift,
                           piOrgLuma[size_t(14) << cShift]);   // temp = piOrg[14] - piCur[14]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[15], piCur[15], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[15], piCur[15], shift,
                           piOrgLuma[size_t(15) << cShift]);   // temp = piOrg[15] - piCur[15]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[16], piCur[16], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[16], piCur[16], shift,
                           piOrgLuma[size_t(16) << cShift]);   //  temp = piOrg[16] - piCur[16]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[17], piCur[17], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[17], piCur[17], shift,
                           piOrgLuma[size_t(17) << cShift]);   //  temp = piOrg[17] - piCur[17]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[18], piCur[18], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[18], piCur[18], shift,
                           piOrgLuma[size_t(18) << cShift]);   //  temp = piOrg[18] - piCur[18]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[19], piCur[19], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[19], piCur[19], shift,
                           piOrgLuma[size_t(19) << cShift]);   //  temp = piOrg[19] - piCur[19]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[20], piCur[20], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[20], piCur[20], shift,
                           piOrgLuma[size_t(20) << cShift]);   //  temp = piOrg[20] - piCur[20]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[21], piCur[21], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[21], piCur[21], shift,
                           piOrgLuma[size_t(21) << cShift]);   //  temp = piOrg[21] - piCur[21]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[22], piCur[22], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[22], piCur[22], shift,
                           piOrgLuma[size_t(22) << cShift]);   //  temp = piOrg[22] - piCur[22]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[23], piCur[23], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[23], piCur[23], shift,
                           piOrgLuma[size_t(23) << cShift]);   //  temp = piOrg[23] - piCur[23]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[24], piCur[24], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[24], piCur[24], shift,
                           piOrgLuma[size_t(24) << cShift]);   //  temp = piOrg[24] - piCur[24]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[25], piCur[25], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[25], piCur[25], shift,
                           piOrgLuma[size_t(25) << cShift]);   //  temp = piOrg[25] - piCur[25]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[26], piCur[26], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[26], piCur[26], shift,
                           piOrgLuma[size_t(26) << cShift]);   //  temp = piOrg[26] - piCur[26]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[27], piCur[27], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[27], piCur[27], shift,
                           piOrgLuma[size_t(27) << cShift]);   //  temp = piOrg[27] - piCur[27]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[28], piCur[28], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[28], piCur[28], shift,
                           piOrgLuma[size_t(28) << cShift]);   //  temp = piOrg[28] - piCur[28]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[29], piCur[29], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[29], piCur[29], shift,
                           piOrgLuma[size_t(29) << cShift]);   //  temp = piOrg[29] - piCur[29]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[30], piCur[30], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[30], piCur[30], shift,
                           piOrgLuma[size_t(30) << cShift]);   //  temp = piOrg[30] - piCur[30]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[31], piCur[31], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[31], piCur[31], shift,
                           piOrgLuma[size_t(31) << cShift]);   //  temp = piOrg[31] - piCur[31]; sum += Distortion((
-                                                              //  temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[32], piCur[32], uiShift,
+                                                              //  temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[32], piCur[32], shift,
                           piOrgLuma[size_t(32) << cShift]);   // temp = piOrg[32] - piCur[32]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[33], piCur[33], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[33], piCur[33], shift,
                           piOrgLuma[size_t(33) << cShift]);   // temp = piOrg[33] - piCur[33]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[34], piCur[34], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[34], piCur[34], shift,
                           piOrgLuma[size_t(34) << cShift]);   // temp = piOrg[34] - piCur[34]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[35], piCur[35], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[35], piCur[35], shift,
                           piOrgLuma[size_t(35) << cShift]);   // temp = piOrg[35] - piCur[35]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[36], piCur[36], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[36], piCur[36], shift,
                           piOrgLuma[size_t(36) << cShift]);   // temp = piOrg[36] - piCur[36]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[37], piCur[37], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[37], piCur[37], shift,
                           piOrgLuma[size_t(37) << cShift]);   // temp = piOrg[37] - piCur[37]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[38], piCur[38], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[38], piCur[38], shift,
                           piOrgLuma[size_t(38) << cShift]);   // temp = piOrg[38] - piCur[38]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[39], piCur[39], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[39], piCur[39], shift,
                           piOrgLuma[size_t(39) << cShift]);   // temp = piOrg[39] - piCur[39]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[40], piCur[40], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[40], piCur[40], shift,
                           piOrgLuma[size_t(40) << cShift]);   // temp = piOrg[40] - piCur[40]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[41], piCur[41], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[41], piCur[41], shift,
                           piOrgLuma[size_t(41) << cShift]);   // temp = piOrg[41] - piCur[41]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[42], piCur[42], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[42], piCur[42], shift,
                           piOrgLuma[size_t(42) << cShift]);   // temp = piOrg[42] - piCur[42]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[43], piCur[43], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[43], piCur[43], shift,
                           piOrgLuma[size_t(43) << cShift]);   // temp = piOrg[43] - piCur[43]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[44], piCur[44], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[44], piCur[44], shift,
                           piOrgLuma[size_t(44) << cShift]);   // temp = piOrg[44] - piCur[44]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[45], piCur[45], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[45], piCur[45], shift,
                           piOrgLuma[size_t(45) << cShift]);   // temp = piOrg[45] - piCur[45]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[46], piCur[46], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[46], piCur[46], shift,
                           piOrgLuma[size_t(46) << cShift]);   // temp = piOrg[46] - piCur[46]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[47], piCur[47], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[47], piCur[47], shift,
                           piOrgLuma[size_t(47) << cShift]);   // temp = piOrg[47] - piCur[47]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[48], piCur[48], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[48], piCur[48], shift,
                           piOrgLuma[size_t(48) << cShift]);   // temp = piOrg[48] - piCur[48]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[49], piCur[49], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[49], piCur[49], shift,
                           piOrgLuma[size_t(49) << cShift]);   // temp = piOrg[49] - piCur[49]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[50], piCur[50], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[50], piCur[50], shift,
                           piOrgLuma[size_t(50) << cShift]);   // temp = piOrg[50] - piCur[50]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[51], piCur[51], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[51], piCur[51], shift,
                           piOrgLuma[size_t(51) << cShift]);   // temp = piOrg[51] - piCur[51]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[52], piCur[52], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[52], piCur[52], shift,
                           piOrgLuma[size_t(52) << cShift]);   // temp = piOrg[52] - piCur[52]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[53], piCur[53], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[53], piCur[53], shift,
                           piOrgLuma[size_t(53) << cShift]);   // temp = piOrg[53] - piCur[53]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[54], piCur[54], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[54], piCur[54], shift,
                           piOrgLuma[size_t(54) << cShift]);   // temp = piOrg[54] - piCur[54]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[55], piCur[55], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[55], piCur[55], shift,
                           piOrgLuma[size_t(55) << cShift]);   // temp = piOrg[55] - piCur[55]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[56], piCur[56], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[56], piCur[56], shift,
                           piOrgLuma[size_t(56) << cShift]);   // temp = piOrg[56] - piCur[56]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[57], piCur[57], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[57], piCur[57], shift,
                           piOrgLuma[size_t(57) << cShift]);   // temp = piOrg[57] - piCur[57]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[58], piCur[58], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[58], piCur[58], shift,
                           piOrgLuma[size_t(58) << cShift]);   // temp = piOrg[58] - piCur[58]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[59], piCur[59], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[59], piCur[59], shift,
                           piOrgLuma[size_t(59) << cShift]);   // temp = piOrg[59] - piCur[59]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[60], piCur[60], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[60], piCur[60], shift,
                           piOrgLuma[size_t(60) << cShift]);   // temp = piOrg[60] - piCur[60]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[61], piCur[61], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[61], piCur[61], shift,
                           piOrgLuma[size_t(61) << cShift]);   // temp = piOrg[61] - piCur[61]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[62], piCur[62], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[62], piCur[62], shift,
                           piOrgLuma[size_t(62) << cShift]);   // temp = piOrg[62] - piCur[62]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
-    sum += getWeightedMSE(rcDtParam.compID, piOrg[63], piCur[63], uiShift,
+                                                              // temp * temp ) >> shift);
+    sum += getWeightedMSE(rcDtParam.compID, piOrg[63], piCur[63], shift,
                           piOrgLuma[size_t(63) << cShift]);   // temp = piOrg[63] - piCur[63]; sum += Distortion((
-                                                              // temp * temp ) >> uiShift);
+                                                              // temp * temp ) >> shift);
     piOrg += iStrideOrg;
     piCur += iStrideCur;
 
