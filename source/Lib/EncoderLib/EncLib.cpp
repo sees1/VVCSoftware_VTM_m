@@ -2201,16 +2201,16 @@ bool EncLib::APSNeedsWriting(int apsId)
 
 bool EncLib::PPSNeedsWriting(int ppsId)
 {
-  bool bChanged=m_ppsMap.getChangedFlag(ppsId);
+  bool changed = m_ppsMap.getChangedFlag(ppsId);
   m_ppsMap.clearChangedFlag(ppsId);
-  return bChanged;
+  return changed;
 }
 
 bool EncLib::SPSNeedsWriting(int spsId)
 {
-  bool bChanged=m_spsMap.getChangedFlag(spsId);
+  bool changed = m_spsMap.getChangedFlag(spsId);
   m_spsMap.clearChangedFlag(spsId);
-  return bChanged;
+  return changed;
 }
 
 void EncLib::checkPltStats( Picture* pic )
