@@ -1591,15 +1591,17 @@ double EncAdaptiveLoopFilter::mergeFiltersAndCost(
   double distReturn;
   if (cost <= cost0)
   {
-    distReturn = dist;
+    distReturn     = dist;
+    coeffBitsFinal = coeffBits;
+
     alfParam.alfLumaCoeffDeltaFlag = 0;
-    coeffBitsFinal                 = coeffBits;
   }
   else
   {
-    distReturn = distForce0;
+    distReturn     = distForce0;
+    coeffBitsFinal = coeffBitsForce0;
+
     alfParam.alfLumaCoeffDeltaFlag = 1;
-    coeffBitsFinal                 = coeffBitsForce0;
     memcpy( alfParam.alfLumaCoeffFlag, codedVarBins, sizeof( codedVarBins ) );
 
     for( int varInd = 0; varInd < numFiltersBest; varInd++ )

@@ -307,7 +307,10 @@ private:
                    );
 
   void   copyAlfParam( AlfParam& alfParamDst, AlfParam& alfParamSrc, ChannelType channel );
-  double mergeFiltersAndCost( AlfParam& alfParam, AlfFilterShape& alfShape, AlfCovariance* covFrame, AlfCovariance* covMerged, int clipMerged[MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_LUMA_COEFF], int& coeffBits );
+  double mergeFiltersAndCost(AlfParam &alfParam, AlfFilterShape &alfShape, AlfCovariance *covFrame,
+                             AlfCovariance *covMerged,
+                             int  clipMerged[MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_CLASSES][MAX_NUM_ALF_LUMA_COEFF],
+                             int &coeffBitsFinal);
 
   void   getFrameStats(ChannelType channel, int shapeIdx);
   void   getFrameStat( AlfCovariance* frameCov, AlfCovariance** ctbCov, uint8_t* ctbEnableFlags, uint8_t* ctbAltIdx, const int numClasses, int altIdx );
