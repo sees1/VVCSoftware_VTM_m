@@ -5086,41 +5086,41 @@ void EncGOP::xCalculateAddPSNR(Picture* pcPic, PelUnitBuf cPicD, const AccessUni
     for (int refList = 0; refList < 2; refList++)
     {
       msg(NOTICE, " [L%d", refList);
-      for (int iRefIndex = 0; iRefIndex < pcSlice->getNumRefIdx(RefPicList(refList)); iRefIndex++)
+      for (int refIndex = 0; refIndex < pcSlice->getNumRefIdx(RefPicList(refList)); refIndex++)
       {
-        const std::pair<int, int> &scaleRatio = pcSlice->getScalingRatio(RefPicList(refList), iRefIndex);
+        const std::pair<int, int> &scaleRatio = pcSlice->getScalingRatio(RefPicList(refList), refIndex);
 
         if (pcPic->cs->picHeader->getEnableTMVPFlag() && pcSlice->getColFromL0Flag() == bool(1 - refList)
-            && pcSlice->getColRefIdx() == iRefIndex)
+            && pcSlice->getColRefIdx() == refIndex)
         {
           if( scaleRatio.first != 1 << SCALE_RATIO_BITS || scaleRatio.second != 1 << SCALE_RATIO_BITS )
           {
-            msg(NOTICE, " %dc(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC(RefPicList(refList), iRefIndex),
+            msg(NOTICE, " %dc(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC(RefPicList(refList), refIndex),
                 double(scaleRatio.first) / (1 << SCALE_RATIO_BITS),
                 double(scaleRatio.second) / (1 << SCALE_RATIO_BITS));
           }
           else
           {
-            msg(NOTICE, " %dc", pcSlice->getRefPOC(RefPicList(refList), iRefIndex));
+            msg(NOTICE, " %dc", pcSlice->getRefPOC(RefPicList(refList), refIndex));
           }
         }
         else
         {
           if( scaleRatio.first != 1 << SCALE_RATIO_BITS || scaleRatio.second != 1 << SCALE_RATIO_BITS )
           {
-            msg(NOTICE, " %d(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC(RefPicList(refList), iRefIndex),
+            msg(NOTICE, " %d(%1.2lfx, %1.2lfx)", pcSlice->getRefPOC(RefPicList(refList), refIndex),
                 double(scaleRatio.first) / (1 << SCALE_RATIO_BITS),
                 double(scaleRatio.second) / (1 << SCALE_RATIO_BITS));
           }
           else
           {
-            msg(NOTICE, " %d", pcSlice->getRefPOC(RefPicList(refList), iRefIndex));
+            msg(NOTICE, " %d", pcSlice->getRefPOC(RefPicList(refList), refIndex));
           }
         }
 
-        if (pcSlice->getRefPOC(RefPicList(refList), iRefIndex) == pcSlice->getPOC())
+        if (pcSlice->getRefPOC(RefPicList(refList), refIndex) == pcSlice->getPOC())
         {
-          msg(NOTICE, ".%d", pcSlice->getRefPic(RefPicList(refList), iRefIndex)->layerId);
+          msg(NOTICE, ".%d", pcSlice->getRefPic(RefPicList(refList), refIndex)->layerId);
         }
       }
       msg( NOTICE, "]" );
