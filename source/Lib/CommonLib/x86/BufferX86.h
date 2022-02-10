@@ -127,7 +127,9 @@ void copyBufferSimd(Pel *src, int srcStride, Pel *dst, int dstStride, int width,
     for (size_t x = 0; x < width; x += 4)
     {
       if (x > width - 4)
+      {
         x = width - 4;
+      }
       for (size_t y = 0; y < height; y++)
       {
         __m128i val = _mm_loadl_epi64((const __m128i *) (src + y * srcStride + x));
@@ -140,7 +142,9 @@ void copyBufferSimd(Pel *src, int srcStride, Pel *dst, int dstStride, int width,
     for (size_t x = 0; x < width; x += 8)
     {
       if (x > width - 8)
+      {
         x = width - 8;
+      }
       for (size_t y = 0; y < height; y++)
       {
         __m128i val = _mm_loadu_si128((const __m128i *) (src + y * srcStride + x));
@@ -1030,25 +1034,25 @@ void gradFilter_SSE(Pel* src, int srcStride, int width, int height, int gradStri
 
   if (PAD)
   {
-  gradXTmp = gradX + gradStride + 1;
-  gradYTmp = gradY + gradStride + 1;
-  for (int y = 0; y < heightInside; y++)
-  {
-    gradXTmp[-1] = gradXTmp[0];
-    gradXTmp[widthInside] = gradXTmp[widthInside - 1];
-    gradXTmp += gradStride;
+    gradXTmp = gradX + gradStride + 1;
+    gradYTmp = gradY + gradStride + 1;
+    for (int y = 0; y < heightInside; y++)
+    {
+      gradXTmp[-1]          = gradXTmp[0];
+      gradXTmp[widthInside] = gradXTmp[widthInside - 1];
+      gradXTmp += gradStride;
 
-    gradYTmp[-1] = gradYTmp[0];
-    gradYTmp[widthInside] = gradYTmp[widthInside - 1];
-    gradYTmp += gradStride;
-  }
+      gradYTmp[-1]          = gradYTmp[0];
+      gradYTmp[widthInside] = gradYTmp[widthInside - 1];
+      gradYTmp += gradStride;
+    }
 
-  gradXTmp = gradX + gradStride;
-  gradYTmp = gradY + gradStride;
-  ::memcpy(gradXTmp - gradStride, gradXTmp, sizeof(Pel)*(width));
-  ::memcpy(gradXTmp + heightInside*gradStride, gradXTmp + (heightInside - 1)*gradStride, sizeof(Pel)*(width));
-  ::memcpy(gradYTmp - gradStride, gradYTmp, sizeof(Pel)*(width));
-  ::memcpy(gradYTmp + heightInside*gradStride, gradYTmp + (heightInside - 1)*gradStride, sizeof(Pel)*(width));
+    gradXTmp = gradX + gradStride;
+    gradYTmp = gradY + gradStride;
+    ::memcpy(gradXTmp - gradStride, gradXTmp, sizeof(Pel) * (width));
+    ::memcpy(gradXTmp + heightInside * gradStride, gradXTmp + (heightInside - 1) * gradStride, sizeof(Pel) * (width));
+    ::memcpy(gradYTmp - gradStride, gradYTmp, sizeof(Pel) * (width));
+    ::memcpy(gradYTmp + heightInside * gradStride, gradYTmp + (heightInside - 1) * gradStride, sizeof(Pel) * (width));
   }
 }
 
