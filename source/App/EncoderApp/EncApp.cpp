@@ -669,9 +669,7 @@ void EncApp::xInitLibCfg()
   m_cEncLib.setdQPs                                              ( m_aidQP        );
   m_cEncLib.setUseRDOQ                                           ( m_useRDOQ     );
   m_cEncLib.setUseRDOQTS                                         ( m_useRDOQTS   );
-#if T0196_SELECTIVE_RDOQ
   m_cEncLib.setUseSelectiveRDOQ                                  ( m_useSelectiveRDOQ );
-#endif
   m_cEncLib.setRDpenalty                                         ( m_rdPenalty );
   m_cEncLib.setCTUSize                                           ( m_uiCTUSize );
   m_cEncLib.setSubPicInfoPresentFlag                             ( m_subPicInfoPresentFlag );

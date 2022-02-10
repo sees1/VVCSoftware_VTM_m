@@ -531,10 +531,8 @@ void QuantRDOQ::quant(TransformUnit &tu, const ComponentID &compID, const CCoeff
 
   if (useRDOQ && (isLuma(compID) || RDOQ_CHROMA))
   {
-#if T0196_SELECTIVE_RDOQ
     if (!m_useSelectiveRDOQ || xNeedRDOQ(tu, compID, piCoef, cQP))
     {
-#endif
       if( useTransformSkip )
       {
         if( (tu.cu->bdpcmMode && isLuma(compID)) || (isChroma(compID) && tu.cu->bdpcmModeChroma ) )
@@ -550,14 +548,12 @@ void QuantRDOQ::quant(TransformUnit &tu, const ComponentID &compID, const CCoeff
       {
         xRateDistOptQuant( tu, compID, pSrc, uiAbsSum, cQP, ctx );
       }
-#if T0196_SELECTIVE_RDOQ
     }
     else
     {
       piQCoef.fill(0);
       uiAbsSum = 0;
     }
-#endif
   }
   else
   {

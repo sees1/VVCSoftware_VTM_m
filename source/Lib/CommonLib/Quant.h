@@ -100,9 +100,7 @@ public:
   virtual void init( uint32_t uiMaxTrSize,
                      bool useRDOQ = false,
                      bool useRDOQTS = false,
-#if T0196_SELECTIVE_RDOQ
                      bool useSelectiveRDOQ = false
-#endif
                      );
 
 public:
@@ -142,17 +140,13 @@ public:
 
 protected:
 
-#if T0196_SELECTIVE_RDOQ
   bool xNeedRDOQ                 ( TransformUnit &tu, const ComponentID &compID, const CCoeffBuf &pSrc, const QpParam &cQP );
-#endif
 
   double   m_dLambda;
   uint32_t     m_uiMaxTrSize;
   bool     m_useRDOQ;
   bool     m_useRDOQTS;
-#if T0196_SELECTIVE_RDOQ
   bool     m_useSelectiveRDOQ;
-#endif
 private:
   void xInitScalingList   ( const Quant* other );
   void xDestroyScalingList();
