@@ -3246,7 +3246,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
         }
 #endif
 
-        uint32_t uiMotBits[2];
+        uint32_t motBits[2];
 
         if(cs.picHeader->getMvdL1ZeroFlag())
         {
@@ -3291,21 +3291,21 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
           PelUnitBuf predBufTmp = m_tmpPredStorage[REF_PIC_LIST_1].getBuf( UnitAreaRelative(cu, pu) );
           motionCompensation( pu, predBufTmp, REF_PIC_LIST_1 );
 
-          uiMotBits[0] = bits[0] - uiMbBits[0];
-          uiMotBits[1] = uiMbBits[1];
+          motBits[0] = bits[0] - uiMbBits[0];
+          motBits[1] = uiMbBits[1];
 
           if ( cs.slice->getNumRefIdx(REF_PIC_LIST_1) > 1 )
           {
-            uiMotBits[1] += bestBiPRefIdxL1 + 1;
+            motBits[1] += bestBiPRefIdxL1 + 1;
             if ( bestBiPRefIdxL1 == cs.slice->getNumRefIdx(REF_PIC_LIST_1)-1 )
             {
-              uiMotBits[1]--;
+              motBits[1]--;
             }
           }
 
-          uiMotBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
+          motBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
 
-          bits[2] = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+          bits[2] = uiMbBits[2] + motBits[0] + motBits[1];
 
           cMvTemp[1][bestBiPRefIdxL1] = cMvBi[1];
 #if GDR_ENABLED
@@ -3318,9 +3318,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
         }
         else
         {
-          uiMotBits[0] = bits[0] - uiMbBits[0];
-          uiMotBits[1] = bits[1] - uiMbBits[1];
-          bits[2]      = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+          motBits[0] = bits[0] - uiMbBits[0];
+          motBits[1] = bits[1] - uiMbBits[1];
+          bits[2]    = uiMbBits[2] + motBits[0] + motBits[1];
         }
 
         if( doBiPred )
@@ -3417,7 +3417,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               {
                 continue;
               }
-              bitsTemp = uiMbBits[2] + uiMotBits[1 - refList];
+              bitsTemp = uiMbBits[2] + motBits[1 - refList];
               bitsTemp += ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
               if (cs.slice->getNumRefIdx(eRefPicList) > 1)
               {
@@ -3534,8 +3534,8 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                   uiCostBiOk = uiCostTempOk;
                 }
 #endif
-                uiMotBits[refList] = bitsTemp - uiMbBits[2] - uiMotBits[1 - refList];
-                uiMotBits[refList] -= ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
+                motBits[refList] = bitsTemp - uiMbBits[2] - motBits[1 - refList];
+                motBits[refList] -= ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
                 bits[2] = bitsTemp;
 
                 if (numIter != 1)
@@ -7289,7 +7289,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
     }
 #endif
 
-    uint32_t uiMotBits[2];
+    uint32_t motBits[2];
     bool doBiPred = true;
 
     if ( slice.getPicHeader()->getMvdL1ZeroFlag() ) // GPB, list 1 only use Mvp
@@ -7379,25 +7379,25 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       motionCompensation( pu, predBufTmp, REF_PIC_LIST_1 );
 
       // Update bits
-      uiMotBits[0] = bits[0] - uiMbBits[0];
-      uiMotBits[1] = uiMbBits[1];
+      motBits[0] = bits[0] - uiMbBits[0];
+      motBits[1] = uiMbBits[1];
 
       if( slice.getNumRefIdx(REF_PIC_LIST_1) > 1 )
       {
-        uiMotBits[1] += bestBiPRefIdxL1+1;
+        motBits[1] += bestBiPRefIdxL1 + 1;
         if( bestBiPRefIdxL1 == slice.getNumRefIdx(REF_PIC_LIST_1)-1 )
         {
-          uiMotBits[1]--;
+          motBits[1]--;
         }
       }
-      uiMotBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
-      bits[2] = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+      motBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
+      bits[2] = uiMbBits[2] + motBits[0] + motBits[1];
     }
     else
     {
-      uiMotBits[0] = bits[0] - uiMbBits[0];
-      uiMotBits[1] = bits[1] - uiMbBits[1];
-      bits[2]      = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+      motBits[0] = bits[0] - uiMbBits[0];
+      motBits[1] = bits[1] - uiMbBits[1];
+      bits[2]    = uiMbBits[2] + motBits[0] + motBits[1];
     }
 
     if( doBiPred )
@@ -7512,7 +7512,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
           continue;
         }
         // update bits
-        bitsTemp = uiMbBits[2] + uiMotBits[1 - refList];
+        bitsTemp = uiMbBits[2] + motBits[1 - refList];
         bitsTemp += ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
         if( slice.getNumRefIdx(eRefPicList) > 1 )
         {
@@ -7659,8 +7659,8 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
             uiCostBiOk = uiCostTempOk;
           }
 #endif
-          uiMotBits[refList] = bitsTemp - uiMbBits[2] - uiMotBits[1 - refList];
-          uiMotBits[refList] -= ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
+          motBits[refList] = bitsTemp - uiMbBits[2] - motBits[1 - refList];
+          motBits[refList] -= ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
           bits[2] = bitsTemp;
 
           if (numIter != 1)   // MC for next iter
