@@ -2748,7 +2748,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
   int refIdx[2] = { 0, 0 };   // If un-initialized, may cause SEGV in bi-directional prediction iterative stage.
   int          iRefIdxBi[2] = { -1, -1 };
 
-  uint32_t         uiMbBits[3] = {1, 1, 0};
+  uint32_t mbBits[3] = { 1, 1, 0 };
 
   uint32_t         uiLastMode = 0;
   uint32_t         uiLastModeTemp = 0;
@@ -2874,7 +2874,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
     uiAffineCostOk = false;
 #endif
 
-    uint32_t         uiBits[3];
+    uint32_t         bits[3];
     uint32_t         bitsTemp;
     Distortion   bestBiPDist = std::numeric_limits<Distortion>::max();
 
@@ -2892,7 +2892,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 
     PelUnitBuf origBuf = pu.cs->getOrgBuf( pu );
 
-    xGetBlkBits( cs.slice->isInterP(), puIdx, uiLastMode, uiMbBits );
+    xGetBlkBits(cs.slice->isInterP(), puIdx, uiLastMode, mbBits);
 
     m_pcRdCost->selectMotionLambda( );
 
@@ -2905,7 +2905,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
         RefPicList eRefPicList = (refList ? REF_PIC_LIST_1 : REF_PIC_LIST_0);
         for (int refIdxTemp = 0; refIdxTemp < cs.slice->getNumRefIdx(eRefPicList); refIdxTemp++)
         {
-          bitsTemp = uiMbBits[refList];
+          bitsTemp = mbBits[refList];
           if ( cs.slice->getNumRefIdx(eRefPicList) > 1 )
           {
             bitsTemp += refIdxTemp + 1;
@@ -3141,7 +3141,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #endif
           {
             uiCost[refList] = costTemp;
-            uiBits[refList] = bitsTemp;   // storing for bi-prediction
+            bits[refList]   = bitsTemp;   // storing for bi-prediction
 
             // set motion
             cMv[refList]    = cMvTemp[refList][refIdxTemp];
@@ -3246,7 +3246,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
         }
 #endif
 
-        uint32_t uiMotBits[2];
+        uint32_t motBits[2];
 
         if(cs.picHeader->getMvdL1ZeroFlag())
         {
@@ -3291,21 +3291,21 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
           PelUnitBuf predBufTmp = m_tmpPredStorage[REF_PIC_LIST_1].getBuf( UnitAreaRelative(cu, pu) );
           motionCompensation( pu, predBufTmp, REF_PIC_LIST_1 );
 
-          uiMotBits[0] = uiBits[0] - uiMbBits[0];
-          uiMotBits[1] = uiMbBits[1];
+          motBits[0] = bits[0] - mbBits[0];
+          motBits[1] = mbBits[1];
 
           if ( cs.slice->getNumRefIdx(REF_PIC_LIST_1) > 1 )
           {
-            uiMotBits[1] += bestBiPRefIdxL1 + 1;
+            motBits[1] += bestBiPRefIdxL1 + 1;
             if ( bestBiPRefIdxL1 == cs.slice->getNumRefIdx(REF_PIC_LIST_1)-1 )
             {
-              uiMotBits[1]--;
+              motBits[1]--;
             }
           }
 
-          uiMotBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
+          motBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
 
-          uiBits[2] = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+          bits[2] = mbBits[2] + motBits[0] + motBits[1];
 
           cMvTemp[1][bestBiPRefIdxL1] = cMvBi[1];
 #if GDR_ENABLED
@@ -3318,9 +3318,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
         }
         else
         {
-          uiMotBits[0] = uiBits[0] - uiMbBits[0];
-          uiMotBits[1] = uiBits[1] - uiMbBits[1];
-          uiBits[2] = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+          motBits[0] = bits[0] - mbBits[0];
+          motBits[1] = bits[1] - mbBits[1];
+          bits[2]    = mbBits[2] + motBits[0] + motBits[1];
         }
 
         if( doBiPred )
@@ -3417,7 +3417,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
               {
                 continue;
               }
-              bitsTemp = uiMbBits[2] + uiMotBits[1 - refList];
+              bitsTemp = mbBits[2] + motBits[1 - refList];
               bitsTemp += ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
               if (cs.slice->getNumRefIdx(eRefPicList) > 1)
               {
@@ -3534,9 +3534,9 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                   uiCostBiOk = uiCostTempOk;
                 }
 #endif
-                uiMotBits[refList] = bitsTemp - uiMbBits[2] - uiMotBits[1 - refList];
-                uiMotBits[refList] -= ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
-                uiBits[2] = bitsTemp;
+                motBits[refList] = bitsTemp - mbBits[2] - motBits[1 - refList];
+                motBits[refList] -= ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
+                bits[2] = bitsTemp;
 
                 if (numIter != 1)
                 {
@@ -3583,7 +3583,8 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
                 // note : uiCostBi is the new Best MVP cost,
                 //          solid info will be at amvp[eRefPicList].mvSolid[aaiMvpIdx[refList][refIdxTemp]];
-                xCheckBestMVP(pu, REF_PIC_LIST_0, cMvBi[0], cMvPredBi[0][iRefIdxBi[0]], aaiMvpIdxBi[0][iRefIdxBi[0]], amvp[REF_PIC_LIST_0], uiBits[2], uiCostBi, pu.cu->imv);
+                xCheckBestMVP(pu, REF_PIC_LIST_0, cMvBi[0], cMvPredBi[0][iRefIdxBi[0]], aaiMvpIdxBi[0][iRefIdxBi[0]],
+                              amvp[REF_PIC_LIST_0], bits[2], uiCostBi, pu.cu->imv);
 
                 if (isEncodeGdrClean)
                 {
@@ -3604,7 +3605,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                 }
 #else
                 xCheckBestMVP(REF_PIC_LIST_0, cMvBi[0], cMvPredBi[0][iRefIdxBi[0]], aaiMvpIdxBi[0][iRefIdxBi[0]],
-                              amvp[REF_PIC_LIST_0], uiBits[2], uiCostBi, pu.cu->imv);
+                              amvp[REF_PIC_LIST_0], bits[2], uiCostBi, pu.cu->imv);
 #endif
                 if (!cs.picHeader->getMvdL1ZeroFlag())
                 {
@@ -3612,7 +3613,8 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #if GDR_ENABLED
                   // note : uiCostBi is the new Best MVP cost,
                   //          solid info will be at amvp[eRefPicList].mvSolid[aaiMvpIdx[refList][refIdxTemp]];
-                  xCheckBestMVP(pu, REF_PIC_LIST_1, cMvBi[1], cMvPredBi[1][iRefIdxBi[1]], aaiMvpIdxBi[1][iRefIdxBi[1]], amvp[REF_PIC_LIST_1], uiBits[2], uiCostBi, pu.cu->imv);
+                  xCheckBestMVP(pu, REF_PIC_LIST_1, cMvBi[1], cMvPredBi[1][iRefIdxBi[1]], aaiMvpIdxBi[1][iRefIdxBi[1]],
+                                amvp[REF_PIC_LIST_1], bits[2], uiCostBi, pu.cu->imv);
 
                   if (isEncodeGdrClean)
                   {
@@ -3633,7 +3635,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
                   }
 #else
                   xCheckBestMVP(REF_PIC_LIST_1, cMvBi[1], cMvPredBi[1][iRefIdxBi[1]], aaiMvpIdxBi[1][iRefIdxBi[1]],
-                                amvp[REF_PIC_LIST_1], uiBits[2], uiCostBi, pu.cu->imv);
+                                amvp[REF_PIC_LIST_1], bits[2], uiCostBi, pu.cu->imv);
 #endif
                 }
               }
@@ -3917,7 +3919,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
 #endif
           }
 
-          bits = uiMbBits[2];
+          bits = mbBits[2];
           bits += 1; // add one bit for #symmetrical MVD mode
           bits += ((cs.slice->getSPS()->getUseBcw() == true) ? getWeightIdxBits(bcwIdx) : 0);
           symCost += m_pcRdCost->getCost(bits);
@@ -4015,7 +4017,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
       }
 #endif
       refIdx[1]  = refIdxValidList1;
-      uiBits[1]  = bitsValidList1;
+      bits[1]    = bitsValidList1;
       uiCost[1]  = costValidList1;
 #if GDR_ENABLED
       if (isEncodeGdrClean)
@@ -4675,23 +4677,23 @@ uint32_t InterSearch::xGetMvpIdxBits(int idx, int iNum)
     return 0;
   }
 
-  uint32_t uiLength = 1;
+  uint32_t length   = 1;
   int      temp     = idx;
   if (temp == 0)
   {
-    return uiLength;
+    return length;
   }
 
   bool bCodeLast = (iNum - 1 > temp);
 
-  uiLength += (temp - 1);
+  length += (temp - 1);
 
   if( bCodeLast )
   {
-    uiLength++;
+    length++;
   }
 
-  return uiLength;
+  return length;
 }
 
 void InterSearch::xGetBlkBits( bool bPSlice, int iPartIdx, uint32_t uiLastMode, uint32_t uiBlkBit[3])
@@ -6392,7 +6394,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
   int refIdx[2] = { 0, 0 };   // If un-initialized, may cause SEGV in bi-directional prediction iterative stage.
   int           iRefIdxBi[2];
 
-  uint32_t          uiMbBits[3] = {1, 1, 0};
+  uint32_t mbBits[3] = { 1, 1, 0 };
 
   int           iRefStart, iRefEnd;
 
@@ -6464,7 +6466,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
   bool uiCostTempOk = init_value;
 #endif
 
-  uint32_t          uiBits[3] = { 0 };
+  uint32_t          bits[3] = { 0 };
   uint32_t          bitsTemp;
   Distortion    bestBiPDist = std::numeric_limits<Distortion>::max();
 
@@ -6496,7 +6498,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
   int tryBipred = 0;
   WPScalingParam *wp0;
   WPScalingParam *wp1;
-  xGetBlkBits( slice.isInterP(), puIdx, lastMode, uiMbBits);
+  xGetBlkBits(slice.isInterP(), puIdx, lastMode, mbBits);
 
   pu.cu->affine = true;
   pu.mergeFlag = false;
@@ -6514,7 +6516,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
     for (int refIdxTemp = 0; refIdxTemp < slice.getNumRefIdx(eRefPicList); refIdxTemp++)
     {
       // Get RefIdx bits
-      bitsTemp = uiMbBits[refList];
+      bitsTemp = mbBits[refList];
       if ( slice.getNumRefIdx(eRefPicList) > 1 )
       {
         bitsTemp += refIdxTemp + 1;
@@ -7150,7 +7152,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #endif
       {
         uiCost[refList] = costTemp;
-        uiBits[refList] = bitsTemp;   // storing for bi-prediction
+        bits[refList]   = bitsTemp;   // storing for bi-prediction
 
 #if GDR_ENABLED
         if (isEncodeGdrClean)
@@ -7287,7 +7289,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
     }
 #endif
 
-    uint32_t uiMotBits[2];
+    uint32_t motBits[2];
     bool doBiPred = true;
 
     if ( slice.getPicHeader()->getMvdL1ZeroFlag() ) // GPB, list 1 only use Mvp
@@ -7377,25 +7379,25 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
       motionCompensation( pu, predBufTmp, REF_PIC_LIST_1 );
 
       // Update bits
-      uiMotBits[0] = uiBits[0] - uiMbBits[0];
-      uiMotBits[1] = uiMbBits[1];
+      motBits[0] = bits[0] - mbBits[0];
+      motBits[1] = mbBits[1];
 
       if( slice.getNumRefIdx(REF_PIC_LIST_1) > 1 )
       {
-        uiMotBits[1] += bestBiPRefIdxL1+1;
+        motBits[1] += bestBiPRefIdxL1 + 1;
         if( bestBiPRefIdxL1 == slice.getNumRefIdx(REF_PIC_LIST_1)-1 )
         {
-          uiMotBits[1]--;
+          motBits[1]--;
         }
       }
-      uiMotBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
-      uiBits[2] = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+      motBits[1] += m_auiMVPIdxCost[aaiMvpIdxBi[1][bestBiPRefIdxL1]][AMVP_MAX_NUM_CANDS];
+      bits[2] = mbBits[2] + motBits[0] + motBits[1];
     }
     else
     {
-      uiMotBits[0] = uiBits[0] - uiMbBits[0];
-      uiMotBits[1] = uiBits[1] - uiMbBits[1];
-      uiBits[2] = uiMbBits[2] + uiMotBits[0] + uiMotBits[1];
+      motBits[0] = bits[0] - mbBits[0];
+      motBits[1] = bits[1] - mbBits[1];
+      bits[2]    = mbBits[2] + motBits[0] + motBits[1];
     }
 
     if( doBiPred )
@@ -7510,7 +7512,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
           continue;
         }
         // update bits
-        bitsTemp = uiMbBits[2] + uiMotBits[1 - refList];
+        bitsTemp = mbBits[2] + motBits[1 - refList];
         bitsTemp += ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
         if( slice.getNumRefIdx(eRefPicList) > 1 )
         {
@@ -7657,9 +7659,9 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
             uiCostBiOk = uiCostTempOk;
           }
 #endif
-          uiMotBits[refList] = bitsTemp - uiMbBits[2] - uiMotBits[1 - refList];
-          uiMotBits[refList] -= ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
-          uiBits[2] = bitsTemp;
+          motBits[refList] = bitsTemp - mbBits[2] - motBits[1 - refList];
+          motBits[refList] -= ((pu.cu->slice->getSPS()->getUseBcw() == true) ? bcwIdxBits : 0);
+          bits[2] = bitsTemp;
 
           if (numIter != 1)   // MC for next iter
           {
@@ -7722,7 +7724,8 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #endif
         {
           xCopyAffineAMVPInfo( aacAffineAMVPInfo[0][iRefIdxBi[0]], affiAMVPInfoTemp[REF_PIC_LIST_0] );
-          xCheckBestAffineMVP( pu, affiAMVPInfoTemp[REF_PIC_LIST_0], REF_PIC_LIST_0, cMvBi[0], cMvPredBi[0][iRefIdxBi[0]], aaiMvpIdxBi[0][iRefIdxBi[0]], uiBits[2], uiCostBi );
+          xCheckBestAffineMVP(pu, affiAMVPInfoTemp[REF_PIC_LIST_0], REF_PIC_LIST_0, cMvBi[0],
+                              cMvPredBi[0][iRefIdxBi[0]], aaiMvpIdxBi[0][iRefIdxBi[0]], bits[2], uiCostBi);
 #if GDR_ENABLED
           if (isEncodeGdrClean)
           {
@@ -7754,7 +7757,8 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
           if ( !slice.getPicHeader()->getMvdL1ZeroFlag() )
           {
             xCopyAffineAMVPInfo( aacAffineAMVPInfo[1][iRefIdxBi[1]], affiAMVPInfoTemp[REF_PIC_LIST_1] );
-            xCheckBestAffineMVP( pu, affiAMVPInfoTemp[REF_PIC_LIST_1], REF_PIC_LIST_1, cMvBi[1], cMvPredBi[1][iRefIdxBi[1]], aaiMvpIdxBi[1][iRefIdxBi[1]], uiBits[2], uiCostBi );
+            xCheckBestAffineMVP(pu, affiAMVPInfoTemp[REF_PIC_LIST_1], REF_PIC_LIST_1, cMvBi[1],
+                                cMvPredBi[1][iRefIdxBi[1]], aaiMvpIdxBi[1][iRefIdxBi[1]], bits[2], uiCostBi);
 #if GDR_ENABLED
             if (isEncodeGdrClean)
             {
@@ -7811,7 +7815,7 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
   // Set Motion Field
   memcpy( aacMv[1], mvValidList1, sizeof(Mv)*3 );
   refIdx[1]  = refIdxValidList1;
-  uiBits[1]  = bitsValidList1;
+  bits[1]    = bitsValidList1;
   uiCost[1]  = costValidList1;
 
 #if GDR_ENABLED
@@ -9382,7 +9386,7 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
     int lengthY = compArea.height / numPartY;
     int strideOrg  = orgPel.stride;
     int stridePred = predPel.stride;
-    uint32_t   uiShift = DISTORTION_PRECISION_ADJUSTMENT( ( *cs.sps.getBitDepth( toChannelType( compID ) ) - 8 ) << 1 );
+    uint32_t          shift = DISTORTION_PRECISION_ADJUSTMENT((*cs.sps.getBitDepth(toChannelType(compID)) - 8) << 1);
     Intermediate_Int  temp;
 
     //calc distY of 16 sub parts
@@ -9394,22 +9398,22 @@ void InterSearch::calcMinDistSbt( CodingStructure &cs, const CodingUnit& cu, con
         int posY = j * lengthY;
         const Pel* ptrOrg  = orgPel.bufAt( posX, posY );
         const Pel* ptrPred = predPel.bufAt( posX, posY );
-        Distortion uiSum = 0;
+        Distortion sum     = 0;
         for( int n = 0; n < lengthY; n++ )
         {
           for( int m = 0; m < lengthX; m++ )
           {
             temp = ptrOrg[m] - ptrPred[m];
-            uiSum += Distortion((temp * temp) >> uiShift);
+            sum += Distortion((temp * temp) >> shift);
           }
           ptrOrg += strideOrg;
           ptrPred += stridePred;
         }
         if( isChroma( compID ) )
         {
-          uiSum = (Distortion)( uiSum * m_pcRdCost->getChromaWeight() );
+          sum = (Distortion) (sum * m_pcRdCost->getChromaWeight());
         }
-        dist[j][i] += uiSum;
+        dist[j][i] += sum;
       }
     }
   }

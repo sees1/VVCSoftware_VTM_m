@@ -122,15 +122,15 @@ void VLCWriter::xWriteSCode    ( int code, uint32_t length )
   m_pcBitIf->write( length==32 ? uint32_t(code) : ( uint32_t(code)&((1<<length)-1) ), length );
 }
 
-void VLCWriter::xWriteCode     ( uint32_t uiCode, uint32_t uiLength )
+void VLCWriter::xWriteCode(uint32_t uiCode, uint32_t length)
 {
-  CHECK( uiLength == 0, "Code of length '0' not supported" );
-  m_pcBitIf->write( uiCode, uiLength );
+  CHECK(length == 0, "Code of length '0' not supported");
+  m_pcBitIf->write(uiCode, length);
 }
 
 void VLCWriter::xWriteUvlc     ( uint32_t uiCode )
 {
-  uint32_t uiLength = 1;
+  uint32_t length   = 1;
   uint32_t temp     = ++uiCode;
 
   CHECK(!temp, "Integer overflow");
@@ -138,11 +138,11 @@ void VLCWriter::xWriteUvlc     ( uint32_t uiCode )
   while (1 != temp)
   {
     temp >>= 1;
-    uiLength += 2;
+    length += 2;
   }
-  // Take care of cases where uiLength > 32
-  m_pcBitIf->write( 0, uiLength >> 1);
-  m_pcBitIf->write( uiCode, (uiLength+1) >> 1);
+  // Take care of cases where length > 32
+  m_pcBitIf->write(0, length >> 1);
+  m_pcBitIf->write(uiCode, (length + 1) >> 1);
 }
 
 void VLCWriter::xWriteSvlc     ( int iCode )

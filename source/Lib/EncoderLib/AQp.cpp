@@ -89,21 +89,21 @@ void AQpPreanalyzer::preanalyze( Picture* pcEPic )
       {
         const uint32_t uiCurrAQPartWidth = std::min(uiAQPartWidth, width - x);
         const Pel* pBlkY = &pLineY[x];
-        uint64_t uiSum[4] = {0, 0, 0, 0};
-        uint64_t uiSumSq[4] = {0, 0, 0, 0};
+        uint64_t       sum[4]            = { 0, 0, 0, 0 };
+        uint64_t       sumSq[4]          = { 0, 0, 0, 0 };
         uint32_t by = 0;
         for ( ; by < uiCurrAQPartHeight>>1; by++ )
         {
           uint32_t bx = 0;
           for ( ; bx < uiCurrAQPartWidth>>1; bx++ )
           {
-            uiSum  [0] += pBlkY[bx];
-            uiSumSq[0] += pBlkY[bx] * pBlkY[bx];
+            sum[0] += pBlkY[bx];
+            sumSq[0] += pBlkY[bx] * pBlkY[bx];
           }
           for ( ; bx < uiCurrAQPartWidth; bx++ )
           {
-            uiSum  [1] += pBlkY[bx];
-            uiSumSq[1] += pBlkY[bx] * pBlkY[bx];
+            sum[1] += pBlkY[bx];
+            sumSq[1] += pBlkY[bx] * pBlkY[bx];
           }
           pBlkY += stride;
         }
@@ -112,13 +112,13 @@ void AQpPreanalyzer::preanalyze( Picture* pcEPic )
           uint32_t bx = 0;
           for ( ; bx < uiCurrAQPartWidth>>1; bx++ )
           {
-            uiSum  [2] += pBlkY[bx];
-            uiSumSq[2] += pBlkY[bx] * pBlkY[bx];
+            sum[2] += pBlkY[bx];
+            sumSq[2] += pBlkY[bx] * pBlkY[bx];
           }
           for ( ; bx < uiCurrAQPartWidth; bx++ )
           {
-            uiSum  [3] += pBlkY[bx];
-            uiSumSq[3] += pBlkY[bx] * pBlkY[bx];
+            sum[3] += pBlkY[bx];
+            sumSq[3] += pBlkY[bx] * pBlkY[bx];
           }
           pBlkY += stride;
         }
@@ -134,8 +134,8 @@ void AQpPreanalyzer::preanalyze( Picture* pcEPic )
         {
           for ( int i=0; i<4; i++)
           {
-            const double dAverage = double(uiSum[i]) / numPixInAQPart;
-            const double dVariance = double(uiSumSq[i]) / numPixInAQPart - dAverage * dAverage;
+            const double dAverage  = double(sum[i]) / numPixInAQPart;
+            const double dVariance = double(sumSq[i]) / numPixInAQPart - dAverage * dAverage;
             dMinVar = std::min(dMinVar, dVariance);
           }
         }

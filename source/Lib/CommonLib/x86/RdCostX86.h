@@ -61,7 +61,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
   const int iStrideSrc1 = rcDtParam.org.stride;
   const int iStrideSrc2 = rcDtParam.cur.stride;
 
-  const uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  const uint32_t shift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   unsigned int uiRet = 0;
 
   if( vext >= AVX2 && ( iCols & 15 ) == 0 )
@@ -83,7 +83,9 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
     }
     Sum = _mm256_hadd_epi32( Sum, Sum );
     Sum = _mm256_hadd_epi32( Sum, Sum );
-    uiRet = ( _mm_cvtsi128_si32( _mm256_castsi256_si128( Sum ) ) + _mm_cvtsi128_si32( _mm256_castsi256_si128( _mm256_permute2x128_si256( Sum, Sum, 0x11 ) ) ) ) >> uiShift;
+    uiRet = (_mm_cvtsi128_si32(_mm256_castsi256_si128(Sum))
+             + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(Sum, Sum, 0x11))))
+            >> shift;
 #endif
   }
   else if( ( iCols & 7 ) == 0 )
@@ -104,7 +106,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
     }
     Sum = _mm_hadd_epi32( Sum, Sum );
     Sum = _mm_hadd_epi32( Sum, Sum );
-    uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+    uiRet = _mm_cvtsi128_si32(Sum) >> shift;
   }
   else
   {
@@ -123,7 +125,7 @@ Distortion RdCost::xGetSSE_SIMD( const DistParam &rcDtParam )
       pSrc2   += iStrideSrc2;
     }
     Sum = _mm_hadd_epi32( Sum, Sum );
-    uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+    uiRet = _mm_cvtsi128_si32(Sum) >> shift;
   }
 
   return uiRet;
@@ -142,7 +144,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
   const int iStrideSrc1 = rcDtParam.org.stride;
   const int iStrideSrc2 = rcDtParam.cur.stride;
 
-  const uint32_t uiShift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
+  const uint32_t shift = DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth) << 1;
   unsigned int uiRet = 0;
 
   if (4 == width)
@@ -159,7 +161,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
       Sum = _mm_add_epi32( Sum, Res );
     }
     Sum = _mm_hadd_epi32( Sum, Sum );
-    uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+    uiRet = _mm_cvtsi128_si32(Sum) >> shift;
   }
   else
   {
@@ -182,7 +184,9 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
       }
       Sum = _mm256_hadd_epi32( Sum, Sum );
       Sum = _mm256_hadd_epi32( Sum, Sum );
-      uiRet = ( _mm_cvtsi128_si32( _mm256_castsi256_si128( Sum ) ) + _mm_cvtsi128_si32( _mm256_castsi256_si128( _mm256_permute2x128_si256( Sum, Sum, 0x11 ) ) ) ) >> uiShift;
+      uiRet = (_mm_cvtsi128_si32(_mm256_castsi256_si128(Sum))
+               + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(Sum, Sum, 0x11))))
+              >> shift;
 #endif
     }
     else
@@ -203,7 +207,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSSE_NxN_SIMD(const Dis
       }
       Sum = _mm_hadd_epi32( Sum, Sum );
       Sum = _mm_hadd_epi32( Sum, Sum );
-      uiRet = _mm_cvtsi128_si32( Sum )>>uiShift;
+      uiRet = _mm_cvtsi128_si32(Sum) >> shift;
     }
   }
   return uiRet;
@@ -226,7 +230,7 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
   const int iStrideSrc1 = rcDtParam.org.stride * iSubStep;
   const int iStrideSrc2 = rcDtParam.cur.stride * iSubStep;
 
-  uint32_t uiSum = 0;
+  uint32_t sum = 0;
   if( vext >= AVX2 && ( iCols & 15 ) == 0 )
   {
 #ifdef USE_AVX2
@@ -249,7 +253,8 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
     }
     vsum32 = _mm256_hadd_epi32( vsum32, vzero );
     vsum32 = _mm256_hadd_epi32( vsum32, vzero );
-    uiSum =  _mm_cvtsi128_si32( _mm256_castsi256_si128( vsum32 ) ) + _mm_cvtsi128_si32( _mm256_castsi256_si128( _mm256_permute2x128_si256( vsum32, vsum32, 0x11 ) ) );
+    sum    = _mm_cvtsi128_si32(_mm256_castsi256_si128(vsum32))
+          + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(vsum32, vsum32, 0x11)));
 #endif
   }
   else if( ( iCols & 7 ) == 0 )
@@ -273,7 +278,7 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
     }
     vsum32 = _mm_hadd_epi32( vsum32, vzero );
     vsum32 = _mm_hadd_epi32( vsum32, vzero );
-    uiSum  =  _mm_cvtsi128_si32( vsum32 );
+    sum    = _mm_cvtsi128_si32(vsum32);
   }
   else
   {
@@ -297,11 +302,11 @@ Distortion RdCost::xGetSAD_SIMD( const DistParam &rcDtParam )
     }
     vsum32 = _mm_hadd_epi32( vsum32, vzero );
     vsum32 = _mm_hadd_epi32( vsum32, vzero );
-    uiSum  = _mm_cvtsi128_si32( vsum32 );
+    sum    = _mm_cvtsi128_si32(vsum32);
   }
 
-  uiSum <<= iSubShift;
-  return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
+  sum <<= iSubShift;
+  return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
 template< X86_VEXT vext >
@@ -338,10 +343,10 @@ Distortion RdCost::xGetSAD_IBD_SIMD(const DistParam &rcDtParam)
   }
   vtotalsum32 = _mm_hadd_epi32(vtotalsum32, vzero);
   vtotalsum32 = _mm_hadd_epi32(vtotalsum32, vzero);
-  Distortion uiSum = _mm_cvtsi128_si32(vtotalsum32);
+  Distortion sum = _mm_cvtsi128_si32(vtotalsum32);
 
-  uiSum <<= subShift;
-  return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
+  sum <<= subShift;
+  return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
 template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const DistParam &rcDtParam)
@@ -360,7 +365,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const Dis
   const int iStrideSrc1 = rcDtParam.org.stride * iSubStep;
   const int iStrideSrc2 = rcDtParam.cur.stride * iSubStep;
 
-  uint32_t uiSum = 0;
+  uint32_t sum = 0;
 
   if (width == 4)
   {
@@ -382,7 +387,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const Dis
       vsum  = _mm_hadd_epi16( vsum, vzero );
       vsum  = _mm_hadd_epi16( vsum, vzero );
       vsum  = _mm_hadd_epi16( vsum, vzero );
-      uiSum = _mm_cvtsi128_si32( vsum );
+      sum   = _mm_cvtsi128_si32(vsum);
     }
     else
     {
@@ -403,7 +408,7 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const Dis
       }
       vsum32 = _mm_hadd_epi32( vsum32, vzero );
       vsum32 = _mm_hadd_epi32( vsum32, vzero );
-      uiSum = _mm_cvtsi128_si32( vsum32 );
+      sum    = _mm_cvtsi128_si32(vsum32);
     }
   }
   else
@@ -430,7 +435,8 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const Dis
       }
       vsum32 = _mm256_hadd_epi32( vsum32, vzero );
       vsum32 = _mm256_hadd_epi32( vsum32, vzero );
-      uiSum =  _mm_cvtsi128_si32( _mm256_castsi256_si128( vsum32 ) ) + _mm_cvtsi128_si32( _mm256_castsi256_si128( _mm256_permute2x128_si256( vsum32, vsum32, 0x11 ) ) );
+      sum    = _mm_cvtsi128_si32(_mm256_castsi256_si128(vsum32))
+            + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(vsum32, vsum32, 0x11)));
 #endif
     }
     else
@@ -454,12 +460,12 @@ template<int width, X86_VEXT vext> Distortion RdCost::xGetSAD_NxN_SIMD(const Dis
       }
       vsum32 = _mm_hadd_epi32( vsum32, vzero );
       vsum32 = _mm_hadd_epi32( vsum32, vzero );
-      uiSum =  _mm_cvtsi128_si32( vsum32 );
+      sum    = _mm_cvtsi128_si32(vsum32);
     }
   }
 
-  uiSum <<= iSubShift;
-  return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
+  sum <<= iSubShift;
+  return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
@@ -3890,7 +3896,7 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
   CHECK(iStep != 1, "the function only supports of iStep equal to 1");
 
   int  x = 0, y = 0;
-  Distortion uiSum = 0;
+  Distortion sum = 0;
 
   if (iCols > iRows && (iRows & 7) == 0 && (iCols & 15) == 0)
   {
@@ -3901,11 +3907,11 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
 #ifdef USE_AVX2
         if (vext >= AVX2)
         {
-          uiSum += xCalcHAD16x8_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD16x8_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
         else
 #endif
-          uiSum += xCalcHAD16x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD16x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
       }
       piOrg += iStrideOrg * 8;
       piCur += iStrideCur * 8;
@@ -3920,12 +3926,12 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
 #ifdef USE_AVX2
         if (vext >= AVX2)
         {
-          uiSum += xCalcHAD8x16_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD8x16_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
         else
 #endif
         {
-          uiSum += xCalcHAD8x16_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD8x16_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
       }
       piOrg += iStrideOrg * 16;
@@ -3941,12 +3947,12 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
 #ifdef USE_AVX2
         if (vext >= AVX2)
         {
-          uiSum += xCalcHAD8x4_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD8x4_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
         else
 #endif
         {
-          uiSum += xCalcHAD8x4_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD8x4_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
       }
       piOrg += iStrideOrg * 4;
@@ -3962,12 +3968,12 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
 #ifdef USE_AVX2
         if (vext >= AVX2)
         {
-          uiSum += xCalcHAD4x8_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD4x8_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
         else
 #endif
         {
-          uiSum += xCalcHAD4x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD4x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
       }
       piOrg += iStrideOrg * 8;
@@ -3985,12 +3991,12 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
 #ifdef USE_AVX2
         if (vext >= AVX2)
         {
-          uiSum += xCalcHAD8x8_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD8x8_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
         else
 #endif
         {
-          uiSum += xCalcHAD8x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD8x8_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
       }
       piOrg += iOffsetOrg;
@@ -4009,12 +4015,12 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
 #ifdef USE_AVX2
         if (vext >= AVX2)
         {
-          uiSum += xCalcHAD4x4_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD4x4_HBD_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
         else
 #endif
         {
-          uiSum += xCalcHAD4x4_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+          sum += xCalcHAD4x4_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
         }
       }
       piOrg += iOffsetOrg;
@@ -4029,7 +4035,7 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
     {
       for (x = 0; x < iCols; x += 2)
       {
-        uiSum += xCalcHAD2x2_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
+        sum += xCalcHAD2x2_HBD_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -4040,7 +4046,7 @@ Distortion RdCost::xGetHADs_HBD_SIMD(const DistParam &rcDtParam)
     THROW("Invalid size");
   }
 
-  return (uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
+  return (sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth));
 }
 
 template< X86_VEXT vext >
@@ -4065,7 +4071,7 @@ Distortion RdCost::xGetSAD_HBD_SIMD(const DistParam &rcDtParam)
     return RdCost::xGetSAD(rcDtParam);
   }
 
-  uint32_t uiSum = 0;
+  uint32_t sum = 0;
 #ifdef USE_AVX2
   if ((vext >= AVX2) && ((iCols & 7) == 0))
   {
@@ -4086,7 +4092,8 @@ Distortion RdCost::xGetSAD_HBD_SIMD(const DistParam &rcDtParam)
     }
     vsum32 = _mm256_hadd_epi32(vsum32, vzero);
     vsum32 = _mm256_hadd_epi32(vsum32, vzero);
-    uiSum = _mm_cvtsi128_si32(_mm256_castsi256_si128(vsum32)) + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(vsum32, vsum32, 0x11)));
+    sum    = _mm_cvtsi128_si32(_mm256_castsi256_si128(vsum32))
+          + _mm_cvtsi128_si32(_mm256_castsi256_si128(_mm256_permute2x128_si256(vsum32, vsum32, 0x11)));
   }
   else
 #endif
@@ -4109,7 +4116,7 @@ Distortion RdCost::xGetSAD_HBD_SIMD(const DistParam &rcDtParam)
       }
       vsum32 = _mm_hadd_epi32(vsum32, vzero);
       vsum32 = _mm_hadd_epi32(vsum32, vzero);
-      uiSum = _mm_cvtsi128_si32(vsum32);
+      sum    = _mm_cvtsi128_si32(vsum32);
     }
     else
     {
@@ -4140,11 +4147,11 @@ Distortion RdCost::xGetSAD_HBD_SIMD(const DistParam &rcDtParam)
       }
       vsum32 = _mm_hadd_epi32(vsum32, vzero);
       vsum32 = _mm_hadd_epi32(vsum32, vzero);
-      uiSum = _mm_cvtsi128_si32(vsum32);
+      sum    = _mm_cvtsi128_si32(vsum32);
     }
 
-  uiSum <<= iSubShift;
-  return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
+    sum <<= iSubShift;
+    return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
 template< X86_VEXT vext >
@@ -4262,7 +4269,7 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
   int  iStrideCur = pcDtParam.cur.stride;
   int  iStrideOrg = pcDtParam.org.stride;
 
-  Distortion uiSum = 0;
+  Distortion sum = 0;
 #ifdef USE_AVX2
   if ((vext >= AVX2) && ((iCols & 7) == 0))
   {
@@ -4284,7 +4291,8 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
       piOrg += iStrideOrg;
       piCur += iStrideCur;
     }
-    uiSum += _mm256_extract_epi64(vsum, 0) + _mm256_extract_epi64(vsum, 1) + _mm256_extract_epi64(vsum, 2) + _mm256_extract_epi64(vsum, 3);
+    sum += _mm256_extract_epi64(vsum, 0) + _mm256_extract_epi64(vsum, 1) + _mm256_extract_epi64(vsum, 2)
+           + _mm256_extract_epi64(vsum, 3);
   }
   else
 #endif
@@ -4308,7 +4316,7 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
         piOrg += iStrideOrg;
         piCur += iStrideCur;
       }
-      uiSum += _mm_extract_epi64(vsum, 0) + _mm_extract_epi64(vsum, 1);
+      sum += _mm_extract_epi64(vsum, 0) + _mm_extract_epi64(vsum, 1);
     }
     else if ((iCols & 1) == 0)
     {
@@ -4327,7 +4335,7 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
         piOrg += iStrideOrg;
         piCur += iStrideCur;
       }
-      uiSum += _mm_extract_epi64(vsum, 0) + _mm_extract_epi64(vsum, 1);
+      sum += _mm_extract_epi64(vsum, 0) + _mm_extract_epi64(vsum, 1);
     }
     else
     {
@@ -4337,14 +4345,14 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
         for (int iX = 0; iX < iCols; iX++)
         {
           temp = piOrg[iX] - piCur[iX];
-          uiSum += Distortion(temp * temp);
+          sum += Distortion(temp * temp);
         }
         piOrg += iStrideOrg;
         piCur += iStrideCur;
       }
     }
 
-  return uiSum;
+    return sum;
 }
 #else
 template<X86_VEXT vext>
@@ -4364,7 +4372,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
   const int iBitDepth  = rcDtParam.bitDepth;
 
   int  x, y;
-  Distortion uiSum = 0;
+  Distortion sum = 0;
 
   if( iCols > iRows && ( iCols & 15 ) == 0 && ( iRows & 7 ) == 0 )
   {
@@ -4374,11 +4382,11 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
       {
         if( vext >= AVX2 )
         {
-          uiSum += xCalcHAD16x8_AVX2( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+          sum += xCalcHAD16x8_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
         }
         else
         {
-          uiSum += xCalcHAD16x8_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+          sum += xCalcHAD16x8_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
         }
       }
       piOrg += iStrideOrg * 8;
@@ -4393,11 +4401,11 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
       {
         if( vext >= AVX2 )
         {
-          uiSum += xCalcHAD8x16_AVX2( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+          sum += xCalcHAD8x16_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
         }
         else
         {
-          uiSum += xCalcHAD8x16_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+          sum += xCalcHAD8x16_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
         }
       }
       piOrg += iStrideOrg * 16;
@@ -4410,7 +4418,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     {
       for( x = 0; x < iCols; x += 8 )
       {
-        uiSum += xCalcHAD8x4_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        sum += xCalcHAD8x4_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
       }
       piOrg += iStrideOrg * 4;
       piCur += iStrideCur * 4;
@@ -4422,7 +4430,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     {
       for( x = 0; x < iCols; x += 4 )
       {
-        uiSum += xCalcHAD4x8_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        sum += xCalcHAD4x8_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
       }
       piOrg += iStrideOrg * 8;
       piCur += iStrideCur * 8;
@@ -4436,7 +4444,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     {
       for( x = 0; x < iCols; x += 16 )
       {
-        uiSum += xCalcHAD16x16_AVX2( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        sum += xCalcHAD16x16_AVX2(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -4450,7 +4458,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     {
       for( x = 0; x < iCols; x += 8 )
       {
-        uiSum += xCalcHAD8x8_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth );
+        sum += xCalcHAD8x8_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur, iBitDepth);
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -4465,7 +4473,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     {
       for( x = 0; x < iCols; x += 4 )
       {
-        uiSum += xCalcHAD4x4_SSE( &piOrg[x], &piCur[x], iStrideOrg, iStrideCur );
+        sum += xCalcHAD4x4_SSE(&piOrg[x], &piCur[x], iStrideOrg, iStrideCur);
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -4479,7 +4487,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     {
       for( x = 0; x < iCols; x += 2 )
       {
-        uiSum += xCalcHADs2x2( &piOrg[x], &piCur[x*rcDtParam.step], iStrideOrg, iStrideCur, rcDtParam.step );
+        sum += xCalcHADs2x2(&piOrg[x], &piCur[x * rcDtParam.step], iStrideOrg, iStrideCur, rcDtParam.step);
       }
       piOrg += iOffsetOrg;
       piCur += iOffsetCur;
@@ -4490,8 +4498,7 @@ Distortion RdCost::xGetHADs_SIMD( const DistParam &rcDtParam )
     THROW( "Unsupported size" );
   }
 
-
-  return uiSum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
+  return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 #endif
 template <X86_VEXT vext>
