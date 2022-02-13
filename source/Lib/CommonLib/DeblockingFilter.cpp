@@ -1691,7 +1691,7 @@ inline bool DeblockingFilter::xUseStrongFiltering(Pel *src, const int offset, co
         const Pel mP5 = src[-offset * 5];
         const Pel mP6 = src[-offset * 6];
         const Pel mP7 = src[-offset * 7];
-        ;
+
         mP4 = src[-offset * 8];
         sp3 = sp3 + abs(mP5 - mP6 - mP7 + mP4);
       }

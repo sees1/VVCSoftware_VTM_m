@@ -108,13 +108,10 @@ const SAOBlkParam& SAOBlkParam::operator= (const SAOBlkParam& src)
 }
 
 
-
-
 SampleAdaptiveOffset::SampleAdaptiveOffset()
 {
   m_numberOfComponents = 0;
 }
-
 
 SampleAdaptiveOffset::~SampleAdaptiveOffset()
 {
@@ -167,7 +164,6 @@ void SampleAdaptiveOffset::invertQuantOffsets(ComponentID compIdx, int typeIdc, 
     }
     CHECK(dstOffsets[SAO_CLASS_EO_PLAIN] != 0, "EO offset is not '0'"); //keep EO plain offset as zero
   }
-
 }
 
 int SampleAdaptiveOffset::getMergeList(CodingStructure& cs, int ctuRsAddr, SAOBlkParam* blkParams, SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES])
@@ -521,7 +517,6 @@ void SampleAdaptiveOffset::offsetBlock(const int channelBitDepth, const ClpRng& 
         }
         edgeType = sgn(srcLine[x] - srcLineBelow[x-1]) + signUpLine[x];
         resLine[x] = ClipPel<int>(srcLine[x] + offset[edgeType], clpRng);
-
       }
     }
     break;
@@ -661,9 +656,7 @@ void SampleAdaptiveOffset::SAOProcess( CodingStructure& cs, SAOBlkParam* saoBlkP
 
   DTRACE    ( g_trace_ctx, D_CRC, "SAO" );
   DTRACE_CRC( g_trace_ctx, D_CRC, cs, cs.getRecoBuf() );
-
 }
-
 
 void SampleAdaptiveOffset::deriveLoopFilterBoundaryAvailibility(CodingStructure& cs, const Position &pos,
   bool& isLeftAvail,
@@ -749,7 +742,7 @@ bool SampleAdaptiveOffset::isCrossedByVirtualBoundaries(const int xPos, const in
   {
     for (int i = 0; i < picHeader->getNumHorVirtualBoundaries(); i++)
     {
-     if (yPos <= picHeader->getVirtualBoundariesPosY(i) && picHeader->getVirtualBoundariesPosY(i) <= yPos + height)
+      if (yPos <= picHeader->getVirtualBoundariesPosY(i) && picHeader->getVirtualBoundariesPosY(i) <= yPos + height)
       {
         horVirBndryPos[numHorVirBndry++] = picHeader->getVirtualBoundariesPosY(i);
       }

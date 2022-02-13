@@ -91,8 +91,6 @@ QuantRDOQ::~QuantRDOQ()
 }
 
 
-
-
 /** Get the best level in RD sense
  *
  * \returns best quantized transform level for given scan position
@@ -501,7 +499,10 @@ void QuantRDOQ::xInitScalingList( const QuantRDOQ* other )
  */
 void QuantRDOQ::xDestroyScalingList()
 {
-  if( !m_isErrScaleListOwner ) return;
+  if (!m_isErrScaleListOwner)
+  {
+    return;
+  }
 
   delete[] m_errScale[0][0][0][0];
 }
@@ -527,7 +528,9 @@ void QuantRDOQ::quant(TransformUnit &tu, const ComponentID &compID, const CCoeff
   }
 
   if (tu.cs->slice->isLossless())
+  {
     useRDOQ = false;
+  }
 
   if (useRDOQ && (isLuma(compID) || RDOQ_CHROMA))
   {
@@ -1295,7 +1298,9 @@ void QuantRDOQ::xRateDistOptQuantTS( TransformUnit &tu, const ComponentID &compI
       coeffLevels[m_testedLevels++] = roundAbsLevel;
 
       if (minAbsLevel != roundAbsLevel)
+      {
         coeffLevels[m_testedLevels++] = minAbsLevel;
+      }
 
       int rightPixel, belowPixel, predPixel;
 
@@ -1303,7 +1308,9 @@ void QuantRDOQ::xRateDistOptQuantTS( TransformUnit &tu, const ComponentID &compI
       predPixel = cctx.deriveModCoeff(rightPixel, belowPixel, upAbsLevel, 0);
 
       if (upAbsLevel != roundAbsLevel && upAbsLevel != minAbsLevel && predPixel == 1)
+      {
         coeffLevels[m_testedLevels++] = upAbsLevel;
+      }
 
       double dErr = double(levelDouble);
       coeffLevelError[0] = dErr * dErr * errorScale;
@@ -1526,7 +1533,9 @@ void QuantRDOQ::forwardBDPCM(TransformUnit &tu, const ComponentID &compID, const
       coeffLevels[m_testedLevels++] = roundAbsLevel;
 
       if (minAbsLevel != roundAbsLevel)
+      {
         coeffLevels[m_testedLevels++] = minAbsLevel;
+      }
 
       double dErr = double(levelDouble);
       coeffLevelError[0]  = dErr * dErr * errorScale;
@@ -1699,12 +1708,18 @@ inline uint32_t QuantRDOQ::xGetCodedLevelTSPred(double&            rd64CodedCost
   if (!isLast && coeffLevels[0] < 3)
   {
     if (cctx.numCtxBins() >= 4)
+    {
       rd64CodedCostSig = xGetRateSigCoef(*fracBitsSig, 0);
+    }
     else
+    {
       rd64CodedCostSig = xGetICost(1 << SCALE_BITS);
+    }
     rd64CodedCost = rd64CodedCost0 + rd64CodedCostSig;
     if (cctx.numCtxBins() >= 4)
+    {
       numUsedCtxBins++;
+    }
     if (coeffLevels[0] == 0)
     {
       return bestAbsLevel;
@@ -1718,11 +1733,17 @@ inline uint32_t QuantRDOQ::xGetCodedLevelTSPred(double&            rd64CodedCost
   if (!isLast)
   {
     if (cctx.numCtxBins() >= 4)
+    {
       currCostSig = xGetRateSigCoef(*fracBitsSig, 1);
+    }
     else
+    {
       currCostSig = xGetICost(1 << SCALE_BITS);
+    }
     if (coeffLevels[0] >= 3 && cctx.numCtxBins() >= 4)
+    {
       numUsedCtxBins++;
+    }
   }
 
   for (int errorInd = 1; errorInd <= m_testedLevels; errorInd++)
@@ -1815,7 +1836,9 @@ inline int QuantRDOQ::xGetICRateTS( const uint32_t            absLevel,
   {
     int rate = fracBitsSign.intBits[sign]; // sign bits
     if (absLevel)
+    {
       numCtxBins++;
+    }
 
     if (absLevel > 1)
     {
@@ -1874,15 +1897,14 @@ inline int QuantRDOQ::xGetICRateTS( const uint32_t            absLevel,
       rate = 0;
     }
     return rate;
-
   }
-
-
 
   int rate = fracBitsSign.intBits[sign];
 
   if (absLevel)
+  {
     numCtxBins++;
+  }
 
   if( absLevel > 1 )
   {

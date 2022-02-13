@@ -440,9 +440,13 @@ namespace DQIntern
     inline int32_t lastOffset(unsigned scanIdx, int effWidth, int effHeight, bool reverseLast) const
     {
       if (reverseLast)
+      {
         return m_lastBitsX[effWidth - 1 - m_scanId2Pos[scanIdx].x] + m_lastBitsY[effHeight - 1 - m_scanId2Pos[scanIdx].y];
+      }
       else
+      {
         return m_lastBitsX[m_scanId2Pos[scanIdx].x] + m_lastBitsY[m_scanId2Pos[scanIdx].y];
+      }
     }
 
   private:

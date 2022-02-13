@@ -1705,33 +1705,33 @@ void Slice::applyReferencePictureListBasedMarking( PicList& rcListPic, const Ref
       }
       else if (pcPic->layerId == layerId)
       {
-      if (!(pRPL0->isRefPicLongterm(i)))
-      {
-        if (pcPic->poc == this->getPOC() + pRPL0->getRefPicIdentifier(i))
+        if (!(pRPL0->isRefPicLongterm(i)))
         {
-          isReference = 1;
-          pcPic->longTerm = false;
-        }
-      }
-      else
-      {
-        int pocCycle = 1 << (pcPic->cs->sps->getBitsForPOC());
-        int curPoc = pcPic->poc;
-        int refPoc = pRPL0->getRefPicIdentifier(i) & (pocCycle - 1);
-        if(pRPL0->getDeltaPocMSBPresentFlag(i))
-        {
-          refPoc += getPOC() - pRPL0->getDeltaPocMSBCycleLT(i) * pocCycle - (getPOC() & (pocCycle - 1));
+          if (pcPic->poc == this->getPOC() + pRPL0->getRefPicIdentifier(i))
+          {
+            isReference     = 1;
+            pcPic->longTerm = false;
+          }
         }
         else
         {
-          curPoc = curPoc & (pocCycle - 1);
+          int pocCycle = 1 << (pcPic->cs->sps->getBitsForPOC());
+          int curPoc   = pcPic->poc;
+          int refPoc   = pRPL0->getRefPicIdentifier(i) & (pocCycle - 1);
+          if (pRPL0->getDeltaPocMSBPresentFlag(i))
+          {
+            refPoc += getPOC() - pRPL0->getDeltaPocMSBCycleLT(i) * pocCycle - (getPOC() & (pocCycle - 1));
+          }
+          else
+          {
+            curPoc = curPoc & (pocCycle - 1);
+          }
+          if (pcPic->longTerm && curPoc == refPoc)
+          {
+            isReference     = 1;
+            pcPic->longTerm = true;
+          }
         }
-        if (pcPic->longTerm && curPoc == refPoc)
-        {
-          isReference = 1;
-          pcPic->longTerm = true;
-        }
-      }
       }
     }
 
@@ -1750,33 +1750,33 @@ void Slice::applyReferencePictureListBasedMarking( PicList& rcListPic, const Ref
       }
       else if( pcPic->layerId == layerId )
       {
-      if (!(pRPL1->isRefPicLongterm(i)))
-      {
-        if (pcPic->poc == this->getPOC() + pRPL1->getRefPicIdentifier(i))
+        if (!(pRPL1->isRefPicLongterm(i)))
         {
-          isReference = 1;
-          pcPic->longTerm = false;
-        }
-      }
-      else
-      {
-        int pocCycle = 1 << (pcPic->cs->sps->getBitsForPOC());
-        int curPoc = pcPic->poc;
-        int refPoc = pRPL1->getRefPicIdentifier(i) & (pocCycle - 1);
-        if(pRPL1->getDeltaPocMSBPresentFlag(i))
-        {
-          refPoc += getPOC() - pRPL1->getDeltaPocMSBCycleLT(i) * pocCycle - (getPOC() & (pocCycle - 1));
+          if (pcPic->poc == this->getPOC() + pRPL1->getRefPicIdentifier(i))
+          {
+            isReference     = 1;
+            pcPic->longTerm = false;
+          }
         }
         else
         {
-          curPoc = curPoc & (pocCycle - 1);
+          int pocCycle = 1 << (pcPic->cs->sps->getBitsForPOC());
+          int curPoc   = pcPic->poc;
+          int refPoc   = pRPL1->getRefPicIdentifier(i) & (pocCycle - 1);
+          if (pRPL1->getDeltaPocMSBPresentFlag(i))
+          {
+            refPoc += getPOC() - pRPL1->getDeltaPocMSBCycleLT(i) * pocCycle - (getPOC() & (pocCycle - 1));
+          }
+          else
+          {
+            curPoc = curPoc & (pocCycle - 1);
+          }
+          if (pcPic->longTerm && curPoc == refPoc)
+          {
+            isReference     = 1;
+            pcPic->longTerm = true;
+          }
         }
-        if (pcPic->longTerm && curPoc == refPoc)
-        {
-          isReference = 1;
-          pcPic->longTerm = true;
-        }
-      }
       }
     }
     // mark the picture as "unused for reference" if it is not in
@@ -3897,7 +3897,10 @@ bool ScalingList::isNotDefaultScalingList()
         break;
       }
     }
-    if (!isAllDefault) break;
+    if (!isAllDefault)
+    {
+      break;
+    }
   }
 
   return !isAllDefault;
@@ -3967,7 +3970,9 @@ void ScalingList::codePredScalingList(int* scalingList, const int* scalingListPr
   for (int i = 0; i < coefNum; i++)
   {
     if (scalingListId >= SCALING_LIST_1D_START_64x64 && scan[i].x >= 4 && scan[i].y >= 4)
+    {
       continue;
+    }
     deltaValue = (src[scan[i].idx] - srcPred[scan[i].idx]);
     data = (int8_t)(deltaValue - nextCoef);
     nextCoef = deltaValue;

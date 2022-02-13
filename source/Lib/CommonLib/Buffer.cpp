@@ -132,25 +132,27 @@ void gradFilterCore(Pel* pSrc, int srcStride, int width, int height, int gradStr
 
   if (PAD)
   {
-  gradXTmp = gradX + gradStride + 1;
-  gradYTmp = gradY + gradStride + 1;
-  for (int y = 0; y < (height - 2 * BIO_EXTEND_SIZE); y++)
-  {
-    gradXTmp[-1] = gradXTmp[0];
-    gradXTmp[width - 2 * BIO_EXTEND_SIZE] = gradXTmp[width - 2 * BIO_EXTEND_SIZE - 1];
-    gradXTmp += gradStride;
+    gradXTmp = gradX + gradStride + 1;
+    gradYTmp = gradY + gradStride + 1;
+    for (int y = 0; y < (height - 2 * BIO_EXTEND_SIZE); y++)
+    {
+      gradXTmp[-1]                          = gradXTmp[0];
+      gradXTmp[width - 2 * BIO_EXTEND_SIZE] = gradXTmp[width - 2 * BIO_EXTEND_SIZE - 1];
+      gradXTmp += gradStride;
 
-    gradYTmp[-1] = gradYTmp[0];
-    gradYTmp[width - 2 * BIO_EXTEND_SIZE] = gradYTmp[width - 2 * BIO_EXTEND_SIZE - 1];
-    gradYTmp += gradStride;
-  }
+      gradYTmp[-1]                          = gradYTmp[0];
+      gradYTmp[width - 2 * BIO_EXTEND_SIZE] = gradYTmp[width - 2 * BIO_EXTEND_SIZE - 1];
+      gradYTmp += gradStride;
+    }
 
-  gradXTmp = gradX + gradStride;
-  gradYTmp = gradY + gradStride;
-  ::memcpy(gradXTmp - gradStride, gradXTmp, sizeof(Pel)*(width));
-  ::memcpy(gradXTmp + (height - 2 * BIO_EXTEND_SIZE)*gradStride, gradXTmp + (height - 2 * BIO_EXTEND_SIZE - 1)*gradStride, sizeof(Pel)*(width));
-  ::memcpy(gradYTmp - gradStride, gradYTmp, sizeof(Pel)*(width));
-  ::memcpy(gradYTmp + (height - 2 * BIO_EXTEND_SIZE)*gradStride, gradYTmp + (height - 2 * BIO_EXTEND_SIZE - 1)*gradStride, sizeof(Pel)*(width));
+    gradXTmp = gradX + gradStride;
+    gradYTmp = gradY + gradStride;
+    ::memcpy(gradXTmp - gradStride, gradXTmp, sizeof(Pel) * (width));
+    ::memcpy(gradXTmp + (height - 2 * BIO_EXTEND_SIZE) * gradStride,
+             gradXTmp + (height - 2 * BIO_EXTEND_SIZE - 1) * gradStride, sizeof(Pel) * (width));
+    ::memcpy(gradYTmp - gradStride, gradYTmp, sizeof(Pel) * (width));
+    ::memcpy(gradYTmp + (height - 2 * BIO_EXTEND_SIZE) * gradStride,
+             gradYTmp + (height - 2 * BIO_EXTEND_SIZE - 1) * gradStride, sizeof(Pel) * (width));
   }
 }
 
@@ -539,6 +541,7 @@ void AreaBuf<Pel>::applyChromaCTI(Pel* bufY, int strideY, std::vector<Pel>& pLUT
     }
   }
 }
+
 template<>
 void AreaBuf<Pel>::addAvg( const AreaBuf<const Pel> &other1, const AreaBuf<const Pel> &other2, const ClpRng& clpRng)
 {
