@@ -303,8 +303,9 @@ void Picture::fillSliceLossyLosslessArray(std::vector<uint16_t> sliceLosslessInd
     // mixed lossy/lossless slices, set only lossless slices;
     for (uint16_t i = 0; i < numElementsinsliceLosslessIndexArray; i++)
     {
-        CHECK(sliceLosslessIndexArray[i] >= numSlices || sliceLosslessIndexArray[i] < 0, "index of lossless slice is out of slice index bound");
-        m_lossylosslessSliceArray[sliceLosslessIndexArray[i]] = true;
+      CHECK(sliceLosslessIndexArray[i] >= numSlices || sliceLosslessIndexArray[i] < 0,
+            "index of lossless slice is out of slice index bound");
+      m_lossylosslessSliceArray[sliceLosslessIndexArray[i]] = true;
     }
   }
   CHECK(m_lossylosslessSliceArray.size() < numSlices, "sliceLosslessArray size is less than number of slices");

@@ -1542,7 +1542,6 @@ void CodingStructure::create(const ChromaFormat &_chromaFormat, const Area& _are
     return;
   }
 
-
   m_reco.create( area );
   m_pred.create( area );
   m_resi.create( area );
@@ -1557,7 +1556,6 @@ void CodingStructure::create(const UnitArea& _unit, const bool isTopLayer, const
   {
     return;
   }
-
 
   m_reco.create( area );
   m_pred.create( area );

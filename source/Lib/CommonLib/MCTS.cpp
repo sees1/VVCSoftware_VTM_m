@@ -257,6 +257,7 @@ bool MCTSHelper::checkMvBufferForMCTSConstraint( const PredictionUnit &pu, bool 
 
   return true;
 }
+
 bool MCTSHelper::checkMvIsNotInRestrictedArea( const PredictionUnit &pu, const Mv& mv, const Area& restrArea, const MvPrecision mvPrec )
 {
   CHECKD( mvPrec < MV_PRECISION_INT, "Wrong MV precision!" );
@@ -271,6 +272,7 @@ bool MCTSHelper::checkMvIsNotInRestrictedArea( const PredictionUnit &pu, const M
   }
   return true;
 }
+
 bool MCTSHelper::checkMvForMCTSConstraint( const PredictionUnit &pu, const Mv& mv, const MvPrecision mvPrec )
 {
   return checkMvIsNotInRestrictedArea( pu, mv, pu.cs->picture->mctsInfo.getTileAreaSubPelRestricted( pu ), mvPrec );

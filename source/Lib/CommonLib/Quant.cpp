@@ -497,12 +497,6 @@ void Quant::init( uint32_t uiMaxTrSize,
   m_resetStore = true;
 }
 
-/** set quantized matrix coefficient for encode
- * \param scalingList            quantized matrix address
- * \param format                 chroma format
- * \param maxLog2TrDynamicRange
- * \param bitDepths              reference to bit depth array for all channels
- */
 void Quant::setScalingList(ScalingList *scalingList, const int maxLog2TrDynamicRange[MAX_NUM_CHANNEL_TYPE], const BitDepths &bitDepths)
 {
   const int minimumQp = 0;
@@ -529,7 +523,7 @@ void Quant::setScalingList(ScalingList *scalingList, const int maxLog2TrDynamicR
       }
       else // chroma QMs in 400
       {
-         scalingList->processDefaultMatrix(scalingListId);
+        scalingList->processDefaultMatrix(scalingListId);
       }
     }
   }
@@ -608,14 +602,6 @@ void Quant::setScalingListDec(const ScalingList &scalingList)
   }
 }
 
-
-/** set quantized matrix coefficient for encode
- * \param scalingList quantized matrix address
- * \param listId List index
- * \param sizeId size index
- * \param qp Quantization parameter
- * \param format chroma format
- */
 void Quant::xSetScalingListEnc(ScalingList *scalingList, uint32_t listId, uint32_t sizeId, int qp, uint32_t scalingListId)
 {
   uint32_t width  = g_scalingListSizeX[sizeId];
@@ -636,13 +622,6 @@ void Quant::xSetScalingListEnc(ScalingList *scalingList, uint32_t listId, uint32
                         scalingList->getScalingListDC(scalingListId));
 }
 
-/** set quantized matrix coefficient for decode
- * \param scalingList quantaized matrix address
- * \param listId List index
- * \param sizeId size index
- * \param qp Quantization parameter
- * \param format chroma format
- */
 void Quant::xSetScalingListDec(const ScalingList &scalingList, uint32_t listId, uint32_t sizeId, int qp, uint32_t scalingListId)
 {
   uint32_t width  = g_scalingListSizeX[sizeId];
@@ -664,13 +643,6 @@ void Quant::xSetScalingListDec(const ScalingList &scalingList, uint32_t listId, 
                         scalingList.getScalingListDC(scalingListId));
 }
 
-/** set quantized matrix coefficient for encode
-* \param scalingList quantized matrix address
-* \param listId List index
-* \param sizeId size index
-* \param qp Quantization parameter
-* \param format chroma format
-*/
 void Quant::xSetRecScalingListEnc(ScalingList *scalingList, uint32_t listId, uint32_t sizeIdw, uint32_t sizeIdh, int qp, uint32_t scalingListId)
 {
   if (sizeIdw == sizeIdh) return;
@@ -692,16 +664,13 @@ void Quant::xSetRecScalingListEnc(ScalingList *scalingList, uint32_t listId, uin
     ((largeSideId >= 3) ? 8 : 4),
     scalingList->getScalingListDC(scalingListId));
 }
-/** set quantized matrix coefficient for decode
-* \param scalingList quantaized matrix address
-* \param listId List index
-* \param sizeId size index
-* \param qp Quantization parameter
-* \param format chroma format
-*/
+
 void Quant::xSetRecScalingListDec(const ScalingList &scalingList, uint32_t listId, uint32_t sizeIdw, uint32_t sizeIdh, int qp, uint32_t scalingListId)
 {
-  if (sizeIdw == sizeIdh) return;
+  if (sizeIdw == sizeIdh)
+  {
+    return;
+  }
   uint32_t width = g_scalingListSizeX[sizeIdw];
   uint32_t height = g_scalingListSizeX[sizeIdh];
   uint32_t largeSideId = (sizeIdw > sizeIdh) ? sizeIdw : sizeIdh;  //16
