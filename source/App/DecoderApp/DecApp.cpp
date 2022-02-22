@@ -460,14 +460,17 @@ uint32_t DecApp::decode()
         }
       }
       // update file bitdepth shift if recon bitdepth changed between sequences
-      for (uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++)
+      if (!m_SEIFGSFileName.empty())
       {
-        int reconBitdepth = pcListPic->front()->cs->sps->getBitDepth((ChannelType) channelType);
-        int fileBitdepth  = m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].getFileBitdepth(channelType);
-        int bitdepthShift = m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].getBitdepthShift(channelType);
-        if (fileBitdepth + bitdepthShift != reconBitdepth)
+        for (uint32_t channelType = 0; channelType < MAX_NUM_CHANNEL_TYPE; channelType++)
         {
-          m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
+          int reconBitdepth = pcListPic->front()->cs->sps->getBitDepth((ChannelType) channelType);
+          int fileBitdepth  = m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].getFileBitdepth(channelType);
+          int bitdepthShift = m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].getBitdepthShift(channelType);
+          if (fileBitdepth + bitdepthShift != reconBitdepth)
+          {
+            m_videoIOYuvSEIFGSFile[nalu.m_nuhLayerId].setBitdepthShift(channelType, reconBitdepth - fileBitdepth);
+          }
         }
       }
 
