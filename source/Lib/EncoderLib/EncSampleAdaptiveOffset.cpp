@@ -1558,15 +1558,15 @@ void EncSampleAdaptiveOffset::deriveLoopFilterBoundaryAvailibility(CodingStructu
 
   if (!isLoopFiltAcrossSlicePPS)
   {
-    isLeftAvail      = (cuLeft == NULL)      ? false : CU::isSameTile(*cuCurr, *cuLeft);
-    isAboveAvail     = (cuAbove == NULL)     ? false : CU::isSameTile(*cuCurr, *cuAbove);
-    isAboveLeftAvail = (cuAboveLeft == NULL) ? false : CU::isSameTile(*cuCurr, *cuAboveLeft);
+    isLeftAvail      = (cuLeft      == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuLeft);
+    isAboveAvail     = (cuAbove     == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuAbove);
+    isAboveLeftAvail = (cuAboveLeft == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuAboveLeft);
   }
   else
   {
-    isLeftAvail      = (cuLeft != NULL);
-    isAboveAvail     = (cuAbove != NULL);
-    isAboveLeftAvail = (cuAboveLeft != NULL);
+    isLeftAvail      = (cuLeft      != nullptr);
+    isAboveAvail     = (cuAbove     != nullptr);
+    isAboveLeftAvail = (cuAboveLeft != nullptr);
   }
 
   if (!isLoopFiltAcrossTilePPS)
