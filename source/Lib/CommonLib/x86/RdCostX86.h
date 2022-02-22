@@ -4097,6 +4097,7 @@ Distortion RdCost::xGetSAD_HBD_SIMD(const DistParam &rcDtParam)
   }
   else
 #endif
+  {
     if ((iCols & 3) == 0)
     {
       __m128i vzero = _mm_setzero_si128();
@@ -4149,9 +4150,10 @@ Distortion RdCost::xGetSAD_HBD_SIMD(const DistParam &rcDtParam)
       vsum32 = _mm_hadd_epi32(vsum32, vzero);
       sum    = _mm_cvtsi128_si32(vsum32);
     }
+  }
 
-    sum <<= iSubShift;
-    return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
+  sum <<= iSubShift;
+  return sum >> DISTORTION_PRECISION_ADJUSTMENT(rcDtParam.bitDepth);
 }
 
 template< X86_VEXT vext >
@@ -4296,6 +4298,7 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
   }
   else
 #endif
+  {
     if ((iCols & 3) == 0)
     {
       __m128i vsum = _mm_setzero_si128();
@@ -4351,8 +4354,9 @@ Distortion RdCost::xGetSSE_HBD_SIMD(const DistParam& pcDtParam)
         piCur += iStrideCur;
       }
     }
-
-    return sum;
+  }
+  
+  return sum;
 }
 #else
 template<X86_VEXT vext>
