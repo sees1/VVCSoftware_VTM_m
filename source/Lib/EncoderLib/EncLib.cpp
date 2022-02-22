@@ -896,7 +896,8 @@ void EncLib::xGetNewPicBuffer ( std::list<PelUnitBuf*>& rcListPicYuvRecOut, Pict
   {
     rpcPic = new Picture;
     rpcPic->create(sps.getChromaFormatIdc(), Size(pps.getPicWidthInLumaSamples(), pps.getPicHeightInLumaSamples()),
-                   sps.getMaxCUWidth(), sps.getMaxCUWidth() + 16, false, m_layerId, getGopBasedTemporalFilterEnabled(), m_fgcSEIAnalysisEnabled);
+                   sps.getMaxCUWidth(), sps.getMaxCUWidth() + PIC_MARGIN, false, m_layerId,
+                   getGopBasedTemporalFilterEnabled(), m_fgcSEIAnalysisEnabled);
     if (m_resChangeInClvsEnabled)
     {
       const PPS &pps0 = *m_ppsMap.getPS(0);
