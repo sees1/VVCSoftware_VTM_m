@@ -62,15 +62,17 @@ void clipMvInPic ( Mv& rcMv, const struct Position& pos, const struct Size& size
   }
 
   int mvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  int offset = 8;
+  const int offset  = PIC_MARGIN / 2;
   int horMax = (pps.getPicWidthInLumaSamples() + offset - (int)pos.x - 1) << mvShift;
   int horMin = (-(int)sps.getMaxCUWidth() - offset - (int)pos.x + 1) << mvShift;
 
   int verMax = (pps.getPicHeightInLumaSamples() + offset - (int)pos.y - 1) << mvShift;
   int verMin = (-(int)sps.getMaxCUHeight() - offset - (int)pos.y + 1) << mvShift;
 
-  rcMv.setHor(std::min(horMax, std::max(horMin, rcMv.getHor())));
-  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())));
+  // Keep LSBs such as to not change filter phase
+  const int mask = (1 << MV_FRACTIONAL_BITS_INTERNAL) - 1;
+  rcMv.setHor(std::min(horMax, std::max(horMin, rcMv.getHor())) | (rcMv.getHor() & mask));
+  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())) | (rcMv.getVer() & mask));
 }
 
 void clipMvInSubpic ( Mv& rcMv, const struct Position& pos, const struct Size& size, const class SPS& sps, const class PPS& pps )
@@ -82,7 +84,7 @@ void clipMvInSubpic ( Mv& rcMv, const struct Position& pos, const struct Size& s
   }
 
   int mvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  int offset = 8;
+  const int offset  = PIC_MARGIN / 2;
   int horMax = (pps.getPicWidthInLumaSamples() + offset - (int)pos.x - 1) << mvShift;
   int horMin = (-(int)sps.getMaxCUWidth() - offset - (int)pos.x + 1) << mvShift;
 
@@ -97,15 +99,18 @@ void clipMvInSubpic ( Mv& rcMv, const struct Position& pos, const struct Size& s
     verMax = ((curSubPic.getSubPicBottom() + 1) + offset - (int)pos.y - 1) << mvShift;
     verMin = (-(int)sps.getMaxCUHeight() - offset - ((int)pos.y - curSubPic.getSubPicTop()) + 1) << mvShift;
   }
-  rcMv.setHor(std::min(horMax, std::max(horMin, rcMv.getHor())));
-  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())));
+
+  // Keep LSBs such as to not change filter phase
+  const int mask = (1 << MV_FRACTIONAL_BITS_INTERNAL) - 1;
+  rcMv.setHor(std::min(horMax, std::max(horMin, rcMv.getHor())) | (rcMv.getHor() & mask));
+  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())) | (rcMv.getVer() & mask));
 }
 
 bool wrapClipMv( Mv& rcMv, const Position& pos, const struct Size& size, const SPS *sps, const PPS *pps )
 {
   bool wrapRef = true;
   int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  int  offset   = 8;
+  const int offset   = PIC_MARGIN / 2;
   int  horMax   = (pps->getPicWidthInLumaSamples() + sps->getMaxCUWidth() - size.width + offset - (int) pos.x - 1)
                << iMvShift;
   int horMin = (-(int) sps->getMaxCUWidth() - offset - (int) pos.x + 1) << iMvShift;
@@ -124,18 +129,18 @@ bool wrapClipMv( Mv& rcMv, const Position& pos, const struct Size& size, const S
   if (mvX > horMax)
   {
     mvX -= ( pps->getWrapAroundOffset() << iMvShift );
-    mvX     = std::min(horMax, std::max(horMin, mvX));
     wrapRef = false;
   }
   if (mvX < horMin)
   {
     mvX += ( pps->getWrapAroundOffset() << iMvShift );
-    mvX     = std::min(horMax, std::max(horMin, mvX));
     wrapRef = false;
   }
 
-  rcMv.setHor( mvX );
-  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())));
+  // Keep LSBs such as to not change filter phase
+  const int mask = (1 << MV_FRACTIONAL_BITS_INTERNAL) - 1;
+  rcMv.setHor(std::min(horMax, std::max(horMin, mvX)) | (mvX & mask));
+  rcMv.setVer(std::min(verMax, std::max(verMin, rcMv.getVer())) | (rcMv.getVer() & mask));
   return wrapRef;
 }
 

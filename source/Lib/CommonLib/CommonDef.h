@@ -299,6 +299,8 @@ static const int MAX_NUM_TUS =                                     16; ///< Maxi
 static const int MAX_LOG2_DIFF_CU_TR_SIZE =                         3;
 static const int MAX_CU_TILING_PARTITIONS = 1 << ( MAX_LOG2_DIFF_CU_TR_SIZE << 1 );
 
+static constexpr int PIC_MARGIN = 16;
+
 static const int JVET_C0024_ZERO_OUT_TH =                          32;
 
 static const int MAX_NUM_PART_IDXS_IN_CTU_WIDTH = MAX_CU_SIZE/MIN_PU_SIZE; ///< maximum number of partition indices across the width of a CTU (or height of a CTU)
