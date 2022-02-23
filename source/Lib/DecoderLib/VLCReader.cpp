@@ -4610,8 +4610,7 @@ void HLSyntaxReader::parseConstraintInfo(ConstraintInfo *cinfo, const ProfileTie
 #if JVET_Y0273_GCI_BUGFIX
     else if (numAdditionalBits > 0)
     {
-      msg(ERROR, "Warning: the current bitstream is illegal because gci_num_additional_bits was set to the value %d. \
-        gci_num_additional_bits may only be set to 0, 6, or greater than 6.", numAdditionalBits);
+      msg(ERROR, "Invalid bitstream: gci_num_additional_bits set to value %d (must be 0 or >= 6)\n", numAdditionalBits);
       numAdditionalBitsUsed = 0;
     }
 #endif
