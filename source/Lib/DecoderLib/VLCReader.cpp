@@ -3640,7 +3640,7 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 
       pcSlice->addCtusToSlice(pps->getTileColumnBd(tileX), pps->getTileColumnBd(tileX + 1),
                               pps->getTileRowBd(tileY), pps->getTileRowBd(tileY + 1), pps->getPicWidthInCtu());
-   }
+    }
   }
 
   if (picHeader->getPicInterSliceAllowedFlag())
@@ -3770,92 +3770,83 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     pcSlice->setExplicitScalingListUsed(pcSlice->getPictureHeaderInSliceHeader() ? picHeader->getExplicitScalingListEnabledFlag() : false);
   }
 
-    if( pps->getRplInfoInPhFlag() )
+  if (pps->getRplInfoInPhFlag())
+  {
+    *pcSlice->getRPL0() = *picHeader->getRPL0();
+    *pcSlice->getRPL1() = *picHeader->getRPL1();
+  }
+  else if (pcSlice->getIdrPicFlag() && !(sps->getIDRRefParamListPresent()))
+  {
+    ReferencePictureList *rpl0 = pcSlice->getRPL0();
+    (*rpl0)                    = ReferencePictureList();
+    ReferencePictureList *rpl1 = pcSlice->getRPL1();
+    (*rpl1)                    = ReferencePictureList();
+  }
+  else
+  {
+    // Read L0 related syntax elements
+    bool rplSpsFlag0 = 0;
+
+    if (sps->getNumRPL0() > 0)
     {
-      *pcSlice->getRPL0() = *picHeader->getRPL0();
-      *pcSlice->getRPL1() = *picHeader->getRPL1();
-    }
-    else if( pcSlice->getIdrPicFlag() && !(sps->getIDRRefParamListPresent()) )
-    {
-      ReferencePictureList* rpl0 = pcSlice->getRPL0();
-      (*rpl0) = ReferencePictureList();
-      ReferencePictureList* rpl1 = pcSlice->getRPL1();
-      (*rpl1) = ReferencePictureList();
+      READ_FLAG(uiCode, "ref_pic_list_sps_flag[0]");
     }
     else
     {
-      //Read L0 related syntax elements
-      bool rplSpsFlag0 = 0;
+      uiCode = 0;
+    }
 
-      if (sps->getNumRPL0() > 0)
+    rplSpsFlag0 = uiCode;
+
+    auto const rpl0 = pcSlice->getRPL0();
+    if (!uiCode)   // explicitly carried in this SH
+    {
+      (*rpl0) = ReferencePictureList();
+      parseRefPicList(sps, rpl0, -1);
+      pcSlice->setRPL0idx(-1);
+    }
+    else   // Refer to list in SPS
+    {
+      if (sps->getNumRPL0() > 1)
       {
-        READ_FLAG(uiCode, "ref_pic_list_sps_flag[0]");
+        int numBits = ceilLog2(sps->getNumRPL0());
+        READ_CODE(numBits, uiCode, "ref_pic_list_idx[0]");
+        pcSlice->setRPL0idx(uiCode);
+        *rpl0 = *sps->getRPLList0()->getReferencePictureList(uiCode);
       }
       else
       {
-        uiCode = 0;
+        pcSlice->setRPL0idx(0);
+        *rpl0 = *sps->getRPLList0()->getReferencePictureList(0);
       }
-
-      rplSpsFlag0 = uiCode;
-
-      auto const rpl0 = pcSlice->getRPL0();
-      if (!uiCode) //explicitly carried in this SH
-      {
-        (*rpl0) = ReferencePictureList();
-        parseRefPicList(sps, rpl0, -1);
-        pcSlice->setRPL0idx(-1);
-      }
-      else    //Refer to list in SPS
-      {
-        if (sps->getNumRPL0() > 1)
-        {
-          int numBits = ceilLog2(sps->getNumRPL0());
-          READ_CODE(numBits, uiCode, "ref_pic_list_idx[0]");
-          pcSlice->setRPL0idx(uiCode);
-          *rpl0 = *sps->getRPLList0()->getReferencePictureList(uiCode);
-        }
-        else
-        {
-          pcSlice->setRPL0idx(0);
-          *rpl0 = *sps->getRPLList0()->getReferencePictureList(0);
-        }
-      }
-      //Deal POC Msb cycle signalling for LTRP
+    }
+    // Deal POC Msb cycle signalling for LTRP
+    for (int i = 0; i < rpl0->getNumberOfLongtermPictures() + rpl0->getNumberOfShorttermPictures(); i++)
+    {
+      rpl0->setDeltaPocMSBPresentFlag(i, false);
+      rpl0->setDeltaPocMSBCycleLT(i, 0);
+    }
+    if (rpl0->getNumberOfLongtermPictures())
+    {
       for (int i = 0; i < rpl0->getNumberOfLongtermPictures() + rpl0->getNumberOfShorttermPictures(); i++)
       {
-        rpl0->setDeltaPocMSBPresentFlag(i, false);
-        rpl0->setDeltaPocMSBCycleLT(i, 0);
-      }
-      if (rpl0->getNumberOfLongtermPictures())
-      {
-        for (int i = 0; i < rpl0->getNumberOfLongtermPictures() + rpl0->getNumberOfShorttermPictures(); i++)
+        if (rpl0->isRefPicLongterm(i))
         {
-          if (rpl0->isRefPicLongterm(i))
+          if (rpl0->getLtrpInSliceHeaderFlag())
           {
-            if (rpl0->getLtrpInSliceHeaderFlag())
+            READ_CODE(sps->getBitsForPOC(), uiCode, "slice_poc_lsb_lt[i][j]");
+            rpl0->setRefPicIdentifier(i, uiCode, true, false, 0);
+          }
+          READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
+          rpl0->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
+          if (uiCode)
+          {
+            READ_UVLC(uiCode, "slice_delta_poc_msb_cycle_lt[i][j]");
+            if (i != 0)
             {
-              READ_CODE(sps->getBitsForPOC(), uiCode, "slice_poc_lsb_lt[i][j]");
-              rpl0->setRefPicIdentifier( i, uiCode, true, false, 0 );
+              uiCode += rpl0->getDeltaPocMSBCycleLT(i - 1);
             }
-            READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
-            rpl0->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
-            if (uiCode)
-            {
-              READ_UVLC(uiCode, "slice_delta_poc_msb_cycle_lt[i][j]");
-              if(i != 0)
-              {
-                uiCode += rpl0->getDeltaPocMSBCycleLT(i-1);
-              }
-              rpl0->setDeltaPocMSBCycleLT(i, uiCode);
-            }
-            else if(i != 0)
-            {
-              rpl0->setDeltaPocMSBCycleLT(i, rpl0->getDeltaPocMSBCycleLT(i-1));
-            }
-            else
-            {
-              rpl0->setDeltaPocMSBCycleLT(i,0);
-            }
+            rpl0->setDeltaPocMSBCycleLT(i, uiCode);
           }
           else if(i != 0)
           {
@@ -3866,87 +3857,87 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
             rpl0->setDeltaPocMSBCycleLT(i,0);
           }
         }
-      }
-
-      //Read L1 related syntax elements
-      if (sps->getNumRPL(1) > 0 && pps->getRpl1IdxPresentFlag())
-      {
-          READ_FLAG(uiCode, "ref_pic_list_sps_flag[1]");
-      }
-      else if (sps->getNumRPL(1) == 0)
-      {
-        uiCode = 0;
-      }
-      else
-      {
-        uiCode = rplSpsFlag0;
-      }
-
-      auto const rpl1 = pcSlice->getRPL1();
-      if (uiCode == 1)
-      {
-        if (sps->getNumRPL(1) > 1 && pps->getRpl1IdxPresentFlag())
+        else if (i != 0)
         {
-          int numBits = ceilLog2(sps->getNumRPL1());
-          READ_CODE(numBits, uiCode, "ref_pic_list_idx[1]");
-          pcSlice->setRPL1idx(uiCode);
-          *rpl1 = *sps->getRPLList1()->getReferencePictureList(uiCode);
-        }
-        else if (sps->getNumRPL(1) == 1)
-        {
-          pcSlice->setRPL1idx(0);
-          *rpl1 = *sps->getRPLList1()->getReferencePictureList(0);
+          rpl0->setDeltaPocMSBCycleLT(i, rpl0->getDeltaPocMSBCycleLT(i - 1));
         }
         else
         {
-          assert(pcSlice->getRPL0idx() != -1);
-          pcSlice->setRPL1idx(pcSlice->getRPL0idx());
-          *rpl1 = *sps->getRPLList1()->getReferencePictureList(pcSlice->getRPL0idx());
+          rpl0->setDeltaPocMSBCycleLT(i, 0);
         }
+      }
+    }
+
+    // Read L1 related syntax elements
+    if (sps->getNumRPL(1) > 0 && pps->getRpl1IdxPresentFlag())
+    {
+      READ_FLAG(uiCode, "ref_pic_list_sps_flag[1]");
+    }
+    else if (sps->getNumRPL(1) == 0)
+    {
+      uiCode = 0;
+    }
+    else
+    {
+      uiCode = rplSpsFlag0;
+    }
+
+    auto const rpl1 = pcSlice->getRPL1();
+    if (uiCode == 1)
+    {
+      if (sps->getNumRPL(1) > 1 && pps->getRpl1IdxPresentFlag())
+      {
+        int numBits = ceilLog2(sps->getNumRPL1());
+        READ_CODE(numBits, uiCode, "ref_pic_list_idx[1]");
+        pcSlice->setRPL1idx(uiCode);
+        *rpl1 = *sps->getRPLList1()->getReferencePictureList(uiCode);
+      }
+      else if (sps->getNumRPL(1) == 1)
+      {
+        pcSlice->setRPL1idx(0);
+        *rpl1 = *sps->getRPLList1()->getReferencePictureList(0);
       }
       else
       {
-        (*rpl1) = ReferencePictureList();
-        parseRefPicList(sps, rpl1, -1);
-        pcSlice->setRPL1idx(-1);
+        assert(pcSlice->getRPL0idx() != -1);
+        pcSlice->setRPL1idx(pcSlice->getRPL0idx());
+        *rpl1 = *sps->getRPLList1()->getReferencePictureList(pcSlice->getRPL0idx());
       }
+    }
+    else
+    {
+      (*rpl1) = ReferencePictureList();
+      parseRefPicList(sps, rpl1, -1);
+      pcSlice->setRPL1idx(-1);
+    }
 
-      //Deal POC Msb cycle signalling for LTRP
+    // Deal POC Msb cycle signalling for LTRP
+    for (int i = 0; i < rpl1->getNumberOfLongtermPictures() + rpl1->getNumberOfShorttermPictures(); i++)
+    {
+      rpl1->setDeltaPocMSBPresentFlag(i, false);
+      rpl1->setDeltaPocMSBCycleLT(i, 0);
+    }
+    if (rpl1->getNumberOfLongtermPictures())
+    {
       for (int i = 0; i < rpl1->getNumberOfLongtermPictures() + rpl1->getNumberOfShorttermPictures(); i++)
       {
-        rpl1->setDeltaPocMSBPresentFlag(i, false);
-        rpl1->setDeltaPocMSBCycleLT(i, 0);
-      }
-      if (rpl1->getNumberOfLongtermPictures())
-      {
-        for (int i = 0; i < rpl1->getNumberOfLongtermPictures() + rpl1->getNumberOfShorttermPictures(); i++)
+        if (rpl1->isRefPicLongterm(i))
         {
-          if (rpl1->isRefPicLongterm(i))
+          if (rpl1->getLtrpInSliceHeaderFlag())
           {
-            if (rpl1->getLtrpInSliceHeaderFlag())
+            READ_CODE(sps->getBitsForPOC(), uiCode, "slice_poc_lsb_lt[i][j]");
+            rpl1->setRefPicIdentifier(i, uiCode, true, false, 0);
+          }
+          READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
+          rpl1->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
+          if (uiCode)
+          {
+            READ_UVLC(uiCode, "slice_delta_poc_msb_cycle_lt[i][j]");
+            if (i != 0)
             {
-              READ_CODE(sps->getBitsForPOC(), uiCode, "slice_poc_lsb_lt[i][j]");
-              rpl1->setRefPicIdentifier( i, uiCode, true, false, 0 );
+              uiCode += rpl1->getDeltaPocMSBCycleLT(i - 1);
             }
-            READ_FLAG(uiCode, "delta_poc_msb_present_flag[i][j]");
-            rpl1->setDeltaPocMSBPresentFlag(i, uiCode ? true : false);
-            if (uiCode)
-            {
-              READ_UVLC(uiCode, "slice_delta_poc_msb_cycle_lt[i][j]");
-              if(i != 0)
-              {
-                uiCode += rpl1->getDeltaPocMSBCycleLT(i-1);
-              }
-              rpl1->setDeltaPocMSBCycleLT(i, uiCode);
-            }
-            else if(i != 0)
-            {
-              rpl1->setDeltaPocMSBCycleLT(i, rpl1->getDeltaPocMSBCycleLT(i-1));
-            }
-            else
-            {
-              rpl1->setDeltaPocMSBCycleLT(i,0);
-            }
+            rpl1->setDeltaPocMSBCycleLT(i, uiCode);
           }
           else if(i != 0)
           {
@@ -3957,305 +3948,339 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
             rpl1->setDeltaPocMSBCycleLT(i,0);
           }
         }
-      }
-
-    }
-    if( !pps->getRplInfoInPhFlag() && pcSlice->getIdrPicFlag() && !(sps->getIDRRefParamListPresent()) )
-    {
-      pcSlice->setNumRefIdx(REF_PIC_LIST_0, 0);
-      pcSlice->setNumRefIdx(REF_PIC_LIST_1, 0);
-    }
-      if ((!pcSlice->isIntra() && pcSlice->getRPL0()->getNumRefEntries() > 1) ||
-          (pcSlice->isInterB() && pcSlice->getRPL1()->getNumRefEntries() > 1) )
-      {
-        READ_FLAG( uiCode, "sh_num_ref_idx_active_override_flag");
-        if (uiCode)
+        else if (i != 0)
         {
-          if(pcSlice->getRPL0()->getNumRefEntries() > 1)
-          {
-            READ_UVLC (uiCode, "sh_num_ref_idx_active_minus1[0]" );
-          }
-          else
-          {
-            uiCode = 0;
-          }
-          pcSlice->setNumRefIdx( REF_PIC_LIST_0, uiCode + 1 );
-          if (pcSlice->isInterB())
-          {
-            if(pcSlice->getRPL1()->getNumRefEntries() > 1)
-            {
-              READ_UVLC (uiCode, "sh_num_ref_idx_active_minus1[1]" );
-            }
-            else
-            {
-              uiCode = 0;
-            }
-            pcSlice->setNumRefIdx(REF_PIC_LIST_1, uiCode + 1);
-          }
-          else
-          {
-            pcSlice->setNumRefIdx(REF_PIC_LIST_1, 0);
-          }
+          rpl1->setDeltaPocMSBCycleLT(i, rpl1->getDeltaPocMSBCycleLT(i - 1));
         }
         else
         {
-          if(pcSlice->getRPL0()->getNumRefEntries() >= pps->getNumRefIdxL0DefaultActive())
-          {
-            pcSlice->setNumRefIdx(REF_PIC_LIST_0, pps->getNumRefIdxL0DefaultActive());
-          }
-          else
-          {
-            pcSlice->setNumRefIdx(REF_PIC_LIST_0, pcSlice->getRPL0()->getNumRefEntries());
-          }
+          rpl1->setDeltaPocMSBCycleLT(i, 0);
+        }
+      }
+    }
+  }
+  if (!pps->getRplInfoInPhFlag() && pcSlice->getIdrPicFlag() && !(sps->getIDRRefParamListPresent()))
+  {
+    pcSlice->setNumRefIdx(REF_PIC_LIST_0, 0);
+    pcSlice->setNumRefIdx(REF_PIC_LIST_1, 0);
+  }
+  if ((!pcSlice->isIntra() && pcSlice->getRPL0()->getNumRefEntries() > 1)
+      || (pcSlice->isInterB() && pcSlice->getRPL1()->getNumRefEntries() > 1))
+  {
+    READ_FLAG(uiCode, "sh_num_ref_idx_active_override_flag");
+    if (uiCode)
+    {
+      if (pcSlice->getRPL0()->getNumRefEntries() > 1)
+      {
+        READ_UVLC(uiCode, "sh_num_ref_idx_active_minus1[0]");
+      }
+      else
+      {
+        uiCode = 0;
+      }
+      pcSlice->setNumRefIdx(REF_PIC_LIST_0, uiCode + 1);
+      if (pcSlice->isInterB())
+      {
+        if (pcSlice->getRPL1()->getNumRefEntries() > 1)
+        {
+          READ_UVLC(uiCode, "sh_num_ref_idx_active_minus1[1]");
+        }
+        else
+        {
+          uiCode = 0;
+        }
+        pcSlice->setNumRefIdx(REF_PIC_LIST_1, uiCode + 1);
+      }
+      else
+      {
+        pcSlice->setNumRefIdx(REF_PIC_LIST_1, 0);
+      }
+    }
+    else
+    {
+      if (pcSlice->getRPL0()->getNumRefEntries() >= pps->getNumRefIdxL0DefaultActive())
+      {
+        pcSlice->setNumRefIdx(REF_PIC_LIST_0, pps->getNumRefIdxL0DefaultActive());
+      }
+      else
+      {
+        pcSlice->setNumRefIdx(REF_PIC_LIST_0, pcSlice->getRPL0()->getNumRefEntries());
+      }
 
-          if (pcSlice->isInterB())
-          {
-            if(pcSlice->getRPL1()->getNumRefEntries() >= pps->getNumRefIdxL1DefaultActive())
-            {
-              pcSlice->setNumRefIdx(REF_PIC_LIST_1, pps->getNumRefIdxL1DefaultActive());
-            }
-            else
-            {
-              pcSlice->setNumRefIdx(REF_PIC_LIST_1, pcSlice->getRPL1()->getNumRefEntries());
-            }
-          }
-          else
-          {
-            pcSlice->setNumRefIdx(REF_PIC_LIST_1, 0);
-          }
+      if (pcSlice->isInterB())
+      {
+        if (pcSlice->getRPL1()->getNumRefEntries() >= pps->getNumRefIdxL1DefaultActive())
+        {
+          pcSlice->setNumRefIdx(REF_PIC_LIST_1, pps->getNumRefIdxL1DefaultActive());
+        }
+        else
+        {
+          pcSlice->setNumRefIdx(REF_PIC_LIST_1, pcSlice->getRPL1()->getNumRefEntries());
         }
       }
       else
       {
-        pcSlice->setNumRefIdx( REF_PIC_LIST_0, pcSlice->isIntra() ? 0 : 1 );
-        pcSlice->setNumRefIdx( REF_PIC_LIST_1, pcSlice->isInterB() ? 1 : 0 );
+        pcSlice->setNumRefIdx(REF_PIC_LIST_1, 0);
       }
+    }
+  }
+  else
+  {
+    pcSlice->setNumRefIdx(REF_PIC_LIST_0, pcSlice->isIntra() ? 0 : 1);
+    pcSlice->setNumRefIdx(REF_PIC_LIST_1, pcSlice->isInterB() ? 1 : 0);
+  }
 
-    if (pcSlice->isInterP() || pcSlice->isInterB())
+  if (pcSlice->isInterP() || pcSlice->isInterB())
+  {
+    CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_0) == 0,
+          "Number of active entries in RPL0 of P or B picture shall be greater than 0");
+    if (pcSlice->isInterB())
     {
-      CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_0) == 0, "Number of active entries in RPL0 of P or B picture shall be greater than 0");
-      if (pcSlice->isInterB())
-        CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_1) == 0, "Number of active entries in RPL1 of B picture shall be greater than 0");
+      CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_1) == 0,
+            "Number of active entries in RPL1 of B picture shall be greater than 0");
+    }
+  }
+
+  pcSlice->setCabacInitFlag(false);   // default
+  if (pps->getCabacInitPresentFlag() && !pcSlice->isIntra())
+  {
+    READ_FLAG(uiCode, "sh_cabac_init_flag");
+    pcSlice->setCabacInitFlag(uiCode ? true : false);
+    pcSlice->setEncCABACTableIdx(pcSlice->getSliceType() == B_SLICE ? (uiCode ? P_SLICE : B_SLICE)
+                                                                    : (uiCode ? B_SLICE : P_SLICE));
+  }
+
+  if (picHeader->getEnableTMVPFlag())
+  {
+    if (pcSlice->getSliceType() == P_SLICE)
+    {
+      pcSlice->setColFromL0Flag(true);
+    }
+    else if (!pps->getRplInfoInPhFlag() && pcSlice->getSliceType() == B_SLICE)
+    {
+      READ_FLAG(uiCode, "sh_collocated_from_l0_flag");
+      pcSlice->setColFromL0Flag(uiCode);
+    }
+    else
+    {
+      pcSlice->setColFromL0Flag(picHeader->getPicColFromL0Flag());
     }
 
-
-    pcSlice->setCabacInitFlag( false ); // default
-    if(pps->getCabacInitPresentFlag() && !pcSlice->isIntra())
+    if (!pps->getRplInfoInPhFlag())
     {
-      READ_FLAG(uiCode, "sh_cabac_init_flag");
-      pcSlice->setCabacInitFlag( uiCode ? true : false );
-      pcSlice->setEncCABACTableIdx( pcSlice->getSliceType() == B_SLICE ? ( uiCode ? P_SLICE : B_SLICE ) : ( uiCode ? B_SLICE : P_SLICE ) );
-    }
-
-    if ( picHeader->getEnableTMVPFlag() )
-    {
-      if( pcSlice->getSliceType() == P_SLICE )
+      if (pcSlice->getSliceType() != I_SLICE
+          && ((pcSlice->getColFromL0Flag() == 1 && pcSlice->getNumRefIdx(REF_PIC_LIST_0) > 1)
+              || (pcSlice->getColFromL0Flag() == 0 && pcSlice->getNumRefIdx(REF_PIC_LIST_1) > 1)))
       {
-        pcSlice->setColFromL0Flag( true );
-      }
-      else if( !pps->getRplInfoInPhFlag() && pcSlice->getSliceType() == B_SLICE )
-      {
-        READ_FLAG( uiCode, "sh_collocated_from_l0_flag" );
-        pcSlice->setColFromL0Flag( uiCode );
-      }
-      else
-      {
-        pcSlice->setColFromL0Flag( picHeader->getPicColFromL0Flag() );
-      }
-
-      if (!pps->getRplInfoInPhFlag())
-      {
-      if ( pcSlice->getSliceType() != I_SLICE &&
-           ((pcSlice->getColFromL0Flag() == 1 && pcSlice->getNumRefIdx(REF_PIC_LIST_0) > 1)||
-           (pcSlice->getColFromL0Flag() == 0 && pcSlice->getNumRefIdx(REF_PIC_LIST_1) > 1)))
-      {
-        READ_UVLC( uiCode, "sh_collocated_ref_idx" );
+        READ_UVLC(uiCode, "sh_collocated_ref_idx");
         pcSlice->setColRefIdx(uiCode);
       }
       else
       {
         pcSlice->setColRefIdx(0);
       }
-
-      }
-      else
-      {
-        pcSlice->setColRefIdx(picHeader->getColRefIdx());
-      }
-    }
-    if ( (pps->getUseWP() && pcSlice->getSliceType()==P_SLICE) || (pps->getWPBiPred() && pcSlice->getSliceType()==B_SLICE) )
-    {
-      if (pps->getWpInfoInPhFlag())
-      {
-        CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_0) > picHeader->getNumL0Weights(), "ERROR: Number of active reference picture L0 is greater than the number of weighted prediction signalled in Picture Header");
-        CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_1) > picHeader->getNumL1Weights(), "ERROR: Number of active reference picture L1 is greater than the number of weighted prediction signalled in Picture Header");
-        pcSlice->setWpScaling(picHeader->getWpScalingAll());
-      }
-      else
-      {
-        parsePredWeightTable(pcSlice, sps);
-      }
-      pcSlice->initWpScaling(sps);
     }
     else
     {
-      for ( int iNumRef=0 ; iNumRef<((pcSlice->getSliceType() == B_SLICE )?2:1); iNumRef++ )
-      {
-        RefPicList  eRefPicList = ( iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0 );
-        for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
-        {
-          WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
-
-          wp[0].presentFlag = false;
-          wp[1].presentFlag = false;
-          wp[2].presentFlag = false;
-        }
-      }
+      pcSlice->setColRefIdx(picHeader->getColRefIdx());
     }
-
-    int qpDelta = 0;
-    if (pps->getQpDeltaInfoInPhFlag())
+  }
+  if ((pps->getUseWP() && pcSlice->getSliceType() == P_SLICE)
+      || (pps->getWPBiPred() && pcSlice->getSliceType() == B_SLICE))
+  {
+    if (pps->getWpInfoInPhFlag())
     {
-      qpDelta = picHeader->getQpDelta();
+      CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_0) > picHeader->getNumL0Weights(),
+            "ERROR: Number of active reference picture L0 is greater than the number of weighted prediction signalled "
+            "in Picture Header");
+      CHECK(pcSlice->getNumRefIdx(REF_PIC_LIST_1) > picHeader->getNumL1Weights(),
+            "ERROR: Number of active reference picture L1 is greater than the number of weighted prediction signalled "
+            "in Picture Header");
+      pcSlice->setWpScaling(picHeader->getWpScalingAll());
     }
     else
     {
-      READ_SVLC(iCode, "sh_qp_delta");
-      qpDelta = iCode;
+      parsePredWeightTable(pcSlice, sps);
     }
-    pcSlice->setSliceQp(26 + pps->getPicInitQPMinus26() + qpDelta);
-    pcSlice->setSliceQpBase(pcSlice->getSliceQp());
-
-    CHECK( pcSlice->getSliceQp() < -sps->getQpBDOffset(CHANNEL_TYPE_LUMA), "Invalid slice QP delta" );
-    CHECK( pcSlice->getSliceQp() > MAX_QP, "Invalid slice QP" );
-
-    if (pps->getSliceChromaQpFlag())
+    pcSlice->initWpScaling(sps);
+  }
+  else
+  {
+    for (int iNumRef = 0; iNumRef < ((pcSlice->getSliceType() == B_SLICE) ? 2 : 1); iNumRef++)
     {
-      if (numValidComp>COMPONENT_Cb)
+      RefPicList eRefPicList = (iNumRef ? REF_PIC_LIST_1 : REF_PIC_LIST_0);
+      for (int refIdx = 0; refIdx < pcSlice->getNumRefIdx(eRefPicList); refIdx++)
       {
-        READ_SVLC( iCode, "sh_cb_qp_offset" );
-        pcSlice->setSliceChromaQpDelta(COMPONENT_Cb, iCode );
-        CHECK( pcSlice->getSliceChromaQpDelta(COMPONENT_Cb) < -12, "Invalid chroma QP offset" );
-        CHECK( pcSlice->getSliceChromaQpDelta(COMPONENT_Cb) >  12, "Invalid chroma QP offset" );
-        CHECK( (pps->getQpOffset(COMPONENT_Cb) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cb)) < -12, "Invalid chroma QP offset" );
-        CHECK( (pps->getQpOffset(COMPONENT_Cb) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cb)) >  12, "Invalid chroma QP offset" );
-      }
+        WPScalingParam *wp = pcSlice->getWpScaling(eRefPicList, refIdx);
 
-      if (numValidComp>COMPONENT_Cr)
-      {
-        READ_SVLC( iCode, "sh_cr_qp_offset" );
-        pcSlice->setSliceChromaQpDelta(COMPONENT_Cr, iCode );
-        CHECK( pcSlice->getSliceChromaQpDelta(COMPONENT_Cr) < -12, "Invalid chroma QP offset" );
-        CHECK( pcSlice->getSliceChromaQpDelta(COMPONENT_Cr) >  12, "Invalid chroma QP offset" );
-        CHECK( (pps->getQpOffset(COMPONENT_Cr) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cr)) < -12, "Invalid chroma QP offset" );
-        CHECK( (pps->getQpOffset(COMPONENT_Cr) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cr)) >  12, "Invalid chroma QP offset" );
-        if (sps->getJointCbCrEnabledFlag())
-        {
-          READ_SVLC(iCode, "sh_joint_cbcr_qp_offset" );
-          pcSlice->setSliceChromaQpDelta(JOINT_CbCr, iCode);
-          CHECK( pcSlice->getSliceChromaQpDelta(JOINT_CbCr) < -12, "Invalid chroma QP offset");
-          CHECK( pcSlice->getSliceChromaQpDelta(JOINT_CbCr) >  12, "Invalid chroma QP offset");
-          CHECK( (pps->getQpOffset(JOINT_CbCr) + pcSlice->getSliceChromaQpDelta(JOINT_CbCr)) < -12, "Invalid chroma QP offset");
-          CHECK( (pps->getQpOffset(JOINT_CbCr) + pcSlice->getSliceChromaQpDelta(JOINT_CbCr)) >  12, "Invalid chroma QP offset");
-        }
+        wp[0].presentFlag = false;
+        wp[1].presentFlag = false;
+        wp[2].presentFlag = false;
       }
     }
+  }
 
-    if (pps->getCuChromaQpOffsetListEnabledFlag())
+  int qpDelta = 0;
+  if (pps->getQpDeltaInfoInPhFlag())
+  {
+    qpDelta = picHeader->getQpDelta();
+  }
+  else
+  {
+    READ_SVLC(iCode, "sh_qp_delta");
+    qpDelta = iCode;
+  }
+  pcSlice->setSliceQp(26 + pps->getPicInitQPMinus26() + qpDelta);
+  pcSlice->setSliceQpBase(pcSlice->getSliceQp());
+
+  CHECK(pcSlice->getSliceQp() < -sps->getQpBDOffset(CHANNEL_TYPE_LUMA), "Invalid slice QP delta");
+  CHECK(pcSlice->getSliceQp() > MAX_QP, "Invalid slice QP");
+
+  if (pps->getSliceChromaQpFlag())
+  {
+    if (numValidComp > COMPONENT_Cb)
     {
-      READ_FLAG(uiCode, "sh_cu_chroma_qp_offset_enabled_flag"); pcSlice->setUseChromaQpAdj(uiCode != 0);
+      READ_SVLC(iCode, "sh_cb_qp_offset");
+      pcSlice->setSliceChromaQpDelta(COMPONENT_Cb, iCode);
+      CHECK(pcSlice->getSliceChromaQpDelta(COMPONENT_Cb) < -12, "Invalid chroma QP offset");
+      CHECK(pcSlice->getSliceChromaQpDelta(COMPONENT_Cb) > 12, "Invalid chroma QP offset");
+      CHECK((pps->getQpOffset(COMPONENT_Cb) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cb)) < -12,
+            "Invalid chroma QP offset");
+      CHECK((pps->getQpOffset(COMPONENT_Cb) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cb)) > 12,
+            "Invalid chroma QP offset");
+    }
+
+    if (numValidComp > COMPONENT_Cr)
+    {
+      READ_SVLC(iCode, "sh_cr_qp_offset");
+      pcSlice->setSliceChromaQpDelta(COMPONENT_Cr, iCode);
+      CHECK(pcSlice->getSliceChromaQpDelta(COMPONENT_Cr) < -12, "Invalid chroma QP offset");
+      CHECK(pcSlice->getSliceChromaQpDelta(COMPONENT_Cr) > 12, "Invalid chroma QP offset");
+      CHECK((pps->getQpOffset(COMPONENT_Cr) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cr)) < -12,
+            "Invalid chroma QP offset");
+      CHECK((pps->getQpOffset(COMPONENT_Cr) + pcSlice->getSliceChromaQpDelta(COMPONENT_Cr)) > 12,
+            "Invalid chroma QP offset");
+      if (sps->getJointCbCrEnabledFlag())
+      {
+        READ_SVLC(iCode, "sh_joint_cbcr_qp_offset");
+        pcSlice->setSliceChromaQpDelta(JOINT_CbCr, iCode);
+        CHECK(pcSlice->getSliceChromaQpDelta(JOINT_CbCr) < -12, "Invalid chroma QP offset");
+        CHECK(pcSlice->getSliceChromaQpDelta(JOINT_CbCr) > 12, "Invalid chroma QP offset");
+        CHECK((pps->getQpOffset(JOINT_CbCr) + pcSlice->getSliceChromaQpDelta(JOINT_CbCr)) < -12,
+              "Invalid chroma QP offset");
+        CHECK((pps->getQpOffset(JOINT_CbCr) + pcSlice->getSliceChromaQpDelta(JOINT_CbCr)) > 12,
+              "Invalid chroma QP offset");
+      }
+    }
+  }
+
+  if (pps->getCuChromaQpOffsetListEnabledFlag())
+  {
+    READ_FLAG(uiCode, "sh_cu_chroma_qp_offset_enabled_flag");
+    pcSlice->setUseChromaQpAdj(uiCode != 0);
+  }
+  else
+  {
+    pcSlice->setUseChromaQpAdj(false);
+  }
+
+  if (sps->getSAOEnabledFlag() && !pps->getSaoInfoInPhFlag())
+  {
+    READ_FLAG(uiCode, "sh_sao_luma_used_flag");
+    pcSlice->setSaoEnabledFlag(CHANNEL_TYPE_LUMA, (bool) uiCode);
+
+    if (bChroma)
+    {
+      READ_FLAG(uiCode, "sh_sao_chroma_used_flag");
+      pcSlice->setSaoEnabledFlag(CHANNEL_TYPE_CHROMA, (bool) uiCode);
+    }
+  }
+
+  if (pps->getDeblockingFilterControlPresentFlag())
+  {
+    if (pps->getDeblockingFilterOverrideEnabledFlag() && !pps->getDbfInfoInPhFlag())
+    {
+      READ_FLAG(uiCode, "sh_deblocking_params_present_flag");
+      pcSlice->setDeblockingFilterOverrideFlag(uiCode ? true : false);
     }
     else
     {
-      pcSlice->setUseChromaQpAdj(false);
+      pcSlice->setDeblockingFilterOverrideFlag(0);
     }
-
-    if (sps->getSAOEnabledFlag() && !pps->getSaoInfoInPhFlag())
+    if (pcSlice->getDeblockingFilterOverrideFlag())
     {
-      READ_FLAG(uiCode, "sh_sao_luma_used_flag");  pcSlice->setSaoEnabledFlag(CHANNEL_TYPE_LUMA, (bool)uiCode);
-
-      if (bChroma)
+      if (!pps->getPPSDeblockingFilterDisabledFlag())
       {
-        READ_FLAG(uiCode, "sh_sao_chroma_used_flag");  pcSlice->setSaoEnabledFlag(CHANNEL_TYPE_CHROMA, (bool)uiCode);
-      }
-    }
-
-
-    if (pps->getDeblockingFilterControlPresentFlag())
-    {
-      if (pps->getDeblockingFilterOverrideEnabledFlag() && !pps->getDbfInfoInPhFlag())
-      {
-        READ_FLAG ( uiCode, "sh_deblocking_params_present_flag" );        pcSlice->setDeblockingFilterOverrideFlag(uiCode ? true : false);
+        READ_FLAG(uiCode, "sh_deblocking_filter_disabled_flag");
+        pcSlice->setDeblockingFilterDisable(uiCode ? 1 : 0);
       }
       else
       {
-        pcSlice->setDeblockingFilterOverrideFlag(0);
+        pcSlice->setDeblockingFilterDisable(false);
       }
-      if(pcSlice->getDeblockingFilterOverrideFlag())
+      if (!pcSlice->getDeblockingFilterDisable())
       {
-        if (!pps->getPPSDeblockingFilterDisabledFlag())
+        READ_SVLC(iCode, "sh_luma_beta_offset_div2");
+        pcSlice->setDeblockingFilterBetaOffsetDiv2(iCode);
+        CHECK(pcSlice->getDeblockingFilterBetaOffsetDiv2() < -12 || pcSlice->getDeblockingFilterBetaOffsetDiv2() > 12,
+              "Invalid deblocking filter configuration");
+        READ_SVLC(iCode, "sh_luma_tc_offset_div2");
+        pcSlice->setDeblockingFilterTcOffsetDiv2(iCode);
+        CHECK(pcSlice->getDeblockingFilterTcOffsetDiv2() < -12 || pcSlice->getDeblockingFilterTcOffsetDiv2() > 12,
+              "Invalid deblocking filter configuration");
+
+        if (pps->getPPSChromaToolFlag())
         {
-          READ_FLAG(uiCode, "sh_deblocking_filter_disabled_flag");   pcSlice->setDeblockingFilterDisable(uiCode ? 1 : 0);
+          READ_SVLC(iCode, "sh_cb_beta_offset_div2");
+          pcSlice->setDeblockingFilterCbBetaOffsetDiv2(iCode);
+          CHECK(pcSlice->getDeblockingFilterCbBetaOffsetDiv2() < -12
+                  || pcSlice->getDeblockingFilterCbBetaOffsetDiv2() > 12,
+                "Invalid deblocking filter configuration");
+          READ_SVLC(iCode, "sh_cb_tc_offset_div2");
+          pcSlice->setDeblockingFilterCbTcOffsetDiv2(iCode);
+          CHECK(pcSlice->getDeblockingFilterCbTcOffsetDiv2() < -12 || pcSlice->getDeblockingFilterCbTcOffsetDiv2() > 12,
+                "Invalid deblocking filter configuration");
+
+          READ_SVLC(iCode, "sh_cr_beta_offset_div2");
+          pcSlice->setDeblockingFilterCrBetaOffsetDiv2(iCode);
+          CHECK(pcSlice->getDeblockingFilterCrBetaOffsetDiv2() < -12
+                  || pcSlice->getDeblockingFilterCrBetaOffsetDiv2() > 12,
+                "Invalid deblocking filter configuration");
+          READ_SVLC(iCode, "sh_cr_tc_offset_div2");
+          pcSlice->setDeblockingFilterCrTcOffsetDiv2(iCode);
+          CHECK(pcSlice->getDeblockingFilterCrTcOffsetDiv2() < -12 || pcSlice->getDeblockingFilterCrTcOffsetDiv2() > 12,
+                "Invalid deblocking filter configuration");
         }
         else
         {
-          pcSlice->setDeblockingFilterDisable(false);
+          pcSlice->setDeblockingFilterCbBetaOffsetDiv2(pcSlice->getDeblockingFilterBetaOffsetDiv2());
+          pcSlice->setDeblockingFilterCbTcOffsetDiv2(pcSlice->getDeblockingFilterTcOffsetDiv2());
+          pcSlice->setDeblockingFilterCrBetaOffsetDiv2(pcSlice->getDeblockingFilterBetaOffsetDiv2());
+          pcSlice->setDeblockingFilterCrTcOffsetDiv2(pcSlice->getDeblockingFilterTcOffsetDiv2());
         }
-        if(!pcSlice->getDeblockingFilterDisable())
-        {
-          READ_SVLC( iCode, "sh_luma_beta_offset_div2" );                     pcSlice->setDeblockingFilterBetaOffsetDiv2( iCode );
-          CHECK(  pcSlice->getDeblockingFilterBetaOffsetDiv2() < -12 ||
-                  pcSlice->getDeblockingFilterBetaOffsetDiv2() > 12, "Invalid deblocking filter configuration");
-          READ_SVLC( iCode, "sh_luma_tc_offset_div2" );                       pcSlice->setDeblockingFilterTcOffsetDiv2( iCode );
-          CHECK(  pcSlice->getDeblockingFilterTcOffsetDiv2() < -12 ||
-                  pcSlice->getDeblockingFilterTcOffsetDiv2() > 12, "Invalid deblocking filter configuration");
-
-          if( pps->getPPSChromaToolFlag() )
-          {
-            READ_SVLC( iCode, "sh_cb_beta_offset_div2" );                  pcSlice->setDeblockingFilterCbBetaOffsetDiv2( iCode );
-            CHECK( pcSlice->getDeblockingFilterCbBetaOffsetDiv2() < -12 ||
-              pcSlice->getDeblockingFilterCbBetaOffsetDiv2() > 12, "Invalid deblocking filter configuration" );
-            READ_SVLC( iCode, "sh_cb_tc_offset_div2" );                    pcSlice->setDeblockingFilterCbTcOffsetDiv2( iCode );
-            CHECK( pcSlice->getDeblockingFilterCbTcOffsetDiv2() < -12 ||
-              pcSlice->getDeblockingFilterCbTcOffsetDiv2() > 12, "Invalid deblocking filter configuration" );
-
-            READ_SVLC( iCode, "sh_cr_beta_offset_div2" );                  pcSlice->setDeblockingFilterCrBetaOffsetDiv2( iCode );
-            CHECK( pcSlice->getDeblockingFilterCrBetaOffsetDiv2() < -12 ||
-              pcSlice->getDeblockingFilterCrBetaOffsetDiv2() > 12, "Invalid deblocking filter configuration" );
-            READ_SVLC( iCode, "sh_cr_tc_offset_div2" );                    pcSlice->setDeblockingFilterCrTcOffsetDiv2( iCode );
-            CHECK( pcSlice->getDeblockingFilterCrTcOffsetDiv2() < -12 ||
-              pcSlice->getDeblockingFilterCrTcOffsetDiv2() > 12, "Invalid deblocking filter configuration" );
-          }
-          else
-          {
-            pcSlice->setDeblockingFilterCbBetaOffsetDiv2 ( pcSlice->getDeblockingFilterBetaOffsetDiv2() );
-            pcSlice->setDeblockingFilterCbTcOffsetDiv2   ( pcSlice->getDeblockingFilterTcOffsetDiv2()   );
-            pcSlice->setDeblockingFilterCrBetaOffsetDiv2 ( pcSlice->getDeblockingFilterBetaOffsetDiv2() );
-            pcSlice->setDeblockingFilterCrTcOffsetDiv2   ( pcSlice->getDeblockingFilterTcOffsetDiv2()   );
-          }
-        }
-      }
-      else
-      {
-        pcSlice->setDeblockingFilterDisable       ( picHeader->getDeblockingFilterDisable() );
-        pcSlice->setDeblockingFilterBetaOffsetDiv2( picHeader->getDeblockingFilterBetaOffsetDiv2() );
-        pcSlice->setDeblockingFilterTcOffsetDiv2  ( picHeader->getDeblockingFilterTcOffsetDiv2() );
-        pcSlice->setDeblockingFilterCbBetaOffsetDiv2( picHeader->getDeblockingFilterCbBetaOffsetDiv2() );
-        pcSlice->setDeblockingFilterCbTcOffsetDiv2  ( picHeader->getDeblockingFilterCbTcOffsetDiv2() );
-        pcSlice->setDeblockingFilterCrBetaOffsetDiv2(picHeader->getDeblockingFilterCrBetaOffsetDiv2());
-        pcSlice->setDeblockingFilterCrTcOffsetDiv2(picHeader->getDeblockingFilterCrTcOffsetDiv2());
       }
     }
     else
     {
-      pcSlice->setDeblockingFilterDisable       ( false );
-      pcSlice->setDeblockingFilterBetaOffsetDiv2( 0 );
-      pcSlice->setDeblockingFilterTcOffsetDiv2  ( 0 );
-      pcSlice->setDeblockingFilterCbBetaOffsetDiv2( 0 );
-      pcSlice->setDeblockingFilterCbTcOffsetDiv2  ( 0 );
-      pcSlice->setDeblockingFilterCrBetaOffsetDiv2( 0 );
-      pcSlice->setDeblockingFilterCrTcOffsetDiv2  ( 0 );
+      pcSlice->setDeblockingFilterDisable(picHeader->getDeblockingFilterDisable());
+      pcSlice->setDeblockingFilterBetaOffsetDiv2(picHeader->getDeblockingFilterBetaOffsetDiv2());
+      pcSlice->setDeblockingFilterTcOffsetDiv2(picHeader->getDeblockingFilterTcOffsetDiv2());
+      pcSlice->setDeblockingFilterCbBetaOffsetDiv2(picHeader->getDeblockingFilterCbBetaOffsetDiv2());
+      pcSlice->setDeblockingFilterCbTcOffsetDiv2(picHeader->getDeblockingFilterCbTcOffsetDiv2());
+      pcSlice->setDeblockingFilterCrBetaOffsetDiv2(picHeader->getDeblockingFilterCrBetaOffsetDiv2());
+      pcSlice->setDeblockingFilterCrTcOffsetDiv2(picHeader->getDeblockingFilterCrTcOffsetDiv2());
     }
+  }
+  else
+  {
+    pcSlice->setDeblockingFilterDisable(false);
+    pcSlice->setDeblockingFilterBetaOffsetDiv2(0);
+    pcSlice->setDeblockingFilterTcOffsetDiv2(0);
+    pcSlice->setDeblockingFilterCbBetaOffsetDiv2(0);
+    pcSlice->setDeblockingFilterCbTcOffsetDiv2(0);
+    pcSlice->setDeblockingFilterCrBetaOffsetDiv2(0);
+    pcSlice->setDeblockingFilterCrTcOffsetDiv2(0);
+  }
 
   // dependent quantization
   if( sps->getDepQuantEnabledFlag() )
@@ -4300,14 +4325,14 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
     READ_FLAG(uiCode, "sh_reverse_last_sig_coeff_flag");
     pcSlice->setReverseLastSigCoeffFlag(uiCode != 0);
   }
-  else {
+  else
+  {
     pcSlice->setReverseLastSigCoeffFlag(false);
   }
 
   if( pcSlice->getFirstCtuRsAddrInSlice() == 0 )
   {
     pcSlice->setDefaultClpRng( *sps );
-
   }
 
   if(pps->getSliceHeaderExtensionPresentFlag())
@@ -4368,8 +4393,10 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       int emulationPreventionByteCount = 0;
       for ( uint32_t curByteIdx  = 0; curByteIdx<m_pcBitstream->numEmulationPreventionBytesRead(); curByteIdx++ )
       {
-        if ( m_pcBitstream->getEmulationPreventionByteLocation( curByteIdx ) >= ( prevEntryPointOffset + endOfSliceHeaderLocation ) &&
-             m_pcBitstream->getEmulationPreventionByteLocation( curByteIdx ) <  ( curEntryPointOffset  + endOfSliceHeaderLocation ) )
+        if (m_pcBitstream->getEmulationPreventionByteLocation(curByteIdx)
+              >= (prevEntryPointOffset + endOfSliceHeaderLocation)
+            && m_pcBitstream->getEmulationPreventionByteLocation(curByteIdx)
+                 < (curEntryPointOffset + endOfSliceHeaderLocation))
         {
           emulationPreventionByteCount++;
         }
@@ -5030,53 +5057,57 @@ void HLSyntaxReader::parseScalingList(ScalingList *scalingList, bool aps_chromaP
   for (int scalingListId = 0; scalingListId < 28; scalingListId++)
   {
     if (aps_chromaPrsentFlag || scalingList->isLumaScalingList(scalingListId))
-  {
-    READ_FLAG(code, "scaling_list_copy_mode_flag");
-    scalingListCopyModeFlag = (code) ? true : false;
-    scalingList->setScalingListCopyModeFlag(scalingListId, scalingListCopyModeFlag);
+    {
+      READ_FLAG(code, "scaling_list_copy_mode_flag");
+      scalingListCopyModeFlag = (code) ? true : false;
+      scalingList->setScalingListCopyModeFlag(scalingListId, scalingListCopyModeFlag);
 
-    scalingList->setScalingListPreditorModeFlag(scalingListId, false);
-    if (!scalingListCopyModeFlag)
-    {
-      READ_FLAG(code, "scaling_list_predictor_mode_flag");
-      scalingList->setScalingListPreditorModeFlag(scalingListId, code);
-    }
-
-    if ((scalingListCopyModeFlag || scalingList->getScalingListPreditorModeFlag(scalingListId)) && scalingListId!= SCALING_LIST_1D_START_2x2 && scalingListId!= SCALING_LIST_1D_START_4x4 && scalingListId!= SCALING_LIST_1D_START_8x8) //Copy Mode
-    {
-      READ_UVLC(code, "scaling_list_pred_matrix_id_delta");
-      scalingList->setRefMatrixId(scalingListId, (uint32_t)((int)(scalingListId)-(code)));
-    }
-    else if (scalingListCopyModeFlag || scalingList->getScalingListPreditorModeFlag(scalingListId))
-    {
-      scalingList->setRefMatrixId(scalingListId, (uint32_t)((int)(scalingListId)));
-    }
-    if (scalingListCopyModeFlag)//copy
-    {
-      if (scalingListId >= SCALING_LIST_1D_START_16x16)
+      scalingList->setScalingListPreditorModeFlag(scalingListId, false);
+      if (!scalingListCopyModeFlag)
       {
-        scalingList->setScalingListDC(scalingListId,
-          ((scalingListId == scalingList->getRefMatrixId(scalingListId)) ? 16
-            : (scalingList->getRefMatrixId(scalingListId) < SCALING_LIST_1D_START_16x16) ? scalingList->getScalingListAddress(scalingList->getRefMatrixId(scalingListId))[0] : scalingList->getScalingListDC(scalingList->getRefMatrixId(scalingListId))));
+        READ_FLAG(code, "scaling_list_predictor_mode_flag");
+        scalingList->setScalingListPreditorModeFlag(scalingListId, code);
       }
-      scalingList->processRefMatrix(scalingListId, scalingList->getRefMatrixId(scalingListId));
+
+      if ((scalingListCopyModeFlag || scalingList->getScalingListPreditorModeFlag(scalingListId))
+          && scalingListId != SCALING_LIST_1D_START_2x2 && scalingListId != SCALING_LIST_1D_START_4x4
+          && scalingListId != SCALING_LIST_1D_START_8x8)   // Copy Mode
+      {
+        READ_UVLC(code, "scaling_list_pred_matrix_id_delta");
+        scalingList->setRefMatrixId(scalingListId, (uint32_t) ((int) (scalingListId) - (code)));
+      }
+      else if (scalingListCopyModeFlag || scalingList->getScalingListPreditorModeFlag(scalingListId))
+      {
+        scalingList->setRefMatrixId(scalingListId, (uint32_t) ((int) (scalingListId)));
+      }
+      if (scalingListCopyModeFlag)   // copy
+      {
+        if (scalingListId >= SCALING_LIST_1D_START_16x16)
+        {
+          scalingList->setScalingListDC(
+            scalingListId, ((scalingListId == scalingList->getRefMatrixId(scalingListId)) ? 16
+                            : (scalingList->getRefMatrixId(scalingListId) < SCALING_LIST_1D_START_16x16)
+                              ? scalingList->getScalingListAddress(scalingList->getRefMatrixId(scalingListId))[0]
+                              : scalingList->getScalingListDC(scalingList->getRefMatrixId(scalingListId))));
+        }
+        scalingList->processRefMatrix(scalingListId, scalingList->getRefMatrixId(scalingListId));
+      }
+      else
+      {
+        decodeScalingList(scalingList, scalingListId, scalingList->getScalingListPreditorModeFlag(scalingListId));
+      }
     }
     else
     {
-      decodeScalingList(scalingList, scalingListId, scalingList->getScalingListPreditorModeFlag(scalingListId));
+      scalingListCopyModeFlag = true;
+      scalingList->setScalingListCopyModeFlag(scalingListId, scalingListCopyModeFlag);
+      scalingList->setRefMatrixId(scalingListId, (uint32_t)((int)(scalingListId)));
+      if (scalingListId >= SCALING_LIST_1D_START_16x16)
+      {
+        scalingList->setScalingListDC(scalingListId, 16);
+      }
+      scalingList->processRefMatrix(scalingListId, scalingList->getRefMatrixId(scalingListId));
     }
-  }
-  else
-  {
-    scalingListCopyModeFlag = true;
-    scalingList->setScalingListCopyModeFlag(scalingListId, scalingListCopyModeFlag);
-    scalingList->setRefMatrixId(scalingListId, (uint32_t)((int)(scalingListId)));
-    if (scalingListId >= SCALING_LIST_1D_START_16x16)
-    {
-      scalingList->setScalingListDC(scalingListId, 16);
-    }
-    scalingList->processRefMatrix(scalingListId, scalingList->getRefMatrixId(scalingListId));
-  }
   }
 
   return;
@@ -5101,7 +5132,9 @@ void HLSyntaxReader::decodeScalingList(ScalingList *scalingList, uint32_t scalin
   CHECK(isPredictor && PredListId > scalingListId, "Scaling List error predictor!");
   const int *srcPred = (isPredictor) ? ((scalingListId == PredListId) ? scalingList->getScalingListDefaultAddress(scalingListId) : scalingList->getScalingListAddress(PredListId)) : NULL;
   if(isPredictor && scalingListId == PredListId)
+  {
     scalingList->setScalingListDC(PredListId, SCALING_LIST_DC);
+  }
   int predCoef = 0;
 
   if (scalingListId >= SCALING_LIST_1D_START_16x16)
@@ -5169,11 +5202,9 @@ void HLSyntaxReader::alfFilter( AlfParam& alfParam, const bool isChroma, const i
   short* coeff = isChroma ? alfParam.chromaCoeff[altIdx] : alfParam.lumaCoeff;
   Pel*   clipp = isChroma ? alfParam.chromaClipp[altIdx] : alfParam.lumaClipp;
 
-
   // Filter coefficients
   for( int ind = 0; ind < numFilters; ++ind )
   {
-
     for( int i = 0; i < alfShape.numCoeff - 1; i++ )
     {
       READ_UVLC( code, isChroma ? "alf_chroma_coeff_abs" : "alf_luma_coeff_abs" );
@@ -5182,7 +5213,7 @@ void HLSyntaxReader::alfFilter( AlfParam& alfParam, const bool isChroma, const i
       {
         READ_FLAG( code, isChroma ? "alf_chroma_coeff_sign" : "alf_luma_coeff_sign" );
         coeff[ ind * MAX_NUM_ALF_LUMA_COEFF + i ] = ( code ) ? -coeff[ ind * MAX_NUM_ALF_LUMA_COEFF + i ] : coeff[ ind * MAX_NUM_ALF_LUMA_COEFF + i ];
-       }
+      }
       CHECK( isChroma &&
              ( coeff[ind * MAX_NUM_ALF_LUMA_COEFF + i] > 127 || coeff[ind * MAX_NUM_ALF_LUMA_COEFF + i] < -128 )
              , "AlfCoeffC shall be in the range of -128 to 127, inclusive" );
@@ -5192,11 +5223,9 @@ void HLSyntaxReader::alfFilter( AlfParam& alfParam, const bool isChroma, const i
   // Clipping values coding
   if ( alfParam.nonLinearFlag[isChroma] )
   {
-
     // Filter coefficients
     for( int ind = 0; ind < numFilters; ++ind )
     {
-
       for( int i = 0; i < alfShape.numCoeff - 1; i++ )
       {
         READ_CODE(2, code, isChroma ? "alf_chroma_clip_idx" : "alf_luma_clip_idx");
