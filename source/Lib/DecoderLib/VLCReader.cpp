@@ -2087,14 +2087,10 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
   if (uiCode)
   {
 #if ENABLE_TRACING || RExt__DECODER_DEBUG_BIT_STATISTICS
-    static const char *syntaxStrings[]={ "sps_range_extension_flag",
-      "sps_multilayer_extension_flag",
-      "sps_extension_6bits[0]",
-      "sps_extension_6bits[1]",
-      "sps_extension_6bits[2]",
-      "sps_extension_6bits[3]",
-      "sps_extension_6bits[4]",
-      "sps_extension_6bits[5]" };
+    static const char *syntaxStrings[] = {
+      "sps_range_extension_flag", "sps_extension_7bits[0]", "sps_extension_7bits[1]", "sps_extension_7bits[2]",
+      "sps_extension_7bits[3]",   "sps_extension_7bits[4]", "sps_extension_7bits[5]", "sps_extension_7bits[6]",
+    };
 #endif
     bool sps_extension_flags[NUM_SPS_EXTENSION_FLAGS];
 

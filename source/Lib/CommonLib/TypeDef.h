@@ -764,9 +764,6 @@ enum FastInterSearchMode
 enum SPSExtensionFlagIndex
 {
   SPS_EXT__REXT           = 0,
-//SPS_EXT__MVHEVC         = 1, //for use in future versions
-//SPS_EXT__SHVC           = 2, //for use in future versions
-  SPS_EXT__NEXT           = 3,
   NUM_SPS_EXTENSION_FLAGS = 8
 };
 
