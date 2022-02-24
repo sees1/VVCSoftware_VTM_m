@@ -1406,14 +1406,17 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
 
   if (pcSPS->getSubPicInfoPresentFlag())
   {
+    const int maxPicWidthInCtus  = ((pcSPS->getMaxPicWidthInLumaSamples() - 1) / pcSPS->getCTUSize()) + 1;
+    const int maxPicHeightInCtus = ((pcSPS->getMaxPicHeightInLumaSamples() - 1) / pcSPS->getCTUSize()) + 1;
+
     READ_UVLC(uiCode, "sps_num_subpics_minus1"); pcSPS->setNumSubPics(uiCode + 1);
-    CHECK(uiCode > (pcSPS->getMaxPicWidthInLumaSamples() / (1 << pcSPS->getCTUSize())) * (pcSPS->getMaxPicHeightInLumaSamples() / (1 << pcSPS->getCTUSize())) - 1, "Invalid sps_num_subpics_minus1 value");
+    CHECK(uiCode > maxPicWidthInCtus * maxPicHeightInCtus - 1, "Invalid sps_num_subpics_minus1 value");
     if( pcSPS->getNumSubPics() == 1 )
     {
       pcSPS->setSubPicCtuTopLeftX( 0, 0 );
       pcSPS->setSubPicCtuTopLeftY( 0, 0 );
-      pcSPS->setSubPicWidth( 0, ( pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1 ) >> floorLog2( pcSPS->getCTUSize() ) );
-      pcSPS->setSubPicHeight( 0, ( pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1 ) >> floorLog2( pcSPS->getCTUSize() ) );
+      pcSPS->setSubPicWidth(0, maxPicWidthInCtus);
+      pcSPS->setSubPicHeight(0, maxPicHeightInCtus);
 
       pcSPS->setIndependentSubPicsFlag(1);
       pcSPS->setSubPicSameSizeFlag(0);
@@ -1425,8 +1428,8 @@ void HLSyntaxReader::parseSPS(SPS* pcSPS)
     {
       READ_FLAG(uiCode, "sps_independent_subpics_flag"); pcSPS->setIndependentSubPicsFlag(uiCode != 0);
       READ_FLAG(uiCode, "sps_subpic_same_size_flag"); pcSPS->setSubPicSameSizeFlag(uiCode);
-      uint32_t tmpWidthVal = (pcSPS->getMaxPicWidthInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
-      uint32_t tmpHeightVal = (pcSPS->getMaxPicHeightInLumaSamples() + pcSPS->getCTUSize() - 1) / pcSPS->getCTUSize();
+      uint32_t tmpWidthVal   = maxPicWidthInCtus;
+      uint32_t tmpHeightVal  = maxPicHeightInCtus;
       uint32_t numSubpicCols = 1;
       for (int picIdx = 0; picIdx < pcSPS->getNumSubPics(); picIdx++)
       {
