@@ -158,9 +158,10 @@ namespace std
   };
 }
 
-inline size_t rsAddr(const Position &pos, const uint32_t stride, const UnitScale &unitScale )
+inline ptrdiff_t rsAddr(const Position &pos, const uint32_t stride, const UnitScale &unitScale)
 {
-  return (size_t)(stride >> unitScale.posx) * (size_t)(pos.y >> unitScale.posy) + (size_t)(pos.x >> unitScale.posx);
+  return (ptrdiff_t) (stride >> unitScale.posx) * (ptrdiff_t) (pos.y >> unitScale.posy)
+         + (ptrdiff_t) (pos.x >> unitScale.posx);
 }
 
 inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t stride, const UnitScale &unitScale )
@@ -168,9 +169,9 @@ inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t
   return (stride >> unitScale.posx) * ((pos.y - origin.y) >> unitScale.posy) + ((pos.x - origin.x) >> unitScale.posx);
 }
 
-inline size_t rsAddr(const Position &pos, const uint32_t stride )
+inline ptrdiff_t rsAddr(const Position &pos, const uint32_t stride)
 {
-  return stride * (size_t)pos.y + (size_t)pos.x;
+  return stride * (ptrdiff_t) pos.y + (ptrdiff_t) pos.x;
 }
 
 inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t stride )

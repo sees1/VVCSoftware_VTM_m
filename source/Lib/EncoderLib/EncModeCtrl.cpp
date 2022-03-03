@@ -853,7 +853,8 @@ void BestEncInfoCache::init( const Slice &slice )
                 pcmbf[i] = pcmPtr;   pcmPtr += area.blocks[i].area();
                 if (i < 2)
                 {
-                  runType[i]   = runTypePtr;   runTypePtr   += area.blocks[i].area();
+                  runType[i] = runTypePtr;
+                  runTypePtr += runTypePtr ? area.blocks[i].area() : 0;
                 }
               }
 

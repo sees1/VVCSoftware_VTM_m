@@ -137,8 +137,8 @@ public:
 
   const Mv& operator<<= (const int i)
   {
-    hor <<= i;
-    ver <<= i;
+    hor *= 1 << i;
+    ver *= 1 << i;
     return  *this;
   }
 

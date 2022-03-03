@@ -78,12 +78,12 @@ struct AMVPInfo
   Mv       mvCand[ AMVP_MAX_NUM_CANDS_MEM ];  ///< array of motion vector predictor candidates
   unsigned numCand;                       ///< number of motion vector predictor candidates
 #if GDR_ENABLED
-  bool     allCandSolidInAbove;
-  bool     mvSolid[AMVP_MAX_NUM_CANDS_MEM];
-  bool     mvValid[AMVP_MAX_NUM_CANDS_MEM];
+  bool allCandSolidInAbove{ true };
+  bool mvSolid[AMVP_MAX_NUM_CANDS_MEM]{ true };
+  bool mvValid[AMVP_MAX_NUM_CANDS_MEM]{ true };
 
   Position mvPos[AMVP_MAX_NUM_CANDS_MEM];
-  MvpType  mvType[AMVP_MAX_NUM_CANDS_MEM];
+  MvpType  mvType[AMVP_MAX_NUM_CANDS_MEM]{ MVP_ZERO };
 #endif
 };
 

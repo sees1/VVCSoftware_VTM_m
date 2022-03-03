@@ -63,11 +63,12 @@ void clipMvInPic ( Mv& rcMv, const struct Position& pos, const struct Size& size
 
   int mvShift = MV_FRACTIONAL_BITS_INTERNAL;
   const int offset  = PIC_MARGIN / 2;
-  int horMax = (pps.getPicWidthInLumaSamples() + offset - (int)pos.x - 1) << mvShift;
-  int horMin = (-(int)sps.getMaxCUWidth() - offset - (int)pos.x + 1) << mvShift;
 
-  int verMax = (pps.getPicHeightInLumaSamples() + offset - (int)pos.y - 1) << mvShift;
-  int verMin = (-(int)sps.getMaxCUHeight() - offset - (int)pos.y + 1) << mvShift;
+  int horMax = (pps.getPicWidthInLumaSamples() + offset - (int) pos.x - 1) << mvShift;
+  int horMin = (-(int) sps.getMaxCUWidth() - offset - (int) pos.x + 1) * (1 << mvShift);
+
+  int verMax = (pps.getPicHeightInLumaSamples() + offset - (int) pos.y - 1) << mvShift;
+  int verMin = (-(int) sps.getMaxCUHeight() - offset - (int) pos.y + 1) * (1 << mvShift);
 
   // Keep LSBs such as to not change filter phase
   const int mask = (1 << MV_FRACTIONAL_BITS_INTERNAL) - 1;
@@ -85,19 +86,21 @@ void clipMvInSubpic ( Mv& rcMv, const struct Position& pos, const struct Size& s
 
   int mvShift = MV_FRACTIONAL_BITS_INTERNAL;
   const int offset  = PIC_MARGIN / 2;
-  int horMax = (pps.getPicWidthInLumaSamples() + offset - (int)pos.x - 1) << mvShift;
-  int horMin = (-(int)sps.getMaxCUWidth() - offset - (int)pos.x + 1) << mvShift;
 
-  int verMax = (pps.getPicHeightInLumaSamples() + offset - (int)pos.y - 1) << mvShift;
-  int verMin = (-(int)sps.getMaxCUHeight() - offset - (int)pos.y + 1) << mvShift;
+  int horMax = (pps.getPicWidthInLumaSamples() + offset - (int) pos.x - 1) << mvShift;
+  int horMin = (-(int) sps.getMaxCUWidth() - offset - (int) pos.x + 1) * (1 << mvShift);
+
+  int verMax = (pps.getPicHeightInLumaSamples() + offset - (int) pos.y - 1) << mvShift;
+  int verMin = (-(int) sps.getMaxCUHeight() - offset - (int) pos.y + 1) * (1 << mvShift);
+
   const SubPic& curSubPic = pps.getSubPicFromPos(pos);
   if (curSubPic.getTreatedAsPicFlag())
   {
-    horMax = ((curSubPic.getSubPicRight() + 1) + offset - (int)pos.x - 1) << mvShift;
-    horMin = (-(int)sps.getMaxCUWidth() - offset - ((int)pos.x - curSubPic.getSubPicLeft()) + 1) << mvShift;
+    horMax = ((curSubPic.getSubPicRight() + 1) + offset - (int) pos.x - 1) << mvShift;
+    horMin = (-(int) sps.getMaxCUWidth() - offset - ((int) pos.x - curSubPic.getSubPicLeft()) + 1) * (1 << mvShift);
 
-    verMax = ((curSubPic.getSubPicBottom() + 1) + offset - (int)pos.y - 1) << mvShift;
-    verMin = (-(int)sps.getMaxCUHeight() - offset - ((int)pos.y - curSubPic.getSubPicTop()) + 1) << mvShift;
+    verMax = ((curSubPic.getSubPicBottom() + 1) + offset - (int) pos.y - 1) << mvShift;
+    verMin = (-(int) sps.getMaxCUHeight() - offset - ((int) pos.y - curSubPic.getSubPicTop()) + 1) * (1 << mvShift);
   }
 
   // Keep LSBs such as to not change filter phase
@@ -109,31 +112,33 @@ void clipMvInSubpic ( Mv& rcMv, const struct Position& pos, const struct Size& s
 bool wrapClipMv( Mv& rcMv, const Position& pos, const struct Size& size, const SPS *sps, const PPS *pps )
 {
   bool wrapRef = true;
-  int iMvShift = MV_FRACTIONAL_BITS_INTERNAL;
-  const int offset   = PIC_MARGIN / 2;
-  int  horMax   = (pps->getPicWidthInLumaSamples() + sps->getMaxCUWidth() - size.width + offset - (int) pos.x - 1)
-               << iMvShift;
-  int horMin = (-(int) sps->getMaxCUWidth() - offset - (int) pos.x + 1) << iMvShift;
 
-  int verMax = (pps->getPicHeightInLumaSamples() + offset - (int) pos.y - 1) << iMvShift;
-  int verMin = (-(int) sps->getMaxCUHeight() - offset - (int) pos.y + 1) << iMvShift;
+  const int mvShift = MV_FRACTIONAL_BITS_INTERNAL;
+  const int offset  = PIC_MARGIN / 2;
+
+  int horMax = (pps->getPicWidthInLumaSamples() + sps->getMaxCUWidth() - size.width + offset - (int) pos.x - 1)
+               << mvShift;
+  int horMin = (-(int) sps->getMaxCUWidth() - offset - (int) pos.x + 1) * (1 << mvShift);
+
+  int verMax = (pps->getPicHeightInLumaSamples() + offset - (int) pos.y - 1) << mvShift;
+  int verMin = (-(int) sps->getMaxCUHeight() - offset - (int) pos.y + 1) * (1 << mvShift);
 
   const SubPic& curSubPic = pps->getSubPicFromPos( pos );
   if( curSubPic.getTreatedAsPicFlag() )
   {
-    verMax = ((curSubPic.getSubPicBottom() + 1) + offset - (int) pos.y - 1) << iMvShift;
-    verMin = (-(int) sps->getMaxCUHeight() - offset - ((int) pos.y - curSubPic.getSubPicTop()) + 1) << iMvShift;
+    verMax = ((curSubPic.getSubPicBottom() + 1) + offset - (int) pos.y - 1) << mvShift;
+    verMin = (-(int) sps->getMaxCUHeight() - offset - ((int) pos.y - curSubPic.getSubPicTop()) + 1) * (1 << mvShift);
   }
   int mvX = rcMv.getHor();
 
   if (mvX > horMax)
   {
-    mvX -= ( pps->getWrapAroundOffset() << iMvShift );
+    mvX -= pps->getWrapAroundOffset() << mvShift;
     wrapRef = false;
   }
   if (mvX < horMin)
   {
-    mvX += ( pps->getWrapAroundOffset() << iMvShift );
+    mvX += pps->getWrapAroundOffset() << mvShift;
     wrapRef = false;
   }
 

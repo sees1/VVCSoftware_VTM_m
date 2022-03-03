@@ -3701,10 +3701,12 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
         //only 1 LMCS data for 1 picture
         int apsId = picHeader->getLmcsAPSId();
         ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
-        APS* aps = apsMap->getPS((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
+
+        APS *aps = apsId >= 0 ? apsMap->getPS((apsId << NUM_APS_TYPE_LEN) + LMCS_APS) : nullptr;
+
         bool writeAPS = aps && apsMap->getChangedFlag((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
 #if GDR_ENABLED // note : insert APS at every GDR picture
-        if (aps && apsId >= 0)
+        if (aps)
         {
           writeAPS |= pcSlice->isInterGDR();
         }

@@ -2721,7 +2721,7 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
   bool         cMvPredSolid[2][33];
   bool         cMvPredBiSolid[2][33];
 
-  bool         cMvTempSolid[2][33];
+  bool         cMvTempSolid[2][33]{ { true } };
   bool         cMvTempValid[2][33];
 
   bool         cMvHevcTempSolid[2][33];
@@ -4526,7 +4526,10 @@ void InterSearch::predInterSearch(CodingUnit& cu, Partitioner& partitioner)
     PelUnitBuf predBuf = pu.cs->getPredBuf(pu);
     if ( bcwIdx == BCW_DEFAULT || !m_affineMotion.affine4ParaAvail || !m_affineMotion.affine6ParaAvail )
     {
-      m_affineMotion.hevcCost[pu.cu->imv] = uiHevcCost;
+      if (pu.cu->imv < 3)
+      {
+        m_affineMotion.hevcCost[pu.cu->imv] = uiHevcCost;
+      }
     }
     motionCompensation( pu, predBuf, REF_PIC_LIST_X );
     puIdx++;
@@ -6697,13 +6700,15 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
 #endif
           int vx, vy;
           int dMvHorX, dMvHorY, dMvVerX, dMvVerY;
-          int mvScaleHor = nbMv[0].getHor() << shift;
-          int mvScaleVer = nbMv[0].getVer() << shift;
+          int mvScaleHor = nbMv[0].getHor() * (1 << shift);
+          int mvScaleVer = nbMv[0].getVer() * (1 << shift);
           Mv dMv = nbMv[1] - nbMv[0];
-          dMvHorX = dMv.getHor() << (shift - floorLog2(mvInfo->w));
-          dMvHorY = dMv.getVer() << (shift - floorLog2(mvInfo->w));
+
+          dMvHorX = dMv.getHor() * (1 << (shift - floorLog2(mvInfo->w)));
+          dMvHorY = dMv.getVer() * (1 << (shift - floorLog2(mvInfo->w)));
           dMvVerX = -dMvHorY;
           dMvVerY = dMvHorX;
+
           vx = mvScaleHor + dMvHorX * (pu.Y().x - mvInfo->x) + dMvVerX * (pu.Y().y - mvInfo->y);
           vy = mvScaleVer + dMvHorY * (pu.Y().x - mvInfo->x) + dMvVerY * (pu.Y().y - mvInfo->y);
           roundAffineMv(vx, vy, shift);
@@ -6781,8 +6786,12 @@ void InterSearch::xPredAffineInterSearch( PredictionUnit&       pu,
         mvAffine4Para[refList][refIdxTemp][1].roundAffinePrecInternal2Amvr(pu.cu->imv);
 
         int shift = MAX_CU_DEPTH;
-        int vx2 = (mvFour[0].getHor() << shift) - ((mvFour[1].getVer() - mvFour[0].getVer()) << (shift + floorLog2(pu.lheight()) - floorLog2(pu.lwidth())));
-        int vy2 = (mvFour[0].getVer() << shift) + ((mvFour[1].getHor() - mvFour[0].getHor()) << (shift + floorLog2(pu.lheight()) - floorLog2(pu.lwidth())));
+        int vx2   = (mvFour[0].getHor() * (1 << shift))
+                  - ((mvFour[1].getVer() - mvFour[0].getVer())
+                     * (1 << (shift + floorLog2(pu.lheight()) - floorLog2(pu.lwidth()))));
+        int vy2 = (mvFour[0].getVer() * (1 << shift))
+                  + ((mvFour[1].getHor() - mvFour[0].getHor())
+                     * (1 << (shift + floorLog2(pu.lheight()) - floorLog2(pu.lwidth()))));
         int offset = (1 << (shift - 1));
         vx2 = (vx2 + offset - (vx2 >= 0)) >> shift;
         vy2 = (vy2 + offset - (vy2 >= 0)) >> shift;
@@ -8490,15 +8499,25 @@ void InterSearch::xAffineMotionEstimation(PredictionUnit &pu, PelUnitBuf &origBu
       dDeltaMv[3] = -dAffinePara[3] * width + dAffinePara[2];
     }
 
+    for (int i = 0; i < 6; i++)
+    {
+      dDeltaMv[i] = Clip3(-8192.0, 8192.0, dDeltaMv[i]);
+    }
+
     const int normShiftTab[3] = { MV_PRECISION_QUARTER - MV_PRECISION_INT, MV_PRECISION_SIXTEENTH - MV_PRECISION_INT, MV_PRECISION_QUARTER - MV_PRECISION_INT };
     const int stepShiftTab[3] = { MV_PRECISION_INTERNAL - MV_PRECISION_QUARTER, MV_PRECISION_INTERNAL - MV_PRECISION_SIXTEENTH, MV_PRECISION_INTERNAL - MV_PRECISION_QUARTER };
     const int multiShift = 1 << normShiftTab[pu.cu->imv];
     const int mvShift = stepShiftTab[pu.cu->imv];
-    acDeltaMv[0] = Mv( ( int ) ( dDeltaMv[0] * multiShift + SIGN( dDeltaMv[0] ) * 0.5 ) << mvShift, ( int ) ( dDeltaMv[2] * multiShift + SIGN( dDeltaMv[2] ) * 0.5 ) << mvShift );
-    acDeltaMv[1] = Mv( ( int ) ( dDeltaMv[1] * multiShift + SIGN( dDeltaMv[1] ) * 0.5 ) << mvShift, ( int ) ( dDeltaMv[3] * multiShift + SIGN( dDeltaMv[3] ) * 0.5 ) << mvShift );
+
+    acDeltaMv[0] = Mv((int) (dDeltaMv[0] * multiShift + SIGN(dDeltaMv[0]) * 0.5) * (1 << mvShift),
+                      (int) (dDeltaMv[2] * multiShift + SIGN(dDeltaMv[2]) * 0.5) * (1 << mvShift));
+    acDeltaMv[1] = Mv((int) (dDeltaMv[1] * multiShift + SIGN(dDeltaMv[1]) * 0.5) * (1 << mvShift),
+                      (int) (dDeltaMv[3] * multiShift + SIGN(dDeltaMv[3]) * 0.5) * (1 << mvShift));
+
     if ( pu.cu->affineType == AFFINEMODEL_6PARAM )
     {
-      acDeltaMv[2] = Mv( ( int ) ( dDeltaMv[4] * multiShift + SIGN( dDeltaMv[4] ) * 0.5 ) << mvShift, ( int ) ( dDeltaMv[5] * multiShift + SIGN( dDeltaMv[5] ) * 0.5 ) << mvShift );
+      acDeltaMv[2] = Mv((int) (dDeltaMv[4] * multiShift + SIGN(dDeltaMv[4]) * 0.5) * (1 << mvShift),
+                        (int) (dDeltaMv[5] * multiShift + SIGN(dDeltaMv[5]) * 0.5) * (1 << mvShift));
     }
     if ( !m_pcEncCfg->getUseAffineAmvrEncOpt() )
     {
@@ -8775,7 +8794,8 @@ void InterSearch::xAffineMotionEstimation(PredictionUnit &pu, PelUnitBuf &origBu
 
           for (int i = ((iter == 0) ? 0 : 4); i < ((iter == 0) ? 4 : 8); i++)
           {
-            acMvTemp[j].set(centerMv[j].getHor() + (testPos[i][0] << mvShift), centerMv[j].getVer() + (testPos[i][1] << mvShift));
+            acMvTemp[j].set(centerMv[j].getHor() + testPos[i][0] * (1 << mvShift),
+                            centerMv[j].getVer() + testPos[i][1] * (1 << mvShift));
             clipMv( acMvTemp[j], pu.cu->lumaPos(), pu.cu->lumaSize(), *pu.cs->sps, *pu.cs->pps );
 #if GDR_ENABLED
             bool YYOk = xPredAffineBlk(COMPONENT_Y, pu, refPic, acMvTemp, predBuf, false, pu.cu->slice->clpRng(COMPONENT_Y));
@@ -11012,24 +11032,26 @@ void InterSearch::xClipMv( Mv& rcMv, const Position& pos, const struct Size& siz
 {
   int mvShift = MV_FRACTIONAL_BITS_INTERNAL;
   int offset = 8;
+
   int horMax = ( pps.getPicWidthInLumaSamples() + offset - (int)pos.x - 1 ) << mvShift;
-  int horMin = ( -( int ) sps.getMaxCUWidth()   - offset - ( int ) pos.x + 1 ) << mvShift;
+  int horMin = (-(int) sps.getMaxCUWidth() - offset - (int) pos.x + 1) * (1 << mvShift);
 
   int verMax = ( pps.getPicHeightInLumaSamples() + offset - (int)pos.y - 1 ) << mvShift;
-  int verMin = ( -( int ) sps.getMaxCUHeight()   - offset - ( int ) pos.y + 1 ) << mvShift;
+  int verMin = (-(int) sps.getMaxCUHeight() - offset - (int) pos.y + 1) * (1 << mvShift);
+
   const SubPic &curSubPic = pps.getSubPicFromPos(pos);
   if (curSubPic.getTreatedAsPicFlag() && m_clipMvInSubPic)
   {
     horMax = ((curSubPic.getSubPicRight() + 1)  + offset - (int)pos.x - 1) << mvShift;
-    horMin = (-(int)sps.getMaxCUWidth()  - offset - ((int)pos.x - curSubPic.getSubPicLeft()) + 1) << mvShift;
+    horMin = (-(int) sps.getMaxCUWidth() - offset - ((int) pos.x - curSubPic.getSubPicLeft()) + 1) * (1 << mvShift);
 
     verMax = ((curSubPic.getSubPicBottom() + 1) + offset -  (int)pos.y - 1) << mvShift;
-    verMin = (-(int)sps.getMaxCUHeight() - offset - ((int)pos.y - curSubPic.getSubPicTop()) + 1) << mvShift;
+    verMin = (-(int) sps.getMaxCUHeight() - offset - ((int) pos.y - curSubPic.getSubPicTop()) + 1) * (1 << mvShift);
   }
   if( pps.getWrapAroundEnabledFlag() )
   {
     int horMax = ( pps.getPicWidthInLumaSamples() + sps.getMaxCUWidth() - size.width + offset - (int)pos.x - 1 ) << mvShift;
-    int horMin = ( -( int ) sps.getMaxCUWidth()                                      - offset - ( int ) pos.x + 1 ) << mvShift;
+    int horMin = (-(int) sps.getMaxCUWidth() - offset - (int) pos.x + 1) * (1 << mvShift);
     rcMv.setHor( std::min( horMax, std::max( horMin, rcMv.getHor() ) ) );
     rcMv.setVer( std::min( verMax, std::max( verMin, rcMv.getVer() ) ) );
     return;
