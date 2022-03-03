@@ -2177,7 +2177,7 @@ static void simdFilter( const ClpRng& clpRng, Pel const *src, int srcStride, Pel
   else
   {
     shift -= ( isFirst ) ? headRoom : 0;
-    offset = ( isFirst ) ? -IF_INTERNAL_OFFS << shift : 0;
+    offset = (isFirst) ? -(IF_INTERNAL_OFFS << shift) : 0;
   }
 
   if (biMCForDMVR)
@@ -2415,7 +2415,9 @@ void xWeightedGeoBlk_SSE(const PredictionUnit &pu, const uint32_t width, const u
   const __m128i mmMax = _mm_set1_epi16(clpRng.max);
 
   if (compIdx != COMPONENT_Y && pu.chromaFormat == CHROMA_420)
-    stepY <<= 1;
+  {
+    stepY *= 2;
+  }
   if (width == 4)
   {
     // it will occur to chroma only

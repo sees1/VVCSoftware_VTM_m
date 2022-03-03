@@ -1989,42 +1989,57 @@ void EncLib::xInitRPL(SPS &sps)
   uint32_t numberOfRPL = sps.getNumRPL0();
 
   bool isAllEntriesinRPLHasSameSignFlag = true;
-  bool isFirstEntry = true;
-  bool lastSign = true;        //true = positive ; false = negative
   for (uint32_t ii = 0; isAllEntriesinRPLHasSameSignFlag && ii < numberOfRPL; ii++)
   {
+    bool isFirstEntry = true;
+    bool lastSign;
+
     const ReferencePictureList* rpl = rplList0->getReferencePictureList(ii);
     for (uint32_t jj = 0; isAllEntriesinRPLHasSameSignFlag && jj < rpl->getNumberOfActivePictures(); jj++)
     {
-      if (!rpl->isRefPicLongterm(jj) && isFirstEntry)
+      if (!rpl->isRefPicLongterm(jj))
       {
-        lastSign = (rpl->getRefPicIdentifier(jj) >= 0) ? true : false;
-        isFirstEntry = false;
-      }
-      else if (!rpl->isRefPicLongterm(jj) && (((rpl->getRefPicIdentifier(jj) - rpl->getRefPicIdentifier(jj - 1)) >= 0 && lastSign == false) || ((rpl->getRefPicIdentifier(jj) - rpl->getRefPicIdentifier(jj - 1)) < 0 && lastSign == true)))
-      {
-        isAllEntriesinRPLHasSameSignFlag = false;
+        if (isFirstEntry)
+        {
+          lastSign     = rpl->getRefPicIdentifier(jj) >= 0;
+          isFirstEntry = false;
+        }
+        else
+        {
+          const bool currentSign = rpl->getRefPicIdentifier(jj) - rpl->getRefPicIdentifier(jj - 1) >= 0;
+          if (currentSign != lastSign)
+          {
+            isAllEntriesinRPLHasSameSignFlag = false;
+          }
+        }
       }
     }
   }
   //Check RPLL1. Skip it if it is already found out that this flag is not true for RPL0 or if RPL1 is the same as RPL0
   numberOfRPL = sps.getNumRPL1();
-  isFirstEntry = true;
-  lastSign = true;
   for (uint32_t ii = 0; isAllEntriesinRPLHasSameSignFlag && !sps.getRPL1CopyFromRPL0Flag() && ii < numberOfRPL; ii++)
   {
-    isFirstEntry = true;
+    bool isFirstEntry = true;
+    bool lastSign;
+
     const ReferencePictureList* rpl = rplList1->getReferencePictureList(ii);
     for (uint32_t jj = 0; isAllEntriesinRPLHasSameSignFlag && jj < rpl->getNumberOfActivePictures(); jj++)
     {
-      if (!rpl->isRefPicLongterm(jj) && isFirstEntry)
+      if (!rpl->isRefPicLongterm(jj))
       {
-        lastSign = (rpl->getRefPicIdentifier(jj) >= 0) ? true : false;
-        isFirstEntry = false;
-      }
-      else if (!rpl->isRefPicLongterm(jj) && (((rpl->getRefPicIdentifier(jj) - rpl->getRefPicIdentifier(jj - 1)) >= 0 && lastSign == false) || ((rpl->getRefPicIdentifier(jj) - rpl->getRefPicIdentifier(jj - 1)) < 0 && lastSign == true)))
-      {
-        isAllEntriesinRPLHasSameSignFlag = false;
+        if (isFirstEntry)
+        {
+          lastSign     = rpl->getRefPicIdentifier(jj) >= 0;
+          isFirstEntry = false;
+        }
+        else
+        {
+          const bool currentSign = rpl->getRefPicIdentifier(jj) - rpl->getRefPicIdentifier(jj - 1) >= 0;
+          if (currentSign != lastSign)
+          {
+            isAllEntriesinRPLHasSameSignFlag = false;
+          }
+        }
       }
     }
   }

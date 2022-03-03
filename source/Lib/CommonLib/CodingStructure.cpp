@@ -2383,8 +2383,10 @@ const CodingUnit* CodingStructure::getCURestricted( const Position &pos, const P
   const CodingUnit* cu = getCU( pos, _chType );
   const bool wavefrontsEnabled = this->slice->getSPS()->getEntropyCodingSyncEnabledFlag();
   int ctuSizeBit = floorLog2(this->sps->getMaxCUWidth());
-  int xNbY  = pos.x << getChannelTypeScaleX( _chType, this->area.chromaFormat );
-  int xCurr = curPos.x << getChannelTypeScaleX( _chType, this->area.chromaFormat );
+
+  const int xNbY  = pos.x * (1 << getChannelTypeScaleX(_chType, this->area.chromaFormat));
+  const int xCurr = curPos.x * (1 << getChannelTypeScaleX(_chType, this->area.chromaFormat));
+
   bool addCheck = (wavefrontsEnabled && (xNbY >> ctuSizeBit) >= (xCurr >> ctuSizeBit) + 1 ) ? false : true;
   return ( cu && cu->slice->getIndependentSliceIdx() == curSliceIdx && cu->tileIdx == curTileIdx && addCheck ) ? cu : nullptr;
 }

@@ -162,7 +162,7 @@ void paddingSimd(Pel *dst, int stride, int width, int height, int padSize)
 
   if (padSize == 1)
   {
-    for (size_t i = 0; i < height; i++)
+    for (ptrdiff_t i = 0; i < height; i++)
     {
       Pel left                = dst[i * stride];
       Pel right               = dst[i * stride + width - 1];
@@ -192,7 +192,7 @@ void paddingSimd(Pel *dst, int stride, int width, int height, int padSize)
   }
   else if (padSize == 2)
   {
-    for (size_t i = 0; i < height; i++)
+    for (ptrdiff_t i = 0; i < height; i++)
     {
       Pel left                    = dst[i * stride];
       Pel right                   = dst[i * stride + width - 1];
@@ -283,7 +283,8 @@ void calcBIOSums_SSE(const Pel* srcY0Tmp, const Pel* srcY1Tmp, Pel* gradX0, Pel*
     // Note: loading 8 values also works, but valgrind doesn't like it
     auto load6values = [](const Pel *ptr) {
       __m128i a = _mm_loadl_epi64((const __m128i *) ptr);
-      __m128i b = _mm_cvtsi32_si128(*(uint32_t *) (ptr + 4));
+      // Note: loading 4 values to avoid unaligned 32-bit load
+      __m128i b = _mm_srli_si128(_mm_loadl_epi64((const __m128i *) (ptr + 2)), 4);
       return _mm_unpacklo_epi64(a, b);
     };
 
@@ -1209,7 +1210,7 @@ template< X86_VEXT vext, int W >
 void removeWeightHighFreq_SSE(int16_t* src0, int src0Stride, const int16_t* src1, int src1Stride, int width, int height, int shift, int bcwWeight)
 {
   int normalizer = ((1 << 16) + (bcwWeight>0 ? (bcwWeight >> 1) : -(bcwWeight >> 1))) / bcwWeight;
-  int weight0 = normalizer << g_BcwLog2WeightBase;
+  int weight0    = normalizer * (1 << g_BcwLog2WeightBase);
   int weight1 = (g_BcwWeightBase - bcwWeight)*normalizer;
   int offset = 1 << (shift - 1);
   if (W == 8)

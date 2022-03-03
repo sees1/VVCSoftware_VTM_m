@@ -45,7 +45,8 @@
 static inline Pel weightBidir(int w0, Pel p0, int w1, Pel p1, int round, int shift, int offset, const ClpRng &clpRng)
 {
   return ClipPel(
-    ((w0 * (p0 + IF_INTERNAL_OFFS) + w1 * (p1 + IF_INTERNAL_OFFS) + round + (offset << (shift - 1))) >> shift), clpRng);
+    ((w0 * (p0 + IF_INTERNAL_OFFS) + w1 * (p1 + IF_INTERNAL_OFFS) + round + (offset * (1 << (shift - 1)))) >> shift),
+    clpRng);
 }
 
 static inline Pel weightUnidir(int w0, Pel p0, int round, int shift, int offset, const ClpRng &clpRng)

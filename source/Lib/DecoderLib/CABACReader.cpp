@@ -3353,7 +3353,7 @@ void CABACReader::residual_coding_subblock( CoeffCodingContext& cctx, TCoeff* co
   //===== decode sign's =====
   RExt__DECODER_DEBUG_BIT_STATISTICS_CREATE_SET_SIZE2( STATS__CABAC_BITS__SIGN_BIT, Size( cctx.width(), cctx.height() ), cctx.compID() );
   const unsigned  numSigns    = ( cctx.hideSign( firstNZPos, lastNZPos ) ? numNonZero - 1 : numNonZero );
-  unsigned        signPattern = m_BinDecoder.decodeBinsEP( numSigns ) << ( 32 - numSigns );
+  unsigned        signPattern = numSigns > 0 ? m_BinDecoder.decodeBinsEP(numSigns) << (32 - numSigns) : 0;
 
   //===== set final coefficents =====
   TCoeff sumAbs = 0;

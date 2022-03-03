@@ -572,7 +572,7 @@ static void simdDeriveClassificationBlk(AlfClassifier **classifier, int **laplac
   CHECK((blk.width & 7) != 0, "Block width must be a multiple of 8");
   CHECK((vbCTUHeight & (vbCTUHeight - 1)) != 0, "vbCTUHeight must be a power of 2");
 
-  const size_t imgStride = srcLuma.stride;
+  const ptrdiff_t imgStride = srcLuma.stride;
   const Pel *  srcExt    = srcLuma.buf;
 
   const int imgHExtended = blk.height + 4;
@@ -587,7 +587,7 @@ static void simdDeriveClassificationBlk(AlfClassifier **classifier, int **laplac
 
   for (int i = 0; i < imgHExtended; i += 2)
   {
-    const size_t offset = (i + posY - 3) * imgStride + posX - 3;
+    const ptrdiff_t offset = (i + posY - 3) * imgStride + posX - 3;
 
     const Pel *imgY0 = &srcExt[offset];
     const Pel *imgY1 = &srcExt[offset + imgStride];

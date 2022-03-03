@@ -1561,8 +1561,8 @@ void PU::getInterMergeCandidates( const PredictionUnit &pu, MergeCtx& mrgCtx,
 
 #if GDR_ENABLED
         // GDR: Pairwise average candidate
-        bool mvISolid = mrgCtx.mvSolid[0 * 2 + refListId];
-        bool mvJSolid = mrgCtx.mvSolid[1 * 2 + refListId];
+        bool mvISolid = isEncodeGdrClean ? mrgCtx.mvSolid[0 * 2 + refListId] : true;
+        bool mvJSolid = isEncodeGdrClean ? mrgCtx.mvSolid[1 * 2 + refListId] : true;
         bool mvSolid = true;
 #endif
         // both MVs are invalid, skip
@@ -1770,7 +1770,7 @@ int convertMvFixedToFloat(int32_t val)
     int round = (1 << scale) >> 1;
     int n     = (val + round) >> scale;
     exponent  = scale + ((n ^ sign) >> (MV_MANTISSA_BITCOUNT - 1));
-    mantissa  = (n & MV_MANTISSA_UPPER_LIMIT) | (sign << (MV_MANTISSA_BITCOUNT - 1));
+    mantissa  = (n & MV_MANTISSA_UPPER_LIMIT) | (sign * (1 << (MV_MANTISSA_BITCOUNT - 1)));
   }
   else
   {
@@ -1778,14 +1778,14 @@ int convertMvFixedToFloat(int32_t val)
     mantissa = val;
   }
 
-  return exponent | (mantissa << MV_EXPONENT_BITCOUNT);
+  return exponent | (mantissa * (1 << MV_EXPONENT_BITCOUNT));
 }
 
 int convertMvFloatToFixed(int val)
 {
   int exponent = val & MV_EXPONENT_MASK;
   int mantissa = val >> MV_EXPONENT_BITCOUNT;
-  return exponent == 0 ? mantissa : (mantissa ^ MV_MANTISSA_LIMIT) << (exponent - 1);
+  return exponent == 0 ? mantissa : (mantissa ^ MV_MANTISSA_LIMIT) * (1 << (exponent - 1));
 }
 
 int roundMvComp(int x)
@@ -2597,12 +2597,12 @@ void PU::xInheritedAffineMv( const PredictionUnit &pu, const PredictionUnit* puN
   int shift = MAX_CU_DEPTH;
   int iDMvHorX, iDMvHorY, iDMvVerX, iDMvVerY;
 
-  iDMvHorX = (mvRT - mvLT).getHor() << (shift - floorLog2(neiW));
-  iDMvHorY = (mvRT - mvLT).getVer() << (shift - floorLog2(neiW));
+  iDMvHorX = (mvRT - mvLT).getHor() * (1 << (shift - floorLog2(neiW)));
+  iDMvHorY = (mvRT - mvLT).getVer() * (1 << (shift - floorLog2(neiW)));
   if ( puNeighbour->cu->affineType == AFFINEMODEL_6PARAM && !isTopCtuBoundary )
   {
-    iDMvVerX = (mvLB - mvLT).getHor() << (shift - floorLog2(neiH));
-    iDMvVerY = (mvLB - mvLT).getVer() << (shift - floorLog2(neiH));
+    iDMvVerX = (mvLB - mvLT).getHor() * (1 << (shift - floorLog2(neiH)));
+    iDMvVerY = (mvLB - mvLT).getVer() * (1 << (shift - floorLog2(neiH)));
   }
   else
   {
@@ -2610,8 +2610,8 @@ void PU::xInheritedAffineMv( const PredictionUnit &pu, const PredictionUnit* puN
     iDMvVerY = iDMvHorX;
   }
 
-  int iMvScaleHor = mvLT.getHor() << shift;
-  int iMvScaleVer = mvLT.getVer() << shift;
+  int iMvScaleHor = mvLT.getHor() * (1 << shift);
+  int iMvScaleVer = mvLT.getVer() * (1 << shift);
   int horTmp, verTmp;
 
   // v0
@@ -3247,8 +3247,8 @@ void PU::getAffineControlPointCand(const PredictionUnit& pu, MotionInfo mi[4], b
         break;
 
       case 5: // 5 : LT, LB
-        vx = (cMv[l][0].hor << shift) + ((cMv[l][2].ver - cMv[l][0].ver) << shiftHtoW);
-        vy = (cMv[l][0].ver << shift) - ((cMv[l][2].hor - cMv[l][0].hor) << shiftHtoW);
+        vx = (cMv[l][0].hor * (1 << shift)) + ((cMv[l][2].ver - cMv[l][0].ver) * (1 << shiftHtoW));
+        vy = (cMv[l][0].ver * (1 << shift)) - ((cMv[l][2].hor - cMv[l][0].hor) * (1 << shiftHtoW));
         roundAffineMv( vx, vy, shift );
         cMv[l][1].set( vx, vy );
         cMv[l][1].clipToStorageBitDepth();
@@ -3818,13 +3818,13 @@ void PU::setAllAffineMv(PredictionUnit& pu, Mv affLT, Mv affRT, Mv affLB, RefPic
     }
   }
   int deltaMvHorX, deltaMvHorY, deltaMvVerX, deltaMvVerY;
-  deltaMvHorX = (affRT - affLT).getHor() << (shift - floorLog2(width));
-  deltaMvHorY = (affRT - affLT).getVer() << (shift - floorLog2(width));
+  deltaMvHorX = (affRT - affLT).getHor() * (1 << (shift - floorLog2(width)));
+  deltaMvHorY = (affRT - affLT).getVer() * (1 << (shift - floorLog2(width)));
   int height = pu.Y().height;
   if ( pu.cu->affineType == AFFINEMODEL_6PARAM )
   {
-    deltaMvVerX = (affLB - affLT).getHor() << (shift - floorLog2(height));
-    deltaMvVerY = (affLB - affLT).getVer() << (shift - floorLog2(height));
+    deltaMvVerX = (affLB - affLT).getHor() * (1 << (shift - floorLog2(height)));
+    deltaMvVerY = (affLB - affLT).getVer() * (1 << (shift - floorLog2(height)));
   }
   else
   {
@@ -3832,8 +3832,8 @@ void PU::setAllAffineMv(PredictionUnit& pu, Mv affLT, Mv affRT, Mv affLB, RefPic
     deltaMvVerY = deltaMvHorX;
   }
 
-  int mvScaleHor = affLT.getHor() << shift;
-  int mvScaleVer = affLT.getVer() << shift;
+  int mvScaleHor = affLT.getHor() * (1 << shift);
+  int mvScaleVer = affLT.getVer() * (1 << shift);
 
   int blockWidth = AFFINE_MIN_BLOCK_SIZE;
   int blockHeight = AFFINE_MIN_BLOCK_SIZE;
@@ -4420,10 +4420,10 @@ void PU::spanGeoMotionInfo( PredictionUnit &pu, MergeCtx &geoMrgCtx, const uint8
   }
   for (int y = 0; y < mb.height; y++)
   {
-    lookUpY = (((4 * y + offsetY) << 1) + 5) * g_Dis[distanceY];
+    lookUpY = (2 * (4 * y + offsetY) + 5) * g_Dis[distanceY];
     for (int x = 0; x < mb.width; x++)
     {
-      motionIdx = (((4 * x + offsetX) << 1) + 5) * g_Dis[distanceX] + lookUpY;
+      motionIdx = (2 * (4 * x + offsetX) + 5) * g_Dis[distanceX] + lookUpY;
       tpmMask = abs(motionIdx) < 32 ? 2 : (motionIdx <= 0 ? (1 - isFlip) : isFlip);
       if (tpmMask == 2)
       {

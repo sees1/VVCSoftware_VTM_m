@@ -1074,8 +1074,8 @@ void DeblockingFilter::xEdgeFilterLuma(const CodingUnit &cu, const DeblockEdgeDi
         sidePisLarge = false;
       }
       const int indexTC =
-        Clip3(0, MAX_QP + DEFAULT_INTRA_TC_OFFSET, int(qp + DEFAULT_INTRA_TC_OFFSET * (bs - 1) + (tcOffsetDiv2 << 1)));
-      const int indexB = Clip3(0, MAX_QP, qp + (betaOffsetDiv2 << 1));
+        Clip3(0, MAX_QP + DEFAULT_INTRA_TC_OFFSET, int(qp + DEFAULT_INTRA_TC_OFFSET * (bs - 1) + 2 * tcOffsetDiv2));
+      const int indexB = Clip3(0, MAX_QP, qp + 2 * betaOffsetDiv2);
 
       const int tc   = bitDepthLuma < 10 ? ((sm_tcTable[indexTC] + (1 << (9 - bitDepthLuma))) >> (10 - bitDepthLuma))
                                          : ((sm_tcTable[indexTC]) << (bitDepthLuma - 10));
@@ -1352,7 +1352,7 @@ void DeblockingFilter::xEdgeFilterChroma(const CodingUnit &cu, const DeblockEdge
 
           const int indexTC =
             Clip3<int>(0, MAX_QP + DEFAULT_INTRA_TC_OFFSET,
-                       qp + DEFAULT_INTRA_TC_OFFSET * (bS[chromaIdx] - 1) + (tcOffsetDiv2[chromaIdx] << 1));
+                       qp + DEFAULT_INTRA_TC_OFFSET * (bS[chromaIdx] - 1) + 2 * tcOffsetDiv2[chromaIdx]);
           const int bitDepthChroma = sps.getBitDepth(CHANNEL_TYPE_CHROMA);
           const int tc             = bitDepthChroma < 10
                                        ? ((sm_tcTable[indexTC] + (1 << (9 - bitDepthChroma))) >> (10 - bitDepthChroma))
@@ -1360,7 +1360,7 @@ void DeblockingFilter::xEdgeFilterChroma(const CodingUnit &cu, const DeblockEdge
           bool useLongFilter = false;
           if (largeBoundary)
           {
-            const int indexB = Clip3<int>(0, MAX_QP, qp + (betaOffsetDiv2[chromaIdx] << 1));
+            const int indexB = Clip3<int>(0, MAX_QP, qp + 2 * betaOffsetDiv2[chromaIdx]);
             const int beta   = sm_betaTable[indexB] * iBitdepthScale;
 
             const int dp0 = xCalcDP(tmpSrcChroma + srcStep * (idx * loopLength + 0), offset, isChromaHorCTBBoundary);
@@ -1638,7 +1638,7 @@ inline void DeblockingFilter::xPelFilterChroma(Pel *src, const int offset, const
   }
   else
   {
-    delta           = Clip3(-tc, tc, ((((m4 - m3) << 2) + m2 - m5 + 4) >> 3));
+    delta           = Clip3(-tc, tc, ((4 * (m4 - m3) + m2 - m5 + 4) >> 3));
     src[-offset]    = ClipPel(m3 + delta, clpRng);
     src[0]          = ClipPel(m4 - delta, clpRng);
   }

@@ -2760,8 +2760,8 @@ private:
   bool                       m_ccAlfCrEnabledFlag;
   int                        m_ccAlfCbApsId;
   int                        m_ccAlfCrApsId;
-  bool                       m_disableSATDForRd;
-  bool                       m_isLossless;
+  bool                       m_disableSATDForRd{ false };
+  bool                       m_isLossless{ false };
   int                        m_tsrc_index;
   unsigned                   m_riceBit[8];
   int                        m_cnt_right_bottom;
