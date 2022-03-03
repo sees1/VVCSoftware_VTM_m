@@ -117,26 +117,26 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
 
       if( !bNewPicture )
       {
-      AnnexBStats stats       = AnnexBStats();
-      byteStreamNALUnit( *bytestream, nalu.getBitstream().getFifo(), stats );
+        AnnexBStats stats = AnnexBStats();
+        byteStreamNALUnit(*bytestream, nalu.getBitstream().getFifo(), stats);
 
-      // call actual decoding function
-      if( nalu.getBitstream().getFifo().empty() )
-      {
-        /* this can happen if the following occur:
-         *  - empty input file
-         *  - two back-to-back start_code_prefixes
-         *  - start_code_prefix immediately followed by EOF
-         */
-        msg( ERROR, "Warning: Attempt to decode an empty NAL unit\n");
-      }
-      else
-      {
-        read( nalu );
-        int iSkipFrame = 0;
+        // call actual decoding function
+        if (nalu.getBitstream().getFifo().empty())
+        {
+          /* this can happen if the following occur:
+           *  - empty input file
+           *  - two back-to-back start_code_prefixes
+           *  - start_code_prefix immediately followed by EOF
+           */
+          msg(ERROR, "Warning: Attempt to decode an empty NAL unit\n");
+        }
+        else
+        {
+          read(nalu);
+          int iSkipFrame = 0;
 
-        pcDecLib->decode(nalu, iSkipFrame, iPOCLastDisplay, 0);
-      }
+          pcDecLib->decode(nalu, iSkipFrame, iPOCLastDisplay, 0);
+        }
       }
 
       if ((bNewPicture || !*bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS) && !pcDecLib->getFirstSliceInSequence(nalu.m_nuhLayerId))
@@ -157,19 +157,19 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
 
                 if( debugCTU < 0 || poc != debugPOC )
                 {
-                for( int i = 0; i < pic->slices.size(); i++ )
-                {
-                  if( pcEncPic->slices.size() <= i )
+                  for (int i = 0; i < pic->slices.size(); i++)
                   {
-                    pcEncPic->slices.push_back( new Slice );
-                    pcEncPic->slices.back()->initSlice();
-                    pcEncPic->slices.back()->setPPS( pcEncPic->slices[0]->getPPS() );
-                    pcEncPic->slices.back()->setSPS( pcEncPic->slices[0]->getSPS() );
-                    pcEncPic->slices.back()->setVPS( pcEncPic->slices[0]->getVPS() );
-                    pcEncPic->slices.back()->setPic( pcEncPic->slices[0]->getPic() );
+                    if (pcEncPic->slices.size() <= i)
+                    {
+                      pcEncPic->slices.push_back(new Slice);
+                      pcEncPic->slices.back()->initSlice();
+                      pcEncPic->slices.back()->setPPS(pcEncPic->slices[0]->getPPS());
+                      pcEncPic->slices.back()->setSPS(pcEncPic->slices[0]->getSPS());
+                      pcEncPic->slices.back()->setVPS(pcEncPic->slices[0]->getVPS());
+                      pcEncPic->slices.back()->setPic(pcEncPic->slices[0]->getPic());
+                    }
+                    pcEncPic->slices[i]->copySliceInfo(pic->slices[i], false);
                   }
-                  pcEncPic->slices[i]->copySliceInfo( pic->slices[i], false );
-                }
                 }
 
                 pcEncPic->cs->slice = pcEncPic->slices.back();
@@ -192,52 +192,62 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
                 }
                 else
                 {
-                if ( pic->cs->sps->getSAOEnabledFlag() )
-                {
-                  pcEncPic->copySAO( *pic, 0 );
-                }
-
-                if( pic->cs->sps->getALFEnabledFlag() )
-                {
-                  std::copy(pic->getAlfCtbFilterIndexVec().begin(), pic->getAlfCtbFilterIndexVec().end(), pcEncPic->getAlfCtbFilterIndexVec().begin());
-                  for( int compIdx = 0; compIdx < MAX_NUM_COMPONENT; compIdx++ )
+                  if (pic->cs->sps->getSAOEnabledFlag())
                   {
-                    std::copy( pic->getAlfCtuEnableFlag()[compIdx].begin(), pic->getAlfCtuEnableFlag()[compIdx].end(), pcEncPic->getAlfCtuEnableFlag()[compIdx].begin() );
+                    pcEncPic->copySAO(*pic, 0);
                   }
-                  pcEncPic->resizeAlfCtbFilterIndex(pic->cs->pcv->sizeInCtus);
-                  memcpy( pcEncPic->getAlfCtbFilterIndex(), pic->getAlfCtbFilterIndex(), sizeof(short)*pic->cs->pcv->sizeInCtus );
 
-                  std::copy( pic->getAlfCtuAlternative(COMPONENT_Cb).begin(), pic->getAlfCtuAlternative(COMPONENT_Cb).end(), pcEncPic->getAlfCtuAlternative(COMPONENT_Cb).begin() );
-                  std::copy( pic->getAlfCtuAlternative(COMPONENT_Cr).begin(), pic->getAlfCtuAlternative(COMPONENT_Cr).end(), pcEncPic->getAlfCtuAlternative(COMPONENT_Cr).begin() );
-
-                  for( int i = 0; i < pic->slices.size(); i++ )
+                  if (pic->cs->sps->getALFEnabledFlag())
                   {
-                    pcEncPic->slices[i]->setNumAlfApsIdsLuma(pic->slices[i]->getNumAlfApsIdsLuma());
-                    pcEncPic->slices[i]->setAlfApsIdsLuma(pic->slices[i]->getAlfApsIdsLuma());
-                    pcEncPic->slices[i]->setAlfAPSs(pic->slices[i]->getAlfAPSs());
-                    pcEncPic->slices[i]->setAlfApsIdChroma(pic->slices[i]->getAlfApsIdChroma());
-                    pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Y,  pic->slices[i]->getAlfEnabledFlag(COMPONENT_Y));
-                    pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Cb, pic->slices[i]->getAlfEnabledFlag(COMPONENT_Cb));
-                    pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Cr, pic->slices[i]->getAlfEnabledFlag(COMPONENT_Cr));
-                    pcEncPic->slices[i]->setCcAlfCbApsId(pic->slices[i]->getCcAlfCbApsId());
-                    pcEncPic->slices[i]->setCcAlfCbEnabledFlag(pic->slices[i]->getCcAlfCbEnabledFlag());
-                    pcEncPic->slices[i]->setCcAlfCrApsId(pic->slices[i]->getCcAlfCrApsId());
-                    pcEncPic->slices[i]->setCcAlfCrEnabledFlag(pic->slices[i]->getCcAlfCrEnabledFlag());
+                    std::copy(pic->getAlfCtbFilterIndexVec().begin(), pic->getAlfCtbFilterIndexVec().end(),
+                              pcEncPic->getAlfCtbFilterIndexVec().begin());
+                    for (int compIdx = 0; compIdx < MAX_NUM_COMPONENT; compIdx++)
+                    {
+                      std::copy(pic->getAlfCtuEnableFlag()[compIdx].begin(), pic->getAlfCtuEnableFlag()[compIdx].end(),
+                                pcEncPic->getAlfCtuEnableFlag()[compIdx].begin());
+                    }
+                    pcEncPic->resizeAlfCtbFilterIndex(pic->cs->pcv->sizeInCtus);
+                    memcpy(pcEncPic->getAlfCtbFilterIndex(), pic->getAlfCtbFilterIndex(),
+                           sizeof(short) * pic->cs->pcv->sizeInCtus);
+
+                    std::copy(pic->getAlfCtuAlternative(COMPONENT_Cb).begin(),
+                              pic->getAlfCtuAlternative(COMPONENT_Cb).end(),
+                              pcEncPic->getAlfCtuAlternative(COMPONENT_Cb).begin());
+                    std::copy(pic->getAlfCtuAlternative(COMPONENT_Cr).begin(),
+                              pic->getAlfCtuAlternative(COMPONENT_Cr).end(),
+                              pcEncPic->getAlfCtuAlternative(COMPONENT_Cr).begin());
+
+                    for (int i = 0; i < pic->slices.size(); i++)
+                    {
+                      pcEncPic->slices[i]->setNumAlfApsIdsLuma(pic->slices[i]->getNumAlfApsIdsLuma());
+                      pcEncPic->slices[i]->setAlfApsIdsLuma(pic->slices[i]->getAlfApsIdsLuma());
+                      pcEncPic->slices[i]->setAlfAPSs(pic->slices[i]->getAlfAPSs());
+                      pcEncPic->slices[i]->setAlfApsIdChroma(pic->slices[i]->getAlfApsIdChroma());
+                      pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Y,
+                                                             pic->slices[i]->getAlfEnabledFlag(COMPONENT_Y));
+                      pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Cb,
+                                                             pic->slices[i]->getAlfEnabledFlag(COMPONENT_Cb));
+                      pcEncPic->slices[i]->setAlfEnabledFlag(COMPONENT_Cr,
+                                                             pic->slices[i]->getAlfEnabledFlag(COMPONENT_Cr));
+                      pcEncPic->slices[i]->setCcAlfCbApsId(pic->slices[i]->getCcAlfCbApsId());
+                      pcEncPic->slices[i]->setCcAlfCbEnabledFlag(pic->slices[i]->getCcAlfCbEnabledFlag());
+                      pcEncPic->slices[i]->setCcAlfCrApsId(pic->slices[i]->getCcAlfCrApsId());
+                      pcEncPic->slices[i]->setCcAlfCrEnabledFlag(pic->slices[i]->getCcAlfCrEnabledFlag());
+                    }
                   }
-                }
 
-                pcDecLib->executeLoopFilters();
-                if ( pic->cs->sps->getSAOEnabledFlag() )
-                {
-                  pcEncPic->copySAO( *pic, 1 );
-                }
+                  pcDecLib->executeLoopFilters();
+                  if (pic->cs->sps->getSAOEnabledFlag())
+                  {
+                    pcEncPic->copySAO(*pic, 1);
+                  }
 
-                pcEncPic->cs->copyStructure( *pic->cs, CH_L, true, true );
+                  pcEncPic->cs->copyStructure(*pic->cs, CH_L, true, true);
 
-                if( CS::isDualITree( *pcEncPic->cs ) )
-                {
-                  pcEncPic->cs->copyStructure( *pic->cs, CH_C, true, true );
-                }
+                  if (CS::isDualITree(*pcEncPic->cs))
+                  {
+                    pcEncPic->cs->copyStructure(*pic->cs, CH_C, true, true);
+                  }
                 }
                 goOn = false; // exit the loop return
                 bRet = true;
@@ -309,7 +319,7 @@ bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::stri
                 if(pcCurPic->neededForOutput && pcCurPic->getPOC() > iPOCLastDisplay &&
                   (numPicsNotYetDisplayed >  maxNumReorderPicsHighestTid || dpbFullness > maxDecPicBufferingHighestTid))
                 {
-                    numPicsNotYetDisplayed--;
+                  numPicsNotYetDisplayed--;
                   if( ! pcCurPic->referenced )
                   {
                     dpbFullness--;
@@ -1461,7 +1471,8 @@ bool DecLib::isSliceNaluFirstInAU( bool newPicture, InputNALUnit &nalu )
   // get slice POC
   m_apcSlicePilot->setPicHeader( &m_picHeader );
   m_apcSlicePilot->initSlice();
-  m_HLSReader.setBitstream( &nalu.getBitstream() );
+  InputBitstream bs(nalu.getBitstream());   // create copy
+  m_HLSReader.setBitstream(&bs);
   m_HLSReader.getSlicePoc( m_apcSlicePilot, &m_picHeader, &m_parameterSetManager, m_prevTid0POC );
 
   // check for different POC

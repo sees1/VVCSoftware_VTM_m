@@ -2638,26 +2638,17 @@ void VPS::deriveTargetOutputLayerSet( int targetOlsIdx )
 int VPS::deriveTargetOLSIdx(void)
 {
   int lowestIdx = 0;
-  int highestNumLayers = m_numLayersInOls[lowestIdx];
 
-  if ((m_numLayersInOls.size() > 1 ))
+  for (int idx = 1; idx < m_totalNumOLSs; idx++)
   {
-    for (int idx = 1; idx < m_numLayersInOls.size(); idx++)
+    if ((m_numLayersInOls[lowestIdx] == m_numLayersInOls[idx]
+         && m_numOutputLayersInOls[lowestIdx] < m_numOutputLayersInOls[idx])
+        || m_numLayersInOls[lowestIdx] < m_numLayersInOls[idx])
     {
-      if(highestNumLayers == m_numLayersInOls[idx])
-      {
-        if (m_numOutputLayersInOls[lowestIdx] < m_numOutputLayersInOls[idx])
-        {
-          lowestIdx       = idx;
-        }
-      }
-      else if(highestNumLayers < m_numLayersInOls[idx])
-      {
-        highestNumLayers = m_numLayersInOls[idx];
-        lowestIdx       = idx;
-      }
+      lowestIdx = idx;
     }
   }
+
   return lowestIdx;
 }
 
