@@ -332,34 +332,37 @@ uint32_t DecApp::decode()
       nalu.m_nuhLayerId = lastNaluLayerId;
     }
 
-    if ((bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS) && !m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId) && !bPicSkipped)
+    if (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS)
     {
-      if (!loopFiltered[nalu.m_nuhLayerId] || bitstreamFile)
+      if (!m_cDecLib.getFirstSliceInSequence(nalu.m_nuhLayerId) && !bPicSkipped)
       {
-        m_cDecLib.executeLoopFilters();
-        m_cDecLib.finishPicture(poc, pcListPic, INFO, m_newCLVS[nalu.m_nuhLayerId]);
-      }
-      loopFiltered[nalu.m_nuhLayerId] = (nalu.m_nalUnitType == NAL_UNIT_EOS);
-      if (nalu.m_nalUnitType == NAL_UNIT_EOS)
-      {
-        m_cDecLib.setFirstSliceInSequence(true, nalu.m_nuhLayerId);
-      }
-
-      m_cDecLib.updateAssociatedIRAP();
-      m_cDecLib.updatePrevGDRInSameLayer();
-      m_cDecLib.updatePrevIRAPAndGDRSubpic();
-
-      if ( gdrRecoveryPeriod[nalu.m_nuhLayerId] )
-      {
-        if ( m_cDecLib.getGDRRecoveryPocReached() )
+        if (!loopFiltered[nalu.m_nuhLayerId] || bitstreamFile)
         {
-          gdrRecoveryPeriod[nalu.m_nuhLayerId] = false;
+          m_cDecLib.executeLoopFilters();
+          m_cDecLib.finishPicture(poc, pcListPic, INFO, m_newCLVS[nalu.m_nuhLayerId]);
+        }
+        loopFiltered[nalu.m_nuhLayerId] = (nalu.m_nalUnitType == NAL_UNIT_EOS);
+        if (nalu.m_nalUnitType == NAL_UNIT_EOS)
+        {
+          m_cDecLib.setFirstSliceInSequence(true, nalu.m_nuhLayerId);
+        }
+
+        m_cDecLib.updateAssociatedIRAP();
+        m_cDecLib.updatePrevGDRInSameLayer();
+        m_cDecLib.updatePrevIRAPAndGDRSubpic();
+
+        if (gdrRecoveryPeriod[nalu.m_nuhLayerId])
+        {
+          if (m_cDecLib.getGDRRecoveryPocReached())
+          {
+            gdrRecoveryPeriod[nalu.m_nuhLayerId] = false;
+          }
         }
       }
-    }
-    else if ( (bNewPicture || !bitstreamFile || nalu.m_nalUnitType == NAL_UNIT_EOS ) )
-    {
-      m_cDecLib.setFirstSliceInPicture (true);
+      else
+      {
+        m_cDecLib.setFirstSliceInPicture(true);
+      }
     }
 
     if( pcListPic )
@@ -728,7 +731,7 @@ void DecApp::xWriteOutput( PicList* pcListPic, uint32_t tId )
     Picture* pcPic = *(iterPic);
     if(pcPic->neededForOutput && pcPic->getPOC() >= m_iPOCLastDisplay)
     {
-       numPicsNotYetDisplayed++;
+      numPicsNotYetDisplayed++;
       dpbFullness++;
     }
     else if(pcPic->referenced)
@@ -1246,7 +1249,8 @@ bool DecApp::xIsNaluWithinTargetDecLayerIdSet( const InputNALUnit* nalu ) const
     return true;
   }
 
-  return std::find( m_targetDecLayerIdSet.begin(), m_targetDecLayerIdSet.end(), nalu->m_nuhLayerId ) != m_targetDecLayerIdSet.end();
+  return std::find(m_targetDecLayerIdSet.begin(), m_targetDecLayerIdSet.end(), nalu->m_nuhLayerId)
+         != m_targetDecLayerIdSet.end();
 }
 
 /** \param nalu Input nalu to check whether its LayerId is within targetOutputLayerIdSet
@@ -1258,7 +1262,8 @@ bool DecApp::xIsNaluWithinTargetOutputLayerIdSet( const InputNALUnit* nalu ) con
     return true;
   }
 
-  return std::find( m_targetOutputLayerIdSet.begin(), m_targetOutputLayerIdSet.end(), nalu->m_nuhLayerId ) != m_targetOutputLayerIdSet.end();
+  return std::find(m_targetOutputLayerIdSet.begin(), m_targetOutputLayerIdSet.end(), nalu->m_nuhLayerId)
+         != m_targetOutputLayerIdSet.end();
 }
 
 //! \}
