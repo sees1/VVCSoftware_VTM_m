@@ -105,7 +105,6 @@ void BitstreamExtractorApp::xReadPicHeader(InputNALUnit &nalu)
 }
 
 
-#if JVET_R0107_BITSTREAM_EXTACTION
 Slice BitstreamExtractorApp::xParseSliceHeader(InputNALUnit &nalu)
 {
   m_hlSynaxReader.setBitstream(&nalu.getBitstream());
@@ -140,37 +139,6 @@ bool BitstreamExtractorApp::xCheckSliceSubpicture(Slice &slice, int targetSubPic
 
   return true;
 }
-#else
-bool BitstreamExtractorApp::xCheckSliceSubpicture(InputNALUnit &nalu, int targetSubPicId)
-{
-  m_hlSynaxReader.setBitstream(&nalu.getBitstream());
-  Slice slice;
-  slice.initSlice();
-  slice.setNalUnitType(nalu.m_nalUnitType);
-  slice.setNalUnitLayerId(nalu.m_nuhLayerId);
-  slice.setTLayer(nalu.m_temporalId);
-
-  m_hlSynaxReader.parseSliceHeader(&slice, &m_picHeader, &m_parameterSetManager, m_prevTid0Poc, m_prevPicPOC);
-
-  PPS *pps = m_parameterSetManager.getPPS(m_picHeader.getPPSId());
-  CHECK (nullptr==pps, "referenced PPS not found");
-  SPS *sps = m_parameterSetManager.getSPS(pps->getSPSId());
-  CHECK (nullptr==sps, "referenced SPS not found");
-
-  if (sps->getSubPicInfoPresentFlag())
-  {
-    // subpic ID is explicitly indicated
-    msg( VERBOSE, "found slice subpic id %d\n", slice.getSliceSubPicId());
-    return ( targetSubPicId == slice.getSliceSubPicId());
-  }
-  else
-  {
-    THROW ("Subpicture signalling disbled, cannot extract.");
-  }
-
-  return true;
-}
-#endif
 
 bool BitstreamExtractorApp::xCheckSEIFiller(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten)
 {
@@ -457,14 +425,10 @@ void BitstreamExtractorApp::xWritePPS(PPS *pps, std::ostream& out, int layerId, 
 // returns true, if the NAL unit is to be discarded
 bool BitstreamExtractorApp::xCheckNumSubLayers(InputNALUnit &nalu, VPS *vps)
 {
-#if JVET_R0107_BITSTREAM_EXTACTION
   bool retval = (nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_N_LP)
                 && (nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_W_RADL)
                 && (nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_CRA)
                 && !( (nalu.m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR) && (m_picHeader.getRecoveryPocCnt() == 0) );
-#else
-  bool retval = (nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_N_LP) && (nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_IDR_W_RADL) && (nalu.m_nalUnitType != NAL_UNIT_CODED_SLICE_CRA);
-#endif
 
   retval &= nalu.m_temporalId >= vps->getNumSubLayersInLayerInOLS(m_targetOlsIdx, vps->getGeneralLayerIdx(nalu.m_nuhLayerId));
 
@@ -890,13 +854,11 @@ uint32_t BitstreamExtractorApp::decode()
         }
       }
 
-#if JVET_R0107_BITSTREAM_EXTACTION
       Slice slice;
       if (nalu.isSlice())
       {
          slice = xParseSliceHeader(nalu);
       }
-#endif
       if (isMultiSubpicLayer[nalu.m_nuhLayerId] && writeInpuNalUnitToStream)
       {
         if (m_subPicIdx >= 0 && nalu.isSlice())
