@@ -659,8 +659,8 @@ uint32_t BitstreamExtractorApp::decode()
           vps->deriveOutputLayerSets();
         }
         uint32_t numOlss = vps->getTotalNumOLSs();
-        CHECK(m_targetOlsIdx <0  || m_targetOlsIdx >= numOlss, "target Ols shall be in the range of OLSs specified by the VPS");
-        CHECK(m_maxTemporalLayer < -1 || m_maxTemporalLayer > vps->getPtlMaxTemporalId(vps->getOlsPtlIdx(m_targetOlsIdx)), "MaxTemporalLayer shall either be equal -1 (for diabled) or in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive");
+        CHECK(m_targetOlsIdx <0  || m_targetOlsIdx >= numOlss, "target OLS shall be in the range of OLSs specified by the VPS");
+        CHECK(m_maxTemporalLayer < -1 || m_maxTemporalLayer > (int)vps->getPtlMaxTemporalId(vps->getOlsPtlIdx(m_targetOlsIdx)), "MaxTemporalLayer shall either be equal -1 (for disabled) or in the range of 0 to vps_ptl_max_tid[ vps_ols_ptl_idx[ targetOlsIdx ] ], inclusive");
         std::vector<int> layerIdInOls = vps->getLayerIdsInOls(m_targetOlsIdx);
         isIncludedInTargetOls = std::find(layerIdInOls.begin(), layerIdInOls.end(), nalu.m_nuhLayerId) != layerIdInOls.end();
         writeInpuNalUnitToStream &= (isSpecialNalTypes || isIncludedInTargetOls);
