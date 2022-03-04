@@ -67,12 +67,8 @@ protected:
   void xRewritePPS (PPS &targetPPS, const PPS &sourcePPS, const SPS &sourceSPS, SubPic &subPic);
   bool xCheckSEIFiller(SEIMessages SEIs, int targetSubPicId, bool &rmAllFillerInSubpicExt, bool lastSliceWritten);
 
-#if JVET_R0107_BITSTREAM_EXTACTION
   Slice xParseSliceHeader(InputNALUnit &nalu);
   bool  xCheckSliceSubpicture(Slice &slice, int subPicId);
-#else
-  bool xCheckSliceSubpicture(InputNALUnit &nalu, int subPicId);
-#endif
   void xReadPicHeader(InputNALUnit &nalu);
   bool xIsTargetOlsIncludeAllVclLayers();
   bool xCheckSEIsSubPicture(SEIMessages& SEIs, InputNALUnit& nalu, std::ostream& out, int subpicId, VPS *vps);
