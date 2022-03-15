@@ -238,11 +238,9 @@ static void simdInterpolateHorM4( const int16_t* src, int srcStride, int16_t *ds
         vsum = _mm_hadd_epi32( vtmp0, vtmp1 );
       }
 
-      {
-        vsum = _mm_add_epi32( vsum, voffset );
-        vsum = _mm_srai_epi32( vsum, shift );
-        vsum = _mm_packs_epi32( vsum, vzero );
-      }
+      vsum = _mm_add_epi32(vsum, voffset);
+      vsum = _mm_srai_epi32(vsum, shift);
+      vsum = _mm_packs_epi32(vsum, vzero);
 
       if( shiftBack )
       { //clip
@@ -319,15 +317,13 @@ static void simdInterpolateHorM8( const int16_t* src, int srcStride, int16_t *ds
         vsumb = _mm_hadd_epi32( vtmp10, vtmp11 );
       }
 
-      {
-        vsuma = _mm_add_epi32( vsuma, voffset );
-        vsumb = _mm_add_epi32( vsumb, voffset );
+      vsuma = _mm_add_epi32(vsuma, voffset);
+      vsumb = _mm_add_epi32(vsumb, voffset);
 
-        vsuma = _mm_srai_epi32( vsuma, shift );
-        vsumb = _mm_srai_epi32( vsumb, shift );
+      vsuma = _mm_srai_epi32(vsuma, shift);
+      vsumb = _mm_srai_epi32(vsumb, shift);
 
-        vsum = _mm_packs_epi32( vsuma, vsumb );
-      }
+      vsum = _mm_packs_epi32(vsuma, vsumb);
 
       if (shiftBack)
       {   // clip
@@ -405,10 +401,8 @@ static void simdInterpolateHorM8_AVX2( const int16_t* src, int srcStride, int16_
         vtmp13 = _mm256_madd_epi16( vtmp13, vcoeff[1] );
         vsum = _mm256_add_epi32( vtmp02, vtmp13 );
       }
-      {
-        vsum = _mm256_add_epi32( vsum, voffset );
-        vsum = _mm256_srai_epi32( vsum, shift );
-      }
+      vsum = _mm256_add_epi32(vsum, voffset);
+      vsum = _mm256_srai_epi32(vsum, shift);
 
       __m128i vsump = _mm256_castsi256_si128( _mm256_permute4x64_epi64( _mm256_packs_epi32( vsum, vsum ), 0x88 ) );
       if( shiftBack )
@@ -484,12 +478,11 @@ static void simdInterpolateHorM16_AVX2( const int16_t* src, int srcStride, int16
       else
       {
         __m256i vtmp00, vtmp01, vtmp10, vtmp11;
-        {
-          vtmp00 = _mm256_shuffle_epi8( vsrc[0], vshuf0 );
-          vtmp01 = _mm256_shuffle_epi8( vsrc[0], vshuf1 );
-          vtmp10 = _mm256_shuffle_epi8( vsrc[1], vshuf0 );
-          vtmp11 = _mm256_shuffle_epi8( vsrc[1], vshuf1 );
-        }
+        vtmp00 = _mm256_shuffle_epi8(vsrc[0], vshuf0);
+        vtmp01 = _mm256_shuffle_epi8(vsrc[0], vshuf1);
+        vtmp10 = _mm256_shuffle_epi8(vsrc[1], vshuf0);
+        vtmp11 = _mm256_shuffle_epi8(vsrc[1], vshuf1);
+
         vtmp00 = _mm256_madd_epi16( vtmp00, vcoeff[0] );
         vtmp01 = _mm256_madd_epi16( vtmp01, vcoeff[1] );
         vtmp10 = _mm256_madd_epi16( vtmp10, vcoeff[0] );
@@ -499,13 +492,11 @@ static void simdInterpolateHorM16_AVX2( const int16_t* src, int srcStride, int16
         vsumb = _mm256_add_epi32( vtmp10, vtmp11 );
       }
 
-      {
-        vsuma = _mm256_add_epi32( vsuma, voffset );
-        vsumb = _mm256_add_epi32( vsumb, voffset );
-        vsuma = _mm256_srai_epi32( vsuma, shift );
-        vsumb = _mm256_srai_epi32( vsumb, shift );
-        vsum  = _mm256_packs_epi32( vsuma, vsumb );
-      }
+      vsuma = _mm256_add_epi32(vsuma, voffset);
+      vsumb = _mm256_add_epi32(vsumb, voffset);
+      vsuma = _mm256_srai_epi32(vsuma, shift);
+      vsumb = _mm256_srai_epi32(vsumb, shift);
+      vsum  = _mm256_packs_epi32(vsuma, vsumb);
 
       if( shiftBack )
       { //clip
@@ -561,11 +552,10 @@ static void simdInterpolateVerM4( const int16_t *src, int srcStride, int16_t *ds
         vsrc[i] = vsrc[i + 1];
       }
 
-      {
-        vsum = _mm_add_epi32( vsum, voffset );
-        vsum = _mm_srai_epi32( vsum, shift );
-        vsum = _mm_packs_epi32( vsum, vzero );
-      }
+      vsum = _mm_add_epi32(vsum, voffset);
+      vsum = _mm_srai_epi32(vsum, shift);
+      vsum = _mm_packs_epi32(vsum, vzero);
+
       if( shiftBack ) //clip
       {
         vsum = _mm_min_epi16( vibdimax, _mm_max_epi16( vibdimin, vsum ) );
@@ -624,15 +614,14 @@ static void simdInterpolateVerM8( const int16_t *src, int srcStride, int16_t *ds
         vsrc[i] = vsrc[i + 1];
       }
 
-      {
-        vsuma = _mm_add_epi32( vsuma, voffset );
-        vsumb = _mm_add_epi32( vsumb, voffset );
+      vsuma = _mm_add_epi32(vsuma, voffset);
+      vsumb = _mm_add_epi32(vsumb, voffset);
 
-        vsuma = _mm_srai_epi32( vsuma, shift );
-        vsumb = _mm_srai_epi32( vsumb, shift );
+      vsuma = _mm_srai_epi32(vsuma, shift);
+      vsumb = _mm_srai_epi32(vsumb, shift);
 
-        vsum = _mm_packs_epi32( vsuma, vsumb );
-      }
+      vsum = _mm_packs_epi32(vsuma, vsumb);
+
       if( shiftBack ) //clip
       {
         vsum = _mm_min_epi16( vibdimax, _mm_max_epi16( vibdimin, vsum ) );
@@ -690,10 +679,8 @@ static void simdInterpolateVerM8_AVX2( const int16_t *src, int srcStride, int16_
         vsrc[i] = vsrc[i+1];
       }
 
-      {
-        vsum = _mm256_add_epi32( vsum, voffset );
-        vsum = _mm256_srai_epi32( vsum, shift );
-      }
+      vsum = _mm256_add_epi32(vsum, voffset);
+      vsum = _mm256_srai_epi32(vsum, shift);
 
       __m128i vsump = _mm256_castsi256_si128( _mm256_permute4x64_epi64( _mm256_packs_epi32( vsum, vsum ), 0x88 ) );
       if( shiftBack )
@@ -754,13 +741,11 @@ static void simdInterpolateVerM16_AVX2( const int16_t *src, int srcStride, int16
         vsrc[i] = vsrc[i+1];
       }
 
-      {
-        vsuma = _mm256_add_epi32( vsuma, voffset );
-        vsumb = _mm256_add_epi32( vsumb, voffset );
-        vsuma = _mm256_srai_epi32( vsuma, shift );
-        vsumb = _mm256_srai_epi32( vsumb, shift );
-        vsum  = _mm256_packs_epi32( vsuma, vsumb );
-      }
+      vsuma = _mm256_add_epi32(vsuma, voffset);
+      vsumb = _mm256_add_epi32(vsumb, voffset);
+      vsuma = _mm256_srai_epi32(vsuma, shift);
+      vsumb = _mm256_srai_epi32(vsumb, shift);
+      vsum  = _mm256_packs_epi32(vsuma, vsumb);
 
       if( shiftBack )
       { //clip
@@ -919,13 +904,11 @@ static void simdInterpolateN2_M4( const int16_t* src, int srcStride, int16_t *ds
 static inline __m256i simdInterpolateLuma10Bit2P16(int16_t const *src1, int srcStride, __m256i *mmCoeff, const __m256i & mmOffset, __m128i &mmShift)
 {
   __m256i sumLo;
-  {
-    __m256i mmPix = _mm256_loadu_si256((__m256i*)src1);
-    __m256i mmPix1 = _mm256_loadu_si256((__m256i*)(src1 + srcStride));
-    __m256i lo0 = _mm256_mullo_epi16(mmPix, mmCoeff[0]);
-    __m256i lo1 = _mm256_mullo_epi16(mmPix1, mmCoeff[1]);
-    sumLo = _mm256_add_epi16(lo0, lo1);
-  }
+  __m256i mmPix  = _mm256_loadu_si256((__m256i *) src1);
+  __m256i mmPix1 = _mm256_loadu_si256((__m256i *) (src1 + srcStride));
+  __m256i lo0    = _mm256_mullo_epi16(mmPix, mmCoeff[0]);
+  __m256i lo1    = _mm256_mullo_epi16(mmPix1, mmCoeff[1]);
+  sumLo          = _mm256_add_epi16(lo0, lo1);
   sumLo = _mm256_sra_epi16(_mm256_add_epi16(sumLo, mmOffset), mmShift);
   return(sumLo);
 }
@@ -934,13 +917,11 @@ static inline __m256i simdInterpolateLuma10Bit2P16(int16_t const *src1, int srcS
 static inline __m128i simdInterpolateLuma10Bit2P8(int16_t const *src1, int srcStride, __m128i *mmCoeff, const __m128i & mmOffset, __m128i &mmShift)
 {
   __m128i sumLo;
-  {
-    __m128i mmPix = _mm_loadu_si128((__m128i*)src1);
-    __m128i mmPix1 = _mm_loadu_si128((__m128i*)(src1 + srcStride));
-    __m128i lo0 = _mm_mullo_epi16(mmPix, mmCoeff[0]);
-    __m128i lo1 = _mm_mullo_epi16(mmPix1, mmCoeff[1]);
-    sumLo = _mm_add_epi16(lo0, lo1);
-  }
+  __m128i mmPix  = _mm_loadu_si128((__m128i *) src1);
+  __m128i mmPix1 = _mm_loadu_si128((__m128i *) (src1 + srcStride));
+  __m128i lo0    = _mm_mullo_epi16(mmPix, mmCoeff[0]);
+  __m128i lo1    = _mm_mullo_epi16(mmPix1, mmCoeff[1]);
+  sumLo          = _mm_add_epi16(lo0, lo1);
   sumLo = _mm_sra_epi16(_mm_add_epi16(sumLo, mmOffset), mmShift);
   return(sumLo);
 }
@@ -948,13 +929,11 @@ static inline __m128i simdInterpolateLuma10Bit2P8(int16_t const *src1, int srcSt
 static inline __m128i simdInterpolateLuma10Bit2P4(int16_t const *src, int srcStride, __m128i *mmCoeff, const __m128i & mmOffset, __m128i &mmShift)
 {
   __m128i sumLo;
-  {
-    __m128i mmPix = _mm_loadl_epi64((__m128i*)src);
-    __m128i mmPix1 = _mm_loadl_epi64((__m128i*)(src + srcStride));
-    __m128i lo0 = _mm_mullo_epi16(mmPix, mmCoeff[0]);
-    __m128i lo1 = _mm_mullo_epi16(mmPix1, mmCoeff[1]);
-    sumLo = _mm_add_epi16(lo0, lo1);
-  }
+  __m128i mmPix  = _mm_loadl_epi64((__m128i *) src);
+  __m128i mmPix1 = _mm_loadl_epi64((__m128i *) (src + srcStride));
+  __m128i lo0    = _mm_mullo_epi16(mmPix, mmCoeff[0]);
+  __m128i lo1    = _mm_mullo_epi16(mmPix1, mmCoeff[1]);
+  sumLo          = _mm_add_epi16(lo0, lo1);
   sumLo = _mm_sra_epi16(_mm_add_epi16(sumLo, mmOffset), mmShift);
   return sumLo;
 }
