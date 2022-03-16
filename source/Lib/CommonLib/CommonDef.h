@@ -220,21 +220,23 @@ static const int MULTI_REF_LINE_IDX[4] =               { 0, 1, 2, 0 };
 
 static const int PRED_REG_MIN_WIDTH =                               4;  // Minimum prediction region width for ISP subblocks
 
-static const int NUM_LUMA_MODE =                                   67; ///< Planar + DC + 65 directional mode (4*16 + 1)
-static const int NUM_LMC_MODE =                                    1 + 2; ///< LMC + MDLM_T + MDLM_L
-static const int NUM_INTRA_MODE = (NUM_LUMA_MODE + NUM_LMC_MODE);
+static constexpr int NUM_DIR                 = 16;
+static constexpr int NUM_INTRA_ANGULAR_MODES = 4 * NUM_DIR + 1;
+static constexpr int ANGULAR_BASE            = 2;   // First two modes and planar and DC
+static constexpr int NUM_LUMA_MODE           = ANGULAR_BASE + NUM_INTRA_ANGULAR_MODES;
+static constexpr int NUM_LMC_MODE            = 1 + 2;   // LMC + MDLM_T + MDLM_L
+static constexpr int NUM_INTRA_MODE          = NUM_LUMA_MODE + NUM_LMC_MODE;
 
 static const int NUM_EXT_LUMA_MODE =                               28;
 
-static const int NUM_DIR =           (((NUM_LUMA_MODE - 3) >> 2) + 1);
-static const int PLANAR_IDX =                                       0; ///< index for intra PLANAR mode
-static const int DC_IDX =                                           1; ///< index for intra DC     mode
-static const int HOR_IDX =                    (1 * (NUM_DIR - 1) + 2); ///< index for intra HORIZONTAL mode
-static const int DIA_IDX =                    (2 * (NUM_DIR - 1) + 2); ///< index for intra DIAGONAL   mode
-static const int VER_IDX =                    (3 * (NUM_DIR - 1) + 2); ///< index for intra VERTICAL   mode
-static const int VDIA_IDX =                   (4 * (NUM_DIR - 1) + 2); ///< index for intra VDIAGONAL  mode
-static const int BDPCM_IDX =                  (5 * (NUM_DIR - 1) + 2); ///< index for intra VDIAGONAL  mode
-static const int NOMODE_IDX =                               MAX_UCHAR; ///< indicating uninitialized elements
+static const int PLANAR_IDX = 0;                              ///< index for intra PLANAR mode
+static const int DC_IDX     = 1;                              ///< index for intra DC     mode
+static const int HOR_IDX    = (1 * NUM_DIR + ANGULAR_BASE);   ///< index for intra HORIZONTAL mode
+static const int DIA_IDX    = (2 * NUM_DIR + ANGULAR_BASE);   ///< index for intra DIAGONAL   mode
+static const int VER_IDX    = (3 * NUM_DIR + ANGULAR_BASE);   ///< index for intra VERTICAL   mode
+static const int VDIA_IDX   = (4 * NUM_DIR + ANGULAR_BASE);   ///< index for intra VDIAGONAL  mode
+static const int BDPCM_IDX  = (5 * NUM_DIR + ANGULAR_BASE);   ///< index for intra BDPCM  mode
+static const int NOMODE_IDX = MAX_UCHAR;                      ///< indicating uninitialized elements
 
 static const int NUM_CHROMA_MODE = (5 + NUM_LMC_MODE); ///< total number of chroma modes
 static const int LM_CHROMA_IDX = NUM_LUMA_MODE; ///< chroma mode index for derived from LM mode
