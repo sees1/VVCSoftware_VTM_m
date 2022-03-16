@@ -82,7 +82,7 @@ inline double xRoundIbdi(int bitDepth, double x)
 
 EncSampleAdaptiveOffset::EncSampleAdaptiveOffset()
 {
-  m_CABACEstimator = NULL;
+  m_CABACEstimator = nullptr;
 
   ::memset( m_saoDisabledRate, 0, sizeof( m_saoDisabledRate ) );
 }
@@ -604,7 +604,8 @@ void EncSampleAdaptiveOffset::deriveModeNewRDO(const BitDepths &bitDepths, int c
   //pre-encode merge flags
   modeParam[COMPONENT_Y].modeIdc = SAO_MODE_OFF;
   const TempCtx ctxStartBlk   ( m_CtxCache, SAOCtx( m_CABACEstimator->getCtx() ) );
-  m_CABACEstimator->sao_block_pars( modeParam, bitDepths, sliceEnabled, (mergeList[SAO_MERGE_LEFT]!= NULL), (mergeList[SAO_MERGE_ABOVE]!= NULL), true );
+  m_CABACEstimator->sao_block_pars(modeParam, bitDepths, sliceEnabled, (mergeList[SAO_MERGE_LEFT] != nullptr),
+                                   (mergeList[SAO_MERGE_ABOVE] != nullptr), true);
   const TempCtx ctxStartLuma  ( m_CtxCache, SAOCtx( m_CABACEstimator->getCtx() ) );
   TempCtx       ctxBestLuma   ( m_CtxCache );
 
@@ -723,7 +724,8 @@ void EncSampleAdaptiveOffset::deriveModeNewRDO(const BitDepths &bitDepths, int c
 
   m_CABACEstimator->getCtx() = SAOCtx( ctxStartBlk );
   m_CABACEstimator->resetBits();
-  m_CABACEstimator->sao_block_pars( modeParam, bitDepths, sliceEnabled, (mergeList[SAO_MERGE_LEFT]!= NULL), (mergeList[SAO_MERGE_ABOVE]!= NULL), false );
+  m_CABACEstimator->sao_block_pars(modeParam, bitDepths, sliceEnabled, (mergeList[SAO_MERGE_LEFT] != nullptr),
+                                   (mergeList[SAO_MERGE_ABOVE] != nullptr), false);
   modeNormCost += FRAC_BITS_SCALE * m_CABACEstimator->getEstFracBits();
 }
 
@@ -740,7 +742,7 @@ void EncSampleAdaptiveOffset::deriveModeMergeRDO(const BitDepths &bitDepths, int
 
   for(int mergeType=0; mergeType< NUM_SAO_MERGE_TYPES; mergeType++)
   {
-    if(mergeList[mergeType] == NULL)
+    if (mergeList[mergeType] == nullptr)
     {
       continue;
     }
@@ -766,7 +768,8 @@ void EncSampleAdaptiveOffset::deriveModeMergeRDO(const BitDepths &bitDepths, int
     //rate
     m_CABACEstimator->getCtx() = SAOCtx( ctxStart );
     m_CABACEstimator->resetBits();
-    m_CABACEstimator->sao_block_pars( testBlkParam, bitDepths, sliceEnabled, (mergeList[SAO_MERGE_LEFT]!= NULL), (mergeList[SAO_MERGE_ABOVE]!= NULL), false );
+    m_CABACEstimator->sao_block_pars(testBlkParam, bitDepths, sliceEnabled, (mergeList[SAO_MERGE_LEFT] != nullptr),
+                                     (mergeList[SAO_MERGE_ABOVE] != nullptr), false);
     double rate = FRAC_BITS_SCALE * m_CABACEstimator->getEstFracBits();
     cost = normDist+rate;
 
@@ -823,8 +826,8 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
   }
   SAOBlkParam  testBlkParam;
   SAOBlkParam  groupParam;
-  SAOBlkParam* tempMergeList[NUM_SAO_MERGE_TYPES] = { NULL };
-  SAOBlkParam* startingMergeList[NUM_SAO_MERGE_TYPES] = { NULL };
+  SAOBlkParam *tempMergeList[NUM_SAO_MERGE_TYPES]     = { nullptr };
+  SAOBlkParam *startingMergeList[NUM_SAO_MERGE_TYPES] = { nullptr };
 
   int     mergeCtuAddr = 1; //Ctu to be merged
   int     groupSize = 1;
@@ -862,7 +865,7 @@ void EncSampleAdaptiveOffset::decideBlkParams(CodingStructure& cs, bool* sliceEn
       }
 
       //get merge list
-      SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES] = { NULL };
+      SAOBlkParam *mergeList[NUM_SAO_MERGE_TYPES] = { nullptr };
       getMergeList(cs, ctuRsAddr, reconParams, mergeList);
 
       minCost = MAX_DOUBLE;

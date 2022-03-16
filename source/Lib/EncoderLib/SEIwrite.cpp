@@ -43,7 +43,7 @@
 
 void SEIWriter::xWriteSEIpayloadData(OutputBitstream &bs, const SEI& sei, HRD &hrd, const uint32_t temporalId)
 {
-  const SEIBufferingPeriod *bp = NULL;
+  const SEIBufferingPeriod *bp = nullptr;
   switch (sei.payloadType())
   {
   case SEI::USER_DATA_UNREGISTERED:

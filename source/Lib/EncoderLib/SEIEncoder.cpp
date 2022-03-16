@@ -48,7 +48,7 @@ std::string hashToString(const PictureHash &digest, int numChar);
 void SEIEncoder::initSEIFramePacking(SEIFramePacking *seiFramePacking, int currPicNum)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiFramePacking!=NULL), "Unspecified error");
+  CHECK(!(seiFramePacking != nullptr), "Unspecified error");
 
   seiFramePacking->m_arrangementId = m_pcCfg->getFramePackingArrangementSEIId();
   seiFramePacking->m_arrangementCancelFlag = 0;
@@ -75,7 +75,7 @@ void SEIEncoder::initSEIFramePacking(SEIFramePacking *seiFramePacking, int currP
 void SEIEncoder::initSEIParameterSetsInclusionIndication(SEIParameterSetsInclusionIndication* seiParameterSetsInclusionIndication)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiParameterSetsInclusionIndication != NULL), "Unspecified error");
+  CHECK(!(seiParameterSetsInclusionIndication != nullptr), "Unspecified error");
 
   seiParameterSetsInclusionIndication->m_selfContainedClvsFlag = m_pcCfg->getSelfContainedClvsFlag();
 }
@@ -401,7 +401,7 @@ void SEIEncoder::initSEISampleAspectRatioInfo(SEISampleAspectRatioInfo* seiSampl
 void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, SEIMessages &nestedSEIs, const std::vector<int> &targetOLSs, const std::vector<int> &targetLayers, const std::vector<uint16_t> &subpictureIDs, uint16_t maxSubpicIdInPic)
 {
   CHECK(!(m_isInitialized), "Scalable Nesting SEI already initialized ");
-  CHECK(!(scalableNestingSEI != NULL), "No Scalable Nesting SEI object passed");
+  CHECK(!(scalableNestingSEI != nullptr), "No Scalable Nesting SEI object passed");
   CHECK (targetOLSs.size() > 0 && targetLayers.size() > 0, "Scalable Nesting SEI can apply to either OLS or layer(s), not both");
 
   scalableNestingSEI->m_snOlsFlag = (targetOLSs.size() > 0) ? 1 : 0;  // If the nested SEI messages are picture buffering SEI messages, picture timing SEI messages or sub-picture timing SEI messages, nesting_ols_flag shall be equal to 1, by default case
@@ -458,7 +458,7 @@ void SEIEncoder::initSEIScalableNesting(SEIScalableNesting *scalableNestingSEI, 
 void SEIEncoder::initDecodedPictureHashSEI(SEIDecodedPictureHash *decodedPictureHashSEI, PelUnitBuf& pic, std::string &rHashString, const BitDepths &bitDepths)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(decodedPictureHashSEI!=NULL), "Unspecified error");
+  CHECK(!(decodedPictureHashSEI != nullptr), "Unspecified error");
 
   decodedPictureHashSEI->method = m_pcCfg->getDecodedPictureHashSEIType();
   decodedPictureHashSEI->singleCompFlag = (m_pcCfg->getChromaFormatIdc() == 0);
@@ -489,13 +489,13 @@ void SEIEncoder::initDecodedPictureHashSEI(SEIDecodedPictureHash *decodedPicture
 void SEIEncoder::initSEIDependentRAPIndication(SEIDependentRAPIndication *seiDependentRAPIndication)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiDependentRAPIndication!=NULL), "Unspecified error");
+  CHECK(!(seiDependentRAPIndication != nullptr), "Unspecified error");
 }
 
 void SEIEncoder::initSEIExtendedDrapIndication(SEIExtendedDrapIndication *sei)
 {
   CHECK(!(m_isInitialized), "Extended DRAP SEI already initialized");
-  CHECK(!(sei!=NULL), "Need a seiExtendedDrapIndication for initialization (got nullptr)");
+  CHECK(!(sei != nullptr), "Need a seiExtendedDrapIndication for initialization (got nullptr)");
   sei->m_edrapIndicationRapIdMinus1 = 0;
   sei->m_edrapIndicationLeadingPicturesDecodableFlag = false;
   sei->m_edrapIndicationReservedZero12Bits = 0;
@@ -688,7 +688,7 @@ void SEIEncoder::readAnnotatedRegionSEI(std::istream &fic, SEIAnnotatedRegions *
 bool SEIEncoder::initSEIAnnotatedRegions(SEIAnnotatedRegions* SEIAnnoReg, int currPOC)
 {
   assert(m_isInitialized);
-  assert(SEIAnnoReg != NULL);
+  assert(SEIAnnoReg != nullptr);
 
   // reading external Annotated Regions Information SEI message parameters from file
   if (!m_pcCfg->getAnnotatedRegionSEIFileRoot().empty())
@@ -723,7 +723,7 @@ bool SEIEncoder::initSEIAnnotatedRegions(SEIAnnotatedRegions* SEIAnnoReg, int cu
 void SEIEncoder::initSEIAlternativeTransferCharacteristics(SEIAlternativeTransferCharacteristics *seiAltTransCharacteristics)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiAltTransCharacteristics!=NULL), "Unspecified error");
+  CHECK(!(seiAltTransCharacteristics != nullptr), "Unspecified error");
   //  Set SEI message parameters read from command line options
   seiAltTransCharacteristics->m_preferredTransferCharacteristics = m_pcCfg->getSEIPreferredTransferCharacteristics();
 }
@@ -731,7 +731,7 @@ void SEIEncoder::initSEIAlternativeTransferCharacteristics(SEIAlternativeTransfe
 void SEIEncoder::initSEIFilmGrainCharacteristics(SEIFilmGrainCharacteristics *seiFilmGrain)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiFilmGrain != NULL), "Unspecified error");
+  CHECK(!(seiFilmGrain != nullptr), "Unspecified error");
   //  Set SEI message parameters read from command line options
   seiFilmGrain->m_filmGrainCharacteristicsCancelFlag      = m_pcCfg->getFilmGrainCharactersticsSEICancelFlag();
   seiFilmGrain->m_filmGrainCharacteristicsPersistenceFlag = m_pcCfg->getFilmGrainCharactersticsSEIPersistenceFlag();
@@ -764,7 +764,7 @@ void SEIEncoder::initSEIFilmGrainCharacteristics(SEIFilmGrainCharacteristics *se
 void SEIEncoder::initSEIMasteringDisplayColourVolume(SEIMasteringDisplayColourVolume *seiMDCV)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiMDCV != NULL), "Unspecified error");
+  CHECK(!(seiMDCV != nullptr), "Unspecified error");
   //  Set SEI message parameters read from command line options
   for (int j = 0; j <= 1; j++)
   {
@@ -781,7 +781,7 @@ void SEIEncoder::initSEIMasteringDisplayColourVolume(SEIMasteringDisplayColourVo
 void SEIEncoder::initSEIContentLightLevel(SEIContentLightLevelInfo *seiCLL)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiCLL != NULL), "Unspecified error");
+  CHECK(!(seiCLL != nullptr), "Unspecified error");
   //  Set SEI message parameters read from command line options
   seiCLL->m_maxContentLightLevel    = m_pcCfg->getCLLSEIMaxContentLightLevel();
   seiCLL->m_maxPicAverageLightLevel = m_pcCfg->getCLLSEIMaxPicAvgLightLevel();
@@ -790,7 +790,7 @@ void SEIEncoder::initSEIContentLightLevel(SEIContentLightLevelInfo *seiCLL)
 void SEIEncoder::initSEIAmbientViewingEnvironment(SEIAmbientViewingEnvironment *seiAmbViewEnvironment)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiAmbViewEnvironment != NULL), "Unspecified error");
+  CHECK(!(seiAmbViewEnvironment != nullptr), "Unspecified error");
   //  Set SEI message parameters read from command line options
   seiAmbViewEnvironment->m_ambientIlluminance = m_pcCfg->getAmbientViewingEnvironmentSEIIlluminance();
   seiAmbViewEnvironment->m_ambientLightX      = m_pcCfg->getAmbientViewingEnvironmentSEIAmbientLightX();
@@ -800,7 +800,7 @@ void SEIEncoder::initSEIAmbientViewingEnvironment(SEIAmbientViewingEnvironment *
 void SEIEncoder::initSEIContentColourVolume(SEIContentColourVolume *seiContentColourVolume)
 {
   assert(m_isInitialized);
-  assert(seiContentColourVolume != NULL);
+  assert(seiContentColourVolume != nullptr);
   seiContentColourVolume->m_ccvCancelFlag = m_pcCfg->getCcvSEICancelFlag();
   seiContentColourVolume->m_ccvPersistenceFlag = m_pcCfg->getCcvSEIPersistenceFlag();
 
@@ -837,7 +837,7 @@ void SEIEncoder::initSEIContentColourVolume(SEIContentColourVolume *seiContentCo
 void SEIEncoder::initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *sei)
 {
   CHECK(!(m_isInitialized), "Scalability dimension information SEI already initialized");
-  CHECK(!(sei != NULL), "Need a seiScalabilityDimensionInfo for initialization (got nullptr)");
+  CHECK(!(sei != nullptr), "Need a seiScalabilityDimensionInfo for initialization (got nullptr)");
   sei->m_sdiMaxLayersMinus1 = m_pcCfg->getSdiSEIMaxLayersMinus1();
   sei->m_sdiMultiviewInfoFlag = m_pcCfg->getSdiSEIMultiviewInfoFlag();
   sei->m_sdiAuxiliaryInfoFlag = m_pcCfg->getSdiSEIAuxiliaryInfoFlag();
@@ -898,7 +898,7 @@ void SEIEncoder::initSEIScalabilityDimensionInfo(SEIScalabilityDimensionInfo *se
 void SEIEncoder::initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *sei)
 {
   CHECK(!(m_isInitialized), "Multiview acquisition information SEI already initialized");
-  CHECK(!(sei != NULL), "Need a seiMultiviewAcquisitionInfo for initialization (got nullptr)");
+  CHECK(!(sei != nullptr), "Need a seiMultiviewAcquisitionInfo for initialization (got nullptr)");
   sei->m_maiIntrinsicParamFlag        = m_pcCfg->getMaiSEIIntrinsicParamFlag();
   sei->m_maiExtrinsicParamFlag        = m_pcCfg->getMaiSEIExtrinsicParamFlag();
   sei->m_maiNumViewsMinus1            = m_pcCfg->getMaiSEINumViewsMinus1();
@@ -983,7 +983,7 @@ void SEIEncoder::initSEIMultiviewAcquisitionInfo(SEIMultiviewAcquisitionInfo *se
 void SEIEncoder::initSEIMultiviewViewPosition(SEIMultiviewViewPosition *sei)
 {
   CHECK(!(m_isInitialized), "Multiview view position SEI already initialized");
-  CHECK(!(sei != NULL), "Need a seiMultiviewViewPosition for initialization (got nullptr)");
+  CHECK(!(sei != nullptr), "Need a seiMultiviewViewPosition for initialization (got nullptr)");
   sei->m_mvpNumViewsMinus1 = m_pcCfg->getMvpSEINumViewsMinus1();
 
   int numViews = sei->m_mvpNumViewsMinus1 + 1;
@@ -997,7 +997,7 @@ void SEIEncoder::initSEIMultiviewViewPosition(SEIMultiviewViewPosition *sei)
 void SEIEncoder::initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei)
 {
   CHECK(!(m_isInitialized), "Alpha channel information SEI already initialized");
-  CHECK(!(sei != NULL), "Need a seiAlphaChannelInfo for initialization (got nullptr)");
+  CHECK(!(sei != nullptr), "Need a seiAlphaChannelInfo for initialization (got nullptr)");
   sei->m_aciCancelFlag = m_pcCfg->getAciSEICancelFlag();
   sei->m_aciUseIdc = m_pcCfg->getAciSEIUseIdc();
   sei->m_aciBitDepthMinus8 = m_pcCfg->getAciSEIBitDepthMinus8();
@@ -1011,7 +1011,7 @@ void SEIEncoder::initSEIAlphaChannelInfo(SEIAlphaChannelInfo *sei)
 void SEIEncoder::initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei)
 {
   CHECK(!(m_isInitialized), "Depth representation information SEI already initialized");
-  CHECK(!(sei != NULL), "Need a seiDepthRepresentationInfo for initialization (got nullptr)");
+  CHECK(!(sei != nullptr), "Need a seiDepthRepresentationInfo for initialization (got nullptr)");
   sei->m_driZNearFlag = m_pcCfg->getDriSEIZNearFlag();
   sei->m_driZFarFlag = m_pcCfg->getDriSEIZFarFlag();
   sei->m_driDMinFlag = m_pcCfg->getDriSEIDMinFlag();
@@ -1033,7 +1033,7 @@ void SEIEncoder::initSEIDepthRepresentationInfo(SEIDepthRepresentationInfo *sei)
 void SEIEncoder::initSEIColourTransformInfo(SEIColourTransformInfo* seiCTI)
 {
   CHECK(!(m_isInitialized), "Unspecified error");
-  CHECK(!(seiCTI != NULL), "Unspecified error");
+  CHECK(!(seiCTI != nullptr), "Unspecified error");
 
   //  Set SEI message parameters read from command line options
   seiCTI->m_id = m_pcCfg->getCtiSEIId();

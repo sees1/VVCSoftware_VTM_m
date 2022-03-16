@@ -326,7 +326,8 @@ public:
   inline std::vector<double>& getLumaLevelWeightTable        ()                   { return m_lumaLevelToWeightPLUT; }
 #endif
 
-  void           lambdaAdjustColorTrans(bool forward, ComponentID compID, bool applyChromaScale = false, int* resScaleInv = NULL);
+  void           lambdaAdjustColorTrans(bool forward, ComponentID compID, bool applyChromaScale = false,
+                                        int *resScaleInv = nullptr);
   void           resetStore() { m_resetStore = true; }
 
 private:
@@ -424,7 +425,8 @@ private:
 public:
 
 #if WCG_EXT
-  Distortion   getDistPart( const CPelBuf &org, const CPelBuf &cur, int bitDepth, const ComponentID compID, DFunc eDFunc, const CPelBuf *orgLuma = NULL );
+  Distortion getDistPart(const CPelBuf &org, const CPelBuf &cur, int bitDepth, const ComponentID compID, DFunc eDFunc,
+                         const CPelBuf *orgLuma = nullptr);
 #else
   Distortion   getDistPart( const CPelBuf &org, const CPelBuf &cur, int bitDepth, const ComponentID compID, DFunc eDFunc );
 #endif

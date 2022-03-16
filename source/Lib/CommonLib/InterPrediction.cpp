@@ -355,7 +355,8 @@ void InterPrediction::xSubPuMC( PredictionUnit& pu, PelUnitBuf& predBuf, const R
   pu.cu->affine = isAffine;
 }
 
-void InterPrediction::xSubPuBio(PredictionUnit& pu, PelUnitBuf& predBuf, const RefPicList &eRefPicList /*= REF_PIC_LIST_X*/, PelUnitBuf* yuvDstTmp /*= NULL*/)
+void InterPrediction::xSubPuBio(PredictionUnit &pu, PelUnitBuf &predBuf,
+                                const RefPicList &eRefPicList /*= REF_PIC_LIST_X*/, PelUnitBuf *yuvDstTmp /*= nullptr*/)
 {
   // compute the location of the current PU
   Position puPos = pu.lumaPos();
@@ -521,7 +522,8 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
   }
 }
 
-void InterPrediction::xPredInterBi(PredictionUnit &pu, PelUnitBuf &pcYuvPred, const bool luma, const bool chroma, PelUnitBuf *yuvPredTmp /*= NULL*/)
+void InterPrediction::xPredInterBi(PredictionUnit &pu, PelUnitBuf &pcYuvPred, const bool luma, const bool chroma,
+                                   PelUnitBuf *yuvPredTmp /*= nullptr*/)
 {
   const PPS   &pps   = *pu.cs->pps;
   const Slice &slice = *pu.cs->slice;
@@ -735,7 +737,7 @@ void InterPrediction::xPredInterBlk ( const ComponentID& compID, const Predictio
       }
     }
 
-    if (NULL != srcPadBuf)
+    if (nullptr != srcPadBuf)
     {
       refBuf.buf    = srcPadBuf;
       refBuf.stride = srcPadStride;
@@ -1418,7 +1420,10 @@ void InterPrediction::xCalcBlkGradient(int sx, int sy, int    *arraysGx2, int   
   g_pelBufOP.calcBlkGradient(sx, sy, arraysGx2, arraysGxGy, arraysGxdI, arraysGy2, arraysGydI, sGx2, sGy2, sGxGy, sGxdI, sGydI, width, height, unitSize);
 }
 
-void InterPrediction::xWeightedAverage(const PredictionUnit& pu, const CPelUnitBuf& pcYuvSrc0, const CPelUnitBuf& pcYuvSrc1, PelUnitBuf& pcYuvDst, const BitDepths& clipBitDepths, const ClpRngs& clpRngs, const bool& bioApplied, bool lumaOnly, bool chromaOnly, PelUnitBuf* yuvDstTmp /*= NULL*/)
+void InterPrediction::xWeightedAverage(const PredictionUnit &pu, const CPelUnitBuf &pcYuvSrc0,
+                                       const CPelUnitBuf &pcYuvSrc1, PelUnitBuf &pcYuvDst,
+                                       const BitDepths &clipBitDepths, const ClpRngs &clpRngs, const bool &bioApplied,
+                                       bool lumaOnly, bool chromaOnly, PelUnitBuf *yuvDstTmp /*= nullptr*/)
 {
   CHECK( (chromaOnly && lumaOnly), "should not happen" );
 
@@ -1512,10 +1517,8 @@ void InterPrediction::xWeightedAverage(const PredictionUnit& pu, const CPelUnitB
   }
 }
 
-
-void InterPrediction::motionCompensation( PredictionUnit &pu, PelUnitBuf &predBuf, const RefPicList &eRefPicList
-  , const bool luma, const bool chroma
-  , PelUnitBuf* predBufWOBIO /*= NULL*/
+void InterPrediction::motionCompensation(PredictionUnit &pu, PelUnitBuf &predBuf, const RefPicList &eRefPicList,
+                                         const bool luma, const bool chroma, PelUnitBuf *predBufWOBIO /*= nullptr*/
 )
 {
   // Note: there appears to be an interaction with weighted prediction that
@@ -1550,7 +1553,7 @@ void InterPrediction::motionCompensation( PredictionUnit &pu, PelUnitBuf &predBu
 
   if( eRefPicList != REF_PIC_LIST_X )
   {
-    CHECK(predBufWOBIO != NULL, "the case should not happen!");
+    CHECK(predBufWOBIO != nullptr, "the case should not happen!");
     if ((CU::isIBC(*pu.cu) == false) && ((sliceType == P_SLICE && pps.getUseWP()) || (sliceType == B_SLICE && pps.getWPBiPred())))
     {
       xPredInterUni(pu, eRefPicList, predBuf, true, false, luma, chroma);
@@ -1628,7 +1631,7 @@ void InterPrediction::motionCompensation( PredictionUnit &pu, PelUnitBuf &predBu
     {
       if (pu.mergeType != MRG_TYPE_DEFAULT_N && pu.mergeType != MRG_TYPE_IBC)
       {
-        CHECK(predBufWOBIO != NULL, "the case should not happen!");
+        CHECK(predBufWOBIO != nullptr, "the case should not happen!");
         xSubPuMC(pu, predBuf, eRefPicList, luma, chroma);
       }
       else if (xCheckIdenticalMotion(pu))
@@ -1943,7 +1946,7 @@ void InterPrediction::xFinalPaddedMCForDMVR(PredictionUnit &pu, PelUnitBuf &pcYu
     }
     for (int compID = 0; compID < getNumberValidComponents(pu.chromaFormat); compID++)
     {
-      Pel *srcBufPelPtr = NULL;
+      Pel *srcBufPelPtr = nullptr;
       int pcPadstride = 0;
       if (blockMoved || (compID == 0))
       {

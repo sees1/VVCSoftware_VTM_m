@@ -94,10 +94,10 @@ EncGOP::EncGOP()
   ::memset(m_preQP, MAX_INT, 2 * sizeof(int));
   m_preIPOC             = 0;
 
-  m_pcCfg               = NULL;
-  m_pcSliceEncoder      = NULL;
-  m_pcListPic           = NULL;
-  m_HLSWriter           = NULL;
+  m_pcCfg               = nullptr;
+  m_pcSliceEncoder      = nullptr;
+  m_pcListPic           = nullptr;
+  m_HLSWriter           = nullptr;
   m_bSeqFirst           = true;
   m_audIrapOrGdrAuFlag  = false;
 
@@ -115,7 +115,7 @@ EncGOP::EncGOP()
   }
   ::memset(m_associatedIRAPPOC, 0, sizeof(m_associatedIRAPPOC));
 #if W0038_DB_OPT
-  m_pcDeblockingTempPicYuv = NULL;
+  m_pcDeblockingTempPicYuv = nullptr;
 #endif
 
 #if JVET_O0756_CALCULATE_HDRMETRICS
@@ -136,8 +136,10 @@ EncGOP::EncGOP()
 
   m_bInitAMaxBT         = true;
   m_bgPOC = -1;
-  m_picBg = NULL;
-  m_picOrig = NULL;
+
+  m_picBg   = nullptr;
+  m_picOrig = nullptr;
+
   m_isEncodedLTRef = false;
   m_isUseLTRef = false;
   m_isPrepareLTRef = true;
@@ -151,7 +153,7 @@ EncGOP::~EncGOP()
   if( !m_pcCfg->getDecodeBitstream(0).empty() || !m_pcCfg->getDecodeBitstream(1).empty() )
   {
     // reset potential decoder resources
-    tryDecodePicture( NULL, 0, std::string("") );
+    tryDecodePicture(nullptr, 0, std::string(""));
   }
 #if JVET_O0756_CALCULATE_HDRMETRICS
   delete [] m_ppcFrameOrg;
@@ -192,20 +194,20 @@ void  EncGOP::destroy()
   {
     m_pcDeblockingTempPicYuv->destroy();
     delete m_pcDeblockingTempPicYuv;
-    m_pcDeblockingTempPicYuv = NULL;
+    m_pcDeblockingTempPicYuv = nullptr;
   }
 #endif
   if (m_picBg)
   {
     m_picBg->destroy();
     delete m_picBg;
-    m_picBg = NULL;
+    m_picBg = nullptr;
   }
   if (m_picOrig)
   {
     m_picOrig->destroy();
     delete m_picOrig;
-    m_picOrig = NULL;
+    m_picOrig = nullptr;
   }
   if (m_pcCfg->getFilmGrainAnalysisEnabled())
   {
@@ -611,7 +613,7 @@ void EncGOP::xWriteLeadingSEIMessages (SEIMessages& seiMessages, SEIMessages& du
   AccessUnit testAU;
   SEIMessages picTimingSEIs = getSeisByType(seiMessages, SEI::PICTURE_TIMING);
   CHECK(!(picTimingSEIs.size() < 2), "Unspecified error");
-  SEIPictureTiming * picTiming = picTimingSEIs.empty() ? NULL : (SEIPictureTiming*) picTimingSEIs.front();
+  SEIPictureTiming *picTiming = picTimingSEIs.empty() ? nullptr : (SEIPictureTiming *) picTimingSEIs.front();
 
   // test writing
   xWriteLeadingSEIOrdered(seiMessages, duInfoSeiMessages, testAU, temporalId, true);
@@ -1330,7 +1332,7 @@ void EncGOP::xUpdateTimingSEI(SEIPictureTiming *pictureTimingSEI, std::deque<DUD
 }
 void EncGOP::xUpdateDuInfoSEI(SEIMessages &duInfoSeiMessages, SEIPictureTiming *pictureTimingSEI, int maxSubLayers)
 {
-  if (duInfoSeiMessages.empty() || (pictureTimingSEI == NULL))
+  if (duInfoSeiMessages.empty() || (pictureTimingSEI == nullptr))
   {
     return;
   }
@@ -1608,11 +1610,9 @@ printHash(const HashType hashType, const std::string &digestStr)
     case HASHTYPE_CHECKSUM:
       decodedPictureHashModeName = "Checksum";
       break;
-    default:
-      decodedPictureHashModeName = NULL;
-      break;
+    default: decodedPictureHashModeName = nullptr; break;
   }
-  if (decodedPictureHashModeName != NULL)
+  if (decodedPictureHashModeName != nullptr)
   {
     if (digestStr.empty())
     {
@@ -1713,7 +1713,7 @@ void trySkipOrDecodePicture( bool& decPic, bool& encPic, const EncCfg& cfg, Pict
         else if( pcPic->getPOC() )
         {
           // reset decoder if used and not required any further
-          tryDecodePicture( NULL, 0, std::string( "" ) );
+          tryDecodePicture(nullptr, 0, std::string(""));
         }
       }
     }
@@ -2103,7 +2103,7 @@ void EncGOP::xPicInitLMCS(Picture *pic, PicHeader *picHeader, Slice *slice)
       {
         ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
         lmcsAPS = apsMap->getPS((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
-        if (lmcsAPS == NULL)
+        if (lmcsAPS == nullptr)
         {
           lmcsAPS = apsMap->allocatePS((apsId << NUM_APS_TYPE_LEN) + LMCS_APS);
           lmcsAPS->setAPSId(apsId);
@@ -2224,8 +2224,9 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 {
   // TODO: Split this function up.
 
-  Picture*        pcPic = NULL;
-  PicHeader*      picHeader = NULL;
+  Picture   *pcPic     = nullptr;
+  PicHeader *picHeader = nullptr;
+
   Slice*      pcSlice;
   OutputBitstream  *pcBitstreamRedirect;
   pcBitstreamRedirect = new OutputBitstream;
@@ -3124,7 +3125,7 @@ void EncGOP::compressGOP( int iPOCLast, int iNumPicRcvd, PicList& rcListPic,
 
       ParameterSetMap<APS> *apsMap = m_pcEncLib->getApsMap();
       APS*  scalingListAPS = apsMap->getPS( ( apsId << NUM_APS_TYPE_LEN ) + SCALING_LIST_APS );
-      assert( scalingListAPS != NULL );
+      assert(scalingListAPS != nullptr);
       picHeader->setScalingListAPS( scalingListAPS );
     }
 
@@ -4398,7 +4399,7 @@ void EncGOP::xGetBuffer( PicList&                  rcListPic,
     iterPic++;
   }
 
-  CHECK(!(rpcPic != NULL), "Unspecified error");
+  CHECK(!(rpcPic != nullptr), "Unspecified error");
   CHECK(!(rpcPic->getPOC() == pocCurr), "Unspecified error");
 
   (**iterPicYuvRec) = rpcPic->getRecoBuf();
@@ -5735,7 +5736,7 @@ void EncGOP::xAttachSliceDataToNalUnit (OutputNALUnit& rNalu, OutputBitstream* c
 
 void EncGOP::arrangeCompositeReference(Slice* pcSlice, PicList& rcListPic, int pocCurr)
 {
-  Picture* curPic = NULL;
+  Picture             *curPic  = nullptr;
   PicList::iterator  iterPic = rcListPic.begin();
   const PreCalcValues *pcv = pcSlice->getPPS()->pcv;
   m_bgPOC = pocCurr + 1;
@@ -5864,7 +5865,7 @@ void EncGOP::arrangeCompositeReference(Slice* pcSlice, PicList& rcListPic, int p
 
 void EncGOP::updateCompositeReference(Slice* pcSlice, PicList& rcListPic, int pocCurr)
 {
-  Picture* curPic = NULL;
+  Picture             *curPic  = nullptr;
   const PreCalcValues *pcv = pcSlice->getPPS()->pcv;
   PicList::iterator  iterPic = rcListPic.begin();
   iterPic = rcListPic.begin();

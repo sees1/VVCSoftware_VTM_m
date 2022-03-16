@@ -698,7 +698,6 @@ static void simdInterpolateVerM8_AVX2( const int16_t *src, int srcStride, int16_
 #endif
 }
 
-
 template<X86_VEXT vext, int N, bool shiftBack>
 static void simdInterpolateVerM16_AVX2( const int16_t *src, int srcStride, int16_t *dst, int dstStride, int width, int height, int shift, int offset, const ClpRng& clpRng, int16_t const *coeff )
 {

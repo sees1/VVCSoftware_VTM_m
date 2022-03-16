@@ -53,12 +53,7 @@ public:
     Tm*                   parameterSet;
   };
 
-  ParameterSetMap(int maxId)
-  :m_maxId (maxId)
-  ,m_lastActiveParameterSet(NULL)
-  {
-    m_activePsId.clear();
-  }
+  ParameterSetMap(int maxId) : m_maxId(maxId), m_lastActiveParameterSet(nullptr) { m_activePsId.clear(); }
 
   ~ParameterSetMap()
   {
@@ -67,7 +62,8 @@ public:
       delete (*i).second.pNaluData;
       delete (*i).second.parameterSet;
     }
-    delete m_lastActiveParameterSet; m_lastActiveParameterSet = NULL;
+    delete m_lastActiveParameterSet;
+    m_lastActiveParameterSet = nullptr;
   }
 
   T *allocatePS(const int psId)
@@ -201,18 +197,18 @@ public:
   T* getPS(int psId)
   {
     typename std::map<int,MapData<T> >::iterator it=m_paramsetMap.find(psId);
-    return ( it == m_paramsetMap.end() ) ? NULL : (it)->second.parameterSet;
+    return (it == m_paramsetMap.end()) ? nullptr : (it)->second.parameterSet;
   }
 
   const T* getPS(int psId) const
   {
     typename std::map<int,MapData<T> >::const_iterator it=m_paramsetMap.find(psId);
-    return ( it == m_paramsetMap.end() ) ? NULL : (it)->second.parameterSet;
+    return (it == m_paramsetMap.end()) ? nullptr : (it)->second.parameterSet;
   }
 
   T* getFirstPS()
   {
-    return (m_paramsetMap.begin() == m_paramsetMap.end() ) ? NULL : m_paramsetMap.begin()->second.parameterSet;
+    return (m_paramsetMap.begin() == m_paramsetMap.end()) ? nullptr : m_paramsetMap.begin()->second.parameterSet;
   }
 
   void setActive(int psId) { m_activePsId.push_back(psId); }

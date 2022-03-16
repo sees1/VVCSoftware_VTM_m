@@ -467,7 +467,7 @@ void EncLib::deletePicBuffer()
     }
 
     delete pcPic;
-    pcPic = NULL;
+    pcPic = nullptr;
   }
 
   m_cListPic.clear();
@@ -477,7 +477,7 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
 {
   if( m_compositeRefEnabled && m_cGOPEncoder.getPicBg()->getSpliceFull() && m_iPOCLast >= 10 && m_iNumPicRcvd == 0 && m_cGOPEncoder.getEncodedLTRef() == false )
   {
-    Picture* picCurr = NULL;
+    Picture *picCurr = nullptr;
     xGetNewPicBuffer( rcListPicYuvRecOut, picCurr, 2 );
     const PPS *pps = m_ppsMap.getPS( 2 );
     const SPS *sps = m_spsMap.getPS( pps->getSPSId() );
@@ -518,10 +518,10 @@ bool EncLib::encodePrep( bool flush, PelStorage* pcPicYuvOrg, PelStorage* cPicYu
   }
 
   //PROF_ACCUM_AND_START_NEW_SET( getProfilerPic(), P_GOP_LEVEL );
-  if( pcPicYuvOrg != NULL )
+  if (pcPicYuvOrg != nullptr)
   {
     // get original YUV
-    Picture* pcPicCurr = NULL;
+    Picture *pcPicCurr = nullptr;
 
     int ppsID = -1; // Use default PPS ID
 #if ER_CHROMA_QP_WCG_PPS

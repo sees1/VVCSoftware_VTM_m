@@ -151,14 +151,14 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
 
   do
   {
-    sei_read_code(NULL, 8, val, "payload_type");
+    sei_read_code(nullptr, 8, val, "payload_type");
     payloadType += val;
   } while (val==0xFF);
 
   uint32_t payloadSize = 0;
   do
   {
-    sei_read_code(NULL, 8, val, "payload_size");
+    sei_read_code(nullptr, 8, val, "payload_size");
     payloadSize += val;
   } while (val==0xFF);
 
@@ -175,8 +175,8 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
   InputBitstream *bs = getBitstream();
   setBitstream(bs->extractSubstream(payloadSize * 8));
 
-  SEI *sei = NULL;
-  const SEIBufferingPeriod *bp = NULL;
+  SEI                      *sei = nullptr;
+  const SEIBufferingPeriod *bp  = nullptr;
 
   if(nalUnitType == NAL_UNIT_PREFIX_SEI)
   {
@@ -340,7 +340,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
       for (uint32_t i = 0; i < payloadSize; i++)
       {
         uint32_t seiByte;
-        sei_read_code (NULL, 8, seiByte, "unknown prefix SEI payload byte");
+        sei_read_code(nullptr, 8, seiByte, "unknown prefix SEI payload byte");
       }
       msg( WARNING, "Unknown prefix SEI message (payloadType = %d) was found!\n", payloadType);
       if (pDecodedMessageOutputStream)
@@ -370,7 +370,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
         for (uint32_t i = 0; i < payloadSize; i++)
         {
           uint32_t seiByte;
-          sei_read_code( NULL, 8, seiByte, "unknown suffix SEI payload byte");
+          sei_read_code(nullptr, 8, seiByte, "unknown suffix SEI payload byte");
         }
         msg( WARNING, "Unknown suffix SEI message (payloadType = %d) was found!\n", payloadType);
         if (pDecodedMessageOutputStream)
@@ -381,7 +381,7 @@ void SEIReader::xReadSEImessage(SEIMessages& seis, const NalUnitType nalUnitType
     }
   }
 
-  if (sei != NULL)
+  if (sei != nullptr)
   {
     seis.push_back(sei);
   }
@@ -457,7 +457,7 @@ void SEIReader::xParseSEIuserDataUnregistered(SEIuserDataUnregistered &sei, uint
   sei.userData = new uint8_t[sei.userDataLength];
   for (uint32_t i = 0; i < sei.userDataLength; i++)
   {
-    sei_read_code( NULL, 8, val, "user_data_payload_byte" );
+    sei_read_code(nullptr, 8, val, "user_data_payload_byte");
     sei.userData[i] = val;
   }
   if (pDecodedMessageOutputStream)
@@ -502,7 +502,7 @@ void SEIReader::xParseSEIDecodedPictureHash(SEIDecodedPictureHash& sei, uint32_t
   sei.m_pictureHash.hash.clear();
   for(;bytesRead < payloadSize; bytesRead++)
   {
-    sei_read_code( NULL, 8, val, traceString);
+    sei_read_code(nullptr, 8, val, traceString);
     sei.m_pictureHash.hash.push_back((uint8_t)val);
     if (pDecodedMessageOutputStream)
     {
@@ -1304,7 +1304,7 @@ void SEIReader::xParseSEIUserDataRegistered(SEIUserDataRegistered& sei, uint32_t
   sei.m_userData.resize(payloadSize);
   for (uint32_t i = 0; i < sei.m_userData.size(); i++)
   {
-    sei_read_code(NULL, 8, code, "itu_t_t35_payload_byte");
+    sei_read_code(nullptr, 8, code, "itu_t_t35_payload_byte");
     sei.m_userData[i] = code;
   }
   if (pDecodedMessageOutputStream)

@@ -48,12 +48,7 @@ class EncGOP;
 class SEIEncoder
 {
 public:
-  SEIEncoder()
-    :m_pcCfg(NULL)
-    ,m_pcEncLib(NULL)
-    ,m_pcEncGOP(NULL)
-  ,m_isInitialized(false)
-  {};
+  SEIEncoder() : m_pcCfg(nullptr), m_pcEncLib(nullptr), m_pcEncGOP(nullptr), m_isInitialized(false){};
   virtual ~SEIEncoder(){};
 
   void init(EncCfg* encCfg, EncLib *encTop, EncGOP *encGOP)

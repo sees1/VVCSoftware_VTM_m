@@ -47,64 +47,64 @@
 //! \{
 
 Slice::Slice()
-: m_iPOC                          ( 0 )
-, m_iLastIDR                      ( 0 )
-, m_prevGDRInSameLayerPOC         ( -MAX_INT )
-, m_iAssociatedIRAP               ( 0 )
-, m_iAssociatedIRAPType           ( NAL_UNIT_INVALID )
-, m_prevGDRSubpicPOC              ( -MAX_INT )
-, m_prevIRAPSubpicPOC             ( -MAX_INT )
-, m_prevIRAPSubpicType            ( NAL_UNIT_INVALID )
-, m_rpl0Idx                       ( -1 )
-, m_rpl1Idx                       ( -1 )
-, m_eNalUnitType                  ( NAL_UNIT_CODED_SLICE_IDR_W_RADL )
-, m_pictureHeaderInSliceHeader   ( false )
-, m_eSliceType                    ( I_SLICE )
-, m_noOutputOfPriorPicsFlag       ( 0 )
-, m_iSliceQp                      ( 0 )
-, m_ChromaQpAdjEnabled            ( false )
-, m_lmcsEnabledFlag               ( 0 )
-, m_explicitScalingListUsed       ( 0 )
-, m_deblockingFilterDisable       ( false )
-, m_deblockingFilterOverrideFlag  ( false )
-, m_deblockingFilterBetaOffsetDiv2( 0 )
-, m_deblockingFilterTcOffsetDiv2  ( 0 )
-, m_deblockingFilterCbBetaOffsetDiv2( 0 )
-, m_deblockingFilterCbTcOffsetDiv2  ( 0 )
-, m_deblockingFilterCrBetaOffsetDiv2( 0 )
-, m_deblockingFilterCrTcOffsetDiv2  ( 0 )
-, m_depQuantEnabledFlag             ( false )
-, m_reverseLastSigCoeffFlag         ( false )
-, m_signDataHidingEnabledFlag       ( false )
-, m_tsResidualCodingDisabledFlag  ( false )
-, m_pendingRasInit                ( false )
-, m_bCheckLDC                     ( false )
-, m_biDirPred                    ( false )
-, m_lmChromaCheckDisable          ( false )
-, m_iSliceQpDelta                 ( 0 )
-, m_iDepth                        ( 0 )
-, m_pcSPS                         ( NULL )
-, m_pcPPS                         ( NULL )
-, m_pcPic                         ( NULL )
-, m_pcPicHeader                   ( NULL )
-, m_colFromL0Flag                 ( true )
-, m_colRefIdx                     ( 0 )
-, m_uiTLayer                      ( 0 )
-, m_bTLayerSwitchingFlag          ( false )
-, m_independentSliceIdx           ( 0 )
-, m_nextSlice                     ( false )
-, m_sliceBits                     ( 0 )
-, m_bFinalized                    ( false )
-, m_bTestWeightPred               ( false )
-, m_bTestWeightBiPred             ( false )
-, m_substreamSizes                ( )
-, m_numEntryPoints                ( 0 )
-, m_cabacInitFlag                 ( false )
-, m_sliceSubPicId                 ( 0 )
-, m_encCABACTableIdx              (I_SLICE)
-, m_iProcessingStartTime          ( 0 )
-, m_dProcessingTime               ( 0 )
-, m_tsrc_index                    ( 0 )
+  : m_iPOC(0)
+  , m_iLastIDR(0)
+  , m_prevGDRInSameLayerPOC(-MAX_INT)
+  , m_iAssociatedIRAP(0)
+  , m_iAssociatedIRAPType(NAL_UNIT_INVALID)
+  , m_prevGDRSubpicPOC(-MAX_INT)
+  , m_prevIRAPSubpicPOC(-MAX_INT)
+  , m_prevIRAPSubpicType(NAL_UNIT_INVALID)
+  , m_rpl0Idx(-1)
+  , m_rpl1Idx(-1)
+  , m_eNalUnitType(NAL_UNIT_CODED_SLICE_IDR_W_RADL)
+  , m_pictureHeaderInSliceHeader(false)
+  , m_eSliceType(I_SLICE)
+  , m_noOutputOfPriorPicsFlag(0)
+  , m_iSliceQp(0)
+  , m_ChromaQpAdjEnabled(false)
+  , m_lmcsEnabledFlag(0)
+  , m_explicitScalingListUsed(0)
+  , m_deblockingFilterDisable(false)
+  , m_deblockingFilterOverrideFlag(false)
+  , m_deblockingFilterBetaOffsetDiv2(0)
+  , m_deblockingFilterTcOffsetDiv2(0)
+  , m_deblockingFilterCbBetaOffsetDiv2(0)
+  , m_deblockingFilterCbTcOffsetDiv2(0)
+  , m_deblockingFilterCrBetaOffsetDiv2(0)
+  , m_deblockingFilterCrTcOffsetDiv2(0)
+  , m_depQuantEnabledFlag(false)
+  , m_reverseLastSigCoeffFlag(false)
+  , m_signDataHidingEnabledFlag(false)
+  , m_tsResidualCodingDisabledFlag(false)
+  , m_pendingRasInit(false)
+  , m_bCheckLDC(false)
+  , m_biDirPred(false)
+  , m_lmChromaCheckDisable(false)
+  , m_iSliceQpDelta(0)
+  , m_iDepth(0)
+  , m_pcSPS(nullptr)
+  , m_pcPPS(nullptr)
+  , m_pcPic(nullptr)
+  , m_pcPicHeader(nullptr)
+  , m_colFromL0Flag(true)
+  , m_colRefIdx(0)
+  , m_uiTLayer(0)
+  , m_bTLayerSwitchingFlag(false)
+  , m_independentSliceIdx(0)
+  , m_nextSlice(false)
+  , m_sliceBits(0)
+  , m_bFinalized(false)
+  , m_bTestWeightPred(false)
+  , m_bTestWeightBiPred(false)
+  , m_substreamSizes()
+  , m_numEntryPoints(0)
+  , m_cabacInitFlag(false)
+  , m_sliceSubPicId(0)
+  , m_encCABACTableIdx(I_SLICE)
+  , m_iProcessingStartTime(0)
+  , m_dProcessingTime(0)
+  , m_tsrc_index(0)
 {
   for (uint32_t i = 0; i < MAX_TSRC_RICE; i++)
   {
@@ -136,7 +136,7 @@ Slice::Slice()
   {
     for(uint32_t i=0; i<NUM_REF_PIC_LIST_01; i++)
     {
-      m_apcRefPicList [i][iNumCount] = NULL;
+      m_apcRefPicList[i][iNumCount]  = nullptr;
       m_aiRefPOCList  [i][iNumCount] = 0;
     }
   }
@@ -453,7 +453,8 @@ void Slice::constructRefPicList(PicList& rcListPic)
     return;
   }
 
-  Picture*  pcRefPic = NULL;
+  Picture *pcRefPic = nullptr;
+
   uint32_t numOfActiveRef = 0;
   //construct L0
   numOfActiveRef = getNumRefIdx(REF_PIC_LIST_0);
@@ -470,8 +471,7 @@ void Slice::constructRefPicList(PicList& rcListPic)
       pcRefPic = xGetRefPic( rcListPic, getPOC(), refLayerId );
       pcRefPic->longTerm = true;
     }
-    else
-    if (!m_RPL0.isRefPicLongterm(ii))
+    else if (!m_RPL0.isRefPicLongterm(ii))
     {
       pcRefPic = xGetRefPic(rcListPic, getPOC() + m_RPL0.getRefPicIdentifier(ii), m_pcPic->layerId);
       pcRefPic->longTerm = false;
@@ -747,7 +747,8 @@ void Slice::checkRPL(const ReferencePictureList* pRPL0, const ReferencePictureLi
 void Slice::checkSTSA(PicList& rcListPic)
 {
   int ii;
-  Picture* pcRefPic = NULL;
+  Picture *pcRefPic = nullptr;
+
   int numOfActiveRef = getNumRefIdx(REF_PIC_LIST_0);
 
   for (ii = 0; ii < numOfActiveRef; ii++)
@@ -894,7 +895,7 @@ void Slice::decodingRefreshMarking(int& pocCRA, bool& bRefreshPending, PicList& 
 
 void Slice::copySliceInfo(Slice *pSrc, bool cpyAlmostAll)
 {
-  CHECK(!pSrc, "Source is NULL");
+  CHECK(!pSrc, "Source is nullptr");
 
   int i, j, k;
 
@@ -1299,7 +1300,7 @@ void Slice::checkSubpicTypeConstraints(PicList& rcListPic, const ReferencePictur
       int bufSubpicType = NAL_UNIT_INVALID;
       int bufSubpicPrevIRAPSubpicPOC = 0;
 
-      if (bufPic->slices[0]->getPicHeader() != NULL) // Generated reference picture does not have picture header
+      if (bufPic->slices[0]->getPicHeader() != nullptr)   // Generated reference picture does not have picture header
       {
         for (int i = 0; i < bufPic->numSlices; i++)
         {
@@ -3149,56 +3150,55 @@ SubPic::~SubPic()
   m_ctuAddrInSubPic.clear();
 }
 
-
 PPS::PPS()
-: m_PPSId                            (0)
-, m_SPSId                            (0)
-, m_picInitQPMinus26                 (0)
-, m_useDQP                           (false)
-, m_usePPSChromaTool                 (false)
-, m_bSliceChromaQpFlag               (false)
-, m_chromaCbQpOffset                 (0)
-, m_chromaCrQpOffset                 (0)
-, m_chromaCbCrQpOffset               (0)
-, m_chromaQpOffsetListLen              (0)
-, m_numRefIdxL0DefaultActive         (1)
-, m_numRefIdxL1DefaultActive         (1)
-, m_rpl1IdxPresentFlag               (false)
-, m_numSubPics                       (1)
-, m_subPicIdMappingInPpsFlag         (0)
-, m_subPicIdLen                      (16)
-, m_noPicPartitionFlag               (1)
-, m_log2CtuSize                      (0)
-, m_ctuSize                          (0)
-, m_picWidthInCtu                    (0)
-, m_picHeightInCtu                   (0)
-, m_numTileCols                      (1)
-, m_numTileRows                      (1)
-, m_rectSliceFlag                    (1)
-, m_singleSlicePerSubPicFlag         (0)
-, m_numSlicesInPic                   (1)
-, m_tileIdxDeltaPresentFlag          (0)
-, m_loopFilterAcrossTilesEnabledFlag (1)
-, m_loopFilterAcrossSlicesEnabledFlag(0)
-, m_cabacInitPresentFlag             (false)
-, m_pictureHeaderExtensionPresentFlag(0)
-, m_sliceHeaderExtensionPresentFlag  (false)
-, m_listsModificationPresentFlag     (0)
-, m_rplInfoInPhFlag                  (0)
-, m_dbfInfoInPhFlag                  (0)
-, m_saoInfoInPhFlag                  (0)
-, m_alfInfoInPhFlag                  (0)
-, m_wpInfoInPhFlag                   (0)
-, m_qpDeltaInfoInPhFlag              (0)
-, m_mixedNaluTypesInPicFlag          ( false )
-, m_conformanceWindowFlag            (false)
-, m_picWidthInLumaSamples(352)
-, m_picHeightInLumaSamples( 288 )
-, m_explicitScalingWindowFlag        (false)
-, m_wrapAroundEnabledFlag            (false)
-, m_picWidthMinusWrapAroundOffset    (0)
-, m_wrapAroundOffset                 (0)
-, pcv                                (NULL)
+  : m_PPSId(0)
+  , m_SPSId(0)
+  , m_picInitQPMinus26(0)
+  , m_useDQP(false)
+  , m_usePPSChromaTool(false)
+  , m_bSliceChromaQpFlag(false)
+  , m_chromaCbQpOffset(0)
+  , m_chromaCrQpOffset(0)
+  , m_chromaCbCrQpOffset(0)
+  , m_chromaQpOffsetListLen(0)
+  , m_numRefIdxL0DefaultActive(1)
+  , m_numRefIdxL1DefaultActive(1)
+  , m_rpl1IdxPresentFlag(false)
+  , m_numSubPics(1)
+  , m_subPicIdMappingInPpsFlag(0)
+  , m_subPicIdLen(16)
+  , m_noPicPartitionFlag(1)
+  , m_log2CtuSize(0)
+  , m_ctuSize(0)
+  , m_picWidthInCtu(0)
+  , m_picHeightInCtu(0)
+  , m_numTileCols(1)
+  , m_numTileRows(1)
+  , m_rectSliceFlag(1)
+  , m_singleSlicePerSubPicFlag(0)
+  , m_numSlicesInPic(1)
+  , m_tileIdxDeltaPresentFlag(0)
+  , m_loopFilterAcrossTilesEnabledFlag(1)
+  , m_loopFilterAcrossSlicesEnabledFlag(0)
+  , m_cabacInitPresentFlag(false)
+  , m_pictureHeaderExtensionPresentFlag(0)
+  , m_sliceHeaderExtensionPresentFlag(false)
+  , m_listsModificationPresentFlag(0)
+  , m_rplInfoInPhFlag(0)
+  , m_dbfInfoInPhFlag(0)
+  , m_saoInfoInPhFlag(0)
+  , m_alfInfoInPhFlag(0)
+  , m_wpInfoInPhFlag(0)
+  , m_qpDeltaInfoInPhFlag(0)
+  , m_mixedNaluTypesInPicFlag(false)
+  , m_conformanceWindowFlag(false)
+  , m_picWidthInLumaSamples(352)
+  , m_picHeightInLumaSamples(288)
+  , m_explicitScalingWindowFlag(false)
+  , m_wrapAroundEnabledFlag(false)
+  , m_picWidthMinusWrapAroundOffset(0)
+  , m_wrapAroundOffset(0)
+  , pcv(nullptr)
 {
   m_ChromaQpAdjTableIncludingNullEntry[0].u.comp.CbOffset = 0; // Array includes entry [0] for the null offset used when cu_chroma_qp_offset_flag=0. This is initialised here and never subsequently changed.
   m_ChromaQpAdjTableIncludingNullEntry[0].u.comp.CrOffset = 0;
@@ -4135,7 +4135,9 @@ void ScalingList::outputScalingLists(std::ostream &os) const
 bool ScalingList::xParseScalingList(const std::string &fileName)
 {
   static const int LINE_SIZE=1024;
-  FILE *fp = NULL;
+
+  FILE *fp = nullptr;
+
   char line[LINE_SIZE];
 
   if (fileName.empty())
@@ -4146,7 +4148,7 @@ bool ScalingList::xParseScalingList(const std::string &fileName)
     outputScalingLists(std::cout);
     return true;
   }
-  else if ((fp = fopen(fileName.c_str(),"r")) == (FILE*)NULL)
+  else if ((fp = fopen(fileName.c_str(), "r")) == (FILE *) nullptr)
   {
     msg( ERROR, "Error: cannot open scaling list file %s for reading\n", fileName.c_str());
     return true;
@@ -4173,9 +4175,11 @@ bool ScalingList::xParseScalingList(const std::string &fileName)
           while ((!feof(fp)) && (!bFound))
           {
             char *ret = fgets(line, LINE_SIZE, fp);
-            char *findNamePosition= ret==NULL ? NULL : strstr(line, MatrixType[sizeIdc][listIdc]);
+            char *findNamePosition = ret == nullptr ? nullptr : strstr(line, MatrixType[sizeIdc][listIdc]);
             // This could be a match against the DC string as well, so verify it isn't
-            if (findNamePosition!= NULL && (MatrixType_DC[sizeIdc][listIdc]==NULL || strstr(line, MatrixType_DC[sizeIdc][listIdc])==NULL))
+            if (findNamePosition != nullptr
+                && (MatrixType_DC[sizeIdc][listIdc] == nullptr
+                    || strstr(line, MatrixType_DC[sizeIdc][listIdc]) == nullptr))
             {
               bFound=true;
             }
@@ -4214,8 +4218,8 @@ bool ScalingList::xParseScalingList(const std::string &fileName)
             while ((!feof(fp)) && (!bFound))
             {
               char *ret = fgets(line, LINE_SIZE, fp);
-              char *findNamePosition= ret==NULL ? NULL : strstr(line, MatrixType_DC[sizeIdc][listIdc]);
-              if (findNamePosition!= NULL)
+              char *findNamePosition = ret == nullptr ? nullptr : strstr(line, MatrixType_DC[sizeIdc][listIdc]);
+              if (findNamePosition != nullptr)
               {
                 // This won't be a match against the non-DC string.
                 bFound=true;
@@ -4278,7 +4282,7 @@ const int* ScalingList::getScalingListDefaultAddress(uint32_t scalingListId)
       break;
     default:
       THROW( "Invalid scaling list" );
-      src = NULL;
+      src = nullptr;
       break;
   }
   return src;
@@ -4850,7 +4854,7 @@ bool             operator != (const ProfileTierLevel& op1, const ProfileTierLeve
 
 bool Slice::isLastSliceInSubpic()
 {
-  CHECK(m_pcPPS == NULL, "PPS pointer not initialized");
+  CHECK(m_pcPPS == nullptr, "PPS pointer not initialized");
 
   int lastCTUAddrInSlice = m_sliceMap.getCtuAddrList().back();
 

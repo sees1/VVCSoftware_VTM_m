@@ -343,11 +343,11 @@ int CU::predictQP( const CodingUnit& cu, const int prevQP )
   uint32_t  ctuXPosInCtus   = ctuRsAddr % cs.pcv->widthInCtus;
   uint32_t  tileColIdx      = cu.slice->getPPS()->ctuToTileCol( ctuXPosInCtus );
   uint32_t  tileXPosInCtus  = cu.slice->getPPS()->getTileColumnBd( tileColIdx );
-  if( ctuXPosInCtus == tileXPosInCtus &&
-      !( cu.blocks[cu.chType].x & ( cs.pcv->maxCUWidthMask  >> getChannelTypeScaleX( cu.chType, cu.chromaFormat ) ) ) &&
-      !( cu.blocks[cu.chType].y & ( cs.pcv->maxCUHeightMask >> getChannelTypeScaleY( cu.chType, cu.chromaFormat ) ) ) &&
-      ( cs.getCU( cu.blocks[cu.chType].pos().offset( 0, -1 ), cu.chType) != NULL ) &&
-      CU::isSameSliceAndTile( *cs.getCU( cu.blocks[cu.chType].pos().offset( 0, -1 ), cu.chType), cu ) )
+  if (ctuXPosInCtus == tileXPosInCtus
+      && !(cu.blocks[cu.chType].x & (cs.pcv->maxCUWidthMask >> getChannelTypeScaleX(cu.chType, cu.chromaFormat)))
+      && !(cu.blocks[cu.chType].y & (cs.pcv->maxCUHeightMask >> getChannelTypeScaleY(cu.chType, cu.chromaFormat)))
+      && (cs.getCU(cu.blocks[cu.chType].pos().offset(0, -1), cu.chType) != nullptr)
+      && CU::isSameSliceAndTile(*cs.getCU(cu.blocks[cu.chType].pos().offset(0, -1), cu.chType), cu))
   {
     return ( ( cs.getCU( cu.blocks[cu.chType].pos().offset( 0, -1 ), cu.chType ) )->qp );
   }
@@ -2140,7 +2140,7 @@ bool PU::getDerivedBV(PredictionUnit &pu, const Mv& currentMv, Mv& derivedMv)
     return false;
   }
 
-  const PredictionUnit *neibRefPU = NULL;
+  const PredictionUnit *neibRefPU = nullptr;
   neibRefPU = pu.cs->getPURestricted(pu.lumaPos().offset(offsetX, offsetY), pu, CHANNEL_TYPE_LUMA);
 
   bool isIBC = (neibRefPU) ? CU::isIBC(*neibRefPU->cu) : 0;
@@ -2327,7 +2327,7 @@ void PU::fillMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, const in
 bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &refPicList, const int &refIdx, const Position &pos, const MvpDir &dir, AffineAMVPInfo &affiAMVPInfo )
 {
   CodingStructure &cs = *pu.cs;
-  const PredictionUnit *neibPU = NULL;
+  const PredictionUnit *neibPU = nullptr;
   Position neibPos;
 
 #if GDR_ENABLED
@@ -2356,7 +2356,7 @@ bool PU::addAffineMVPCandUnscaled( const PredictionUnit &pu, const RefPicList &r
 
   neibPU = cs.getPURestricted( neibPos, pu, pu.chType );
 
-  if (neibPU == NULL || !CU::isInter(*neibPU->cu) || !neibPU->cu->affine || neibPU->mergeType != MRG_TYPE_DEFAULT_N)
+  if (neibPU == nullptr || !CU::isInter(*neibPU->cu) || !neibPU->cu->affine || neibPU->mergeType != MRG_TYPE_DEFAULT_N)
   {
     return false;
   }
@@ -2997,9 +2997,10 @@ void PU::fillAffineMvpCand(PredictionUnit &pu, const RefPicList &eRefPicList, co
 bool PU::addMVPCandUnscaled(const PredictionUnit &pu, const RefPicList &eRefPicList, const int &refIdx,
                             const Position &pos, const MvpDir &eDir, AMVPInfo &info)
 {
-        CodingStructure &cs    = *pu.cs;
-  const PredictionUnit *neibPU = NULL;
-        Position neibPos;
+  CodingStructure &cs = *pu.cs;
+
+  const PredictionUnit *neibPU = nullptr;
+  Position              neibPos;
 
 #if GDR_ENABLED
   const bool isEncodeGdrClean = cs.sps->getGDREnabledFlag() && cs.pcv->isEncoder && ((cs.picHeader->getInGdrInterval() && cs.isClean(pu.Y().topRight(), CHANNEL_TYPE_LUMA)) || (cs.picHeader->getNumVerVirtualBoundaries() == 0));
@@ -3029,7 +3030,7 @@ bool PU::addMVPCandUnscaled(const PredictionUnit &pu, const RefPicList &eRefPicL
 
   neibPU = cs.getPURestricted( neibPos, pu, pu.chType );
 
-  if( neibPU == NULL || !CU::isInter( *neibPU->cu ) )
+  if (neibPU == nullptr || !CU::isInter(*neibPU->cu))
   {
     return false;
   }

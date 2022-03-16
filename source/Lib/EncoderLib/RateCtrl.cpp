@@ -61,10 +61,10 @@ EncRCSeq::EncRCSeq()
   m_numberOfLevel       = 0;
   m_numberOfLCU         = 0;
   m_averageBits         = 0;
-  m_bitsRatio           = NULL;
-  m_GOPID2Level         = NULL;
-  m_picPara             = NULL;
-  m_LCUPara             = NULL;
+  m_bitsRatio           = nullptr;
+  m_GOPID2Level         = nullptr;
+  m_picPara             = nullptr;
+  m_LCUPara             = nullptr;
   m_numberOfPixel       = 0;
   m_framesLeft          = 0;
   m_bitsLeft            = 0;
@@ -179,32 +179,32 @@ void EncRCSeq::create(int totalFrames, int targetBitrate, int frameRate, int GOP
 
 void EncRCSeq::destroy()
 {
-  if (m_bitsRatio != NULL)
+  if (m_bitsRatio != nullptr)
   {
     delete[] m_bitsRatio;
-    m_bitsRatio = NULL;
+    m_bitsRatio = nullptr;
   }
 
-  if ( m_GOPID2Level != NULL )
+  if (m_GOPID2Level != nullptr)
   {
     delete[] m_GOPID2Level;
-    m_GOPID2Level = NULL;
+    m_GOPID2Level = nullptr;
   }
 
-  if ( m_picPara != NULL )
+  if (m_picPara != nullptr)
   {
     delete[] m_picPara;
-    m_picPara = NULL;
+    m_picPara = nullptr;
   }
 
-  if ( m_LCUPara != NULL )
+  if (m_LCUPara != nullptr)
   {
     for ( int i=0; i<m_numberOfLevel; i++ )
     {
       delete[] m_LCUPara[i];
     }
     delete[] m_LCUPara;
-    m_LCUPara = NULL;
+    m_LCUPara = nullptr;
   }
 }
 
@@ -226,9 +226,9 @@ void EncRCSeq::initGOPID2Level( int GOPID2Level[] )
 
 void EncRCSeq::initPicPara( TRCParameter* picPara )
 {
-  CHECK( m_picPara == NULL, "Object does not exist" );
+  CHECK(m_picPara == nullptr, "Object does not exist");
 
-  if ( picPara == NULL )
+  if (picPara == nullptr)
   {
     for ( int i=0; i<m_numberOfLevel; i++ )
     {
@@ -263,11 +263,11 @@ void EncRCSeq::initPicPara( TRCParameter* picPara )
 
 void EncRCSeq::initLCUPara( TRCParameter** LCUPara )
 {
-  if ( m_LCUPara == NULL )
+  if (m_LCUPara == nullptr)
   {
     return;
   }
-  if ( LCUPara == NULL )
+  if (LCUPara == nullptr)
   {
     for ( int i=0; i<m_numberOfLevel; i++ )
     {
@@ -310,8 +310,8 @@ void EncRCSeq::setAllBitRatio( double basicLambda, double* equaCoeffA, double* e
 //GOP level
 EncRCGOP::EncRCGOP()
 {
-  m_encRCSeq  = NULL;
-  m_picTargetBitInGOP = NULL;
+  m_encRCSeq          = nullptr;
+  m_picTargetBitInGOP = nullptr;
   m_numPic     = 0;
   m_targetBits = 0;
   m_picLeft    = 0;
@@ -618,11 +618,11 @@ double EncRCGOP::xSolveEqua(EncRCSeq* encRCSeq, double targetBpp, double* equaCo
 
 void EncRCGOP::destroy()
 {
-  m_encRCSeq = NULL;
-  if ( m_picTargetBitInGOP != NULL )
+  m_encRCSeq = nullptr;
+  if (m_picTargetBitInGOP != nullptr)
   {
     delete[] m_picTargetBitInGOP;
-    m_picTargetBitInGOP = NULL;
+    m_picTargetBitInGOP = nullptr;
   }
 }
 
@@ -654,8 +654,8 @@ int EncRCGOP::xEstGOPTargetBits( EncRCSeq* encRCSeq, int GOPSize )
 //picture level
 EncRCPic::EncRCPic()
 {
-  m_encRCSeq = NULL;
-  m_encRCGOP = NULL;
+  m_encRCSeq = nullptr;
+  m_encRCGOP = nullptr;
 
   m_frameLevel    = 0;
   m_numberOfPixel = 0;
@@ -669,7 +669,7 @@ EncRCPic::EncRCPic()
   m_bitsLeft      = 0;
   m_pixelsLeft    = 0;
 
-  m_LCUs         = NULL;
+  m_LCUs                = nullptr;
   m_picActualHeaderBits = 0;
   m_picActualBits       = 0;
   m_picQP               = 0;
@@ -854,13 +854,13 @@ void EncRCPic::create( EncRCSeq* encRCSeq, EncRCGOP* encRCGOP, int frameLevel, l
 
 void EncRCPic::destroy()
 {
-  if( m_LCUs != NULL )
+  if (m_LCUs != nullptr)
   {
     delete[] m_LCUs;
-    m_LCUs = NULL;
+    m_LCUs = nullptr;
   }
-  m_encRCSeq = NULL;
-  m_encRCGOP = NULL;
+  m_encRCSeq = nullptr;
+  m_encRCGOP = nullptr;
 }
 
 
@@ -1445,9 +1445,9 @@ double EncRCPic::getLCUEstLambdaAndQP(double bpp, int clipPicQP, int *estQP)
 
 RateCtrl::RateCtrl()
 {
-  m_encRCSeq = NULL;
-  m_encRCGOP = NULL;
-  m_encRCPic = NULL;
+  m_encRCSeq = nullptr;
+  m_encRCGOP = nullptr;
+  m_encRCPic = nullptr;
 }
 
 RateCtrl::~RateCtrl()
@@ -1457,15 +1457,15 @@ RateCtrl::~RateCtrl()
 
 void RateCtrl::destroy()
 {
-  if ( m_encRCSeq != NULL )
+  if (m_encRCSeq != nullptr)
   {
     delete m_encRCSeq;
-    m_encRCSeq = NULL;
+    m_encRCSeq = nullptr;
   }
-  if ( m_encRCGOP != NULL )
+  if (m_encRCGOP != nullptr)
   {
     delete m_encRCGOP;
-    m_encRCGOP = NULL;
+    m_encRCGOP = nullptr;
   }
   while ( m_listRCPictures.size() > 0 )
   {
@@ -1986,5 +1986,5 @@ void RateCtrl::initHrdParam(const GeneralHrdParams* generalHrd, const OlsHrdPara
 void RateCtrl::destroyRCGOP()
 {
   delete m_encRCGOP;
-  m_encRCGOP = NULL;
+  m_encRCGOP = nullptr;
 }

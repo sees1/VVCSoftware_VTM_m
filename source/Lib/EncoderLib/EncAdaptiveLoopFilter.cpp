@@ -809,7 +809,7 @@ void EncAdaptiveLoopFilter::xSetupCcAlfAPS( CodingStructure &cs )
   {
     int  ccAlfCbApsId = cs.slice->getCcAlfCbApsId();
     APS* aps = m_apsMap->getPS((cs.slice->getCcAlfCbApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
-    if (aps == NULL)
+    if (aps == nullptr)
     {
       aps = m_apsMap->allocatePS((ccAlfCbApsId << NUM_APS_TYPE_LEN) + ALF_APS);
       aps->setTemporalId(cs.slice->getTLayer());
@@ -841,7 +841,7 @@ void EncAdaptiveLoopFilter::xSetupCcAlfAPS( CodingStructure &cs )
   {
     int  ccAlfCrApsId = cs.slice->getCcAlfCrApsId();
     APS* aps = m_apsMap->getPS((cs.slice->getCcAlfCrApsId() << NUM_APS_TYPE_LEN) + ALF_APS);
-    if (aps == NULL)
+    if (aps == nullptr)
     {
       aps = m_apsMap->allocatePS((ccAlfCrApsId << NUM_APS_TYPE_LEN) + ALF_APS);
       aps->setTemporalId(cs.slice->getTLayer());
@@ -2901,7 +2901,7 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
     if (alfParamNewFiltersBest.newFilterFlag[CHANNEL_TYPE_LUMA])
     {
       APS* newAPS = m_apsMap->getPS((newApsId << NUM_APS_TYPE_LEN) + ALF_APS);
-      if (newAPS == NULL)
+      if (newAPS == nullptr)
       {
         newAPS = m_apsMap->allocatePS((newApsId << NUM_APS_TYPE_LEN) + ALF_APS);
         newAPS->setAPSId(newApsId);
@@ -3105,7 +3105,7 @@ void  EncAdaptiveLoopFilter::alfEncoderCtb(CodingStructure& cs, AlfParam& alfPar
       if (cs.slice->getAlfApsIdChroma() == newApsIdChroma)   // new filter
       {
         APS *newAPS = m_apsMap->getPS((newApsIdChroma << NUM_APS_TYPE_LEN) + ALF_APS);
-        if (newAPS == NULL)
+        if (newAPS == nullptr)
         {
           newAPS = m_apsMap->allocatePS((newApsIdChroma << NUM_APS_TYPE_LEN) + ALF_APS);
           newAPS->setAPSType(ALF_APS);

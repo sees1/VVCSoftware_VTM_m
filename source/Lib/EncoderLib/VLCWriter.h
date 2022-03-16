@@ -73,7 +73,7 @@ protected:
 
   OutputBitstream*    m_pcBitIf;
 
-  VLCWriter() : m_pcBitIf(NULL) {}
+  VLCWriter() : m_pcBitIf(nullptr) {}
   virtual ~VLCWriter() {}
 
   void  setBitstream          ( OutputBitstream* p )  { m_pcBitIf = p;  }

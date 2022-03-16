@@ -212,18 +212,17 @@ static const uint32_t seedLUT[256] = {
 static const uint32_t deblockFactor[13] =
 { 64, 71, 77, 84, 90, 96, 103, 109, 116, 122, 128, 128, 128 };
 
-
 SEIFilmGrainSynthesizer::SEIFilmGrainSynthesizer()
-  : m_width           (0)
-  , m_height          (0)
-  , m_chromaFormat    (NUM_CHROMA_FORMAT)
-  , m_bitDepth        (0)
-  , m_idrPicId        (0)
-  , m_grainSynt       (NULL)
-  , m_fgsBlkSize      (8)
-  , m_poc             (0)
-  , m_errorCode       (0)
-  , m_fgcParameters   (NULL)
+  : m_width(0)
+  , m_height(0)
+  , m_chromaFormat(NUM_CHROMA_FORMAT)
+  , m_bitDepth(0)
+  , m_idrPicId(0)
+  , m_grainSynt(nullptr)
+  , m_fgsBlkSize(8)
+  , m_poc(0)
+  , m_errorCode(0)
+  , m_fgcParameters(nullptr)
 {
 
 }

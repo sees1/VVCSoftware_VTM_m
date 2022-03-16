@@ -63,8 +63,9 @@ bool ParcatHLSyntaxReader::parsePictureHeaderInSliceHeaderFlag(ParameterSetManag
 void ParcatHLSyntaxReader::parsePictureHeaderUpToPoc ( ParameterSetManager *parameterSetManager )
 {
   uint32_t  uiCode;
-  PPS* pps = NULL;
-  SPS* sps = NULL;
+
+  PPS *pps = nullptr;
+  SPS *sps = nullptr;
 
   uint32_t uiTmp;
   READ_FLAG(uiTmp, "ph_gdr_or_irap_pic_flag");
@@ -365,7 +366,7 @@ std::vector<uint8_t> process_segment(const char * path, int idx, int * poc_base,
 {
   FILE * fdi = fopen(path, "rb");
 
-  if (fdi == NULL)
+  if (fdi == nullptr)
   {
     fprintf(stderr, "Error: could not open input file: %s", path);
     exit(1);
@@ -405,7 +406,7 @@ int main(int argc, char * argv[])
   }
 
   FILE * fdo = fopen(argv[argc - 1], "wb");
-  if (fdo==NULL)
+  if (fdo == nullptr)
   {
     fprintf(stderr, "Error: could not open output file: %s", argv[argc - 1]);
     exit(1);

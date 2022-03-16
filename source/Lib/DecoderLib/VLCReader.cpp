@@ -2548,8 +2548,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
 {
   uint32_t  uiCode;
   int       iCode;
-  PPS*      pps = NULL;
-  SPS*      sps = NULL;
+
+  PPS *pps = nullptr;
+  SPS *sps = nullptr;
 
 #if ENABLE_TRACING
   xTracePictureHeader();
@@ -3482,8 +3483,8 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
 #if ENABLE_TRACING
   xTraceSliceHeader();
 #endif
-  PPS* pps = NULL;
-  SPS* sps = NULL;
+  PPS *pps = nullptr;
+  SPS *sps = nullptr;
   READ_FLAG(uiCode, "sh_picture_header_in_slice_header_flag");
   pcSlice->setPictureHeaderInSliceHeader(uiCode);
   if (uiCode)
@@ -4446,8 +4447,9 @@ void HLSyntaxReader::getSlicePoc(Slice* pcSlice, PicHeader* picHeader, Parameter
 {
   uint32_t  uiCode;
   uint32_t  pocLsb;
-  PPS* pps = NULL;
-  SPS* sps = NULL;
+
+  PPS *pps = nullptr;
+  SPS *sps = nullptr;
 
   CHECK(picHeader==0, "Invalid Picture Header");
   CHECK(picHeader->isValid()==false, "Invalid Picture Header");
@@ -5130,7 +5132,10 @@ void HLSyntaxReader::decodeScalingList(ScalingList *scalingList, uint32_t scalin
 
   int PredListId = scalingList->getRefMatrixId(scalingListId);
   CHECK(isPredictor && PredListId > scalingListId, "Scaling List error predictor!");
-  const int *srcPred = (isPredictor) ? ((scalingListId == PredListId) ? scalingList->getScalingListDefaultAddress(scalingListId) : scalingList->getScalingListAddress(PredListId)) : NULL;
+  const int *srcPred = (isPredictor)
+                         ? ((scalingListId == PredListId) ? scalingList->getScalingListDefaultAddress(scalingListId)
+                                                          : scalingList->getScalingListAddress(PredListId))
+                         : nullptr;
   if(isPredictor && scalingListId == PredListId)
   {
     scalingList->setScalingListDC(PredListId, SCALING_LIST_DC);

@@ -558,7 +558,7 @@ void EncCu::xCompressCU( CodingStructure*& tempCS, CodingStructure*& bestCS, Par
   const UnitArea currCsArea = clipArea( CS::getArea( *bestCS, bestCS->area, partitioner.chType ), *tempCS->picture );
 
 #if JVET_Y0152_TT_ENC_SPEEDUP
-  tempCS->splitRdCostBest = NULL;
+  tempCS->splitRdCostBest = nullptr;
 #endif
   m_modeCtrl->initCULevel( partitioner, *tempCS );
 #if GDR_ENABLED
@@ -2893,15 +2893,18 @@ void EncCu::xCheckRDCostMerge2Nx2N( CodingStructure *&tempCS, CodingStructure *&
 
         if (isSolid && isValid)
         {
-          xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : NULL);
+          xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass,
+                               uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : nullptr);
         }
       }
       else
       {
-        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : NULL);
+        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass,
+                             uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : nullptr);
       }
 #else
-      xEncodeInterResidual( tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : NULL );
+      xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass,
+                           uiNoResidualPass == 0 ? &candHasNoResidual[uiMrgHADIdx] : nullptr);
 #endif
 
       if( m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip && !pu.ciipFlag)
@@ -3326,15 +3329,18 @@ void EncCu::xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure 
 
         if (isSolid0 && isSolid1 && isValid0 && isValid1)
         {
-          xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass, (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : NULL));
+          xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass,
+                               (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : nullptr));
         }
       }
       else
       {
-        xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass, (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : NULL));
+        xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass,
+                             (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : nullptr));
       }
 #else
-      xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass, (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : NULL));
+      xEncodeInterResidual(tempCS, bestCS, pm, encTestMode, noResidualPass,
+                           (noResidualPass == 0 ? &geocandHasNoResidual[candidateIdx] : nullptr));
 #endif
 
       if (m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip)
@@ -3657,15 +3663,18 @@ void EncCu::xCheckRDCostAffineMerge2Nx2N( CodingStructure *&tempCS, CodingStruct
 
         if (isSolid && isValid)
         {
-          xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : NULL));
+          xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass,
+                               (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : nullptr));
         }
       }
       else
       {
-        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : NULL));
+        xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass,
+                             (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : nullptr));
       }
 #else
-      xEncodeInterResidual( tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass, ( uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : NULL ) );
+      xEncodeInterResidual(tempCS, bestCS, partitioner, encTestMode, uiNoResidualPass,
+                           (uiNoResidualPass == 0 ? &candHasNoResidual[uiMergeCand] : nullptr));
 #endif
 
       if ( m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip )
@@ -4054,7 +4063,7 @@ void EncCu::xCheckRDCostIBCModeMerge2Nx2N(CodingStructure *&tempCS, CodingStruct
 
           if (m_pcEncCfg->getUseFastDecisionForMerge() && !bestIsSkip)
           {
-            if (bestCS->getCU(partitioner.chType) == NULL)
+            if (bestCS->getCU(partitioner.chType) == nullptr)
             {
               bestIsSkip = 0;
             }
@@ -4998,7 +5007,7 @@ void EncCu::xEncodeInterResidual(CodingStructure *&tempCS, CodingStructure *&bes
       xCheckDQP(*tempCS, partitioner);
       xCheckChromaQPOffset(*tempCS, partitioner);
 
-      if (NULL != bestHasNonResi && (bestCostInternal > tempCS->cost))
+      if (nullptr != bestHasNonResi && (bestCostInternal > tempCS->cost))
       {
         bestCostInternal = tempCS->cost;
         if (!(tempCS->getPU(partitioner.chType)->ciipFlag))
@@ -5145,7 +5154,7 @@ void EncCu::xEncodeInterResidual(CodingStructure *&tempCS, CodingStructure *&bes
       xCheckDQP( *tempCS, partitioner );
       xCheckChromaQPOffset( *tempCS, partitioner );
 
-      if( NULL != bestHasNonResi && ( bestCostInternal > tempCS->cost ) )
+      if (nullptr != bestHasNonResi && (bestCostInternal > tempCS->cost))
       {
         bestCostInternal = tempCS->cost;
         if( !( tempCS->getPU( partitioner.chType )->ciipFlag ) )
@@ -5182,7 +5191,7 @@ void EncCu::xEncodeInterResidual(CodingStructure *&tempCS, CodingStructure *&bes
   tempCS->cost = currBestCost;
   if( ETM_INTER_ME == encTestMode.type )
   {
-    if( equBcwCost != NULL )
+    if (equBcwCost != nullptr)
     {
       if( tempCS->cost < ( *equBcwCost ) && cu->BcwIdx == BCW_DEFAULT )
       {
@@ -5191,7 +5200,7 @@ void EncCu::xEncodeInterResidual(CodingStructure *&tempCS, CodingStructure *&bes
     }
     else
     {
-      CHECK( equBcwCost == NULL, "equBcwCost == NULL" );
+      CHECK(equBcwCost == nullptr, "equBcwCost == nullptr");
     }
     if( tempCS->slice->getCheckLDC() && !cu->imv && cu->BcwIdx != BCW_DEFAULT && tempCS->cost < m_bestBcwCost[1] )
     {
