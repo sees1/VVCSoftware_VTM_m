@@ -72,12 +72,6 @@ struct AlfFilterShape
                  0
       };
 
-      weights = {
-                 2,
-              2, 2, 2,
-           2, 2, 1, 1
-      };
-
       filterType = ALF_FILTER_5;
     }
     else if( size == 7 )
@@ -90,13 +84,6 @@ struct AlfFilterShape
              8,  7,  6,  5,  4,
                  3,  2,  1,
                      0
-      };
-
-      weights = {
-                    2,
-                2,  2,  2,
-            2,  2,  2,  2,  2,
-        2,  2,  2,  1,  1
       };
 
       filterType = ALF_FILTER_7;
@@ -121,7 +108,6 @@ struct AlfFilterShape
   int numCoeff;      //TO DO: check whether we need both numCoeff and filterSize
   int filterSize;
   std::vector<int> pattern;
-  std::vector<int> weights;
 };
 
 struct AlfParam
