@@ -4148,7 +4148,7 @@ bool ScalingList::xParseScalingList(const std::string &fileName)
     outputScalingLists(std::cout);
     return true;
   }
-  else if ((fp = fopen(fileName.c_str(), "r")) == (FILE *) nullptr)
+  else if ((fp = fopen(fileName.c_str(), "r")) == nullptr)
   {
     msg( ERROR, "Error: cannot open scaling list file %s for reading\n", fileName.c_str());
     return true;

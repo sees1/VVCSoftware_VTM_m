@@ -355,8 +355,8 @@ void InterPrediction::xSubPuMC( PredictionUnit& pu, PelUnitBuf& predBuf, const R
   pu.cu->affine = isAffine;
 }
 
-void InterPrediction::xSubPuBio(PredictionUnit &pu, PelUnitBuf &predBuf,
-                                const RefPicList &eRefPicList /*= REF_PIC_LIST_X*/, PelUnitBuf *yuvDstTmp /*= nullptr*/)
+void InterPrediction::xSubPuBio(PredictionUnit &pu, PelUnitBuf &predBuf, const RefPicList &eRefPicList,
+                                PelUnitBuf *yuvDstTmp)
 {
   // compute the location of the current PU
   Position puPos = pu.lumaPos();
@@ -523,7 +523,7 @@ void InterPrediction::xPredInterUni(const PredictionUnit &pu, const RefPicList &
 }
 
 void InterPrediction::xPredInterBi(PredictionUnit &pu, PelUnitBuf &pcYuvPred, const bool luma, const bool chroma,
-                                   PelUnitBuf *yuvPredTmp /*= nullptr*/)
+                                   PelUnitBuf *yuvPredTmp)
 {
   const PPS   &pps   = *pu.cs->pps;
   const Slice &slice = *pu.cs->slice;
@@ -1423,7 +1423,7 @@ void InterPrediction::xCalcBlkGradient(int sx, int sy, int    *arraysGx2, int   
 void InterPrediction::xWeightedAverage(const PredictionUnit &pu, const CPelUnitBuf &pcYuvSrc0,
                                        const CPelUnitBuf &pcYuvSrc1, PelUnitBuf &pcYuvDst,
                                        const BitDepths &clipBitDepths, const ClpRngs &clpRngs, const bool &bioApplied,
-                                       bool lumaOnly, bool chromaOnly, PelUnitBuf *yuvDstTmp /*= nullptr*/)
+                                       bool lumaOnly, bool chromaOnly, PelUnitBuf *yuvDstTmp)
 {
   CHECK( (chromaOnly && lumaOnly), "should not happen" );
 
@@ -1518,8 +1518,7 @@ void InterPrediction::xWeightedAverage(const PredictionUnit &pu, const CPelUnitB
 }
 
 void InterPrediction::motionCompensation(PredictionUnit &pu, PelUnitBuf &predBuf, const RefPicList &eRefPicList,
-                                         const bool luma, const bool chroma, PelUnitBuf *predBufWOBIO /*= nullptr*/
-)
+                                         const bool luma, const bool chroma, PelUnitBuf *predBufWOBIO)
 {
   // Note: there appears to be an interaction with weighted prediction that
   // makes the code follow different paths if chroma is on or off (in the encoder).
@@ -1649,9 +1648,8 @@ void InterPrediction::motionCompensation(PredictionUnit &pu, PelUnitBuf &predBuf
   return;
 }
 
-void InterPrediction::motionCompensation( CodingUnit &cu, const RefPicList &eRefPicList
-  , const bool luma, const bool chroma
-)
+void InterPrediction::motionCompensation(CodingUnit &cu, const RefPicList &eRefPicList, const bool luma,
+                                         const bool chroma)
 {
   for( auto &pu : CU::traversePUs( cu ) )
   {
@@ -1662,9 +1660,8 @@ void InterPrediction::motionCompensation( CodingUnit &cu, const RefPicList &eRef
   }
 }
 
-void InterPrediction::motionCompensation( PredictionUnit &pu, const RefPicList &eRefPicList /*= REF_PIC_LIST_X*/
-  , const bool luma, const bool chroma
-)
+void InterPrediction::motionCompensation(PredictionUnit &pu, const RefPicList &eRefPicList, const bool luma,
+                                         const bool chroma)
 {
   PelUnitBuf predBuf = pu.cs->getPredBuf( pu );
   motionCompensation(pu, predBuf, eRefPicList, luma, chroma);
