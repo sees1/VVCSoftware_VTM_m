@@ -57,10 +57,7 @@ static const int size_CC_ALF = -1;
 
 struct AlfFilterShape
 {
-  AlfFilterShape( int size )
-    : filterLength( size ),
-    numCoeff( size * size / 4 + 1 ),
-    filterSize( size * size / 2 + 1 )
+  AlfFilterShape(int size) : filterLength(size), numCoeff(size * size / 4 + 1)
   {
     if( size == 5 )
     {
@@ -70,12 +67,6 @@ struct AlfFilterShape
          4,  5,  6,  5,  4,
              3,  2,  1,
                  0
-      };
-
-      weights = {
-                 2,
-              2, 2, 2,
-           2, 2, 1, 1
       };
 
       filterType = ALF_FILTER_5;
@@ -92,13 +83,6 @@ struct AlfFilterShape
                      0
       };
 
-      weights = {
-                    2,
-                2,  2,  2,
-            2,  2,  2,  2,  2,
-        2,  2,  2,  1,  1
-      };
-
       filterType = ALF_FILTER_7;
     }
     else if (size == size_CC_ALF)
@@ -106,7 +90,6 @@ struct AlfFilterShape
       size = 4;
       filterLength = 8;
       numCoeff = 8;
-      filterSize = 8;
       filterType   = CC_ALF;
     }
     else
@@ -118,10 +101,8 @@ struct AlfFilterShape
 
   AlfFilterType filterType;
   int filterLength;
-  int numCoeff;      //TO DO: check whether we need both numCoeff and filterSize
-  int filterSize;
+  int              numCoeff;
   std::vector<int> pattern;
-  std::vector<int> weights;
 };
 
 struct AlfParam
