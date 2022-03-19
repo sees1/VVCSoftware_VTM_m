@@ -825,12 +825,14 @@ unsigned DeblockingFilter::xGetBoundaryStrengthSingle ( const CodingUnit& cu, co
   {
     const Picture *refP0 =
       (CU::isIBC(cuP) ? sliceP.getPic()
-                      : ((0 > miP.refIdx[0]) ? NULL : sliceP.getRefPic(REF_PIC_LIST_0, miP.refIdx[0])));
-    const Picture *piRefP1 = (CU::isIBC(cuP) ? NULL            : ((0 > miP.refIdx[1]) ? NULL : sliceP.getRefPic(REF_PIC_LIST_1, miP.refIdx[1])));
+                      : ((0 > miP.refIdx[0]) ? nullptr : sliceP.getRefPic(REF_PIC_LIST_0, miP.refIdx[0])));
+    const Picture *piRefP1 =
+      (CU::isIBC(cuP) ? nullptr : ((0 > miP.refIdx[1]) ? nullptr : sliceP.getRefPic(REF_PIC_LIST_1, miP.refIdx[1])));
     const Picture *refQ0 =
       (CU::isIBC(cuQ) ? sliceQ.getPic()
-                      : ((0 > miQ.refIdx[0]) ? NULL : sliceQ.getRefPic(REF_PIC_LIST_0, miQ.refIdx[0])));
-    const Picture *piRefQ1 = (CU::isIBC(cuQ) ? NULL            : ((0 > miQ.refIdx[1]) ? NULL : sliceQ.getRefPic(REF_PIC_LIST_1, miQ.refIdx[1])));
+                      : ((0 > miQ.refIdx[0]) ? nullptr : sliceQ.getRefPic(REF_PIC_LIST_0, miQ.refIdx[0])));
+    const Picture *piRefQ1 =
+      (CU::isIBC(cuQ) ? nullptr : ((0 > miQ.refIdx[1]) ? nullptr : sliceQ.getRefPic(REF_PIC_LIST_1, miQ.refIdx[1])));
     Mv mvP0, mvP1, mvQ0, mvQ1;
 
     if (0 <= miP.refIdx[0])

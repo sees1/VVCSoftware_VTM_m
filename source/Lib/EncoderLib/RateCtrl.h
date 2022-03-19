@@ -116,8 +116,8 @@ public:
   void destroy();
   void initBitsRatio( int bitsRatio[] );
   void initGOPID2Level( int GOPID2Level[] );
-  void initPicPara( TRCParameter* picPara  = NULL );    // NULL to initial with default value
-  void initLCUPara( TRCParameter** LCUPara = NULL );    // NULL to initial with default value
+  void initPicPara(TRCParameter *picPara = nullptr);    // nullptr to initial with default value
+  void initLCUPara(TRCParameter **LCUPara = nullptr);   // nullptr to initial with default value
   void updateAfterPic ( int bits );
   void setAllBitRatio( double basicLambda, double* equaCoeffA, double* equaCoeffB );
 
@@ -367,9 +367,21 @@ public:
 public:
   void       setRCQP ( int QP ) { m_RCQP = QP;   }
   int        getRCQP () const   { return m_RCQP; }
-  EncRCSeq* getRCSeq()          { CHECK( m_encRCSeq == NULL, "Object does not exist" ); return m_encRCSeq; }
-  EncRCGOP* getRCGOP()          { CHECK( m_encRCGOP == NULL, "Object does not exist" ); return m_encRCGOP; }
-  EncRCPic* getRCPic()          { CHECK( m_encRCPic == NULL, "Object does not exist" ); return m_encRCPic; }
+  EncRCSeq  *getRCSeq()
+  {
+    CHECK(m_encRCSeq == nullptr, "Object does not exist");
+    return m_encRCSeq;
+  }
+  EncRCGOP *getRCGOP()
+  {
+    CHECK(m_encRCGOP == nullptr, "Object does not exist");
+    return m_encRCGOP;
+  }
+  EncRCPic *getRCPic()
+  {
+    CHECK(m_encRCPic == nullptr, "Object does not exist");
+    return m_encRCPic;
+  }
   list<EncRCPic*>& getPicList() { return m_listRCPictures; }
 #if U0132_TARGET_BITS_SATURATION
   bool       getCpbSaturationEnabled()  { return m_CpbSaturationEnabled;  }

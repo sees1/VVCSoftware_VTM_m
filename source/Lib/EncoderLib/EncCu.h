@@ -269,14 +269,9 @@ protected:
 
   void xCheckRDCostMergeGeo2Nx2N(CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &pm, const EncTestMode& encTestMode);
 
-  void xEncodeInterResidual(   CodingStructure *&tempCS
-                             , CodingStructure *&bestCS
-                             , Partitioner &partitioner
-                             , const EncTestMode& encTestMode
-                             , int residualPass       = 0
-                             , bool* bestHasNonResi   = NULL
-                             , double* equBcwCost     = NULL
-                           );
+  void xEncodeInterResidual(CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &partitioner,
+                            const EncTestMode &encTestMode, int residualPass = 0, bool *bestHasNonResi = nullptr,
+                            double *equBcwCost = nullptr);
 #if REUSE_CU_RESULTS
   void xReuseCachedResult     ( CodingStructure *&tempCS, CodingStructure *&bestCS, Partitioner &Partitioner );
 #endif

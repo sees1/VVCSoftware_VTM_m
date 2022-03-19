@@ -452,7 +452,7 @@ protected:
   // -------------------------------------------------------------------------------------------------------------------
 
   void xEstimateMvPredAMVP(PredictionUnit &pu, PelUnitBuf &origBuf, RefPicList eRefPicList, int refIdx, Mv &rcMvPred,
-                           AMVPInfo &amvpInfo, bool bFilled = false, Distortion *puiDistBiP = NULL);
+                           AMVPInfo &amvpInfo, bool bFilled = false, Distortion *puiDistBiP = nullptr);
 
 #if GDR_ENABLED
   void xCheckBestMVP(
@@ -662,10 +662,8 @@ public:
     , const bool luma = true, const bool chroma = true
   );
   void xEncodeInterResidualQT     (CodingStructure &cs, Partitioner &partitioner, const ComponentID &compID);
-  void xEstimateInterResidualQT   (CodingStructure &cs, Partitioner &partitioner, Distortion *puiZeroDist = NULL
-    , const bool luma = true, const bool chroma = true
-    , PelUnitBuf* orgResi = NULL
-  );
+  void     xEstimateInterResidualQT(CodingStructure &cs, Partitioner &partitioner, Distortion *puiZeroDist = nullptr,
+                                    const bool luma = true, const bool chroma = true, PelUnitBuf *orgResi = nullptr);
   uint64_t xGetSymbolFracBitsInter  (CodingStructure &cs, Partitioner &partitioner);
   uint64_t xCalcPuMeBits            (PredictionUnit& pu);
 

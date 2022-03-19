@@ -98,7 +98,7 @@ struct AreaBuf : public Size
   // the proper type causes awful lot of errors
   //ptrdiff_t stride;
 
-  AreaBuf()                                                                               : Size(),                  buf( NULL ), stride( 0 )          { }
+  AreaBuf() : Size(), buf(nullptr), stride(0) {}
   AreaBuf( T *_buf, const Size &size )                                                    : Size( size ),            buf( _buf ), stride( size.width ) { }
   AreaBuf( T *_buf, const int &_stride, const Size &size )                                : Size( size ),            buf( _buf ), stride( _stride )    { }
   AreaBuf( T *_buf, const SizeType &_width, const SizeType &_height )                     : Size( _width, _height ), buf( _buf ), stride( _width )     { }

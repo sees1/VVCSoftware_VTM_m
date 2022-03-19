@@ -111,10 +111,6 @@
 
 #define NVM_BITS          "[%d bit] ", (sizeof(void*) == 8 ? 64 : 32) ///< used for checking 64-bit O/S
 
-#ifndef NULL
-#define NULL              0
-#endif
-
 typedef enum
 {
   AFFINEMODEL_4PARAM,
@@ -560,7 +556,7 @@ void cache_mem_align_free(void *ptr);
 namespace detail {
 template<typename T>
 T* aligned_malloc(size_t len, size_t alignement) {
-  T* p = NULL;
+  T *p = nullptr;
   if( posix_memalign( (void**)&p, alignement, sizeof(T)*(len) ) )
   {
     THROW("posix_memalign failed");

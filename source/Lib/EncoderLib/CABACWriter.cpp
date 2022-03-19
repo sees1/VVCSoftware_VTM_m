@@ -161,7 +161,7 @@ void CABACWriter::coding_tree_unit( CodingStructure& cs, const UnitArea& area, i
   {
     for (int compIdx = 0; compIdx < MAX_NUM_COMPONENT; compIdx++)
     {
-      codeAlfCtuEnableFlag(cs, ctuRsAddr, compIdx, NULL);
+      codeAlfCtuEnableFlag(cs, ctuRsAddr, compIdx, nullptr);
       if (isLuma(ComponentID(compIdx)))
       {
         codeAlfCtuFilterIndex(cs, ctuRsAddr, cs.slice->getAlfEnabledFlag(COMPONENT_Y));
@@ -2309,7 +2309,8 @@ void CABACWriter::cbf_comp( const CodingStructure& cs, bool cbf, const CompArea&
   const CtxSet&   ctxSet  = Ctx::QtCbf[ area.compID ];
 
   if ((area.compID == COMPONENT_Y && cs.getCU(area.pos(), toChannelType(area.compID))->bdpcmMode)
-   || (area.compID != COMPONENT_Y && cs.getCU(area.pos(), toChannelType(area.compID)) != NULL && cs.getCU(area.pos(), toChannelType(area.compID))->bdpcmModeChroma))
+      || (area.compID != COMPONENT_Y && cs.getCU(area.pos(), toChannelType(area.compID)) != nullptr
+          && cs.getCU(area.pos(), toChannelType(area.compID))->bdpcmModeChroma))
   {
     if (area.compID == COMPONENT_Y)
     {
@@ -3362,7 +3363,8 @@ void CABACWriter::codeAlfCtuEnableFlags( CodingStructure& cs, ComponentID compID
 
 void CABACWriter::codeAlfCtuEnableFlag( CodingStructure& cs, uint32_t ctuRsAddr, const int compIdx, AlfParam* alfParam)
 {
-  const bool alfComponentEnabled = (alfParam != NULL) ? alfParam->enabledFlag[compIdx] : cs.slice->getAlfEnabledFlag((ComponentID)compIdx);
+  const bool alfComponentEnabled =
+    (alfParam != nullptr) ? alfParam->enabledFlag[compIdx] : cs.slice->getAlfEnabledFlag((ComponentID) compIdx);
 
   if( cs.sps->getALFEnabledFlag() && alfComponentEnabled )
   {

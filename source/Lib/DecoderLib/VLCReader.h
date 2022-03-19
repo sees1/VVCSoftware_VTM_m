@@ -87,7 +87,7 @@ class VLCReader
 protected:
   InputBitstream*   m_pcBitstream;
 
-  VLCReader() : m_pcBitstream (NULL) {};
+  VLCReader() : m_pcBitstream(nullptr){};
   virtual ~VLCReader() {};
 
 #if RExt__DECODER_DEBUG_BIT_STATISTICS

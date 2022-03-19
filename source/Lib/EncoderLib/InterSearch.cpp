@@ -130,7 +130,7 @@ void InterSearch::destroy()
   if ( m_pTempPel )
   {
     delete [] m_pTempPel;
-    m_pTempPel = NULL;
+    m_pTempPel = nullptr;
   }
 
   m_pSplitCS = m_pFullCS = nullptr;
@@ -144,15 +144,15 @@ void InterSearch::destroy()
   m_tmpStorageLCU.destroy();
   m_tmpAffiStorage.destroy();
 
-  if ( m_tmpAffiError != NULL )
+  if (m_tmpAffiError != nullptr)
   {
     delete[] m_tmpAffiError;
   }
-  if ( m_tmpAffiDeri[0] != NULL )
+  if (m_tmpAffiDeri[0] != nullptr)
   {
     delete[] m_tmpAffiDeri[0];
   }
-  if ( m_tmpAffiDeri[1] != NULL )
+  if (m_tmpAffiDeri[1] != nullptr)
   {
     delete[] m_tmpAffiDeri[1];
   }
@@ -5052,7 +5052,7 @@ void InterSearch::xMotionEstimation(PredictionUnit &pu, PelUnitBuf &origBuf, Ref
 
     cStruct.subShiftMode = ( !m_pcEncCfg->getRestrictMESampling() && m_pcEncCfg->getMotionEstimationSearchMethod() == MESEARCH_SELECTIVE ) ? 1 :
                             ( m_pcEncCfg->getFastInterSearchMode() == FASTINTERSEARCH_MODE1 || m_pcEncCfg->getFastInterSearchMode() == FASTINTERSEARCH_MODE3 ) ? 2 : 0;
-    xTZSearch(pu, eRefPicList, refIdxPred, cStruct, rcMv, ruiCost, NULL, false, true);
+    xTZSearch(pu, eRefPicList, refIdxPred, cStruct, rcMv, ruiCost, nullptr, false, true);
   }
   else
   {
@@ -9257,14 +9257,14 @@ void InterSearch::setWpScalingDistParam(int refIdx, RefPicList eRefPicListCur, S
 
   if (refIdx0 < 0)
   {
-    wp0 = NULL;
+    wp0 = nullptr;
   }
   if (refIdx1 < 0)
   {
-    wp1 = NULL;
+    wp1 = nullptr;
   }
 
-  m_cDistParam.wpCur  = NULL;
+  m_cDistParam.wpCur = nullptr;
 
   if ( eRefPicListCur == REF_PIC_LIST_0 )
   {
@@ -9617,10 +9617,10 @@ uint8_t InterSearch::skipSbtByRDCost( int width, int height, int mtDepth, uint8_
   return MAX_UCHAR;
 }
 
-void InterSearch::xEstimateInterResidualQT(CodingStructure &cs, Partitioner &partitioner, Distortion *puiZeroDist /*= NULL*/
-  , const bool luma, const bool chroma
-  , PelUnitBuf* orgResi
-)
+void InterSearch::xEstimateInterResidualQT(CodingStructure &cs, Partitioner &partitioner,
+                                           Distortion *puiZeroDist /*= nullptr*/
+                                           ,
+                                           const bool luma, const bool chroma, PelUnitBuf *orgResi)
 {
   const UnitArea& currArea = partitioner.currArea();
   const SPS &sps           = *cs.sps;
@@ -9887,7 +9887,7 @@ void InterSearch::xEstimateInterResidualQT(CodingStructure &cs, Partitioner &par
           }
         }
 
-        if ((puiZeroDist != NULL) && isFirstMode)
+        if ((puiZeroDist != nullptr) && isFirstMode)
         {
           *puiZeroDist += nonCoeffDist;   // initialized with zero residual distortion
         }
@@ -10684,7 +10684,7 @@ void InterSearch::encodeResAndCalcRdInterCU(CodingStructure &cs, Partitioner &pa
         zeroDistortion += m_pcRdCost->getDistPart(zeroBuf, orgResidual.bufs[compIdx],
                                                   sps.getBitDepth(toChannelType(componentID)), componentID, DF_SSE);
       }
-      xEstimateInterResidualQT(cs, partitioner, NULL, luma, chroma, &orgResidual);
+      xEstimateInterResidualQT(cs, partitioner, nullptr, luma, chroma, &orgResidual);
     }
     else
     {

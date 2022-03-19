@@ -896,7 +896,7 @@ Subpicture &SubpicMergeApp::selectSubpicForPicHeader(bool isMixedNaluPic)
     return m_subpics->at(0);
   }
 
-  Subpicture *subpicToReturn = NULL;
+  Subpicture *subpicToReturn = nullptr;
   bool IRAPFound = false;
 
   // Find first non-IRAP subpicture
@@ -912,7 +912,7 @@ Subpicture &SubpicMergeApp::selectSubpicForPicHeader(bool isMixedNaluPic)
     }
   }
 
-  CHECK(subpicToReturn == NULL, "Could not find non-IRAP subpicture when mixed NALU types in enabled");
+  CHECK(subpicToReturn == nullptr, "Could not find non-IRAP subpicture when mixed NALU types in enabled");
 
   if (IRAPFound)
   {
@@ -976,7 +976,7 @@ void SubpicMergeApp::generateMergedPic(ParameterSetManager &psManager, bool mixe
   // Code merged stream PPS NAL units if any was generated
   for (auto pps : ppsList)
   {
-    PPS *ppsMixed = NULL;
+    PPS *ppsMixed = nullptr;
     if (mixedNaluFlag)
     {
       ppsMixed = new PPS(*pps);

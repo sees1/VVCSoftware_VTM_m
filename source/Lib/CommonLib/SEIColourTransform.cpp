@@ -42,11 +42,7 @@
 #include "Buffer.h"
 
 SEIColourTransformApply::SEIColourTransformApply()
-  : m_width               (0)
-  , m_height              (0)
-  , m_chromaFormat        (NUM_CHROMA_FORMAT)
-  , m_bitDepth            (0)
-  , m_pColourTransfParams (NULL)
+  : m_width(0), m_height(0), m_chromaFormat(NUM_CHROMA_FORMAT), m_bitDepth(0), m_pColourTransfParams(nullptr)
 {
 }
 

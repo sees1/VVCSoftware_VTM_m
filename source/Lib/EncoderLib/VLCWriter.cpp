@@ -1551,8 +1551,8 @@ void HLSWriter::codeVPS(const VPS* pcVPS)
 
 void HLSWriter::codePictureHeader( PicHeader* picHeader, bool writeRbspTrailingBits, Slice *slice )
 {
-  const PPS*  pps = NULL;
-  const SPS*  sps = NULL;
+  const PPS *pps = nullptr;
+  const SPS *sps = nullptr;
 
 #if ENABLE_TRACING
   xTracePictureHeader ();
@@ -3065,7 +3065,10 @@ void HLSWriter::xCodeScalingList(const ScalingList* scalingList, uint32_t scalin
   int data;
   const int *src = scalingList->getScalingListAddress(scalingListId);
   int PredListId = scalingList->getRefMatrixId(scalingListId);
-  const int *srcPred = (isPredictor) ? ((scalingListId==PredListId) ? scalingList->getScalingListDefaultAddress(scalingListId) : scalingList->getScalingListAddress(PredListId)) : NULL;
+  const int *srcPred      = (isPredictor)
+                              ? ((scalingListId == PredListId) ? scalingList->getScalingListDefaultAddress(scalingListId)
+                                                               : scalingList->getScalingListAddress(PredListId))
+                              : nullptr;
   int deltasrc[65] = { 0 };
 
   if (isPredictor)

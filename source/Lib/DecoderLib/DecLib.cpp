@@ -61,7 +61,7 @@
 bool tryDecodePicture( Picture* pcEncPic, const int expectedPoc, const std::string& bitstreamFileName, ParameterSetMap<APS> *apsMap, bool bDecodeUntilPocFound /* = false */, int debugCTU /* = -1*/, int debugPOC /* = -1*/ )
 {
   int      poc;
-  PicList* pcListPic = NULL;
+  PicList *pcListPic = nullptr;
 
   static bool bFirstCall      = true;             /* TODO: MT */
   static bool loopFiltered[MAX_VPS_LAYERS] = { false };            /* TODO: MT */
@@ -414,11 +414,11 @@ DecLib::DecLib()
   , m_lastRasPoc(MAX_INT)
   , m_cListPic()
   , m_parameterSetManager()
-  , m_apcSlicePilot(NULL)
+  , m_apcSlicePilot(nullptr)
   , m_SEIs()
-  , m_sdiSEIInFirstAU(NULL)
-  , m_maiSEIInFirstAU(NULL)
-  , m_mvpSEIInFirstAU(NULL)
+  , m_sdiSEIInFirstAU(nullptr)
+  , m_maiSEIInFirstAU(nullptr)
+  , m_mvpSEIInFirstAU(nullptr)
   , m_cIntraPred()
   , m_cInterPred()
   , m_cTrQuant()
@@ -433,7 +433,7 @@ DecLib::DecLib()
 #if JVET_J0090_MEMORY_BANDWITH_MEASURE
   , m_cacheModel()
 #endif
-  , m_pcPic(NULL)
+  , m_pcPic(nullptr)
   , m_prevLayerID(MAX_INT)
   , m_prevPOC(MAX_INT)
   , m_prevPicPOC(MAX_INT)
@@ -444,7 +444,7 @@ DecLib::DecLib()
   , m_grainBuf()
   , m_colourTranfParams()
   , m_firstSliceInBitstream(true)
-  , m_isFirstAuInCvs( true )
+  , m_isFirstAuInCvs(true)
   , m_prevSliceSkipped(false)
   , m_skippedPOC(MAX_INT)
   , m_skippedLayerID(MAX_INT)
@@ -452,8 +452,8 @@ DecLib::DecLib()
   , m_isNoOutputPriorPics(false)
   , m_lastNoOutputBeforeRecoveryFlag{ false }
   , m_sliceLmcsApsId(-1)
-  , m_pDecodedSEIOutputStream(NULL)
-  , m_audIrapOrGdrAuFlag( false )
+  , m_pDecodedSEIOutputStream(nullptr)
+  , m_audIrapOrGdrAuFlag(false)
 #if JVET_S0257_DUMP_360SEI_MESSAGE
   , m_decoded360SeiDumpFileName()
 #endif
@@ -461,20 +461,20 @@ DecLib::DecLib()
   , m_numberOfChecksumErrorsDetected(0)
   , m_warningMessageSkipPicture(false)
   , m_prefixSEINALUs()
-  , m_debugPOC( -1 )
-  , m_debugCTU( -1 )
-  , m_opi( nullptr )
+  , m_debugPOC(-1)
+  , m_debugCTU(-1)
+  , m_opi(nullptr)
   , m_mTidExternalSet(false)
   , m_mTidOpiSet(false)
   , m_tOlsIdxTidExternalSet(false)
   , m_tOlsIdxTidOpiSet(false)
-  , m_vps( nullptr )
+  , m_vps(nullptr)
   , m_maxDecSubPicIdx(0)
   , m_maxDecSliceAddrInSubPic(-1)
   , m_clsVPSid(0)
   , m_targetSubPicIdx(0)
-  , m_dci(NULL)
-  , m_apsMapEnc( nullptr )
+  , m_dci(nullptr)
+  , m_apsMapEnc(nullptr)
 {
 #if ENABLE_SIMD_OPT_BUFFER
   g_pelBufOP.initPelBufOpsX86();
@@ -503,21 +503,21 @@ DecLib::~DecLib()
     delete m_prefixSEINALUs.front();
     m_prefixSEINALUs.pop_front();
   }
-  if (m_sdiSEIInFirstAU != NULL)
+  if (m_sdiSEIInFirstAU != nullptr)
   {
     delete m_sdiSEIInFirstAU;
   }
-  m_sdiSEIInFirstAU = NULL;
-  if (m_maiSEIInFirstAU != NULL)
+  m_sdiSEIInFirstAU = nullptr;
+  if (m_maiSEIInFirstAU != nullptr)
   {
     delete m_maiSEIInFirstAU;
   }
-  m_maiSEIInFirstAU = NULL;
-  if (m_mvpSEIInFirstAU != NULL)
+  m_maiSEIInFirstAU = nullptr;
+  if (m_mvpSEIInFirstAU != nullptr)
   {
     delete m_mvpSEIInFirstAU;
   }
-  m_mvpSEIInFirstAU = NULL;
+  m_mvpSEIInFirstAU = nullptr;
 }
 
 void DecLib::create()
@@ -529,12 +529,12 @@ void DecLib::create()
 void DecLib::destroy()
 {
   delete m_apcSlicePilot;
-  m_apcSlicePilot = NULL;
+  m_apcSlicePilot = nullptr;
 
   if( m_dci )
   {
     delete m_dci;
-    m_dci = NULL;
+    m_dci = nullptr;
   }
 
   m_cSliceDecoder.destroy();
@@ -566,7 +566,7 @@ void DecLib::deletePicBuffer ( )
     pcPic->destroy();
 
     delete pcPic;
-    pcPic = NULL;
+    pcPic = nullptr;
   }
   m_cALF.destroy();
   m_cSAO.destroy();
@@ -839,7 +839,8 @@ void DecLib::finishPicture(int &poc, PicList *&rpcListPic, MsgLevel msgl, bool a
   if (m_decodedPictureHashSEIEnabled)
   {
     SEIMessages pictureHashes = getSeisByType(m_pcPic->SEIs, SEI::DECODED_PICTURE_HASH );
-    const SEIDecodedPictureHash *hash = ( pictureHashes.size() > 0 ) ? (SEIDecodedPictureHash*) *(pictureHashes.begin()) : NULL;
+    const SEIDecodedPictureHash *hash =
+      (pictureHashes.size() > 0) ? (SEIDecodedPictureHash *) *(pictureHashes.begin()) : nullptr;
     if (pictureHashes.size() > 1)
     {
       msg( WARNING, "Warning: Got multiple decoded picture hash SEI messages. Using first.");
@@ -1833,8 +1834,9 @@ void DecLib::xActivateParameterSets( const InputNALUnit nalu )
         isTopField = isField && (!ff->m_bottomFieldFlag);
       }
       SEIMessages inclusionSEIs = getSeisByType(m_SEIs, SEI::PARAMETER_SETS_INCLUSION_INDICATION);
-      const SEIParameterSetsInclusionIndication* inclusion = (inclusionSEIs.size() > 0) ? (SEIParameterSetsInclusionIndication*)*(inclusionSEIs.begin()) : NULL;
-      if (inclusion != NULL)
+      const SEIParameterSetsInclusionIndication *inclusion =
+        (inclusionSEIs.size() > 0) ? (SEIParameterSetsInclusionIndication *) *(inclusionSEIs.begin()) : nullptr;
+      if (inclusion != nullptr)
       {
         m_seiInclusionFlag = inclusion->m_selfContainedClvsFlag;
       }
@@ -2274,21 +2276,21 @@ void DecLib::xCheckPrefixSEIMessages( SEIMessages& prefixSEIs )
   }
   if ((getVPS()->getMaxLayers() == 1 || m_audIrapOrGdrAuFlag) && (m_isFirstAuInCvs || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_N_LP || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_IDR_W_RADL || ((m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_CRA || m_accessUnitPicInfo.begin()->m_nalUnitType == NAL_UNIT_CODED_SLICE_GDR) && m_lastNoOutputBeforeRecoveryFlag[m_accessUnitPicInfo.begin()->m_nuhLayerId])) && m_accessUnitPicInfo.size() == 1)
   {
-    if (m_sdiSEIInFirstAU != NULL)
+    if (m_sdiSEIInFirstAU != nullptr)
     {
       delete m_sdiSEIInFirstAU;
     }
-    m_sdiSEIInFirstAU = NULL;
-    if (m_maiSEIInFirstAU != NULL)
+    m_sdiSEIInFirstAU = nullptr;
+    if (m_maiSEIInFirstAU != nullptr)
     {
       delete m_maiSEIInFirstAU;
     }
-    m_maiSEIInFirstAU = NULL;
-    if (m_mvpSEIInFirstAU != NULL) 
+    m_maiSEIInFirstAU = nullptr;
+    if (m_mvpSEIInFirstAU != nullptr)
     {
       delete m_mvpSEIInFirstAU;
     }
-    m_mvpSEIInFirstAU = NULL;
+    m_mvpSEIInFirstAU    = nullptr;
     SEIMessages sdiSEIs  = getSeisByType(prefixSEIs, SEI::SCALABILITY_DIMENSION_INFO);
     if (!sdiSEIs.empty())
     {
@@ -3594,7 +3596,8 @@ bool DecLib::isRandomAccessSkipPicture( int& iSkipFrame, int& iPOCLastDisplay, b
 
 void DecLib::checkNalUnitConstraints( uint32_t naluType )
 {
-  if (m_parameterSetManager.getActiveSPS() != NULL && m_parameterSetManager.getActiveSPS()->getProfileTierLevel() != NULL)
+  if (m_parameterSetManager.getActiveSPS() != nullptr
+      && m_parameterSetManager.getActiveSPS()->getProfileTierLevel() != nullptr)
   {
     const ConstraintInfo *cInfo = m_parameterSetManager.getActiveSPS()->getProfileTierLevel()->getConstraintInfo();
     xCheckNalUnitConstraintFlags( cInfo, naluType );
@@ -3602,7 +3605,7 @@ void DecLib::checkNalUnitConstraints( uint32_t naluType )
 }
 void DecLib::xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType )
 {
-  if (cInfo != NULL)
+  if (cInfo != nullptr)
   {
     CHECK(cInfo->getNoTrailConstraintFlag() && naluType == NAL_UNIT_CODED_SLICE_TRAIL,
       "Non-conforming bitstream. no_trail_constraint_flag is equal to 1 but bitstream contains NAL unit of type TRAIL_NUT.");

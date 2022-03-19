@@ -111,18 +111,17 @@ private:
     std::map< Key, int > deserializationTable;
 
 public:
-    CDTrace() : copy(false), m_trace_file(NULL) {}
-    CDTrace( const char *filename, vstring channel_names );
-    CDTrace( const char *filename, const dtrace_channels_t& channels );
-    CDTrace( const std::string& sTracingFile, const std::string& sTracingRule, const dtrace_channels_t& channels );
-    CDTrace( const CDTrace& other );
-    CDTrace& operator=( const CDTrace& other );
-    ~CDTrace();
-    void swap         ( CDTrace& other );
-    int  addRule      ( std::string rulestring );
-    template<bool bCount>
-    void dtrace       ( int, const char *format, /*va_list args*/... );
-    void dtrace_repeat( int, int i_times, const char *format, /*va_list args*/... );
+  CDTrace() : copy(false), m_trace_file(nullptr) {}
+  CDTrace(const char *filename, vstring channel_names);
+  CDTrace(const char *filename, const dtrace_channels_t &channels);
+  CDTrace(const std::string &sTracingFile, const std::string &sTracingRule, const dtrace_channels_t &channels);
+  CDTrace(const CDTrace &other);
+  CDTrace &operator=(const CDTrace &other);
+  ~CDTrace();
+  void                       swap(CDTrace &other);
+  int                        addRule(std::string rulestring);
+  template<bool bCount> void dtrace(int, const char *format, /*va_list args*/...);
+  void                       dtrace_repeat(int, int i_times, const char *format, /*va_list args*/...);
 #if K0149_BLOCK_STATISTICS
     void dtrace_header       ( const char *format, /*va_list args*/... );
     // CTU

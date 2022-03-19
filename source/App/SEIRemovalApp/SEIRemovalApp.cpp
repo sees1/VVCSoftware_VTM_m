@@ -81,9 +81,6 @@ void read2(InputNALUnit& nalu)
 
 uint32_t SEIRemovalApp::decode()
 {
-//  int                 poc;
-//  PicList* pcListPic = NULL;
-
   ifstream bitstreamFileIn(m_bitstreamFileNameIn.c_str(), ifstream::in | ifstream::binary);
   if (!bitstreamFileIn)
   {

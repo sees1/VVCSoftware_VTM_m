@@ -631,7 +631,7 @@ void AdaptiveLoopFilter::reconstructCoeffAPSs(CodingStructure& cs, bool luma, bo
     {
       int apsIdx = cs.slice->getAlfApsIdsLuma()[i];
       curAPS = aps[apsIdx];
-      CHECK(curAPS == NULL, "invalid APS");
+      CHECK(curAPS == nullptr, "invalid APS");
       alfParamTmp = curAPS->getAlfAPSParam();
       reconstructCoeff(alfParamTmp, CHANNEL_TYPE_LUMA, isRdo, true);
       memcpy(m_coeffApsLuma[i], m_coeffFinal, sizeof(m_coeffFinal));

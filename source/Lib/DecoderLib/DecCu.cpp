@@ -61,7 +61,7 @@
 
 DecCu::DecCu()
 {
-  m_tmpStorageLCU = NULL;
+  m_tmpStorageLCU = nullptr;
 }
 
 DecCu::~DecCu()
@@ -77,7 +77,7 @@ void DecCu::init( TrQuant* pcTrQuant, IntraPrediction* pcIntra, InterPrediction*
 void DecCu::initDecCuReshaper  (Reshape* pcReshape, ChromaFormat chromaFormatIDC)
 {
   m_pcReshape = pcReshape;
-  if (m_tmpStorageLCU == NULL)
+  if (m_tmpStorageLCU == nullptr)
   {
     m_tmpStorageLCU = new PelStorage;
     m_tmpStorageLCU->create(UnitArea(chromaFormatIDC, Area(0, 0, MAX_CU_SIZE, MAX_CU_SIZE)));
@@ -90,7 +90,7 @@ void DecCu::destoryDecCuReshaprBuf()
   {
     m_tmpStorageLCU->destroy();
     delete m_tmpStorageLCU;
-    m_tmpStorageLCU = NULL;
+    m_tmpStorageLCU = nullptr;
   }
 }
 

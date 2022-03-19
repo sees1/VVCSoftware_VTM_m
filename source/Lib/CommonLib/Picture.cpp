@@ -63,21 +63,21 @@ Picture::Picture()
   topField             = false;
   precedingDRAP        = false;
   edrapRapId           = -1;
-  m_colourTranfParams  = NULL;
+  m_colourTranfParams     = nullptr;
   nonReferencePictureFlag = false;
 
   for( int i = 0; i < MAX_NUM_CHANNEL_TYPE; i++ )
   {
     m_prevQP[i] = -1;
   }
-  m_spliceIdx = NULL;
+  m_spliceIdx           = nullptr;
   m_ctuNums = 0;
   layerId = NOT_VALID;
   numSlices = 1;
   unscaledPic = nullptr;
   m_isMctfFiltered      = false;
-  m_grainCharacteristic = NULL;
-  m_grainBuf            = NULL;
+  m_grainCharacteristic = nullptr;
+  m_grainBuf            = nullptr;
 }
 
 void Picture::create( const ChromaFormat &_chromaFormat, const Size &size, const unsigned _maxCUSize, const unsigned _margin, const bool _decoder, const int _layerId, const bool gopBasedTemporalFilterEnabled, const bool fgcSEIAnalysisEnabled )
@@ -144,10 +144,10 @@ void Picture::destroy()
   if (m_spliceIdx)
   {
     delete[] m_spliceIdx;
-    m_spliceIdx = NULL;
+    m_spliceIdx = nullptr;
   }
-  m_invColourTransfBuf = NULL;
-  m_grainBuf           = NULL;
+  m_invColourTransfBuf = nullptr;
+  m_grainBuf           = nullptr;
 }
 
 void Picture::createTempBuffers( const unsigned _maxCUSize )
@@ -266,7 +266,7 @@ void Picture::finalInit( const VPS* vps, const SPS& sps, const PPS& pps, PicHead
   mixedNaluTypesInPicFlag = pps.getMixedNaluTypesInPicFlag();
   nonReferencePictureFlag = picHeader->getNonReferencePictureFlag();
 
-  if (m_spliceIdx == NULL)
+  if (m_spliceIdx == nullptr)
   {
     m_ctuNums = cs->pcv->sizeInCtus;
     m_spliceIdx = new int[m_ctuNums];
@@ -1324,7 +1324,7 @@ PelUnitBuf Picture::getDisplayBuf()
 
   m_invColourTransfBuf->copyFrom(getRecoBuf());
 
-  if (m_colourTranfParams->m_pColourTransfParams != NULL)
+  if (m_colourTranfParams->m_pColourTransfParams != nullptr)
   {
     m_colourTranfParams->generateColourTransfLUTs();
     m_colourTranfParams->inverseColourTransform(m_invColourTransfBuf);

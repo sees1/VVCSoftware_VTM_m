@@ -811,8 +811,11 @@ void IntraPrediction::initIntraPatternChTypeISP(const CodingUnit& cu, const Comp
   }
 
   const Position posLT = area;
-  bool           isLeftAvail  = (cs.getCURestricted(posLT.offset(-1, 0), cu, CHANNEL_TYPE_LUMA) != NULL) && cs.isDecomp(posLT.offset(-1, 0), CHANNEL_TYPE_LUMA);
-  bool           isAboveAvail = (cs.getCURestricted(posLT.offset(0, -1), cu, CHANNEL_TYPE_LUMA) != NULL) && cs.isDecomp(posLT.offset(0, -1), CHANNEL_TYPE_LUMA);
+
+  bool isLeftAvail = (cs.getCURestricted(posLT.offset(-1, 0), cu, CHANNEL_TYPE_LUMA) != nullptr)
+                     && cs.isDecomp(posLT.offset(-1, 0), CHANNEL_TYPE_LUMA);
+  bool isAboveAvail = (cs.getCURestricted(posLT.offset(0, -1), cu, CHANNEL_TYPE_LUMA) != nullptr)
+                      && cs.isDecomp(posLT.offset(0, -1), CHANNEL_TYPE_LUMA);
   // ----- Step 1: unfiltered reference samples -----
   if (cu.blocks[area.compID].x == area.x && cu.blocks[area.compID].y == area.y)
   {
@@ -1213,7 +1216,7 @@ bool isAboveLeftAvailable(const CodingUnit &cu, const ChannelType &chType, const
     return false;
   }
 
-  return (cs.getCURestricted(refPos, cu, chType) != NULL);
+  return (cs.getCURestricted(refPos, cu, chType) != nullptr);
 }
 
 int isAboveAvailable(const CodingUnit &cu, const ChannelType &chType, const Position &posLT, const uint32_t uiNumUnitsInPU, const uint32_t unitWidth, bool *bValidFlags)
@@ -1233,7 +1236,7 @@ int isAboveAvailable(const CodingUnit &cu, const ChannelType &chType, const Posi
       break;
     }
 
-    const bool valid = (cs.getCURestricted(refPos, cu, chType) != NULL);
+    const bool valid = (cs.getCURestricted(refPos, cu, chType) != nullptr);
     numIntra += valid ? 1 : 0;
     *validFlags = valid;
 
@@ -1260,7 +1263,7 @@ int isLeftAvailable(const CodingUnit &cu, const ChannelType &chType, const Posit
       break;
     }
 
-    const bool valid = (cs.getCURestricted(refPos, cu, chType) != NULL);
+    const bool valid = (cs.getCURestricted(refPos, cu, chType) != nullptr);
     numIntra += valid ? 1 : 0;
     *validFlags = valid;
 
@@ -1287,7 +1290,7 @@ int isAboveRightAvailable(const CodingUnit &cu, const ChannelType &chType, const
       break;
     }
 
-    const bool valid = (cs.getCURestricted(refPos, cu, chType) != NULL);
+    const bool valid = (cs.getCURestricted(refPos, cu, chType) != nullptr);
     numIntra += valid ? 1 : 0;
     *validFlags = valid;
 
@@ -1314,7 +1317,7 @@ int isBelowLeftAvailable(const CodingUnit &cu, const ChannelType &chType, const 
       break;
     }
 
-    const bool valid = (cs.getCURestricted(refPos, cu, chType) != NULL);
+    const bool valid = (cs.getCURestricted(refPos, cu, chType) != nullptr);
     numIntra += valid ? 1 : 0;
     *validFlags = valid;
 

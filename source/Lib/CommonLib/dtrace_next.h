@@ -261,7 +261,6 @@ inline CDTrace* tracing_init( std::string& sTracingFile, std::string& sTracingRu
   if( pDtrace->getLastError() )
   {
     msg( WARNING, "%s\n", pDtrace->getErrMessage().c_str() );
-    //return NULL;
   }
 
   return pDtrace;

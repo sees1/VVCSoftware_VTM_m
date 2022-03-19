@@ -143,7 +143,8 @@ inline void dtraceUnitComp( DTRACE_CHANNEL channel, CPelUnitBuf& pelUnitBuf, con
   DTRACE_BLOCK( g_trace_ctx, channel, piReco, uiStride, uiWidth, uiHeight );
 }
 
-inline void dtraceCRC( CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingStructure& cs, const CPelUnitBuf& pelUnitBuf, const Area* parea = NULL )
+inline void dtraceCRC(CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingStructure &cs,
+                      const CPelUnitBuf &pelUnitBuf, const Area *parea = nullptr)
 {
   const Area& area = parea ? *parea : cs.area.Y();
   DTRACE( trace_ctx, channel, " CRC: %6lld %3d @(%4d,%4d) [%2dx%2d] ,Checksum(%x %x %x)\n",
@@ -155,7 +156,8 @@ inline void dtraceCRC( CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingS
       calcCheckSum( pelUnitBuf.bufs[COMPONENT_Cr], cs.sps->getBitDepth (CHANNEL_TYPE_CHROMA)));
 }
 
-inline void dtraceCCRC( CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingStructure& cs, const CPelBuf& pelBuf, ComponentID compId, const Area* parea = NULL )
+inline void dtraceCCRC(CDTrace *trace_ctx, DTRACE_CHANNEL channel, const CodingStructure &cs, const CPelBuf &pelBuf,
+                       ComponentID compId, const Area *parea = nullptr)
 {
   const Area& area = parea ? *parea : cs.area.Y();
   DTRACE( trace_ctx, channel, "CRC: %6lld %3d @(%4d,%4d) [%2dx%2d] ,comp %d Checksum(%x)\n",

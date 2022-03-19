@@ -178,7 +178,7 @@ int SampleAdaptiveOffset::getMergeList(CodingStructure& cs, int ctuRsAddr, SAOBl
 
   for(int mergeType=0; mergeType< NUM_SAO_MERGE_TYPES; mergeType++)
   {
-    SAOBlkParam* mergeCandidate = NULL;
+    SAOBlkParam *mergeCandidate = nullptr;
 
     switch(mergeType)
     {
@@ -213,7 +213,7 @@ int SampleAdaptiveOffset::getMergeList(CodingStructure& cs, int ctuRsAddr, SAOBl
     }
 
     mergeList[mergeType]=mergeCandidate;
-    if (mergeCandidate != NULL)
+    if (mergeCandidate != nullptr)
     {
       numValidMergeCandidates++;
     }
@@ -246,7 +246,7 @@ void SampleAdaptiveOffset::reconstructBlkSAOParam(SAOBlkParam& recParam, SAOBlkP
     case SAO_MODE_MERGE:
       {
         SAOBlkParam* mergeTarget = mergeList[offsetParam.typeIdc];
-        CHECK(mergeTarget == NULL, "Merge target does not exist");
+        CHECK(mergeTarget == nullptr, "Merge target does not exist");
 
         offsetParam = (*mergeTarget)[component];
       }
@@ -270,7 +270,7 @@ void SampleAdaptiveOffset::xReconstructBlkSAOParams(CodingStructure& cs, SAOBlkP
 
   for(int ctuRsAddr=0; ctuRsAddr< cs.pcv->sizeInCtus; ctuRsAddr++)
   {
-    SAOBlkParam* mergeList[NUM_SAO_MERGE_TYPES] = { NULL };
+    SAOBlkParam *mergeList[NUM_SAO_MERGE_TYPES] = { nullptr };
     getMergeList(cs, ctuRsAddr, saoBlkParams, mergeList);
 
     reconstructBlkSAOParam(saoBlkParams[ctuRsAddr], mergeList);
@@ -685,25 +685,25 @@ void SampleAdaptiveOffset::deriveLoopFilterBoundaryAvailibility(CodingStructure&
   const bool isLoopFilterAcrossSlicePPS = cs.pps->getLoopFilterAcrossSlicesEnabledFlag();
   if (!isLoopFilterAcrossSlicePPS)
   {
-    isLeftAvail       = (cuLeft == NULL)       ? false : CU::isSameSlice(*cuCurr, *cuLeft);
-    isAboveAvail      = (cuAbove == NULL)      ? false : CU::isSameSlice(*cuCurr, *cuAbove);
-    isRightAvail      = (cuRight == NULL)      ? false : CU::isSameSlice(*cuCurr, *cuRight);
-    isBelowAvail      = (cuBelow == NULL)      ? false : CU::isSameSlice(*cuCurr, *cuBelow);
-    isAboveLeftAvail  = (cuAboveLeft == NULL)  ? false : CU::isSameSlice(*cuCurr, *cuAboveLeft);
-    isAboveRightAvail = (cuAboveRight == NULL) ? false : CU::isSameSlice(*cuCurr, *cuAboveRight);
-    isBelowLeftAvail  = (cuBelowLeft == NULL)  ? false : CU::isSameSlice(*cuCurr, *cuBelowLeft);
-    isBelowRightAvail = (cuBelowRight == NULL) ? false : CU::isSameSlice(*cuCurr, *cuBelowRight);
+    isLeftAvail       = (cuLeft == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuLeft);
+    isAboveAvail      = (cuAbove == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuAbove);
+    isRightAvail      = (cuRight == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuRight);
+    isBelowAvail      = (cuBelow == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuBelow);
+    isAboveLeftAvail  = (cuAboveLeft == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuAboveLeft);
+    isAboveRightAvail = (cuAboveRight == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuAboveRight);
+    isBelowLeftAvail  = (cuBelowLeft == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuBelowLeft);
+    isBelowRightAvail = (cuBelowRight == nullptr) ? false : CU::isSameSlice(*cuCurr, *cuBelowRight);
   }
   else
   {
-    isLeftAvail       = (cuLeft != NULL);
-    isAboveAvail      = (cuAbove != NULL);
-    isRightAvail      = (cuRight != NULL);
-    isBelowAvail      = (cuBelow != NULL);
-    isAboveLeftAvail  = (cuAboveLeft != NULL);
-    isAboveRightAvail = (cuAboveRight != NULL);
-    isBelowLeftAvail  = (cuBelowLeft != NULL);
-    isBelowRightAvail = (cuBelowRight != NULL);
+    isLeftAvail       = (cuLeft != nullptr);
+    isAboveAvail      = (cuAbove != nullptr);
+    isRightAvail      = (cuRight != nullptr);
+    isBelowAvail      = (cuBelow != nullptr);
+    isAboveLeftAvail  = (cuAboveLeft != nullptr);
+    isAboveRightAvail = (cuAboveRight != nullptr);
+    isBelowLeftAvail  = (cuBelowLeft != nullptr);
+    isBelowRightAvail = (cuBelowRight != nullptr);
   }
 
   // check cross tile flags

@@ -99,7 +99,7 @@ EncAppCfg::EncAppCfg()
 , m_ext360(*this)
 #endif
 {
-  m_aidQP = NULL;
+  m_aidQP = nullptr;
 }
 
 EncAppCfg::~EncAppCfg()

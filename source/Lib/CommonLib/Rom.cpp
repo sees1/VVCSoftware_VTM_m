@@ -49,7 +49,7 @@
 // ====================================================================================================================
 
 #if ENABLE_TRACING
-CDTrace *g_trace_ctx = NULL;
+CDTrace *g_trace_ctx = nullptr;
 #endif
 bool g_mctsDecCheckEnabled = false;
 
@@ -513,7 +513,7 @@ const uint8_t g_chroma422IntraAngleMappingTable[NUM_INTRA_MODE] =
 // ====================================================================================================================
 // Misc.
 // ====================================================================================================================
-SizeIndexInfo*           gp_sizeIdxInfo = NULL;
+SizeIndexInfo *gp_sizeIdxInfo = nullptr;
 
 const int                 g_ictModes[2][4] = { { 0, 3, 1, 2 }, { 0, -3, -1, -2 } };
 

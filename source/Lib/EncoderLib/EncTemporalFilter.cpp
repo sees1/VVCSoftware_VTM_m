@@ -445,7 +445,7 @@ void EncTemporalFilter::motionEstimationLuma(Array2D<MotionVector> &mvs, const P
     {
       MotionVector best;
 
-      if (previous == NULL)
+      if (previous == nullptr)
       {
         range = 8;
       }

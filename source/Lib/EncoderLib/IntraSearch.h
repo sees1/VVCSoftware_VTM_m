@@ -427,7 +427,9 @@ public:
   double findInterCUCost          ( CodingUnit &cu );
 
 public:
-  bool estIntraPredLumaQT(CodingUnit &cu, Partitioner& pm, const double bestCostSoFar = MAX_DOUBLE, bool mtsCheckRangeFlag = false, int mtsFirstCheckId = 0, int mtsLastCheckId = 0, bool moreProbMTSIdxFirst = false, CodingStructure* bestCS = NULL);
+  bool     estIntraPredLumaQT(CodingUnit &cu, Partitioner &pm, const double bestCostSoFar = MAX_DOUBLE,
+                              bool mtsCheckRangeFlag = false, int mtsFirstCheckId = 0, int mtsLastCheckId = 0,
+                              bool moreProbMTSIdxFirst = false, CodingStructure *bestCS = nullptr);
   void estIntraPredChromaQT       ( CodingUnit &cu, Partitioner& pm, const double maxCostAllowed = MAX_DOUBLE );
   void PLTSearch                  ( CodingStructure &cs, Partitioner& partitioner, ComponentID compBegin, uint32_t numComp);
   uint64_t xFracModeBitsIntra(PredictionUnit &pu, const uint32_t &mode, const ChannelType &compID);

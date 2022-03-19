@@ -78,8 +78,8 @@ DecApp::DecApp()
  */
 uint32_t DecApp::decode()
 {
-  int                 poc;
-  PicList* pcListPic = NULL;
+  int      poc;
+  PicList *pcListPic = nullptr;
 
   ifstream bitstreamFile(m_bitstreamFileName.c_str(), ifstream::in | ifstream::binary);
   if (!bitstreamFile)
@@ -923,7 +923,7 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
   {
     PicList::iterator endPic   = pcListPic->end();
     endPic--;
-    Picture *pcPicTop, *pcPicBottom = NULL;
+    Picture *pcPicTop, *pcPicBottom = nullptr;
     while (iterPic != endPic)
     {
       pcPicTop = *(iterPic);
@@ -973,7 +973,7 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
         {
           pcPicTop->destroy();
           delete pcPicTop;
-          pcPicTop = NULL;
+          pcPicTop = nullptr;
         }
       }
     }
@@ -981,7 +981,7 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
     {
       pcPicBottom->destroy();
       delete pcPicBottom;
-      pcPicBottom = NULL;
+      pcPicBottom = nullptr;
     }
   }
   else //Frame decoding
@@ -1073,11 +1073,11 @@ void DecApp::xFlushOutput( PicList* pcListPic, const int layerId )
         }
         pcPic->neededForOutput = false;
       }
-      if(pcPic != NULL)
+      if (pcPic != nullptr)
       {
         pcPic->destroy();
         delete pcPic;
-        pcPic = NULL;
+        pcPic    = nullptr;
         *iterPic = nullptr;
       }
       iterPic++;
@@ -1203,7 +1203,7 @@ void DecApp::xOutputAnnotatedRegions(PicList* pcListPic)
       if (!m_arObjects.empty())
       {
         FILE *fpPersist = fopen(m_annotatedRegionsSEIFileName.c_str(), "ab");
-        if (fpPersist == NULL)
+        if (fpPersist == nullptr)
         {
           std::cout << "Not able to open file for writing persist SEI messages" << std::endl;
         }
