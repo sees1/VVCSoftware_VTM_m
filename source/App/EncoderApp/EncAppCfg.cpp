@@ -4405,7 +4405,7 @@ bool EncAppCfg::xCheckParameter()
       msg(WARNING, "Number of frames used for temporal prefilter is different from default.\n");
     }
   }
-#if JVET_Y0240
+#if JVET_Y0077_BIM
   if (m_bimEnabled)
   {
     xConfirmPara(m_temporalSubsampleRatio != 1, "Block Importance Mapping only support Temporal sub-sample ratio 1");
