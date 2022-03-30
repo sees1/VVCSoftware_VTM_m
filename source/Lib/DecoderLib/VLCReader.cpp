@@ -2654,6 +2654,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
         {
           READ_CODE(3, uiCode, "ph_alf_aps_id_luma");
           apsId[i] = uiCode;
+          APS* apsToCheckLuma = parameterSetManager->getAPS(apsId[i], ALF_APS);
+          CHECK(apsToCheckLuma == nullptr, "referenced APS not found");
+          CHECK(apsToCheckLuma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_LUMA] != 1, "bitstream conformance error, alf_luma_filter_signal_flag shall be equal to 1");
         }
         picHeader->setAlfApsIdsLuma(apsId);
 
@@ -2671,6 +2674,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
         {
           READ_CODE(3, uiCode, "ph_alf_aps_id_chroma");
           picHeader->setAlfApsIdChroma(uiCode);
+          APS* apsToCheckChroma = parameterSetManager->getAPS(uiCode, ALF_APS);
+          CHECK(apsToCheckChroma == nullptr, "referenced APS not found");
+          CHECK(apsToCheckChroma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_CHROMA] != 1, "bitstream conformance error, alf_chroma_filter_signal_flag shall be equal to 1");
         }
         if (sps->getCCALFEnabledFlag())
         {
@@ -2682,6 +2688,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
             // parse APS ID
             READ_CODE(3, uiCode, "ph_cc_alf_cb_aps_id");
             picHeader->setCcAlfCbApsId(uiCode);
+            APS* apsToCheckCcCb = parameterSetManager->getAPS(uiCode, ALF_APS);
+            CHECK(apsToCheckCcCb == nullptr, "referenced APS not found");
+            CHECK(apsToCheckCcCb->getCcAlfAPSParam().newCcAlfFilter[COMPONENT_Cb - 1] != 1, "bitstream conformance error, alf_cc_cb_filter_signal_flag shall be equal to 1");
           }
           // Cr
           READ_FLAG(uiCode, "ph_cc_alf_cr_enabled_flag");
@@ -2692,6 +2701,9 @@ void HLSyntaxReader::parsePictureHeader( PicHeader* picHeader, ParameterSetManag
             // parse APS ID
             READ_CODE(3, uiCode, "ph_cc_alf_cr_aps_id");
             picHeader->setCcAlfCrApsId(uiCode);
+            APS* apsToCheckCcCr = parameterSetManager->getAPS(uiCode, ALF_APS);
+            CHECK(apsToCheckCcCr == nullptr, "referenced APS not found");
+            CHECK(apsToCheckCcCr->getCcAlfAPSParam().newCcAlfFilter[COMPONENT_Cr - 1] != 1, "bitstream conformance error, alf_cc_cr_filter_signal_flag shall be equal to 1");
           }
         }
       }
@@ -3687,9 +3699,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       {
         READ_CODE(3, uiCode, "sh_alf_aps_id_luma[i]");
         apsId[i] = uiCode;
-        APS* APStoCheckLuma = parameterSetManager->getAPS(apsId[i], ALF_APS);
-        CHECK(APStoCheckLuma == nullptr, "referenced APS not found");
-        CHECK(APStoCheckLuma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_LUMA] != 1, "bitstream conformance error, alf_luma_filter_signal_flag shall be equal to 1");
+        APS* apsToCheckLuma = parameterSetManager->getAPS(apsId[i], ALF_APS);
+        CHECK(apsToCheckLuma == nullptr, "referenced APS not found");
+        CHECK(apsToCheckLuma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_LUMA] != 1, "bitstream conformance error, alf_luma_filter_signal_flag shall be equal to 1");
       }
 
 
@@ -3708,9 +3720,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
       {
         READ_CODE(3, uiCode, "sh_alf_aps_id_chroma");
         pcSlice->setAlfApsIdChroma(uiCode);
-        APS* APStoCheckChroma = parameterSetManager->getAPS(uiCode, ALF_APS);
-        CHECK(APStoCheckChroma == nullptr, "referenced APS not found");
-        CHECK(APStoCheckChroma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_CHROMA] != 1, "bitstream conformance error, alf_chroma_filter_signal_flag shall be equal to 1");
+        APS* apsToCheckChroma = parameterSetManager->getAPS(uiCode, ALF_APS);
+        CHECK(apsToCheckChroma == nullptr, "referenced APS not found");
+        CHECK(apsToCheckChroma->getAlfAPSParam().newFilterFlag[CHANNEL_TYPE_CHROMA] != 1, "bitstream conformance error, alf_chroma_filter_signal_flag shall be equal to 1");
       }
     }
     else
@@ -3732,6 +3744,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
         // parse APS ID
         READ_CODE(3, uiCode, "sh_alf_cc_cb_aps_id");
         pcSlice->setCcAlfCbApsId(uiCode);
+        APS* apsToCheckCcCb = parameterSetManager->getAPS(uiCode, ALF_APS);
+        CHECK(apsToCheckCcCb == nullptr, "referenced APS not found");
+        CHECK(apsToCheckCcCb->getCcAlfAPSParam().newCcAlfFilter[COMPONENT_Cb - 1] != 1, "bitstream conformance error, alf_cc_cb_filter_signal_flag shall be equal to 1");
       }
       // Cr
       READ_FLAG(uiCode, "sh_alf_cc_cr_enabled_flag");
@@ -3743,6 +3758,9 @@ void HLSyntaxReader::parseSliceHeader (Slice* pcSlice, PicHeader* picHeader, Par
         // parse APS ID
         READ_CODE(3, uiCode, "sh_alf_cc_cr_aps_id");
         pcSlice->setCcAlfCrApsId(uiCode);
+        APS* apsToCheckCcCr = parameterSetManager->getAPS(uiCode, ALF_APS);
+        CHECK(apsToCheckCcCr == nullptr, "referenced APS not found");
+        CHECK(apsToCheckCcCr->getCcAlfAPSParam().newCcAlfFilter[COMPONENT_Cr - 1] != 1, "bitstream conformance error, alf_cc_cr_filter_signal_flag shall be equal to 1");
       }
     }
     else
