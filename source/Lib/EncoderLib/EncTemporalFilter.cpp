@@ -237,7 +237,7 @@ bool EncTemporalFilter::filter(PelStorage *orgPic, int receivedPoc)
       int* qpMap = new int[m_numCtu];
       for (int poc = bimFirstFrame; poc <= bimLastFrame; poc++)
       {
-        if ((poc < 0) || (poc == currentFilePoc))
+        if ((poc < 0) || (poc == currentFilePoc) || (frameIndex >= numRefs))
         {
           continue; // frame not available or frame that is being filtered
         }
