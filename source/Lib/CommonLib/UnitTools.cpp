@@ -313,7 +313,7 @@ bool CU::isSameSubPic(const CodingUnit& cu, const CodingUnit& cu2)
 
 bool CU::isSameCtu(const CodingUnit& cu, const CodingUnit& cu2)
 {
-  uint32_t ctuSizeBit = floorLog2(cu.cs->sps->getMaxCUWidth());
+  const uint32_t ctuSizeBit = floorLog2(cu.cs->sps->getMaxCUWidth());
 
   Position pos1Ctu(cu.lumaPos().x  >> ctuSizeBit, cu.lumaPos().y  >> ctuSizeBit);
   Position pos2Ctu(cu2.lumaPos().x >> ctuSizeBit, cu2.lumaPos().y >> ctuSizeBit);
@@ -339,10 +339,10 @@ int CU::predictQP( const CodingUnit& cu, const int prevQP )
 {
   const CodingStructure &cs = *cu.cs;
 
-  uint32_t  ctuRsAddr       = getCtuAddr( cu );
-  uint32_t  ctuXPosInCtus   = ctuRsAddr % cs.pcv->widthInCtus;
-  uint32_t  tileColIdx      = cu.slice->getPPS()->ctuToTileCol( ctuXPosInCtus );
-  uint32_t  tileXPosInCtus  = cu.slice->getPPS()->getTileColumnBd( tileColIdx );
+  const uint32_t ctuRsAddr      = getCtuAddr(cu);
+  const uint32_t ctuXPosInCtus  = ctuRsAddr % cs.pcv->widthInCtus;
+  const uint32_t tileColIdx     = cu.slice->getPPS()->ctuToTileCol(ctuXPosInCtus);
+  const uint32_t tileXPosInCtus = cu.slice->getPPS()->getTileColumnBd(tileColIdx);
   if (ctuXPosInCtus == tileXPosInCtus
       && !(cu.blocks[cu.chType].x & (cs.pcv->maxCUWidthMask >> getChannelTypeScaleX(cu.chType, cu.chromaFormat)))
       && !(cu.blocks[cu.chType].y & (cs.pcv->maxCUHeightMask >> getChannelTypeScaleY(cu.chType, cu.chromaFormat)))
@@ -359,7 +359,6 @@ int CU::predictQP( const CodingUnit& cu, const int prevQP )
     return ( a + b + 1 ) >> 1;
   }
 }
-
 
 uint32_t CU::getNumPUs( const CodingUnit& cu )
 {
@@ -393,11 +392,13 @@ void CU::saveMotionInHMVP( const CodingUnit& cu, const bool isToBeDone )
 #endif
     mi.BcwIdx = (mi.interDir == 3) ? cu.BcwIdx : BCW_DEFAULT;
 
-    const unsigned log2ParallelMergeLevel = (pu.cs->sps->getLog2ParallelMergeLevelMinus2() + 2);
+    const unsigned log2ParallelMergeLevel = pu.cs->sps->getLog2ParallelMergeLevelMinus2() + 2;
     const unsigned xBr = pu.cu->Y().width + pu.cu->Y().x;
     const unsigned yBr = pu.cu->Y().height + pu.cu->Y().y;
-    bool enableHmvp = ((xBr >> log2ParallelMergeLevel) > (pu.cu->Y().x >> log2ParallelMergeLevel)) && ((yBr >> log2ParallelMergeLevel) > (pu.cu->Y().y >> log2ParallelMergeLevel));
-    bool enableInsertion = CU::isIBC(cu) || enableHmvp;
+
+    const bool enableHmvp = ((xBr >> log2ParallelMergeLevel) > (pu.cu->Y().x >> log2ParallelMergeLevel))
+                            && ((yBr >> log2ParallelMergeLevel) > (pu.cu->Y().y >> log2ParallelMergeLevel));
+    const bool enableInsertion = CU::isIBC(cu) || enableHmvp;
     if (enableInsertion)
     {
       cu.cs->addMiToLut(CU::isIBC(cu) ? cu.cs->motionLut.lutIbc : cu.cs->motionLut.lut, mi);
@@ -467,9 +468,9 @@ PartSplit CU::getISPType( const CodingUnit &cu, const ComponentID compID )
 
 bool CU::isISPLast( const CodingUnit &cu, const CompArea &tuArea, const ComponentID compID )
 {
-  PartSplit partitionType = CU::getISPType( cu, compID );
+  const PartSplit partitionType = CU::getISPType(cu, compID);
 
-  Area originalArea = cu.blocks[compID];
+  const Area originalArea = cu.blocks[compID];
   switch( partitionType )
   {
     case TU_1D_HORZ_SPLIT:
@@ -497,8 +498,8 @@ bool CU::canUseISP( const CodingUnit &cu, const ComponentID compID )
 
 bool CU::canUseISP( const int width, const int height, const int maxTrSize )
 {
-  bool  notEnoughSamplesToSplit = ( floorLog2(width) + floorLog2(height) <= ( floorLog2(MIN_TB_SIZEY) << 1 ) );
-  bool  cuSizeLargerThanMaxTrSize = width > maxTrSize || height > maxTrSize;
+  const bool notEnoughSamplesToSplit   = (floorLog2(width) + floorLog2(height) <= (floorLog2(MIN_TB_SIZEY) << 1));
+  const bool cuSizeLargerThanMaxTrSize = width > maxTrSize || height > maxTrSize;
   if ( notEnoughSamplesToSplit || cuSizeLargerThanMaxTrSize )
   {
     return false;
@@ -512,8 +513,9 @@ bool CU::canUseLfnstWithISP( const CompArea& cuArea, const ISPType ispSplitType 
   {
     return false;
   }
-  Size tuSize = ( ispSplitType == HOR_INTRA_SUBPARTITIONS ) ? Size( cuArea.width, CU::getISPSplitDim( cuArea.width, cuArea.height, TU_1D_HORZ_SPLIT ) ) :
-    Size( CU::getISPSplitDim( cuArea.width, cuArea.height, TU_1D_VERT_SPLIT ), cuArea.height );
+  const Size tuSize = (ispSplitType == HOR_INTRA_SUBPARTITIONS)
+                        ? Size(cuArea.width, CU::getISPSplitDim(cuArea.width, cuArea.height, TU_1D_HORZ_SPLIT))
+                        : Size(CU::getISPSplitDim(cuArea.width, cuArea.height, TU_1D_VERT_SPLIT), cuArea.height);
 
   if( !( tuSize.width >= MIN_TB_SIZEY && tuSize.height >= MIN_TB_SIZEY ) )
   {
@@ -530,8 +532,10 @@ bool CU::canUseLfnstWithISP( const CodingUnit& cu, const ChannelType chType )
 
 uint32_t CU::getISPSplitDim( const int width, const int height, const PartSplit ispType )
 {
-  bool divideTuInRows = ispType == TU_1D_HORZ_SPLIT;
-  uint32_t splitDimensionSize, nonSplitDimensionSize, partitionSize, divShift = 2;
+  const bool divideTuInRows = ispType == TU_1D_HORZ_SPLIT;
+
+  uint32_t splitDimensionSize;
+  uint32_t nonSplitDimensionSize;
 
   if( divideTuInRows )
   {
@@ -544,9 +548,14 @@ uint32_t CU::getISPSplitDim( const int width, const int height, const PartSplit 
     nonSplitDimensionSize = height;
   }
 
-  const int minNumberOfSamplesPerCu = 1 << ( ( floorLog2(MIN_TB_SIZEY) << 1 ) );
-  const int factorToMinSamples = nonSplitDimensionSize < minNumberOfSamplesPerCu ? minNumberOfSamplesPerCu >> floorLog2(nonSplitDimensionSize) : 1;
-  partitionSize = ( splitDimensionSize >> divShift ) < factorToMinSamples ? factorToMinSamples : ( splitDimensionSize >> divShift );
+  const int divShift = 2;
+
+  const int minNumberOfSamplesPerCu = 1 << (2 * floorLog2(MIN_TB_SIZEY));
+
+  const int factorToMinSamples =
+    nonSplitDimensionSize < minNumberOfSamplesPerCu ? minNumberOfSamplesPerCu >> floorLog2(nonSplitDimensionSize) : 1;
+  const int partitionSize =
+    (splitDimensionSize >> divShift) < factorToMinSamples ? factorToMinSamples : (splitDimensionSize >> divShift);
 
   CHECK( floorLog2(partitionSize) + floorLog2(nonSplitDimensionSize) < floorLog2(minNumberOfSamplesPerCu), "A partition has less than the minimum amount of samples!" );
   return partitionSize;
@@ -560,7 +569,8 @@ bool CU::allLumaCBFsAreZero(const CodingUnit& cu)
   }
   else
   {
-    int numTotalTUs = cu.ispMode == HOR_INTRA_SUBPARTITIONS ? cu.lheight() >> floorLog2(cu.firstTU->lheight()) : cu.lwidth() >> floorLog2(cu.firstTU->lwidth());
+    const int numTotalTUs = cu.ispMode == HOR_INTRA_SUBPARTITIONS ? cu.lheight() >> floorLog2(cu.firstTU->lheight())
+                                                                  : cu.lwidth() >> floorLog2(cu.firstTU->lwidth());
     TransformUnit* tuPtr = cu.firstTU;
     for (int tuIdx = 0; tuIdx < numTotalTUs; tuIdx++)
     {
@@ -597,112 +607,97 @@ cTUTraverser CU::traverseTUs( const CodingUnit& cu )
 
 // PU tools
 
-int PU::getIntraMPMs( const PredictionUnit &pu, unsigned* mpm, const ChannelType &channelType /*= CHANNEL_TYPE_LUMA*/ )
+int PU::getIntraMPMs(const PredictionUnit &pu, unsigned *mpm)
 {
-  const int numMPMs = NUM_MOST_PROBABLE_MODES;
+  const ChannelType channelType = CHANNEL_TYPE_LUMA;
+
+  int leftIntraDir  = PLANAR_IDX;
+  int aboveIntraDir = PLANAR_IDX;
+
+  const CompArea &area  = pu.block(getFirstComponentOfChannel(channelType));
+  const Position  posRT = area.topRight();
+  const Position  posLB = area.bottomLeft();
+
+  // Get intra direction of left PU
+  const PredictionUnit *puLeft = pu.cs->getPURestricted(posLB.offset(-1, 0), pu, channelType);
+  if (puLeft && CU::isIntra(*puLeft->cu))
   {
-    CHECK(channelType != CHANNEL_TYPE_LUMA, "Not harmonized yet");
-    int numCand      = -1;
-    int leftIntraDir = PLANAR_IDX, aboveIntraDir = PLANAR_IDX;
+    leftIntraDir = PU::getIntraDirLuma(*puLeft);
+  }
 
-    const CompArea &area = pu.block(getFirstComponentOfChannel(channelType));
-    const Position posRT = area.topRight();
-    const Position posLB = area.bottomLeft();
+  // Get intra direction of above PU
+  const PredictionUnit *puAbove = pu.cs->getPURestricted(posRT.offset(0, -1), pu, channelType);
+  if (puAbove && CU::isIntra(*puAbove->cu) && CU::isSameCtu(*pu.cu, *puAbove->cu))
+  {
+    aboveIntraDir = PU::getIntraDirLuma(*puAbove);
+  }
 
-    // Get intra direction of left PU
-    const PredictionUnit *puLeft = pu.cs->getPURestricted(posLB.offset(-1, 0), pu, channelType);
-    if (puLeft && CU::isIntra(*puLeft->cu))
-    {
-      leftIntraDir = PU::getIntraDirLuma( *puLeft );
-    }
+  auto wrap = [](const int m)
+  {
+    const int mod = NUM_INTRA_ANGULAR_MODES - 1;
+    return (m - ANGULAR_BASE + mod) % mod + ANGULAR_BASE;
+  };
 
-    // Get intra direction of above PU
-    const PredictionUnit *puAbove = pu.cs->getPURestricted(posRT.offset(0, -1), pu, channelType);
-    if (puAbove && CU::isIntra(*puAbove->cu) && CU::isSameCtu(*pu.cu, *puAbove->cu))
-    {
-      aboveIntraDir = PU::getIntraDirLuma( *puAbove );
-    }
+  const int numCands = leftIntraDir == aboveIntraDir ? 1 : 2;
 
-    CHECK(2 >= numMPMs, "Invalid number of most probable modes");
+  const int minCandVal = std::min<int>(leftIntraDir, aboveIntraDir);
+  const int maxCandVal = std::max<int>(leftIntraDir, aboveIntraDir);
 
-    const int offset = (int)NUM_LUMA_MODE - 6;
-    const int mod = offset + 3;
+  mpm[0] = PLANAR_IDX;
 
-    mpm[0] = PLANAR_IDX;
+  if (maxCandVal < ANGULAR_BASE)
+  {
     mpm[1] = DC_IDX;
     mpm[2] = VER_IDX;
     mpm[3] = HOR_IDX;
     mpm[4] = VER_IDX - 4;
     mpm[5] = VER_IDX + 4;
-
-    if (leftIntraDir == aboveIntraDir)
-    {
-      numCand = 1;
-      if (leftIntraDir > DC_IDX)
-      {
-        mpm[0] = PLANAR_IDX;
-        mpm[1] = leftIntraDir;
-        mpm[2] = ((leftIntraDir + offset) % mod) + 2;
-        mpm[3] = ((leftIntraDir - 1) % mod) + 2;
-        mpm[4] = ((leftIntraDir + offset - 1) % mod) + 2;
-        mpm[5] = (leftIntraDir % mod) + 2;
-      }
-    }
-    else   // L!=A
-    {
-      numCand            = 2;
-      int maxCandModeIdx = mpm[0] > mpm[1] ? 0 : 1;
-
-      if ((leftIntraDir > DC_IDX) && (aboveIntraDir > DC_IDX))
-      {
-        mpm[0]             = PLANAR_IDX;
-        mpm[1]             = leftIntraDir;
-        mpm[2]             = aboveIntraDir;
-        maxCandModeIdx     = mpm[1] > mpm[2] ? 1 : 2;
-        int minCandModeIdx = mpm[1] > mpm[2] ? 2 : 1;
-        if (mpm[maxCandModeIdx] - mpm[minCandModeIdx] == 1)
-        {
-          mpm[3] = ((mpm[minCandModeIdx] + offset) % mod) + 2;
-          mpm[4] = ((mpm[maxCandModeIdx] - 1) % mod) + 2;
-          mpm[5] = ((mpm[minCandModeIdx] + offset - 1) % mod) + 2;
-        }
-        else if (mpm[maxCandModeIdx] - mpm[minCandModeIdx] >= 62)
-        {
-          mpm[3] = ((mpm[minCandModeIdx] - 1) % mod) + 2;
-          mpm[4] = ((mpm[maxCandModeIdx] + offset) % mod) + 2;
-          mpm[5] = (mpm[minCandModeIdx] % mod) + 2;
-        }
-        else if (mpm[maxCandModeIdx] - mpm[minCandModeIdx] == 2)
-        {
-          mpm[3] = ((mpm[minCandModeIdx] - 1) % mod) + 2;
-          mpm[4] = ((mpm[minCandModeIdx] + offset) % mod) + 2;
-          mpm[5] = ((mpm[maxCandModeIdx] - 1) % mod) + 2;
-        }
-        else
-        {
-          mpm[3] = ((mpm[minCandModeIdx] + offset) % mod) + 2;
-          mpm[4] = ((mpm[minCandModeIdx] - 1) % mod) + 2;
-          mpm[5] = ((mpm[maxCandModeIdx] + offset) % mod) + 2;
-        }
-      }
-      else if (leftIntraDir + aboveIntraDir >= 2)
-      {
-        mpm[0]         = PLANAR_IDX;
-        mpm[1]         = (leftIntraDir < aboveIntraDir) ? aboveIntraDir : leftIntraDir;
-        maxCandModeIdx = 1;
-        mpm[2]         = ((mpm[maxCandModeIdx] + offset) % mod) + 2;
-        mpm[3]         = ((mpm[maxCandModeIdx] - 1) % mod) + 2;
-        mpm[4]         = ((mpm[maxCandModeIdx] + offset - 1) % mod) + 2;
-        mpm[5]         = (mpm[maxCandModeIdx] % mod) + 2;
-      }
-    }
-    for (int i = 0; i < numMPMs; i++)
-    {
-      CHECK(mpm[i] >= NUM_LUMA_MODE, "Invalid MPM");
-    }
-    CHECK(numCand == 0, "No candidates found");
-    return numCand;
   }
+  else if (numCands == 1 || minCandVal < ANGULAR_BASE)
+  {
+    mpm[1] = maxCandVal;
+    mpm[2] = wrap(maxCandVal - 1);
+    mpm[3] = wrap(maxCandVal + 1);
+    mpm[4] = wrap(maxCandVal - 2);
+    mpm[5] = wrap(maxCandVal + 2);
+  }
+  else   // L!=A
+  {
+    mpm[1] = leftIntraDir;
+    mpm[2] = aboveIntraDir;
+
+    if (maxCandVal - minCandVal == 1)
+    {
+      mpm[3] = wrap(minCandVal - 1);
+      mpm[4] = wrap(maxCandVal + 1);
+      mpm[5] = wrap(minCandVal - 2);
+    }
+    else if (maxCandVal - minCandVal >= NUM_INTRA_ANGULAR_MODES - 3)
+    {
+      mpm[3] = wrap(minCandVal + 1);
+      mpm[4] = wrap(maxCandVal - 1);
+      mpm[5] = wrap(minCandVal + 2);
+    }
+    else if (maxCandVal - minCandVal == 2)
+    {
+      mpm[3] = wrap(minCandVal + 1);
+      mpm[4] = wrap(minCandVal - 1);
+      mpm[5] = wrap(maxCandVal + 1);
+    }
+    else
+    {
+      mpm[3] = wrap(minCandVal - 1);
+      mpm[4] = wrap(minCandVal + 1);
+      mpm[5] = wrap(maxCandVal - 1);
+    }
+  }
+
+  for (int i = 0; i < NUM_MOST_PROBABLE_MODES; i++)
+  {
+    CHECK(mpm[i] >= NUM_LUMA_MODE, "Invalid MPM");
+  }
+
+  return numCands;
 }
 
 bool PU::isMIP(const PredictionUnit &pu, const ChannelType &chType)

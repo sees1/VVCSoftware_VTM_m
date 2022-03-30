@@ -126,19 +126,19 @@ namespace CU
 // PU tools
 namespace PU
 {
-  int  getLMSymbolList(const PredictionUnit &pu, int *modeList);
-  int  getIntraMPMs(const PredictionUnit &pu, unsigned *mpm, const ChannelType &channelType = CHANNEL_TYPE_LUMA);
-  bool          isMIP                 (const PredictionUnit &pu, const ChannelType &chType = CHANNEL_TYPE_LUMA);
-  bool          isDMChromaMIP         (const PredictionUnit &pu);
-  uint32_t      getIntraDirLuma       (const PredictionUnit &pu);
-  void getIntraChromaCandModes        (const PredictionUnit &pu, unsigned modeList[NUM_CHROMA_MODE]);
+  int      getLMSymbolList(const PredictionUnit &pu, int *modeList);
+  int      getIntraMPMs(const PredictionUnit &pu, unsigned *mpm);
+  bool     isMIP(const PredictionUnit &pu, const ChannelType &chType = CHANNEL_TYPE_LUMA);
+  bool     isDMChromaMIP(const PredictionUnit &pu);
+  uint32_t getIntraDirLuma(const PredictionUnit &pu);
+  void     getIntraChromaCandModes(const PredictionUnit &pu, unsigned modeList[NUM_CHROMA_MODE]);
+  uint32_t getFinalIntraMode(const PredictionUnit &pu, const ChannelType &chType);
+  uint32_t getCoLocatedIntraLumaMode(const PredictionUnit &pu);
+  int      getWideAngle(const TransformUnit &tu, const uint32_t dirMode, const ComponentID compID);
+
   const PredictionUnit &getCoLocatedLumaPU(const PredictionUnit &pu);
-  uint32_t getFinalIntraMode              (const PredictionUnit &pu, const ChannelType &chType);
-  uint32_t getCoLocatedIntraLumaMode      (const PredictionUnit &pu);
-  int  getWideAngle                   ( const TransformUnit &tu, const uint32_t dirMode, const ComponentID compID );
-  void getInterMergeCandidates        (const PredictionUnit &pu, MergeCtx& mrgCtx,
-    int mmvdList,
-    const int& mrgCandIdx = -1 );
+
+  void getInterMergeCandidates(const PredictionUnit &pu, MergeCtx &mrgCtx, int mmvdList, const int &mrgCandIdx = -1);
   void getIBCMergeCandidates          (const PredictionUnit &pu, MergeCtx& mrgCtx, const int& mrgCandIdx = -1);
   void getInterMMVDMergeCandidates(const PredictionUnit &pu, MergeCtx& mrgCtx, const int& mrgCandIdx = -1);
   int getDistScaleFactor(const int &currPOC, const int &currRefPOC, const int &colPOC, const int &colRefPOC);
