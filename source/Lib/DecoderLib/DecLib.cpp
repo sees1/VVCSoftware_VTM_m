@@ -2488,7 +2488,7 @@ bool DecLib::xDecodeSlice(InputNALUnit &nalu, int &iSkipFrame, int iPOCLastDispl
 
   m_HLSReader.setBitstream( &nalu.getBitstream() );
   m_apcSlicePilot->m_ccAlfFilterParam = m_cALF.getCcAlfFilterParam();
-  m_HLSReader.parseSliceHeader( m_apcSlicePilot, &m_picHeader, &m_parameterSetManager, m_prevTid0POC, m_prevPicPOC );
+  m_HLSReader.parseSliceHeader( m_apcSlicePilot, &m_picHeader, &m_parameterSetManager, m_prevTid0POC, m_prevPicPOC);
 
   if (m_picHeader.getGdrOrIrapPicFlag() && m_bFirstSliceInPicture)
   {
@@ -3352,6 +3352,11 @@ void DecLib::xDecodeAPS(InputNALUnit& nalu)
   // thus, storing it must be last action.
   m_parameterSetManager.storeAPS(aps, nalu.getBitstream().getFifo());
 }
+
+HLSyntaxReader& DecLib::get_qp_delta_mean_count(){
+	return  m_HLSReader;
+	}
+
 bool DecLib::decode(InputNALUnit& nalu, int& iSkipFrame, int& iPOCLastDisplay, int iTargetOlsIdx)
 {
   bool ret;

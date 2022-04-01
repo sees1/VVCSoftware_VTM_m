@@ -84,6 +84,9 @@ int main(int argc, char* argv[])
   clock_t lBefore = clock();
 
   // call decoding function
+  
+  
+  
 #ifndef _DEBUG
   try
   {
@@ -110,7 +113,13 @@ int main(int argc, char* argv[])
   // ending time
   dResult = (double)(clock()-lBefore) / CLOCKS_PER_SEC;
   printf("\n Total Time: %12.3f sec.\n", dResult);
-
+  
+  fprintf (stdout,"\n %s\n","sh_qp_stat");
+  fprintf ( stdout," %s  %s\n","mean","count");
+  for(auto i : pcDecApp->get_dec_lib().get_qp_delta_mean_count().qp_delta_mean_count){
+  	fprintf( stdout, "%s%3d%s %s %s%d%s\n","<",i.first,">",":","<",i.second,">");
+  }
+ 
   delete pcDecApp;
 
   return returnCode;

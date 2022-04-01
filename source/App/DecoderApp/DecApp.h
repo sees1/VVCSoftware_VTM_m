@@ -96,7 +96,8 @@ private:
 
   void  writeLineToOutputLog(Picture * pcPic);
   void xOutputAnnotatedRegions(PicList* pcListPic);
-
+public:
+  DecLib& get_dec_lib();
 };
 
 //! \}

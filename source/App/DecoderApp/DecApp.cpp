@@ -76,6 +76,11 @@ DecApp::DecApp()
  - destroy internal class
  - returns the number of mismatching pictures
  */
+
+DecLib& DecApp::get_dec_lib(){
+	return m_cDecLib;
+} 
+
 uint32_t DecApp::decode()
 {
   int      poc;

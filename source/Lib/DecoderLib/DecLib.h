@@ -347,6 +347,8 @@ protected:
 
   void  xCheckNalUnitConstraintFlags( const ConstraintInfo *cInfo, uint32_t naluType );
   void     xCheckMixedNalUnit(Slice* pcSlice, SPS *sps, InputNALUnit &nalu);
+public:
+	HLSyntaxReader& get_qp_delta_mean_count();
 };// END CLASS DEFINITION DecLib
 
 

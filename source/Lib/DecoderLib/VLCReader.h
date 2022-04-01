@@ -120,6 +120,8 @@ public:
 protected:
   void xReadRbspTrailingBits();
   bool isByteAligned() { return (m_pcBitstream->getNumBitsUntilByteAligned() == 0 ); }
+public:
+	std::map <int,int> qp_delta_mean_count;
 };
 
 
@@ -183,7 +185,7 @@ public:
   void parseGeneralHrdParameters(GeneralHrdParams *generalHrd);
   void  parsePictureHeader  ( PicHeader* picHeader, ParameterSetManager *parameterSetManager, bool readRbspTrailingBits );
   void  checkAlfNaluTidAndPicTid(Slice* pcSlice, PicHeader* picHeader, ParameterSetManager *parameterSetManager);
-  void  parseSliceHeader    ( Slice* pcSlice, PicHeader* picHeader, ParameterSetManager *parameterSetManager, const int prevTid0POC, const int prevPicPOC );
+  void  parseSliceHeader    ( Slice* pcSlice, PicHeader* picHeader, ParameterSetManager *parameterSetManager, const int prevTid0POC, const int prevPicPOC);
   void  getSlicePoc ( Slice* pcSlice, PicHeader* picHeader, ParameterSetManager *parameterSetManager, const int prevTid0POC );
   void  parseTerminatingBit ( uint32_t& ruiBit );
   void  parseRemainingBytes ( bool noTrailingBytesExpected );
@@ -200,6 +202,7 @@ private:
 
 protected:
   bool  xMoreRbspData();
+
 };
 
 
